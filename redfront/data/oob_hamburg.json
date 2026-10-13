@@ -1,0 +1,592 @@
+{
+  "_about": "Состав сил по умолчанию для сектора 'Гамбург' - пример, который игрок заменяет своим. Типы - любые, которые знает pydcs (имя класса или DCS id); у каждой части - роль из roles.json. Составы, темпы и позиции - заглушки (estimate=true).",
+  "countries": {
+    "red": "Russia",
+    "blue": "Germany"
+  },
+  "units": [
+    {
+      "id": "red_shap_1",
+      "name": "Штурмовая эскадрилья (Су-25)",
+      "side": "red",
+      "role": "attack",
+      "base": "parchim",
+      "type": "Su_25",
+      "count": 12,
+      "note": "12 самолётов = эскадрилья ША (3 звена по 4, 'Тактика ВВС' 3.3.2). Тип - выбор игрока.",
+      "estimate": true
+    },
+    {
+      "id": "red_bap_1",
+      "name": "Бомбардировочная эскадрилья (Су-24М)",
+      "side": "red",
+      "role": "bomber",
+      "base": "parchim",
+      "type": "Su_24M",
+      "count": 12,
+      "strike_radius_km": 300,
+      "note": "Су-24М - юнит ИИ базового DCS; мод делает его летабельным на том же типе и слоте. 12 = эскадрилья (3 звена по 4, 'Тактика ВВС' 3.3.2). Аэродром и strike_radius_km 300 - ОЦЕНКИ: табл. 5 учебника даёт боевой радиус 1300 км для Су-24МК - это другой вариант, на Су-24М не переносится.",
+      "estimate": true
+    },
+    {
+      "id": "blue_pzgren_bn_1",
+      "name": "Панцергренадерский батальон (усиленный)",
+      "side": "blue",
+      "role": "maneuver",
+      "state": "march",
+      "route": [
+        "Munster",
+        "Amelinghausen",
+        "Luneburg",
+        "Dahlenburg"
+      ],
+      "progress_km": 6.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "Marder",
+          "count": 14,
+          "role": "IFV"
+        },
+        {
+          "type": "Leopard_2",
+          "count": 10,
+          "role": "MBT"
+        },
+        {
+          "type": "TPZ",
+          "count": 6,
+          "role": "APC"
+        }
+      ],
+      "estimate": true
+    },
+    {
+      "id": "blue_flak_1",
+      "name": "Войсковая ПВО батальона (Gepard, Roland)",
+      "side": "blue",
+      "role": "sam_short",
+      "attached_to": "blue_pzgren_bn_1",
+      "state": "march",
+      "composition": [
+        {
+          "type": "Gepard",
+          "count": 2,
+          "role": "launcher"
+        },
+        {
+          "type": "Roland_ADS",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Войсковая ПВО при колонне на марше ('Тактика ВВС' 1.4.3: войсковая ПВО сухопутных войск не входит в зоны ПВО). Идёт в колонне, отдельной группой. Состав - ОЦЕНКА. Радиус угрозы - из pydcs (Roland 8 км).",
+      "estimate": true
+    },
+    {
+      "id": "blue_patriot_1",
+      "name": "Батарея Patriot",
+      "side": "blue",
+      "role": "sam_long",
+      "state": "deployed",
+      "pos": {
+        "lat": 53.25,
+        "lon": 9.3
+      },
+      "threat_radius_km": 60,
+      "composition": [
+        {
+          "type": "Patriot_str",
+          "count": 1,
+          "role": "radar"
+        },
+        {
+          "type": "Patriot_ECS",
+          "count": 1,
+          "role": "control"
+        },
+        {
+          "type": "Patriot_ln",
+          "count": 4,
+          "role": "launcher"
+        }
+      ],
+      "note": "Зональная ПВО в глубине ('Тактика ВВС' 1.4.3: ПВО НАТО обороняет районы, а не отдельные объекты): позиция ~60-75 км западнее маршрута колонны, колонна на краю зоны. threat_radius_km 60 - оценка против маловысотной цели (версия 0.1). Позиция - ОЦЕНКА (в 0.2 стояла в 25-35 км от маршрута, т.е. прикрывала ровно эту колонну).",
+      "estimate": true
+    },
+    {
+      "id": "red_msp_1",
+      "name": "Мотострелковый полк (передовой отряд)",
+      "side": "red",
+      "role": "maneuver",
+      "state": "march",
+      "route": [
+        "Dannenberg",
+        "Dahlenburg",
+        "Luneburg"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "T_72B",
+          "count": 10,
+          "role": "MBT"
+        },
+        {
+          "type": "BMP_2",
+          "count": 22,
+          "role": "IFV"
+        },
+        {
+          "type": "BTR_80",
+          "count": 6,
+          "role": "APC"
+        }
+      ],
+      "note": "Начало: плацдарм у Данненберга (переправа через Эльбу за кадром). Составы, маршруты, темпы - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "red_pvo_msp_1",
+      "name": "ПВО мотострелкового полка (Оса, Стрела-10)",
+      "side": "red",
+      "role": "sam_short",
+      "attached_to": "red_msp_1",
+      "state": "march",
+      "composition": [
+        {
+          "type": "Osa_9A33_ln",
+          "count": 2,
+          "role": "launcher"
+        },
+        {
+          "type": "Strela_10M3",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Составы, маршруты, темпы - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "red_tp_1",
+      "name": "Танковый полк (передовой отряд)",
+      "side": "red",
+      "role": "maneuver",
+      "state": "march",
+      "route": [
+        "Boizenburg",
+        "Lauenburg",
+        "Luneburg"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "T_80UD",
+          "count": 20,
+          "role": "MBT"
+        },
+        {
+          "type": "BMP_2",
+          "count": 10,
+          "role": "IFV"
+        }
+      ],
+      "note": "Составы, маршруты, темпы - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "red_pvo_tp_1",
+      "name": "ПВО танкового полка (Шилка, Стрела-10)",
+      "side": "red",
+      "role": "sam_short",
+      "attached_to": "red_tp_1",
+      "state": "march",
+      "composition": [
+        {
+          "type": "ZSU_23_4_Shilka",
+          "count": 2,
+          "role": "launcher"
+        },
+        {
+          "type": "Strela_10M3",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Составы, маршруты, темпы - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "blue_pz_bn_1",
+      "name": "Танковый батальон (оборона Люнебурга)",
+      "side": "blue",
+      "role": "maneuver",
+      "state": "defend",
+      "route": [
+        "Luneburg"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 0,
+      "composition": [
+        {
+          "type": "Leopard1A3",
+          "count": 14,
+          "role": "MBT"
+        },
+        {
+          "type": "M_113",
+          "count": 6,
+          "role": "APC"
+        }
+      ],
+      "note": "Составы, маршруты, темпы - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "blue_flak_2",
+      "name": "Войсковая ПВО танкового батальона (Gepard)",
+      "side": "blue",
+      "role": "sam_short",
+      "attached_to": "blue_pz_bn_1",
+      "state": "defend",
+      "composition": [
+        {
+          "type": "Gepard",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Составы, маршруты, темпы - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "red_iap_1",
+      "name": "Истребительная эскадрилья (МиГ-29)",
+      "side": "red",
+      "role": "fighter",
+      "base": "laage",
+      "type": "MiG_29_Fulcrum",
+      "count": 12,
+      "strike_radius_km": 250,
+      "note": "Тип, аэродром, число и радиус - ОЦЕНКИ (заглушка сценария); радиус не из документа.",
+      "estimate": true
+    },
+    {
+      "id": "blue_jg_1",
+      "name": "Истребительная эскадрилья (F-4)",
+      "side": "blue",
+      "role": "fighter",
+      "base": "uetersen",
+      "type": "F_4E_45MC",
+      "count": 12,
+      "strike_radius_km": 300,
+      "note": "Тип, аэродром, число и радиус - ОЦЕНКИ (заглушка сценария); радиус не из документа.",
+      "estimate": true
+    },
+    {
+      "id": "blue_jbg_1",
+      "name": "Истребительно-бомбардировочная эскадрилья (Tornado)",
+      "side": "blue",
+      "role": "fighter_bomber",
+      "base": "wunstorf",
+      "type": "Tornado_IDS",
+      "count": 12,
+      "strike_radius_km": 400,
+      "note": "Тип, аэродром, число и радиус - ОЦЕНКИ (заглушка сценария); радиус не из документа.",
+      "estimate": true
+    },
+    {
+      "id": "blue_pzbrig_1",
+      "name": "Танковая бригада (резерв корпуса)",
+      "side": "blue",
+      "role": "maneuver",
+      "state": "pending",
+      "arrives_day": 4,
+      "route": [
+        "Soltau"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "Leopard_2",
+          "count": 24,
+          "role": "MBT"
+        },
+        {
+          "type": "Marder",
+          "count": 12,
+          "role": "IFV"
+        }
+      ],
+      "note": "Резерв: вводится в сектор в день arrives_day. Состав и срок - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true,
+      "arrives_jitter": 1
+    },
+    {
+      "id": "blue_flak_3",
+      "name": "Войсковая ПВО бригады (Gepard, Roland)",
+      "side": "blue",
+      "role": "sam_short",
+      "attached_to": "blue_pzbrig_1",
+      "state": "pending",
+      "composition": [
+        {
+          "type": "Gepard",
+          "count": 2,
+          "role": "launcher"
+        },
+        {
+          "type": "Roland_ADS",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Резерв: вводится в сектор в день arrives_day. Состав и срок - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "red_tp_2",
+      "name": "Танковый полк (второй эшелон)",
+      "side": "red",
+      "role": "maneuver",
+      "state": "pending",
+      "arrives_day": 5,
+      "route": [
+        "Dannenberg"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "T_80UD",
+          "count": 30,
+          "role": "MBT"
+        },
+        {
+          "type": "BMP_2",
+          "count": 10,
+          "role": "IFV"
+        }
+      ],
+      "note": "Резерв: вводится в сектор в день arrives_day. Состав и срок - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true,
+      "arrives_jitter": 1
+    },
+    {
+      "id": "red_pvo_tp_2",
+      "name": "ПВО танкового полка второго эшелона (Тунгуска нет в pydcs - Шилка, Оса)",
+      "side": "red",
+      "role": "sam_short",
+      "attached_to": "red_tp_2",
+      "state": "pending",
+      "composition": [
+        {
+          "type": "ZSU_23_4_Shilka",
+          "count": 2,
+          "role": "launcher"
+        },
+        {
+          "type": "Osa_9A33_ln",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Резерв: вводится в сектор в день arrives_day. Состав и срок - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "blue_pzgren_bn_2",
+      "name": "Панцергренадерский батальон (оборона Венланда)",
+      "side": "blue",
+      "role": "maneuver",
+      "state": "defend",
+      "route": [
+        "Luchow"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "Marder",
+          "count": 16,
+          "role": "IFV"
+        },
+        {
+          "type": "Leopard1A3",
+          "count": 8,
+          "role": "MBT"
+        }
+      ],
+      "note": "Состав и сроки - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "blue_flak_4",
+      "name": "Войсковая ПВО батальона (Gepard)",
+      "side": "blue",
+      "role": "sam_short",
+      "attached_to": "blue_pzgren_bn_2",
+      "state": "defend",
+      "composition": [
+        {
+          "type": "Gepard",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Состав и сроки - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "blue_pzbrig_2",
+      "name": "Танковая бригада (второй резерв)",
+      "side": "blue",
+      "role": "maneuver",
+      "state": "pending",
+      "arrives_day": 7,
+      "arrives_jitter": 1,
+      "route": [
+        "Soltau"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "Leopard_2",
+          "count": 24,
+          "role": "MBT"
+        },
+        {
+          "type": "Marder",
+          "count": 12,
+          "role": "IFV"
+        }
+      ],
+      "note": "Состав и сроки - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "blue_flak_5",
+      "name": "Войсковая ПВО бригады (Gepard, Roland)",
+      "side": "blue",
+      "role": "sam_short",
+      "attached_to": "blue_pzbrig_2",
+      "state": "pending",
+      "composition": [
+        {
+          "type": "Gepard",
+          "count": 2,
+          "role": "launcher"
+        },
+        {
+          "type": "Roland_ADS",
+          "count": 2,
+          "role": "launcher"
+        }
+      ],
+      "note": "Состав и сроки - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "red_msp_2",
+      "name": "Мотострелковый полк (Венланд)",
+      "side": "red",
+      "role": "maneuver",
+      "state": "march",
+      "route": [
+        "Dannenberg",
+        "Luchow"
+      ],
+      "progress_km": 0.0,
+      "march_kmh": 30,
+      "daily_advance_km": 25,
+      "composition": [
+        {
+          "type": "T_72B",
+          "count": 10,
+          "role": "MBT"
+        },
+        {
+          "type": "BMP_2",
+          "count": 22,
+          "role": "IFV"
+        }
+      ],
+      "note": "Состав и сроки - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    },
+    {
+      "id": "red_pvo_msp_2",
+      "name": "ПВО мотострелкового полка (Стрела-10)",
+      "side": "red",
+      "role": "sam_short",
+      "attached_to": "red_msp_2",
+      "state": "march",
+      "composition": [
+        {
+          "type": "Strela_10M3",
+          "count": 3,
+          "role": "launcher"
+        }
+      ],
+      "note": "Состав и сроки - ОЦЕНКИ (заглушка сценария).",
+      "estimate": true
+    }
+  ],
+  "variants": [
+    {
+      "name": "base",
+      "title": "Удар на Люнебург и Винзен"
+    },
+    {
+      "name": "uelzen",
+      "title": "Главный удар на юг: Ильцен - Мюнстер",
+      "objectives": {
+        "red": [
+          "Uelzen",
+          "Munster",
+          "Soltau"
+        ]
+      },
+      "units": {
+        "red_msp_1": {
+          "route": [
+            "Dannenberg",
+            "Uelzen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "blue_early",
+      "title": "Синие успели: резерв на 2-й день, оборона по Эльбе",
+      "units": {
+        "blue_pzbrig_1": {
+          "arrives_day": 2
+        },
+        "blue_pz_bn_1": {
+          "route": [
+            "Lauenburg"
+          ]
+        }
+      }
+    }
+  ],
+  "_about_variants": "Варианты сценария: при new выбирается случайный (или --variant). units - поправки полей частей, objectives - цели операции. ОЦЕНКИ сценария.",
+  "replacements": {
+    "air_per_day": 0.5,
+    "note": "Пополнение эскадрилий: самолётов в сутки до штата (ОЦЕНКА)."
+  }
+}

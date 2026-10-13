@@ -1,0 +1,2012 @@
+{
+ "_about": "Театр всей карты Cold War Germany: внутригерманская граница от Балтики до Хофа. Генерирован tools/gen_germany.py. Координаты пунктов - ОЦЕНКИ (по памяти, +-2 км), пункты и связи сектора Гамбурга - из sector_hamburg.json; связи остального графа - граф Габриэля не длиннее 70 км (ОЦЕНКА дорожной сети). Стороны пунктов - граница 1989 г.",
+ "theatre": "germany",
+ "places": {
+  "Munster": {
+   "lat": 52.986,
+   "lon": 10.087,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Amelinghausen": {
+   "lat": 53.124,
+   "lon": 10.214,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Luneburg": {
+   "lat": 53.248,
+   "lon": 10.411,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Dahlenburg": {
+   "lat": 53.186,
+   "lon": 10.733,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Dannenberg": {
+   "lat": 53.098,
+   "lon": 11.098,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Lauenburg": {
+   "lat": 53.374,
+   "lon": 10.56,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Boizenburg": {
+   "lat": 53.38,
+   "lon": 10.723,
+   "estimate": true,
+   "side": "red"
+  },
+  "Uelzen": {
+   "lat": 52.965,
+   "lon": 10.56,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Bleckede": {
+   "lat": 53.287,
+   "lon": 10.733,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Winsen": {
+   "lat": 53.357,
+   "lon": 10.212,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Soltau": {
+   "lat": 52.986,
+   "lon": 9.843,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Ludwigslust": {
+   "lat": 53.329,
+   "lon": 11.497,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hitzacker": {
+   "lat": 53.152,
+   "lon": 11.044,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Luchow": {
+   "lat": 52.967,
+   "lon": 11.152,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kiel": {
+   "lat": 54.323,
+   "lon": 10.135,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Neumunster": {
+   "lat": 54.074,
+   "lon": 9.982,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Rendsburg": {
+   "lat": 54.304,
+   "lon": 9.663,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Itzehoe": {
+   "lat": 53.925,
+   "lon": 9.516,
+   "estimate": true,
+   "side": "blue"
+  },
+  "BadSegeberg": {
+   "lat": 53.936,
+   "lon": 10.309,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Lubeck": {
+   "lat": 53.866,
+   "lon": 10.687,
+   "estimate": true,
+   "side": "blue"
+  },
+  "BadOldesloe": {
+   "lat": 53.81,
+   "lon": 10.374,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Ratzeburg": {
+   "lat": 53.7,
+   "lon": 10.758,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Molln": {
+   "lat": 53.627,
+   "lon": 10.687,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hamburg": {
+   "lat": 53.551,
+   "lon": 9.994,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Stade": {
+   "lat": 53.6,
+   "lon": 9.476,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Buxtehude": {
+   "lat": 53.477,
+   "lon": 9.701,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Rotenburg": {
+   "lat": 53.111,
+   "lon": 9.41,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Bremen": {
+   "lat": 53.079,
+   "lon": 8.802,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Verden": {
+   "lat": 52.923,
+   "lon": 9.234,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Nienburg": {
+   "lat": 52.64,
+   "lon": 9.208,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Celle": {
+   "lat": 52.625,
+   "lon": 10.081,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Gifhorn": {
+   "lat": 52.479,
+   "lon": 10.546,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Wittingen": {
+   "lat": 52.727,
+   "lon": 10.739,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Wolfsburg": {
+   "lat": 52.423,
+   "lon": 10.787,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hannover": {
+   "lat": 52.375,
+   "lon": 9.732,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Braunschweig": {
+   "lat": 52.269,
+   "lon": 10.521,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Helmstedt": {
+   "lat": 52.228,
+   "lon": 11.01,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Salzgitter": {
+   "lat": 52.15,
+   "lon": 10.33,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hildesheim": {
+   "lat": 52.151,
+   "lon": 9.951,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Goslar": {
+   "lat": 51.906,
+   "lon": 10.429,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Osterode": {
+   "lat": 51.729,
+   "lon": 10.252,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Northeim": {
+   "lat": 51.706,
+   "lon": 9.999,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Gottingen": {
+   "lat": 51.541,
+   "lon": 9.915,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Duderstadt": {
+   "lat": 51.512,
+   "lon": 10.259,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kassel": {
+   "lat": 51.312,
+   "lon": 9.48,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Witzenhausen": {
+   "lat": 51.341,
+   "lon": 9.856,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Eschwege": {
+   "lat": 51.188,
+   "lon": 10.053,
+   "estimate": true,
+   "side": "blue"
+  },
+  "BadHersfeld": {
+   "lat": 50.868,
+   "lon": 9.707,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hunfeld": {
+   "lat": 50.672,
+   "lon": 9.767,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Fulda": {
+   "lat": 50.551,
+   "lon": 9.676,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Alsfeld": {
+   "lat": 50.751,
+   "lon": 9.271,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Giessen": {
+   "lat": 50.584,
+   "lon": 8.678,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Frankfurt": {
+   "lat": 50.11,
+   "lon": 8.682,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hanau": {
+   "lat": 50.133,
+   "lon": 8.917,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Gelnhausen": {
+   "lat": 50.202,
+   "lon": 9.188,
+   "estimate": true,
+   "side": "blue"
+  },
+  "BadKissingen": {
+   "lat": 50.2,
+   "lon": 10.077,
+   "estimate": true,
+   "side": "blue"
+  },
+  "BadNeustadt": {
+   "lat": 50.322,
+   "lon": 10.216,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Schweinfurt": {
+   "lat": 50.049,
+   "lon": 10.229,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Wurzburg": {
+   "lat": 49.791,
+   "lon": 9.953,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Bamberg": {
+   "lat": 49.898,
+   "lon": 10.902,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Coburg": {
+   "lat": 50.258,
+   "lon": 10.965,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kronach": {
+   "lat": 50.239,
+   "lon": 11.328,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hof": {
+   "lat": 50.313,
+   "lon": 11.912,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Bayreuth": {
+   "lat": 49.945,
+   "lon": 11.576,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Nurnberg": {
+   "lat": 49.452,
+   "lon": 11.077,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Weiden": {
+   "lat": 49.677,
+   "lon": 12.156,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Paderborn": {
+   "lat": 51.718,
+   "lon": 8.757,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Bielefeld": {
+   "lat": 52.021,
+   "lon": 8.532,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Osnabruck": {
+   "lat": 52.279,
+   "lon": 8.047,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Wismar": {
+   "lat": 53.893,
+   "lon": 11.465,
+   "estimate": true,
+   "side": "red"
+  },
+  "Grevesmuhlen": {
+   "lat": 53.863,
+   "lon": 11.187,
+   "estimate": true,
+   "side": "red"
+  },
+  "Schonberg": {
+   "lat": 53.85,
+   "lon": 10.934,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gadebusch": {
+   "lat": 53.703,
+   "lon": 11.117,
+   "estimate": true,
+   "side": "red"
+  },
+  "Schwerin": {
+   "lat": 53.635,
+   "lon": 11.401,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hagenow": {
+   "lat": 53.43,
+   "lon": 11.191,
+   "estimate": true,
+   "side": "red"
+  },
+  "Rostock": {
+   "lat": 54.092,
+   "lon": 12.099,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gustrow": {
+   "lat": 53.793,
+   "lon": 12.175,
+   "estimate": true,
+   "side": "red"
+  },
+  "Parchim": {
+   "lat": 53.426,
+   "lon": 11.848,
+   "estimate": true,
+   "side": "red"
+  },
+  "Perleberg": {
+   "lat": 53.075,
+   "lon": 11.858,
+   "estimate": true,
+   "side": "red"
+  },
+  "Wittenberge": {
+   "lat": 53.0,
+   "lon": 11.75,
+   "estimate": true,
+   "side": "red"
+  },
+  "Neustrelitz": {
+   "lat": 53.364,
+   "lon": 13.063,
+   "estimate": true,
+   "side": "red"
+  },
+  "Neubrandenburg": {
+   "lat": 53.557,
+   "lon": 13.261,
+   "estimate": true,
+   "side": "red"
+  },
+  "Neuruppin": {
+   "lat": 52.924,
+   "lon": 12.804,
+   "estimate": true,
+   "side": "red"
+  },
+  "Kyritz": {
+   "lat": 52.942,
+   "lon": 12.395,
+   "estimate": true,
+   "side": "red"
+  },
+  "Salzwedel": {
+   "lat": 52.851,
+   "lon": 11.153,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gardelegen": {
+   "lat": 52.526,
+   "lon": 11.395,
+   "estimate": true,
+   "side": "red"
+  },
+  "Stendal": {
+   "lat": 52.606,
+   "lon": 11.858,
+   "estimate": true,
+   "side": "red"
+  },
+  "Haldensleben": {
+   "lat": 52.29,
+   "lon": 11.408,
+   "estimate": true,
+   "side": "red"
+  },
+  "Magdeburg": {
+   "lat": 52.131,
+   "lon": 11.64,
+   "estimate": true,
+   "side": "red"
+  },
+  "Oschersleben": {
+   "lat": 52.03,
+   "lon": 11.225,
+   "estimate": true,
+   "side": "red"
+  },
+  "Halberstadt": {
+   "lat": 51.896,
+   "lon": 11.047,
+   "estimate": true,
+   "side": "red"
+  },
+  "Wernigerode": {
+   "lat": 51.835,
+   "lon": 10.785,
+   "estimate": true,
+   "side": "red"
+  },
+  "Brandenburg": {
+   "lat": 52.412,
+   "lon": 12.532,
+   "estimate": true,
+   "side": "red"
+  },
+  "Burg": {
+   "lat": 52.272,
+   "lon": 11.855,
+   "estimate": true,
+   "side": "red"
+  },
+  "Dessau": {
+   "lat": 51.833,
+   "lon": 12.246,
+   "estimate": true,
+   "side": "red"
+  },
+  "Halle": {
+   "lat": 51.483,
+   "lon": 11.97,
+   "estimate": true,
+   "side": "red"
+  },
+  "Leipzig": {
+   "lat": 51.34,
+   "lon": 12.375,
+   "estimate": true,
+   "side": "red"
+  },
+  "Nordhausen": {
+   "lat": 51.505,
+   "lon": 10.791,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sangerhausen": {
+   "lat": 51.473,
+   "lon": 11.298,
+   "estimate": true,
+   "side": "red"
+  },
+  "Muhlhausen": {
+   "lat": 51.209,
+   "lon": 10.455,
+   "estimate": true,
+   "side": "red"
+  },
+  "Heiligenstadt": {
+   "lat": 51.378,
+   "lon": 10.138,
+   "estimate": true,
+   "side": "red"
+  },
+  "Eisenach": {
+   "lat": 50.975,
+   "lon": 10.32,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gotha": {
+   "lat": 50.947,
+   "lon": 10.701,
+   "estimate": true,
+   "side": "red"
+  },
+  "Erfurt": {
+   "lat": 50.978,
+   "lon": 11.029,
+   "estimate": true,
+   "side": "red"
+  },
+  "Weimar": {
+   "lat": 50.98,
+   "lon": 11.329,
+   "estimate": true,
+   "side": "red"
+  },
+  "Jena": {
+   "lat": 50.927,
+   "lon": 11.589,
+   "estimate": true,
+   "side": "red"
+  },
+  "Meiningen": {
+   "lat": 50.568,
+   "lon": 10.416,
+   "estimate": true,
+   "side": "red"
+  },
+  "Suhl": {
+   "lat": 50.609,
+   "lon": 10.692,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hildburghausen": {
+   "lat": 50.425,
+   "lon": 10.729,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sonneberg": {
+   "lat": 50.36,
+   "lon": 11.17,
+   "estimate": true,
+   "side": "red"
+  },
+  "Saalfeld": {
+   "lat": 50.648,
+   "lon": 11.365,
+   "estimate": true,
+   "side": "red"
+  },
+  "Plauen": {
+   "lat": 50.495,
+   "lon": 12.137,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gera": {
+   "lat": 50.88,
+   "lon": 12.081,
+   "estimate": true,
+   "side": "red"
+  }
+ },
+ "airbases": {
+  "damgarten": {
+   "name": "Damgarten",
+   "airport": "Damgarten",
+   "side": "red",
+   "military": true
+  },
+  "laage": {
+   "name": "Laage",
+   "airport": "Laage",
+   "side": "red",
+   "military": true
+  },
+  "peenemunde": {
+   "name": "Peenemunde",
+   "airport": "Peenemunde",
+   "side": "red",
+   "military": true
+  },
+  "neubrandenburg": {
+   "name": "Neubrandenburg",
+   "airport": "Neubrandenburg",
+   "side": "red",
+   "military": true
+  },
+  "tutow": {
+   "name": "Tutow",
+   "airport": "Tutow",
+   "side": "red",
+   "military": true
+  },
+  "parchim": {
+   "name": "Parchim",
+   "airport": "Parchim",
+   "side": "red",
+   "military": true
+  },
+  "wittstock": {
+   "name": "Wittstock",
+   "airport": "Wittstock",
+   "side": "red",
+   "military": true
+  },
+  "larz": {
+   "name": "Larz",
+   "airport": "Larz",
+   "side": "red",
+   "military": true
+  },
+  "neuruppin": {
+   "name": "Neuruppin",
+   "airport": "Neuruppin",
+   "side": "red",
+   "military": true
+  },
+  "templin": {
+   "name": "Templin",
+   "airport": "Templin",
+   "side": "red",
+   "military": true
+  },
+  "finow": {
+   "name": "Finow",
+   "airport": "Finow",
+   "side": "red",
+   "military": true
+  },
+  "werneuchen": {
+   "name": "Werneuchen",
+   "airport": "Werneuchen",
+   "side": "red",
+   "military": true
+  },
+  "marxwalde": {
+   "name": "Marxwalde",
+   "airport": "Marxwalde",
+   "side": "red",
+   "military": true
+  },
+  "altes_lager": {
+   "name": "Altes Lager",
+   "airport": "Altes Lager",
+   "side": "red",
+   "military": true
+  },
+  "brand": {
+   "name": "Brand",
+   "airport": "Brand",
+   "side": "red",
+   "military": true
+  },
+  "zerbst": {
+   "name": "Zerbst",
+   "airport": "Zerbst",
+   "side": "red",
+   "military": true
+  },
+  "kothen": {
+   "name": "Kothen",
+   "airport": "Kothen",
+   "side": "red",
+   "military": true
+  },
+  "merseburg": {
+   "name": "Merseburg",
+   "airport": "Merseburg",
+   "side": "red",
+   "military": true
+  },
+  "brandis": {
+   "name": "Brandis",
+   "airport": "Brandis",
+   "side": "red",
+   "military": true
+  },
+  "holzdorf": {
+   "name": "Holzdorf",
+   "airport": "Holzdorf",
+   "side": "red",
+   "military": true
+  },
+  "falkenberg": {
+   "name": "Falkenberg",
+   "airport": "Falkenberg",
+   "side": "red",
+   "military": true
+  },
+  "mahlwinkel": {
+   "name": "Mahlwinkel",
+   "airport": "Mahlwinkel",
+   "side": "red",
+   "military": true
+  },
+  "stendal": {
+   "name": "Stendal",
+   "airport": "Stendal",
+   "side": "red",
+   "military": true
+  },
+  "cochstedt": {
+   "name": "Cochstedt",
+   "airport": "Cochstedt",
+   "side": "red",
+   "military": true
+  },
+  "allstedt": {
+   "name": "Allstedt",
+   "airport": "Allstedt",
+   "side": "red",
+   "military": true
+  },
+  "wunstorf": {
+   "name": "Wunstorf",
+   "airport": "Wunstorf",
+   "side": "blue",
+   "military": true
+  },
+  "celle": {
+   "name": "Celle",
+   "airport": "Celle",
+   "side": "blue",
+   "military": true
+  },
+  "fassberg": {
+   "name": "Fassberg",
+   "airport": "Fassberg",
+   "side": "blue",
+   "military": true
+  },
+  "buckeburg": {
+   "name": "Buckeburg",
+   "airport": "Buckeburg",
+   "side": "blue",
+   "military": true
+  },
+  "hildesheim": {
+   "name": "Hildesheim",
+   "airport": "Hildesheim",
+   "side": "blue",
+   "military": true
+  },
+  "gutersloh": {
+   "name": "Gutersloh",
+   "airport": "Gutersloh",
+   "side": "blue",
+   "military": true
+  },
+  "norvenich": {
+   "name": "Norvenich",
+   "airport": "Norvenich",
+   "side": "blue",
+   "military": true
+  },
+  "buchel": {
+   "name": "Buchel",
+   "airport": "Buchel",
+   "side": "blue",
+   "military": true
+  },
+  "pferdsfeld": {
+   "name": "Pferdsfeld",
+   "airport": "Pferdsfeld",
+   "side": "blue",
+   "military": true
+  },
+  "hahn": {
+   "name": "Hahn",
+   "airport": "Hahn",
+   "side": "blue",
+   "military": true
+  },
+  "spangdahlem": {
+   "name": "Spangdahlem",
+   "airport": "Spangdahlem",
+   "side": "blue",
+   "military": true
+  },
+  "bitburg": {
+   "name": "Bitburg",
+   "airport": "Bitburg",
+   "side": "blue",
+   "military": true
+  },
+  "ramstein": {
+   "name": "Ramstein",
+   "airport": "Ramstein",
+   "side": "blue",
+   "military": true
+  },
+  "sembach": {
+   "name": "Sembach",
+   "airport": "Sembach",
+   "side": "blue",
+   "military": true
+  },
+  "zweibrucken": {
+   "name": "Zweibrucken",
+   "airport": "Zweibrucken",
+   "side": "blue",
+   "military": true
+  },
+  "fritzlar": {
+   "name": "Fritzlar",
+   "airport": "Fritzlar",
+   "side": "blue",
+   "military": true
+  },
+  "nordholz": {
+   "name": "Nordholz",
+   "airport": "Nordholz",
+   "side": "blue",
+   "military": true
+  },
+  "uetersen": {
+   "name": "Uetersen",
+   "airport": "Uetersen",
+   "side": "blue",
+   "military": true
+  },
+  "giebelstadt": {
+   "name": "Giebelstadt",
+   "airport": "Giebelstadt",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "links": [
+  [
+   "Alsfeld",
+   "BadHersfeld"
+  ],
+  [
+   "Alsfeld",
+   "Fulda"
+  ],
+  [
+   "Alsfeld",
+   "Gelnhausen"
+  ],
+  [
+   "Alsfeld",
+   "Giessen"
+  ],
+  [
+   "Alsfeld",
+   "Hunfeld"
+  ],
+  [
+   "Amelinghausen",
+   "Luneburg"
+  ],
+  [
+   "Amelinghausen",
+   "Munster"
+  ],
+  [
+   "BadHersfeld",
+   "Eisenach"
+  ],
+  [
+   "BadHersfeld",
+   "Eschwege"
+  ],
+  [
+   "BadHersfeld",
+   "Hunfeld"
+  ],
+  [
+   "BadHersfeld",
+   "Kassel"
+  ],
+  [
+   "BadKissingen",
+   "BadNeustadt"
+  ],
+  [
+   "BadKissingen",
+   "Fulda"
+  ],
+  [
+   "BadKissingen",
+   "Gelnhausen"
+  ],
+  [
+   "BadKissingen",
+   "Schweinfurt"
+  ],
+  [
+   "BadNeustadt",
+   "Fulda"
+  ],
+  [
+   "BadNeustadt",
+   "Hildburghausen"
+  ],
+  [
+   "BadNeustadt",
+   "Meiningen"
+  ],
+  [
+   "BadOldesloe",
+   "BadSegeberg"
+  ],
+  [
+   "BadOldesloe",
+   "Hamburg"
+  ],
+  [
+   "BadOldesloe",
+   "Lubeck"
+  ],
+  [
+   "BadOldesloe",
+   "Molln"
+  ],
+  [
+   "BadOldesloe",
+   "Ratzeburg"
+  ],
+  [
+   "BadSegeberg",
+   "Lubeck"
+  ],
+  [
+   "BadSegeberg",
+   "Neumunster"
+  ],
+  [
+   "Bamberg",
+   "Bayreuth"
+  ],
+  [
+   "Bamberg",
+   "Coburg"
+  ],
+  [
+   "Bamberg",
+   "Nurnberg"
+  ],
+  [
+   "Bamberg",
+   "Schweinfurt"
+  ],
+  [
+   "Bayreuth",
+   "Hof"
+  ],
+  [
+   "Bayreuth",
+   "Kronach"
+  ],
+  [
+   "Bayreuth",
+   "Nurnberg"
+  ],
+  [
+   "Bayreuth",
+   "Weiden"
+  ],
+  [
+   "Bielefeld",
+   "Osnabruck"
+  ],
+  [
+   "Bielefeld",
+   "Paderborn"
+  ],
+  [
+   "Bleckede",
+   "Dahlenburg"
+  ],
+  [
+   "Bleckede",
+   "Hitzacker"
+  ],
+  [
+   "Bleckede",
+   "Luneburg"
+  ],
+  [
+   "Boizenburg",
+   "Hagenow"
+  ],
+  [
+   "Boizenburg",
+   "Lauenburg"
+  ],
+  [
+   "Boizenburg",
+   "Ludwigslust"
+  ],
+  [
+   "Boizenburg",
+   "Molln"
+  ],
+  [
+   "Brandenburg",
+   "Burg"
+  ],
+  [
+   "Brandenburg",
+   "Dessau"
+  ],
+  [
+   "Brandenburg",
+   "Kyritz"
+  ],
+  [
+   "Brandenburg",
+   "Neuruppin"
+  ],
+  [
+   "Brandenburg",
+   "Stendal"
+  ],
+  [
+   "Braunschweig",
+   "Gifhorn"
+  ],
+  [
+   "Braunschweig",
+   "Helmstedt"
+  ],
+  [
+   "Braunschweig",
+   "Salzgitter"
+  ],
+  [
+   "Braunschweig",
+   "Wolfsburg"
+  ],
+  [
+   "Bremen",
+   "Rotenburg"
+  ],
+  [
+   "Bremen",
+   "Verden"
+  ],
+  [
+   "Burg",
+   "Dessau"
+  ],
+  [
+   "Burg",
+   "Haldensleben"
+  ],
+  [
+   "Burg",
+   "Magdeburg"
+  ],
+  [
+   "Burg",
+   "Stendal"
+  ],
+  [
+   "Buxtehude",
+   "Hamburg"
+  ],
+  [
+   "Buxtehude",
+   "Rotenburg"
+  ],
+  [
+   "Buxtehude",
+   "Stade"
+  ],
+  [
+   "Celle",
+   "Gifhorn"
+  ],
+  [
+   "Celle",
+   "Hannover"
+  ],
+  [
+   "Celle",
+   "Munster"
+  ],
+  [
+   "Celle",
+   "Soltau"
+  ],
+  [
+   "Celle",
+   "Uelzen"
+  ],
+  [
+   "Celle",
+   "Wittingen"
+  ],
+  [
+   "Coburg",
+   "Hildburghausen"
+  ],
+  [
+   "Coburg",
+   "Schweinfurt"
+  ],
+  [
+   "Coburg",
+   "Sonneberg"
+  ],
+  [
+   "Dahlenburg",
+   "Dannenberg"
+  ],
+  [
+   "Dahlenburg",
+   "Luneburg"
+  ],
+  [
+   "Dahlenburg",
+   "Uelzen"
+  ],
+  [
+   "Dannenberg",
+   "Hitzacker"
+  ],
+  [
+   "Dannenberg",
+   "Luchow"
+  ],
+  [
+   "Dannenberg",
+   "Ludwigslust"
+  ],
+  [
+   "Dannenberg",
+   "Uelzen"
+  ],
+  [
+   "Dessau",
+   "Halle"
+  ],
+  [
+   "Dessau",
+   "Magdeburg"
+  ],
+  [
+   "Duderstadt",
+   "Gottingen"
+  ],
+  [
+   "Duderstadt",
+   "Heiligenstadt"
+  ],
+  [
+   "Duderstadt",
+   "Nordhausen"
+  ],
+  [
+   "Duderstadt",
+   "Northeim"
+  ],
+  [
+   "Duderstadt",
+   "Osterode"
+  ],
+  [
+   "Eisenach",
+   "Eschwege"
+  ],
+  [
+   "Eisenach",
+   "Gotha"
+  ],
+  [
+   "Eisenach",
+   "Meiningen"
+  ],
+  [
+   "Eisenach",
+   "Muhlhausen"
+  ],
+  [
+   "Erfurt",
+   "Gotha"
+  ],
+  [
+   "Erfurt",
+   "Nordhausen"
+  ],
+  [
+   "Erfurt",
+   "Sangerhausen"
+  ],
+  [
+   "Erfurt",
+   "Weimar"
+  ],
+  [
+   "Eschwege",
+   "Heiligenstadt"
+  ],
+  [
+   "Eschwege",
+   "Muhlhausen"
+  ],
+  [
+   "Eschwege",
+   "Witzenhausen"
+  ],
+  [
+   "Frankfurt",
+   "Giessen"
+  ],
+  [
+   "Frankfurt",
+   "Hanau"
+  ],
+  [
+   "Fulda",
+   "Gelnhausen"
+  ],
+  [
+   "Fulda",
+   "Hunfeld"
+  ],
+  [
+   "Gadebusch",
+   "Grevesmuhlen"
+  ],
+  [
+   "Gadebusch",
+   "Hagenow"
+  ],
+  [
+   "Gadebusch",
+   "Ratzeburg"
+  ],
+  [
+   "Gadebusch",
+   "Schonberg"
+  ],
+  [
+   "Gadebusch",
+   "Schwerin"
+  ],
+  [
+   "Gardelegen",
+   "Haldensleben"
+  ],
+  [
+   "Gardelegen",
+   "Salzwedel"
+  ],
+  [
+   "Gardelegen",
+   "Stendal"
+  ],
+  [
+   "Gardelegen",
+   "Wittingen"
+  ],
+  [
+   "Gardelegen",
+   "Wolfsburg"
+  ],
+  [
+   "Gelnhausen",
+   "Giessen"
+  ],
+  [
+   "Gelnhausen",
+   "Hanau"
+  ],
+  [
+   "Gera",
+   "Jena"
+  ],
+  [
+   "Gera",
+   "Leipzig"
+  ],
+  [
+   "Gera",
+   "Plauen"
+  ],
+  [
+   "Giessen",
+   "Hanau"
+  ],
+  [
+   "Gifhorn",
+   "Wittingen"
+  ],
+  [
+   "Gifhorn",
+   "Wolfsburg"
+  ],
+  [
+   "Goslar",
+   "Osterode"
+  ],
+  [
+   "Goslar",
+   "Salzgitter"
+  ],
+  [
+   "Goslar",
+   "Wernigerode"
+  ],
+  [
+   "Gotha",
+   "Muhlhausen"
+  ],
+  [
+   "Gotha",
+   "Suhl"
+  ],
+  [
+   "Gottingen",
+   "Heiligenstadt"
+  ],
+  [
+   "Gottingen",
+   "Northeim"
+  ],
+  [
+   "Gottingen",
+   "Witzenhausen"
+  ],
+  [
+   "Grevesmuhlen",
+   "Schonberg"
+  ],
+  [
+   "Grevesmuhlen",
+   "Wismar"
+  ],
+  [
+   "Gustrow",
+   "Parchim"
+  ],
+  [
+   "Gustrow",
+   "Rostock"
+  ],
+  [
+   "Gustrow",
+   "Schwerin"
+  ],
+  [
+   "Gustrow",
+   "Wismar"
+  ],
+  [
+   "Hagenow",
+   "Hitzacker"
+  ],
+  [
+   "Hagenow",
+   "Ludwigslust"
+  ],
+  [
+   "Hagenow",
+   "Molln"
+  ],
+  [
+   "Hagenow",
+   "Schwerin"
+  ],
+  [
+   "Halberstadt",
+   "Oschersleben"
+  ],
+  [
+   "Halberstadt",
+   "Sangerhausen"
+  ],
+  [
+   "Halberstadt",
+   "Wernigerode"
+  ],
+  [
+   "Haldensleben",
+   "Helmstedt"
+  ],
+  [
+   "Haldensleben",
+   "Magdeburg"
+  ],
+  [
+   "Haldensleben",
+   "Oschersleben"
+  ],
+  [
+   "Halle",
+   "Jena"
+  ],
+  [
+   "Halle",
+   "Leipzig"
+  ],
+  [
+   "Halle",
+   "Sangerhausen"
+  ],
+  [
+   "Hamburg",
+   "Molln"
+  ],
+  [
+   "Hamburg",
+   "Winsen"
+  ],
+  [
+   "Hannover",
+   "Hildesheim"
+  ],
+  [
+   "Hannover",
+   "Nienburg"
+  ],
+  [
+   "Heiligenstadt",
+   "Muhlhausen"
+  ],
+  [
+   "Heiligenstadt",
+   "Witzenhausen"
+  ],
+  [
+   "Helmstedt",
+   "Oschersleben"
+  ],
+  [
+   "Helmstedt",
+   "Wolfsburg"
+  ],
+  [
+   "Hildburghausen",
+   "Meiningen"
+  ],
+  [
+   "Hildburghausen",
+   "Suhl"
+  ],
+  [
+   "Hildesheim",
+   "Northeim"
+  ],
+  [
+   "Hildesheim",
+   "Salzgitter"
+  ],
+  [
+   "Hof",
+   "Kronach"
+  ],
+  [
+   "Hof",
+   "Plauen"
+  ],
+  [
+   "Hof",
+   "Saalfeld"
+  ],
+  [
+   "Hunfeld",
+   "Meiningen"
+  ],
+  [
+   "Itzehoe",
+   "Neumunster"
+  ],
+  [
+   "Itzehoe",
+   "Rendsburg"
+  ],
+  [
+   "Itzehoe",
+   "Stade"
+  ],
+  [
+   "Jena",
+   "Saalfeld"
+  ],
+  [
+   "Jena",
+   "Weimar"
+  ],
+  [
+   "Kassel",
+   "Paderborn"
+  ],
+  [
+   "Kassel",
+   "Witzenhausen"
+  ],
+  [
+   "Kiel",
+   "Neumunster"
+  ],
+  [
+   "Kiel",
+   "Rendsburg"
+  ],
+  [
+   "Kronach",
+   "Sonneberg"
+  ],
+  [
+   "Kyritz",
+   "Neuruppin"
+  ],
+  [
+   "Kyritz",
+   "Perleberg"
+  ],
+  [
+   "Kyritz",
+   "Stendal"
+  ],
+  [
+   "Lauenburg",
+   "Luneburg"
+  ],
+  [
+   "Lauenburg",
+   "Molln"
+  ],
+  [
+   "Lauenburg",
+   "Winsen"
+  ],
+  [
+   "Lubeck",
+   "Ratzeburg"
+  ],
+  [
+   "Lubeck",
+   "Schonberg"
+  ],
+  [
+   "Luchow",
+   "Salzwedel"
+  ],
+  [
+   "Luchow",
+   "Uelzen"
+  ],
+  [
+   "Luchow",
+   "Wittenberge"
+  ],
+  [
+   "Ludwigslust",
+   "Parchim"
+  ],
+  [
+   "Ludwigslust",
+   "Perleberg"
+  ],
+  [
+   "Ludwigslust",
+   "Schwerin"
+  ],
+  [
+   "Luneburg",
+   "Uelzen"
+  ],
+  [
+   "Luneburg",
+   "Winsen"
+  ],
+  [
+   "Magdeburg",
+   "Oschersleben"
+  ],
+  [
+   "Meiningen",
+   "Suhl"
+  ],
+  [
+   "Molln",
+   "Ratzeburg"
+  ],
+  [
+   "Muhlhausen",
+   "Nordhausen"
+  ],
+  [
+   "Munster",
+   "Soltau"
+  ],
+  [
+   "Munster",
+   "Uelzen"
+  ],
+  [
+   "Neubrandenburg",
+   "Neustrelitz"
+  ],
+  [
+   "Neumunster",
+   "Rendsburg"
+  ],
+  [
+   "Neuruppin",
+   "Neustrelitz"
+  ],
+  [
+   "Nienburg",
+   "Verden"
+  ],
+  [
+   "Nordhausen",
+   "Sangerhausen"
+  ],
+  [
+   "Nordhausen",
+   "Wernigerode"
+  ],
+  [
+   "Northeim",
+   "Osterode"
+  ],
+  [
+   "Parchim",
+   "Perleberg"
+  ],
+  [
+   "Parchim",
+   "Schwerin"
+  ],
+  [
+   "Perleberg",
+   "Wittenberge"
+  ],
+  [
+   "Plauen",
+   "Saalfeld"
+  ],
+  [
+   "Ratzeburg",
+   "Schonberg"
+  ],
+  [
+   "Rostock",
+   "Wismar"
+  ],
+  [
+   "Rotenburg",
+   "Soltau"
+  ],
+  [
+   "Rotenburg",
+   "Verden"
+  ],
+  [
+   "Saalfeld",
+   "Sonneberg"
+  ],
+  [
+   "Saalfeld",
+   "Suhl"
+  ],
+  [
+   "Saalfeld",
+   "Weimar"
+  ],
+  [
+   "Salzwedel",
+   "Wittingen"
+  ],
+  [
+   "Sangerhausen",
+   "Weimar"
+  ],
+  [
+   "Schweinfurt",
+   "Wurzburg"
+  ],
+  [
+   "Schwerin",
+   "Wismar"
+  ],
+  [
+   "Soltau",
+   "Winsen"
+  ],
+  [
+   "Stendal",
+   "Wittenberge"
+  ],
+  [
+   "Uelzen",
+   "Wittingen"
+  ],
+  [
+   "Wittingen",
+   "Wolfsburg"
+  ]
+ ],
+ "axes": {
+  "north": "Шлезвиг-Гольштейн",
+  "elbe": "Нижняя Эльба",
+  "altmark": "Альтмарк - Целле",
+  "center": "Хельмштедт - Ганновер",
+  "harz": "Гёттинген - Кассель",
+  "fulda": "Фульдский коридор",
+  "main": "Майн",
+  "hof": "Хоф - Нюрнберг"
+ },
+ "objectives": {
+  "red": {
+   "north": [
+    "Ratzeburg",
+    "Hamburg",
+    "Neumunster",
+    "Kiel"
+   ],
+   "elbe": [
+    "Luneburg",
+    "Soltau",
+    "Rotenburg",
+    "Bremen"
+   ],
+   "altmark": [
+    "Uelzen",
+    "Celle",
+    "Nienburg"
+   ],
+   "center": [
+    "Braunschweig",
+    "Hildesheim",
+    "Hannover"
+   ],
+   "harz": [
+    "Gottingen",
+    "Kassel",
+    "Paderborn"
+   ],
+   "fulda": [
+    "BadHersfeld",
+    "Fulda",
+    "Gelnhausen",
+    "Frankfurt"
+   ],
+   "main": [
+    "BadNeustadt",
+    "Schweinfurt",
+    "Wurzburg"
+   ],
+   "hof": [
+    "Hof",
+    "Bayreuth",
+    "Nurnberg"
+   ]
+  },
+  "blue": []
+ },
+ "_about_objectives": "Оси наступления ОВД - ОЦЕНКА по общим представлениям о планах, не документ. У каждой части красных - своя ось (axis); цели оси берутся по порядку, первая не взятая.",
+ "depots": [
+  {
+   "id": "red_depot_1",
+   "name": "Склад снабжения (Людвигслюст)",
+   "side": "red",
+   "place": "Ludwigslust"
+  },
+  {
+   "id": "red_depot_2",
+   "name": "Передовой склад (Бойценбург)",
+   "side": "red",
+   "place": "Boizenburg"
+  },
+  {
+   "id": "red_depot_schwerin",
+   "name": "Склад снабжения (Шверин)",
+   "side": "red",
+   "place": "Schwerin"
+  },
+  {
+   "id": "red_depot_stendal",
+   "name": "Склад снабжения (Стендаль)",
+   "side": "red",
+   "place": "Stendal"
+  },
+  {
+   "id": "red_depot_magdeburg",
+   "name": "Склад снабжения (Магдебург)",
+   "side": "red",
+   "place": "Magdeburg"
+  },
+  {
+   "id": "red_depot_halle",
+   "name": "Склад снабжения (Галле)",
+   "side": "red",
+   "place": "Halle"
+  },
+  {
+   "id": "red_depot_erfurt",
+   "name": "Склад снабжения (Эрфурт)",
+   "side": "red",
+   "place": "Erfurt"
+  },
+  {
+   "id": "red_depot_gera",
+   "name": "Склад снабжения (Гера)",
+   "side": "red",
+   "place": "Gera"
+  },
+  {
+   "id": "blue_depot_1",
+   "name": "Склад снабжения (Зольтау)",
+   "side": "blue",
+   "place": "Soltau"
+  },
+  {
+   "id": "blue_depot_2",
+   "name": "Склад снабжения (Ильцен)",
+   "side": "blue",
+   "place": "Uelzen"
+  },
+  {
+   "id": "blue_depot_nms",
+   "name": "Склад снабжения (Ноймюнстер)",
+   "side": "blue",
+   "place": "Neumunster"
+  },
+  {
+   "id": "blue_depot_han",
+   "name": "Склад снабжения (Ганновер)",
+   "side": "blue",
+   "place": "Hannover"
+  },
+  {
+   "id": "blue_depot_kas",
+   "name": "Склад снабжения (Кассель)",
+   "side": "blue",
+   "place": "Kassel"
+  },
+  {
+   "id": "blue_depot_ful",
+   "name": "Склад снабжения (Фульда)",
+   "side": "blue",
+   "place": "Fulda"
+  },
+  {
+   "id": "blue_depot_wue",
+   "name": "Склад снабжения (Вюрцбург)",
+   "side": "blue",
+   "place": "Wurzburg"
+  },
+  {
+   "id": "blue_depot_nue",
+   "name": "Склад снабжения (Нюрнберг)",
+   "side": "blue",
+   "place": "Nurnberg"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_lauenburg",
+   "name": "Мост через Эльбу у Лауэнбурга",
+   "lat": 53.366,
+   "lon": 10.5596,
+   "links": [
+    [
+     "Lauenburg",
+     "Luneburg"
+    ],
+    [
+     "Lauenburg",
+     "Winsen"
+    ]
+   ],
+   "source": "редактор DCS (Alex): объект rw_bridge_2line, N53°21'56\" E10°33'35\"; оценка 53.3725, 10.558 была в 718 м севернее",
+   "pos_checked": true
+  },
+  {
+   "id": "br_doemitz",
+   "name": "Переправа через Эльбу у Дёмица",
+   "lat": 53.1375,
+   "lon": 11.258,
+   "estimate": true,
+   "links": [
+    [
+     "Ludwigslust",
+     "Dannenberg"
+    ]
+   ],
+   "note": "Есть ли на карте DCS мост у Дёмица - не знаю (дорожный мост построен после 1990); без объектов карты переправа не цель."
+  }
+ ],
+ "_about_targets": "Склады - в пунктах (уточняются зондом карты), мосты через Эльбу - из сектора Гамбурга."
+}

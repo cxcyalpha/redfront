@@ -1,0 +1,317 @@
+{
+  "_about": "Сектор 'Гамбург': только карта - места и аэродромы. Кто на них стоит - в составе сил (oob_*.json). Координаты населённых пунктов приблизительные (estimate=true), проверить в редакторе DCS. Координаты аэродромов берутся из терраина pydcs.",
+  "theatre": "germany",
+  "places": {
+    "Munster": {
+      "lat": 52.986,
+      "lon": 10.087,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Amelinghausen": {
+      "lat": 53.124,
+      "lon": 10.214,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Luneburg": {
+      "lat": 53.248,
+      "lon": 10.411,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Dahlenburg": {
+      "lat": 53.186,
+      "lon": 10.733,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Dannenberg": {
+      "lat": 53.098,
+      "lon": 11.098,
+      "estimate": true,
+      "side": "red"
+    },
+    "Lauenburg": {
+      "lat": 53.374,
+      "lon": 10.56,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Boizenburg": {
+      "lat": 53.38,
+      "lon": 10.723,
+      "estimate": true,
+      "side": "red"
+    },
+    "Uelzen": {
+      "lat": 52.965,
+      "lon": 10.56,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Bleckede": {
+      "lat": 53.287,
+      "lon": 10.733,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Winsen": {
+      "lat": 53.357,
+      "lon": 10.212,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Soltau": {
+      "lat": 52.986,
+      "lon": 9.843,
+      "estimate": true,
+      "side": "blue"
+    },
+    "Ludwigslust": {
+      "lat": 53.329,
+      "lon": 11.497,
+      "side": "red",
+      "estimate": true
+    },
+    "Hitzacker": {
+      "lat": 53.152,
+      "lon": 11.044,
+      "side": "blue",
+      "estimate": true
+    },
+    "Luchow": {
+      "lat": 52.967,
+      "lon": 11.152,
+      "side": "blue",
+      "estimate": true
+    }
+  },
+  "airbases": {
+    "parchim": {
+      "name": "Пархим",
+      "airport": "Parchim",
+      "side": "red",
+      "military": true
+    },
+    "laage": {
+      "name": "Лаге",
+      "airport": "Laage",
+      "side": "red",
+      "military": true
+    },
+    "stendal": {
+      "name": "Стендаль",
+      "airport": "Stendal",
+      "side": "red",
+      "military": true
+    },
+    "damgarten": {
+      "name": "Дамгартен",
+      "airport": "Damgarten",
+      "side": "red",
+      "military": true
+    },
+    "mahlwinkel": {
+      "name": "Мальвинкель",
+      "airport": "Mahlwinkel",
+      "side": "red",
+      "military": true
+    },
+    "wunstorf": {
+      "name": "Вунсторф",
+      "airport": "Wunstorf",
+      "side": "blue",
+      "military": true
+    },
+    "fassberg": {
+      "name": "Фасберг",
+      "airport": "Fassberg",
+      "side": "blue",
+      "military": true
+    },
+    "celle": {
+      "name": "Целле",
+      "airport": "Celle",
+      "side": "blue",
+      "military": true
+    },
+    "uetersen": {
+      "name": "Ютерзен",
+      "airport": "Uetersen",
+      "side": "blue",
+      "military": true
+    },
+    "nordholz": {
+      "name": "Нордхольц",
+      "airport": "Nordholz",
+      "side": "blue",
+      "military": true
+    }
+  },
+  "links": [
+    [
+      "Munster",
+      "Amelinghausen"
+    ],
+    [
+      "Amelinghausen",
+      "Luneburg"
+    ],
+    [
+      "Luneburg",
+      "Dahlenburg"
+    ],
+    [
+      "Dahlenburg",
+      "Dannenberg"
+    ],
+    [
+      "Boizenburg",
+      "Lauenburg"
+    ],
+    [
+      "Lauenburg",
+      "Luneburg"
+    ],
+    [
+      "Lauenburg",
+      "Winsen"
+    ],
+    [
+      "Luneburg",
+      "Winsen"
+    ],
+    [
+      "Luneburg",
+      "Bleckede"
+    ],
+    [
+      "Bleckede",
+      "Dahlenburg"
+    ],
+    [
+      "Dahlenburg",
+      "Uelzen"
+    ],
+    [
+      "Uelzen",
+      "Munster"
+    ],
+    [
+      "Uelzen",
+      "Luneburg"
+    ],
+    [
+      "Munster",
+      "Soltau"
+    ],
+    [
+      "Soltau",
+      "Winsen"
+    ],
+    [
+      "Uelzen",
+      "Dannenberg"
+    ],
+    [
+      "Ludwigslust",
+      "Boizenburg"
+    ],
+    [
+      "Ludwigslust",
+      "Dannenberg"
+    ],
+    [
+      "Dannenberg",
+      "Hitzacker"
+    ],
+    [
+      "Hitzacker",
+      "Bleckede"
+    ],
+    [
+      "Dannenberg",
+      "Luchow"
+    ],
+    [
+      "Luchow",
+      "Uelzen"
+    ]
+  ],
+  "objectives": {
+    "red": [
+      "Luneburg",
+      "Winsen",
+      "Soltau"
+    ],
+    "blue": [
+      "Luneburg",
+      "Dahlenburg",
+      "Dannenberg"
+    ]
+  },
+  "_about_ops": "side - кто держит пункт в начале; links - связи пунктов (дороги для оперативного уровня); objectives - цели операции стороны по порядку (направление наступления, ОЦЕНКА сценария). Координаты Uelzen/Bleckede/Winsen/Soltau - приблизительные.",
+  "_about_airbases": "Только военные аэродромы (Alex: гражданских на карте Германии слишком много). Список - по моим знаниям о базах 1980-х, НЕ сверен с документом: Пархим, Лаге, Стендаль, Дамгартен, Мальвинкель (ГДР/ГСВГ), Вунсторф, Фасберг, Целле, Ютерзен, Нордхольц (ФРГ) - проверить. Захваченный аэродром к противнику не переходит.",
+  "depots": [
+    {
+      "id": "red_depot_1",
+      "name": "Склад снабжения (Людвигслюст)",
+      "side": "red",
+      "place": "Ludwigslust"
+    },
+    {
+      "id": "red_depot_2",
+      "name": "Передовой склад (Бойценбург)",
+      "side": "red",
+      "place": "Boizenburg"
+    },
+    {
+      "id": "blue_depot_1",
+      "name": "Склад снабжения (Зольтау)",
+      "side": "blue",
+      "place": "Soltau"
+    },
+    {
+      "id": "blue_depot_2",
+      "name": "Склад снабжения (Ильцен)",
+      "side": "blue",
+      "place": "Uelzen"
+    }
+  ],
+  "bridges": [
+    {
+      "id": "br_lauenburg",
+      "name": "Мост через Эльбу у Лауэнбурга",
+      "lat": 53.366,
+      "lon": 10.5596,
+      "links": [
+        [
+          "Lauenburg",
+          "Luneburg"
+        ],
+        [
+          "Lauenburg",
+          "Winsen"
+        ]
+      ],
+      "source": "редактор DCS (Alex): объект rw_bridge_2line, N53°21'56\" E10°33'35\"; оценка 53.3725, 10.558 была в 718 м севернее",
+      "pos_checked": true
+    },
+    {
+      "id": "br_doemitz",
+      "name": "Переправа через Эльбу у Дёмица",
+      "lat": 53.1375,
+      "lon": 11.258,
+      "estimate": true,
+      "links": [
+        [
+          "Ludwigslust",
+          "Dannenberg"
+        ]
+      ],
+      "note": "Есть ли на карте DCS мост у Дёмица - не знаю (дорожный мост построен после 1990); без объектов карты переправа не цель."
+    }
+  ],
+  "_about_targets": "Склады - в пунктах (в миссии - объекты карты в районе пункта и/или статика), мосты - по координатам (ОЦЕНКИ, проверить в редакторе)."
+}

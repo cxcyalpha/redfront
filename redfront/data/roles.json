@@ -1,0 +1,29 @@
+{
+  "_about": "Таблица ролей. Доктрина работает с ролями, а не с типами: любая техника в составе сил (хоть мод, хоть единорог) получает роль, и планировщик обращается с ней по роли. Числа по умолчанию - только там, где они уже были в версии 0.1 (estimate=true). null = своего значения у роли нет: нужно указать у части в составе сил, либо берётся из pydcs (дальность ЗРК - threat_range пусковых).",
+  "units": {
+    "attack":         {"title": "штурмовая авиация",            "category": "air",  "strike_radius_km": 250, "estimate": true, "note": "250 км - оценка версии 0.1 для Су-25 с подвеской без ПТБ"},
+    "bomber":         {"title": "бомбардировочная авиация",     "category": "air",  "strike_radius_km": null},
+    "fighter_bomber": {"title": "истребительно-бомбардировочная авиация", "category": "air", "strike_radius_km": null},
+    "fighter":        {"title": "истребительная авиация",       "category": "air",  "strike_radius_km": null},
+    "interceptor":    {"title": "истребители-перехватчики",     "category": "air",  "strike_radius_km": null},
+    "attack_helo":    {"title": "боевые вертолёты",             "category": "heli", "strike_radius_km": null},
+    "transport_helo": {"title": "транспортные вертолёты",       "category": "heli", "strike_radius_km": null},
+    "maneuver":       {"title": "общевойсковая часть (батальон, полк)", "category": "ground"},
+    "sam_long":       {"title": "ЗРК большой дальности",        "category": "sam",  "threat_radius_km": null},
+    "sam_medium":     {"title": "ЗРК средней дальности",        "category": "sam",  "threat_radius_km": null},
+    "sam_short":      {"title": "ЗРК малой дальности, войсковая ПВО", "category": "sam", "threat_radius_km": null},
+    "depot":          {"title": "склад снабжения",               "category": "depot"},
+    "bridge":         {"title": "мост",                          "category": "bridge"},
+    "airfield":       {"title": "военный аэродром",              "category": "airfield"},
+    "factory":        {"title": "завод (промышленный объект)",   "category": "factory"}
+  },
+  "elements": {
+    "MBT":      "танк",
+    "IFV":      "БМП",
+    "APC":      "БТР",
+    "truck":    "автомобиль",
+    "radar":    "РЛС",
+    "control":  "пункт управления",
+    "launcher": "пусковая установка"
+  }
+}

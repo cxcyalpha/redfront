@@ -1,0 +1,331 @@
+"""Модель кампании: части, их состояние, сохранение.
+
+Три слоя данных: сектор (карта), состав сил (что выставил игрок - любые типы, у каждой части роль из roles.json)
+и пакеты доктрины по сторонам (data/doctrine/*.json). Доктрина работает с ролями, не с типами.
+
+Состояние - обычный JSON (state.json). Численность наземных частей хранится по типам техники: count (штат на начало
+кампании) и lost (потери, дробные: развёрнутый в миссии кусок части несёт "вес", см. materialize.py).
+"""
+from __future__ import annotations
+
+import copy
+import json
+import random
+import math
+import uuid
+from pathlib import Path
+
+DATA = Path(__file__).parent / "data"
+EARTH_R_KM = 6371.0
+STATE_VERSION = 2
+SIDES = ("red", "blue")
+
+
+def load_json(name: str | Path) -> dict:
+    """Файл игрока (если путь существует) или файл из data/ пакета."""
+    p = Path(name)
+    if not p.is_file():
+        p = DATA / name
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+# ---------- роли и доктрина ----------
+
+_ROLES: dict | None = None
+
+
+def roles() -> dict:
+    global _ROLES
+    if _ROLES is None:
+        _ROLES = load_json("roles.json")
+    return _ROLES
+
+
+def role_info(role: str) -> dict:
+    try:
+        return roles()["units"][role]
+    except KeyError:
+        raise KeyError(f"роль '{role}' не описана в roles.json") from None
+
+
+def category(unit: dict) -> str:
+    """air / heli / ground / sam - по роли части."""
+    return role_info(unit["role"])["category"]
+
+
+def enemy(side: str) -> str:
+    return "blue" if side == "red" else "red"
+
+
+_DOCTRINE: dict = {}
+
+
+def doctrine(state: dict, side: str) -> dict:
+    """Пакет доктрины стороны (по state['doctrine'][side]). Кэш по файлу и времени изменения: на всём фронте
+    доктрина спрашивается десятки тысяч раз за сутки. Результат только для чтения."""
+    name = Path("doctrine") / f"{state['doctrine'][side]}.json"
+    p = name if name.is_file() else DATA / name
+    key = (str(p), p.stat().st_mtime_ns)
+    if key not in _DOCTRINE:
+        _DOCTRINE[key] = json.loads(p.read_text(encoding="utf-8"))
+    return _DOCTRINE[key]
+
+
+# ---------- геометрия (широта/долгота, без проекции DCS) ----------
+
+def dist_km(a: dict, b: dict) -> float:
+    la1, lo1, la2, lo2 = map(math.radians, (a["lat"], a["lon"], b["lat"], b["lon"]))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 2 * EARTH_R_KM * math.asin(math.sqrt(h))
+
+
+def lerp(a: dict, b: dict, t: float) -> dict:
+    return {"lat": a["lat"] + (b["lat"] - a["lat"]) * t, "lon": a["lon"] + (b["lon"] - a["lon"]) * t}
+
+
+def bearing_deg(a: dict, b: dict) -> float:
+    """Начальный пеленг из a на b, градусы от севера по часовой."""
+    la1, la2 = math.radians(a["lat"]), math.radians(b["lat"])
+    dlo = math.radians(b["lon"] - a["lon"])
+    y = math.sin(dlo) * math.cos(la2)
+    x = math.cos(la1) * math.sin(la2) - math.sin(la1) * math.cos(la2) * math.cos(dlo)
+    return (math.degrees(math.atan2(y, x)) + 360.0) % 360.0
+
+
+def offset(p: dict, bearing: float, fwd_m: float, right_m: float = 0.0) -> dict:
+    """Точка в fwd_m вперёд по курсу bearing и right_m вправо от p (плоское приближение, для сотен метров - километров)."""
+    b = math.radians(bearing)
+    north = fwd_m * math.cos(b) - right_m * math.sin(b)
+    east = fwd_m * math.sin(b) + right_m * math.cos(b)
+    return {"lat": p["lat"] + north / 111_320.0, "lon": p["lon"] + east / (111_320.0 * math.cos(math.radians(p["lat"])))}
+
+
+def route_points(state: dict, unit: dict) -> list[dict]:
+    """Геометрия маршрута: по каждому участку "A>B" - ломаная по дорогам из state['roads'] (см. roads.py),
+    если она есть, иначе прямая между пунктами (как в 0.1/0.2)."""
+    places, roads = state["places"], state.get("roads") or {}
+    route = unit["route"]
+    if len(route) == 1:
+        return [dict(lat=places[route[0]]["lat"], lon=places[route[0]]["lon"])] * 2
+    pts: list[dict] = []
+    for a, b in zip(route, route[1:]):
+        seg = (roads.get(f"{a}>{b}") or list(reversed(roads.get(f"{b}>{a}") or []))      # дорога в обратную сторону - та же
+               or [dict(lat=places[p]["lat"], lon=places[p]["lon"]) for p in (a, b)])
+        if pts and dist_km(pts[-1], seg[0]) < 0.005:
+            seg = seg[1:]
+        pts.extend(dict(p) for p in seg)
+    return pts
+
+
+def place_km(state: dict, unit: dict) -> list[tuple[str, float]]:
+    """Пункты маршрута и их удаление вдоль геометрии маршрута, км."""
+    pts = route_points(state, unit)
+    return [(p, project_km(pts, state["places"][p])) for p in unit["route"]]
+
+
+def route_length_km(pts: list[dict]) -> float:
+    return sum(dist_km(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+
+def point_at_km(pts: list[dict], km: float) -> tuple[dict, int]:
+    """Точка на маршруте через km от начала и индекс сегмента, на котором она лежит."""
+    km = max(0.0, km)
+    for i in range(len(pts) - 1):
+        seg = dist_km(pts[i], pts[i + 1])
+        if km <= seg or i == len(pts) - 2:
+            return lerp(pts[i], pts[i + 1], min(1.0, km / seg if seg else 0.0)), i
+        km -= seg
+    return dict(pts[-1]), len(pts) - 2
+
+
+def project_km(pts: list[dict], p: dict) -> float:
+    """Расстояние вдоль маршрута до ближайшей к p точки маршрута (приближённо, в плоскости lat/lon с поправкой на широту)."""
+    best, best_km, run = None, 0.0, 0.0
+    k = math.cos(math.radians(p["lat"]))
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        ax, ay, bx, by, px, py = a["lon"] * k, a["lat"], b["lon"] * k, b["lat"], p["lon"] * k, p["lat"]
+        dx, dy = bx - ax, by - ay
+        t = 0.0 if dx == dy == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+        q = lerp(a, b, t)
+        d = dist_km(q, p)
+        seg = dist_km(a, b)
+        if best is None or d < best:
+            best, best_km = d, run + seg * t
+        run += seg
+    return best_km
+
+
+# ---------- численность ----------
+
+def total(unit: dict) -> float:
+    return float(sum(c["count"] for c in unit.get("composition", [])))
+
+
+def alive_by_type(unit: dict) -> dict[str, float]:
+    return {c["type"]: max(0.0, c["count"] - unit["lost"].get(c["type"], 0.0)) for c in unit.get("composition", [])}
+
+
+def strength(unit: dict) -> float:
+    """Доля исправной техники от штата, 0..1."""
+    t = total(unit)
+    return sum(alive_by_type(unit).values()) / t if t else 0.0
+
+
+def unit_pos(state: dict, unit: dict) -> dict:
+    if unit.get("attached_to"):                 # приданная часть (войсковая ПВО) - там же, где её часть
+        return unit_pos(state, state["units"][unit["attached_to"]])
+    if "route" in unit:
+        return point_at_km(route_points(state, unit), unit["progress_km"])[0]
+    if "pos" in unit:
+        return unit["pos"]
+    base = state["airbases"][unit["base"]]
+    return {"lat": base["lat"], "lon": base["lon"]}
+
+
+def unit_pos_at(state: dict, unit: dict, seconds: float, default_kmh: float | None = None) -> dict:
+    """Где часть будет через seconds от начала миссии. Колонна на марше идёт со скоростью, замеренной в прошлых
+    миссиях (observed_kmh, пишет дебриф); пока замера нет - default_kmh (None - приказная march_kmh).
+    В DCS колонна идёт заметно медленнее приказа: camp3, день 1 - около 6 км/ч при march_kmh 30 (Tacview).
+    Остальные части стоят. Приданная часть - там же, где её часть."""
+    if unit.get("attached_to"):
+        return unit_pos_at(state, state["units"][unit["attached_to"]], seconds, default_kmh)
+    if "route" in unit and unit.get("state") == "march":
+        kmh = unit.get("observed_kmh")
+        if kmh is None:
+            kmh = unit.get("march_kmh", 0) if default_kmh is None else default_kmh
+        pts = route_points(state, unit)
+        km = min(route_length_km(pts), unit["progress_km"] + kmh * seconds / 3600.0)
+        return point_at_km(pts, km)[0]
+    return unit_pos(state, unit)
+
+
+BUBBLE_KM = 150   # ОЦЕНКА: ЗРК противника, стоящие не дальше этого от маршрутов пакета, ставятся в миссию, даже если до маршрута не достают
+
+
+# ---------- кампания ----------
+
+def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
+                 sector: str | Path = "sector_hamburg.json", oob: str | Path = "oob_hamburg.json",
+                 player_side: str = "red", packages: dict[str, str] | None = None,
+                 column_budget_units: int = 40, seed: int | None = None, variant: str | None = None,
+                 randomness: bool = True) -> dict:
+    """Новая кампания. Вариант сценария (variants в составе сил) - заданный, иначе случайный по seed;
+    randomness=False - без случайности: базовый вариант, без разброса в бою и в решениях командования."""
+    from dcs.terrain.germany import Germany  # координаты аэродромов берём из терраина pydcs, а не вписываем руками
+    if player_side not in SIDES:
+        raise ValueError(f"сторона должна быть одной из {SIDES}")
+    packages = {**{"red": "wp", "blue": "generic"}, **(packages or {})}
+    for side, pkg in packages.items():
+        if not (DATA / "doctrine" / f"{pkg}.json").is_file():
+            raise FileNotFoundError(f"нет пакета доктрины '{pkg}' для стороны {side} (data/doctrine/{pkg}.json)")
+    sec = load_json(sector)
+    forces = load_json(oob)
+    if forces["countries"]["red"] == forces["countries"]["blue"]:
+        raise ValueError("у сторон в составе сил одна и та же страна (countries)")
+    terrain = Germany()
+    bases = {}
+    for bid, b in sec["airbases"].items():
+        if not b.get("military", True):          # только военные аэродромы
+            continue
+        ll = terrain.airports[b["airport"]].position.latlng()
+        bases[bid] = {**b, "lat": ll.lat, "lon": ll.lng, "state": "open"}
+    # ---- вариант сценария и разброс ----
+    if seed is None:
+        seed = random.randrange(1, 10**6) if randomness else 0
+    rng = random.Random(seed)
+    variants = forces.get("variants") or []
+    if variant:
+        chosen = next((v for v in variants if v["name"] == variant), None)
+        if chosen is None:
+            raise ValueError(f"в составе сил нет варианта '{variant}'; есть: {', '.join(v['name'] for v in variants) or 'нет'}")
+    elif variants and randomness:
+        chosen = rng.choice(variants)
+    else:
+        chosen = variants[0] if variants else None
+    objectives = copy.deepcopy(sec.get("objectives", {}))
+    if chosen:
+        objectives.update(chosen.get("objectives", {}))
+    patches = (chosen or {}).get("units", {})
+    units = {}
+    for u in copy.deepcopy(forces["units"]):
+        u.update(copy.deepcopy(patches.get(u["id"], {})))
+        if randomness and u.get("arrives_jitter") and "arrives_day" in u:   # срок ввода резерва +-jitter суток
+            u["arrives_day"] = max(1, u["arrives_day"] + rng.randint(-u["arrives_jitter"], u["arrives_jitter"]))
+        role_info(u["role"])                       # роль должна быть известна - иначе ошибка сразу, а не в планировщике
+        u.setdefault("lost", {})
+        u.setdefault("state", "ready")
+        u.pop("_about", None)
+        if role_info(u["role"])["category"] in ("air", "heli"):
+            u.setdefault("count0", u.get("count", 0))   # штат - до него идёт пополнение
+        units[u["id"]] = u
+    # объекты в тылу - цели ударов: склады, мосты, аэродромы (повреждение 0..1, восстановление - sim)
+    for d in [*sec.get("depots", []), *[{**f, "_role": "factory"} for f in sec.get("factories", [])]]:   # заводы - как склады
+        pl = sec["places"][d["place"]]
+        units[d["id"]] = {"id": d["id"], "name": d["name"], "side": d["side"], "role": d.get("_role", "depot"), "place": d["place"],
+                          "pos": {"lat": d.get("lat", pl["lat"]), "lon": d.get("lon", pl["lon"])},   # уточнён - mapobj.py
+                          "state": "active", "damage": 0.0, "lost": {}, "composition": []}
+        for k in ("map_objects", "map_type", "pos_checked", "found", "supply"):
+            if k in d:
+                units[d["id"]][k] = d[k]
+    for b in sec.get("bridges", []):
+        units[b["id"]] = {"id": b["id"], "name": b["name"], "side": None, "role": "bridge", "links": b["links"],
+                          "pos": {"lat": b["lat"], "lon": b["lon"]}, "state": "active", "damage": 0.0, "lost": {}, "composition": []}
+        for k in ("map_objects", "map_type", "pos_checked", "found", "minor"):   # мост уточнён / найден зондом (mapobj.py)
+            if k in b:
+                units[b["id"]][k] = b[k]
+    for bid, b in bases.items():
+        units[f"af_{bid}"] = {"id": f"af_{bid}", "name": f"Аэродром {b['name']}", "side": b["side"], "role": "airfield", "base": bid,
+                              "pos": {"lat": b["lat"], "lon": b["lon"]}, "state": "active", "damage": 0.0, "lost": {}, "composition": []}
+    return {
+        "version": STATE_VERSION,
+        "campaign_id": uuid.uuid4().hex[:8],
+        "name": name,
+        "theatre": sec["theatre"],
+        "sector": str(sector), "oob": str(oob),   # файлы театра: зонды карты и дорог, окно - по ним
+        "date": date,
+        "start_hour": start_hour,
+        "day": 1,
+        "sortie": 0,
+        "player_side": player_side,
+        "doctrine": packages,
+        "countries": forces["countries"],
+        "settings": {"column_budget_units": column_budget_units,   # ОЦЕНКА версии 0.1: бюджет машин на колонну при плотности 1.0
+                     "bubble_km": BUBBLE_KM, "randomness": randomness},
+        "places": sec["places"],
+        "links": sec.get("links", []),            # связи пунктов - граф оперативного уровня (ops.py)
+        "replacements": forces.get("replacements", {}),
+        "objectives": objectives,                 # цели операции сторон (по порядку), с учётом варианта
+        "scenario": {"seed": seed, "variant": chosen["name"] if chosen else None,
+                     "title": chosen.get("title") if chosen else None},
+        "airbases": bases,
+        "units": units,
+        "task": None,
+        "manifest": None,
+        "log": [],
+    }
+
+
+def rng(state: dict, purpose: str) -> random.Random | None:
+    """Генератор случайных чисел для суток и цели (повторяемый по seed кампании); None - случайность выключена."""
+    if not state.get("settings", {}).get("randomness"):
+        return None
+    return random.Random(f"{(state.get('scenario') or {}).get('seed', 0)}-{state['day']}-{purpose}")
+
+
+def note(state: dict, text: str) -> None:
+    state["log"].append(f"День {state['day']}: {text}")
+
+
+def save(state: dict, path: Path) -> None:
+    path = Path(path)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp.replace(path)
+
+
+def load(path: Path) -> dict:
+    st = json.loads(Path(path).read_text(encoding="utf-8"))
+    if st.get("version") != STATE_VERSION:
+        raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
+    return st

@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>redfront</title>
+<link rel="stylesheet" href="/web/leaflet.css">
+<script src="/web/leaflet.js"></script>
+<style>
+:root{--bg:#15181c;--panel:#1d2126;--line:#2c3239;--txt:#d9dde2;--dim:#8a939d;--red:#e0483e;--blue:#3d8ee8;--acc:#e6a23c;--ok:#5cb85c}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:13px/1.4 "Segoe UI",system-ui,sans-serif}
+#app{display:grid;grid-template-columns:380px 1fr;height:100vh}
+#side{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-height:0}
+#map{height:100%;background:#0e1013}
+header{padding:10px 12px;border-bottom:1px solid var(--line)}
+header h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em}
+header h1 span{color:var(--dim);font-weight:400}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+select,input,button{background:#262b31;color:var(--txt);border:1px solid var(--line);border-radius:4px;padding:5px 8px;font:inherit}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.main{background:#3a3020;border-color:#6b5426}
+button:disabled{opacity:.45;cursor:default}
+.meta{color:var(--dim);margin-top:6px}
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.cycle button{padding:8px 4px}
+.cycle small{display:block;color:var(--dim);font-size:11px}
+nav{display:flex;border-bottom:1px solid var(--line)}
+nav button{flex:1;border:0;border-radius:0;background:none;padding:8px;color:var(--dim)}
+nav button.on{color:var(--txt);box-shadow:inset 0 -2px var(--acc)}
+#pane{flex:1;overflow:auto;padding:8px 12px;min-height:0}
+.task{border:1px solid var(--line);border-radius:6px;padding:8px;margin-bottom:8px;cursor:pointer}
+.task.sel{border-color:var(--acc)}
+.task b{display:block}
+.task .pk{color:var(--dim);font-size:12px;margin-top:4px}
+.task .row{margin-top:6px}
+.item{padding:4px 0;border-bottom:1px dashed var(--line)}
+.item .d{color:var(--dim);font-size:12px}
+.red{color:var(--red)}.blue{color:var(--blue)}
+.bar{display:inline-block;width:60px;height:6px;background:#333;border-radius:3px;vertical-align:middle;margin-left:6px}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--ok)}
+#out{max-height:28vh;overflow:auto;border-top:1px solid var(--line);padding:8px 12px;font-size:12px;background:#171a1e;white-space:pre-wrap}
+#out .err{color:var(--red)}
+.log p{margin:0 0 3px}
+dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:8px;min-width:320px}
+dialog label{display:block;margin:8px 0 2px;color:var(--dim)}
+dialog input,dialog select{width:100%}
+.lbl{background:none;border:0;box-shadow:none;color:#fff;font-size:11px;text-shadow:0 0 3px #000,0 0 3px #000;white-space:nowrap}
+.obj{font-size:15px;text-shadow:0 0 3px #000}
+.legend{background:rgba(20,23,27,.9);padding:6px 8px;border-radius:6px;color:var(--txt);font-size:12px;line-height:1.6}
+@media (max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:55vh 1fr}#map{order:-1}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side">
+    <header>
+      <h1>REDFRONT <span id="title"></span></h1>
+      <div class="row">
+        <select id="camp" style="flex:1"></select>
+        <button id="bNew">Новая</button>
+      </div>
+      <div class="meta" id="meta"></div>
+    </header>
+    <div class="cycle">
+      <button class="main" id="bPlan">1. План<small>задачи дня</small></button>
+      <button class="main" id="bBuild">2. Миссия<small>собрать .miz</small></button>
+      <button class="main" id="bDebrief">3. Дебриф<small>после вылета</small></button>
+      <button class="main" id="bEnd">4. Конец дня<small>ход модели</small></button>
+    </div>
+    <nav>
+      <button data-tab="plan" class="on">План</button>
+      <button data-tab="ground">Войска</button>
+      <button data-tab="air">Авиация</button>
+      <button data-tab="rear">Тыл</button>
+      <button data-tab="log">Журнал</button>
+    </nav>
+    <div id="pane"></div>
+    <div id="out"></div>
+  </div>
+  <div id="map"></div>
+</div>
+
+<dialog id="dNew">
+  <form method="dialog">
+    <b>Новая кампания</b>
+    <label>Файл</label><input id="nFile" value="campaign">
+    <label>Театр</label><select id="nTh"></select>
+    <label>Сторона игрока</label>
+    <select id="nSide"><option value="red">Красные (ВД)</option><option value="blue">Синие (НАТО)</option></select>
+    <label>Вариант сценария</label><select id="nVar"></select>
+    <label>Seed (пусто - случайный)</label><input id="nSeed" placeholder="например 12345">
+    <label><input type="checkbox" id="nNoRand" style="width:auto"> без случайности</label>
+    <label><input type="checkbox" id="nOver" style="width:auto"> перезаписать файл</label>
+    <div class="row" style="margin-top:12px;justify-content:flex-end">
+      <button value="cancel">Отмена</button><button id="nOk" value="ok" class="main">Создать</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let INFO = null, ST = null, FILE = localStorage.getItem("rf_file") || "", TAB = "plan", SEL = 0;
+
+function out(lines, err) {
+  const o = $("#out");
+  const t = new Date().toLocaleTimeString();
+  o.innerHTML = `<div class="${err ? "err" : ""}">[${t}] ${(Array.isArray(lines) ? lines : [lines]).map(esc).join("\n")}</div>` + o.innerHTML;
+}
+async function api(action, body) {
+  const r = await fetch("/api/" + action, body === undefined ? {} :
+    {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const j = await r.json();
+  if (j.error) throw new Error(j.error);
+  return j;
+}
+async function act(action, extra, btn) {
+  if (!FILE && action !== "new" && action !== "mapprobe") return out("Сначала создайте или выберите кампанию.", true);
+  if (btn) btn.disabled = true;
+  try {
+    const j = await api(action, Object.assign({file: FILE}, extra || {}));
+    if (j.lines) out(j.lines);
+    if (j.file) { FILE = j.file; localStorage.setItem("rf_file", FILE); await loadInfo(); }
+    if (j.state) { ST = j.state; render(); }
+  } catch (e) { out(e.message, true); }
+  finally { if (btn) btn.disabled = false; }
+}
+
+// ---------- карта ----------
+const map = L.map("map", {preferCanvas: true}).setView([53.2, 10.6], 9);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 16, attribution: "© OpenStreetMap"}).addTo(map);
+const layers = {links: L.layerGroup().addTo(map), places: L.layerGroup().addTo(map), sam: L.layerGroup().addTo(map),
+                ground: L.layerGroup().addTo(map), objects: L.layerGroup().addTo(map), bases: L.layerGroup().addTo(map),
+                task: L.layerGroup().addTo(map)};
+L.control.layers(null, {"Связи и фронт": layers.links, "Пункты": layers.places, "Зоны ПВО": layers.sam,
+  "Войска": layers.ground, "Тыл": layers.objects, "Аэродромы": layers.bases, "Задача": layers.task}, {collapsed: true}).addTo(map);
+const legend = L.control({position: "bottomright"});
+legend.onAdd = () => { const d = L.DomUtil.create("div", "legend");
+  d.innerHTML = "<b>━</b> <span style='color:#e6a23c'>фронт</span> · ⛽ склад · 🏭 завод · 🌉 мост · ✈ аэродром<br>" +
+    "● часть (размер - боеспособность) · пунктир - марш<br>серый объект - координаты по оценке"; return d; };
+legend.addTo(map);
+let fitted = false;
+const col = s => s === "red" ? "#e0483e" : s === "blue" ? "#3d8ee8" : "#999";
+
+function drawMap() {
+  Object.values(layers).forEach(l => l.clearLayers());
+  if (!ST) return;
+  const P = Object.fromEntries(ST.places.map(p => [p.name, p]));
+  for (const l of ST.links) {
+    const a = P[l.a], b = P[l.b]; if (!a || !b) continue;
+    L.polyline([a.pos, b.pos], {color: l.front ? "#e6a23c" : !l.open ? "#777" : "#c9ced4", weight: l.front ? 5 : 2,
+      opacity: l.front ? .9 : .5, dashArray: l.open ? null : "4 6"})
+      .bindTooltip(`${l.a} – ${l.b}${l.front ? " · линия фронта" : ""}${l.open ? "" : " · закрыта (мост)"}`).addTo(layers.links);
+  }
+  for (const p of ST.places) {
+    L.circleMarker(p.pos, {radius: 5, color: "#000", weight: 1, fillColor: col(p.side), fillOpacity: 1}).addTo(layers.places);
+    L.marker(p.pos, {icon: L.divIcon({className: "lbl", html: esc(p.name), iconAnchor: [-8, 6]}), interactive: false}).addTo(layers.places);
+  }
+  for (const g of ST.ground) {
+    if (g.state === "destroyed") continue;
+    if (g.cat === "sam" && g.threat_km && g.state !== "pending")
+      L.circle(g.pos, {radius: g.threat_km * 1000, color: col(g.side), weight: 1, opacity: .5, fill: true, fillOpacity: .04, dashArray: "3 5", interactive: false}).addTo(layers.sam);
+    if (g.route) L.polyline(g.route, {color: col(g.side), weight: 2, dashArray: "6 6", opacity: .9}).addTo(layers.ground);
+    if (g.attached) continue;
+    const r = g.cat === "sam" ? 5 : 5 + 9 * g.strength;
+    const tip = `<b>${esc(g.name)}</b><br>${esc(stateRu(g))} · боеспособность ${Math.round(g.strength * 100)}%` +
+      (g.engaged.length ? `<br>бой с: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? "<br><b>без снабжения</b>" : "") +
+      `<br><span style="color:#888">${esc(g.types)}</span>`;
+    L.circleMarker(g.pos, {radius: r, color: g.state === "battle" ? "#fff" : "#000", weight: g.state === "battle" ? 2 : 1,
+      fillColor: col(g.side), fillOpacity: g.state === "pending" ? .25 : g.state === "halted" ? .45 : .9,
+      dashArray: g.cat === "sam" ? "2 2" : null}).bindTooltip(tip).addTo(layers.ground);
+  }
+  for (const o of ST.objects) {
+    const ico = {depot: "⛽", bridge: "🌉", airfield: "✈", factory: "🏭"}[o.role];
+    if (o.role === "airfield") continue;
+    const dmg = o.state === "lost" ? "потерян" : o.damage > 0 ? `повреждение ${Math.round(o.damage * 100)}%` : "цел";
+    L.marker(o.pos, {icon: L.divIcon({className: "obj", html: `<span style="opacity:${o.checked ? 1 : .55};filter:${o.damage >= 1 || o.state === "lost" ? "grayscale(1)" : "none"}">${ico}</span>`, iconSize: [18, 18]})})
+      .bindTooltip(`<b>${esc(o.name)}</b><br>${dmg}${o.checked ? "" : "<br>координаты по оценке"}`).addTo(layers.objects);
+  }
+  const AF = Object.fromEntries(ST.objects.filter(o => o.role === "airfield").map(o => [o.name, o]));
+  for (const b of ST.airbases) {
+    const o = AF["Аэродром " + b.name];
+    const st = {open: "открыт", active: "открыт", closed: "закрыт", lost: "потерян"}[b.state] || b.state;
+    L.marker(b.pos, {icon: L.divIcon({className: "obj", html: `<span style="color:${col(b.side)};opacity:${b.state === "open" || b.state === "active" ? 1 : .4}">✈</span>`, iconSize: [18, 18]})})
+      .bindTooltip(`<b>${esc(b.name)}</b> · ${st}${o && o.damage > 0 ? ` · повреждение ${Math.round(o.damage * 100)}%` : ""}`).addTo(layers.bases);
+  }
+  drawTask();
+  if (!fitted && ST.places.length) { map.fitBounds(ST.places.map(p => p.pos), {padding: [30, 30]}); fitted = true; }
+}
+function drawTask() {
+  layers.task.clearLayers();
+  const t = ST && ST.tasks[SEL]; if (!t) return;
+  const pts = [t.base_pos, t.ip, t.target].filter(Boolean);
+  L.polyline(pts, {color: "#e6a23c", weight: 3}).addTo(layers.task);
+  if (t.ip) L.circleMarker(t.ip, {radius: 4, color: "#e6a23c"}).bindTooltip("ИПМ").addTo(layers.task);
+  if (t.target) L.circleMarker(t.target, {radius: 9, color: "#e6a23c", weight: 3, fill: false}).bindTooltip("Цель: " + esc(t.title)).addTo(layers.task);
+}
+
+// ---------- панель ----------
+function stateRu(g) {
+  let s = {march: "марш", battle: "бой", defend: "оборона", halted: "небоеспособна", destroyed: "уничтожена",
+           deployed: "на позиции", refit: "восстановление", pending: `резерв, день ${g.arrives}`}[g.state] || g.state;
+  if (g.state === "march" && g.order) s += {attack: " (наступление)", hold: " (на рубеж)", withdraw: " (отход)"}[g.order] || "";
+  return s;
+}
+const bar = v => `<span class="bar"><i style="width:${Math.round(v * 100)}%;background:${v < .5 ? "#e0483e" : v < .75 ? "#e6a23c" : "#5cb85c"}"></i></span>`;
+
+function render() {
+  if (!ST) { $("#pane").innerHTML = "<p class='meta'>Создайте кампанию кнопкой «Новая».</p>"; drawMap(); return; }
+  $("#title").textContent = "· " + ST.name;
+  $("#meta").innerHTML = `День <b>${ST.day}</b> · ${ST.date || ""} · вылетов ${ST.sortie} · игрок: <span class="${ST.side}">${ST.side === "red" ? "красные" : "синие"}</span><br>` +
+    `${esc(ST.scenario || "")} · seed ${ST.seed ?? "-"}${ST.randomness ? "" : " · без случайности"}` +
+    (ST.built ? `<br>собран вылет ${ST.built.sortie}: ${esc(ST.built.file)}` : "");
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === TAB));
+  const p = $("#pane");
+  if (TAB === "plan") {
+    if (!ST.tasks.length) p.innerHTML = `<p class="meta">${ST.task_reason ? "Задач нет: " + esc(ST.task_reason) : "Плана ещё нет - кнопка «1. План»."}</p>`;
+    else p.innerHTML = ST.tasks.map((t, i) => `<div class="task ${i === SEL ? "sel" : ""}" data-i="${i}">
+      <b>${t.n}. ${esc(t.title)}</b>
+      <div class="pk">${t.km} км от ${esc(t.base)} · ПВО: ${esc(t.threats.join(", ") || "нет")}</div>
+      <div class="pk">${t.package.map(g => `${esc(g.title)}: ${g.size} × ${esc(g.performer)}`).join("<br>")}</div>
+      ${t.notes ? `<div class="pk">⚠ ${esc(t.notes)}</div>` : ""}
+      <div class="row"><span class="meta" style="margin:0">лечу в</span>
+        <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
+        <button class="main go">Собрать миссию</button></div></div>`).join("");
+    p.querySelectorAll(".task").forEach(el => {
+      el.onclick = e => { if (e.target.closest("select,button")) return; SEL = +el.dataset.i; render(); };
+      el.querySelector(".go").onclick = e => act("build", {task: +el.dataset.i + 1, fly: el.querySelector(".fly").value}, e.target);
+    });
+  } else if (TAB === "ground") {
+    const by = s => ST.ground.filter(g => g.side === s && !g.attached);
+    p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` + by(s).map(g =>
+      `<div class="item" data-pos="${g.pos}"><b>${esc(g.name)}</b>${bar(g.strength)} ${Math.round(g.strength * 100)}%
+       <div class="d">${esc(stateRu(g))}${g.engaged.length ? " · против: " + esc(g.engaged.join(", ")) : ""}${g.supply < 1 ? " · без снабжения" : ""}</div></div>`).join("")).join("");
+    p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
+  } else if (TAB === "air") {
+    p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` +
+      ST.air.filter(a => a.side === s).map(a => `<div class="item"><b>${esc(a.name)}</b>
+       <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0} · к вылету ${a.available}</div></div>`).join("")).join("");
+  } else if (TAB === "rear") {
+    const unk = ST.objects.filter(o => !o.checked).length;
+    p.innerHTML = `<div class="row" style="margin-bottom:8px">
+        <button id="bProbe">Зонд карты</button><button id="bApply">Применить зонд</button>
+        <button id="bRProbe">Зонд дорог</button><button id="bRApply">Применить дороги</button></div>
+      <p class="meta" style="margin-top:0">${unk ? `По оценке: ${unk} объект(ов) - запустите «Зонд карты» в DCS, затем «Применить зонд».` : "Все цели тыла на объектах карты."}</p>
+      <div class="row" style="margin-bottom:8px"><input id="miz" placeholder="путь к .miz с зонами Assign as... (ROLE/VALUE)" style="flex:1"><button id="bImport">Импорт</button></div>` +
+      ST.objects.map(o => `<div class="item" data-pos="${o.pos}"><b>${{depot: "⛽", bridge: "🌉", airfield: "✈", factory: "🏭"}[o.role]} ${esc(o.name)}</b>
+        <div class="d">${o.state === "lost" ? "потерян" : o.state === "closed" ? "закрыт" : o.damage > 0 ? "повреждение " + Math.round(o.damage * 100) + "%" : "цел"}${o.checked ? "" : " · координаты по оценке"} · ${esc(o.id)}</div></div>`).join("");
+    $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
+    $("#bApply").onclick = e => act("mapapply", {}, e.target);
+    $("#bRProbe").onclick = e => act("roadsprobe", {}, e.target);
+    $("#bRApply").onclick = e => act("roadsapply", {}, e.target);
+    $("#bImport").onclick = e => act("mapimport", {miz: $("#miz").value.trim()}, e.target);
+    p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 13));
+  } else {
+    p.innerHTML = `<div class="log">${ST.log.slice().reverse().map(l => `<p>${esc(l)}</p>`).join("")}</div>`;
+  }
+  drawMap();
+}
+
+async function loadInfo() {
+  INFO = await api("info");
+  const c = INFO.campaigns;
+  $("#camp").innerHTML = c.length ? c.map(x => `<option value="${esc(x.file)}">${esc(x.file)} · день ${x.day}${x.ok ? "" : " (старая версия)"}</option>`).join("")
+                                  : `<option value="">нет кампаний</option>`;
+  if (FILE && c.some(x => x.file === FILE)) $("#camp").value = FILE;
+  else FILE = c.length ? c[0].file : "";
+  $("#nTh").innerHTML = INFO.theatres.map(t => `<option value="${esc(t.id)}">${esc(t.title)}</option>`).join("");
+  fillVariants();
+}
+function fillVariants() {
+  const t = INFO.theatres.find(x => x.id === $("#nTh").value) || INFO.theatres[0];
+  $("#nVar").innerHTML = `<option value="">случайный (по seed)</option>` + t.variants.map(v => `<option value="${esc(v.name)}">${esc(v.title)}</option>`).join("");
+}
+async function loadState() {
+  ST = null;
+  if (FILE) { try { ST = (await api("state?file=" + encodeURIComponent(FILE))).state; } catch (e) { out(e.message, true); } }
+  SEL = 0; fitted = false; render();
+}
+
+$("#camp").onchange = () => { FILE = $("#camp").value; localStorage.setItem("rf_file", FILE); loadState(); };
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b.dataset.tab; render(); });
+$("#bPlan").onclick = e => { SEL = 0; TAB = "plan"; act("plan", {}, e.currentTarget); };
+$("#bBuild").onclick = e => { TAB = "plan"; act("build", {task: SEL + 1, fly: (document.querySelectorAll(".task .fly")[SEL] || {}).value || "strike"}, e.currentTarget); };
+$("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
+$("#bEnd").onclick = e => { if (confirm("Закончить день? Модель сделает ход, план дня сбросится.")) act("endday", {}, e.currentTarget); };
+$("#bNew").onclick = () => $("#dNew").showModal();
+$("#nTh").onchange = fillVariants;
+$("#dNew").addEventListener("close", () => {
+  if ($("#dNew").returnValue !== "ok") return;
+  act("new", {file: $("#nFile").value.trim(), theatre: $("#nTh").value, side: $("#nSide").value, variant: $("#nVar").value, seed: $("#nSeed").value.trim(),
+              norandom: $("#nNoRand").checked, overwrite: $("#nOver").checked}).then(loadState);
+});
+(async () => { try { await loadInfo(); } catch (e) { out(e.message, true); } await loadState();
+  out("Готово. Цикл дня: План → Миссия → (полёт в DCS) → Дебриф → Конец дня."); })();
+</script>
+</body>
+</html>
