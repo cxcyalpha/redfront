@@ -203,10 +203,12 @@ def site_script(campaign_id: str, sortie: int, battles: list[dict], ads: list[di
                      f'platoons = {{ {", ".join(pls)} }} }}')
     ad_items = []
     for a in ads or []:
-        units = ", ".join(f'{{ name = {q(u["name"])}, type = {q(u["type"])}, x = {u["x"]:.1f}, y = {u["y"]:.1f}, heading = {u["heading"]:.4f} }}'
+        units = ", ".join(f'{{ name = {q(u["name"])}, type = {q(u["type"])}, x = {u["x"]:.1f}, y = {u["y"]:.1f}, heading = {u["heading"]:.4f}'
+                          + (f', unitId = {u["unitId"]}' if u.get("unitId") else "") + " }"
                           for u in a["units"])
+        gci = (f'{{ channel = {a["gci"]["channel"]}, radius = {a["gci"]["radius"]} }}' if a.get("gci") else "nil")
         ad_items.append(f'{{ name = {q(a["name"])}, groupId = {a["groupId"]}, country = {a["country"]}, '
-                        f'follow = {q(a["follow"]) if a.get("follow") else "nil"}, units = {{ {units} }} }}')
+                        f'follow = {q(a["follow"]) if a.get("follow") else "nil"}, gci = {gci}, units = {{ {units} }} }}')
     return (SITE_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
             .replace("@CFG@", cfg).replace("@BATTLES@", ", ".join(items)).replace("@ADS@", ", ".join(ad_items)))
 
@@ -938,12 +940,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String(column_script(state["campaign_id"], state["sortie"], specs))))
     ads = []                                     # ПВО на позициях - на открытое место (battle_site.lua)
     for g in groups:
-        if g["kind"] != "sam_site":
+        if g["kind"] not in ("sam_site", "gci_site"):   # КРУ - тоже: позиция генератора бывает в воде (Дамгартен)
             continue
         vg = vg_by_unit[g["unit"]]
         ads.append({"name": vg.name, "groupId": vg.id, "country": _country(m, state, g["side"]).id,
                     "follow": g.get("cluster") if g.get("battle") else None,
-                    "units": [{"name": u.name, "type": u.type, "x": u.position.x, "y": u.position.y,
+                    "gci": ({"channel": g["channel"], "radius": int(g["radius_km"] * 1000)} if g["kind"] == "gci_site" else None),
+                    "units": [{"name": u.name, "type": u.type, "x": u.position.x, "y": u.position.y, "unitId": u.id,
                                "heading": math.radians(u.heading)} for u in vg.units]})
     if platoons or ads:                          # расстановка боёв и ПВО по местности (до front.lua)
         center = tk.get("target_pos")             # дальние бои (театр всей карты) - без поиска места: дорого при старте миссии

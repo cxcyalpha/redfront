@@ -1576,6 +1576,11 @@ def air_defence_section(tmp: Path) -> None:
                                                     for n, a in acts.items())
           and all(u["name"] in m.description_text() for u in gci),
           f"в миссии КРУ включены с начала (ActivateGCI: канал, радиус 250 км), каналы - в брифинге")
+    site = next(a_.text.id for a_ in m.triggerrules.triggers[0].actions if "redfront battle site" in a_.text.id)
+    check(all(f'name = "{n}"' in site and f'unitId = {g.units[0].id}' in site for n, g in gg.items())
+          and site.count("gci = { channel") == len(gg),
+          "КРУ - в расстановке battle_site.lua (из воды, с аэродрома, из города - на сушу; Дамгартен стоял в заливе): "
+          "пересоздаётся с тем же unitId, включение наведения ставится заново")
     hawk = st["units"]["blue_sam31"]
     for u in (hawk, s200):
         u["lost"] = {c["type"]: float(c["count"]) for c in u["composition"]}    # уничтожены целиком
