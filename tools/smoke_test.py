@@ -1300,9 +1300,6 @@ def germany_section(tmp: Path) -> None:
     heavy = max(v["weight"] for g in man["ground"] for v in g["vehicles"])
     check(veh <= 1200 and heavy <= materialize.MAX_WEIGHT * 1.1,      # округление по типам - как и раньше
           f"миссия всего фронта: {len(man['ground'])} групп, {veh} машин (не больше 1200), машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
-    air_defence_section(tmp)
-    support_air_section(tmp)
-    helo_section(tmp)
 
 
 def helo_section(tmp: Path) -> None:
@@ -1402,8 +1399,8 @@ def air_defence_section(tmp: Path) -> None:
               f"удар по позиции ЗРК: позиция в миссии, у ударной группы атака по ней ({tgt})")
 
 
-def main() -> int:
-    tmp = Path(tempfile.mkdtemp(prefix="redfront_"))
+def core_section(tmp: Path) -> None:
+    """Сквозной цикл двух дней на составе сил слоёв 0.1-0.3 (BASELINE) и проверки слоёв."""
     st = model.new_campaign("smoke", oob=BASE_OOB, sector=BASE_SECTOR)
     bn = st["units"]["blue_pzgren_bn_1"]
 
@@ -1560,19 +1557,17 @@ def main() -> int:
     check(abs(planner.threat_radius_km(st5["units"]["blue_patriot_1"]) - 100.0) < 1e-6,
           "ЗРК без threat_radius_km: радиус из pydcs (Patriot_ln threat_range = 100 км)")
 
-    patriot_close_section(tmp)
-    front_section(tmp)
-    random_section(tmp)
-    logistics_section(tmp)
-    menu_section(tmp)
-    theatre_section(tmp)
-    air_section(tmp)
-    package_section(tmp)
-    roads_section(tmp)
-    column_road_section(tmp)
-    mapobj_section(tmp)
-    gui_section(tmp)
-    germany_section(tmp)
+
+# Разделы теста по порядку: python tools/smoke_test.py - все; pytest (tests/test_smoke.py) - каждый отдельным тестом.
+SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
+            theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
+            gui_section, germany_section, air_defence_section, support_air_section, helo_section]
+
+
+def main() -> int:
+    tmp = Path(tempfile.mkdtemp(prefix="redfront_"))
+    for section in SECTIONS:
+        section(tmp)
 
     print(f"\nФайлы теста: {tmp}")
     print("ИТОГ: " + ("всё прошло" if not FAILS else f"{len(FAILS)} провал(ов)"))

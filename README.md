@@ -65,6 +65,9 @@
 Необязательно, для полной проверки Lua-хука в тесте: `.venv\Scripts\python -m pip install -r requirements-dev.txt`
 (ставит lupa). Если pip не может её собрать — пропустите: тест идёт и без неё, пропуская 4 проверки хука.
 
+Тот же тест под pytest - каждый раздел отдельным тестом: `.venv\Scripts\python -m pytest -q` (нужен
+`requirements-dev.txt`). На GitHub он идёт сам на каждый push и pull request (`.github/workflows/tests.yml`).
+
 ## Цикл
 
     .venv\Scripts\python -m redfront new     camp.json [--side red|blue] [--oob my_oob.json] [--doctrine blue=generic]
