@@ -76,14 +76,13 @@ def title(state: dict, d: dict) -> str:
     return f"экипаж {d['type']} ({u['name'] if u else d['unit']})"
 
 
-def daily(state: dict) -> list[str]:
-    """Конец суток: итог вылетов CSAR плана полётов (свой - по дебрифу, ИИ - по угрозам), затем судьба остальных:
-    на своей территории - вышли к своим, на чужой - плен с вероятностью capture_per_day, старше downed_max_days - пропали."""
+def resolve(state: dict, until_s: float | None = None) -> list[str]:
+    """Итог вылетов CSAR плана полётов со временем на цели не позже until_s (свой - по дебрифу, ИИ - по угрозам)."""
     lines = []
     a = state.get("ato") or {}
     done = set(a.get("done", []))
     for e in a.get("entries", []):
-        if e["kind"] != "csar" or e.get("resolved"):
+        if e["kind"] != "csar" or e.get("resolved") or (until_s is not None and e["tot_s"] > until_s):
             continue
         g = e["task"]["package"][0]
         d = next((x for x in state.get("downed", []) if x["id"] == g["objective"]["downed"]), None)
@@ -97,6 +96,13 @@ def daily(state: dict) -> list[str]:
         r = model.rng(state, f"csar-{e['id']}")
         if (r.random() < p) if r else p >= 0.5:
             lines.append(returned(state, d, f"спасён ({e['title']})"))
+    return lines
+
+
+def daily(state: dict) -> list[str]:
+    """Конец суток - судьба экипажей на земле: на своей территории - вышли к своим, на чужой - плен с вероятностью
+    capture_per_day, старше downed_max_days - пропали."""
+    lines = []
     for d in list(state.get("downed", [])):
         sim = model.doctrine(state, d["side"])["sim"]
         side_here = owner_at(state, d["pos"])

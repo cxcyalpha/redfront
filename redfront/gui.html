@@ -248,7 +248,7 @@ const bar = v => `<span class="bar"><i style="width:${Math.round(v * 100)}%;back
 function render() {
   if (!ST) { $("#pane").innerHTML = "<p class='meta'>Создайте кампанию кнопкой «Новая».</p>"; drawMap(); return; }
   $("#title").textContent = "· " + ST.name;
-  $("#meta").innerHTML = `День <b>${ST.day}</b> · ${ST.date || ""} · вылетов ${ST.sortie} · игрок: <span class="${ST.side}">${ST.side === "red" ? "красные" : "синие"}</span><br>` +
+  $("#meta").innerHTML = `День <b>${ST.day}</b>, обстановка на ${esc(ST.ground_time || "00:00")} · ${ST.date || ""} · вылетов ${ST.sortie} · игрок: <span class="${ST.side}">${ST.side === "red" ? "красные" : "синие"}</span><br>` +
     `${esc(ST.scenario || "")} · seed ${ST.seed ?? "-"}${ST.randomness ? "" : " · без случайности"}` +
     (ST.built ? `<br>собран вылет ${ST.built.sortie}: ${esc(ST.built.file)}` : "");
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === TAB));
@@ -290,7 +290,7 @@ function render() {
     const rows = ST.ato.filter(r => sides.includes(r.side));
     p.innerHTML = `<div class="row" style="margin-bottom:8px">
         <label class="meta" style="margin:0"><input type="checkbox" id="atoEnemy" style="width:auto" ${cheat ? "checked" : ""}>
-        план противника (отладка)</label>${ST.clock ? `<span class="meta" style="margin:0">· часы кампании ${esc(ST.clock)}</span>` : ""}</div>` +
+        план противника (отладка)</label>${ST.clock ? `<span class="meta" style="margin:0">· часы кампании ${esc(ST.clock)}</span>` : ""}<span class="meta" style="margin:0">· обстановка на ${esc(ST.ground_time)}</span></div>` +
       (ST.ato.length ? "" : `<p class="meta">План полётов строится кнопкой «1. План».</p>`) +
       sides.map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}${s === ST.side ? " (вы)" : " - противник"}</h4>` +
         rows.filter(r => r.side === s).map(r => `<div class="item">

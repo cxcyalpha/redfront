@@ -143,6 +143,14 @@ def apply(state: dict, data: dict) -> list[str]:
     state["manifest"]["applied"] = True
     if man.get("end_s") is not None:            # часы кампании: следующий вылет игрока - после этой миссии (ato.py)
         state["clock_s"] = max(state.get("clock_s") or 0, man["end_s"])
-        if man.get("ato_id") and state.get("ato") and man["ato_id"] not in state["ato"]["done"]:
-            state["ato"]["done"].append(man["ato_id"])
+        a = state.get("ato")
+        if man.get("ato_id") and a and man["ato_id"] not in a["done"]:
+            a["done"].append(man["ato_id"])
+        if a:                                    # группы ИИ этой миссии - слетаны в DCS: итог вне миссии им не считается
+            a["played"] = sorted(set(a.get("played", [])) | {fl["ato"] for fl in flights if fl.get("ato")})
+        from . import sim                        # окно миссии: бой и марш прошли в DCS - модели только события плана полётов
+        ev = sim.advance(state, man["end_s"], ground=False)
+        for ln in ev:
+            model.note(state, ln)
+        lines += ev
     return lines

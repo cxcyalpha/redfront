@@ -6,7 +6,7 @@
 (logistics.road_connected), затем - ближнего к цели своей оси. Рота держит пункт (order airhead), пока не
 соединится со своими (получает снабжение со своих складов), затем - обычная часть.
 
-Итог высадки - в конце суток (resolve): вылет игрока - по файлу дебрифа (сколько бортов село на площадку,
+Итог высадки - в своё время суток (resolve из шага наземной модели, airwar.py): вылет игрока - по файлу дебрифа (сколько бортов село на площадку,
 lua/assault.lua); вылет ИИ - по потерям в миссиях (если был в окне) и по угрозам ЗРК в коридоре.
 """
 from __future__ import annotations
@@ -75,14 +75,14 @@ def candidates(state: dict, side: str, tdef: dict) -> list[str]:
     return [n for _k, n in out]
 
 
-def resolve(state: dict) -> list[str]:
-    """Итог высадок плана полётов суток (в конце суток, до снабжения и боя)."""
+def resolve(state: dict, until_s: float | None = None) -> list[str]:
+    """Итог высадок плана полётов суток со временем на цели не позже until_s (шаг наземной модели, airwar.py)."""
     a = state.get("ato") or {}
     results = a.get("assault") or {}
     lost_by = a.get("lost") or {}
     lines = []
     for e in a.get("entries", []):
-        if e["kind"] != "air_assault" or e.get("resolved"):
+        if e["kind"] != "air_assault" or e.get("resolved") or (until_s is not None and e["tot_s"] > until_s):
             continue
         g = e["task"]["package"][0]
         obj = g["objective"]

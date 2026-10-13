@@ -254,6 +254,10 @@ def main(argv=None) -> int:
         man = build_mod.build(st, Path(a.out), a.density, player=not a.ai, fly=a.fly, task_no=a.task)
         n = sum(len(g["vehicles"]) for g in man["ground"])
         print(f"Миссия: {man['file']} (вылет {man['sortie']}, наземных юнитов {n})")
+        if man.get("pre_lines"):                 # модель продвинута к началу миссии (sim.advance)
+            print(f"Обстановка на {sim.ato_hhmm(man['ground_s'] or 0)}:")
+            for ln in man["pre_lines"]:
+                print(f"  {ln}")
         for ln in man["package_lines"]:
             print(f"  {ln}")
     elif a.cmd == "debrief":

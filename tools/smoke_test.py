@@ -368,19 +368,22 @@ def front_section(tmp: Path) -> None:
     check(a["state"] == b["state"] == "battle" and a["engaged"] == ["blue_pz_bn_1"] and b["engaged"] == ["red_tp_1"] and d <= 5.0,
           f"конец дня 1: танковый полк встретил танковый батальон (выдвинут командованием на рубеж) - соприкосновение на {d:.1f} км, марш остановлен")
     import copy as _copy
-    from redfront import ato as _ato, logistics as _lg
-    pre = _copy.deepcopy(st)                     # сила - после снабжения суток (оно в end_day до боя)
-    _ato.ensure(pre)
-    _lg.supply(pre)
-    pw_a, pw_b = sim.power(pre, pre["units"][a["id"]]), sim.power(pre, pre["units"][b["id"]])
+    one = _copy.deepcopy(st)                     # один часовой шаг боя: потери = суточная доля / 24, одновременно
+    one["settings"]["randomness"] = False
+    a1, b1 = one["units"][a["id"]], one["units"][b["id"]]
+    pw_a, pw_b = sim.power(one, a1), sim.power(one, b1)
+    sa, sb = model.strength(a1), model.strength(b1)
+    sim.battles(one, 1 / 24)
+    fa = min(0.5, 0.15 * pw_b / pw_a) * (0.6 if a1.get("defending") else 1) / 24
+    fb = min(0.5, 0.15 * pw_a / pw_b) * (0.6 if b1.get("defending") else 1) / 24
+    check(abs((sa - model.strength(a1)) - sa * fa) < 1e-6 and abs((sb - model.strength(b1)) - sb * fb) < 1e-6,
+          f"бой за час: потери одновременно, по соотношению сил ({pw_a:.1f} : {pw_b:.1f}), 1/24 суточной доли; у обороны "
+          f"x0.6 - {sa:.1%}->{model.strength(a1):.1%} и {sb:.1%}->{model.strength(b1):.1%}")
+    check(abs(model.strength(one["units"]["blue_flak_2"]) - model.strength(b1)) < 1e-6, "приданная ПВО несёт потери вместе с частью")
     sa, sb = model.strength(a), model.strength(b)
     sim.end_day(st)
-    fa = min(0.5, 0.15 * pw_b / pw_a) * (0.6 if a.get("defending") else 1)
-    fb = min(0.5, 0.15 * pw_a / pw_b) * (0.6 if b.get("defending") else 1)
-    check(abs((sa - model.strength(a)) - sa * fa) < 1e-6 and abs((sb - model.strength(b)) - sb * fb) < 1e-6,
-          f"бой за сутки: потери одновременно, по соотношению сил ({pw_a:.1f} : {pw_b:.1f}); у обороны x0.6 (встречный бой - без) "
-          f"- {sa:.0%}->{model.strength(a):.0%} и {sb:.0%}->{model.strength(b):.0%}")
-    check(abs(model.strength(U["blue_flak_2"]) - model.strength(b)) < 1e-6, "приданная ПВО несёт потери вместе с частью")
+    check(model.strength(a) < sa and model.strength(b) < sb,
+          f"сутки боя по часам: {sa:.0%}->{model.strength(a):.0%} и {sb:.0%}->{model.strength(b):.0%}")
     tasks = planner.plan(st) and st["tasks"]
     kinds = [t["kind"] for t in tasks]
     check(kinds and kinds[0] == "cas_contact" and all(t["package"][0]["objective"]["kind"] == "column" for t in tasks if t["kind"] == "cas_contact")
@@ -388,6 +391,7 @@ def front_section(tmp: Path) -> None:
           f"день 3: в плане {len(tasks)} задач, первыми - войска в соприкосновении (без доразведки): "
           + ", ".join(t["title"].split(": ")[1] for t in tasks))
     n = next(i for i, t in enumerate(tasks, 1) if t["target"] == "blue_pz_bn_1")
+    tasks[n - 1]["tot_s"] = None                 # без времени плана: модель к миссии не продвигается (это - advance_section)
     man = build.build(st, tmp / "front.miz", task_no=n)
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "front.miz"))
@@ -455,6 +459,7 @@ def theatre_section(tmp: Path) -> None:
            and g["kind"] == "battle"]
     check(far and max(far) < near, f"цель игрока - {near} машин, части вдали - по {min(far)}-{max(far)}")
     keys = {g["cluster"] for g in groups if g.get("cluster")}
+    st["tasks"][0]["tot_s"] = None               # без продвижения модели к миссии: сравниваем с окном, построенным выше
     man = build.build(st, tmp / "theatre.miz", task_no=1)
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "theatre.miz"))
@@ -943,6 +948,7 @@ def column_road_section(tmp: Path) -> None:
     st = model.new_campaign("colroad", oob=BASE_OOB, sector=BASE_SECTOR)
     bn = st["units"]["blue_pzgren_bn_1"]
     planner.plan(st)
+    st["task"]["tot_s"] = None                   # без продвижения модели к миссии: колонна там, где её посчитал тест
     man = build.build(st, tmp / "colroad.miz")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "colroad.miz"))
@@ -1702,9 +1708,12 @@ def core_section(tmp: Path) -> None:
 
     # ---- конец дня, день 2 ----
     km1 = bn["progress_km"]
+    rest = (86400 - (st.get("ground_s") or 0)) / 86400   # наземная модель уже на конце окна миссии - до 24:00 остаток суток
     sim.end_day(st)
     adv = bn["progress_km"] - km1
-    check(st["day"] == 2 and abs(adv - BASELINE["advance_d2_km"]) < 0.01, f"день 2: колонна прошла {adv:.2f} км за сутки (как в 0.1)")
+    check(st["day"] == 2 and abs(adv - BASELINE["advance_d2_km"] * rest) < 0.05,
+          f"день 2: колонна прошла {adv:.2f} км за остаток суток после вылета ({rest:.0%} суток; за сутки - "
+          f"{BASELINE['advance_d2_km']} км, как в 0.1)")
     tk2 = planner.plan(st)
     check(tk2 is not None and tk2["target_pos"] != tk["target_pos"], "день 2: задача по колонне в новом месте")
     man2 = build.build(st, tmp / "d2.miz")
@@ -2172,10 +2181,54 @@ def convoy_section(tmp: Path) -> None:
           f"удар ИИ по пути подвоза вне миссии: {lines[0] if lines else '-'}")
 
 
+def advance_section(tmp: Path) -> None:
+    """Наземная модель по часам: шаг до времени, командование по 6 ч, итоги вылетов ИИ в своё время, сборка миссии
+    продвигает модель и цель, окно слетанной миссии - только события, план не идёт назад."""
+    from redfront import airwar, ato
+    print("\n== наземная модель по часам ==")
+    st = model.new_campaign("adv", sector="sector_germany.json", oob="oob_germany.json", seed=2)
+    st["settings"]["randomness"] = False
+    sim.end_day(st)
+    a = ato.ensure(st)
+    marching = [u for u in st["units"].values() if u.get("state") == "march"]
+    km0 = {u["id"]: u["progress_km"] for u in marching}
+    strikes = [e for e in a["entries"] if not e["ai_only"] and e["task"]["package"][0]["objective"]["kind"] in ("column", "point", "site")
+               and e["side"] != st["player_side"]]
+    e = min(strikes, key=lambda x: x["tot_s"])
+    tgt = st["units"][e["task"]["package"][0]["objective"]["unit"]]
+    s0, d0 = model.strength(tgt), tgt.get("damage", 0.0)
+    lines = sim.advance(st, e["tot_s"] + 1)
+    moved = [u for u in marching if u["progress_km"] > km0[u["id"]] + 0.1]
+    check(abs(st["ground_s"] - (e["tot_s"] + 1)) < 1 and moved and e.get("resolved")
+          and (model.strength(tgt) < s0 or tgt.get("damage", 0.0) > d0),
+          f"шаг до {sim.ato_hhmm(st['ground_s'])}: на марше продвинулись {len(moved)} частей; вылет ИИ дал итог в своё время "
+          f"({e['title']}: {next((ln for ln in lines if e['title'] in ln), '-')})")
+    before = st["ground_s"]
+    check(sim.advance(st, before - 3600) == [] and st["ground_s"] == before, "модель назад не идёт")
+    # сборка миссии: модель - к её началу, цель - на место
+    planner.plan(st)
+    tasks = st["tasks"]
+    check(tasks and all(t["takeoff_s"] >= before for t in tasks), f"план дня - вылеты не раньше обстановки ({sim.ato_hhmm(before)})")
+    n = next((i for i, t in enumerate(tasks, 1) if t["package"][0]["objective"]["kind"] == "column"), 1)
+    man = build.build(st, tmp / "adv.miz", task_no=n)
+    tk = st["task"]
+    tgt = st["units"].get(tk["package"][0]["objective"].get("unit") or "")
+    check(man["ground_s"] >= before and (not tgt or model.dist_km(model.unit_pos(st, tgt), tk["target_pos"]) < 0.3),
+          f"сборка: обстановка на {sim.ato_hhmm(man['ground_s'])} (начало миссии), цель задачи - на своём месте к этому времени")
+    # окно слетанной миссии: только события, без марша
+    km1 = {u["id"]: u["progress_km"] for u in st["units"].values() if u.get("state") == "march"}
+    data = {"campaign": st["campaign_id"], "sortie": man["sortie"], "dead": [], "ejected": [], "mission_ended": True}
+    debrief.apply(st, data)
+    still = all(abs(st["units"][k]["progress_km"] - v) < 1e-9 for k, v in km1.items() if st["units"][k].get("state") == "march")
+    check(still and st["ground_s"] >= man["end_s"] - 1 and set(st["ato"].get("played", [])) >= {f["ato"] for f in man["flights"] if f.get("ato")},
+          f"дебриф: окно миссии пройдено только событиями (марша нет), обстановка на {sim.ato_hhmm(st['ground_s'])}; "
+          f"группы ИИ миссии - слетаны ({len(st['ato'].get('played', []))})")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
-            supply_section, assault_section, csar_section, convoy_section]
+            supply_section, assault_section, csar_section, convoy_section, advance_section]
 
 
 def main() -> int:

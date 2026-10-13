@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+import copy
 import datetime
 import math
 import tempfile
@@ -483,7 +484,9 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             continue
         if lift and nl[enemy] >= AI_AIRLIFT:
             continue
-        g = dict(e["task"]["package"][0])
+        etask = copy.deepcopy(e["task"])
+        planner.refresh(state, etask)            # цель группы ИИ - на её место к времени миссии
+        g = dict(etask["package"][0])
         perf = state["units"][g["performer"]]
         if g["size"] <= 0 or used.get(perf["id"], 0) + g["size"] > perf.get("count", 0):
             continue
@@ -573,6 +576,16 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     pkg = tk["package"]
     if fly not in {g["group"] for g in pkg}:
         raise ValueError(f"в пакете нет группы '{fly}'; есть: {', '.join(g['group'] for g in pkg)}")
+
+    # наземная модель - к началу миссии (sim.advance: бой, марш, итоги вылетов ИИ по часам); цель - на её место
+    pre_lines = []
+    if tk.get("tot_s") is not None:
+        from . import sim
+        t_pre = timeline(tdef, state, pkg, fly)
+        pre_lines = sim.advance(state, tk["tot_s"] - t_pre["strike"]["objective_s"])
+        pre_lines += planner.refresh(state, tk)
+        for ln in pre_lines:
+            model.note(state, ln)
 
     m = Mission(Germany())
     y, mo, d = map(int, state["date"].split("-"))
@@ -938,6 +951,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "battle_key": bkey,                              # бой цели игрока
         "battle_keys": keys,
         "objects": [o["id"] for o in objs],              # объекты тыла, по которым миссия считает разрушения
+        "ground_s": state.get("ground_s"),               # наземная модель - на это время суток (sim.advance)
+        "pre_lines": pre_lines,                          # что изменилось к началу миссии (бой, марш, вылеты ИИ)
         "ground": [{"unit": g["unit"], "kind": g["kind"], "cluster": g.get("cluster"), "vehicles": [{"name": v["name"], "type": v["type"], "weight": v["weight"]} for v in g["vehicles"]]}
                    for g in groups if g["kind"] not in ("downed", "convoy")],   # экипажи, колонны снабжения - не части модели
         "convoys": [{"unit": g["unit"], "side": g["side"], "link": g["link"],      # колонны снабжения: потери - недовоз (convoys.py)

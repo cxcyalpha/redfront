@@ -140,6 +140,7 @@ def view(st: dict) -> dict:
                     "title": csar.title(st, d)} for d in st.get("downed", [])
                    if d["side"] == st["player_side"]],    # свои сбитые экипажи (чужие - не видны)
         "ato": ato.rows(st), "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
+        "ground_time": ato.hhmm(st.get("ground_s") or 0),          # наземная обстановка - на это время (sim.advance)
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],
     }
@@ -286,6 +287,9 @@ class App:
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1))
             n = sum(len(g["vehicles"]) for g in man["ground"])
             lines.append(f"Миссия: {man['file']} (наземных машин {n}, бюджет {st['settings'].get('mission_budget', materialize.MISSION_BUDGET)})")
+            if man.get("pre_lines"):             # модель продвинута к началу миссии (sim.advance)
+                lines.append(f"Обстановка на {sim.ato_hhmm(man['ground_s'] or 0)}:")
+                lines += man["pre_lines"]
             lines += man["package_lines"]
         elif action == "debrief":
             f = debrief.find_file(st, self.home)

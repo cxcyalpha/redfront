@@ -150,13 +150,15 @@ def depot_losses(state: dict, side: str) -> dict[str, float]:
     return out
 
 
-def daily(state: dict) -> list[str]:
+def daily(state: dict, until_s: float | None = None) -> list[str]:
     """Удары ИИ по путям подвоза плана полётов суток (не слетанные игроком): удачный (вероятность - как у ЗРК в
     коридоре) - INTERDICT_LOSS суточного потока участка в недовоз."""
     lines = []
     a = state.get("ato") or {}
     for e in a.get("entries", []):
-        if e["kind"] != "strike_supply_route" or e.get("resolved") or e["id"] in a.get("done", []):
+        if (e["kind"] != "strike_supply_route" or e.get("resolved") or e["id"] in a.get("done", [])
+                or e["id"] in a.get("played", [])       # слетан в миссии - колонну били в DCS (дебриф)
+                or (until_s is not None and e["tot_s"] > until_s)):
             continue
         e["resolved"] = True
         link, foe = e["task"].get("link"), model.enemy(e["side"])

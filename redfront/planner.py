@@ -123,7 +123,7 @@ def plan(state: dict) -> dict | None:
     state["task"] = None
     state["tasks"] = []
     a = ato.ensure(state)
-    clock = state.get("clock_s") or 0
+    clock = max(state.get("clock_s") or 0, state.get("ground_s") or 0)   # наземная модель не идёт назад
     tasks = []
     for e in a["entries"]:                       # вылеты своей стороны по времени; дежурства (ДРЛО, заправщик) - только ИИ
         if e["side"] != state["player_side"] or e["ai_only"] or e["id"] in a["done"]:
@@ -478,6 +478,41 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                                                           f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"})
             break
     return out
+
+
+def refresh(state: dict, task: dict) -> list[str]:
+    """Цель задачи - на её место сейчас (после шага наземной модели к времени миссии): точка цели, ИПМ и маршруты
+    групп по цели (удар, прикрытие, доразведка). Рубежи подавления ПВО пересчитывает сборка (build). Цель выбыла
+    (уничтожена, ушла в тыл) - строка-замечание, маршрут прежний."""
+    units = state["units"]
+    tdef = model.doctrine(state, task["side"])["tasks"][task["kind"]]
+    obj0 = task["package"][0]["objective"]
+    tgt = units.get(obj0.get("unit") or "")
+    if not tgt or obj0["kind"] not in ("column", "site", "point", "cap_zone"):
+        return []
+    if tgt.get("state") in ("destroyed", "lost"):
+        return [f"{task['title']}: цель выбыла к времени вылета."]
+    tpos = model.unit_pos(state, tgt)
+    if model.dist_km(tpos, task["target_pos"]) < 0.2:
+        return []
+    moved = model.dist_km(tpos, task["target_pos"])
+    task["target_pos"] = tpos
+    for g in task["package"]:
+        o = g["objective"]
+        base = state["airbases"][g["base"]]
+        if o["kind"] in ("column", "site", "point"):
+            ip = ip_point(base, tpos, tdef["ip_offset_km"])
+            g["route"] = [ip, tpos]
+            if g["group"] == "strike":
+                task["ip"] = ip
+        elif o["kind"] in ("cover_zone", "cap_zone"):
+            g["route"] = [tpos]
+        elif o["kind"] in ("search_zone", "flyover"):
+            g["route"] = [ip_point(base, tpos, tdef["ip_offset_km"]), tpos]
+        else:
+            continue
+        o["pos"] = tpos
+    return [f"{task['title']}: цель сместилась на {moved:.0f} км к времени вылета - маршрут пересчитан."]
 
 
 def choose(state: dict, n: int) -> dict:

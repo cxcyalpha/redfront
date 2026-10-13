@@ -172,18 +172,19 @@ def objective(state: dict, side: str, u: dict | None = None) -> str | None:
     return next((o for o in objs if owner(state, o) != side), None)   # цели по порядку: первая не взятая
 
 
-def commander(state: dict, side: str) -> list[str]:
+def commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     global _PK
     if not enabled(state):
         return []
     _PK = {}
     try:
-        return _commander(state, side)
+        return _commander(state, side, frac_day)
     finally:
         _PK = None
 
 
-def _commander(state: dict, side: str) -> list[str]:
+def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
+    """frac_day - доля суток до следующего решения: восстановление в тылу и на месте - за неё (refit_rate в сутки)."""
     sim = _sim(state, side)
     lines = []
     own = _maneuver(state, side)
@@ -213,7 +214,7 @@ def _commander(state: dict, side: str) -> list[str]:
             lines.append(f"{u['name']}: в тылу ({u['route'][-1]}), восстановление.")
         if u["state"] == "refit":                                 # без снабжения - вдвое медленнее
             for c in u["composition"]:
-                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * u.get("supply", 1.0))
+                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * frac_day * u.get("supply", 1.0))
             if model.strength(u) >= sim["refit_ready"]:
                 u["state"] = "defend"
                 lines.append(f"{u['name']}: восстановлена до {model.strength(u):.0%}, в строю.")
@@ -222,7 +223,7 @@ def _commander(state: dict, side: str) -> list[str]:
     for u in free:
         if model.strength(u) < sim["refit_ready"]:
             for c in u["composition"]:
-                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * sim["refit_in_line"])
+                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * frac_day * sim["refit_in_line"])
     # десант в резерве и высаженный (держит пункт до подхода своих) - не в распоряжении командования фронта (assault.py)
     free = [u for u in free if u.get("order") not in ("reserve", "airhead")]
     posture = sim.get("posture") or "defense"
