@@ -1100,6 +1100,49 @@
         "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
         "estimate": true
       }
+    },
+    "awacs_orbit": {
+      "title": "Дежурство ДРЛО",
+      "performers": [
+        "awacs"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "orbit",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: ДРЛО и управление над своей территорией за серединой линии фронта, в standoff_km от неё - ОЦЕНКА",
+      "speed_kmh": 750,
+      "transit_alt_m_agl": 9000,
+      "attack_alt_m_agl": 9000,
+      "ip_offset_km": 0,
+      "standoff_km": 150,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "standoff_km"
+      ],
+      "strike": {
+        "title": "дежурство дрло",
+        "group_name": "самолёт",
+        "size": 1,
+        "maintask": [
+          "AWACS"
+        ],
+        "loadout": [],
+        "mode": "orbit",
+        "alt_m": 9000,
+        "estimate_fields": [
+          "size",
+          "alt_m"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+        "estimate": true
+      }
     }
   },
   "march": {

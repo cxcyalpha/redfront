@@ -422,6 +422,92 @@
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
       "bomb_alt_m": 1000
+    },
+    "awacs_orbit": {
+      "title": "Дежурство ДРЛО",
+      "performers": [
+        "awacs"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "orbit",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: ДРЛО и управление над своей территорией за серединой линии фронта, в standoff_km от неё - ОЦЕНКА",
+      "speed_kmh": 750,
+      "transit_alt_m_agl": 9000,
+      "attack_alt_m_agl": 9000,
+      "ip_offset_km": 0,
+      "standoff_km": 150,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "standoff_km"
+      ],
+      "strike": {
+        "title": "дежурство дрло",
+        "group_name": "самолёт",
+        "size": 1,
+        "maintask": [
+          "AWACS"
+        ],
+        "loadout": [],
+        "mode": "orbit",
+        "alt_m": 9000,
+        "estimate_fields": [
+          "size",
+          "alt_m"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+        "estimate": true
+      }
+    },
+    "tanker_orbit": {
+      "title": "Дежурство заправщика",
+      "performers": [
+        "tanker"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "orbit",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: зона дозаправки над своей территорией за серединой линии фронта - ОЦЕНКА",
+      "speed_kmh": 750,
+      "transit_alt_m_agl": 7000,
+      "attack_alt_m_agl": 7000,
+      "ip_offset_km": 0,
+      "standoff_km": 200,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "standoff_km"
+      ],
+      "strike": {
+        "title": "дежурство заправщика",
+        "group_name": "самолёт",
+        "size": 1,
+        "maintask": [
+          "Refueling"
+        ],
+        "loadout": [],
+        "mode": "orbit",
+        "alt_m": 7000,
+        "estimate_fields": [
+          "size",
+          "alt_m"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+        "estimate": true
+      }
     }
   },
   "march": {

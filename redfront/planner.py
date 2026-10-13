@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import math
 
-from . import dcstypes, logistics, model
+from . import dcstypes, logistics, model, ops
 
 
 def strike_radius_km(unit: dict) -> float | None:
@@ -121,6 +121,8 @@ def plan(state: dict) -> dict | None:
     state["task"] = None
     state["tasks"] = []
     tasks, reason = plan_side(state, state["player_side"])
+    doc = model.doctrine(state, state["player_side"])["tasks"]
+    tasks = [t for t in tasks if not doc[t["kind"]].get("ai_only")]   # дежурство ДРЛО, заправщика - только ИИ
     state["tasks"] = tasks
     if not tasks:
         state["task_reason"] = reason
@@ -142,6 +144,11 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
     for kind, tdef in doc["tasks"].items():
         performers = [u for u in state["units"].values()
                       if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0]
+        if tdef.get("method") == "orbit":        # дежурство в зоне над своей территорией (ДРЛО, заправщик)
+            t = orbit_task(state, side, kind, tdef, performers)
+            if t:
+                tasks.append(t)
+            continue
         tside = side if tdef["target"].get("side") == "own" else foe      # прикрытие своих войск - цель своя
         cat = tdef["target"]["category"]
         if cat in STRATEGIC:                     # объекты тыла противника: целы и не потеряны; мост - в тылу противника
@@ -203,7 +210,47 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
             })
         if not found and not targets:
             reasons.append(f"{tdef['title']}: целей нет")
-    return tasks[:MAX_TASKS], "; ".join(reasons) or "целей для задач доктрины нет"
+    orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
+    return [t for t in tasks if not t.get("ai_only")][:MAX_TASKS] + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
+
+
+def orbit_point(state: dict, side: str, standoff_km: float) -> dict | None:
+    """Зона дежурства: середина линии фронта (среднее середин связей между пунктами сторон), отнесённая на standoff_km
+    в сторону своей территории (к среднему своих пунктов). Нет линии фронта - None."""
+    fl = ops.front_links(state)
+    if not fl:
+        return None
+    pl = state["places"]
+    mids = [model.lerp(pl[a], pl[b], 0.5) for a, b in fl]
+    c = {"lat": sum(p["lat"] for p in mids) / len(mids), "lon": sum(p["lon"] for p in mids) / len(mids)}
+    own = [p for n, p in pl.items() if ops.owner(state, n) == side]
+    if not own:
+        return None
+    home = {"lat": sum(p["lat"] for p in own) / len(own), "lon": sum(p["lon"] for p in own) / len(own)}
+    return model.offset(c, model.bearing_deg(c, home), standoff_km * 1000)
+
+
+def orbit_task(state: dict, side: str, kind: str, tdef: dict, performers: list[dict]) -> dict | None:
+    """Задача дежурства (method orbit): одна группа ближней части с самолётами, достающей до зоны."""
+    pos = orbit_point(state, side, tdef.get("standoff_km", 150))
+    if pos is None:
+        return None
+    best = None
+    for r in performers:
+        radius = strike_radius_km(r)
+        d = model.dist_km(state["airbases"][r["base"]], pos)
+        if (radius is None or d <= radius) and (best is None or d < best[0]):
+            best = (d, r)
+    if best is None:
+        return None
+    d, perf = best
+    s = tdef["strike"]
+    g = {"group": "strike", "title": s["title"], "performer": perf["id"], "size": min(s["size"], logistics.available(state, perf)),
+         "base": perf["base"], "route": [pos], "objective": {"kind": "orbit", "pos": pos, "maintask": s["maintask"][0]},
+         "maintask": s["maintask"], "loadout": s.get("loadout", []), "lead_min": 0, "ai": {}, "alt_m": s.get("alt_m")}
+    return {"kind": kind, "side": side, "title": tdef["title"], "performer": perf["id"], "target": f"orbit_{side}_{kind}",
+            "group_size": g["size"], "base": perf["base"], "target_pos": pos, "ip": pos, "distance_km": round(d, 1),
+            "threats": [], "package": [g], "package_notes": "", "ai_only": True}
 
 
 def choose(state: dict, n: int) -> dict:

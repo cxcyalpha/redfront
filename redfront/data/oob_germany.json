@@ -5289,6 +5289,42 @@
    "strike_radius_km": 200,
    "source": "OOB-миссия Germany_OOB_1989 (метка); Harrier GR5 в DCS нет - замена AV-8B; радиус действия - ОЦЕНКА",
    "estimate": true
+  },
+  {
+   "id": "b_naew",
+   "name": "Силы ДРЛО НАТО (E-3A)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "norvenich",
+   "type": "E_3A",
+   "count": 3,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; Гайленкирхен вне карты - Нёрфених (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_kc135",
+   "name": "Заправщики ВВС США (KC-135)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "ramstein",
+   "type": "KC_135",
+   "count": 4,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; базы заправщиков (Милденхолл) вне карты - Рамштайн (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_a50",
+   "name": "Отряд ДРЛО (А-50)",
+   "side": "red",
+   "role": "awacs",
+   "base": "templin",
+   "type": "A_50",
+   "count": 2,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; А-50 в ГСВГ на постоянной основе не было - ОЦЕНКА сценария (выдвинуты на время войны); радиус действия - ОЦЕНКА",
+   "estimate": true
   }
  ],
  "variants": [

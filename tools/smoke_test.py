@@ -1301,6 +1301,28 @@ def germany_section(tmp: Path) -> None:
     check(veh <= 1200 and heavy <= materialize.MAX_WEIGHT * 1.1,      # округление по типам - как и раньше
           f"миссия всего фронта: {len(man['ground'])} групп, {veh} машин (не больше 1200), машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
     air_defence_section(tmp)
+    support_air_section(tmp)
+
+
+def support_air_section(tmp: Path) -> None:
+    """ДРЛО и заправщики: части модели, задача дежурства (только ИИ), в миссии - в зоне с начала, потери - в модель."""
+    print("\n== ДРЛО и заправщики ==")
+    st = model.new_campaign("sup", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    planner.plan(st)
+    check(not any(t.get("ai_only") for t in st["tasks"]), "дежурство ДРЛО/заправщика в план игрока не попадает")
+    man = build.build(st, tmp / "support.miz", task_no=1)
+    m = dcs.Mission(); m.load_file(str(tmp / "support.miz"))
+    orb = {g.units[0].type: g for c in m.coalition.values() for cn in c.countries.values() for g in cn.plane_group
+           if "_orbit" in g.name}
+    check({"E-3A", "A-50", "KC-135"} <= set(orb) and all(g.points[0].alt >= 7000 and g.points[0].type == "Turning Point"
+                                                          for g in orb.values()),
+          f"в миссии на дежурстве в воздухе: {', '.join(sorted(orb))}")
+    fl = next(f for f in man["flights"] if f["performer"] == "b_naew")
+    n0 = st["units"]["b_naew"]["count"]
+    data = fake_hook(st["campaign_id"], st["sortie"], fl["units"], {}, [])
+    debrief.apply(st, data)
+    check(st["units"]["b_naew"]["count"] == n0 - len(fl["units"]),
+          f"сбитый E-3A списан из модели: {n0} -> {st['units']['b_naew']['count']}")
 
 
 def air_defence_section(tmp: Path) -> None:

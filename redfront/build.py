@@ -402,8 +402,21 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int) -> list[dict]:
     out = []
     for side, limit, enemy in ((tk["side"], AI_FLIGHTS["own"], False), (model.enemy(tk["side"]), AI_FLIGHTS["enemy"], True)):
         tasks, _ = planner.plan_side(state, side)
+        tasks.sort(key=lambda t: not t.get("ai_only"))   # дежурство - первым: вне лимита групп, самолёты - до ударов
         n = 0
         for t in tasks:
+            if t.get("ai_only"):                     # дежурство (ДРЛО, заправщик): всю миссию в зоне, вне лимита групп
+                g = dict(t["package"][0])
+                perf = state["units"][g["performer"]]
+                if used.get(perf["id"], 0) + g["size"] > perf.get("count", 0) or g["size"] <= 0:
+                    continue
+                used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
+                key = f"{'enemy' if enemy else 'ai'}_{t['kind']}"
+                g.update({"group": key, "_tdef": model.doctrine(state, side)["tasks"][t["kind"]], "_side": side,
+                          "_enemy": enemy, "_ai": True, "title": f"{'противник' if enemy else 'ИИ'}: {t['title']}"})
+                times[key] = {"start_s": 0, "late_s": 0, "objective_s": 0}
+                out.append(g)
+                continue
             if n >= limit:
                 break
             if not enemy and t["kind"] == tk["kind"] and t["target"] == tk["target"]:
@@ -423,6 +436,25 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int) -> list[dict]:
             times[g["group"]] = {"start_s": max(0, int(obj_s - fly_s)), "late_s": max(0, int(fly_s - obj_s)), "objective_s": int(obj_s)}
             out.append(g)
     return out
+
+
+def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str, sortie: int, spd_kmh: float):
+    """Группа дежурства (ДРЛО, заправщик): в воздухе в зоне с начала миссии, круг до конца миссии, задача DCS -
+    AWACS / Tanker. Потери - через дебриф, как у всех групп (flights)."""
+    alt = int(g.get("alt_m") or 8000)
+    pos = _pt(m, g["route"][0])
+    fg = m.flight_group_inflight(_country(m, state, side), f"{perf['id']} {g['group']} {sortie}", ac, pos, alt,
+                                 speed=int(spd_kmh), maintask=mt, group_size=g["size"])
+    for u in fg.units:
+        u.skill = Skill.High
+    w = fg.points[0]
+    role = g["objective"].get("maintask")
+    want = {"AWACS": task.AWACSTaskAction, "Refueling": task.Tanker}.get(role)
+    if want and not any(isinstance(t, want) for t in w.tasks):   # pydcs обычно ставит её сам по основной задаче
+        w.tasks.append(want())
+    w.tasks.append(task.OrbitAction(altitude=alt, speed=int(spd_kmh), pattern=task.OrbitAction.OrbitPattern.RaceTrack))
+    fg.add_waypoint(Point(pos.x + 40_000, pos.y, m.terrain), alt, speed=int(spd_kmh))   # второй конец "ипподрома"
+    return fg
 
 
 def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str, dict]:
@@ -508,6 +540,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         ac = dcstypes.flying(perf["type"])
         is_player = player and g["group"] == fly
         mt = _maintask(ac, g["maintask"])
+        if g["objective"]["kind"] == "orbit":    # дежурство: к началу миссии уже в зоне (в воздухе), до конца миссии
+            orbit_group(m, state, g, perf, ac, mt, side_g, sortie, spd)
+            line = f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, в зоне с начала миссии"
+            (enemy_lines if g.get("_enemy") else ai_lines).append(line)
+            fl = m.find_group(f"{perf['id']} {g['group']} {sortie}")
+            flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fl.units], "player": False,
+                            **({"side": side_g} if g.get("_enemy") else {})})
+            continue
         fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                          maintask=mt, start_type=StartType.Cold if g["group"] == fly else StartType.Runway,
                                          group_size=g["size"])
