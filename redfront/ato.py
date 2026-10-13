@@ -59,10 +59,10 @@ def _path_km(base: dict, route: list[dict]) -> float:
 
 def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
     """Время групп пакета относительно выхода ударной группы на цель (0): взлёт, выход на свой объект, посадка, с.
-    Группа обеспечения выходит на объект за lead_min до удара (как build.timeline). Скорость - крейсерская типа."""
+    Группа обеспечения выходит на объект за lead_min до удара (как build.timeline). Скорость - задачи доктрины."""
     out = {}
     for g in task["package"]:
-        spd = model.group_speed_kmh(state, g, tdef) / 3.6      # крейсерская типа исполнителя
+        spd = model.group_speed_kmh(state, g, tdef) / 3.6      # скорость задачи доктрины
         base = state["airbases"][g["base"]]
         fly = _path_km(base, g["route"]) * 1000 / spd
         back = model.dist_km(g["route"][-1], base) * 1000 / spd

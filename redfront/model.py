@@ -29,13 +29,13 @@ def load_json(name: str | Path) -> dict:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
-# ---------- скорость ЛА ----------
+# ---------- типы ЛА ----------
 
 _AIRCRAFT: dict | None = None
 
 
 def aircraft_info(type_name: str | None) -> dict:
-    """Запись типа ЛА из data/aircraft.json (cruise_kmh, cargo_t); нет - {}."""
+    """Запись типа ЛА из data/aircraft.json (cargo_t, troops, crew, night); нет - {}."""
     global _AIRCRAFT
     if _AIRCRAFT is None:
         try:
@@ -45,16 +45,9 @@ def aircraft_info(type_name: str | None) -> dict:
     return _AIRCRAFT.get(type_name or "") or {}
 
 
-def cruise_kmh(type_name: str | None) -> float | None:
-    """Крейсерская скорость типа ЛА, км/ч (data/aircraft.json: V_opt из DCS через tools/dcs_cruise.py или ОЦЕНКА)."""
-    rec = aircraft_info(type_name)
-    return float(rec["cruise_kmh"]) if rec.get("cruise_kmh") else None
-
-
 def group_speed_kmh(state: dict, g: dict, tdef: dict) -> float:
-    """Скорость группы на маршруте и в расчёте времени: крейсерская типа исполнителя, иначе скорость задачи доктрины."""
-    perf = state["units"].get(g.get("performer"), {})
-    return cruise_kmh(perf.get("type")) or tdef["speed_kmh"]
+    """Скорость группы на маршруте и в расчёте времени - скорость задачи доктрины (speed_kmh; ОЦЕНКА)."""
+    return tdef["speed_kmh"]
 
 
 # ---------- роли и доктрина ----------

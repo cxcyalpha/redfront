@@ -329,6 +329,15 @@ def csar_script(m: Mission, state: dict, downed: list[dict], rescuers: list[dict
             .replace("@RED_BASES@", bases["red"]).replace("@BLUE_BASES@", bases["blue"]))
 
 
+def _land(fg, airport, spd_kmh: float):
+    """Посадка на аэродром. pydcs ставит точке посадки скорость 0 - ИИ на последнем участке гасит скорость до
+    минимума (Су-17 и др. на возврате шли 300-400 км/ч и крутили фигуры, сбрасывая её). Скорость - как на маршруте:
+    заход и посадку ИИ строит сам."""
+    p = fg.land_at(airport)
+    p.speed = spd_kmh / 3.6
+    return p
+
+
 def _ground_group(m: Mission, state: dict, g: dict, shift_xy: tuple[float, float] = (0.0, 0.0)):
     country = _country(m, state, g["side"])
     vs = g["vehicles"]
@@ -572,7 +581,7 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
     w.tasks.append(orbit)
     fg.add_waypoint(Point(pos.x + 40_000, pos.y, m.terrain), alt, speed=int(spd_kmh))   # второй конец "ипподрома"
     if airport is not None:
-        fg.land_at(airport)
+        _land(fg, airport, spd_kmh)
     return fg
 
 
@@ -581,7 +590,7 @@ def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str,
     плюс полёт до объекта. Группа обеспечения выходит на свой объект за lead_min до выхода ударной группы на цель
     (ОЦЕНКИ из доктрины). Группы ИИ взлетают с полосы с задержкой start_s; если не успевают - late_s > 0."""
     fly_s = {g["group"]: _path_km(state["airbases"][g["base"]], g["route"]) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
-             for g in groups}                    # крейсерская скорость типа исполнителя (data/aircraft.json)
+             for g in groups}                    # скорость задачи доктрины
     lead = {g["group"]: g.get("lead_min", 0) * 60 for g in groups}
     t_player = tdef["timing"]["player_cold_start_min"] * 60 + fly_s[fly]
     eta_strike = t_player + lead[fly]
@@ -677,7 +686,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     for g in pkg + enemy:
         tdg = g.get("_tdef") or tdef             # группы противника - по его пакету доктрины
         side_g = g.get("_side", tk["side"])
-        spd = model.group_speed_kmh(state, g, tdg)   # крейсерская типа (V_opt DCS), иначе скорость задачи доктрины
+        spd = model.group_speed_kmh(state, g, tdg)   # скорость задачи доктрины
         transit = g.get("transit_alt_m_agl") or tdg["transit_alt_m_agl"]   # средние высоты, если угроз в коридоре нет (planner)
         perf = state["units"][g["performer"]]
         base = state["airbases"][g["base"]]
@@ -703,7 +712,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=int(spd), pattern=task.OrbitAction.OrbitPattern.Circle))
             orbit.stop_after_duration(int(tdg.get("cap_min", 40) * 60))
             w.tasks.append(orbit)
-            fg.land_at(airport)
+            _land(fg, airport, spd)
             ap = airport.position
             qra_specs.append({"id": g["_ato"], "group": fg.name, "side": 1 if side_g == "red" else 2,
                               "x": ap.x, "y": ap.y, "r": tdg.get("scramble_km", 150) * 1000, "title": g["title"]})
@@ -899,7 +908,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(ip, transit, "ИПМ")
             wp(tgt, transit, "Цель")
             wp(ip, transit, "Отход")
-        fg.land_at(land)
+        _land(fg, land, spd)
         t = times[g["group"]]
         when = (f"посадка в {g['_dest']} ~{t['objective_s'] // 60} мин" if g.get("_dest")
                 else f"в районе ~{t['objective_s'] // 60} мин")

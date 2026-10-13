@@ -1499,9 +1499,12 @@ def ato_section(tmp: Path) -> None:
           f"коалиции миссии - Combined Joint Task Forces Red / Blue: {used}")
     sg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.plane_group if " strike " in g.name][0]
     perf = st["units"][st["tasks"][n - 1]["performer"]]
-    check(abs(sg.points[1].speed * 3.6 - model.cruise_kmh(perf["type"])) < 1,
-          f"скорость ударной группы на маршруте - крейсерская типа {perf['type']}: {sg.points[1].speed * 3.6:.0f} км/ч "
-          f"(data/aircraft.json)")
+    tdef_ = model.doctrine(st, "red")["tasks"][st["tasks"][n - 1]["kind"]]
+    land = sg.points[-1]
+    check(abs(sg.points[1].speed * 3.6 - tdef_["speed_kmh"]) < 1 and land.type == "Land"
+          and abs(land.speed * 3.6 - tdef_["speed_kmh"]) < 1,
+          f"скорость ударной группы на маршруте - задачи доктрины ({sg.points[1].speed * 3.6:.0f} км/ч), точка посадки - "
+          f"с той же скоростью, не 0 (ИИ не гасит скорость на возврате)")
     t_ = st["tasks"][n - 1]
     check(m.start_time.hour * 3600 + m.start_time.minute * 60 + m.start_time.second == man["start_s"]
           and man["start_s"] <= t_["takeoff_s"] < man["start_s"] + 15 * 60,
