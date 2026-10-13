@@ -75,7 +75,9 @@ def view(st: dict) -> dict:
         if cat in ("depot", "bridge", "airfield", "factory"):
             objects.append({"id": u["id"], "name": u["name"], "role": cat, "side": u.get("side"), "pos": _ll(u["pos"]),
                             "damage": round(u.get("damage", 0.0), 2), "state": u.get("state"),
-                            "checked": bool(u.get("pos_checked")) or cat == "airfield"})
+                            "checked": bool(u.get("pos_checked")) or cat == "airfield",
+                            **({"stock": round(logistics.depot_stock(u), 2), "stock_t": round(u.get("stock_t", 0)),
+                                "cut": bool(u.get("_cut"))} if cat == "depot" and u.get("cap_t") else {})})
         elif cat in ("air", "heli"):
             b = st["airbases"].get(u["base"], {})
             air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
@@ -90,7 +92,8 @@ def view(st: dict) -> dict:
                 continue
             g = {"id": u["id"], "name": u["name"], "side": u["side"], "cat": cat, "state": u["state"],
                  "order": u.get("order"), "strength": round(model.strength(u), 2), "pos": _ll(pos),
-                 "supply": u.get("supply", 1.0), "attached": bool(u.get("attached_to")),
+                 "supply": u.get("supply", 1.0), "supply_frac": u.get("supply_frac", 1.0 if u.get("supply", 1.0) >= 1 else 0.0),
+                 "attached": bool(u.get("attached_to")),
                  "arrives": u.get("arrives_day"),
                  "engaged": [units[f]["name"] for f in u.get("engaged", []) if f in units],
                  "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", []))}
@@ -128,6 +131,7 @@ def view(st: dict) -> dict:
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open")}
                      for k, b in st["airbases"].items()],
         "tasks": tasks, "task_reason": st.get("task_reason") if not tasks else None,
+        "supply_log": st.get("supply_log") or {},
         "ato": ato.rows(st), "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],

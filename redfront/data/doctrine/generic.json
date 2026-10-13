@@ -559,6 +559,57 @@
         "note": "на дежурстве к началу миссии (в воздухе в зоне)",
         "estimate": true
       }
+    },
+    "airlift": {
+      "title": "Воздушная перевозка",
+      "performers": [
+        "transport",
+        "transport_helo"
+      ],
+      "target": {
+        "category": "depot",
+        "side": "own"
+      },
+      "method": "airlift",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: транспортная авиация возит снабжение на склады, где его меньше всего (в первую очередь отрезанные от подвоза), на ближний к складу свой аэродром - ОЦЕНКА",
+      "speed_kmh": 400,
+      "transit_alt_m_agl": 3000,
+      "attack_alt_m_agl": 3000,
+      "helo_alt_m_agl": 150,
+      "ip_offset_km": 0,
+      "airlift_below": 0.9,
+      "airlift_depot_km": 40,
+      "airlift_max": 4,
+      "sorties_per_day": 2,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "helo_alt_m_agl",
+        "airlift_below",
+        "airlift_depot_km",
+        "airlift_max",
+        "sorties_per_day"
+      ],
+      "airlift_note": "Склад с запасом ниже airlift_below ёмкости (отрезанный от подвоза - первым) получает до sorties_per_day рейсов группы транспорта на свой аэродром не дальше airlift_depot_km от склада; направлений в сутки - не больше airlift_max. Груз борта - cargo_t типа (aircraft.json). Сбитый в миссии борт груз не довозит. ОЦЕНКИ.",
+      "strike": {
+        "title": "транспортная группа",
+        "group_name": "борт",
+        "size": 2,
+        "maintask": [
+          "Transport"
+        ],
+        "loadout": [],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "только ИИ; рейс - взлёт со своей базы, посадка на аэродроме назначения",
+        "estimate": true
+      }
     }
   },
   "march": {
@@ -615,7 +666,21 @@
     "sam_note": "ЗРК (ОЦЕНКИ, не из документа): потери восстанавливаются на repair_sam в сутки (x промышленность и снабжение; приданная ПВО части в бою - нет). ЗРК на позиции, понёсший потери, на следующие сутки меняет позицию - уходит на sam_relocate_km в сторону тыла.",
     "industry_effect": 0.5,
     "bridge_detour_km": 15,
-    "bridge_detour_slow": 0.5
+    "bridge_detour_slow": 0.5,
+    "consume_t": {
+      "battle": 1.0,
+      "march": 0.5,
+      "refit": 0.3,
+      "defend": 0.2,
+      "halted": 0.2
+    },
+    "depot_days": 10,
+    "supply_inflow": 2.5,
+    "sortie_t": {
+      "air": 4.0,
+      "heli": 1.5
+    },
+    "supply_t_note": "Снабжение в тоннах (ОЦЕНКИ, не из документа): расход части в сутки = исправные машины (с приданной ПВО) x consume_t по состоянию (бой, марш, восстановление, оборона); авиация - sortie_t на самолёто-вылет плана полётов. Ёмкость складов стороны - depot_days суток её расхода в обороне, поровну по складам. Подвоз из тыла в сутки - supply_inflow x расход стороны в обороне, на склады, до которых есть путь из тыла сектора по своей территории (по недостаче). Часть получила долю нормы - сила между supply_power_factor и 1, марш - между unsupplied и 1."
   },
   "_about_tasks": "Задачи общего пакета - без группы обеспечения, все числа - ОЦЕНКИ (не из документа). По ним в миссию ставится авиация противника игрока, если он играет за другую сторону."
 }

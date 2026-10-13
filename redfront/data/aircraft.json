@@ -107,39 +107,49 @@
     },
     "An_26B": {
       "cruise_kmh": 430,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 5.5
     },
     "Yak_40": {
       "cruise_kmh": 500,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 2.7
     },
     "C_130": {
       "cruise_kmh": 520,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 19
     },
     "Mi_8MT": {
       "cruise_kmh": 220,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 4
     },
     "Mi_26": {
       "cruise_kmh": 230,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 20
     },
     "CH_47D": {
       "cruise_kmh": 240,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 10
     },
     "UH_1H": {
       "cruise_kmh": 180,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 1.5
     },
     "UH_60A": {
       "cruise_kmh": 240,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 4
     },
     "CH_53E": {
       "cruise_kmh": 250,
-      "source": "ОЦЕНКА"
+      "source": "ОЦЕНКА",
+      "cargo_t": 13
     }
-  }
+  },
+  "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность)."
 }

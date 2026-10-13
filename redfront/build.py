@@ -409,6 +409,7 @@ def _path_km(base: dict, route: list[dict]) -> float:
 
 
 AI_FLIGHTS = {"own": 3, "enemy": 4}   # ОЦЕНКА: сколько групп ИИ по плану дня в миссии - своих (кроме пакета игрока) и противника
+AI_AIRLIFT = 2                         # ОЦЕНКА: рейсов воздушной перевозки каждой стороны в миссии (ближние к удару игрока)
 
 
 def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> list[dict]:
@@ -433,9 +434,13 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
         return (not e["ai_only"], abs(t["objective_s"] - tot) / 60 + near_km / 10)
     out = []
     n = {False: 0, True: 0}
+    nl = {False: 0, True: 0}
     for e in sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank):
         enemy = e["side"] != tk["side"]
+        lift = e["kind"] == "airlift" or e["task"]["package"][0]["objective"]["kind"] == "airlift"
         if not e["ai_only"] and n[enemy] >= AI_FLIGHTS["enemy" if enemy else "own"]:
+            continue
+        if lift and nl[enemy] >= AI_AIRLIFT:
             continue
         g = dict(e["task"]["package"][0])
         perf = state["units"][g["performer"]]
@@ -443,16 +448,20 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             continue
         tdg = model.doctrine(state, e["side"])["tasks"][e["kind"]]
         t = e["times"][g["group"]]
-        if e["ai_only"]:
+        if e["ai_only"] and not lift:
             key = f"{'enemy' if enemy else 'ai'}_{e['kind']}_{ato.hhmm(e['tot_s']).replace(':', '')}"
             times[key] = {"start_s": max(0, int(t["objective_s"] - m0)), "late_s": 0,
                           "objective_s": max(0, int(t["objective_s"] - m0)), "until_s": int(t["station_end_s"] - m0)}
         else:
             take, obj = t["takeoff_s"] - m0, t["objective_s"] - m0
             if take < 0 and obj <= 60:
-                continue                         # уже над объектом или возвращается - не ставится
-            n[enemy] += 1
-            key = f"{'enemy' if enemy else 'ai'}{n[enemy]}"
+                continue                         # уже над объектом (перевозка - садится) или возвращается - не ставится
+            if lift:
+                nl[enemy] += 1
+                key = f"{'enemy' if enemy else 'ai'}_lift{nl[enemy]}"
+            else:
+                n[enemy] += 1
+                key = f"{'enemy' if enemy else 'ai'}{n[enemy]}"
             if take < 0:                         # в воздухе на пути к объекту: точка на участке база - первая точка маршрута
                 base = state["airbases"][g["base"]]
                 first = g["route"][0]
@@ -635,7 +644,15 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for opt in _ai_options(ai):              # поведение ИИ из доктрины (группа подавления ПВО: не бросать атаку)
             fg.points[0].tasks.append(opt)
         obj = g["objective"]
-        if obj["kind"] in ("column", "site"):    # ударная группа: колонна, часть в бою, позиция ЗРК
+        land = airport
+        if obj["kind"] == "airlift":             # воздушная перевозка: перелёт и посадка на аэродроме назначения
+            dest = state["airbases"][obj["airbase"]]
+            start_p = g.get("_air_start") or base
+            alt = int(g.get("alt_m") or transit)
+            wp(model.lerp(start_p, obj["pos"], 0.5), alt, "Маршрут", keep_alt=True)
+            land = m.terrain.airports[dest["airport"]]
+            g["_dest"] = dest["name"]
+        elif obj["kind"] in ("column", "site"):    # ударная группа: колонна, часть в бою, позиция ЗРК
             ip, tgt = g["route"]
             wp(ip, transit, "ИПМ")
             w = wp(tgt, tdg["attack_alt_m_agl"], "Цель")
@@ -724,22 +741,26 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(ip, transit, "ИПМ")
             wp(tgt, transit, "Цель")
             wp(ip, transit, "Отход")
-        fg.land_at(airport)
+        fg.land_at(land)
         t = times[g["group"]]
+        when = (f"посадка в {g['_dest']} ~{t['objective_s'] // 60} мин" if g.get("_dest")
+                else f"в районе ~{t['objective_s'] // 60} мин")
         if g.get("_enemy"):                      # авиация противника - в разведсводку, не в состав группы
-            enemy_lines.append(f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, в районе ~{t['objective_s'] // 60} мин")
-            flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fg.units], "player": False, "side": side_g})
+            enemy_lines.append(f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, {when}")
+            flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fg.units], "player": False,
+                            "side": side_g, **({"ato": g["_ato"]} if g.get("_ato") else {})})
             continue
         (ai_lines if g.get("_ai") else lines).append(f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, "
                      + (("игрок, холодный старт" + (" (в базовом DCS тип только для ИИ - нужен мод)" if needs_mod else ""))
                         if is_player else f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин")
-                     + f", на объекте через ~{t['objective_s'] // 60} мин"
+                     + (f", {when}" if g.get("_dest") else f", на объекте через ~{t['objective_s'] // 60} мин")
                      + (f", переход на {transit} м (угроз ЗРК в коридоре нет)" if g.get("transit_alt_m_agl") else "")
                      + (f", ОПАЗДЫВАЕТ на {t['late_s'] // 60} мин" if t["late_s"] else "")
                      + (f", ожидание на рубеже пуска ({g['hold']['launch_km']:.0f} км от ЗРК) на {g['hold']['alt_m']} м до ~{g['hold']['until_s'] // 60} мин"
                         if g.get("hold") else "")
                      + f"; задача DCS {mt.name}, подвеска {cat or 'DCS по умолчанию'}")
-        flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fg.units], "player": is_player})
+        flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fg.units], "player": is_player,
+                        **({"ato": g["_ato"]} if g.get("_ato") else {})})
 
     # ---- хук дебрифа ----
     state["sortie"] = sortie

@@ -26,12 +26,14 @@ def _maneuver(state: dict) -> list[dict]:
 
 def power(state: dict, unit: dict) -> float:
     """Боевая сила: исправная техника с весами ролей (ОЦЕНКА, sim.role_weight стороны части); без снабжения -
-    x supply_power_factor."""
+    x supply_power_factor, при части нормы (supply_frac, logistics.supply) - пропорционально между ним и 1."""
     sim = _sim(state, unit["side"])
     w = sim.get("role_weight", {})
     roles = {c["type"]: c["role"] for c in unit["composition"]}
     p = sum(n * w.get(roles[t], 0.0) for t, n in model.alive_by_type(unit).items())
-    return p * (1.0 if unit.get("supply", 1.0) >= 1.0 else sim.get("supply_power_factor", 1.0))
+    frac = unit.get("supply_frac", 1.0 if unit.get("supply", 1.0) >= 1.0 else 0.0)
+    spf = sim.get("supply_power_factor", 1.0)
+    return p * (spf + (1.0 - spf) * frac)
 
 
 def _take_losses(unit: dict, frac: float) -> float:
@@ -195,6 +197,8 @@ def end_day(state: dict) -> list[str]:
               and model.strength(u) < _sim(state, u["side"])["combat_ineffective_below"]):
             u["state"] = "halted"
             lines.append(f"{u['name']}: потерял боеспособность ({model.strength(u):.0%}), остановился.")
+    from . import ato                            # ato -> planner -> logistics; план полётов суток - для перевозок и расхода авиации
+    ato.ensure(state)
     lines += logistics.supply(state)
     lines += battles(state)
     for side in model.SIDES:                     # оперативный уровень: задачи частям (ops.py)

@@ -34,16 +34,21 @@ def load_json(name: str | Path) -> dict:
 _AIRCRAFT: dict | None = None
 
 
-def cruise_kmh(type_name: str | None) -> float | None:
-    """Крейсерская скорость типа ЛА, км/ч (data/aircraft.json: V_opt из DCS через tools/dcs_cruise.py или ОЦЕНКА)."""
+def aircraft_info(type_name: str | None) -> dict:
+    """Запись типа ЛА из data/aircraft.json (cruise_kmh, cargo_t); нет - {}."""
     global _AIRCRAFT
     if _AIRCRAFT is None:
         try:
             _AIRCRAFT = load_json("aircraft.json").get("types", {})
         except (OSError, ValueError):
             _AIRCRAFT = {}
-    rec = _AIRCRAFT.get(type_name or "")
-    return float(rec["cruise_kmh"]) if rec and rec.get("cruise_kmh") else None
+    return _AIRCRAFT.get(type_name or "") or {}
+
+
+def cruise_kmh(type_name: str | None) -> float | None:
+    """Крейсерская скорость типа ЛА, км/ч (data/aircraft.json: V_opt из DCS через tools/dcs_cruise.py или ОЦЕНКА)."""
+    rec = aircraft_info(type_name)
+    return float(rec["cruise_kmh"]) if rec.get("cruise_kmh") else None
 
 
 def group_speed_kmh(state: dict, g: dict, tdef: dict) -> float:

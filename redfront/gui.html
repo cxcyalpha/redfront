@@ -109,6 +109,8 @@ dialog input,dialog select{width:100%}
 
 <script>
 const $ = s => document.querySelector(s);
+const stockTxt = o => o.stock == null ? "" :   // запас склада (logistics.supply); отрезан - только воздухом
+  ` · запас ${Math.round(o.stock * 100)}% (${o.stock_t} т)` + (o.cut ? " · отрезан от подвоза" : "");
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let INFO = null, ST = null, FILE = localStorage.getItem("rf_file") || "", TAB = "plan", SEL = 0;
 
@@ -194,7 +196,7 @@ function drawMap() {
     if (g.attached) continue;
     const r = g.cat === "sam" ? 5 : 5 + 9 * g.strength;
     const tip = `<b>${esc(g.name)}</b><br>${esc(stateRu(g))} · боеспособность ${Math.round(g.strength * 100)}%` +
-      (g.engaged.length ? `<br>бой с: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? "<br><b>без снабжения</b>" : "") +
+      (g.engaged.length ? `<br>бой с: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? `<br><b>снабжение ${Math.round(g.supply_frac * 100)}% нормы</b>` : "") +
       `<br><span style="color:#888">${esc(g.types)}</span>`;
     L.circleMarker(g.pos, {radius: r, color: g.state === "battle" ? "#fff" : "#000", weight: g.state === "battle" ? 2 : 1,
       fillColor: col(g.side), fillOpacity: g.state === "pending" ? .25 : g.state === "halted" ? .45 : .9,
@@ -203,7 +205,7 @@ function drawMap() {
   for (const o of ST.objects) {
     const ico = {depot: "⛽", bridge: "🌉", airfield: "✈", factory: "🏭"}[o.role];
     if (o.role === "airfield") continue;
-    const dmg = o.state === "lost" ? "потерян" : o.damage > 0 ? `повреждение ${Math.round(o.damage * 100)}%` : "цел";
+    const dmg = (o.state === "lost" ? "потерян" : o.damage > 0 ? `повреждение ${Math.round(o.damage * 100)}%` : "цел") + stockTxt(o);
     L.marker(o.pos, {icon: L.divIcon({className: "obj", html: `<span style="opacity:${o.checked ? 1 : .55};filter:${o.damage >= 1 || o.state === "lost" ? "grayscale(1)" : "none"}">${ico}</span>`, iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(o.name)}</b><br>${dmg}${o.checked ? "" : "<br>координаты по оценке"}`).addTo(layers.objects);
   }
@@ -264,7 +266,7 @@ function render() {
     const by = s => ST.ground.filter(g => g.side === s && !g.attached);
     p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` + by(s).map(g =>
       `<div class="item" data-pos="${g.pos}"><b>${esc(g.name)}</b>${bar(g.strength)} ${Math.round(g.strength * 100)}%
-       <div class="d">${esc(stateRu(g))}${g.engaged.length ? " · против: " + esc(g.engaged.join(", ")) : ""}${g.supply < 1 ? " · без снабжения" : ""}</div></div>`).join("")).join("");
+       <div class="d">${esc(stateRu(g))}${g.engaged.length ? " · против: " + esc(g.engaged.join(", ")) : ""}${g.supply < 1 ? " · снабжение " + Math.round(g.supply_frac * 100) + "% нормы" : ""}</div></div>`).join("")).join("");
     p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
   } else if (TAB === "air") {
     p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` +
@@ -288,13 +290,17 @@ function render() {
     $("#atoEnemy").onchange = e => { try { localStorage.setItem("rf_ato_enemy", e.target.checked ? "1" : "0"); } catch (x) {} render(); };
   } else if (TAB === "rear") {
     const unk = ST.objects.filter(o => !o.checked).length;
+    const SL = ST.supply_log || {};
+    const tyl = ["red", "blue"].filter(s => SL[s]).map(s => { const x = SL[s];
+      return `<div class="d"><b class="${s}">${s === "red" ? "Красные" : "Синие"}</b>: запас складов ${x.stock_t} т из ${x.cap_t} (${Math.round(x.stock_t / x.cap_t * 100)}%) · за сутки подвоз ${x.road_t} т, воздухом ${x.air_t} т, расход ${x.used_t} т${x.cut.length ? " · отрезано складов: " + x.cut.length : ""}</div>`; }).join("");
     p.innerHTML = `<div class="row" style="margin-bottom:8px">
         <button id="bProbe">Зонд карты</button><button id="bApply">Применить зонд</button>
         <button id="bRProbe">Зонд дорог</button><button id="bRApply">Применить дороги</button></div>
+      ${tyl ? `<h4>Тыл (прошлые сутки)</h4>${tyl}` : ""}
       <p class="meta" style="margin-top:0">${unk ? `По оценке: ${unk} объект(ов) - запустите «Зонд карты» в DCS, затем «Применить зонд».` : "Все цели тыла на объектах карты."}</p>
       <div class="row" style="margin-bottom:8px"><input id="miz" placeholder="путь к .miz с зонами Assign as... (ROLE/VALUE)" style="flex:1"><button id="bImport">Импорт</button></div>` +
       ST.objects.map(o => `<div class="item" data-pos="${o.pos}"><b>${{depot: "⛽", bridge: "🌉", airfield: "✈", factory: "🏭"}[o.role]} ${esc(o.name)}</b>
-        <div class="d">${o.state === "lost" ? "потерян" : o.state === "closed" ? "закрыт" : o.damage > 0 ? "повреждение " + Math.round(o.damage * 100) + "%" : "цел"}${o.checked ? "" : " · координаты по оценке"} · ${esc(o.id)}</div></div>`).join("");
+        <div class="d">${o.state === "lost" ? "потерян" : o.state === "closed" ? "закрыт" : o.damage > 0 ? "повреждение " + Math.round(o.damage * 100) + "%" : "цел"}${stockTxt(o)}${o.checked ? "" : " · координаты по оценке"} · ${esc(o.id)}</div></div>`).join("");
     $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
     $("#bApply").onclick = e => act("mapapply", {}, e.target);
     $("#bRProbe").onclick = e => act("roadsprobe", {}, e.target);

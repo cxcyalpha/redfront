@@ -160,6 +160,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             if t:
                 tasks.append(t)
             continue
+        if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
+            tasks += airlift_tasks(state, side, kind, tdef, performers)
+            continue
         tside = side if tdef["target"].get("side") == "own" else foe      # прикрытие своих войск - цель своя
         cat = tdef["target"]["category"]
         if cat in STRATEGIC:                     # объекты тыла противника: целы и не потеряны; мост - в тылу противника
@@ -266,6 +269,65 @@ def orbit_task(state: dict, side: str, kind: str, tdef: dict, performers: list[d
     return {"kind": kind, "side": side, "title": tdef["title"], "performer": perf["id"], "target": f"orbit_{side}_{kind}",
             "group_size": g["size"], "base": perf["base"], "target_pos": pos, "ip": pos, "distance_km": round(d, 1),
             "threats": [], "package": [g], "package_notes": "", "ai_only": True}
+
+
+def airlift_needs(state: dict, side: str, tdef: dict) -> list[tuple[dict, str]]:
+    """Куда везти: (склад, аэродром назначения) - свои склады с запасом ниже airlift_below, у которых есть свой
+    открытый аэродром не дальше airlift_depot_km; отрезанные от подвоза из тыла - первыми, затем по запасу."""
+    logistics.init_depots(state)
+    conn = logistics.road_connected(state, side)
+    out = []
+    for d in logistics.objects(state, "depot"):
+        if d["side"] != side or not logistics.supplies(d) or d.get("state") == "lost" or not d.get("place"):
+            continue
+        stock = logistics.depot_stock(d)
+        if stock >= tdef.get("airlift_below", 0.9):
+            continue
+        pos = state["places"][d["place"]]
+        bases = [(model.dist_km(b, pos), k) for k, b in state["airbases"].items()
+                 if b.get("side") == side and b.get("state", "open") in ("open", "active")]
+        bases = [x for x in bases if x[0] <= tdef.get("airlift_depot_km", 40)]
+        if bases:
+            out.append(((d["id"] in conn, stock), d, min(bases)[1]))
+    out.sort(key=lambda x: x[0])
+    return [(d, b) for _k, d, b in out]
+
+
+def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict]) -> list[dict]:
+    """Задачи воздушной перевозки (method airlift): по направлению (склад + аэродром назначения) - группа ближней
+    транспортной части, достающей до аэродрома (не с него же); части распределяются по направлениям."""
+    out = []
+    tasked: dict[str, int] = {}
+    s = tdef["strike"]
+    for d, dest in airlift_needs(state, side, tdef)[:tdef.get("airlift_max", 4)]:
+        dpos = state["airbases"][dest]
+        best = None
+        for r in performers:
+            if r["base"] == dest:
+                continue
+            km = model.dist_km(state["airbases"][r["base"]], dpos)
+            radius = strike_radius_km(r)
+            if radius is not None and km > radius:
+                continue
+            key = (tasked.get(r["id"], 0), km)
+            if best is None or key < best[0]:
+                best = (key, r)
+        if best is None:
+            continue
+        (_n, km), perf = best
+        tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        helo = model.category(perf) == "heli"
+        alt = tdef.get("helo_alt_m_agl", 150) if helo else tdef["transit_alt_m_agl"]
+        g = {"group": "strike", "title": s["title"], "performer": perf["id"],
+             "size": min(s["size"], logistics.available(state, perf)), "base": perf["base"], "route": [dict(dpos)],
+             "objective": {"kind": "airlift", "airbase": dest, "depot": d["id"], "pos": {"lat": dpos["lat"], "lon": dpos["lon"]}},
+             "maintask": s["maintask"], "loadout": [], "lead_min": 0, "ai": {}, "alt_m": alt}
+        out.append({"kind": kind, "side": side,
+                    "title": f"{tdef['title']}: {state['airbases'][perf['base']]['name']} -> {dpos['name']} ({d['name']})",
+                    "performer": perf["id"], "target": d["id"], "group_size": g["size"], "base": perf["base"],
+                    "target_pos": g["objective"]["pos"], "ip": g["objective"]["pos"], "distance_km": round(km, 1),
+                    "threats": [], "package": [g], "package_notes": "", "ai_only": True})
+    return out
 
 
 def choose(state: dict, n: int) -> dict:

@@ -367,7 +367,12 @@ def front_section(tmp: Path) -> None:
     d = model.dist_km(model.unit_pos(st, a), model.unit_pos(st, b))
     check(a["state"] == b["state"] == "battle" and a["engaged"] == ["blue_pz_bn_1"] and b["engaged"] == ["red_tp_1"] and d <= 5.0,
           f"конец дня 1: танковый полк встретил танковый батальон (выдвинут командованием на рубеж) - соприкосновение на {d:.1f} км, марш остановлен")
-    pw_a, pw_b = sim.power(st, a), sim.power(st, b)
+    import copy as _copy
+    from redfront import ato as _ato, logistics as _lg
+    pre = _copy.deepcopy(st)                     # сила - после снабжения суток (оно в end_day до боя)
+    _ato.ensure(pre)
+    _lg.supply(pre)
+    pw_a, pw_b = sim.power(pre, pre["units"][a["id"]]), sim.power(pre, pre["units"][b["id"]])
     sa, sb = model.strength(a), model.strength(b)
     sim.end_day(st)
     fa = min(0.5, 0.15 * pw_b / pw_a) * (0.6 if a.get("defending") else 1)
@@ -1343,7 +1348,8 @@ def helo_section(tmp: Path) -> None:
     for _ in range(3):
         sim.end_day(st)
     kinds = {side: collections.Counter(t["kind"] for t in planner.plan_side(st, side)[0]) for side in model.SIDES}
-    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for n in c.values()) and len(kinds["blue"]) >= 2,
+    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k != "airlift")   # перевозки - вне лимита
+          and len(kinds["blue"]) >= 2,
           f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
     planner.plan(st)
     n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "cas_helo"), None)
@@ -1745,9 +1751,96 @@ def core_section(tmp: Path) -> None:
 
 
 # Разделы теста по порядку: python tools/smoke_test.py - все; pytest (tests/test_smoke.py) - каждый отдельным тестом.
+def supply_section(tmp: Path) -> None:
+    """Снабжение в тоннах: запасы складов, подвоз из тыла, расход по состоянию, отрезанный склад, воздушные перевозки
+    транспортной авиацией (план полётов, миссия, сбитые борта), аэродром без снабжения."""
+    from redfront import ato, logistics
+    print("\n== снабжение и перевозки ==")
+    st = model.new_campaign("sup", sector="sector_germany.json", oob="oob_germany.json", seed=3)
+    U = st["units"]
+    logistics.init_depots(st)
+    d = U["red_depot_stendal"]
+    u = next(x for x in U.values() if model.category(x) == "ground" and x["side"] == "red" and "route" in x)
+    check(d["cap_t"] > 0 and d["stock_t"] == d["cap_t"]
+          and abs(logistics.demand_t(st, u, "battle") - 5 * logistics.demand_t(st, u, "defend")) < 1e-6,
+          f"склад - запас в тоннах ({d['cap_t']} т), расход части в бою впятеро больше, чем в обороне "
+          f"({logistics.demand_t(st, u, 'battle'):.0f} / {logistics.demand_t(st, u, 'defend'):.0f} т в сутки)")
+    d["damage"] = 0.5
+    logistics.supply(st)
+    check(d["stock_t"] <= d["cap_t"] * 0.5 + 1e-6, f"повреждение склада 50% уничтожает запас сверх половины ёмкости ({d['stock_t']:.0f} т)")
+    # отрезанный склад: вокруг Галле - противник (аэродром Мерзебург рядом - туда можно возить воздухом)
+    cut = U["red_depot_halle"]
+    for a_, b_ in st["links"]:
+        if cut["place"] in (a_, b_):
+            other = b_ if a_ == cut["place"] else a_
+            st["places"][other]["side"] = "blue"
+    cut["stock_t"] = cut["cap_t"] * 0.2
+    conn = logistics.road_connected(st, "red")
+    before = cut["stock_t"]
+    lines = logistics.supply(st)
+    check(cut["id"] not in conn and cut["stock_t"] <= before and any("отрезан" in ln for ln in lines),
+          "склад в окружении (Галле) - отрезан от подвоза из тыла, запас не пополняется")
+    tdef = model.doctrine(st, "red")["tasks"]["airlift"]
+    needs = [x[0]["id"] for x in planner.airlift_needs(st, "red", tdef)]
+    st["ato"] = None
+    a = ato.ensure(st)
+    lifts = [e for e in a["entries"] if e["kind"] == "airlift" and e["side"] == "red"]
+    to_cut = [e for e in lifts if e["task"]["package"][0]["objective"]["depot"] == cut["id"]]
+    check(needs and needs[0] == cut["id"] and to_cut,
+          f"перевозки: отрезанный склад - первый в очереди, рейсов к нему {len(to_cut)} "
+          f"({to_cut[0]['title'] if to_cut else '-'})")
+    g = to_cut[0]["task"]["package"][0]
+    cargo = logistics.airlift_cargo_t(st, U[g["performer"]])
+    a["lost"] = {to_cut[0]["id"]: 1}             # один борт первого рейса сбит в миссии
+    for e in lifts:
+        if e not in to_cut:
+            a["entries"].remove(e)
+    del a["entries"][a["entries"].index(to_cut[0]) + 1:]   # вылеты после первого рейса - не нужны для подсчёта
+    a["entries"] = [e for e in a["entries"] if e["kind"] == "airlift"]
+    before = cut["stock_t"]
+    logistics.supply(st)
+    got = st["supply_log"]["red"]["air_t"]
+    check(abs(got - (g["size"] - 1) * cargo) < 1.0,
+          f"рейс довёз {got} т ({g['size']} x {U[g['performer']]['type']}, {cargo} т борт; один сбит - его груз не дошёл)")
+    # аэродром без снабжения - меньше самолётов к вылету
+    perf = next(x for x in U.values() if x.get("role") == "fighter" and x["side"] == "red")
+    full = logistics.available(st, perf)
+    st["airbases"][perf["base"]]["supply"] = 0.0
+    check(logistics.available(st, perf) == int(full * model.doctrine(st, "red")["sim"]["unsupplied"]),
+          f"аэродром без снабжения: к вылету {logistics.available(st, perf)} из {full}")
+    st["airbases"][perf["base"]]["supply"] = 1.0
+    # миссия: рейс перевозки в окне - садится на аэродроме назначения; в журнале вылетов - номер рейса плана
+    st = model.new_campaign("sup2", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    logistics.init_depots(st)
+    st["units"]["red_depot_stendal"]["stock_t"] *= 0.3
+    st["units"]["blue_depot_han"]["stock_t"] *= 0.2
+    planner.plan(st)
+    found = None
+    for i in range(1, len(st["tasks"]) + 1):
+        man = build.build(st, tmp / "lift.miz", task_no=i)
+        st["manifest"] = None
+        lf = [f for f in man["flights"] if "_lift" in f["group"]]
+        if lf:
+            found = (i, lf[0])
+            break
+    ok = False
+    if found:
+        m = dcs.Mission(Germany())
+        m.load_file(str(tmp / "lift.miz"))
+        e = next(e for e in st["ato"]["entries"] if e["id"] == found[1]["ato"])
+        dest = st["airbases"][e["task"]["package"][0]["objective"]["airbase"]]["airport"]
+        grp = next(g for c in m.coalition.values() for cn in c.countries.values()
+                   for g in list(cn.helicopter_group) + list(cn.plane_group) if g.name.startswith(found[1]["performer"] + " "))
+        ok = grp.points[-1].type == "Land" and grp.points[-1].airdrome_id == m.terrain.airports[dest].id \
+            and str(grp.task) == "Transport"
+    check(ok, f"миссия: рейс перевозки в окне задачи {found[0] if found else '-'} - взлёт со своей базы, посадка на "
+              f"аэродроме назначения, задача DCS Transport; в журнале вылетов - номер рейса плана")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
-            gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section]
+            gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
+            supply_section]
 
 
 def main() -> int:

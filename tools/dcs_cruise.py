@@ -80,7 +80,7 @@ def main(argv: list[str]) -> int:
         v, f = found[dcs_id]
         kmh = round(v * 3.6)
         old = types.get(cls, {}).get("cruise_kmh")
-        types[cls] = {"cruise_kmh": kmh, "source": f"DCS V_opt {v:g} м/с ({Path(f).name})"}
+        types[cls] = {**types.get(cls, {}), "cruise_kmh": kmh, "source": f"DCS V_opt {v:g} м/с ({Path(f).name})"}   # cargo_t и др. - как были
         changed.append(f"{cls} ({dcs_id}): {old} -> {kmh} км/ч")
     p.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Найдено V_opt у {len(found)} ЛА; обновлено {len(changed)} типов в {p}:")

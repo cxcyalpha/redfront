@@ -6,7 +6,8 @@
 ставится, только если у части хватает самолётов на всё время вылета плюс подготовку к повторному (turnaround_min
 раздела sim доктрины) - иначе позже, шагом SLOT_MIN, до конца лётного дня; не влезает - не ставится.
 Дежурства (method orbit: ДРЛО, заправщик) - сменами shift_h часов на весь лётный день, у каждой смены свой вылет;
-не хватает самолётов - в дежурстве разрыв.
+не хватает самолётов - в дежурстве разрыв. Воздушные перевозки (method airlift) - sorties_per_day рейсов на направление;
+груз довозят в конце суток (logistics.supply), минус борта, сбитые в миссии (ato['lost']).
 
 Игрок выбирает вылет своей стороны (planner.plan -> state['tasks'], по времени); миссия - окно суток вокруг него
 (build): вылеты обеих сторон, которые в это окно в воздухе, попадают в миссию - кто уже в воздухе, стоит на своём
@@ -104,7 +105,7 @@ def build(state: dict) -> dict:
         tasks, _why = planner.plan_side(state, side, max_tasks=ATO_MAX_TASKS, per_kind=ATO_PER_KIND)
         rnd = model.rng(state, f"ato-{side}")
         # дежурства - первыми: непрерывное покрытие (ДРЛО) важнее очередного удара
-        for t in (t for t in tasks if t.get("ai_only")):
+        for t in (t for t in tasks if t.get("ai_only") and doc["tasks"][t["kind"]].get("method") == "orbit"):
             tdef = doc["tasks"][t["kind"]]
             g = t["package"][0]
             transit = model.dist_km(state["airbases"][g["base"]], g["route"][0]) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
@@ -119,6 +120,26 @@ def build(state: dict) -> dict:
                     entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
                                     "title": t["title"], "task": t, "tot_s": s, "times": times, "ai_only": True})
                 s = e
+        # воздушные перевозки: sorties_per_day рейсов на направление, равномерно по лётному дню; рейс - до посадки
+        # на аэродроме назначения, самолёты заняты ещё на обратный перелёт и подготовку
+        for t in (t for t in tasks if t.get("ai_only") and doc["tasks"][t["kind"]].get("method") == "airlift"):
+            tdef = doc["tasks"][t["kind"]]
+            g = t["package"][0]
+            if g["size"] <= 0:
+                continue
+            fly = t["distance_km"] * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
+            n = tdef.get("sorties_per_day", 2)
+            for i in range(n):
+                tot = max(w0 + fly, w0 + (w1 - w0) * (i + 0.5) / n + (rnd.uniform(-0.3, 0.3) * (w1 - w0) / n if rnd else 0))
+                while tot <= w1:
+                    need = {g["performer"]: (tot - fly, tot + fly + turn_s, g["size"])}
+                    if pool.fits(need):
+                        pool.book(need)
+                        times = {g["group"]: {"takeoff_s": tot - fly, "objective_s": tot, "land_s": tot}}
+                        entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
+                                        "title": t["title"], "task": t, "tot_s": tot, "times": times, "ai_only": True})
+                        break
+                    tot += SLOT_MIN * 60
         reg = [t for t in tasks if not t.get("ai_only")]
         span = w1 - w0
         for i, t in enumerate(reg):

@@ -116,6 +116,9 @@ def apply(state: dict, data: dict) -> list[str]:
         if lost_ac:
             perf["count"] = max(0, perf["count"] - len(lost_ac))
             lines.append(f"{perf['name']} ({fl['group']}): потеряно {len(lost_ac)} ЛА; в строю {perf['count']}.")
+            if fl.get("ato") and state.get("ato"):   # вылет плана полётов: сбитые борта перевозки груз не довозят
+                lost_by = state["ato"].setdefault("lost", {})
+                lost_by[fl["ato"]] = lost_by.get(fl["ato"], 0) + len(lost_ac)
     if not data.get("mission_ended"):
         lines.append("Внимание: миссия не была завершена штатно - применён последний сохранённый срез.")
     if not lines:
