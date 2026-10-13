@@ -84,6 +84,62 @@
     "MiG_25RBT": {
       "cruise_kmh": 1000,
       "source": "ОЦЕНКА"
+    },
+    "Su_24MR": {
+      "cruise_kmh": 900,
+      "source": "ОЦЕНКА"
+    },
+    "MiG_29A": {
+      "cruise_kmh": 850,
+      "source": "ОЦЕНКА"
+    },
+    "Tornado_GR4": {
+      "cruise_kmh": 870,
+      "source": "ОЦЕНКА"
+    },
+    "FA_18C_hornet": {
+      "cruise_kmh": 850,
+      "source": "ОЦЕНКА"
+    },
+    "L_39ZA": {
+      "cruise_kmh": 650,
+      "source": "ОЦЕНКА"
+    },
+    "An_26B": {
+      "cruise_kmh": 430,
+      "source": "ОЦЕНКА"
+    },
+    "Yak_40": {
+      "cruise_kmh": 500,
+      "source": "ОЦЕНКА"
+    },
+    "C_130": {
+      "cruise_kmh": 520,
+      "source": "ОЦЕНКА"
+    },
+    "Mi_8MT": {
+      "cruise_kmh": 220,
+      "source": "ОЦЕНКА"
+    },
+    "Mi_26": {
+      "cruise_kmh": 230,
+      "source": "ОЦЕНКА"
+    },
+    "CH_47D": {
+      "cruise_kmh": 240,
+      "source": "ОЦЕНКА"
+    },
+    "UH_1H": {
+      "cruise_kmh": 180,
+      "source": "ОЦЕНКА"
+    },
+    "UH_60A": {
+      "cruise_kmh": 240,
+      "source": "ОЦЕНКА"
+    },
+    "CH_53E": {
+      "cruise_kmh": 250,
+      "source": "ОЦЕНКА"
     }
   }
 }

@@ -1375,8 +1375,34 @@ def presets_section(tmp: Path) -> None:
           "авиация по годам: 85-й гв. иап МиГ-23 -> МиГ-29 (1986), Бранд: Су-24М -> 911 апиб МиГ-27К (7.1989), "
           "368 оштап с 12.1988, 357 оштап в 1987 почти весь в Афганистане")
     gci = {f: sorted(u["id"] for u in st["units"].values() if u["role"] == "gci") for f, st in camp.items()}
-    check(not gci["oob_germany_1985.json"] and len(gci["oob_germany.json"]) == 7,
-          f"КРУ только где МиГ-29: 1985 - нет, 1987 - {len(gci['oob_germany_1987.json'])}, 1989 - {len(gci['oob_germany.json'])}")
+    check(not gci["oob_germany_1985.json"] and len(gci["oob_germany.json"]) == 8 and "red_gci_stendal" in gci["oob_germany.json"],
+          f"КРУ только где МиГ-29: 1985 - нет, 1987 - {len(gci['oob_germany_1987.json'])}, 1989 - {len(gci['oob_germany.json'])} "
+          "(в т.ч. Штендаль - МиГ-29 JG-3, перебазированные из Прешена)")
+    oob89 = json.loads((model.DATA / "oob_germany.json").read_text(encoding="utf-8"))
+    st89 = camp["oob_germany.json"]
+    air = [u for u in st89["units"].values() if model.category(u) in ("air", "heli")]
+    reloc = oob89["_relocated"]
+    check(all(u["base"] in st89["airbases"] for u in air) and not any("OFF:" in u["base"] for u in air)
+          and len(reloc) >= 25 and all(st89["units"][k]["base"] == v["to"].lower().replace(" ", "_") for k, v in reloc.items())
+          and y89["r336obvp"]["base"] == y89["r336obvp_8"]["base"] and y89["nva_jg3"]["base"] == y89["nva_jg3_21"]["base"]
+          and "перебазирован" in y89["b_raf_bruggen"]["source"],
+          f"базы вне карты: перебазировано частей - {len(reloc)}, на аэродромы карты своей стороны (подразделения полка - "
+          f"вместе), ни одной базы вне карты; Брюгген -> {reloc['b_raf_bruggen']['to']}, Прешен -> {reloc['nva_jg3']['to']}")
+    per_base: dict[str, int] = {}                # боевые реактивные части по аэродромам, все годы (части - один раз)
+    for uid, u in {u["id"]: u for st in camp.values() for u in st["units"].values() if u.get("base")}.items():
+        if u["role"] not in ("attack_helo", "transport_helo", "transport", "awacs", "tanker"):
+            per_base[u["base"]] = per_base.get(u["base"], 0) + 1
+    empty_before = [b for b in ("cochstedt", "sperenberg", "briest", "wunstorf", "fassberg", "sembach", "nordholz", "kiel")
+                    if not per_base.get(b)]
+    check(not empty_before and max(per_base.values()) <= 4,
+          f"пустующие аэродромы заняты (Кохштедт, Шперенберг, Бриест, Вунсторф, Фасберг, Зембах, Нордхольц, Киль), "
+          f"не больше 4 боевых частей на аэродроме за все годы (max {max(per_base.values())})")
+    trans = [u for u in air if u["role"] in ("transport", "transport_helo")]
+    from redfront import ato as _ato
+    a = _ato.build(st89)
+    tasked = {g["performer"] for e in a["entries"] for g in e["task"]["package"]}
+    check({u["side"] for u in trans} == {"red", "blue"} and len(trans) >= 15 and not tasked & {u["id"] for u in trans},
+          f"транспорт: {len(trans)} частей (самолёты и вертолёты обеих сторон) в составе сил, задач пока не получают")
     root = tmp / "presets_gui"
     root.mkdir(exist_ok=True)
     app = gui.App(root, tmp / "home_presets")
