@@ -340,4 +340,21 @@ def load(path: Path) -> dict:
     st = json.loads(Path(path).read_text(encoding="utf-8"))
     if st.get("version") != STATE_VERSION:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
+    sync_ad_sites(st)
     return st
+
+
+def sync_ad_sites(st: dict) -> None:
+    """Позиции объектовой ПВО (fixed) - из файла сектора: исправленные правила размещения доходят и до уже созданных
+    кампаний. Объектовая ПВО позицию в модели не меняет, так что расхождение - только от правки сектора."""
+    fixed = [u for u in st.get("units", {}).values() if u.get("fixed")]
+    if not fixed or not st.get("sector"):
+        return
+    try:
+        sites = {x["id"]: x for x in load_json(st["sector"]).get("ad_sites", [])}
+    except (OSError, ValueError):
+        return
+    for u in fixed:
+        x = sites.get(u["id"])
+        if x:
+            u["pos"] = {"lat": x["lat"], "lon": x["lon"]}
