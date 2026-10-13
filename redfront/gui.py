@@ -18,8 +18,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import build as build_mod
-from . import debrief, logistics, mapobj, model, ops, planner, roads, sim
+from . import build as build_mod, materialize
+from . import ato, debrief, logistics, mapobj, model, ops, planner, roads, sim
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -105,6 +105,8 @@ def view(st: dict) -> dict:
     for i, t in enumerate(st.get("tasks") or [], 1):
         base = st["airbases"].get(t["base"], {})
         tasks.append({"n": i, "title": t["title"], "km": round(t["distance_km"]), "base": base.get("name", t["base"]),
+                      "time": (f"взлёт {ato.hhmm(t['takeoff_s'])}, на объекте {ato.hhmm(t['tot_s'])}"
+                               if t.get("tot_s") is not None else ""),
                       "base_pos": _ll(base) if "lat" in base else None,
                       "ip": _ll(t["ip"]) if t.get("ip") else None,
                       "target": _ll(t["target_pos"]) if t.get("target_pos") else None,
@@ -119,6 +121,7 @@ def view(st: dict) -> dict:
         "name": st["name"], "day": st["day"], "sortie": st["sortie"], "side": st["player_side"],
         "date": st.get("date"), "scenario": sc.get("title") or sc.get("variant"), "seed": sc.get("seed"),
         "randomness": st["settings"].get("randomness", True),
+        "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open")}
                      for k, b in st["airbases"].items()],
@@ -212,13 +215,17 @@ class App:
             if not planner.plan(st):
                 lines.append(f"Задач нет: {st['task_reason']}")
             else:
-                lines.append(f"План дня {st['day']}: задач {len(st['tasks'])}.")
+                lines.append(f"План полётов на сутки {st['day']}: своих вылетов для игрока {len(st['tasks'])}"
+                             + (f" (после {ato.hhmm(st['clock_s'])})" if st.get("clock_s") else "") + ".")
         elif action == "build":
             if not st.get("tasks"):
                 planner.plan(st)
             out = missions_dir(self.home) / f"redfront_{p.stem}_day{st['day']}.miz"
+            if str(req.get("budget") or "").strip():
+                st["settings"]["mission_budget"] = max(0, int(req["budget"]))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1))
-            lines.append(f"Миссия: {man['file']}")
+            n = sum(len(g["vehicles"]) for g in man["ground"])
+            lines.append(f"Миссия: {man['file']} (наземных машин {n}, бюджет {st['settings'].get('mission_budget', materialize.MISSION_BUDGET)})")
             lines += man["package_lines"]
         elif action == "debrief":
             f = debrief.find_file(st, self.home)

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import datetime
 import math
-import random
 from pathlib import Path
 
 from dcs import Mission, task
@@ -20,6 +19,7 @@ from dcs.triggers import TriggerStart
 from dcs.unit import Skill
 
 from . import dcstypes, materialize, model, planner
+from .ato import MISSION_LEN_S as ATO_LEN_S
 
 LUA = Path(__file__).parent / "lua" / "debrief_hook.lua"
 COLUMN_LUA = Path(__file__).parent / "lua" / "column_road.lua"
@@ -316,6 +316,7 @@ def _set_player(unit) -> bool:
 
 SEARCH_ORBIT_ALT_M = 600   # ОЦЕНКА: высота круга над районом поиска, если в доктрине нет search_alt_m (абсолютная; рельеф ~0-100 м)
 RUNWAY_GAP_S = 30         # ОЦЕНКА: интервал взлёта групп ИИ с полосы одного аэродрома
+AIR_START_MIN_M = 500      # ОЦЕНКА: высота появления группы, которая к началу миссии уже в воздухе
 AI_LOW_MIN_M = 100         # ОЦЕНКА: точки маршрута групп ИИ не ниже этого (у игрока - как в доктрине, 50 м)
 LOW_ENTRY_KM = 20         # ОЦЕНКА: группа подавления ПВО снижается до предельно малой за столько км до зоны ЗРК
 EGRESS_KM = 15             # ОЦЕНКА: точка ухода группы подавления ПВО - на столько км от рубежа пуска в сторону базы
@@ -381,70 +382,74 @@ def _path_km(base: dict, route: list[dict]) -> float:
 
 
 AI_FLIGHTS = {"own": 3, "enemy": 4}   # ОЦЕНКА: сколько групп ИИ по плану дня в миссии - своих (кроме пакета игрока) и противника
-ENEMY_WINDOW_S = 300       # ОЦЕНКА: группы с объектом рядом с объектом игрока - в пределах +-5 мин от его удара
-ENEMY_RADIUS_KM = 40       # ОЦЕНКА: "рядом с объектом игрока"
-MISSION_WINDOW_S = (10 * 60, 60 * 60)   # ОЦЕНКА: остальные группы дня - на объекте между 10-й и 60-й минутой миссии
 
 
-def air_activity(state: dict, tk: dict, times: dict, sortie: int) -> list[dict]:
-    """Воздушная война в миссии: план дня обеих сторон (planner.plan_side). Свои задачи, кроме пакета игрока, летит ИИ
-    (не больше AI_FLIGHTS["own"] групп), задачи противника - его ИИ (AI_FLIGHTS["enemy"]), по всему театру:
-    группы с объектом рядом с объектом игрока - вокруг его удара, остальные - в окне миссии. Самолёты эскадрилий
-    не расходуются сверх наличия (с учётом пакета игрока). Летит ударная группа задачи (без групп обеспечения).
-    Время - со случайным разбросом, повторяемым для вылета."""
+def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> list[dict]:
+    """Воздушная война в миссии - по плану полётов на сутки (ato.py) обеих сторон: вылеты, которые в окне миссии
+    [m0, m0 + ato.MISSION_LEN_S] в воздухе. Свои (кроме пакета игрока) - не больше AI_FLIGHTS["own"] групп, противника -
+    AI_FLIGHTS["enemy"], ближние по времени и месту к удару игрока первыми; дежурства (ДРЛО, заправщик) - все, вне лимита.
+    Кто к началу миссии уже в воздухе на пути к объекту - стоит на своём маршруте (в воздухе), кто позже - взлетает по
+    расписанию, кто уже возвращается - в миссию не ставится. Летит ударная группа задачи (без групп обеспечения).
+    Самолёты эскадрилий не расходуются сверх наличия (с учётом пакета игрока). Время - секунды от начала миссии."""
+    from . import ato
     if "strike" not in times:
         return []
-    rnd = random.Random(f"{state['campaign_id']}-{sortie}")
-    tot = times["strike"]["objective_s"]
+    a = ato.ensure(state)
+    t0, t1 = m0, m0 + ato.MISSION_LEN_S
+    tot = m0 + times["strike"]["objective_s"]
     used: dict[str, int] = {}
     for g in tk["package"]:
         used[g["performer"]] = used.get(g["performer"], 0) + g["size"]
+    def rank(e):
+        t = e["times"]["strike"]
+        near_km = model.dist_km(e["task"]["target_pos"], tk["target_pos"])
+        return (not e["ai_only"], abs(t["objective_s"] - tot) / 60 + near_km / 10)
     out = []
-    for side, limit, enemy in ((tk["side"], AI_FLIGHTS["own"], False), (model.enemy(tk["side"]), AI_FLIGHTS["enemy"], True)):
-        tasks, _ = planner.plan_side(state, side)
-        tasks.sort(key=lambda t: not t.get("ai_only"))   # дежурство - первым: вне лимита групп, самолёты - до ударов
-        n = 0
-        for t in tasks:
-            if t.get("ai_only"):                     # дежурство (ДРЛО, заправщик): всю миссию в зоне, вне лимита групп
-                g = dict(t["package"][0])
-                perf = state["units"][g["performer"]]
-                if used.get(perf["id"], 0) + g["size"] > perf.get("count", 0) or g["size"] <= 0:
-                    continue
-                used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
-                key = f"{'enemy' if enemy else 'ai'}_{t['kind']}"
-                g.update({"group": key, "_tdef": model.doctrine(state, side)["tasks"][t["kind"]], "_side": side,
-                          "_enemy": enemy, "_ai": True, "title": f"{'противник' if enemy else 'ИИ'}: {t['title']}"})
-                times[key] = {"start_s": 0, "late_s": 0, "objective_s": 0}
-                out.append(g)
-                continue
-            if n >= limit:
-                break
-            if not enemy and t["kind"] == tk["kind"] and t["target"] == tk["target"]:
-                continue                             # это задача игрока
-            g = dict(t["package"][0])
-            perf = state["units"][g["performer"]]
-            if used.get(perf["id"], 0) + g["size"] > perf.get("count", 0):
-                continue
-            used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
-            tdg = model.doctrine(state, side)["tasks"][t["kind"]]
-            n += 1
-            g.update({"group": f"{'enemy' if enemy else 'ai'}{n}", "_tdef": tdg, "_side": side, "_enemy": enemy, "_ai": True,
-                      "title": f"{'противник' if enemy else 'ИИ'}: {t['title']}"})
-            fly_s = _path_km(state["airbases"][g["base"]], g["route"]) * 1000 / (tdg["speed_kmh"] / 3.6)
-            near = model.dist_km(t["target_pos"], tk["target_pos"]) <= ENEMY_RADIUS_KM
-            obj_s = tot + rnd.randint(-ENEMY_WINDOW_S, ENEMY_WINDOW_S) if near else rnd.randint(*MISSION_WINDOW_S)
-            times[g["group"]] = {"start_s": max(0, int(obj_s - fly_s)), "late_s": max(0, int(fly_s - obj_s)), "objective_s": int(obj_s)}
-            out.append(g)
+    n = {False: 0, True: 0}
+    for e in sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank):
+        enemy = e["side"] != tk["side"]
+        if not e["ai_only"] and n[enemy] >= AI_FLIGHTS["enemy" if enemy else "own"]:
+            continue
+        g = dict(e["task"]["package"][0])
+        perf = state["units"][g["performer"]]
+        if g["size"] <= 0 or used.get(perf["id"], 0) + g["size"] > perf.get("count", 0):
+            continue
+        tdg = model.doctrine(state, e["side"])["tasks"][e["kind"]]
+        t = e["times"][g["group"]]
+        if e["ai_only"]:
+            key = f"{'enemy' if enemy else 'ai'}_{e['kind']}_{ato.hhmm(e['tot_s']).replace(':', '')}"
+            times[key] = {"start_s": max(0, int(t["objective_s"] - m0)), "late_s": 0,
+                          "objective_s": max(0, int(t["objective_s"] - m0)), "until_s": int(t["station_end_s"] - m0)}
+        else:
+            take, obj = t["takeoff_s"] - m0, t["objective_s"] - m0
+            if take < 0 and obj <= 60:
+                continue                         # уже над объектом или возвращается - не ставится
+            n[enemy] += 1
+            key = f"{'enemy' if enemy else 'ai'}{n[enemy]}"
+            if take < 0:                         # в воздухе на пути к объекту: точка на участке база - первая точка маршрута
+                base = state["airbases"][g["base"]]
+                first = g["route"][0]
+                leg = model.dist_km(base, first)
+                done_km = -take * tdg["speed_kmh"] / 3600
+                g["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
+            times[key] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
+        used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
+        g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
+                  "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"]})
+        out.append(g)
     return out
 
 
-def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str, sortie: int, spd_kmh: float):
-    """Группа дежурства (ДРЛО, заправщик): в воздухе в зоне с начала миссии, круг до конца миссии, задача DCS -
-    AWACS / Tanker. Потери - через дебриф, как у всех групп (flights)."""
+def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str, sortie: int, spd_kmh: float,
+                t: dict | None = None, airport=None):
+    """Смена дежурства (ДРЛО, заправщик) по плану полётов: в воздухе в зоне с начала смены (или с начала миссии, если
+    смена уже идёт), "ипподром" до конца смены, затем посадка; задача DCS - AWACS / Tanker. Смена, начинающаяся в
+    миссии, появляется в зоне в своё время. Потери - через дебриф, как у всех групп (flights)."""
     alt = int(g.get("alt_m") or 8000)
     pos = _pt(m, g["route"][0])
     fg = m.flight_group_inflight(_country(m, state, side), f"{perf['id']} {g['group']} {sortie}", ac, pos, alt,
                                  speed=int(spd_kmh), maintask=mt, group_size=g["size"])
+    fg.start_time = int((t or {}).get("start_s", 0))
     for u in fg.units:
         u.skill = Skill.High
     w = fg.points[0]
@@ -452,8 +457,13 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
     want = {"AWACS": task.AWACSTaskAction, "Refueling": task.Tanker}.get(role)
     if want and not any(isinstance(t, want) for t in w.tasks):   # pydcs обычно ставит её сам по основной задаче
         w.tasks.append(want())
-    w.tasks.append(task.OrbitAction(altitude=alt, speed=int(spd_kmh), pattern=task.OrbitAction.OrbitPattern.RaceTrack))
+    orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=int(spd_kmh), pattern=task.OrbitAction.OrbitPattern.RaceTrack))
+    if t and t.get("until_s") is not None:
+        orbit.stop_after_time(int(t["until_s"]))   # конец смены - домой (смену сменяет следующий вылет плана)
+    w.tasks.append(orbit)
     fg.add_waypoint(Point(pos.x + 40_000, pos.y, m.terrain), alt, speed=int(spd_kmh))   # второй конец "ипподрома"
+    if airport is not None:
+        fg.land_at(airport)
     return fg
 
 
@@ -523,12 +533,15 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 g["route"] = [planner.hold_point(state, state["units"][g["objective"]["units"][0]], base, support[g["support_id"]],
                                                  times[g["group"]]["objective_s"])]
         times = timeline(tdef, state, pkg, fly)
+    # время суток миссии: удар игрока - в своё время по плану полётов (ato); задача без него - start_hour (как раньше)
+    m0 = (tk["tot_s"] - times["strike"]["objective_s"]) if tk.get("tot_s") is not None else state["start_hour"] * 3600
+    m.start_time = datetime.datetime(y, mo, d) + datetime.timedelta(days=state["day"] - 1, seconds=int(m0))
     sam_ids = list(dict.fromkeys(tk["threats"] + [g["unit"] for g in groups if model.category(state["units"][g["unit"]]) == "sam"]))
     circles = threat_circles(state, sam_ids)
     runway_slots: set = set()
     spd = tdef["speed_kmh"]
     flights, lines, enemy_lines, ai_lines = [], [], [], []
-    enemy = air_activity(state, tk, times, sortie)
+    enemy = air_activity(state, tk, times, sortie, m0)
     for g in pkg + enemy:
         tdg = g.get("_tdef") or tdef             # группы противника - по его пакету доктрины
         side_g = g.get("_side", tk["side"])
@@ -542,18 +555,26 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         helo = model.category(perf) == "heli"    # вертолёты: предельно малая высота и для ИИ
         mt = _maintask(ac, g["maintask"])
         if g["objective"]["kind"] == "orbit":    # дежурство: к началу миссии уже в зоне (в воздухе), до конца миссии
-            orbit_group(m, state, g, perf, ac, mt, side_g, sortie, spd)
-            line = f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, в зоне с начала миссии"
+            t_ = times[g["group"]]
+            orbit_group(m, state, g, perf, ac, mt, side_g, sortie, spd, t_, airport)
+            line = (f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, в зоне "
+                    + (f"с ~{t_['start_s'] // 60} мин миссии" if t_["start_s"] else "с начала миссии")
+                    + f" до ~{t_['until_s'] // 60} мин")
             (enemy_lines if g.get("_enemy") else ai_lines).append(line)
             fl = m.find_group(f"{perf['id']} {g['group']} {sortie}")
             flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fl.units], "player": False,
                             **({"side": side_g} if g.get("_enemy") else {})})
             continue
-        fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
-                                         maintask=mt, start_type=StartType.Cold if g["group"] == fly else StartType.Runway,
-                                         group_size=g["size"])
+        if g.get("_air_start"):                  # по плану полётов к началу миссии уже в воздухе, на пути к объекту
+            fg = m.flight_group_inflight(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                                         _pt(m, g["_air_start"]), max(int(transit), AIR_START_MIN_M), speed=int(spd),
+                                         maintask=mt, group_size=g["size"])
+        else:
+            fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                                             maintask=mt, start_type=StartType.Cold if g["group"] == fly else StartType.Runway,
+                                             group_size=g["size"])
         st_s = times[g["group"]]["start_s"]
-        if g["group"] != fly:                    # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
+        if g["group"] != fly and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
             while (base["airport"], st_s) in runway_slots:
                 st_s += RUNWAY_GAP_S
             runway_slots.add((base["airport"], st_s))
@@ -752,6 +773,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     manifest = {
         "sortie": state["sortie"],
         "file": str(out_path),
+        "ato_id": tk.get("ato_id"),                      # вылет плана полётов, который летит игрок
+        "start_s": int(m0),                              # начало миссии, с от полуночи суток кампании
+        "end_s": int(m0) + ATO_LEN_S,                    # окно миссии (после дебрифа - часы кампании)
         "flights": flights,
         "package_lines": lines,
         "enemy_lines": enemy_lines,                      # авиация противника в миссии (в брифинг не выводится)

@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import copy
 import math
 
 from . import dcstypes, logistics, model, ops
@@ -118,21 +119,31 @@ def plan(state: dict) -> dict | None:
     доктрины (ОЦЕНКА), внутри - ближние цели первыми. Задачи - варианты вылета: игрок выбирает одну (build --task N),
     авиация на них считается независимо. Возвращает первую (она же state['task']); нет задач - None и причина
     в state['task_reason']."""
+    from . import ato                            # ato импортирует planner
     state["task"] = None
     state["tasks"] = []
-    tasks, reason = plan_side(state, state["player_side"])
-    doc = model.doctrine(state, state["player_side"])["tasks"]
-    tasks = [t for t in tasks if not doc[t["kind"]].get("ai_only")]   # дежурство ДРЛО, заправщика - только ИИ
+    a = ato.ensure(state)
+    clock = state.get("clock_s") or 0
+    tasks = []
+    for e in a["entries"]:                       # вылеты своей стороны по времени; дежурства (ДРЛО, заправщик) - только ИИ
+        if e["side"] != state["player_side"] or e["ai_only"] or e["id"] in a["done"]:
+            continue
+        t = e["times"]["strike"]
+        if t["takeoff_s"] < clock:
+            continue
+        tasks.append({**copy.deepcopy(e["task"]), "ato_id": e["id"], "tot_s": e["tot_s"], "takeoff_s": t["takeoff_s"]})
     state["tasks"] = tasks
     if not tasks:
-        state["task_reason"] = reason
+        _t, reason = plan_side(state, state["player_side"])
+        state["task_reason"] = (f"в плане полётов на сутки больше нет вылетов после {ato.hhmm(clock)}" if clock and _t
+                                else reason)
         return None
     state["task"] = tasks[0]
     state["task_reason"] = None
     return tasks[0]
 
 
-def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
+def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int = MAX_PER_KIND) -> tuple[list[dict], str]:
     """План дня стороны side (состояние кампании не меняет): (задачи, причина, если задач нет).
     Для стороны противника - так же: по нему в миссию ставятся его ИИ-группы (build.enemy_air)."""
     foe = model.enemy(side)
@@ -170,10 +181,10 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
             bases = [state["airbases"][r["base"]] for r in performers]
             if bases:
                 targets.sort(key=lambda t: min(model.dist_km(b, model.unit_pos(state, t)) for b in bases))
-            targets = targets[:MAX_PER_KIND]
+            targets = targets[:per_kind]
         n_kind = 0
         for tgt in targets:
-            if n_kind >= MAX_PER_KIND:           # задач одного вида в плане дня - не больше (иначе план - 8 одинаковых)
+            if n_kind >= per_kind:           # задач одного вида в плане дня - не больше (иначе план - 8 одинаковых)
                 break
             tpos = model.unit_pos(state, tgt)
             best = None
@@ -215,7 +226,7 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
         if not found and not targets:
             reasons.append(f"{tdef['title']}: целей нет")
     orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
-    return [t for t in tasks if not t.get("ai_only")][:MAX_TASKS] + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
+    return [t for t in tasks if not t.get("ai_only")][:max_tasks] + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
 
 
 def orbit_point(state: dict, side: str, standoff_km: float) -> dict | None:

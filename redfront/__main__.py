@@ -110,6 +110,7 @@ def main(argv=None) -> int:
     p = sp.add_parser("gui", help="окно кампании в браузере (карта, план, сборка, дебриф)")
     p.add_argument("--port", type=int, default=8765); p.add_argument("--no-browser", action="store_true")
     p = sp.add_parser("build"); p.add_argument("state"); p.add_argument("out"); p.add_argument("--density", type=float, default=1.0)
+    p.add_argument("--budget", type=int, help="наземных машин в миссии не больше (запоминается в кампании; 0 - без ограничения)")
     p.add_argument("--ai", action="store_true", help="звено без игрока (проверочный прогон)")
     p.add_argument("--fly", default="strike", help="в какой группе пакета летит игрок: strike (по умолчанию), sead, recon")
     p.add_argument("--task", type=int, help="номер задачи из плана дня (plan); по умолчанию - первая")
@@ -217,15 +218,19 @@ def main(argv=None) -> int:
         if not tk:
             print(f"Задач нет: {st['task_reason']}")
         else:
-            print(f"План дня {st['day']} (build --task N, по умолчанию 1):")
+            from . import ato
+            print(f"План полётов на сутки {st['day']}, свои вылеты (build --task N, по умолчанию 1):")
             for i, t in enumerate(st["tasks"], 1):
                 thr = ", ".join(st["units"][x]["name"] for x in t["threats"]) or "нет"
-                print(f"{i}. {t['title']} - {t['distance_km']:.0f} км от {st['airbases'][t['base']]['name']}; ПВО: {thr}")
+                when = f"взлёт {ato.hhmm(t['takeoff_s'])}, на объекте {ato.hhmm(t['tot_s'])} - " if t.get("tot_s") is not None else ""
+                print(f"{i}. {when}{t['title']} - {t['distance_km']:.0f} км от {st['airbases'][t['base']]['name']}; ПВО: {thr}")
                 for g in t["package"]:
                     print(f"     {g['group']:7s} {g['title']}: {g['size']} ЛА от {st['units'][g['performer']]['name']}")
                 if t.get("package_notes"):
                     print(f"     замечания: {t['package_notes']}")
     elif a.cmd == "build":
+        if a.budget is not None:
+            st["settings"]["mission_budget"] = max(0, a.budget)
         man = build_mod.build(st, Path(a.out), a.density, player=not a.ai, fly=a.fly, task_no=a.task)
         n = sum(len(g["vehicles"]) for g in man["ground"])
         print(f"Миссия: {man['file']} (вылет {man['sortie']}, наземных юнитов {n})")
