@@ -123,4 +123,8 @@ def apply(state: dict, data: dict) -> list[str]:
     for ln in lines:
         model.note(state, ln)
     state["manifest"]["applied"] = True
+    if man.get("end_s") is not None:            # часы кампании: следующий вылет игрока - после этой миссии (ato.py)
+        state["clock_s"] = max(state.get("clock_s") or 0, man["end_s"])
+        if man.get("ato_id") and state.get("ato") and man["ato_id"] not in state["ato"]["done"]:
+            state["ato"]["done"].append(man["ato_id"])
     return lines

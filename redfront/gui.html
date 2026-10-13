@@ -220,7 +220,8 @@ function render() {
     else p.innerHTML = `<div class="row" style="margin-bottom:8px"><span class="meta" style="margin:0">наземных машин в миссии не больше</span>
       <input id="budget" type="number" min="0" step="50" value="${ST.budget}" style="width:80px" title="бюджет миссии: дальнее прореживается и убирается; 0 - без ограничения"></div>` +
       ST.tasks.map((t, i) => `<div class="task ${i === SEL ? "sel" : ""}" data-i="${i}">
-      <b>${t.n}. ${esc(t.title)}</b>
+      <b>${t.n}. ${t.time ? esc(t.time.split(",")[0].replace("взлёт ", "")) + " · " : ""}${esc(t.title)}</b>
+      ${t.time ? `<div class="pk">${esc(t.time)}</div>` : ""}
       <div class="pk">${t.km} км от ${esc(t.base)} · ПВО: ${esc(t.threats.join(", ") || "нет")}</div>
       <div class="pk">${t.package.map(g => `${esc(g.title)}: ${g.size} × ${esc(g.performer)}`).join("<br>")}</div>
       ${t.notes ? `<div class="pk">⚠ ${esc(t.notes)}</div>` : ""}

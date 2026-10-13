@@ -218,10 +218,12 @@ def main(argv=None) -> int:
         if not tk:
             print(f"Задач нет: {st['task_reason']}")
         else:
-            print(f"План дня {st['day']} (build --task N, по умолчанию 1):")
+            from . import ato
+            print(f"План полётов на сутки {st['day']}, свои вылеты (build --task N, по умолчанию 1):")
             for i, t in enumerate(st["tasks"], 1):
                 thr = ", ".join(st["units"][x]["name"] for x in t["threats"]) or "нет"
-                print(f"{i}. {t['title']} - {t['distance_km']:.0f} км от {st['airbases'][t['base']]['name']}; ПВО: {thr}")
+                when = f"взлёт {ato.hhmm(t['takeoff_s'])}, на объекте {ato.hhmm(t['tot_s'])} - " if t.get("tot_s") is not None else ""
+                print(f"{i}. {when}{t['title']} - {t['distance_km']:.0f} км от {st['airbases'][t['base']]['name']}; ПВО: {thr}")
                 for g in t["package"]:
                     print(f"     {g['group']:7s} {g['title']}: {g['size']} ЛА от {st['units'][g['performer']]['name']}")
                 if t.get("package_notes"):

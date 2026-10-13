@@ -211,5 +211,7 @@ def end_day(state: dict) -> list[str]:
         model.note(state, ln)
     state["task"] = None
     state["tasks"] = []
+    state["ato"] = None                          # план полётов и часы - новых суток (ato.py)
+    state["clock_s"] = 0
     state["manifest"] = None
     return lines

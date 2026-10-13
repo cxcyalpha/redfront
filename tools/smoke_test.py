@@ -877,12 +877,19 @@ def air_section(tmp: Path) -> None:
           f"прикрытие: зона 40 км над целью на 3000 м, перехват воздушных целей, до удара + 5 мин; МиГ-29 с Р-27Р и Р-73")
     en = [fl for fl in man["flights"] if fl.get("side") == "blue"]
     own_ai = [fl for fl in man["flights"] if fl["group"].startswith("ai")]
+    from redfront import ato
+    win = [e for e in st["ato"]["entries"] if e["id"] != st["task"].get("ato_id") and not e["ai_only"]
+           and ato.in_window(e, man["start_s"], man["end_s"])
+           and not (e["times"]["strike"]["takeoff_s"] < man["start_s"] and e["times"]["strike"]["objective_s"] <= man["start_s"] + 60)]
+    want = {side_: min(build.AI_FLIGHTS["enemy" if side_ == "blue" else "own"], sum(1 for e in win if e["side"] == side_))
+            for side_ in ("red", "blue")}
     check(len(blue) == len(en) == len(man["enemy_lines"]) and 1 <= len(en) <= build.AI_FLIGHTS["enemy"]
-          and 1 <= len(own_ai) <= build.AI_FLIGHTS["own"] and len(man["ai_lines"]) == len(own_ai)
+          and len(en) <= want["blue"] and len(own_ai) <= want["red"] and len(man["ai_lines"]) == len(own_ai)
           and "Разведка: в районе возможна активность авиации противника." in m.description_text()
-          and "Другие вылеты наших сил" in m.description_text()
+          and ("Другие вылеты наших сил" in m.description_text()) == bool(own_ai)
           and not any(st["units"][fl["performer"]]["name"] in m.description_text() for fl in en),
-          f"воздушная война по всему театру: {len(en)} групп противника и {len(own_ai)} своих групп ИИ по планам дня; "
+          f"воздушная война по плану полётов на сутки: в окне миссии {ato.hhmm(man['start_s'])}-{ato.hhmm(man['end_s'])} "
+          f"{len(en)} групп противника и {len(own_ai)} своих групп ИИ (в окне вылетов: синих {want['blue']}, своих {want['red']}); "
           "свои - в брифинге, противник - только общим предупреждением")
     used = {}
     for g_ in st["task"]["package"]:
@@ -1338,6 +1345,60 @@ def helo_section(tmp: Path) -> None:
               f"вертолёты в миссии: {', '.join(g.units[0].type for g in hg)}, маршрут не выше 60 м")
 
 
+def ato_section(tmp: Path) -> None:
+    """План полётов на сутки (ato.py): время вылетов, занятость самолётов, смены дежурства, часы кампании,
+    группы, которые к началу миссии уже в воздухе."""
+    from redfront import ato, logistics
+    print("\n== план полётов на сутки ==")
+    st = model.new_campaign("ato", sector="sector_germany.json", oob="oob_germany.json", seed=11)
+    planner.plan(st)
+    a = st["ato"]
+    w0, w1 = ato.flying_window(st)
+    turn = {s_: model.doctrine(st, s_)["sim"].get("turnaround_min", ato.TURNAROUND_MIN) * 60 for s_ in model.SIDES}
+    busy = {}
+    for e in a["entries"]:
+        for g in e["task"]["package"]:
+            t = e["times"][g["group"]]
+            busy.setdefault(g["performer"], []).append((t["takeoff_s"], t["land_s"] + turn[e["side"]], g["size"]))
+    over = [u for u, ivs in busy.items() for t0, _t1, _n in ivs
+            if sum(n for a_, b_, n in ivs if a_ <= t0 < b_) > logistics.available(st, st["units"][u])]
+    sides = {s_: sum(1 for e in a["entries"] if e["side"] == s_ and not e["ai_only"]) for s_ in model.SIDES}
+    check(all(sides.values()) and not over and all(w0 <= e["tot_s"] <= w1 for e in a["entries"]),
+          f"ATO на сутки: вылетов красных {sides['red']}, синих {sides['blue']}, все в лётном дне "
+          f"{ato.hhmm(w0)}-{ato.hhmm(w1)}, самолётов частей не больше наличия в любой момент")
+    shifts = sorted(e["tot_s"] for e in a["entries"] if e["kind"] == "awacs_orbit" and e["side"] == "blue")
+    check(shifts and shifts[0] == w0 and all(b_ - a_ == 4 * 3600 for a_, b_ in zip(shifts, shifts[1:])),
+          f"дежурство ДРЛО синих - сменами по 4 ч весь лётный день: {', '.join(ato.hhmm(x) for x in shifts)}")
+    tk = st["tasks"]
+    check(tk and [t["takeoff_s"] for t in tk] == sorted(t["takeoff_s"] for t in tk) and not any(t.get("ai_only") for t in tk),
+          f"игроку - вылеты своей стороны по времени ({len(tk)}: {ato.hhmm(tk[0]['takeoff_s'])} ... {ato.hhmm(tk[-1]['takeoff_s'])})")
+    air = None
+    for n in range(1, len(tk) + 1):
+        man = build.build(st, tmp / "ato.miz", task_no=n)
+        m = dcs.Mission(); m.load_file(str(tmp / "ato.miz"))
+        late = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.plane_group
+                if "_orbit" not in g.name and g.points[0].type == "Turning Point"]
+        if late:
+            air = (n, man, m, late)
+            break
+    check(air is not None and all(g.points[0].alt >= build.AIR_START_MIN_M for g in air[3]),
+          "к началу миссии вылеты ATO, уже идущие к объекту, - в воздухе на своём маршруте"
+          + (f" (задача {air[0]}: {', '.join(g.name for g in air[3])})" if air else ""))
+    n, man, m, _late = air or (len(tk), man, m, [])
+    t_ = st["tasks"][n - 1]
+    check(m.start_time.hour * 3600 + m.start_time.minute * 60 + m.start_time.second == man["start_s"]
+          and man["start_s"] <= t_["takeoff_s"] < man["start_s"] + 15 * 60,
+          f"миссия начинается по плану полётов: {ato.hhmm(man['start_s'])} (взлёт по ATO {ato.hhmm(t_['takeoff_s'])})")
+    debrief.apply(st, fake_hook(st["campaign_id"], man["sortie"], [], {}, all_flight_units(man)))
+    planner.plan(st)
+    check(st["clock_s"] == man["end_s"] and all(t["takeoff_s"] >= st["clock_s"] for t in st["tasks"])
+          and all(t["ato_id"] != man["ato_id"] for t in st["tasks"]),
+          f"после дебрифа часы кампании {ato.hhmm(st['clock_s'])}: в плане только вылеты позже, слетанный - не предлагается")
+    sim.end_day(st)
+    planner.plan(st)
+    check(st["ato"]["day"] == st["day"] == 2 and not st["clock_s"], "новые сутки - новый план полётов, часы с начала дня")
+
+
 def support_air_section(tmp: Path) -> None:
     """ДРЛО и заправщики: части модели, задача дежурства (только ИИ), в миссии - в зоне с начала, потери - в модель."""
     print("\n== ДРЛО и заправщики ==")
@@ -1394,14 +1455,14 @@ def air_defence_section(tmp: Path) -> None:
     # план дня: удары по позициям ЗРК, полки по очереди, средние высоты без угроз в коридоре
     st = model.new_campaign("ad2", sector="sector_germany.json", oob="oob_germany.json", seed=7)
     planner.plan(st)
-    tasks = st["tasks"]
+    tasks = [t for t in planner.plan_side(st, "red")[0] if not t.get("ai_only")]
     perfs = [t["performer"] for t in tasks]
     check(len(set(perfs)) >= len(perfs) - 2, f"план дня: задачи распределены по полкам ({len(set(perfs))} частей на {len(perfs)} задач)")
     medium = [t for t in tasks if not t["threats"] and t["kind"].startswith("strike_")]
     check(medium and all(g.get("transit_alt_m_agl") == 4000 for t in medium for g in t["package"])
           and all(not g.get("transit_alt_m_agl") for t in tasks if t["threats"] for g in t["package"]),
           f"без угроз в коридоре - переход на 4000 м ({len(medium)} задач), с угрозами - на малой высоте")
-    n = next((i for i, t in enumerate(tasks, 1) if t["kind"] == "strike_sam_site"), None)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "strike_sam_site"), None)
     check(n is not None, "в плане дня есть удар по позиции ЗРК")
     if n:
         man = build.build(st, tmp / "sam_site.miz", task_no=n)
@@ -1576,7 +1637,7 @@ def core_section(tmp: Path) -> None:
 # Разделы теста по порядку: python tools/smoke_test.py - все; pytest (tests/test_smoke.py) - каждый отдельным тестом.
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
-            gui_section, germany_section, air_defence_section, support_air_section, helo_section]
+            gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section]
 
 
 def main() -> int:

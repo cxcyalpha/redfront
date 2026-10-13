@@ -1,0 +1,157 @@
+"""План полётов на сутки (ATO) обеих сторон: каждый вылет - со временем взлёта, выхода на объект и посадки.
+
+Задачи и пакеты - те же, что у плана дня (planner.plan_side): цели, исполнители, группы обеспечения. ATO добавляет
+время. Сутки лётной работы - settings.flying_hours (по умолчанию FLYING_HOURS). Задачи стороны ставятся по порядку
+приоритета, равномерно по лётному дню (со случайным сдвигом, если случайность кампании включена); вылет
+ставится, только если у части хватает самолётов на всё время вылета плюс подготовку к повторному (turnaround_min
+раздела sim доктрины) - иначе позже, шагом SLOT_MIN, до конца лётного дня; не влезает - не ставится.
+Дежурства (method orbit: ДРЛО, заправщик) - сменами shift_h часов на весь лётный день, у каждой смены свой вылет;
+не хватает самолётов - в дежурстве разрыв.
+
+Игрок выбирает вылет своей стороны (planner.plan -> state['tasks'], по времени); миссия - окно суток вокруг него
+(build): вылеты обеих сторон, которые в это окно в воздухе, попадают в миссию - кто уже в воздухе, стоит на своём
+маршруте, кто позже - взлетает по расписанию. Все числа - ОЦЕНКИ.
+"""
+from __future__ import annotations
+
+from . import logistics, model, planner
+
+FLYING_HOURS = (6, 20)      # ОЦЕНКА: лётный день (часы, местное время миссии); ночь - позже, с типами, умеющими летать ночью
+TURNAROUND_MIN = 90         # ОЦЕНКА: подготовка к повторному вылету, если в доктрине нет sim.turnaround_min
+SLOT_MIN = 15               # шаг сдвига вылета, если самолётов нет
+ATO_MAX_TASKS = 12          # ОЦЕНКА: задач (кроме дежурств) в ATO стороны на сутки
+ATO_PER_KIND = 3            # ОЦЕНКА: задач одного вида в ATO стороны на сутки
+DWELL_S = 120               # ОЦЕНКА: время над объектом у ударных групп
+MISSION_LEN_S = 75 * 60     # ОЦЕНКА: окно миссии игрока; вылеты в воздухе в это окно - в миссии
+
+
+def flying_window(state: dict) -> tuple[int, int]:
+    h0, h1 = (state.get("settings") or {}).get("flying_hours") or FLYING_HOURS
+    return int(h0 * 3600), int(h1 * 3600)
+
+
+def hhmm(t_s: float) -> str:
+    t = int(t_s) % 86400
+    return f"{t // 3600:02d}:{t % 3600 // 60:02d}"
+
+
+def _path_km(base: dict, route: list[dict]) -> float:
+    pts = [base] + list(route)
+    return sum(model.dist_km(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+
+def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
+    """Время групп пакета относительно выхода ударной группы на цель (0): взлёт, выход на свой объект, посадка, с.
+    Группа обеспечения выходит на объект за lead_min до удара (как build.timeline)."""
+    spd = tdef["speed_kmh"] / 3.6
+    out = {}
+    for g in task["package"]:
+        base = state["airbases"][g["base"]]
+        fly = _path_km(base, g["route"]) * 1000 / spd
+        back = model.dist_km(g["route"][-1], base) * 1000 / spd
+        obj = -g.get("lead_min", 0) * 60
+        kind = g["objective"]["kind"]
+        if kind == "cap_zone":
+            dwell = (g.get("cap_min") or 20) * 60
+        elif kind in ("cover_zone", "sam"):
+            dwell = -obj + (g.get("hold_after_min") or 5) * 60
+        else:
+            dwell = DWELL_S
+        out[g["group"]] = {"takeoff_s": obj - fly, "objective_s": obj, "land_s": obj + dwell + back}
+    return out
+
+
+class _Pool:
+    """Занятость самолётов частей по времени: интервалы (с, по, сколько)."""
+    def __init__(self, state: dict):
+        self.state = state
+        self.busy: dict[str, list[tuple[float, float, int]]] = {}
+
+    def free(self, uid: str, t0: float, t1: float) -> int:
+        cap = logistics.available(self.state, self.state["units"][uid])
+        used = sum(n for a, b, n in self.busy.get(uid, []) if a < t1 and t0 < b)   # с запасом: все пересекающиеся
+        return cap - used
+
+    def fits(self, need: dict[str, tuple[float, float, int]]) -> bool:
+        return all(self.free(uid, t0, t1) >= n for uid, (t0, t1, n) in need.items())
+
+    def book(self, need: dict[str, tuple[float, float, int]]) -> None:
+        for uid, iv in need.items():
+            self.busy.setdefault(uid, []).append(iv)
+
+
+def _need(task: dict, times: dict, tot: float, turn_s: float) -> dict[str, tuple[float, float, int]]:
+    need: dict[str, list] = {}
+    for g in task["package"]:
+        t = times[g["group"]]
+        t0, t1 = tot + t["takeoff_s"], tot + t["land_s"] + turn_s
+        if g["performer"] in need:
+            a, b, n = need[g["performer"]]
+            need[g["performer"]] = [min(a, t0), max(b, t1), n + g["size"]]
+        else:
+            need[g["performer"]] = [t0, t1, g["size"]]
+    return {k: tuple(v) for k, v in need.items()}
+
+
+def build(state: dict) -> dict:
+    """ATO на текущие сутки обеих сторон -> state['ato'] = {'day', 'entries': [...], 'done': [...]}."""
+    w0, w1 = flying_window(state)
+    pool = _Pool(state)
+    entries = []
+    for side in model.SIDES:
+        doc = model.doctrine(state, side)
+        turn_s = doc["sim"].get("turnaround_min", TURNAROUND_MIN) * 60
+        tasks, _why = planner.plan_side(state, side, max_tasks=ATO_MAX_TASKS, per_kind=ATO_PER_KIND)
+        rnd = model.rng(state, f"ato-{side}")
+        # дежурства - первыми: непрерывное покрытие (ДРЛО) важнее очередного удара
+        for t in (t for t in tasks if t.get("ai_only")):
+            tdef = doc["tasks"][t["kind"]]
+            g = t["package"][0]
+            transit = model.dist_km(state["airbases"][g["base"]], g["route"][0]) * 1000 / (tdef["speed_kmh"] / 3.6)
+            shift = tdef.get("shift_h", 4) * 3600
+            s = w0
+            while s < w1:
+                e = min(w1, s + shift)
+                times = {g["group"]: {"takeoff_s": s - transit, "objective_s": s, "land_s": e + transit, "station_end_s": e}}
+                need = {g["performer"]: (s - transit, e + transit + turn_s, g["size"])}
+                if g["size"] > 0 and pool.fits(need):
+                    pool.book(need)
+                    entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
+                                    "title": t["title"], "task": t, "tot_s": s, "times": times, "ai_only": True})
+                s = e
+        reg = [t for t in tasks if not t.get("ai_only")]
+        span = w1 - w0
+        for i, t in enumerate(reg):
+            tdef = doc["tasks"][t["kind"]]
+            rel = rel_times(state, tdef, t)
+            first = min(x["takeoff_s"] for x in rel.values())
+            last = max(x["land_s"] for x in rel.values())
+            want = w0 + span * (i + 0.5) / max(1, len(reg))
+            if rnd:
+                want += rnd.uniform(-0.4, 0.4) * span / max(1, len(reg))
+            tot = max(want, w0 - first)                  # взлёт - не раньше начала лётного дня
+            while tot + last <= w1 + 3600:               # посадка - не позже часа после конца лётного дня
+                need = _need(t, rel, tot, turn_s)
+                if pool.fits(need):
+                    pool.book(need)
+                    times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
+                    entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
+                                    "title": t["title"], "task": t, "tot_s": tot, "times": times, "ai_only": False})
+                    break
+                tot += SLOT_MIN * 60
+    entries.sort(key=lambda e: e["tot_s"])
+    state["ato"] = {"day": state["day"], "entries": entries, "done": []}
+    return state["ato"]
+
+
+def ensure(state: dict) -> dict:
+    """ATO текущих суток: построить, если его нет или он от прошлых суток."""
+    a = state.get("ato")
+    if not a or a.get("day") != state["day"]:
+        a = build(state)
+    return a
+
+
+def in_window(e: dict, t0: float, t1: float, group: str = "strike") -> bool:
+    t = e["times"].get(group) or next(iter(e["times"].values()))
+    return t["takeoff_s"] < t1 and t["land_s"] > t0
