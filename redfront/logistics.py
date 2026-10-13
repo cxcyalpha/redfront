@@ -180,3 +180,38 @@ def available(state: dict, unit: dict) -> int:
     af = state["units"].get(f"af_{unit.get('base')}")
     dmg = af.get("damage", 0.0) if af else 0.0
     return int(unit.get("count", 0) * (1.0 - dmg))
+
+
+def air_defence(state: dict) -> list[str]:
+    """ЗРК за сутки (ОЦЕНКИ, sam_note доктрины): потери восстанавливаются на repair_sam в сутки (ремонт, подвоз
+    пусковых и ракет; x промышленность и снабжение стороны), - иначе после первого удачного подавления ПВО в небе её
+    больше нет. Приданная ПВО части в бою не восстанавливается. Подвижный ЗРК на позиции (не приданный и не
+    объектовая ПВО - fixed), понёсший потери после
+    прошлой смены позиции, - раскрыт: уходит на новую позицию в sam_relocate_km в сторону тыла (от оси угрозы;
+    со случайностью - в пределах +-90 градусов)."""
+    from . import materialize                                    # materialize импортирует planner -> logistics
+    lines = []
+    for u in state["units"].values():
+        if model.category(u) != "sam" or u["state"] in ("destroyed", "pending"):
+            continue
+        sim = _sim(state, u["side"])
+        parent = state["units"].get(u.get("attached_to") or "")
+        lost_now = sum(u["lost"].values())
+        if not parent and "pos" in u and not u.get("fixed") and lost_now > u.get("lost_at_move", 0.0) + 1e-6:
+            r = model.rng(state, f"sam-move-{u['id']}")
+            axis = materialize.threat_axis_deg(state, u)
+            brg = (axis + 180.0 + (r.uniform(-90.0, 90.0) if r else 0.0)) % 360.0
+            u["pos"] = model.offset(u["pos"], brg, sim.get("sam_relocate_km", 5) * 1000)
+            lines.append(f"{u['name']}: позиция раскрыта, ЗРК сменил позицию ({sim.get('sam_relocate_km', 5)} км).")
+        if parent and parent["state"] == "battle":
+            u["lost_at_move"] = lost_now
+            continue
+        was = model.strength(u)
+        if was < 1.0:
+            rate = sim.get("repair_sam", 0.0) * industry(state, u["side"]) * min(1.0, (parent or u).get("supply", 1.0))
+            for c in u["composition"]:
+                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - rate)
+            if was <= 0 < model.strength(u) or (was < 0.5 <= model.strength(u)):
+                lines.append(f"{u['name']}: восстановлен до {model.strength(u):.0%}.")
+        u["lost_at_move"] = sum(u["lost"].values())
+    return lines

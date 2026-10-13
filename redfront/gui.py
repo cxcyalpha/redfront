@@ -273,7 +273,21 @@ def handler(app: App):
         def js(self, obj: dict, code: int = 200):
             self.send(code, json.dumps(obj, ensure_ascii=False).encode("utf-8"), "application/json; charset=utf-8")
 
+        def local(self) -> bool:
+            # Только страница этого сервера: чужой сайт в браузере не должен слать сюда запросы (Origin)
+            # или читать ответы через подмену DNS (Host).
+            port = self.server.server_address[1]
+            hosts = {f"127.0.0.1:{port}", f"localhost:{port}"}
+            origin = self.headers.get("Origin")
+            if self.headers.get("Host") not in hosts or (origin is not None and origin not in
+                                                          {f"http://{h}" for h in hosts}):
+                self.send(403, b"forbidden", "text/plain")
+                return False
+            return True
+
         def do_GET(self):
+            if not self.local():
+                return
             u = urlparse(self.path)
             if u.path in ("/", "/index.html"):
                 return self.send(200, HTML.read_bytes(), "text/html; charset=utf-8")
@@ -290,6 +304,8 @@ def handler(app: App):
             self.send(404, b"not found", "text/plain")
 
         def do_POST(self):
+            if not self.local():
+                return
             u = urlparse(self.path)
             if not u.path.startswith("/api/"):
                 return self.send(404, b"not found", "text/plain")

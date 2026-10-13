@@ -80,7 +80,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -110,6 +111,59 @@
       },
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+    },
+    "cas_helo": {
+      "title": "Удар вертолётов по войскам в соприкосновении",
+      "performers": [
+        "attack_helo"
+      ],
+      "target": {
+        "category": "ground",
+        "state": "battle"
+      },
+      "method": "on_call",
+      "method_source": "толкование, не цитата: боевые вертолёты над полем боя - по войскам противника в соприкосновении, с малой дальности, на предельно малой высоте",
+      "speed_kmh": 220,
+      "transit_alt_m_agl": 60,
+      "attack_alt_m_agl": 30,
+      "ip_offset_km": 8,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа вертолётов",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "CAS",
+          "GroundAttack"
+        ],
+        "loadout": [
+          "anti_armor"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+        }
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 30,
+      "low_alt_source": "ОЦЕНКА: вертолёты над полем боя - на предельно малой высоте, с использованием рельефа",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
     },
     "strike_depot": {
@@ -135,7 +189,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -170,7 +225,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_factory": {
       "title": "Удар по заводу",
@@ -195,7 +252,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -230,7 +288,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_bridge": {
       "title": "Удар по мосту",
@@ -255,7 +315,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -290,7 +351,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_airfield": {
       "title": "Удар по аэродрому",
@@ -314,7 +377,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -349,7 +413,152 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+    },
+    "strike_sam_site": {
+      "title": "Удар по позиции ЗРК",
+      "performers": [
+        "bomber",
+        "fighter_bomber"
+      ],
+      "target": {
+        "category": "sam",
+        "state": "deployed",
+        "fixed": true,
+        "min_strength": 0.5
+      },
+      "method": "on_call",
+      "method_source": "толкование, не цитата: уничтожение позиций объектовой ПВО противника, прикрывающих его аэродромы и тыл - ОЦЕНКА постановки; цель - позиция ЗРК (fixed), группы подавления - по ЗРК коридора, в т.ч. по ней самой",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 300,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "SEAD",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "sead",
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true
+        }
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
       "bomb_alt_m": 1000
+    },
+    "awacs_orbit": {
+      "title": "Дежурство ДРЛО",
+      "performers": [
+        "awacs"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "orbit",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: ДРЛО и управление над своей территорией за серединой линии фронта, в standoff_km от неё - ОЦЕНКА",
+      "speed_kmh": 750,
+      "transit_alt_m_agl": 9000,
+      "attack_alt_m_agl": 9000,
+      "ip_offset_km": 0,
+      "standoff_km": 150,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "standoff_km"
+      ],
+      "strike": {
+        "title": "дежурство дрло",
+        "group_name": "самолёт",
+        "size": 1,
+        "maintask": [
+          "AWACS"
+        ],
+        "loadout": [],
+        "mode": "orbit",
+        "alt_m": 9000,
+        "estimate_fields": [
+          "size",
+          "alt_m"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+        "estimate": true
+      }
+    },
+    "tanker_orbit": {
+      "title": "Дежурство заправщика",
+      "performers": [
+        "tanker"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "orbit",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: зона дозаправки над своей территорией за серединой линии фронта - ОЦЕНКА",
+      "speed_kmh": 750,
+      "transit_alt_m_agl": 7000,
+      "attack_alt_m_agl": 7000,
+      "ip_offset_km": 0,
+      "standoff_km": 200,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "standoff_km"
+      ],
+      "strike": {
+        "title": "дежурство заправщика",
+        "group_name": "самолёт",
+        "size": 1,
+        "maintask": [
+          "Refueling"
+        ],
+        "loadout": [],
+        "mode": "orbit",
+        "alt_m": 7000,
+        "estimate_fields": [
+          "size",
+          "alt_m"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+        "estimate": true
+      }
     }
   },
   "march": {
@@ -401,6 +610,9 @@
     "repair_airfield": 0.2,
     "logistics_note": "Тыл (ОЦЕНКИ, не из документа): снабжение - путь по своей территории до своего склада с запасом от supply_min_stock не длиннее supply_km, иначе марш x unsupplied, сила x supply_power_factor, восстановление медленнее. Аэродром закрыт, если противник ближе airfield_threat_km; потерян - ближе airfield_lost_km. Восстановление повреждений в сутки: repair_depot/bridge/airfield (мост - 3 суток). Заводы (ОЦЕНКИ): среднее повреждение заводов стороны x industry_effect снижает её восстановление тыла (repair_*) и пополнение авиации; завод восстанавливается на repair_factory в сутки. Малые мосты (найдены зондом карты, не через Эльбу; ОЦЕНКИ): разрушенный связь не закрывает - объезд: путь снабжения по связи длиннее на bridge_detour_km, марш по ней x bridge_detour_slow.",
     "repair_factory": 0.1,
+    "repair_sam": 0.25,
+    "sam_relocate_km": 5,
+    "sam_note": "ЗРК (ОЦЕНКИ, не из документа): потери восстанавливаются на repair_sam в сутки (x промышленность и снабжение; приданная ПВО части в бою - нет). ЗРК на позиции, понёсший потери, на следующие сутки меняет позицию - уходит на sam_relocate_km в сторону тыла.",
     "industry_effect": 0.5,
     "bridge_detour_km": 15,
     "bridge_detour_slow": 0.5

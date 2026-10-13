@@ -1302,8 +1302,105 @@ def germany_section(tmp: Path) -> None:
           f"миссия всего фронта: {len(man['ground'])} групп, {veh} машин (не больше 1200), машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
 
 
-def main() -> int:
-    tmp = Path(tempfile.mkdtemp(prefix="redfront_"))
+def helo_section(tmp: Path) -> None:
+    """Боевые вертолёты: части модели, задача по войскам в соприкосновении, предельно малая высота и у ИИ."""
+    import collections
+    print("\n== вертолёты ==")
+    st = model.new_campaign("helo", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    for _ in range(3):
+        sim.end_day(st)
+    kinds = {side: collections.Counter(t["kind"] for t in planner.plan_side(st, side)[0]) for side in model.SIDES}
+    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for n in c.values()) and len(kinds["blue"]) >= 2,
+          f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "cas_helo"), None)
+    check(n is not None, "в плане дня есть удар вертолётов по войскам в соприкосновении")
+    if n:
+        build.build(st, tmp / "helo.miz", task_no=n)
+        m = dcs.Mission(); m.load_file(str(tmp / "helo.miz"))
+        hg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.helicopter_group]
+        check(hg and max(p.alt for g in hg for p in g.points) <= 60,
+              f"вертолёты в миссии: {', '.join(g.units[0].type for g in hg)}, маршрут не выше 60 м")
+
+
+def support_air_section(tmp: Path) -> None:
+    """ДРЛО и заправщики: части модели, задача дежурства (только ИИ), в миссии - в зоне с начала, потери - в модель."""
+    print("\n== ДРЛО и заправщики ==")
+    st = model.new_campaign("sup", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    planner.plan(st)
+    check(not any(t.get("ai_only") for t in st["tasks"]), "дежурство ДРЛО/заправщика в план игрока не попадает")
+    man = build.build(st, tmp / "support.miz", task_no=1)
+    m = dcs.Mission(); m.load_file(str(tmp / "support.miz"))
+    orb = {g.units[0].type: g for c in m.coalition.values() for cn in c.countries.values() for g in cn.plane_group
+           if "_orbit" in g.name}
+    check({"E-3A", "A-50", "KC-135"} <= set(orb) and all(g.points[0].alt >= 7000 and g.points[0].type == "Turning Point"
+                                                          for g in orb.values()),
+          f"в миссии на дежурстве в воздухе: {', '.join(sorted(orb))}")
+    fl = next(f for f in man["flights"] if f["performer"] == "b_naew")
+    n0 = st["units"]["b_naew"]["count"]
+    data = fake_hook(st["campaign_id"], st["sortie"], fl["units"], {}, [])
+    debrief.apply(st, data)
+    check(st["units"]["b_naew"]["count"] == n0 - len(fl["units"]),
+          f"сбитый E-3A списан из модели: {n0} -> {st['units']['b_naew']['count']}")
+
+
+def air_defence_section(tmp: Path) -> None:
+    """Объектовая ПВО: позиции сектора + шаблоны стороны; радиогоризонт в коридоре; восстановление и смена позиции."""
+    from redfront import logistics
+    print("\n== объектовая ПВО ==")
+    st = model.new_campaign("ad", sector="sector_germany.json", oob="oob_germany.json", seed=3)
+    sec = model.load_json("sector_germany.json")
+    ad = [u for u in st["units"].values() if u.get("fixed")]
+    tiers = {r: sum(1 for u in ad if u["role"] == r) for r in ("sam_long", "sam_medium", "sam_short")}
+    check(len(ad) == len(sec["ad_sites"]) and all(tiers.values()),
+          f"позиции ПВО сектора заняты шаблонами сторон: {len(ad)} частей ({tiers})")
+    afs = {u["covers"] for u in ad if u.get("covers")}
+    check(afs == {f"af_{b}" for b in st["airbases"]}, f"ПВО объекта у каждого военного аэродрома ({len(afs)})")
+    s200 = next(u for u in ad if u["role"] == "sam_long")
+    p = model.unit_pos(st, s200)
+    a, b = model.offset(p, 90, 80_000, -100_000), model.offset(p, 90, 80_000, 100_000)   # маршрут в 80 км от С-200
+    hi = planner.corridor_threats(st, [(a, b)], "red")
+    lo = planner.corridor_threats(st, [(a, b)], "red", 50)
+    check(s200["id"] in hi and s200["id"] not in lo,
+          f"С-200 в 80 км: угроза по высотной цели, по маршруту на 50 м - нет (радиогоризонт "
+          f"{planner.radar_horizon_km(planner.RADAR_MAST_M, 50):.0f} км)")
+    hawk = st["units"]["blue_sam31"]
+    for u in (hawk, s200):
+        u["lost"] = {c["type"]: float(c["count"]) for c in u["composition"]}    # уничтожены целиком
+    pos0 = {u["id"]: dict(u["pos"]) for u in (hawk, s200)}
+    lines = logistics.air_defence(st)
+    moved = model.dist_km(pos0[hawk["id"]], hawk["pos"])
+    check(0 < model.strength(hawk) < 1 and 0 < model.strength(s200) < 1,
+          f"разбитые ЗРК восстанавливаются: HAWK {model.strength(hawk):.0%}, С-200 {model.strength(s200):.0%} за сутки")
+    check(abs(moved - model.doctrine(st, "blue")["sim"]["sam_relocate_km"]) < 0.5 and s200["pos"] == pos0[s200["id"]],
+          f"раскрытый HAWK сменил позицию на {moved:.1f} км, объектовая ПВО (С-200) - на месте")
+    logistics.air_defence(st)
+    check(model.dist_km(pos0[hawk["id"]], hawk["pos"]) == moved, "без новых потерь ЗРК позицию не меняет")
+    # план дня: удары по позициям ЗРК, полки по очереди, средние высоты без угроз в коридоре
+    st = model.new_campaign("ad2", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    planner.plan(st)
+    tasks = st["tasks"]
+    perfs = [t["performer"] for t in tasks]
+    check(len(set(perfs)) >= len(perfs) - 2, f"план дня: задачи распределены по полкам ({len(set(perfs))} частей на {len(perfs)} задач)")
+    medium = [t for t in tasks if not t["threats"] and t["kind"].startswith("strike_")]
+    check(medium and all(g.get("transit_alt_m_agl") == 4000 for t in medium for g in t["package"])
+          and all(not g.get("transit_alt_m_agl") for t in tasks if t["threats"] for g in t["package"]),
+          f"без угроз в коридоре - переход на 4000 м ({len(medium)} задач), с угрозами - на малой высоте")
+    n = next((i for i, t in enumerate(tasks, 1) if t["kind"] == "strike_sam_site"), None)
+    check(n is not None, "в плане дня есть удар по позиции ЗРК")
+    if n:
+        man = build.build(st, tmp / "sam_site.miz", task_no=n)
+        m = dcs.Mission(); m.load_file(str(tmp / "sam_site.miz"))
+        tgt = st["tasks"][n - 1]["target"]
+        vg = next(g for c in m.coalition.values() for cn in c.countries.values() for g in cn.vehicle_group if g.name == tgt)
+        sg = strike_group(m)
+        attacks = [t for p_ in sg.points for t in p_.tasks if getattr(t, "id", None) == "AttackGroup"]
+        check(any(t.params.get("groupId") == vg.id for t in attacks),
+              f"удар по позиции ЗРК: позиция в миссии, у ударной группы атака по ней ({tgt})")
+
+
+def core_section(tmp: Path) -> None:
+    """Сквозной цикл двух дней на составе сил слоёв 0.1-0.3 (BASELINE) и проверки слоёв."""
     st = model.new_campaign("smoke", oob=BASE_OOB, sector=BASE_SECTOR)
     bn = st["units"]["blue_pzgren_bn_1"]
 
@@ -1460,19 +1557,17 @@ def main() -> int:
     check(abs(planner.threat_radius_km(st5["units"]["blue_patriot_1"]) - 100.0) < 1e-6,
           "ЗРК без threat_radius_km: радиус из pydcs (Patriot_ln threat_range = 100 км)")
 
-    patriot_close_section(tmp)
-    front_section(tmp)
-    random_section(tmp)
-    logistics_section(tmp)
-    menu_section(tmp)
-    theatre_section(tmp)
-    air_section(tmp)
-    package_section(tmp)
-    roads_section(tmp)
-    column_road_section(tmp)
-    mapobj_section(tmp)
-    gui_section(tmp)
-    germany_section(tmp)
+
+# Разделы теста по порядку: python tools/smoke_test.py - все; pytest (tests/test_smoke.py) - каждый отдельным тестом.
+SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
+            theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
+            gui_section, germany_section, air_defence_section, support_air_section, helo_section]
+
+
+def main() -> int:
+    tmp = Path(tempfile.mkdtemp(prefix="redfront_"))
+    for section in SECTIONS:
+        section(tmp)
 
     print(f"\nФайлы теста: {tmp}")
     print("ИТОГ: " + ("всё прошло" if not FAILS else f"{len(FAILS)} провал(ов)"))

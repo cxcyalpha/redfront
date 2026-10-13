@@ -26,6 +26,7 @@ CAP_TOKEN = 4           # машин в группе дальше DETAIL_KM - п
 CAP_AD_NEAR, CAP_AD_FAR = 8, 2   # приданная ПВО
 DETAIL_KM = 60
 SAM_KM = 250            # ЗРК дальше от цели в миссию не ставятся
+SAM_KM_ROLE = {"sam_short": 100}   # ПВО объекта (ближний ярус) - только ближе (ОЦЕНКА: нагрузка на DCS, по маршруту - window)
 
 
 def _allocate(alive: dict[str, float], n: int) -> dict[str, int]:
@@ -250,9 +251,11 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
 def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     units = state["units"]
     target = units[task["target"]]
-    if model.category(target) in ("depot", "bridge", "airfield", "factory"):   # объект тыла - сам в миссии как объекты карты
-        groups = []
+    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam"):   # объект тыла - сам в миссии как объекты карты
+        groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
         for sid in task["threats"]:
+            if sid == target["id"]:
+                continue
             parent = units.get(units[sid].get("attached_to") or "")
             if parent and parent["state"] == "march":
                 col = column(state, parent, density * OTHER_DENSITY)
@@ -350,10 +353,10 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
             groups += _tag(battle_line(state, u, far, cap_of(u)), [u["id"]])
             placed.add(u["id"])
     placed |= {g["unit"] for g in groups}
-    for u in units.values():                     # ЗРК - полностью, но не дальше SAM_KM от цели
+    for u in units.values():                     # ЗРК - полностью, но не дальше SAM_KM (по роли - SAM_KM_ROLE) от цели
         if (model.category(u) == "sam" and u["id"] not in placed and not u.get("attached_to")
                 and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
-                and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM):
+                and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM_ROLE.get(u["role"], SAM_KM)):
             groups.append(sam_site(state, u))
     return [g for g in groups if g["vehicles"]]
 

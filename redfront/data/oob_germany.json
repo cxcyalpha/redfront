@@ -5289,6 +5289,126 @@
    "strike_radius_km": 200,
    "source": "OOB-миссия Germany_OOB_1989 (метка); Harrier GR5 в DCS нет - замена AV-8B; радиус действия - ОЦЕНКА",
    "estimate": true
+  },
+  {
+   "id": "r_ovp_2gta",
+   "name": "Отдельный вертолётный полк 2-й гв. ТА (Ми-24)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "parchim",
+   "type": "Mi_24P",
+   "count": 20,
+   "strike_radius_km": 150,
+   "source": "по памяти - проверить; число - доля Ми-24 полка (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_ovp_3ua",
+   "name": "Отдельный вертолётный полк 3-й УА (Ми-24)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "mahlwinkel",
+   "type": "Mi_24P",
+   "count": 20,
+   "strike_radius_km": 150,
+   "source": "по памяти - проверить; число - доля Ми-24 полка (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_ovp_1gta",
+   "name": "Отдельный вертолётный полк 1-й гв. ТА (Ми-24)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "brandis",
+   "type": "Mi_24P",
+   "count": 20,
+   "strike_radius_km": 150,
+   "source": "по памяти - проверить; число - доля Ми-24 полка (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_ovp_8ga",
+   "name": "Отдельный вертолётный полк 8-й гв. А (Ми-24)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "allstedt",
+   "type": "Mi_24P",
+   "count": 20,
+   "strike_radius_km": 150,
+   "source": "по памяти - проверить; Нора вне карты - Альштедт (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_pahr16",
+   "name": "Противотанковый вертолётный полк 16 (PAH-1; в DCS - SA342M)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "celle",
+   "type": "SA342M",
+   "count": 24,
+   "strike_radius_km": 120,
+   "source": "по памяти - проверить; Bo-105 PAH-1 в DCS нет - замена SA342M; радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_pahr36",
+   "name": "Противотанковый вертолётный полк 36 (PAH-1; в DCS - SA342M)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "fritzlar",
+   "type": "SA342M",
+   "count": 24,
+   "strike_radius_km": 120,
+   "source": "по памяти - проверить; Bo-105 PAH-1 в DCS нет - замена SA342M; радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_us_avn",
+   "name": "Батальон боевых вертолётов армии США (AH-64A)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "giebelstadt",
+   "type": "AH_64A",
+   "count": 18,
+   "strike_radius_km": 150,
+   "source": "по памяти - проверить; часть и аэродром - ОЦЕНКА; радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_naew",
+   "name": "Силы ДРЛО НАТО (E-3A)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "norvenich",
+   "type": "E_3A",
+   "count": 3,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; Гайленкирхен вне карты - Нёрфених (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_kc135",
+   "name": "Заправщики ВВС США (KC-135)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "ramstein",
+   "type": "KC_135",
+   "count": 4,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; базы заправщиков (Милденхолл) вне карты - Рамштайн (ОЦЕНКА); радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_a50",
+   "name": "Отряд ДРЛО (А-50)",
+   "side": "red",
+   "role": "awacs",
+   "base": "templin",
+   "type": "A_50",
+   "count": 2,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; А-50 в ГСВГ на постоянной основе не было - ОЦЕНКА сценария (выдвинуты на время войны); радиус действия - ОЦЕНКА",
+   "estimate": true
   }
  ],
  "variants": [
@@ -5300,5 +5420,130 @@
  "replacements": {
   "air_per_day": 2,
   "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."
- }
+ },
+ "ad_templates": {
+  "red": {
+   "long": [
+    {
+     "name": "С-200",
+     "composition": [
+      {
+       "type": "RLS_19J6",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "RPC_5N62V",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S_200_Launcher",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ],
+   "medium": [
+    {
+     "name": "С-75",
+     "composition": [
+      {
+       "type": "p-19 s-125 sr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "SNR_75V",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S_75M_Volhov",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    },
+    {
+     "name": "С-125",
+     "composition": [
+      {
+       "type": "p-19 s-125 sr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "snr s-125 tr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "5p73 s-125 ln",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ],
+   "short": [
+    {
+     "name": "Оса, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Osa_9A33_ln",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    },
+    {
+     "name": "С-60",
+     "composition": [
+      {
+       "type": "SON_9",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S-60_Type59_Artillery",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Roland, Gepard",
+     "composition": [
+      {
+       "type": "Roland_Radar",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "Roland_ADS",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "Gepard",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_about_ad_templates": "Объектовая ПВО: сторона -> ярус -> варианты состава батареи на позиции ad_sites сектора (ОЦЕНКИ: одна батарея на позицию). Нет шаблона яруса - позиция стоит пустой."
 }
