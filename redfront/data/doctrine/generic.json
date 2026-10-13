@@ -166,6 +166,65 @@
       "low_alt_source": "ОЦЕНКА: вертолёты над полем боя - на предельно малой высоте, с использованием рельефа",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
     },
+    "air_assault": {
+      "title": "Вертолётный десант",
+      "performers": [
+        "transport_helo"
+      ],
+      "target": {
+        "category": "place"
+      },
+      "method": "air_assault",
+      "method_source": "толкование, не цитата: тактический воздушный десант (рота) на вертолётах захватывает пункт в тылу противника - узел дорог, через который идёт его подвоз; удерживает до подхода своих - ОЦЕНКА",
+      "speed_kmh": 220,
+      "transit_alt_m_agl": 50,
+      "attack_alt_m_agl": 30,
+      "ip_offset_km": 0,
+      "low_alt_m_agl": 50,
+      "assault_min_km": 8,
+      "assault_max_km": 50,
+      "lz_clear_km": 10,
+      "lz_offset_km": 2,
+      "lz_radius_m": 800,
+      "land_s": 120,
+      "max_helos": 8,
+      "per_day": 1,
+      "fail_below": 0.4,
+      "ai_loss_per_threat": 0.15,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "assault_min_km",
+        "assault_max_km",
+        "lz_clear_km",
+        "lz_offset_km",
+        "lz_radius_m",
+        "land_s",
+        "max_helos",
+        "per_day",
+        "fail_below",
+        "ai_loss_per_threat"
+      ],
+      "assault_note": "Цель - пункт противника в assault_min_km..assault_max_km от своих пунктов, без частей противника ближе lz_clear_km; лучший - тот, после взятия которого больше складов противника отрезано от подвоза из тыла, затем ближний к цели своей оси. Площадка - в lz_offset_km от пункта в сторону своих. Подразделение (рота, men) поднимает группа транспортных вертолётов (troops борта в aircraft.json, не больше max_helos), садится на площадку на land_s, пехота выходит при посадке (в миссии - скрипт assault.lua). Долетело меньше fail_below подразделения - высадка сорвана. Вылет ИИ вне миссии: потери - ai_loss_per_threat на ЗРК в коридоре. Высадившиеся держат пункт (order airhead) до соединения со своими (снабжение со своих складов). ОЦЕНКИ.",
+      "strike": {
+        "title": "десантная группа",
+        "group_name": "борт",
+        "size": 4,
+        "maintask": [
+          "Transport"
+        ],
+        "loadout": [],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "игрок может вести десантную группу (Ми-8, UH-1H): посадить на площадку",
+        "estimate": true
+      }
+    },
     "strike_depot": {
       "title": "Удар по складу",
       "performers": [
@@ -635,7 +694,8 @@
       "MBT": 1.0,
       "IFV": 0.5,
       "APC": 0.25,
-      "truck": 0.0
+      "truck": 0.0,
+      "infantry": 0.04
     },
     "sim_note": "Абстрактный бой за сутки (ОЦЕНКИ, не из документа): части противоположных сторон ближе contact_km - в соприкосновении (battle). Потери за сутки = battle_loss_k * (сила противника / своя сила), не больше loss_cap; у обороняющегося x defend_factor. Сила - сумма исправной техники с весами role_weight. Ниже combat_ineffective_below часть выходит из боя (halted). Марш - шагами step_km, до соприкосновения. В миссии части в бою стоят линиями в line_offset_km от середины между ними.",
     "posture": "defense",

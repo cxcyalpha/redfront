@@ -119,6 +119,10 @@ def apply(state: dict, data: dict) -> list[str]:
             if fl.get("ato") and state.get("ato"):   # вылет плана полётов: сбитые борта перевозки груз не довозят
                 lost_by = state["ato"].setdefault("lost", {})
                 lost_by[fl["ato"]] = lost_by.get(fl["ato"], 0) + len(lost_ac)
+    for aid, (landed_n, total) in (data.get("assault") or {}).items():   # десант: сколько бортов село (assault.lua)
+        if state.get("ato"):
+            state["ato"].setdefault("assault", {})[aid] = [int(landed_n), int(total)]
+        lines.append(f"Десант: на площадку село {landed_n} из {total} бортов" + (" - рота высажена." if landed_n else "."))
     if not data.get("mission_ended"):
         lines.append("Внимание: миссия не была завершена штатно - применён последний сохранённый срез.")
     if not lines:

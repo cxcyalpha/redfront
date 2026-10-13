@@ -66,6 +66,13 @@ local function targets()
   for id, t in pairs(REDFRONT_TARGETS) do o[#o + 1] = string.format('"%s":[%d,%d]', esc(id), t.n or 0, dead_by[id] or 0) end
   return "{" .. table.concat(o, ",") .. "}"
 end
+-- вертолётный десант (assault.lua): сколько бортов село на площадку из скольких
+local function assault()
+  if type(REDFRONT_ASSAULT) ~= "table" then return "{}" end
+  local o = {}
+  for id, a in pairs(REDFRONT_ASSAULT) do o[#o + 1] = string.format('"%s":[%d,%d]', esc(id), a.landed or 0, a.total or 0) end
+  return "{" .. table.concat(o, ",") .. "}"
+end
 local function positions()
   local o = {}
   for _, n in ipairs(TRACK) do
@@ -83,8 +90,8 @@ local function dump()
   local f = io.open(OUT, "w")
   if not f then return end
   f:write(string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets()))
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s}',
+    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault()))
   f:close()
 end
 local function nameOf(obj)

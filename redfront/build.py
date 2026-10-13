@@ -25,6 +25,7 @@ LUA = Path(__file__).parent / "lua" / "debrief_hook.lua"
 COLUMN_LUA = Path(__file__).parent / "lua" / "column_road.lua"
 FRONT_LUA = Path(__file__).parent / "lua" / "front.lua"
 SITE_LUA = Path(__file__).parent / "lua" / "battle_site.lua"
+ASSAULT_LUA = Path(__file__).parent / "lua" / "assault.lua"
 
 # Бой наземных частей в миссии (lua/front.lua). Все числа - ОЦЕНКИ.
 PLATOON = 4                # машин во взводе (отдельная группа DCS: застрявшая машина не держит всю часть)
@@ -273,6 +274,15 @@ def front_script(campaign_id: str, sortie: int, platoons: list[dict]) -> str:
              f'range = {p["range"]:.0f}, enemies = {{ {", ".join(q(e) for e in p["enemies"])} }} }}' for p in platoons]
     return (FRONT_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
             .replace("@CFG@", cfg).replace("@PLATOONS@", ", ".join(items)))
+
+
+def assault_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
+    """lua/assault.lua: десантные группы - борта, рота (группа с поздней активацией), площадка (x, y DCS), радиус."""
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    items = [f'{{ id = {q(a["id"])}, title = {q(a["title"])}, troops = {q(a["troops"])}, x = {a["x"]:.1f}, y = {a["y"]:.1f}, '
+             f'r = {a["r"]:.0f}, helos = {{ {", ".join(q(n) for n in a["helos"])} }} }}' for a in specs]
+    return (ASSAULT_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
+            .replace("@SPECS@", ", ".join(items)))
 
 
 def _ground_group(m: Mission, state: dict, g: dict, shift_xy: tuple[float, float] = (0.0, 0.0)):
@@ -555,6 +565,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             vg_by_unit[g["unit"]] = platoons[g["unit"]][0][0]
         else:
             vg_by_unit[g["unit"]] = _ground_group(m, state, g, shift_of(g))
+            if g.get("late"):                    # десант на площадке - выходит из вертолётов при посадке (assault.lua)
+                vg_by_unit[g["unit"]].late_activation = True
             if g["kind"] == "gci_site":          # КРУ: наведение включено с начала миссии
                 vg = vg_by_unit[g["unit"]]
                 vg.points[0].tasks.append(ActivateGCI(g["channel"], vg.units[0].id, int(g["radius_km"] * 1000)))
@@ -583,6 +595,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     runway_slots: set = set()
     spd = tdef["speed_kmh"]
     flights, lines, enemy_lines, ai_lines = [], [], [], []
+    assault_specs = []
     enemy = air_activity(state, tk, times, sortie, m0)
     for g in pkg + enemy:
         tdg = g.get("_tdef") or tdef             # группы противника - по его пакету доктрины
@@ -652,6 +665,28 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(model.lerp(start_p, obj["pos"], 0.5), alt, "Маршрут", keep_alt=True)
             land = m.terrain.airports[dest["airport"]]
             g["_dest"] = dest["name"]
+        elif obj["kind"] == "air_assault":       # десант: на малой высоте к площадке, посадка на land_s, домой
+            lz = obj["pos"]
+            low = int(tdg.get("low_alt_m_agl", 50))
+            start_p = g.get("_air_start") or base
+            d = model.dist_km(start_p, lz)
+            if d > 8:
+                wp(model.lerp(lz, start_p, 5 / d), low, "Подход")
+            w = wp(lz, low, "Площадка")
+            c = _pt(m, lz)
+            w.tasks.append(task.Land(Vector2(c.x, c.y), duration=int(tdg.get("land_s", 120))))
+            if d > 8:
+                wp(model.lerp(lz, base, 5 / model.dist_km(base, lz)), low, "Отход")
+            troops = vg_by_unit.get(obj["unit"])
+            if troops is not None and troops.late_activation:   # рота в миссии - только у своей задачи (окно)
+                sid = tk.get("ato_id") or f"task-{sortie}"
+                spec = next((a for a in assault_specs if a["id"] == sid), None)
+                if spec is None:                 # волны десанта (группы по 4 борта) - одна высадка
+                    spec = {"id": sid, "title": state["units"][obj["unit"]]["name"], "troops": troops.name,
+                            "x": c.x, "y": c.y, "r": tdg.get("lz_radius_m", 800), "helos": []}
+                    assault_specs.append(spec)
+                spec["helos"] += [u.name for u in fg.units]
+            g["_lz"] = obj["place"]
         elif obj["kind"] in ("column", "site"):    # ударная группа: колонна, часть в бою, позиция ЗРК
             ip, tgt = g["route"]
             wp(ip, transit, "ИПМ")
@@ -809,6 +844,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     objs = [u for u in state["units"].values() if u.get("role") in TARGET_SCAN and u["state"] == "active"]
     if objs:                                     # объекты тыла - объекты карты в их районе (targets.lua)
         trig.add_action(DoScript(String(targets_script(m, state, objs))))
+    if assault_specs:                            # десант: рота выходит при посадке бортов на площадку (assault.lua)
+        trig.add_action(DoScript(String(assault_script(state["campaign_id"], state["sortie"], assault_specs))))
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода
     m.triggerrules.triggers.append(trig)
 

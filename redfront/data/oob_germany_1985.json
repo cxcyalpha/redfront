@@ -4962,6 +4962,161 @@
    "estimate": true
   },
   {
+   "id": "r35odshbr_1",
+   "name": "1-я десантно-штурмовая рота 35-й одшбр",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Brandenburg",
+   "men": 100,
+   "route": [
+    "Brandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r35odshbr_2",
+   "name": "2-я десантно-штурмовая рота 35-й одшбр",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Brandenburg",
+   "men": 100,
+   "route": [
+    "Brandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r35odshbr_3",
+   "name": "3-я десантно-штурмовая рота 35-й одшбр",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Magdeburg",
+   "men": 100,
+   "route": [
+    "Magdeburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_fschjg271_1",
+   "name": "1./Fallschirmjägerbataillon 271 (Luftlandebrigade 27)",
+   "side": "blue",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Paderborn",
+   "men": 100,
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Soldier_M4_GRG",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier_M249",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "по памяти - проверить (LLBrig 27, Липпштадт); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_fschjg271_2",
+   "name": "2./Fallschirmjägerbataillon 271 (Luftlandebrigade 27)",
+   "side": "blue",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Paderborn",
+   "men": 100,
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Soldier_M4_GRG",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier_M249",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "по памяти - проверить (LLBrig 27, Липпштадт); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
    "id": "r33iap",
    "name": "33-й иап (МиГ-23М/МЛ; в DCS - МиГ-23МЛД)",
    "side": "red",

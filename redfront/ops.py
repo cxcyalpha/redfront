@@ -222,6 +222,8 @@ def _commander(state: dict, side: str) -> list[str]:
         if model.strength(u) < sim["refit_ready"]:
             for c in u["composition"]:
                 u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * sim["refit_in_line"])
+    # десант в резерве и высаженный (держит пункт до подхода своих) - не в распоряжении командования фронта (assault.py)
+    free = [u for u in free if u.get("order") not in ("reserve", "airhead")]
     posture = sim.get("posture") or "defense"
     if posture == "offense" and not any(objective(state, side, u) for u in free):
         posture = "defense"                                       # цели операции достигнуты - удерживать

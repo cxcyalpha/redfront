@@ -123,33 +123,40 @@
     "Mi_8MT": {
       "cruise_kmh": 220,
       "source": "ОЦЕНКА",
-      "cargo_t": 4
+      "cargo_t": 4,
+      "troops": 24
     },
     "Mi_26": {
       "cruise_kmh": 230,
       "source": "ОЦЕНКА",
-      "cargo_t": 20
+      "cargo_t": 20,
+      "troops": 80
     },
     "CH_47D": {
       "cruise_kmh": 240,
       "source": "ОЦЕНКА",
-      "cargo_t": 10
+      "cargo_t": 10,
+      "troops": 33
     },
     "UH_1H": {
       "cruise_kmh": 180,
       "source": "ОЦЕНКА",
-      "cargo_t": 1.5
+      "cargo_t": 1.5,
+      "troops": 11
     },
     "UH_60A": {
       "cruise_kmh": 240,
       "source": "ОЦЕНКА",
-      "cargo_t": 4
+      "cargo_t": 4,
+      "troops": 11
     },
     "CH_53E": {
       "cruise_kmh": 250,
       "source": "ОЦЕНКА",
-      "cargo_t": 13
+      "cargo_t": 13,
+      "troops": 37
     }
   },
-  "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность)."
+  "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность).",
+  "_about_troops": "troops - десантников на борт вертолёта в высадке (ОЦЕНКА по справочной вместимости)."
 }

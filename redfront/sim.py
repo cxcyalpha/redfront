@@ -197,9 +197,11 @@ def end_day(state: dict) -> list[str]:
               and model.strength(u) < _sim(state, u["side"])["combat_ineffective_below"]):
             u["state"] = "halted"
             lines.append(f"{u['name']}: потерял боеспособность ({model.strength(u):.0%}), остановился.")
-    from . import ato                            # ato -> planner -> logistics; план полётов суток - для перевозок и расхода авиации
+    from . import assault, ato                   # ato -> planner -> logistics; план полётов суток - для перевозок и расхода авиации
     ato.ensure(state)
+    lines += assault.resolve(state)              # высадки суток - до снабжения и боя
     lines += logistics.supply(state)
+    lines += assault.linkup(state)
     lines += battles(state)
     for side in model.SIDES:                     # оперативный уровень: задачи частям (ops.py)
         lines += ops.commander(state, side)

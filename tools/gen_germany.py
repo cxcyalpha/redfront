@@ -707,6 +707,23 @@ def relocate(terrain) -> dict[str, str]:
         add(best, cls)
     return out
 
+# ---------------------------------------------------------------- вертолётный десант (роты; ОЦЕНКИ)
+# Подразделение - рота (men человек; в миссии - фигуры пехоты, одна фигура ~ 4 человека). Поднимают транспортные
+# вертолёты стороны (troops борта - aircraft.json). В резерве (order reserve) стоит в пункте home, в бой фронта не
+# идёт - только в высадку (задача air_assault доктрины).
+AIR_ASSAULT = [   # (id, имя, сторона, пункт, [(тип, число)], человек, источник)
+    ("r35odshbr_1", "1-я десантно-штурмовая рота 35-й одшбр", "red", "Brandenburg",
+     [("Paratrooper_AKS_74", 20), ("Paratrooper_RPG_16", 4)], 100, "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА"),
+    ("r35odshbr_2", "2-я десантно-штурмовая рота 35-й одшбр", "red", "Brandenburg",
+     [("Paratrooper_AKS_74", 20), ("Paratrooper_RPG_16", 4)], 100, "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА"),
+    ("r35odshbr_3", "3-я десантно-штурмовая рота 35-й одшбр", "red", "Magdeburg",
+     [("Paratrooper_AKS_74", 20), ("Paratrooper_RPG_16", 4)], 100, "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА"),
+    ("b_fschjg271_1", "1./Fallschirmjägerbataillon 271 (Luftlandebrigade 27)", "blue", "Paderborn",
+     [("Soldier_M4_GRG", 20), ("Soldier_M249", 4)], 100, MEMORY + " (LLBrig 27, Липпштадт); рота - ОЦЕНКА"),
+    ("b_fschjg271_2", "2./Fallschirmjägerbataillon 271 (Luftlandebrigade 27)", "blue", "Paderborn",
+     [("Soldier_M4_GRG", 20), ("Soldier_M249", 4)], 100, MEMORY + " (LLBrig 27, Липпштадт); рота - ОЦЕНКА"),
+]
+
 # ---------------------------------------------------------------- склады (снабжение; уточняются зондом карты)
 DEPOTS = [  # (id, имя, сторона, пункт)
     ("red_depot_1", "Склад снабжения (Людвигслюст)", "red", "Ludwigslust"),
@@ -868,6 +885,12 @@ def main() -> None:
                       "state": "deployed", "pos": {"lat": la, "lon": lo},
                       "composition": [{"type": t, "count": c, "role": r} for t, (r, c) in tpl.items()],
                       "source": MISSION + "; в модели - одна батарея на батальон/полк (ОЦЕНКА)", "estimate": True})
+    for uid, name, side, place, comp, men, src in AIR_ASSAULT:
+        units.append({"id": uid, "name": name, "side": side, "role": "air_assault", "state": "defend", "order": "reserve",
+                      "air_mobile": True, "home": place, "men": men, "route": [place], "progress_km": 0.0,
+                      "march_kmh": 5, "daily_advance_km": 10,
+                      "composition": [{"type": t, "count": c, "role": "infantry"} for t, c in comp],
+                      "source": src, "estimate": True})
     ground_units = units
     for year, date, title in PRESETS:
         units = list(ground_units)

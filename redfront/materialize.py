@@ -259,9 +259,34 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
     return out
 
 
+def airhead(state: dict, unit: dict, pos: dict, density: float = 1.0) -> dict:
+    """Десант на площадке: пехота кругом в AIRHEAD_R_M от точки посадки; в миссии - с поздней активацией (выходит
+    из вертолётов при посадке, lua/assault.lua). Веса - по правилу сохранения."""
+    counts, weight = _deploy(state, model.alive_by_type(unit), density, CAP_NEAR)
+    vehicles = []
+    n = sum(counts.values())
+    for t, c in counts.items():
+        for _ in range(c):
+            k = len(vehicles)
+            p = model.offset(pos, 360.0 * k / max(1, n), AIRHEAD_R_M)
+            vehicles.append({"name": f"{unit['id']}#{k + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"],
+                             "weight": weight[t], "heading": 360.0 * k / max(1, n)})
+    return {"unit": unit["id"], "side": unit["side"], "kind": "airhead", "name": unit["id"], "vehicles": vehicles,
+            "waypoints": [], "speed_kmh": 0, "late": True}
+
+
+AIRHEAD_R_M = 60        # ОЦЕНКА: радиус, в котором пехота стоит после высадки
+
+
 def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     units = state["units"]
     target = units[task["target"]]
+    obj = (task.get("package") or [{}])[0].get("objective") or {}
+    if obj.get("kind") == "air_assault":         # десант: рота на площадке (появится при посадке), ЗРК коридора
+        groups = [airhead(state, target, obj["pos"], density)]
+        groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
+        groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
+        return [g for g in groups if g["vehicles"]]
     if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam"):   # объект тыла - сам в миссии как объекты карты
         groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
         for sid in task["threats"]:

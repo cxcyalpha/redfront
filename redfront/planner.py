@@ -163,6 +163,12 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
             tasks += airlift_tasks(state, side, kind, tdef, performers)
             continue
+        if tdef.get("method") == "air_assault":  # вертолётный десант в тыл противника (assault.py)
+            t = assault_tasks(state, side, kind, tdef, performers, tasked)
+            if not t:
+                reasons.append(f"{tdef['title']}: нет готовой десантной роты, площадки или вертолётов")
+            tasks += t
+            continue
         tside = side if tdef["target"].get("side") == "own" else foe      # прикрытие своих войск - цель своя
         cat = tdef["target"]["category"]
         if cat in STRATEGIC:                     # объекты тыла противника: целы и не потеряны; мост - в тылу противника
@@ -327,6 +333,64 @@ def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                     "performer": perf["id"], "target": d["id"], "group_size": g["size"], "base": perf["base"],
                     "target_pos": g["objective"]["pos"], "ip": g["objective"]["pos"], "distance_km": round(km, 1),
                     "threats": [], "package": [g], "package_notes": "", "ai_only": True})
+    return out
+
+
+GROUP_MAX = 4   # бортов в группе ЛА DCS
+
+
+def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict) -> list[dict]:
+    """Задачи вертолётного десанта (method air_assault): рота из резерва (assault.reserve) на лучший пункт
+    (assault.candidates); группа - транспортная вертолётная часть, которая поднимает роту не больше чем max_helos
+    бортами и достаёт до площадки; не больше per_day задач."""
+    from . import assault
+    res = sorted(assault.reserve(state, side), key=lambda u: -model.strength(u))
+    if not res:
+        return []
+    foe = model.enemy(side)
+    out, used = [], set()
+    places = assault.candidates(state, side, tdef)
+    for u in res:
+        if len(out) >= tdef.get("per_day", 1):
+            break
+        for place in places:
+            if place in used:
+                continue
+            lz = assault.lz_point(state, side, place, tdef)
+            best = None
+            for r in performers:
+                need = assault.lift_need(u, r["type"])
+                if need > min(logistics.available(state, r), tdef.get("max_helos", 8)):
+                    continue
+                km = model.dist_km(state["airbases"][r["base"]], lz)
+                radius = strike_radius_km(r)
+                if radius is not None and km > radius:
+                    continue
+                key = (tasked.get(r["id"], 0), km)
+                if best is None or key < best[0]:
+                    best = (key, r, need)
+            if best is None:
+                continue
+            (_n, km), perf, need = best
+            base = state["airbases"][perf["base"]]
+            threats = corridor_threats(state, [(base, lz)], foe, tdef.get("low_alt_m_agl"))
+            s = tdef["strike"]
+            groups = []                          # группа ЛА в DCS - не больше 4 бортов: подъём - волнами по 4, через минуту
+            for k in range(0, need, GROUP_MAX):
+                groups.append({"group": "strike" if not k else f"lift{k // GROUP_MAX + 1}",
+                               "title": s["title"] + (f" ({k // GROUP_MAX + 1})" if k else ""), "performer": perf["id"],
+                               "size": min(GROUP_MAX, need - k), "base": perf["base"], "route": [lz],
+                               "objective": {"kind": "air_assault", "unit": u["id"], "place": place, "pos": lz},
+                               "maintask": s["maintask"], "loadout": [], "lead_min": -k // GROUP_MAX, "ai": {},
+                               "alt_m": tdef["transit_alt_m_agl"]})
+            tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+            used.add(place)
+            out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}",
+                        "performer": perf["id"], "target": u["id"], "group_size": need, "base": perf["base"],
+                        "target_pos": lz, "ip": lz, "distance_km": round(km, 1), "threats": threats,
+                        "package": groups, "package_notes": f"площадка в {tdef.get('lz_offset_km', 2)} км от {place}; "
+                                                          f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"})
+            break
     return out
 
 
