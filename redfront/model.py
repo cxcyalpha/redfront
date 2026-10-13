@@ -29,6 +29,29 @@ def load_json(name: str | Path) -> dict:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
+# ---------- скорость ЛА ----------
+
+_AIRCRAFT: dict | None = None
+
+
+def cruise_kmh(type_name: str | None) -> float | None:
+    """Крейсерская скорость типа ЛА, км/ч (data/aircraft.json: V_opt из DCS через tools/dcs_cruise.py или ОЦЕНКА)."""
+    global _AIRCRAFT
+    if _AIRCRAFT is None:
+        try:
+            _AIRCRAFT = load_json("aircraft.json").get("types", {})
+        except (OSError, ValueError):
+            _AIRCRAFT = {}
+    rec = _AIRCRAFT.get(type_name or "")
+    return float(rec["cruise_kmh"]) if rec and rec.get("cruise_kmh") else None
+
+
+def group_speed_kmh(state: dict, g: dict, tdef: dict) -> float:
+    """Скорость группы на маршруте и в расчёте времени: крейсерская типа исполнителя, иначе скорость задачи доктрины."""
+    perf = state["units"].get(g.get("performer"), {})
+    return cruise_kmh(perf.get("type")) or tdef["speed_kmh"]
+
+
 # ---------- роли и доктрина ----------
 
 _ROLES: dict | None = None

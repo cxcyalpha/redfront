@@ -998,7 +998,7 @@ def column_road_section(tmp: Path) -> None:
     a = added[0]
     data = a.data
     units = [data.units[i] for i in range(1, len(data.units) + 1)]
-    country = m.country(st["countries"]["blue"])
+    country = m.country(build.MISSION_COUNTRIES["blue"])     # страна стороны в миссии - CJTF Blue
     check(data.name == "blue_pzgren_bn_1" and int(data.groupId) == vg.id and int(a.c) == country.id and int(a.cat) == 2,
           f"группа пересоздана с тем же именем, groupId {vg.id} и страной {country.name}")
     check([u.name for u in units] == [v["name"] for v in col["vehicles"]]
@@ -1401,6 +1401,15 @@ def ato_section(tmp: Path) -> None:
           "к началу миссии вылеты ATO, уже идущие к объекту, - в воздухе на своём маршруте"
           + (f" (задача {air[0]}: {', '.join(g.name for g in air[3])})" if air else ""))
     n, man, m, _late = air or (len(tk), man, m, [])
+    used = {side_: sorted(cn.name for cn in m.coalition[side_].countries.values()
+                          if cn.vehicle_group or cn.plane_group or cn.helicopter_group) for side_ in ("red", "blue")}
+    check(used == {"red": ["Combined Joint Task Forces Red"], "blue": ["Combined Joint Task Forces Blue"]},
+          f"коалиции миссии - Combined Joint Task Forces Red / Blue: {used}")
+    sg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.plane_group if " strike " in g.name][0]
+    perf = st["units"][st["tasks"][n - 1]["performer"]]
+    check(abs(sg.points[1].speed * 3.6 - model.cruise_kmh(perf["type"])) < 1,
+          f"скорость ударной группы на маршруте - крейсерская типа {perf['type']}: {sg.points[1].speed * 3.6:.0f} км/ч "
+          f"(data/aircraft.json)")
     t_ = st["tasks"][n - 1]
     check(m.start_time.hour * 3600 + m.start_time.minute * 60 + m.start_time.second == man["start_s"]
           and man["start_s"] <= t_["takeoff_s"] < man["start_s"] + 15 * 60,
