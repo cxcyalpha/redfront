@@ -163,9 +163,10 @@ const map = L.map("map", {preferCanvas: true}).setView([53.2, 10.6], 9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 16, attribution: "© OpenStreetMap"}).addTo(map);
 const layers = {links: L.layerGroup().addTo(map), places: L.layerGroup().addTo(map), sam: L.layerGroup().addTo(map),
                 ground: L.layerGroup().addTo(map), objects: L.layerGroup().addTo(map), bases: L.layerGroup().addTo(map),
-                task: L.layerGroup().addTo(map)};
+                task: L.layerGroup().addTo(map), supply: L.layerGroup().addTo(map)};
 L.control.layers(null, {"Связи и фронт": layers.links, "Пункты": layers.places, "Зоны ПВО": layers.sam,
-  "Войска": layers.ground, "Тыл": layers.objects, "Аэродромы": layers.bases, "Задача": layers.task}, {collapsed: true}).addTo(map);
+  "Войска": layers.ground, "Тыл": layers.objects, "Пути подвоза": layers.supply, "Аэродромы": layers.bases,
+  "Задача": layers.task}, {collapsed: true}).addTo(map);
 const legend = L.control({position: "bottomright"});
 legend.onAdd = () => { const d = L.DomUtil.create("div", "legend");
   d.innerHTML = "<b>━</b> <span style='color:#e6a23c'>фронт</span> · ⛽ склад · 🏭 завод · 🌉 мост · ✈ аэродром<br>" +
@@ -209,6 +210,9 @@ function drawMap() {
     L.marker(o.pos, {icon: L.divIcon({className: "obj", html: `<span style="opacity:${o.checked ? 1 : .55};filter:${o.damage >= 1 || o.state === "lost" ? "grayscale(1)" : "none"}">${ico}</span>`, iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(o.name)}</b><br>${dmg}${o.checked ? "" : "<br>координаты по оценке"}`).addTo(layers.objects);
   }
+  for (const r of (ST.supply_routes || []))  // свои пути подвоза: толщина - поток (т/сутки)
+    L.polyline(r.pts, {color: "#8d6e63", weight: 2 + Math.min(6, r.t / 150), opacity: .7, dashArray: "2 6"})
+      .bindTooltip(`путь подвоза ${esc(r.link)} · ~${r.t} т/сутки`).addTo(layers.supply);
   for (const d of (ST.downed || [])) {      // свои сбитые экипажи: ждут спасения (CSAR)
     L.marker(d.pos, {icon: L.divIcon({className: "obj", html: "🪂", iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(d.title)}</b><br>на земле с суток ${d.day} · маяк ${d.freq} кГц`).addTo(layers.objects);

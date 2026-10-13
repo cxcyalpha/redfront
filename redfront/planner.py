@@ -163,6 +163,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
             tasks += airlift_tasks(state, side, kind, tdef, performers)
             continue
+        if tdef.get("method") == "interdiction":   # удары по путям подвоза противника (convoys.py)
+            tasks += interdiction_tasks(state, side, kind, tdef, performers, tasked, reasons, per_kind)
+            continue
         if tdef.get("method") == "csar":         # поиск и спасение своих сбитых экипажей (csar.py)
             tasks += csar_tasks(state, side, kind, tdef, performers, tasked)
             continue
@@ -336,6 +339,50 @@ def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                     "performer": perf["id"], "target": d["id"], "group_size": g["size"], "base": perf["base"],
                     "target_pos": g["objective"]["pos"], "ip": g["objective"]["pos"], "distance_km": round(km, 1),
                     "threats": [], "package": [g], "package_notes": "", "ai_only": True})
+    return out
+
+
+def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict,
+                       reasons: list[str], per_kind: int) -> list[dict]:
+    """Удары по путям подвоза (method interdiction): участки путей подвоза противника с потоком не меньше
+    convoys.MIN_FLOW_T, по убыванию потока; исполнитель - в радиусе, с меньшим числом задач; пакет - как у удара
+    (группы обеспечения доктрины). Цель - псевдочасть роли supply_route (в составе сил её нет)."""
+    from . import convoys
+    foe = model.enemy(side)
+    flows = sorted(((t, l) for l, t in convoys.link_flows(state, foe).items() if t >= convoys.MIN_FLOW_T), reverse=True)
+    out = []
+    for t, link in flows:
+        if len(out) >= min(per_kind, tdef.get("per_day", per_kind)):
+            break
+        tpos = convoys.link_mid(state, link)
+        best = None
+        for r in performers:
+            radius = strike_radius_km(r)
+            d = model.dist_km(state["airbases"][r["base"]], tpos)
+            if radius is not None and d <= radius and (best is None or (tasked.get(r["id"], 0), d) < best[0]):
+                best = ((tasked.get(r["id"], 0), d), r)
+        if best is None:
+            continue
+        (_n, d), perf = best
+        cid = convoys.convoy_id(foe, link)
+        tgt = {"id": cid, "role": "supply_route", "side": foe, "state": "march", "name": f"колонны снабжения {link.replace('>', ' - ')}"}
+        base = state["airbases"][perf["base"]]
+        ip = ip_point(base, tpos, tdef["ip_offset_km"])
+        threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe, tdef.get("low_alt_m_agl"))
+        groups, why = package(state, tdef, perf, tgt, tpos, ip, threats)
+        if groups is None:
+            reasons.append(f"{tdef['title']}: {link} - {why}")
+            continue
+        for g in groups:
+            tasked[g["performer"]] = tasked.get(g["performer"], 0) + 1
+        if not threats and tdef.get("medium_alt_m_agl"):
+            for g in groups:
+                g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {link.replace('>', ' - ')} (~{t:.0f} т/сутки)",
+                    "performer": perf["id"], "target": cid, "target_kind": "convoy", "link": link,
+                    "group_size": groups[0]["size"], "base": perf["base"], "target_pos": tpos, "ip": ip,
+                    "distance_km": round(d, 1), "threats": threats, "package": groups,
+                    "package_notes": "; ".join(x for x in (f"поток ~{t / convoys.TRUCK_T:.0f} грузовиков в сутки", why) if x)})
     return out
 
 

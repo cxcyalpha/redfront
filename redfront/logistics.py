@@ -20,7 +20,7 @@ logistics_note), не из документа.
 """
 from __future__ import annotations
 
-from . import model
+from . import convoys, model
 
 
 def _sim(state: dict, side: str) -> dict:
@@ -241,9 +241,16 @@ def supply(state: dict) -> list[str]:
         rooms = {d["id"]: _room(d) for d in ds if d["id"] in conn}
         tot_room = sum(rooms.values())
         road = min(inflow, tot_room)
+        lost_by = convoys.depot_losses(state, side)   # колонны, разбитые на путях подвоза (миссии и удары ИИ)
+        convoy_lost = 0.0
         for d in ds:
             if rooms.get(d["id"]):
-                d["stock_t"] += road * rooms[d["id"]] / tot_room
+                share = road * rooms[d["id"]] / tot_room
+                lost_here = min(share, lost_by.get(d["id"], 0.0))
+                d["stock_t"] += share - lost_here
+                convoy_lost += lost_here
+        road -= convoy_lost
+        (state.get("convoy_losses") or {}).pop(side, None)
         cut = [d for d in ds if d["id"] not in conn and d.get("state") != "lost"]
         for d in cut:
             if not d.get("_cut"):
@@ -288,12 +295,20 @@ def supply(state: dict) -> list[str]:
             got, _p = _draw(state, need, _airbase_node(state, bid), maps, None)
             used += got
             b["supply"] = round(got / need, 3)
+        # потоки путей подвоза на следующие сутки (convoys.py): недостача складов после расхода, в пределах подвоза
+        need = {d["id"]: _room(d) for d in ds if d["id"] in conn}
+        tot_need = sum(need.values())
+        k = min(1.0, inflow / tot_need) if tot_need else 0.0
+        state.setdefault("supply_routes", {})[side] = convoys.forecast(state, side, {i: n * k for i, n in need.items()}, g)
         stock = sum(d.get("stock_t", 0.0) for d in ds)
         cap = sum(d["cap_t"] for d in ds) or 1.0
         state.setdefault("supply_log", {})[side] = {"day": state["day"], "road_t": round(road), "air_t": round(air),
+                                                   "convoy_lost_t": round(convoy_lost),
                                                    "used_t": round(used), "stock_t": round(stock), "cap_t": round(cap),
                                                    "cut": [d["id"] for d in cut]}
-        lines.append(f"Тыл ({'красные' if side == 'red' else 'синие'}): подвоз {road:.0f} т, воздухом {air:.0f} т, "
+        lines.append(f"Тыл ({'красные' if side == 'red' else 'синие'}): подвоз {road:.0f} т"
+                     + (f" (колонны разбиты - недовезено {convoy_lost:.0f} т)" if convoy_lost >= 0.5 else "")
+                     + f", воздухом {air:.0f} т, "
                      f"расход {used:.0f} т; запас складов {stock:.0f} т ({stock / cap:.0%}).")
     return lines
 

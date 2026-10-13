@@ -20,6 +20,7 @@
     "gci":            {"title": "командный пункт наведения (КРУ, GCI)", "category": "gci"},
     "depot":          {"title": "склад снабжения",               "category": "depot"},
     "bridge":         {"title": "мост",                          "category": "bridge"},
+    "supply_route":   {"title": "путь подвоза (колонны снабжения)", "category": "convoy"},
     "airfield":       {"title": "военный аэродром",              "category": "airfield"},
     "factory":        {"title": "завод (промышленный объект)",   "category": "factory"}
   },

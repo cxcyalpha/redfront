@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim
+from . import ato, convoys, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -133,6 +133,9 @@ def view(st: dict) -> dict:
                      for k, b in st["airbases"].items()],
         "tasks": tasks, "task_reason": st.get("task_reason") if not tasks else None,
         "supply_log": st.get("supply_log") or {},
+        "supply_routes": [{"pts": [_ll(q) for q in model.route_points(st, {"route": l.split(">")})], "t": round(t),
+                           "link": l.replace(">", " - ")}
+                          for l, t in convoys.link_flows(st, st["player_side"]).items()],   # свои пути подвоза (поток, т/сутки)
         "downed": [{"id": d["id"], "side": d["side"], "pos": _ll(d["pos"]), "freq": d["freq_khz"], "day": d["day"],
                     "title": csar.title(st, d)} for d in st.get("downed", [])
                    if d["side"] == st["player_side"]],    # свои сбитые экипажи (чужие - не видны)
@@ -207,7 +210,7 @@ class App:
                                     seed=int(seed) if str(seed or "").strip() else None,
                                     variant=req.get("variant") or None, randomness=not req.get("norandom"))
             sid = roads.sector_id(sec_f)
-            rf = saved_games_file(f"roads_{sid}.json", self.home)
+            rf = saved_games_file(f"roads_{sid}.json", self.home) or roads.bundled(sid)   # свой зонд, иначе - из поставки
             if rf:
                 roads.apply(st, roads.load(rf))
                 lines.append(f"Дороги: {rf}")

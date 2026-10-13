@@ -119,6 +119,15 @@ def apply(state: dict, data: dict) -> list[str]:
             if fl.get("ato") and state.get("ato"):   # вылет плана полётов: сбитые борта перевозки груз не довозят
                 lost_by = state["ato"].setdefault("lost", {})
                 lost_by[fl["ato"]] = lost_by.get(fl["ato"], 0) + len(lost_ac)
+    from . import convoys                       # колонны снабжения: сожжённые машины - недовезённые тонны
+    for cv in man.get("convoys") or []:
+        dead_w = sum(v["weight"] for v in cv["vehicles"] if v["name"] in lost)
+        if dead_w > 0:
+            t = dead_w * convoys.TRUCK_T
+            convoys.add_loss(state, cv["side"], cv["link"], t)
+            n = sum(1 for v in cv["vehicles"] if v["name"] in lost)
+            lines.append(f"Колонна снабжения {cv['link'].replace('>', ' - ')}: уничтожено {n} из {len(cv['vehicles'])} машин "
+                         f"(~{dead_w:.1f} грузовиков потока), недовоз ~{t:.0f} т.")
     from . import csar                          # экипажи сбитых и спасения в миссии (csar.lua)
     lines += csar.apply_debrief(state, man, data, lost)
     for aid, (landed_n, total) in (data.get("assault") or {}).items():   # десант: сколько бортов село (assault.lua)

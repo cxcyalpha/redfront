@@ -74,6 +74,12 @@ def probe(out_path: Path, sector: str | Path = "sector_hamburg.json", oob: str |
     return {"file": str(out_path), "sector": sid, "pairs": [f"{a}>{b}" for a, b in pairs]}
 
 
+def bundled(sector_id_: str) -> Path | None:
+    """Файл дорог из поставки (data/roads_<сектор>.json - зонд, сделанный автором и положенный в проект), если есть."""
+    p = model.DATA / f"roads_{sector_id_}.json"
+    return p if p.is_file() else None
+
+
 def load(path: Path) -> dict:
     """Файл зонда -> {"sector", "paths": {"A>B": [{lat, lon}, ...]}, "errors": {...}}."""
     return from_raw(json.loads(Path(path).read_text(encoding="utf-8")))
@@ -102,6 +108,7 @@ def apply(state: dict, roads: dict, note: bool = True) -> list[str]:
     marching = [u for u in state["units"].values() if "route" in u]
     before = {u["id"]: model.unit_pos(state, u) for u in marching}
     state["roads"] = {**state.get("roads", {}), **roads["paths"]}
+    state["road_km"] = {k: round(model.route_length_km(v), 2) for k, v in state["roads"].items()}   # длины - для графа (ops)
     lines = []
     for u in marching:
         pts = model.route_points(state, u)

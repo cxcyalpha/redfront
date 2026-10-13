@@ -133,8 +133,8 @@ task.wrappedactions.setdefault(ActivateGCI.Key, ActivateGCI)   # pydcs чита�
 def ground_options(state: dict, g: dict) -> list[tuple[int, int]]:
     """Опции наземной группы: всё, кроме ПВО, стреляет только по наземным целям (OptRestrictTargets = GroundUnitsOnly).
     Наземные юниты в DCS по ЛА бьют неестественно точно; ПВО (ЗРК, ЗА) - без ограничения."""
-    if g["kind"] == "downed" or model.category(state["units"][g["unit"]]) in ("sam", "gci"):
-        return []                                # экипаж на земле - не часть модели, огонь не ведёт (csar.lua)
+    if g["kind"] in ("downed", "convoy") or model.category(state["units"][g["unit"]]) in ("sam", "gci"):
+        return []                                # экипаж на земле, колонна снабжения - не части модели, огонь не ведут
     return [(task.OptRestrictTargets.Key, int(task.OptRestrictTargets.Values.GroundUnitsOnly))]
 
 
@@ -325,7 +325,7 @@ def _ground_group(m: Mission, state: dict, g: dict, shift_xy: tuple[float, float
         pos = Point(p0.x + shift_xy[0], p0.y + shift_xy[1], m.terrain)
         if vg is None:
             vg = m.vehicle_group(country, g["name"], dcstypes.vehicle(v["type"]), pos, group_size=1,
-                                 move_formation=PointAction.OnRoad if g["kind"] == "column" else PointAction.OffRoad)
+                                 move_formation=PointAction.OnRoad if g["kind"] in ("column", "convoy") else PointAction.OffRoad)
             vg.units[0].name = v["name"]
         else:
             u = m.vehicle(v["name"], dcstypes.vehicle(v["type"]))
@@ -333,7 +333,7 @@ def _ground_group(m: Mission, state: dict, g: dict, shift_xy: tuple[float, float
             vg.add_unit(u)
         if "heading" in v:                         # курс задан шаблоном (позиция ЗРК развёрнута на ось угрозы)
             vg.units[-1].heading = v["heading"]
-        elif g["kind"] == "column":                # в колонне машина смотрит на впереди идущую (или на следующий пункт маршрута)
+        elif g["kind"] in ("column", "convoy"):    # в колонне машина смотрит на впереди идущую (или на следующий пункт маршрута)
             nxt = vs[i - 1] if i > 0 else (g["waypoints"][0] if g["waypoints"] else None)
             if nxt is not None:
                 vg.units[-1].heading = pos.heading_between_point(_pt(m, nxt))
@@ -939,7 +939,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "battle_keys": keys,
         "objects": [o["id"] for o in objs],              # объекты тыла, по которым миссия считает разрушения
         "ground": [{"unit": g["unit"], "kind": g["kind"], "cluster": g.get("cluster"), "vehicles": [{"name": v["name"], "type": v["type"], "weight": v["weight"]} for v in g["vehicles"]]}
-                   for g in groups if g["kind"] != "downed"],    # экипажи на земле - не части модели (csar.py)
+                   for g in groups if g["kind"] not in ("downed", "convoy")],   # экипажи, колонны снабжения - не части модели
+        "convoys": [{"unit": g["unit"], "side": g["side"], "link": g["link"],      # колонны снабжения: потери - недовоз (convoys.py)
+                     "vehicles": [{"name": v["name"], "weight": v["weight"]} for v in g["vehicles"]]}
+                    for g in groups if g["kind"] == "convoy"],
         "downed": [d["id"] for d in downed],             # экипажи на земле в миссии (их может спасти вертолёт)
     }
     state["manifest"] = manifest

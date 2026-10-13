@@ -25,6 +25,7 @@ CAP_MID = 24            # машин в группе ближе DETAIL_KM к ц�
 CAP_TOKEN = 4           # машин в группе дальше DETAIL_KM - присутствие на фронте, а не бой
 CAP_AD_NEAR, CAP_AD_FAR = 8, 2   # приданная ПВО
 DETAIL_KM = 60
+CONVOY_KM = 40          # ОЦЕНКА: колонны снабжения в миссии - на участках ближе стольких км к цели
 SAM_KM = 250            # ЗРК дальше от цели в миссию не ставятся
 SAM_KM_ROLE = {"sam_short": 100}   # ПВО объекта (ближний ярус) - только ближе (ОЦЕНКА: нагрузка на DCS, по маршруту - window)
 
@@ -290,6 +291,13 @@ def downed_group(state: dict, d: dict) -> dict:
 def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     units = state["units"]
     obj = (task.get("package") or [{}])[0].get("objective") or {}
+    if task.get("target_kind") == "convoy":      # удар по пути подвоза: колонна на участке, ЗРК коридора
+        from . import convoys
+        side = model.enemy(task["side"])
+        groups = [convoys.group(state, side, task["link"], convoys.link_flows(state, side).get(task["link"], 0.0), density)]
+        groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
+        groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
+        return [g for g in groups if g["vehicles"]]
     if obj.get("kind") == "csar":                # поиск и спасение: экипаж на земле, ЗРК коридора
         d = next((x for x in state.get("downed", []) if x["id"] == obj["downed"]), None)
         groups = [downed_group(state, d)] if d else []
@@ -411,6 +419,10 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
                 and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
                 and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM_ROLE.get(u["role"], SAM_KM)):
             groups.append(sam_site(state, u))
+    from . import convoys                        # колонны снабжения на участках с потоком рядом (обе стороны)
+    for side, link, t in convoys.near(state, center, CONVOY_KM):
+        if convoys.convoy_id(side, link) not in placed:
+            groups.append(convoys.group(state, side, link, t, far))
     for d in state.get("downed", []):           # сбитые экипажи обеих сторон рядом - их можно спасти (или перехватить спасателей)
         if d["id"] not in placed and model.dist_km(d["pos"], center) <= DETAIL_KM:
             groups.append({**downed_group(state, d), "core": True})   # одна фигура - бюджет её не трогает

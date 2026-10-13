@@ -29,7 +29,7 @@ def _sim(state: dict, side: str) -> dict:
 
 
 def graph(state: dict) -> dict[str, dict[str, float]]:
-    """Граф пунктов; связи с разрушенным большим мостом закрыты, с разрушенным малым - длиннее на объезд
+    """Граф пунктов (км - по дороге, если она известна); связи с разрушенным большим мостом закрыты, с разрушенным малым - длиннее на объезд
     (logistics.link_open / link_detour - здесь то же правило одним проходом по мостам: граф строится часто)."""
     from . import logistics
     closed, detour = set(), set()
@@ -39,11 +39,12 @@ def graph(state: dict) -> dict[str, dict[str, float]]:
                 (detour if logistics.is_minor(br) else closed).add(frozenset(l))
     extra = model.doctrine(state, state["player_side"])["sim"].get("bridge_detour_km", 0) if detour else 0
     g: dict[str, dict[str, float]] = {p: {} for p in state["places"]}
+    rk = state.get("road_km") or {}              # длина по дороге (roads.apply), иначе - по прямой
     for a, b in state.get("links", []):
         k = frozenset((a, b))
         if k in closed:
             continue
-        d = model.dist_km(state["places"][a], state["places"][b])
+        d = rk.get(f"{a}>{b}") or rk.get(f"{b}>{a}") or model.dist_km(state["places"][a], state["places"][b])
         if k in detour:                                  # разрушен малый мост - объезд (ОЦЕНКА, sim.bridge_detour_km)
             d += extra
         g[a][b] = g[b][a] = d

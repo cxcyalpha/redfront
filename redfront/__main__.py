@@ -181,8 +181,9 @@ def main(argv=None) -> int:
         pk = dict(kv.split("=", 1) for kv in a.doctrine)
         st = model.new_campaign(a.name, a.date, sector=a.sector, oob=a.oob, player_side=a.side, packages=pk,
                                 seed=a.seed, variant=a.variant, randomness=not a.no_random)
-        if a.roads:
-            for ln in roads.apply(st, roads.load(Path(a.roads))):
+        rf = Path(a.roads) if a.roads else roads.bundled(roads.sector_id(a.sector))   # без --roads - из поставки, если есть
+        if rf:
+            for ln in roads.apply(st, roads.load(rf)):
                 print(ln)
         model.save(st, path)
         print(status(st))

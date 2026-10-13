@@ -2111,10 +2111,71 @@ def csar_section(tmp: Path) -> None:
           "сутки: экипаж на своей территории вышел к своим (в полку), на чужой - в плену (без случайности - на вторые сутки)")
 
 
+def convoy_section(tmp: Path) -> None:
+    """Дороги и пути подвоза: граф по длине дорог, потоки складов по путям из тыла, колонны снабжения в миссии,
+    удар по пути подвоза (миссия и ИИ) - недовоз."""
+    from redfront import ato, convoys, logistics, ops, roads
+    print("\n== пути подвоза и колонны снабжения ==")
+    st = model.new_campaign("cv", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    a, b = st["links"][0]
+    pa, pb = st["places"][a], st["places"][b]
+    straight = model.dist_km(pa, pb)
+    bend = model.offset(model.lerp(pa, pb, 0.5), model.bearing_deg(pa, pb) + 90, straight * 300)   # дорога в объезд
+    roads.apply(st, {"paths": {f"{a}>{b}": [dict(pa), bend, dict(pb)]}}, note=False)
+    g = ops.graph(st)
+    check(abs(g[a][b] - st["road_km"][f"{a}>{b}"]) < 1e-6 and g[a][b] > straight * 1.1,
+          f"граф пунктов - по длине дороги, если она известна ({a} - {b}: {g[a][b]:.1f} км по дороге, {straight:.1f} по прямой)")
+    sim.end_day(st)
+    flows = {side: convoys.link_flows(st, side) for side in model.SIDES}
+    rs = convoys.routes(st, "red")
+    check(all(flows.values()) and rs and all(st["places"][r["path"][0]]["side"] == "red"
+                                             and st["units"][r["depot"]]["place"] == r["path"][-1] for r in rs),
+          f"пути подвоза: от пунктов входа (тыл) до складов; участков с потоком - красные {len(flows['red'])}, синие "
+          f"{len(flows['blue'])}; больше всего - {max(flows['blue'], key=flows['blue'].get)} (~{max(flows['blue'].values()):.0f} т/сутки)")
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "strike_supply_route"), None)
+    tk = st["tasks"][n - 1] if n else None
+    check(tk and tk["link"] in flows["blue"] and flows["blue"][tk["link"]] >= convoys.MIN_FLOW_T,
+          f"в плане дня - {tk['title'] if tk else '-'} ({tk['package_notes'] if tk else ''})")
+    man = build.build(st, tmp / "convoy.miz", task_no=n)
+    cv = next(c for c in man["convoys"] if c["link"] == tk["link"])
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "convoy.miz"))
+    vg = next(gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.vehicle_group if gr.name == cv["unit"])
+    strike = next(gr for gr in plane_groups(m) if " strike " in gr.name)
+    attacks = [t for p in strike.points for t in p.tasks if getattr(t, "id", None) == "AttackGroup"]
+    w = sum(v["weight"] for v in cv["vehicles"])
+    check(len(vg.units) == len(cv["vehicles"]) and abs(w - flows["blue"][tk["link"]] / convoys.TRUCK_T * convoys.WINDOW_SHARE) < 1e-6
+          and attacks and all(g_["unit"] != cv["unit"] for g_ in man["ground"]),
+          f"миссия: колонна {len(vg.units)} грузовиков на участке (вес - {w:.1f} грузовиков потока), ударная группа "
+          "атакует её (AttackGroup); в манифесте частей её нет - отдельно, как колонна снабжения")
+    # дебриф: сожжено 3 машины - недовоз; конец суток - склад получил меньше
+    dead = [v["name"] for v in cv["vehicles"][:3]]
+    data = {"campaign": st["campaign_id"], "sortie": man["sortie"], "dead": dead, "ejected": [], "mission_ended": True}
+    lines = debrief.apply(st, data)
+    lost_t = sum(v["weight"] for v in cv["vehicles"][:3]) * convoys.TRUCK_T
+    got = st["convoy_losses"]["blue"][tk["link"]]
+    check(abs(got - lost_t) < 1e-6 and any("Колонна снабжения" in ln for ln in lines),
+          f"дебриф: сожжено 3 машины колонны - недовоз ~{got:.0f} т на участке")
+    by_depot = convoys.depot_losses(st, "blue")
+    check(abs(sum(by_depot.values()) - got) < 1e-6,
+          f"недовоз ложится на склады, чьи пути идут через участок: {', '.join(f'{k} {v:.0f} т' for k, v in by_depot.items())}")
+    # удар ИИ вне миссии (без случайности - удачный при вероятности от 50%)
+    st2 = model.new_campaign("cv2", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    st2["settings"]["randomness"] = False
+    sim.end_day(st2)
+    a2 = ato.ensure(st2)
+    e = next((e for e in a2["entries"] if e["kind"] == "strike_supply_route"), None)
+    lines = convoys.daily(st2) if e else []
+    foe = model.enemy(e["side"]) if e else "blue"
+    check(e and (st2.get("convoy_losses") or {}).get(foe, {}).get(e["task"]["link"], 0) > 0 and lines,
+          f"удар ИИ по пути подвоза вне миссии: {lines[0] if lines else '-'}")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
-            supply_section, assault_section, csar_section]
+            supply_section, assault_section, csar_section, convoy_section]
 
 
 def main() -> int:
