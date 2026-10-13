@@ -268,6 +268,30 @@ AD_TEMPLATES = {   # ярус -> варианты; позиция берёт в�
     },
 }
 AD_TIER_TITLE = {"long": "ЗРК большой дальности", "medium": "ЗРК средней дальности", "short": "ПВО объекта"}
+# КРУ (GCI): в DCS наведением пользуется только игрок на МиГ-29 - пункт у каждого аэродрома красных, где базируется
+# МиГ-29, рядом с ПВО аэродрома (в AD_GCI_OFFSET_KM от центра к фронту); у каждого - свой канал, радиус GCI_RADIUS_KM
+AD_GCI_TYPES = ("MiG_29_Fulcrum", "MiG_29S", "MiG_29A")
+AD_GCI_OFFSET_KM = 3
+GCI_RADIUS_KM = 250
+AD_TEMPLATES["red"]["gci"] = [{"name": "КРУ", "composition": [("GCI_station_MiG29", "control", 1)]}]
+
+
+def gci_sites(places: dict, links: set, airbase_pos: dict, air: list) -> list[dict]:
+    """КРУ у аэродромов красных, где по составу сил базируется МиГ-29 (AD_GCI_TYPES); канал - по порядку с 1."""
+    border = [((places[a]["lat"] + places[b]["lat"]) / 2, (places[a]["lon"] + places[b]["lon"]) / 2)
+              for a, b in links if places[a]["side"] != places[b]["side"]]
+    bases = sorted({base.lower().replace(" ", "_") for _uid, _n, side, _r, typ, base, *_ in air
+                    if side == "red" and typ in AD_GCI_TYPES})
+    out = []
+    for k, bid in enumerate(bases, 1):
+        la, lo, _side, name = airbase_pos[bid]
+        q = min(border, key=lambda q: dist_km((la, lo), q))
+        f = min(1.0, AD_GCI_OFFSET_KM / (dist_km((la, lo), q) or 1.0))
+        out.append({"id": f"red_gci_{bid}", "name": f"КРУ аэродрома {name}", "side": "red", "tier": "gci",
+                    "covers": f"af_{bid}", "lat": round(la + (q[0] - la) * f, 4), "lon": round(lo + (q[1] - lo) * f, 4),
+                    "variant": 0, "channel": k, "radius_km": GCI_RADIUS_KM,
+                    "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"})
+    return out
 
 
 def ad_sites(places: dict, links: set, airbase_pos: dict, airports: list[tuple[float, float]] = ()) -> list[dict]:
@@ -475,7 +499,7 @@ def main() -> None:
         ll = terrain.airports[b["airport"]].position.latlng()
         af_pos[bid] = (ll.lat, ll.lng, b["side"], b["name"])
     all_af = [(ap.position.latlng().lat, ap.position.latlng().lng) for ap in terrain.airports.values()]
-    sites = ad_sites(places, links, af_pos, all_af)
+    sites = ad_sites(places, links, af_pos, all_af) + gci_sites(places, links, af_pos, AIR)
     sector = {
         "_about": "Театр всей карты Cold War Germany: внутригерманская граница от Балтики до Хофа. Генерирован "
                   "tools/gen_germany.py. Координаты пунктов - ОЦЕНКИ (по памяти, +-2 км), пункты и связи сектора "

@@ -14,6 +14,7 @@
     "sam_long":       {"title": "ЗРК большой дальности",        "category": "sam",  "threat_radius_km": null},
     "sam_medium":     {"title": "ЗРК средней дальности",        "category": "sam",  "threat_radius_km": null},
     "sam_short":      {"title": "ЗРК малой дальности, войсковая ПВО", "category": "sam", "threat_radius_km": null},
+    "gci":            {"title": "командный пункт наведения (КРУ, GCI)", "category": "gci"},
     "depot":          {"title": "склад снабжения",               "category": "depot"},
     "bridge":         {"title": "мост",                          "category": "bridge"},
     "airfield":       {"title": "военный аэродром",              "category": "airfield"},

@@ -2763,6 +2763,32 @@
    "lon": 12.4886,
    "variant": 1,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
+  },
+  {
+   "id": "red_gci_merseburg",
+   "name": "КРУ аэродрома Merseburg",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_merseburg",
+   "lat": 51.3683,
+   "lon": 11.9073,
+   "variant": 0,
+   "channel": 1,
+   "radius_km": 250,
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_wittstock",
+   "name": "КРУ аэродрома Wittstock",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_wittstock",
+   "lat": 53.1937,
+   "lon": 12.4804,
+   "variant": 0,
+   "channel": 2,
+   "radius_km": 250,
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
   }
  ],
  "_about_ad_sites": "Позиции объектовой ПВО по ярусам (long / medium / short) - ОЦЕНКА по правилам tools/gen_germany.py (ad_sites), не документ: у аэродромов, покрытие красных аэродромов и пунктов, дальний ярус в глубине. Модель на позиции - шаблон стороны (ad_templates в составе сил)."

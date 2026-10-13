@@ -155,3 +155,33 @@ def ensure(state: dict) -> dict:
 def in_window(e: dict, t0: float, t1: float, group: str = "strike") -> bool:
     t = e["times"].get(group) or next(iter(e["times"].values()))
     return t["takeoff_s"] < t1 and t["land_s"] > t0
+
+
+def rows(state: dict, sides: tuple[str, ...] = model.SIDES) -> list[dict]:
+    """План полётов для показа (окно, консоль): вылеты сторон sides по времени. План противника - отладка
+    ("читы"): в игре его видеть не положено."""
+    a = state.get("ato")
+    if not a:
+        return []
+    units, clock = state["units"], state.get("clock_s") or 0
+    out = []
+    for e in a["entries"]:
+        if e["side"] not in sides:
+            continue
+        g = e["task"]["package"][0]
+        perf = units.get(g["performer"], {})
+        t = e["times"][g["group"]]
+        tgt = units.get(e["task"].get("target"), {})
+        status = ("слетан игроком" if e["id"] in a["done"] else "прошёл" if t["land_s"] <= clock
+                  else "в воздухе" if t["takeoff_s"] <= clock else "по плану")
+        out.append({"id": e["id"], "side": e["side"], "kind": e["kind"], "title": e["title"],
+                    "target": tgt.get("name", ""), "duty": e["ai_only"],
+                    "takeoff": hhmm(t["takeoff_s"]), "tot": hhmm(e["tot_s"]), "land": hhmm(t["land_s"]),
+                    "end": hhmm(t["station_end_s"]) if "station_end_s" in t else None,
+                    "groups": [f"{x['title']}: {x['size']} x {units.get(x['performer'], {}).get('type', '?')} "
+                               f"({units.get(x['performer'], {}).get('name', x['performer'])}, "
+                               f"{state['airbases'].get(x['base'], {}).get('name', x['base'])})"
+                               for x in e["task"]["package"]],
+                    "threats": [units[x]["name"] for x in e["task"].get("threats", []) if x in units],
+                    "status": status, "perf_type": perf.get("type", "")})
+    return out

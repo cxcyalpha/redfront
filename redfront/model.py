@@ -260,17 +260,21 @@ def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
             u.setdefault("count0", u.get("count", 0))   # штат - до него идёт пополнение
         units[u["id"]] = u
     # объектовая ПВО: позиция сектора (ad_sites: место и ярус) + шаблон стороны из состава сил (ad_templates)
-    tier_role = {"long": "sam_long", "medium": "sam_medium", "short": "sam_short"}
+    tier_role = {"long": "sam_long", "medium": "sam_medium", "short": "sam_short", "gci": "gci"}
     for site in sec.get("ad_sites", []):
         variants = ((forces.get("ad_templates") or {}).get(site["side"]) or {}).get(site["tier"]) or []
         if not variants or site["id"] in units:
             continue                               # нет шаблона яруса у стороны - позиция пустая
         tpl = variants[site.get("variant", 0) % len(variants)]
-        units[site["id"]] = {"id": site["id"], "name": f"{site['name']}: {tpl['name']}", "side": site["side"],
+        name = site["name"] if tpl["name"] in site["name"] else f"{site['name']}: {tpl['name']}"
+        units[site["id"]] = {"id": site["id"], "name": name, "side": site["side"],
                              "role": tier_role[site["tier"]], "state": "deployed", "fixed": True,
                              "pos": {"lat": site["lat"], "lon": site["lon"]}, "covers": site.get("covers"),
                              "composition": copy.deepcopy(tpl["composition"]), "lost": {},
                              "source": f"позиция - {site.get('rule', 'сектор')}; состав - шаблон стороны", "estimate": True}
+        for k in ("channel", "radius_km"):         # КРУ: канал и радиус наведения
+            if k in site:
+                units[site["id"]][k] = site[k]
     # объекты в тылу - цели ударов: склады, мосты, аэродромы (повреждение 0..1, восстановление - sim)
     for d in [*sec.get("depots", []), *[{**f, "_role": "factory"} for f in sec.get("factories", [])]]:   # заводы - как склады
         pl = sec["places"][d["place"]]
