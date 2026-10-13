@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, debrief, logistics, mapobj, model, ops, planner, roads, sim
+from . import ato, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -82,7 +82,8 @@ def view(st: dict) -> dict:
             b = st["airbases"].get(u["base"], {})
             air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
                         "count": u.get("count", 0), "count0": u.get("count0", u.get("count", 0)),
-                        "available": logistics.available(st, u), "base": b.get("name", u["base"])})
+                        "available": logistics.available(st, u), "base": b.get("name", u["base"]),
+                        "crews": u.get("crews"), "crews0": u.get("crews0")})
         elif cat in ("ground", "sam", "gci"):
             if u["state"] == "pending":
                 pos = st["places"][u["route"][0]] if u.get("route") else u.get("pos")
@@ -132,6 +133,9 @@ def view(st: dict) -> dict:
                      for k, b in st["airbases"].items()],
         "tasks": tasks, "task_reason": st.get("task_reason") if not tasks else None,
         "supply_log": st.get("supply_log") or {},
+        "downed": [{"id": d["id"], "side": d["side"], "pos": _ll(d["pos"]), "freq": d["freq_khz"], "day": d["day"],
+                    "title": csar.title(st, d)} for d in st.get("downed", [])
+                   if d["side"] == st["player_side"]],    # свои сбитые экипажи (чужие - не видны)
         "ato": ato.rows(st), "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],

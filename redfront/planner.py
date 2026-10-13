@@ -163,6 +163,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
             tasks += airlift_tasks(state, side, kind, tdef, performers)
             continue
+        if tdef.get("method") == "csar":         # поиск и спасение своих сбитых экипажей (csar.py)
+            tasks += csar_tasks(state, side, kind, tdef, performers, tasked)
+            continue
         if tdef.get("method") == "air_assault":  # вертолётный десант в тыл противника (assault.py)
             t = assault_tasks(state, side, kind, tdef, performers, tasked)
             if not t:
@@ -333,6 +336,42 @@ def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                     "performer": perf["id"], "target": d["id"], "group_size": g["size"], "base": perf["base"],
                     "target_pos": g["objective"]["pos"], "ip": g["objective"]["pos"], "distance_km": round(km, 1),
                     "threats": [], "package": [g], "package_notes": "", "ai_only": True})
+    return out
+
+
+def csar_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict) -> list[dict]:
+    """Задачи поиска и спасения (method csar): свои экипажи на земле не на своей территории (со своей выйдут сами),
+    ближние к вертолётным частям первыми; группа - ближняя вертолётная часть в радиусе; не больше per_day."""
+    from . import csar
+    foe = model.enemy(side)
+    out = []
+    downed = [d for d in state.get("downed", []) if d["side"] == side and csar.owner_at(state, d["pos"]) != side]
+    s = tdef["strike"]
+    cands = []
+    for d in downed:
+        best = None
+        for r in performers:
+            km = model.dist_km(state["airbases"][r["base"]], d["pos"])
+            radius = strike_radius_km(r)
+            if (radius is not None and km > radius) or logistics.available(state, r) < 1:
+                continue
+            key = (tasked.get(r["id"], 0), km)
+            if best is None or key < best[0]:
+                best = (key, r)
+        if best:
+            cands.append((best[0][1], d, best[1]))
+    for km, d, perf in sorted(cands, key=lambda x: x[0])[:tdef.get("per_day", 2)]:
+        base = state["airbases"][perf["base"]]
+        size = min(s["size"], logistics.available(state, perf))
+        g = {"group": "strike", "title": s["title"], "performer": perf["id"], "size": size, "base": perf["base"],
+             "route": [dict(d["pos"])], "objective": {"kind": "csar", "downed": d["id"], "pos": dict(d["pos"])},
+             "maintask": s["maintask"], "loadout": [], "lead_min": 0, "ai": {}, "alt_m": tdef["transit_alt_m_agl"]}
+        tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {csar.title(state, d)}",
+                    "performer": perf["id"], "target": d["id"], "group_size": size, "base": perf["base"],
+                    "target_pos": dict(d["pos"]), "ip": dict(d["pos"]), "distance_km": round(km, 1),
+                    "threats": corridor_threats(state, [(base, d["pos"])], foe, tdef.get("low_alt_m_agl")),
+                    "package": [g], "package_notes": f"маяк {d['freq_khz']} кГц (АРК / ADF); на земле с суток {d['day']}"})
     return out
 
 

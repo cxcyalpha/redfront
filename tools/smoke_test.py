@@ -949,8 +949,9 @@ def column_road_section(tmp: Path) -> None:
     trig = m.triggerrules.triggers[0]
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in trig.actions]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
-          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront debrief hook"],
-          "без известных дорог: в триггере старта скрипт перекладки колонны, затем хук")
+          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront csar",
+                        "-- redfront debrief hook"],
+          "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
         return
@@ -1932,10 +1933,155 @@ def assault_section(tmp: Path) -> None:
     check(u["order"] is None and any("соединилась" in ln for ln in lines), "пункт взят и снабжение со своих складов - десант соединился со своими, обычная часть")
 
 
+CSAR_MOCK = r"""
+T = 0; SCHED = {}; MSG = {}; RADIO = {}; STOPPED = {}; ADDED = {}; G = {}; HELIS = { [1] = {}, [2] = {} }; MENUS = {}
+timer = { getTime = function() return T end, scheduleFunction = function(f, a, t) SCHED[#SCHED + 1] = { f = f, a = a, t = t } end }
+function runDue()
+  local again = {}
+  for _, s in ipairs(SCHED) do
+    if s.t <= T then local r = s.f(s.a, T); if r then again[#again + 1] = { f = s.f, a = s.a, t = r } end
+    else again[#again + 1] = s end
+  end
+  SCHED = again
+end
+env = { info = function() end, warning = function() end }
+AI = { Option = { Ground = { id = { ROE = 0 }, val = { ROE = { WEAPON_HOLD = 4 } } } } }
+Unit = { Category = { HELICOPTER = 1 } }
+Group = { Category = { GROUND = 2, HELICOPTER = 1 } }
+world = { event = { S_EVENT_BIRTH = 15, S_EVENT_EJECTION = 6, S_EVENT_LAND = 4, S_EVENT_DEAD = 8, S_EVENT_CRASH = 5 }, handlers = {} }
+function world.addEventHandler(h) world.handlers[#world.handlers + 1] = h end
+trigger = { action = {
+  radioTransmission = function(f, p, mod, loop, fr, pw, name) RADIO[name] = fr end,
+  stopRadioTransmission = function(name) STOPPED[name] = true end,
+  outTextForGroup = function(id, t) MSG[#MSG + 1] = t end, outTextForCoalition = function(s, t) MSG[#MSG + 1] = t end,
+  smoke = function() end, signalFlare = function() end } }
+missionCommands = { addSubMenuForGroup = function(g, n) MENUS[#MENUS + 1] = n; return {} end, addCommandForGroup = function() end }
+function mkUnit(name, x, y, z, side, typ, air)
+  local u = { name = name, p = { x = x, y = y, z = z }, side = side, typ = typ, air = air }
+  local o = {}
+  function o:getName() return u.name end
+  function o:getPoint() return u.p end
+  function o:inAir() return u.air end
+  function o:isExist() return true end
+  function o:isActive() return true end
+  function o:getCoalition() return u.side end
+  function o:getTypeName() return u.typ end
+  function o:getDesc() return { category = 1 } end
+  function o:getGroup() return { getID = function() return 77 end } end
+  function o:getPlayerName() return "Игрок" end
+  o.u = u
+  return o
+end
+function mkGroup(name, unit)
+  local g = { dead = false }
+  local o = {}
+  function o:getUnit(i) if not g.dead then return unit end end
+  function o:getUnits() return { unit } end
+  function o:getController() return { setCommand = function() end, setOption = function() end, setTask = function() end } end
+  function o:destroy() g.dead = true end
+  function o:getName() return name end
+  G[name] = { g = g, o = o }
+  return o
+end
+Group.getByName = function(n) local x = G[n]; if x and not x.g.dead then return x.o end end
+coalition = { addGroup = function(c, cat, t) ADDED[#ADDED + 1] = { country = c, name = t.name, type = t.units[1].type }
+                local u = mkUnit(t.units[1].name, t.units[1].x, 0, t.units[1].y, c, t.units[1].type, false); mkGroup(t.name, u) end,
+              getGroups = function(side, cat) local out = {}; for _, h in ipairs(HELIS[side]) do out[#out + 1] = { getUnits = function() return { h } end } end; return out end }
+"""
+
+
+def csar_section(tmp: Path) -> None:
+    """Экипажи и поиск-спасение: экипажи полка ограничивают вылеты; дебриф - катапультировался (на земле) / спасён в
+    миссии / погиб; сутки - вышел к своим, плен, спасение ИИ; задача CSAR в плане; миссия (пилот, маяк, csar.lua)."""
+    from redfront import csar, logistics
+    print("\n== экипажи и поиск-спасение ==")
+    st = model.new_campaign("cs", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    U = st["units"]
+    u = U["r33iap"]
+    full = logistics.available(st, u)
+    u["crews"] = 10
+    check(u["crews0"] == round(u["count0"] * 1.2) and logistics.available(st, u) == 10,
+          f"экипажи: штат {u['crews0']} (1.2 на самолёт); осталось 10 экипажей - к вылету 10 из {full}")
+    u["crews"] = u["crews0"]
+    # дебриф: три сбитых МиГ-29 - один катапультировался над ФРГ, второго подобрали в миссии, третий без катапультирования
+    man = {"flights": [{"group": "strike", "performer": "r33iap", "units": ["a", "b", "c"], "player": True}]}
+    from dcs.terrain.germany import Germany as _G
+    from dcs.mapping import LatLng as _LL, Point as _P
+    pt = _P.from_latlng(_LL(53.45, 10.30), _G())
+    data = {"ejected": ["a", "b"], "dead": ["a", "b", "c"], "ejectpos": {"a": [pt.x, pt.y], "b": [pt.x, pt.y]},
+            "csar": {"rescued": ["ej:b"], "lost": []}}
+    c0 = u["crews"]
+    lines = csar.apply_debrief(st, man, data, {"a", "b", "c"})
+    dn = st["downed"]
+    check(len(dn) == 1 and dn[0]["unit"] == "r33iap" and csar.owner_at(st, dn[0]["pos"]) == "blue" and u["crews"] == c0 - 2
+          and any("спасён в миссии" in ln for ln in lines) and any("погиб" in ln for ln in lines),
+          f"дебриф: катапультировался над ФРГ - экипаж на земле (маяк {dn[0]['freq_khz']} кГц), подобран в миссии - в полку, "
+          f"без катапультирования - погиб (экипажей {c0} -> {u['crews']})")
+    # задача CSAR в плане - первой; миссия: пилот на земле, маяк - ресурс миссии, скрипт знает экипаж
+    planner.plan(st)
+    tk = st["tasks"][0]
+    check(tk["kind"] == "csar" and tk["target"] == dn[0]["id"] and model.category(U[tk["performer"]]) == "heli",
+          f"в плане дня первым - {tk['title']} ({tk['package_notes']})")
+    man = build.build(st, tmp / "csar.miz", task_no=1)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "csar.miz"))
+    script = next(a.text.id for a in m.triggerrules.triggers[0].actions if "redfront csar" in a.text.id)
+    pilot = [gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.vehicle_group if gr.name == dn[0]["id"]]
+    hg = next(gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.helicopter_group if " strike " in gr.name)
+    lands = [t for p in hg.points for t in p.tasks if getattr(t, "id", None) == "Land"]
+    res = [f for files in m.map_resource.files.values() for f in files.values()]
+    check(pilot and man["downed"] == [dn[0]["id"]] and lands and any(f.endswith(build.BEACON_FILE) for f in res)
+          and dn[0]["id"] in script and all(dn[0]["id"] != g["unit"] for g in man["ground"]),
+          "миссия: пилот на земле у точки катапультирования, вертолёт садится рядом (Land), звук маяка - ресурс миссии, "
+          "экипаж в скрипте csar.lua, но не в манифесте наземных частей")
+    if have_lupa():
+        import lupa
+        L = lupa.LuaRuntime(unpack_returned_tuples=True)
+        L.execute(CSAR_MOCK)
+        L.execute(f'mkGroup("{dn[0]["id"]}", mkUnit("{dn[0]["id"]}#01", 0, 0, 0, 1, "Infantry AK", false))')
+        L.execute('H1 = mkUnit("H1", 2000, 300, 0, 1, "Mi-8MT", true); HELIS[1] = { H1 }')
+        L.execute(script)
+        Gl = L.globals()
+        radio_ok = bool(Gl.RADIO["csar_" + dn[0]["id"]])
+        Gl.T = 1; L.execute("runDue()")
+        heard = any("слышу" in str(x) for x in Gl.MSG.values())
+        L.execute("H1.u.p = { x = 150, y = 0, z = 0 }; H1.u.air = false")
+        for t in range(2, 60):
+            Gl.T = t; L.execute("runDue()")
+        picked = Gl.Group.getByName(dn[0]["id"]) is None and bool(Gl.STOPPED["csar_" + dn[0]["id"]])
+        red_base = next(b["airport"] for b in st["airbases"].values() if b["side"] == "red")
+        L.execute(f'for _, h in ipairs(world.handlers) do h:onEvent({{ id = 4, initiator = H1, place = {{ getName = function() return "{red_base}" end, getCoalition = function() return 0 end }} }}) end')
+        rescued = bool(Gl.REDFRONT_CSAR.rescued[dn[0]["id"]])
+        # катапультирование в миссии: экипаж появляется у точки, маяк сверху диапазона
+        L.execute('P1 = mkUnit("P1", 5000, 3000, 5000, 2, "F-16C_50", true)')
+        L.execute('for _, h in ipairs(world.handlers) do h:onEvent({ id = 6, initiator = P1 }) end')
+        Gl.T = 70; L.execute("runDue()")
+        spawned = Gl.ADDED[1]
+        check(radio_ok and heard and picked and rescued and spawned and spawned.type == "Soldier M4"
+              and bool(Gl.RADIO["csar_ej:P1"]),
+              "csar.lua: маяк с начала миссии; вертолёт ближе 3 км - \"слышу\"; сел в 150 м - пилот добежал, на борту, "
+              "маяк выключен; посадка на свой аэродром - спасён; катапультировавшийся в миссии синий - на земле с маяком")
+    else:
+        print("SKIP lupa не установлена: csar.lua не исполняется")
+    # сутки: ИИ-спасение, выход к своим, плен
+    st2 = model.new_campaign("cs2", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    st2["settings"]["randomness"] = False
+    u2 = st2["units"]["r33iap"]
+    own = csar.add_downed(st2, u2, "x", {"lat": 52.6, "lon": 11.86})        # Штендаль - своя территория
+    foe = csar.add_downed(st2, u2, "y", {"lat": 50.9, "lon": 8.0})          # глубоко у синих, вертолётам не достать
+    c1 = u2["crews"]
+    lines = csar.daily(st2)
+    st2["day"] += 1
+    lines += csar.daily(st2)
+    check(not st2["downed"] and u2["crews"] == c1 + 1 and any("вышел к своим" in ln for ln in lines)
+          and any("в плену" in ln or "пропал" in ln for ln in lines),
+          "сутки: экипаж на своей территории вышел к своим (в полку), на чужой - в плену (без случайности - на вторые сутки)")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
-            supply_section, assault_section]
+            supply_section, assault_section, csar_section]
 
 
 def main() -> int:

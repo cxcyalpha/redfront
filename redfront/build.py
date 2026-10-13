@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import datetime
 import math
+import tempfile
 from pathlib import Path
 
 from dcs import Mission, task
@@ -18,7 +19,7 @@ from dcs.translation import String
 from dcs.triggers import TriggerStart
 from dcs.unit import Skill
 
-from . import dcstypes, materialize, model, planner
+from . import csar, dcstypes, materialize, model, planner
 from .ato import MISSION_LEN_S as ATO_LEN_S
 
 LUA = Path(__file__).parent / "lua" / "debrief_hook.lua"
@@ -26,6 +27,8 @@ COLUMN_LUA = Path(__file__).parent / "lua" / "column_road.lua"
 FRONT_LUA = Path(__file__).parent / "lua" / "front.lua"
 SITE_LUA = Path(__file__).parent / "lua" / "battle_site.lua"
 ASSAULT_LUA = Path(__file__).parent / "lua" / "assault.lua"
+CSAR_LUA = Path(__file__).parent / "lua" / "csar.lua"
+BEACON_FILE = "redfront_beacon.wav"
 
 # Бой наземных частей в миссии (lua/front.lua). Все числа - ОЦЕНКИ.
 PLATOON = 4                # машин во взводе (отдельная группа DCS: застрявшая машина не держит всю часть)
@@ -129,8 +132,8 @@ task.wrappedactions.setdefault(ActivateGCI.Key, ActivateGCI)   # pydcs чита�
 def ground_options(state: dict, g: dict) -> list[tuple[int, int]]:
     """Опции наземной группы: всё, кроме ПВО, стреляет только по наземным целям (OptRestrictTargets = GroundUnitsOnly).
     Наземные юниты в DCS по ЛА бьют неестественно точно; ПВО (ЗРК, ЗА) - без ограничения."""
-    if model.category(state["units"][g["unit"]]) in ("sam", "gci"):
-        return []
+    if g["kind"] == "downed" or model.category(state["units"][g["unit"]]) in ("sam", "gci"):
+        return []                                # экипаж на земле - не часть модели, огонь не ведёт (csar.lua)
     return [(task.OptRestrictTargets.Key, int(task.OptRestrictTargets.Values.GroundUnitsOnly))]
 
 
@@ -283,6 +286,23 @@ def assault_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
              f'r = {a["r"]:.0f}, helos = {{ {", ".join(q(n) for n in a["helos"])} }} }}' for a in specs]
     return (ASSAULT_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
             .replace("@SPECS@", ", ".join(items)))
+
+
+def csar_script(m: Mission, state: dict, downed: list[dict]) -> str:
+    """lua/csar.lua: экипажи на земле из модели (группы в .miz), страны сторон для новых катапультировавшихся,
+    аэродромы сторон (посадка с экипажем - спасён), звук маяка (ресурс миссии)."""
+    from . import csar
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    items = [f'{{ id = {q(d["id"])}, group = {q(d["id"])}, side = {1 if d["side"] == "red" else 2}, '
+             f'title = {q(csar.title(state, d))}, freq = {int(d["freq_khz"])} }}' for d in downed]
+    bases = {side: ", ".join(f'[{q(b["airport"])}] = true' for b in state["airbases"].values() if b.get("side") == side)
+             for side in ("red", "blue")}
+    return (CSAR_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SOUND@", BEACON_FILE)
+            .replace("@DOWNED@", ", ".join(items))
+            .replace("@RED_COUNTRY@", str(_country(m, state, "red").id))
+            .replace("@BLUE_COUNTRY@", str(_country(m, state, "blue").id))
+            .replace("@RED_BASES@", bases["red"]).replace("@BLUE_BASES@", bases["blue"]))
 
 
 def _ground_group(m: Mission, state: dict, g: dict, shift_xy: tuple[float, float] = (0.0, 0.0)):
@@ -590,7 +610,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     # время суток миссии: удар игрока - в своё время по плану полётов (ato); задача без него - start_hour (как раньше)
     m0 = (tk["tot_s"] - times["strike"]["objective_s"]) if tk.get("tot_s") is not None else state["start_hour"] * 3600
     m.start_time = datetime.datetime(y, mo, d) + datetime.timedelta(days=state["day"] - 1, seconds=int(m0))
-    sam_ids = list(dict.fromkeys(tk["threats"] + [g["unit"] for g in groups if model.category(state["units"][g["unit"]]) == "sam"]))
+    sam_ids = list(dict.fromkeys(tk["threats"] + [g["unit"] for g in groups if g["unit"] in state["units"] and model.category(state["units"][g["unit"]]) == "sam"]))
     circles = threat_circles(state, sam_ids)
     runway_slots: set = set()
     spd = tdef["speed_kmh"]
@@ -665,6 +685,18 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(model.lerp(start_p, obj["pos"], 0.5), alt, "Маршрут", keep_alt=True)
             land = m.terrain.airports[dest["airport"]]
             g["_dest"] = dest["name"]
+        elif obj["kind"] == "csar":              # поиск и спасение: на малой высоте к экипажу, посадка рядом, домой
+            dp = obj["pos"]
+            low = int(tdg.get("low_alt_m_agl", 50))
+            start_p = g.get("_air_start") or base
+            d = model.dist_km(start_p, dp)
+            if d > 8:
+                wp(model.lerp(dp, start_p, 5 / d), low, "Подход")
+            w = wp(dp, low, "Экипаж")
+            c = _pt(m, dp)
+            w.tasks.append(task.Land(Vector2(c.x + 60, c.y), duration=int(tdg.get("land_s", 90))))   # рядом, не на нём
+            if d > 8:
+                wp(model.lerp(dp, base, 5 / model.dist_km(base, dp)), low, "Отход")
         elif obj["kind"] == "air_assault":       # десант: на малой высоте к площадке, посадка на land_s, домой
             lz = obj["pos"]
             low = int(tdg.get("low_alt_m_agl", 50))
@@ -844,6 +876,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     objs = [u for u in state["units"].values() if u.get("role") in TARGET_SCAN and u["state"] == "active"]
     if objs:                                     # объекты тыла - объекты карты в их районе (targets.lua)
         trig.add_action(DoScript(String(targets_script(m, state, objs))))
+    # поиск и спасение (csar.lua) - в каждой миссии: катапультироваться может любой; звук маяка - ресурс миссии
+    downed = [d for d in state.get("downed", []) if d["id"] in vg_by_unit]
+    beacon = csar.beacon_wav(Path(tempfile.gettempdir()) / BEACON_FILE)
+    m.map_resource.add_resource_file(beacon)
+    trig.add_action(DoScript(String(csar_script(m, state, downed))))
     if assault_specs:                            # десант: рота выходит при посадке бортов на площадку (assault.lua)
         trig.add_action(DoScript(String(assault_script(state["campaign_id"], state["sortie"], assault_specs))))
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода
@@ -879,7 +916,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "battle_keys": keys,
         "objects": [o["id"] for o in objs],              # объекты тыла, по которым миссия считает разрушения
         "ground": [{"unit": g["unit"], "kind": g["kind"], "cluster": g.get("cluster"), "vehicles": [{"name": v["name"], "type": v["type"], "weight": v["weight"]} for v in g["vehicles"]]}
-                   for g in groups],
+                   for g in groups if g["kind"] != "downed"],    # экипажи на земле - не части модели (csar.py)
+        "downed": [d["id"] for d in downed],             # экипажи на земле в миссии (их может спасти вертолёт)
     }
     state["manifest"] = manifest
     return manifest

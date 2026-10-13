@@ -13,6 +13,7 @@ lfs.mkdir(DIR)
 local OUT = DIR .. "\\debrief_@CAMPAIGN@_@SORTIE@.json"
 local TRACK = { @TRACK@ }        -- наземные юниты, пересоздаваемые скриптами при старте (колонна, части в бою); позиции пишем
 local dead, ejected, landed, takeoff = {}, {}, {}, {}
+local ejpos = {}                 -- точка катапультирования (x, z DCS): экипаж на земле - модель (csar.py)
 local ended = false
 
 local function esc(s)
@@ -73,6 +74,16 @@ local function assault()
   for id, a in pairs(REDFRONT_ASSAULT) do o[#o + 1] = string.format('"%s":[%d,%d]', esc(id), a.landed or 0, a.total or 0) end
   return "{" .. table.concat(o, ",") .. "}"
 end
+local function ejectPos()
+  local o = {}
+  for n, p in pairs(ejpos) do o[#o + 1] = string.format('"%s":[%.1f,%.1f]', esc(n), p.x, p.z) end
+  return "{" .. table.concat(o, ",") .. "}"
+end
+-- поиск и спасение (csar.lua): спасённые и погибшие с вертолётом-спасателем экипажи
+local function csarOut()
+  if type(REDFRONT_CSAR) ~= "table" then return '{"rescued":[],"lost":[]}' end
+  return string.format('{"rescued":%s,"lost":%s}', keys(REDFRONT_CSAR.rescued or {}), keys(REDFRONT_CSAR.lost or {}))
+end
 local function positions()
   local o = {}
   for _, n in ipairs(TRACK) do
@@ -90,8 +101,8 @@ local function dump()
   local f = io.open(OUT, "w")
   if not f then return end
   f:write(string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault()))
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s}',
+    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut()))
   f:close()
 end
 local function nameOf(obj)
@@ -125,7 +136,12 @@ function H:onEvent(e)
       targetDead[n] = REDFRONT_TARGET_OF[n]; dump()
     elseif isTracked(e.initiator) and not landed[n] and not respawning then dead[n] = true; dump() end
   elseif e.id == world.event.S_EVENT_EJECTION then
-    ejected[n] = true; dump()
+    ejected[n] = true
+    if not ejpos[n] then
+      local ok, p = pcall(function() return e.initiator:getPoint() end)
+      if ok and p then ejpos[n] = p end
+    end
+    dump()
   elseif e.id == world.event.S_EVENT_TAKEOFF then
     takeoff[n] = true; landed[n] = nil; dump()
   elseif e.id == world.event.S_EVENT_LAND then

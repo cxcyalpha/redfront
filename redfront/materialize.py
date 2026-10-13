@@ -278,10 +278,25 @@ def airhead(state: dict, unit: dict, pos: dict, density: float = 1.0) -> dict:
 AIRHEAD_R_M = 60        # ОЦЕНКА: радиус, в котором пехота стоит после высадки
 
 
+def downed_group(state: dict, d: dict) -> dict:
+    """Сбитый экипаж на земле (csar.py): одна фигура пехотинца стороны у точки катапультирования; в манифест
+    наземных частей не входит (это не часть модели) - его спасение пишет lua/csar.lua."""
+    from . import csar
+    return {"unit": d["id"], "side": d["side"], "kind": "downed", "name": d["id"], "waypoints": [], "speed_kmh": 0,
+            "vehicles": [{"name": f"{d['id']}#01", "type": csar.PILOT_FIGURE[d["side"]], "lat": d["pos"]["lat"],
+                          "lon": d["pos"]["lon"], "weight": 0.0}]}
+
+
 def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     units = state["units"]
-    target = units[task["target"]]
     obj = (task.get("package") or [{}])[0].get("objective") or {}
+    if obj.get("kind") == "csar":                # поиск и спасение: экипаж на земле, ЗРК коридора
+        d = next((x for x in state.get("downed", []) if x["id"] == obj["downed"]), None)
+        groups = [downed_group(state, d)] if d else []
+        groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
+        groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
+        return [g for g in groups if g["vehicles"]]
+    target = units[task["target"]]
     if obj.get("kind") == "air_assault":         # десант: рота на площадке (появится при посадке), ЗРК коридора
         groups = [airhead(state, target, obj["pos"], density)]
         groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
@@ -396,6 +411,9 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
                 and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
                 and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM_ROLE.get(u["role"], SAM_KM)):
             groups.append(sam_site(state, u))
+    for d in state.get("downed", []):           # сбитые экипажи обеих сторон рядом - их можно спасти (или перехватить спасателей)
+        if d["id"] not in placed and model.dist_km(d["pos"], center) <= DETAIL_KM:
+            groups.append({**downed_group(state, d), "core": True})   # одна фигура - бюджет её не трогает
     for u in units.values():                     # КРУ - все исправные (по одной машине; наведение - на 250 км)
         if model.category(u) == "gci" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0:
             groups.append(gci_site(state, u))

@@ -367,6 +367,14 @@ def repairs(state: dict) -> list[str]:
 def replacements(state: dict) -> list[str]:
     rate = (state.get("replacements") or {}).get("air_per_day", 0)
     lines = []
+    for u in state["units"].values():            # экипажи: crews_per_day доктрины до штата (из училищ и резерва)
+        if "crews" in u and u["crews"] < u.get("crews0", 0):
+            u["crews_acc"] = u.get("crews_acc", 0.0) + _sim(state, u["side"]).get("crews_per_day", 0) * industry(state, u["side"])
+            add = min(int(u["crews_acc"]), u["crews0"] - u["crews"])
+            if add > 0:
+                u["crews"] += add
+                u["crews_acc"] -= add
+                lines.append(f"{u['name']}: пополнение +{add} экипаж(а), экипажей {u['crews']}.")
     for u in state["units"].values():
         if model.category(u) not in ("air", "heli") or u.get("count", 0) >= u.get("count0", 0):
             continue
@@ -388,7 +396,8 @@ def available(state: dict, unit: dict) -> int:
     dmg = af.get("damage", 0.0) if af else 0.0
     sup = base.get("supply")                     # аэродром без снабжения (supply) - меньше самолётов к вылету
     k = 1.0 if sup is None else _sim(state, unit["side"])["unsupplied"] + (1.0 - _sim(state, unit["side"])["unsupplied"]) * sup
-    return int(unit.get("count", 0) * (1.0 - dmg) * k + 1e-9)
+    n = int(unit.get("count", 0) * (1.0 - dmg) * k + 1e-9)
+    return min(n, unit["crews"]) if "crews" in unit else n   # без экипажей самолёт не летит (csar.py)
 
 
 def air_defence(state: dict) -> list[str]:

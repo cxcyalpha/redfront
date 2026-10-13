@@ -119,6 +119,8 @@ def apply(state: dict, data: dict) -> list[str]:
             if fl.get("ato") and state.get("ato"):   # вылет плана полётов: сбитые борта перевозки груз не довозят
                 lost_by = state["ato"].setdefault("lost", {})
                 lost_by[fl["ato"]] = lost_by.get(fl["ato"], 0) + len(lost_ac)
+    from . import csar                          # экипажи сбитых и спасения в миссии (csar.lua)
+    lines += csar.apply_debrief(state, man, data, lost)
     for aid, (landed_n, total) in (data.get("assault") or {}).items():   # десант: сколько бортов село (assault.lua)
         if state.get("ato"):
             state["ato"].setdefault("assault", {})[aid] = [int(landed_n), int(total)]

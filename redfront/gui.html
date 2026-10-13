@@ -209,6 +209,10 @@ function drawMap() {
     L.marker(o.pos, {icon: L.divIcon({className: "obj", html: `<span style="opacity:${o.checked ? 1 : .55};filter:${o.damage >= 1 || o.state === "lost" ? "grayscale(1)" : "none"}">${ico}</span>`, iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(o.name)}</b><br>${dmg}${o.checked ? "" : "<br>координаты по оценке"}`).addTo(layers.objects);
   }
+  for (const d of (ST.downed || [])) {      // свои сбитые экипажи: ждут спасения (CSAR)
+    L.marker(d.pos, {icon: L.divIcon({className: "obj", html: "🪂", iconSize: [18, 18]})})
+      .bindTooltip(`<b>${esc(d.title)}</b><br>на земле с суток ${d.day} · маяк ${d.freq} кГц`).addTo(layers.objects);
+  }
   const AF = Object.fromEntries(ST.objects.filter(o => o.role === "airfield").map(o => [o.name, o]));
   for (const b of ST.airbases) {
     const o = AF["Аэродром " + b.name];
@@ -271,7 +275,10 @@ function render() {
   } else if (TAB === "air") {
     p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` +
       ST.air.filter(a => a.side === s).map(a => `<div class="item"><b>${esc(a.name)}</b>
-       <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0} · к вылету ${a.available}</div></div>`).join("")).join("");
+       <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0}${a.crews != null ? ` · экипажей ${a.crews}/${a.crews0}` : ""} · к вылету ${a.available}</div></div>`).join("")).join("") +
+      ((ST.downed || []).length ? `<h4>Сбитые экипажи на земле</h4>` + ST.downed.map(d => `<div class="item" data-pos="${d.pos}"><b>🪂 ${esc(d.title)}</b>
+       <div class="d">маяк ${d.freq} кГц · на земле с суток ${d.day}</div></div>`).join("") : "");
+    p.querySelectorAll(".item[data-pos]").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
   } else if (TAB === "ato") {
     let cheat = false;
     try { cheat = localStorage.getItem("rf_ato_enemy") === "1"; } catch (e) {}

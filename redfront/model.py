@@ -325,7 +325,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     for bid, b in bases.items():
         units[f"af_{bid}"] = {"id": f"af_{bid}", "name": f"Аэродром {b['name']}", "side": b["side"], "role": "airfield", "base": bid,
                               "pos": {"lat": b["lat"], "lon": b["lon"]}, "state": "active", "damage": 0.0, "lost": {}, "composition": []}
-    return {
+    st = {
         "version": STATE_VERSION,
         "campaign_id": uuid.uuid4().hex[:8],
         "name": name,
@@ -352,6 +352,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "manifest": None,
         "log": [],
     }
+    init_crews(st)
+    return st
 
 
 def rng(state: dict, purpose: str) -> random.Random | None:
@@ -377,7 +379,20 @@ def load(path: Path) -> dict:
     if st.get("version") != STATE_VERSION:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
     sync_ad_sites(st)
+    init_crews(st)
     return st
+
+
+def init_crews(st: dict) -> None:
+    """Экипажи авиачастей (crews, штат crews0): crew_ratio доктрины стороны на самолёт штата (ОЦЕНКА) - для новых
+    кампаний и старых сохранений."""
+    for u in st.get("units", {}).values():
+        if role_info(u["role"])["category"] in ("air", "heli"):
+            if "crews" not in u:
+                ratio = doctrine(st, u["side"])["sim"].get("crew_ratio", 1.0)
+                u["crews0"] = int(round(u.get("count0", u.get("count", 0)) * ratio))
+                u["crews"] = u["crews0"]
+    st.setdefault("downed", [])          # сбитые экипажи на земле (csar.py)
 
 
 def sync_ad_sites(st: dict) -> None:
