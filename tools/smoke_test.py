@@ -1497,6 +1497,12 @@ def ato_section(tmp: Path) -> None:
                           if cn.vehicle_group or cn.plane_group or cn.helicopter_group) for side_ in ("red", "blue")}
     check(used == {"red": ["Combined Joint Task Forces Red"], "blue": ["Combined Joint Task Forces Blue"]},
           f"коалиции миссии - Combined Joint Task Forces Red / Blue: {used}")
+    coal = {b["airport"]: m.terrain.airports[b["airport"]].coalition for b in st["airbases"].values()}
+    check(all(coal[b["airport"]] == ("NEUTRAL" if b.get("state") == "lost" else b["side"].upper())
+              for b in st["airbases"].values())
+          and m.terrain.airports["Hamburg"].coalition == "NEUTRAL",
+          f"коалиция аэродромов - по модели: красных {sum(1 for c in coal.values() if c == 'RED')}, синих "
+          f"{sum(1 for c in coal.values() if c == 'BLUE')}; гражданские - нейтральные")
     sg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.plane_group if " strike " in g.name][0]
     perf = st["units"][st["tasks"][n - 1]["performer"]]
     tdef_ = model.doctrine(st, "red")["tasks"][st["tasks"][n - 1]["kind"]]

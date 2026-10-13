@@ -331,6 +331,17 @@ def csar_script(m: Mission, state: dict, downed: list[dict], rescuers: list[dict
             .replace("@RED_BASES@", bases["red"]).replace("@BLUE_BASES@", bases["blue"]))
 
 
+def set_airbase_coalitions(m: Mission, state: dict) -> None:
+    """Коалиция аэродромов в миссии - по модели: военные аэродромы сторон - их коалиции (потерянный - нейтральный:
+    к противнику он не переходит), остальные аэродромы карты - нейтральные. По ней DCS даёт аэродрому сторону
+    (связь, посадка "на свой" - спасение экипажа в csar.lua)."""
+    for b in state["airbases"].values():
+        ap = m.terrain.airports.get(b.get("airport") or "")
+        if ap is None:
+            continue
+        ap.set_coalition("neutral" if b.get("state") == "lost" or b.get("side") not in ("red", "blue") else b["side"])
+
+
 def _land(fg, airport, spd_kmh: float):
     """Посадка на аэродром. pydcs ставит точке посадки скорость 0 - ИИ на последнем участке гасит скорость до
     минимума (Су-17 и др. на возврате шли 300-400 км/ч и крутили фигуры, сбрасывая её). Скорость - как на маршруте:
@@ -628,6 +639,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             model.note(state, ln)
 
     m = Mission(Germany())
+    set_airbase_coalitions(m, state)
     y, mo, d = map(int, state["date"].split("-"))
     start = datetime.datetime(y, mo, d, state["start_hour"], 0) + datetime.timedelta(days=state["day"] - 1)
     m.start_time = start
