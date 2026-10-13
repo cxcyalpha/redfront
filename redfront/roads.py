@@ -102,20 +102,48 @@ def from_raw(raw: dict) -> dict:
     return {"sector": raw.get("sector"), "paths": paths, "errors": raw.get("errors", {})}
 
 
+ROAD_MAX_RATIO, ROAD_MAX_EXTRA_KM = 2.0, 15.0   # дорога длиннее 2 x прямой + 15 км - крюк DCS, участок - по прямой
+
+
+def bad_road(state: dict, pid: str, line: list[dict]) -> float | None:
+    """Длина дороги участка "A>B", если это крюк (DCS иногда даёт путь по дорогам в сотни км между соседними
+    пунктами: 367 км на участке к Кронаху), иначе None."""
+    a, b = pid.split(">", 1)
+    pl = state.get("places") or {}
+    if a not in pl or b not in pl:
+        return None
+    km = model.route_length_km(line)
+    straight = model.dist_km(pl[a], pl[b])
+    return km if km > ROAD_MAX_RATIO * straight + ROAD_MAX_EXTRA_KM else None
+
+
+def sanitize(state: dict) -> list[str]:
+    """Убрать из кампании дороги-крюки (bad_road) и пересчитать длины; части на марше остаются на месте карты
+    только если вызывающий пересчитает progress (apply). -> строки о выброшенных участках."""
+    lines = []
+    for pid, line in list((state.get("roads") or {}).items()):
+        km = bad_road(state, pid, line)
+        if km is not None:
+            del state["roads"][pid]
+            lines.append(f"Дорога {pid.replace('>', ' - ')}: у DCS {km:.0f} км при "
+                         f"{model.dist_km(*(state['places'][x] for x in pid.split('>', 1))):.0f} по прямой - крюк, участок по прямой.")
+    state["road_km"] = {k: round(model.route_length_km(v), 2) for k, v in (state.get("roads") or {}).items()}   # для графа (ops)
+    return lines
+
+
 def apply(state: dict, roads: dict, note: bool = True) -> list[str]:
-    """Положить дороги в кампанию. Части на марше остаются в той же точке карты: progress_km пересчитывается
-    проекцией их текущего положения на новую геометрию маршрута."""
+    """Положить дороги в кампанию (без крюков - sanitize). Части на марше остаются в той же точке карты: progress_km
+    пересчитывается проекцией их текущего положения на новую геометрию маршрута."""
     marching = [u for u in state["units"].values() if "route" in u]
     before = {u["id"]: model.unit_pos(state, u) for u in marching}
     state["roads"] = {**state.get("roads", {}), **roads["paths"]}
-    state["road_km"] = {k: round(model.route_length_km(v), 2) for k, v in state["roads"].items()}   # длины - для графа (ops)
-    lines = []
+    lines = sanitize(state)
     for u in marching:
         pts = model.route_points(state, u)
         u["progress_km"] = model.project_km(pts, before[u["id"]])
         if len(u["route"]) < 2:                 # часть на месте - маршрута нет, в журнал не пишем
             continue
-        used = sum(1 for a, b in zip(u["route"], u["route"][1:]) if f"{a}>{b}" in state["roads"])
+        used = sum(1 for a, b in zip(u["route"], u["route"][1:]) if f"{a}>{b}" in state["roads"] or f"{b}>{a}" in state["roads"])
         lines.append(f"{u['name']}: участков по дорогам {used} из {len(u['route']) - 1}, "
                      f"длина маршрута {model.route_length_km(pts):.1f} км, пройдено {u['progress_km']:.1f} км.")
     for pid, err in roads.get("errors", {}).items():

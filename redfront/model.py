@@ -373,6 +373,14 @@ def load(path: Path) -> dict:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
     sync_ad_sites(st)
     init_crews(st)
+    if st.get("roads"):                          # старые кампании: дороги-крюки DCS - убрать, части - на прежнем месте
+        from . import roads as _roads
+        marching = [u for u in st["units"].values() if "route" in u]
+        before = {u["id"]: unit_pos(st, u) for u in marching}
+        for ln in _roads.sanitize(st):
+            note(st, ln)
+        for u in marching:
+            u["progress_km"] = project_km(route_points(st, u), before[u["id"]])
     return st
 
 

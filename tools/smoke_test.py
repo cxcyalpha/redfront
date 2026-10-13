@@ -2162,6 +2162,14 @@ def convoy_section(tmp: Path) -> None:
     g = ops.graph(st)
     check(abs(g[a][b] - st["road_km"][f"{a}>{b}"]) < 1e-6 and g[a][b] > straight * 1.1,
           f"граф пунктов - по длине дороги, если она известна ({a} - {b}: {g[a][b]:.1f} км по дороге, {straight:.1f} по прямой)")
+    a2, b2 = st["links"][1]
+    p2, q2 = st["places"][a2], st["places"][b2]
+    far = model.offset(model.lerp(p2, q2, 0.5), model.bearing_deg(p2, q2) + 90, 150_000)   # "дорога" DCS через 150 км
+    lines = roads.apply(st, {"paths": {f"{b2}>{a2}": [dict(q2), far, dict(p2)]}}, note=False)
+    unit = {"route": [a2, b2]}
+    check(f"{b2}>{a2}" not in st["roads"] and any("крюк" in ln for ln in lines)
+          and abs(model.route_length_km(model.route_points(st, unit)) - model.dist_km(p2, q2)) < 1e-6,
+          f"дорога-крюк DCS ({b2} - {a2} через 150 км в сторону) не берётся: участок по прямой (в т.ч. в обратную сторону)")
     sim.end_day(st)
     flows = {side: convoys.link_flows(st, side) for side in model.SIDES}
     rs = convoys.routes(st, "red")

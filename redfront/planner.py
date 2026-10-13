@@ -497,6 +497,8 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
             (_n, km), perf, need = best
             base = state["airbases"][perf["base"]]
             threats = corridor_threats(state, [(base, lz)], foe, tdef.get("low_alt_m_agl"))
+            if len(threats) > tdef.get("max_threats", 1):   # вертолёты через насыщенную ПВО не идут - другая площадка
+                continue
             s = tdef["strike"]
             groups = []                          # группа ЛА в DCS - не больше 4 бортов: подъём - волнами по 4, через минуту
             for k in range(0, need, GROUP_MAX):
