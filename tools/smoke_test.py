@@ -888,7 +888,7 @@ def air_section(tmp: Path) -> None:
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "air1.miz"))
     red = {g.name.split(" ")[1]: g for g in plane_groups(m)}
-    blue = [g for c in m.coalition["blue"].countries.values() for g in c.plane_group]
+    blue = [g for c in m.coalition["blue"].countries.values() for g in c.plane_group if "_qra_" not in g.name]   # дежурные пары - qra_section
     t = build.timeline(model.doctrine(st, "red")["tasks"][t1["kind"]], st, t1["package"], "strike")
     zone = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "EngageTargetsInZone"]
     orb = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "ControlledTask"]
@@ -896,18 +896,21 @@ def air_section(tmp: Path) -> None:
           and red["cover"].points[1].alt == 3000
           and {d["CLSID"] for d in red["cover"].units[0].pylons.values()} >= {dcs.planes.MiG_29_Fulcrum.Pylon3.R_27R__AA_10_Alamo_A____Semi_Act_Rdr_[1]["clsid"]},
           f"прикрытие: зона 40 км над целью на 3000 м, перехват воздушных целей, до удара + 5 мин; МиГ-29 с Р-27Р и Р-73")
-    en = [fl for fl in man["flights"] if fl.get("side") == "blue"]
-    own_ai = [fl for fl in man["flights"] if fl["group"].startswith("ai")]
+    en = [fl for fl in man["flights"] if fl.get("side") == "blue" and "_qra_" not in fl["group"]]
+    own_ai = [fl for fl in man["flights"] if fl["group"].startswith("ai") and "_qra_" not in fl["group"]]
+    qra_lines = [ln for ln in man["enemy_lines"] + man["ai_lines"] if "в готовности на стоянке" in ln]
     from redfront import ato
     win = [e for e in st["ato"]["entries"] if e["id"] != st["task"].get("ato_id") and not e["ai_only"]
            and ato.in_window(e, man["start_s"], man["end_s"])
            and not (e["times"]["strike"]["takeoff_s"] < man["start_s"] and e["times"]["strike"]["objective_s"] <= man["start_s"] + 60)]
     want = {side_: min(build.AI_FLIGHTS["enemy" if side_ == "blue" else "own"], sum(1 for e in win if e["side"] == side_))
             for side_ in ("red", "blue")}
-    check(len(blue) == len(en) == len(man["enemy_lines"]) and 1 <= len(en) <= build.AI_FLIGHTS["enemy"]
-          and len(en) <= want["blue"] and len(own_ai) <= want["red"] and len(man["ai_lines"]) == len(own_ai)
+    en_lines = [ln for ln in man["enemy_lines"] if ln not in qra_lines]
+    ai_lines = [ln for ln in man["ai_lines"] if ln not in qra_lines]
+    check(len(blue) == len(en) == len(en_lines) and 1 <= len(en) <= build.AI_FLIGHTS["enemy"]
+          and len(en) <= want["blue"] and len(own_ai) <= want["red"] and len(ai_lines) == len(own_ai)
           and "Разведка: в районе возможна активность авиации противника." in m.description_text()
-          and ("Другие вылеты наших сил" in m.description_text()) == bool(own_ai)
+          and ("Другие вылеты наших сил" in m.description_text()) == bool(man["ai_lines"])   # и свои дежурные пары
           and not any(st["units"][fl["performer"]]["name"] in m.description_text() for fl in en),
           f"воздушная война по плану полётов на сутки: в окне миссии {ato.hhmm(man['start_s'])}-{ato.hhmm(man['end_s'])} "
           f"{len(en)} групп противника и {len(own_ai)} своих групп ИИ (в окне вылетов: синих {want['blue']}, своих {want['red']}); "
@@ -1355,7 +1358,7 @@ def helo_section(tmp: Path) -> None:
     for _ in range(3):
         sim.end_day(st)
     kinds = {side: collections.Counter(t["kind"] for t in planner.plan_side(st, side)[0]) for side in model.SIDES}
-    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k != "airlift")   # перевозки - вне лимита
+    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k not in ("airlift", "qra"))   # перевозки, дежурства - вне лимита
           and len(kinds["blue"]) >= 2,
           f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
     planner.plan(st)
@@ -2225,10 +2228,84 @@ def advance_section(tmp: Path) -> None:
           f"группы ИИ миссии - слетаны ({len(st['ato'].get('played', []))})")
 
 
+def qra_section(tmp: Path) -> None:
+    """Дежурные пары ПВО: смены в плане суток, пара на стоянке (поздняя активация) в миссии, взлёт по обнаружению
+    радарами своей стороны (qra.lua), влияние на удары ИИ вне миссии."""
+    from redfront import airwar, ato
+    print("\n== дежурные пары ПВО ==")
+    st = model.new_campaign("qra", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    a = ato.ensure(st)
+    q = [e for e in a["entries"] if e["kind"] == "qra"]
+    bases = {side: {e["task"]["base"] for e in q if e["side"] == side} for side in model.SIDES}
+    tdef = model.doctrine(st, "red")["tasks"]["qra"]
+    check(all(1 <= len(b) <= tdef["qra_bases"] for b in bases.values())
+          and all(e["times"]["strike"]["land_s"] - e["times"]["strike"]["takeoff_s"] <= tdef["shift_h"] * 3600 for e in q),
+          f"дежурство: пары на аэродромах у фронта сменами по {tdef['shift_h']} ч - красные {sorted(bases['red'])}, "
+          f"синие {sorted(bases['blue'])}")
+    planner.plan(st)
+    n = next(i for i, t in enumerate(st["tasks"], 1) if t["package"][0]["objective"]["kind"] in ("column", "point"))
+    man = build.build(st, tmp / "qra.miz", task_no=n)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "qra.miz"))
+    qg = [g for g in plane_groups(m) if "_qra_" in g.name]
+    script = next((a_.text.id for a_ in m.triggerrules.triggers[0].actions if "redfront qra" in a_.text.id), "")
+    eng = all(any(getattr(t, "id", None) == "EngageTargets" for p in g.points for t in p.tasks) for g in qg)
+    check(qg and all(g.late_activation for g in qg) and eng and all(g.name in script for g in qg)
+          and any(f.get("ato") and "_qra_" in f["group"] for f in man["flights"]),
+          f"миссия: {len(qg)} дежурных пар на стоянках с поздней активацией, задача - атака воздушных целей; скрипт их знает")
+    if have_lupa():
+        import lupa
+        L = lupa.LuaRuntime(unpack_returned_tuples=True)
+        L.execute(CSAR_MOCK)
+        L.execute("""
+          Controller = { Detection = { RADAR = 4 } }
+          Group.Category.AIRPLANE = 0
+          ACTIVATED = {}; SEEN = false
+          RADARS = { [1] = {}, [2] = {} }; AIR = { [1] = {}, [2] = {} }
+          local function grp(units, ctrl) return { getUnits = function() return units end, getController = function() return ctrl end } end
+          coalition.getGroups = function(side, cat)
+            if cat == Group.Category.GROUND then return RADARS[side] end
+            if cat == Group.Category.AIRPLANE then return AIR[side] end
+            return {}
+          end
+          function radarGroup(side)
+            local u = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end }
+            local c = { isTargetDetected = function(_, t, d) return SEEN end }
+            RADARS[side][#RADARS[side] + 1] = grp({ u }, c)
+          end
+          function plane(side, x, z)
+            local u = { isExist = function() return true end, inAir = function() return true end,
+                        getPoint = function() return { x = x, y = 5000, z = z } end, getTypeName = function() return "Su-25" end }
+            AIR[side][#AIR[side] + 1] = grp({ u }, nil)
+          end
+        """)
+        import re as _re
+        first = _re.search(r'\{ id = "([^"]+)", group = "([^"]+)", side = (\d), x = ([-\d.]+), y = ([-\d.]+), r = (\d+)', script)
+        qid, gname, side, x, y, r = first.groups()
+        side = int(side); foe = 2 if side == 1 else 1
+        L.execute(f'radarGroup({side}); plane({foe}, {float(x) + float(r) * 0.5}, {y})')
+        L.execute(f'G["{gname}"] = {{ g = {{ dead = false }}, o = {{ activate = function() ACTIVATED["{gname}"] = true end }} }}')
+        L.execute(script)
+        Gl = L.globals()
+        Gl.T = 10; L.execute("runDue()")
+        quiet = not Gl.ACTIVATED[gname]
+        Gl.SEEN = True
+        Gl.T = 20; L.execute("runDue()")
+        check(quiet and Gl.ACTIVATED[gname] and Gl.REDFRONT_QRA[qid],
+              "qra.lua: противник в радиусе, но радары стороны его не видят - пара стоит; увидели - пара поднята, время - в дебриф")
+    else:
+        print("SKIP lupa не установлена: qra.lua не исполняется")
+    e = q[0]
+    pos = st["airbases"][e["task"]["base"]]
+    n_near = airwar.alerts_near(st, e["side"], pos, e["tot_s"] + 60)
+    check(n_near >= 1 and airwar.alerts_near(st, e["side"], pos, 0) == 0,
+          f"вне миссии: удар ИИ рядом с базой дежурной пары на смене - её учитывают ({n_near}), вне смены - нет")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
-            supply_section, assault_section, csar_section, convoy_section, advance_section]
+            supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section]
 
 
 def main() -> int:

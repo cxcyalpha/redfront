@@ -16,6 +16,7 @@ from dcs.mapping import LatLng, Point, Vector2
 from dcs.mission import StartType
 from dcs.point import PointAction
 from dcs.terrain.germany import Germany
+from dcs.terrain.terrain import NoParkingSlotError
 from dcs.translation import String
 from dcs.triggers import TriggerStart
 from dcs.unit import Skill
@@ -30,6 +31,7 @@ SITE_LUA = Path(__file__).parent / "lua" / "battle_site.lua"
 ASSAULT_LUA = Path(__file__).parent / "lua" / "assault.lua"
 CSAR_LUA = Path(__file__).parent / "lua" / "csar.lua"
 LZ_LUA = Path(__file__).parent / "lua" / "lz.lua"
+QRA_LUA = Path(__file__).parent / "lua" / "qra.lua"
 BEACON_FILE = "redfront_beacon.wav"
 
 # Бой наземных частей в миссии (lua/front.lua). Все числа - ОЦЕНКИ.
@@ -281,6 +283,15 @@ def front_script(campaign_id: str, sortie: int, platoons: list[dict]) -> str:
             .replace("@CFG@", cfg).replace("@PLATOONS@", ", ".join(items)))
 
 
+def qra_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
+    """lua/qra.lua: дежурные пары - группа (поздняя активация), коалиция, аэродром (x, y DCS), радиус взлёта."""
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    items = [f'{{ id = {q(a["id"])}, group = {q(a["group"])}, side = {a["side"]}, x = {a["x"]:.1f}, y = {a["y"]:.1f}, '
+             f'r = {a["r"]:.0f}, title = {q(a["title"])} }}' for a in specs]
+    return (QRA_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
+            .replace("@SPECS@", ", ".join(items)))
+
+
 def lz_script(campaign_id: str, sortie: int) -> str:
     """lua/lz.lua: открытые площадки для вертолётов, пересчёт маршрута ИИ (общий для csar.lua и assault.lua)."""
     return LZ_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
@@ -479,7 +490,24 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
     nl = {False: 0, True: 0}
     for e in sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank):
         enemy = e["side"] != tk["side"]
-        lift = e["kind"] == "airlift" or e["task"]["package"][0]["objective"]["kind"] == "airlift"
+        okind = e["task"]["package"][0]["objective"]["kind"]
+        lift = e["kind"] == "airlift" or okind == "airlift"
+        if okind == "alert":                     # дежурная пара ПВО: в миссии, если база не дальше mission_km от цели
+            tdg = model.doctrine(state, e["side"])["tasks"][e["kind"]]
+            g = dict(e["task"]["package"][0])
+            perf = state["units"][g["performer"]]
+            if (model.dist_km(state["airbases"][g["base"]], tk["target_pos"]) > tdg.get("mission_km", 300)
+                    or used.get(perf["id"], 0) + g["size"] > perf.get("count", 0)):
+                continue
+            key = f"{'enemy' if enemy else 'ai'}_qra_{g['base']}"
+            if key in times:
+                continue
+            times[key] = {"start_s": 0, "late_s": 0, "objective_s": 0}
+            used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
+            g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
+                      "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"]})
+            out.append(g)
+            continue
         if not e["ai_only"] and n[enemy] >= AI_FLIGHTS["enemy" if enemy else "own"]:
             continue
         if lift and nl[enemy] >= AI_AIRLIFT:
@@ -642,6 +670,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     spd = tdef["speed_kmh"]
     flights, lines, enemy_lines, ai_lines = [], [], [], []
     assault_specs = []
+    qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
     enemy = air_activity(state, tk, times, sortie, m0)
     for g in pkg + enemy:
@@ -656,6 +685,32 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         is_player = player and g["group"] == fly
         helo = model.category(perf) == "heli"    # вертолёты: предельно малая высота и для ИИ
         mt = _maintask(ac, g["maintask"])
+        if g["objective"]["kind"] == "alert":    # дежурная пара ПВО: на стоянке, взлёт по обнаружению (qra.lua)
+            try:                                 # стоянка занята или для реактивных её нет - старт с полосы по тревоге
+                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                                                 airport, maintask=mt, start_type=StartType.Warm, group_size=g["size"])
+            except NoParkingSlotError:
+                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                                                 airport, maintask=mt, start_type=StartType.Runway, group_size=g["size"])
+            fg.late_activation = True
+            _apply_loadout(fg, ac, perf["type"], g["loadout"])
+            for u in fg.units:
+                u.skill = Skill.High
+            alt = int(g.get("alt_m") or tdg.get("cap_alt_m", 6000))
+            w = fg.add_waypoint(_pt(m, g["route"][0]), alt, speed=int(spd), name="Зона дежурства")
+            w.tasks.append(task.EngageTargets(max_distance=int(tdg.get("engage_km", 80) * 1000), targets=[task.Targets.All.Air]))
+            orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=int(spd), pattern=task.OrbitAction.OrbitPattern.Circle))
+            orbit.stop_after_duration(int(tdg.get("cap_min", 40) * 60))
+            w.tasks.append(orbit)
+            fg.land_at(airport)
+            ap = airport.position
+            qra_specs.append({"id": g["_ato"], "group": fg.name, "side": 1 if side_g == "red" else 2,
+                              "x": ap.x, "y": ap.y, "r": tdg.get("scramble_km", 150) * 1000, "title": g["title"]})
+            (enemy_lines if g.get("_enemy") else ai_lines).append(
+                f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, в готовности на стоянке")
+            flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fg.units], "player": False,
+                            "ato": g["_ato"], **({"side": side_g} if g.get("_enemy") else {})})
+            continue
         if g["objective"]["kind"] == "orbit":    # дежурство: к началу миссии уже в зоне (в воздухе), до конца миссии
             t_ = times[g["group"]]
             orbit_group(m, state, g, perf, ac, mt, side_g, sortie, spd, t_, airport)
@@ -917,6 +972,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     m.map_resource.add_resource_file(beacon)
     trig.add_action(DoScript(String(lz_script(state["campaign_id"], state["sortie"]))))   # площадки - до csar и десанта
     trig.add_action(DoScript(String(csar_script(m, state, downed, rescuers))))
+    if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
+        trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
     if assault_specs:                            # десант: рота выходит при посадке бортов на площадку (assault.lua)
         trig.add_action(DoScript(String(assault_script(state["campaign_id"], state["sortie"], assault_specs))))
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода

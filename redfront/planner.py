@@ -160,6 +160,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             if t:
                 tasks.append(t)
             continue
+        if tdef.get("method") == "alert":        # дежурные пары ПВО на аэродромах у фронта (только ИИ)
+            tasks += alert_tasks(state, side, kind, tdef, performers)
+            continue
         if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
             tasks += airlift_tasks(state, side, kind, tdef, performers)
             continue
@@ -281,6 +284,39 @@ def orbit_task(state: dict, side: str, kind: str, tdef: dict, performers: list[d
     return {"kind": kind, "side": side, "title": tdef["title"], "performer": perf["id"], "target": f"orbit_{side}_{kind}",
             "group_size": g["size"], "base": perf["base"], "target_pos": pos, "ip": pos, "distance_km": round(d, 1),
             "threats": [], "package": [g], "package_notes": "", "ai_only": True}
+
+
+def alert_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict]) -> list[dict]:
+    """Дежурство ПВО (method alert): до qra_bases пар на разных аэродромах - истребительные части, ближние к линии
+    фронта; зона после взлёта - в cap_offset_km от базы к фронту."""
+    fl = ops.front_links(state)
+    if not fl:
+        return []
+    pl = state["places"]
+    mids = [model.lerp(pl[a], pl[b], 0.5) for a, b in fl]
+    def front_km(p):
+        return min(model.dist_km(p, q) for q in mids)
+    s = tdef["strike"]
+    out, bases = [], set()
+    for r in sorted((r for r in performers if logistics.available(state, r) >= s["size"]),
+                    key=lambda r: front_km(state["airbases"][r["base"]])):
+        if r["base"] in bases:
+            continue
+        bases.add(r["base"])
+        base = state["airbases"][r["base"]]
+        q = min(mids, key=lambda q: model.dist_km(base, q))
+        d = model.dist_km(base, q)
+        cap = model.lerp(base, q, min(1.0, tdef.get("cap_offset_km", 30) / d)) if d > 0 else dict(base)
+        g = {"group": "strike", "title": s["title"], "performer": r["id"], "size": s["size"], "base": r["base"],
+             "route": [cap], "objective": {"kind": "alert", "pos": cap}, "maintask": s["maintask"],
+             "loadout": s.get("loadout", []), "lead_min": 0, "ai": {}, "alt_m": tdef.get("cap_alt_m", 6000)}
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {base['name']} ({r['name']})",
+                    "performer": r["id"], "target": f"qra_{side}_{r['base']}", "group_size": s["size"], "base": r["base"],
+                    "target_pos": cap, "ip": cap, "distance_km": round(model.dist_km(base, cap), 1), "threats": [],
+                    "package": [g], "package_notes": "", "ai_only": True})
+        if len(out) >= tdef.get("qra_bases", 3):
+            break
+    return out
 
 
 def airlift_needs(state: dict, side: str, tdef: dict) -> list[tuple[dict, str]]:

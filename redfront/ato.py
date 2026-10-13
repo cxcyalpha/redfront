@@ -120,6 +120,21 @@ def build(state: dict) -> dict:
                     entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
                                     "title": t["title"], "task": t, "tot_s": s, "times": times, "ai_only": True})
                 s = e
+        # дежурные пары ПВО: сменами shift_h на аэродроме (самолёты на земле в готовности - заняты всю смену)
+        for t in (t for t in tasks if t.get("ai_only") and doc["tasks"][t["kind"]].get("method") == "alert"):
+            tdef = doc["tasks"][t["kind"]]
+            g = t["package"][0]
+            shift = tdef.get("shift_h", 4) * 3600
+            s = w0
+            while s < w1:
+                e = min(w1, s + shift)
+                need = {g["performer"]: (s, e + turn_s, g["size"])}
+                if pool.fits(need):
+                    pool.book(need)
+                    times = {g["group"]: {"takeoff_s": s, "objective_s": s, "land_s": e, "station_end_s": e}}
+                    entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
+                                    "title": t["title"], "task": t, "tot_s": s, "times": times, "ai_only": True})
+                s = e
         # воздушные перевозки: sorties_per_day рейсов на направление, равномерно по лётному дню; рейс - до посадки
         # на аэродроме назначения, самолёты заняты ещё на обратный перелёт и подготовку
         for t in (t for t in tasks if t.get("ai_only") and doc["tasks"][t["kind"]].get("method") == "airlift"):

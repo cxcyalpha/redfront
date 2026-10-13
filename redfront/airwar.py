@@ -8,7 +8,8 @@
     STRIKE_P минус PER_THREAT на ЗРК в коридоре; потери цели - доля на пару самолётов (LOSS), объекту тыла -
     повреждение (DAMAGE). Сама группа теряет самолёты от ЗРК коридора (LOSS_PER_THREAT на борт); экипаж
     сбитого катапультируется (EJECT_P) - на земле у цели (csar.py), иначе погиб.
-Дежурства, перевозки, прикрытие своих войск - без итога здесь (перевозки - в снабжении, logistics.supply).
+Дежурные пары ПВО противника на смене рядом с целью (alerts_near) снижают успех удара (QRA_P на пару) и повышают
+потери (QRA_LOSS). Дежурства, перевозки, прикрытие своих войск - без итога здесь (перевозки - в снабжении, logistics.supply).
 """
 from __future__ import annotations
 
@@ -20,6 +21,24 @@ LOSS = {"column": 0.04, "site": 0.25}            # доля исправной �
 DAMAGE = {"depot": 0.35, "factory": 0.25, "airfield": 0.3, "bridge": 0.5}
 LOSS_PER_THREAT = 0.03                             # вероятность потерять борт на ЗРК коридора
 EJECT_P = 0.7
+
+
+QRA_P = 0.05                                       # дежурная пара ПВО противника рядом с целью: минус к успеху
+QRA_LOSS = 0.04                                    # и к вероятности потерять борт
+
+
+def alerts_near(state: dict, side: str, pos: dict, t: float) -> int:
+    """Дежурных пар ПВО стороны side на смене в момент t, чья база не дальше scramble_km от pos."""
+    n = 0
+    for e in (state.get("ato") or {}).get("entries", []):
+        g = e["task"]["package"][0]
+        if e["side"] != side or g["objective"]["kind"] != "alert":
+            continue
+        tm = e["times"][g["group"]]
+        tdef = model.doctrine(state, side)["tasks"][e["kind"]]
+        if tm["takeoff_s"] <= t <= tm["land_s"] and model.dist_km(state["airbases"][g["base"]], pos) <= tdef.get("scramble_km", 150):
+            n += 1
+    return n
 
 
 def _tot(e: dict) -> float:
@@ -37,8 +56,9 @@ def _strike(state: dict, e: dict) -> list[str]:
     r = model.rng(state, f"airwar-{e['id']}")
     lines = []
     perf = state["units"].get(g["performer"])
-    # потери группы от ЗРК коридора
-    pl = min(0.5, LOSS_PER_THREAT * len(threats))
+    qra = alerts_near(state, model.enemy(e["side"]), obj["pos"], _tot(e))
+    # потери группы от ЗРК коридора и дежурных пар ПВО противника
+    pl = min(0.5, LOSS_PER_THREAT * len(threats) + QRA_LOSS * qra)
     down = sum(1 for _ in range(g["size"]) if r.random() < pl) if r else 0
     if perf and down:
         perf["count"] = max(0, perf.get("count", 0) - down)
@@ -48,7 +68,7 @@ def _strike(state: dict, e: dict) -> list[str]:
             elif "crews" in perf:
                 perf["crews"] = max(0, perf["crews"] - 1)
         lines.append(f"ИИ, {e['title']}: потеряно {down} {perf['type']} ({perf['name']}).")
-    p = max(0.1, min(0.9, STRIKE_P - PER_THREAT * len(threats)))
+    p = max(0.1, min(0.9, STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra))
     if not ((r.random() < p) if r else p >= 0.5):
         lines.append(f"ИИ, {e['title']}: цель не поражена.")
         return lines

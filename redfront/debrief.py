@@ -128,6 +128,10 @@ def apply(state: dict, data: dict) -> list[str]:
             n = sum(1 for v in cv["vehicles"] if v["name"] in lost)
             lines.append(f"Колонна снабжения {cv['link'].replace('>', ' - ')}: уничтожено {n} из {len(cv['vehicles'])} машин "
                          f"(~{dead_w:.1f} грузовиков потока), недовоз ~{t:.0f} т.")
+    for qid in sorted(data.get("qra") or {}):    # дежурные пары, поднятые в миссии (qra.lua)
+        e = next((x for x in (state.get("ato") or {}).get("entries", []) if x["id"] == qid), None)
+        if e:
+            lines.append(f"{e['title']}: пара поднята по тревоге на {int(data['qra'][qid]) // 60}-й минуте.")
     from . import csar                          # экипажи сбитых и спасения в миссии (csar.lua)
     lines += csar.apply_debrief(state, man, data, lost)
     for aid, (landed_n, total) in (data.get("assault") or {}).items():   # десант: сколько бортов село (assault.lua)

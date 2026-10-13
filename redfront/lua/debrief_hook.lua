@@ -84,6 +84,13 @@ local function csarOut()
   if type(REDFRONT_CSAR) ~= "table" then return '{"rescued":[],"lost":[]}' end
   return string.format('{"rescued":%s,"lost":%s}', keys(REDFRONT_CSAR.rescued or {}), keys(REDFRONT_CSAR.lost or {}))
 end
+-- дежурные пары ПВО (qra.lua): кто поднят (время, с)
+local function qraOut()
+  if type(REDFRONT_QRA) ~= "table" then return "{}" end
+  local o = {}
+  for id, t in pairs(REDFRONT_QRA) do o[#o + 1] = string.format('"%s":%d', esc(id), t) end
+  return "{" .. table.concat(o, ",") .. "}"
+end
 local function positions()
   local o = {}
   for _, n in ipairs(TRACK) do
@@ -101,8 +108,8 @@ local function dump()
   local f = io.open(OUT, "w")
   if not f then return end
   f:write(string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut()))
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s}',
+    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut()))
   f:close()
 end
 local function nameOf(obj)
