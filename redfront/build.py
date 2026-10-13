@@ -46,16 +46,25 @@ def _pt(m: Mission, p: dict) -> Point:
     return Point.from_latlng(LatLng(p["lat"], p["lon"]), m.terrain)
 
 
+MISSION_COUNTRIES = {"red": "Combined Joint Task Forces Red", "blue": "Combined Joint Task Forces Blue"}
+
+
 def _country(m: Mission, state: dict, side: str):
-    """Страна стороны - из состава сил (countries), выбор игрока. В pydcs у страны есть коалиция по умолчанию
-    (например, USA - blue); если она не совпадает со стороной, страна переносится в коалицию стороны."""
-    name = state["countries"][side]
+    """Страна стороны в миссии: Combined Joint Task Forces Red / Blue (в них в DCS есть вся техника и авиация всех
+    стран; национальность частей - в составе сил, countries, для модели). В pydcs у страны есть коалиция по умолчанию;
+    если она не совпадает со стороной, страна переносится в коалицию стороны."""
+    name = MISSION_COUNTRIES.get(side) or state["countries"][side]
     for cname, coal in m.coalition.items():
         if coal.country(name) is not None:
             if cname != side:
                 coal.swap_country(m.coalition[side], name)
             return m.coalition[side].country(name)
-    raise KeyError(f"pydcs не знает страну '{name}'")
+    from dcs import countries as _countries   # CJTF в коалиции новой миссии pydcs нет - добавить
+    try:
+        m.coalition[side].add_country(_countries.get_by_name(name))   # pydcs отдаёт готовый объект страны
+    except KeyError:
+        raise KeyError(f"pydcs не знает страну '{name}'") from None
+    return m.coalition[side].country(name)
 
 
 def _loadout(type_name: str, category: str) -> dict | None:
@@ -448,7 +457,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
                 base = state["airbases"][g["base"]]
                 first = g["route"][0]
                 leg = model.dist_km(base, first)
-                done_km = -take * tdg["speed_kmh"] / 3600
+                done_km = -take * model.group_speed_kmh(state, g, tdg) / 3600
                 g["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
             times[key] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
         used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
@@ -489,8 +498,8 @@ def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str,
     """Задержки взлёта групп пакета. Опорная - группа игрока: холодный старт (timing.player_cold_start_min, ОЦЕНКА)
     плюс полёт до объекта. Группа обеспечения выходит на свой объект за lead_min до выхода ударной группы на цель
     (ОЦЕНКИ из доктрины). Группы ИИ взлетают с полосы с задержкой start_s; если не успевают - late_s > 0."""
-    spd = tdef["speed_kmh"] / 3.6
-    fly_s = {g["group"]: _path_km(state["airbases"][g["base"]], g["route"]) * 1000 / spd for g in groups}
+    fly_s = {g["group"]: _path_km(state["airbases"][g["base"]], g["route"]) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
+             for g in groups}                    # крейсерская скорость типа исполнителя (data/aircraft.json)
     lead = {g["group"]: g.get("lead_min", 0) * 60 for g in groups}
     t_player = tdef["timing"]["player_cold_start_min"] * 60 + fly_s[fly]
     eta_strike = t_player + lead[fly]
@@ -569,7 +578,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     for g in pkg + enemy:
         tdg = g.get("_tdef") or tdef             # группы противника - по его пакету доктрины
         side_g = g.get("_side", tk["side"])
-        spd = tdg["speed_kmh"]
+        spd = model.group_speed_kmh(state, g, tdg)   # крейсерская типа (V_opt DCS), иначе скорость задачи доктрины
         transit = g.get("transit_alt_m_agl") or tdg["transit_alt_m_agl"]   # средние высоты, если угроз в коридоре нет (planner)
         perf = state["units"][g["performer"]]
         base = state["airbases"][g["base"]]
