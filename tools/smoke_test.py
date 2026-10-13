@@ -1380,6 +1380,11 @@ def ato_section(tmp: Path) -> None:
     shifts = sorted(e["tot_s"] for e in a["entries"] if e["kind"] == "awacs_orbit" and e["side"] == "blue")
     check(shifts and shifts[0] == w0 and all(b_ - a_ == 4 * 3600 for a_, b_ in zip(shifts, shifts[1:])),
           f"дежурство ДРЛО синих - сменами по 4 ч весь лётный день: {', '.join(ato.hhmm(x) for x in shifts)}")
+    from redfront import gui
+    v = gui.view(st)
+    enemy_rows = [r for r in v["ato"] if r["side"] == "blue"]
+    check(len(v["ato"]) == len(a["entries"]) and enemy_rows and all(r["takeoff"] and r["groups"] for r in v["ato"]),
+          f"окно: вкладка ATO - вылеты обеих сторон ({len(v['ato'])}, противника {len(enemy_rows)} - показ по галочке отладки)")
     tk = st["tasks"]
     check(tk and [t["takeoff_s"] for t in tk] == sorted(t["takeoff_s"] for t in tk) and not any(t.get("ai_only") for t in tk),
           f"игроку - вылеты своей стороны по времени ({len(tk)}: {ato.hhmm(tk[0]['takeoff_s'])} ... {ato.hhmm(tk[-1]['takeoff_s'])})")

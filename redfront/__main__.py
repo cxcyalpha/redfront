@@ -104,6 +104,8 @@ def main(argv=None) -> int:
     p = sp.add_parser("roads-probe"); p.add_argument("out")
     p.add_argument("--sector", default="sector_hamburg.json"); p.add_argument("--oob", default="oob_hamburg.json")
     p = sp.add_parser("roads-apply"); p.add_argument("state"); p.add_argument("file")
+    p = sp.add_parser("ato", help="план полётов на сутки; --side all - и противника (отладка)")
+    p.add_argument("state"); p.add_argument("--side", choices=("own", "enemy", "all"), default="own")
     for c in ("status", "plan", "end-day"):
         sp.add_parser(c).add_argument("state")
     sp.add_parser("menu", help="меню: новая кампания, план, сборка, дебриф, следующий день").add_argument("state", nargs="?")
@@ -212,6 +214,23 @@ def main(argv=None) -> int:
         return 0
     if a.cmd == "status":
         print(status(st))
+        return 0
+    if a.cmd == "ato":
+        from . import ato
+        ato.ensure(st)
+        own = st["player_side"]
+        sides = {"own": (own,), "enemy": (model.enemy(own),), "all": model.SIDES}[a.side]
+        print(f"План полётов на сутки {st['day']}" + (f", часы кампании {ato.hhmm(st['clock_s'])}" if st.get("clock_s") else "")
+              + (" (план противника - отладка)" if a.side != "own" else "") + ":")
+        for r in ato.rows(st, sides):
+            when = f"в зоне {r['tot']}-{r['end']}" if r["duty"] else f"на объекте {r['tot']}"
+            print(f"[{r['side']}] {r['takeoff']}-{r['land']} {r['title']} "
+                  f"({when}; {r['status']})")
+            for g in r["groups"]:
+                print(f"     {g}")
+            if r["threats"]:
+                print(f"     ПВО: {', '.join(r['threats'])}")
+        model.save(st, Path(a.state))
         return 0
     if a.cmd == "plan":
         tk = planner.plan(st)

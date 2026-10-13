@@ -126,6 +126,7 @@ def view(st: dict) -> dict:
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open")}
                      for k, b in st["airbases"].items()],
         "tasks": tasks, "task_reason": st.get("task_reason") if not tasks else None,
+        "ato": ato.rows(st), "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],
     }
