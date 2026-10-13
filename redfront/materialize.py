@@ -312,14 +312,25 @@ def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
         return [g for g in groups if g["vehicles"]]
     if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam"):   # объект тыла - сам в миссии как объекты карты
         groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
+        placed = set()
         for sid in task["threats"]:
-            if sid == target["id"]:
+            if sid == target["id"] or sid in placed:
                 continue
             parent = units.get(units[sid].get("attached_to") or "")
+            if parent and parent["id"] in placed:
+                continue
             if parent and parent["state"] == "march":
                 col = column(state, parent, density * OTHER_DENSITY)
                 groups += [col, attached_column(state, units[sid], col)]
-            elif not parent:
+                placed |= {parent["id"], sid}
+            elif parent:                         # часть на месте (оборона, бой) - позицией, её ПВО - с ней (цель подавления ПВО)
+                cl = battle_cluster(state, parent["id"]) if parent["state"] == "battle" else [parent["id"]]
+                for uid in cl:
+                    if uid not in placed:
+                        part = _tag(battle_line(state, units[uid], density * OTHER_DENSITY), cl)
+                        groups += part
+                        placed |= {g_["unit"] for g_ in part}
+            else:
                 groups.append(sam_site(state, units[sid]))
         for sid in background_sams(state, task):
             groups.append(sam_site(state, units[sid]))

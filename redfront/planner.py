@@ -131,7 +131,8 @@ def plan(state: dict) -> dict | None:
         t = e["times"]["strike"]
         if t["takeoff_s"] < clock:
             continue
-        tasks.append({**copy.deepcopy(e["task"]), "ato_id": e["id"], "tot_s": e["tot_s"], "takeoff_s": t["takeoff_s"]})
+        tasks.append({**copy.deepcopy(e["task"]), "ato_id": e["id"], "tot_s": e["tot_s"], "takeoff_s": t["takeoff_s"],
+                      "night": bool(e.get("night"))})
     state["tasks"] = tasks
     if not tasks:
         _t, reason = plan_side(state, state["player_side"])

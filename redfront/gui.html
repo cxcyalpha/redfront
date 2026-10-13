@@ -294,7 +294,7 @@ function render() {
       (ST.ato.length ? "" : `<p class="meta">План полётов строится кнопкой «1. План».</p>`) +
       sides.map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}${s === ST.side ? " (вы)" : " - противник"}</h4>` +
         rows.filter(r => r.side === s).map(r => `<div class="item">
-          <b>${esc(r.takeoff)}–${esc(r.land)} · ${esc(r.title)}</b>
+          <b>${r.night ? "🌙 " : ""}${esc(r.takeoff)}–${esc(r.land)} · ${esc(r.title)}</b>
           <div class="d">${r.duty ? `в зоне ${esc(r.tot)}–${esc(r.end)}` : `на объекте ${esc(r.tot)}`} · ${esc(r.status)}</div>
           <div class="d">${r.groups.map(esc).join("<br>")}</div>
           ${r.threats.length ? `<div class="d">ПВО: ${esc(r.threats.join(", "))}</div>` : ""}</div>`).join("")).join("");

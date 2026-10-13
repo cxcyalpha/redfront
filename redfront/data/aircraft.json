@@ -4,195 +4,231 @@
     "Su_17M4": {
       "cruise_kmh": 830,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "Su_24M": {
       "cruise_kmh": 900,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": true
     },
     "Su_25": {
       "cruise_kmh": 720,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "MiG_21Bis": {
       "cruise_kmh": 830,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "MiG_23MLD": {
       "cruise_kmh": 870,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "MiG_25PD": {
       "cruise_kmh": 1000,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": true
     },
     "MiG_27K": {
       "cruise_kmh": 900,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "MiG_29_Fulcrum": {
       "cruise_kmh": 860,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": true
     },
     "F_4E_45MC": {
       "cruise_kmh": 830,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": true
     },
     "F_15C": {
       "cruise_kmh": 860,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": true
     },
     "F_16C_50": {
       "cruise_kmh": 830,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": true
     },
     "Tornado_IDS": {
       "cruise_kmh": 870,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": true
     },
     "A_10A": {
       "cruise_kmh": 560,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "AV8BNA": {
       "cruise_kmh": 760,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "E_3A": {
       "cruise_kmh": 720,
       "source": "ОЦЕНКА",
-      "crew": 18
+      "crew": 18,
+      "night": true
     },
     "A_50": {
       "cruise_kmh": 700,
       "source": "ОЦЕНКА",
-      "crew": 15
+      "crew": 15,
+      "night": true
     },
     "KC_135": {
       "cruise_kmh": 750,
       "source": "ОЦЕНКА",
-      "crew": 3
+      "crew": 3,
+      "night": true
     },
     "Mi_24P": {
       "cruise_kmh": 250,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": false
     },
     "SA342M": {
       "cruise_kmh": 220,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": false
     },
     "AH_64A": {
       "cruise_kmh": 240,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": true
     },
     "MiG_25RBT": {
       "cruise_kmh": 1000,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": true
     },
     "Su_24MR": {
       "cruise_kmh": 900,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": true
     },
     "MiG_29A": {
       "cruise_kmh": 850,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": true
     },
     "Tornado_GR4": {
       "cruise_kmh": 870,
       "source": "ОЦЕНКА",
-      "crew": 2
+      "crew": 2,
+      "night": true
     },
     "FA_18C_hornet": {
       "cruise_kmh": 850,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": true
     },
     "L_39ZA": {
       "cruise_kmh": 650,
       "source": "ОЦЕНКА",
-      "crew": 1
+      "crew": 1,
+      "night": false
     },
     "An_26B": {
       "cruise_kmh": 430,
       "source": "ОЦЕНКА",
       "cargo_t": 5.5,
-      "crew": 5
+      "crew": 5,
+      "night": true
     },
     "Yak_40": {
       "cruise_kmh": 500,
       "source": "ОЦЕНКА",
       "cargo_t": 2.7,
-      "crew": 3
+      "crew": 3,
+      "night": true
     },
     "C_130": {
       "cruise_kmh": 520,
       "source": "ОЦЕНКА",
       "cargo_t": 19,
-      "crew": 5
+      "crew": 5,
+      "night": true
     },
     "Mi_8MT": {
       "cruise_kmh": 220,
       "source": "ОЦЕНКА",
       "cargo_t": 4,
       "troops": 24,
-      "crew": 3
+      "crew": 3,
+      "night": true
     },
     "Mi_26": {
       "cruise_kmh": 230,
       "source": "ОЦЕНКА",
       "cargo_t": 20,
       "troops": 80,
-      "crew": 5
+      "crew": 5,
+      "night": true
     },
     "CH_47D": {
       "cruise_kmh": 240,
       "source": "ОЦЕНКА",
       "cargo_t": 10,
       "troops": 33,
-      "crew": 3
+      "crew": 3,
+      "night": true
     },
     "UH_1H": {
       "cruise_kmh": 180,
       "source": "ОЦЕНКА",
       "cargo_t": 1.5,
       "troops": 11,
-      "crew": 2
+      "crew": 2,
+      "night": false
     },
     "UH_60A": {
       "cruise_kmh": 240,
       "source": "ОЦЕНКА",
       "cargo_t": 4,
       "troops": 11,
-      "crew": 2
+      "crew": 2,
+      "night": true
     },
     "CH_53E": {
       "cruise_kmh": 250,
       "source": "ОЦЕНКА",
       "cargo_t": 13,
       "troops": 37,
-      "crew": 3
+      "crew": 3,
+      "night": true
     }
   },
   "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность).",
   "_about_troops": "troops - десантников на борт вертолёта в высадке (ОЦЕНКА по справочной вместимости).",
-  "_about_crew": "crew - человек в экипаже (для сообщений о сбитых и спасённых); в модели экипаж полка считается комплектом на борт."
+  "_about_crew": "crew - человек в экипаже (для сообщений о сбитых и спасённых); в модели экипаж полка считается комплектом на борт.",
+  "_about_night": "night - тип летает ночью (ОЦЕНКА по прицельно-навигационному оборудованию эпохи: Су-24М, Tornado, F-15/16, F-4E, МиГ-25/29, ДРЛО, транспорт - да; Су-25, Су-17, МиГ-21/23/27, A-10A, AV-8B, Ми-24, лёгкие вертолёты - нет)."
 }

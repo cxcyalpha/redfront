@@ -17,13 +17,29 @@ from __future__ import annotations
 
 from . import logistics, model, planner
 
-FLYING_HOURS = (6, 20)      # ОЦЕНКА: лётный день (часы, местное время миссии); ночь - позже, с типами, умеющими летать ночью
+FLYING_HOURS = (6, 20)      # ОЦЕНКА: лётный день (часы, местное время миссии); ночью летают только типы с night (aircraft.json)
 TURNAROUND_MIN = 90         # ОЦЕНКА: подготовка к повторному вылету, если в доктрине нет sim.turnaround_min
 SLOT_MIN = 15               # шаг сдвига вылета, если самолётов нет
 ATO_MAX_TASKS = 12          # ОЦЕНКА: задач (кроме дежурств) в ATO стороны на сутки
 ATO_PER_KIND = 3            # ОЦЕНКА: задач одного вида в ATO стороны на сутки
 DWELL_S = 120               # ОЦЕНКА: время над объектом у ударных групп
 MISSION_LEN_S = 75 * 60     # ОЦЕНКА: окно миссии игрока; вылеты в воздухе в это окно - в миссии
+
+
+ATO_NIGHT_TASKS = 3         # ОЦЕНКА: задач (кроме дежурств) стороны ночью - из тех, где все исполнители летают ночью
+NIGHT_KINDS = {"strike_bridge", "strike_depot", "strike_factory", "strike_airfield", "strike_supply_route",
+               "strike_sam_site", "air_assault"}   # ночью - глубокие удары и десант; поддержка войск, спасение - днём
+DAY_S = 86400
+
+
+def night_capable(state: dict, task: dict) -> bool:
+    """Все группы задачи - типы, летающие ночью (aircraft.json night)."""
+    return all(model.aircraft_info(state["units"][g["performer"]].get("type")).get("night") for g in task["package"])
+
+
+def is_night(state: dict, t_s: float) -> bool:
+    w0, w1 = flying_window(state)
+    return not (w0 <= t_s % DAY_S < w1)
 
 
 def flying_window(state: dict) -> tuple[int, int]:
@@ -110,9 +126,10 @@ def build(state: dict) -> dict:
             g = t["package"][0]
             transit = model.dist_km(state["airbases"][g["base"]], g["route"][0]) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
             shift = tdef.get("shift_h", 4) * 3600
-            s = w0
-            while s < w1:
-                e = min(w1, s + shift)
+            d0, d1 = (transit, DAY_S - transit) if night_capable(state, t) else (w0, w1)   # ночью - если тип умеет
+            s = d0
+            while s < d1:
+                e = min(d1, s + shift)
                 times = {g["group"]: {"takeoff_s": s - transit, "objective_s": s, "land_s": e + transit, "station_end_s": e}}
                 need = {g["performer"]: (s - transit, e + transit + turn_s, g["size"])}
                 if g["size"] > 0 and pool.fits(need):
@@ -125,9 +142,10 @@ def build(state: dict) -> dict:
             tdef = doc["tasks"][t["kind"]]
             g = t["package"][0]
             shift = tdef.get("shift_h", 4) * 3600
-            s = w0
-            while s < w1:
-                e = min(w1, s + shift)
+            d0, d1 = (0, DAY_S) if night_capable(state, t) else (w0, w1)   # круглосуточно - если тип летает ночью
+            s = d0
+            while s < d1:
+                e = min(d1, s + shift)
                 need = {g["performer"]: (s, e + turn_s, g["size"])}
                 if pool.fits(need):
                     pool.book(need)
@@ -156,6 +174,29 @@ def build(state: dict) -> dict:
                         break
                     tot += SLOT_MIN * 60
         reg = [t for t in tasks if not t.get("ai_only")]
+        # ночь: до ATO_NIGHT_TASKS задач, где все группы летают ночью, - из младших по приоритету (глубокие удары -
+        # ночью, поддержка войск - днём), вечером после лётного дня (утро суток - только дежурства)
+        night = [t for t in reversed(reg) if t["kind"] in NIGHT_KINDS and night_capable(state, t)][:ATO_NIGHT_TASKS]
+        for i, t in enumerate(night):
+            tdef = doc["tasks"][t["kind"]]
+            rel = rel_times(state, tdef, t)
+            first = min(x["takeoff_s"] for x in rel.values())
+            last = max(x["land_s"] for x in rel.values())
+            lo, hi = w1 - first, DAY_S - last
+            if hi <= lo:
+                continue
+            tot = lo + (hi - lo) * (i + 0.5) / len(night)
+            while tot <= hi:
+                need = _need(t, rel, tot, turn_s)
+                if pool.fits(need):
+                    pool.book(need)
+                    times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
+                    entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
+                                    "title": t["title"], "task": t, "tot_s": tot, "times": times, "ai_only": False,
+                                    "night": True})
+                    break
+                tot += SLOT_MIN * 60
+        reg = [t for t in reg if t not in night]
         span = w1 - w0
         for i, t in enumerate(reg):
             tdef = doc["tasks"][t["kind"]]
@@ -210,7 +251,7 @@ def rows(state: dict, sides: tuple[str, ...] = model.SIDES) -> list[dict]:
         tgt = units.get(e["task"].get("target"), {})
         status = ("слетан игроком" if e["id"] in a["done"] else "прошёл" if t["land_s"] <= clock
                   else "в воздухе" if t["takeoff_s"] <= clock else "по плану")
-        out.append({"id": e["id"], "side": e["side"], "kind": e["kind"], "title": e["title"],
+        out.append({"id": e["id"], "side": e["side"], "kind": e["kind"], "title": e["title"], "night": is_night(state, e["tot_s"]),
                     "target": tgt.get("name", ""), "duty": e["ai_only"],
                     "takeoff": hhmm(t["takeoff_s"]), "tot": hhmm(e["tot_s"]), "land": hhmm(t["land_s"]),
                     "end": hhmm(t["station_end_s"]) if "station_end_s" in t else None,

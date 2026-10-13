@@ -23,6 +23,7 @@ from dcs.unit import Skill
 
 from . import csar, dcstypes, materialize, model, planner
 from .ato import MISSION_LEN_S as ATO_LEN_S
+from .ato import is_night as _ato_night
 
 LUA = Path(__file__).parent / "lua" / "debrief_hook.lua"
 COLUMN_LUA = Path(__file__).parent / "lua" / "column_road.lua"
@@ -980,7 +981,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     m.triggerrules.triggers.append(trig)
 
     m.set_description_text(
-        f"{tk['title']}\n\nДень {state['day']}. Тактическая группа:\n" + "\n".join(f"- {ln}" for ln in lines)
+        f"{tk['title']}\n\nДень {state['day']}" + (", НОЧНОЙ ВЫЛЕТ" if _ato_night(state, m0) else "")
+        + ". Тактическая группа:\n" + "\n".join(f"- {ln}" for ln in lines)
         + f"\n\nУдаление цели: {tk['distance_km']:.0f} км. Угрозы на маршруте: "
         + (", ".join(state['units'][t]['name'] for t in tk['threats']) or "не выявлены")
         + (f"\nЗамечания планировщика: {tk['package_notes']}" if tk.get("package_notes") else "")

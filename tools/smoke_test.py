@@ -640,7 +640,9 @@ def ops_section(tmp: Path) -> None:
     check(any("прибыл в район" in ln for ln in log) and U["red_tp_2"]["state"] != "pending" and U["blue_pzbrig_1"]["state"] != "pending",
           "резервы (второй эшелон, бригада) вводятся в свой день")
     took = sorted(owners[-1] - owners[0])
-    check("Luneburg" in owners[-1] and len(took) >= 2, f"красные взяли пункты: {', '.join(took)}; за 20 дней кампания не встала")
+    check(any("Luneburg" in o for o in owners) and len(took) >= 2,   # к 20-м суткам Люнебург могут и отбить
+          f"красные взяли пункты: {', '.join(took)} (Люнебург - на сутках "
+          f"{', '.join(str(i + 1) for i, o in enumerate(owners) if 'Luneburg' in o) or '-'}); за 20 дней кампания не встала")
     fl = ops.front_links(st)
     check(fl and all(ops.owner(st, a) != ops.owner(st, b) for a, b in fl), f"линия фронта: {len(fl)} связей между пунктами сторон")
     # отходящая часть разрывает соприкосновение и не держит пункт
@@ -1459,12 +1461,17 @@ def ato_section(tmp: Path) -> None:
     over = [u for u, ivs in busy.items() for t0, _t1, _n in ivs
             if sum(n for a_, b_, n in ivs if a_ <= t0 < b_) > logistics.available(st, st["units"][u])]
     sides = {s_: sum(1 for e in a["entries"] if e["side"] == s_ and not e["ai_only"]) for s_ in model.SIDES}
-    check(all(sides.values()) and not over and all(w0 <= e["tot_s"] <= w1 for e in a["entries"]),
-          f"ATO на сутки: вылетов красных {sides['red']}, синих {sides['blue']}, все в лётном дне "
-          f"{ato.hhmm(w0)}-{ato.hhmm(w1)}, самолётов частей не больше наличия в любой момент")
+    day_ok = all(w0 <= e["tot_s"] <= w1 for e in a["entries"] if not e["ai_only"] and not e.get("night"))
+    night = [e for e in a["entries"] if e.get("night")]
+    night_ok = all(e["tot_s"] >= w1 and e["kind"] in ato.NIGHT_KINDS and ato.night_capable(st, e["task"])
+                   and max(t["land_s"] for t in e["times"].values()) <= 86400 for e in night)
+    check(all(sides.values()) and not over and day_ok and night_ok,
+          f"ATO на сутки: вылетов красных {sides['red']}, синих {sides['blue']}; днём - в лётном дне "
+          f"{ato.hhmm(w0)}-{ato.hhmm(w1)}, ночью - {len(night)} глубоких ударов вечером типами, летающими ночью; "
+          "самолётов частей не больше наличия в любой момент")
     shifts = sorted(e["tot_s"] for e in a["entries"] if e["kind"] == "awacs_orbit" and e["side"] == "blue")
-    check(shifts and shifts[0] == w0 and all(b_ - a_ == 4 * 3600 for a_, b_ in zip(shifts, shifts[1:])),
-          f"дежурство ДРЛО синих - сменами по 4 ч весь лётный день: {', '.join(ato.hhmm(x) for x in shifts)}")
+    check(shifts and shifts[0] < 3600 and shifts[-1] >= 20 * 3600 and all(abs(b_ - a_ - 4 * 3600) < 1 for a_, b_ in zip(shifts, shifts[1:])),
+          f"дежурство ДРЛО синих (E-3A летает ночью) - сменами по 4 ч круглые сутки: {', '.join(ato.hhmm(x) for x in shifts)}")
     from redfront import gui
     v = gui.view(st)
     enemy_rows = [r for r in v["ato"] if r["side"] == "blue"]
@@ -1711,11 +1718,15 @@ def core_section(tmp: Path) -> None:
 
     # ---- конец дня, день 2 ----
     km1 = bn["progress_km"]
-    rest = (86400 - (st.get("ground_s") or 0)) / 86400   # наземная модель уже на конце окна миссии - до 24:00 остаток суток
+    g0 = st.get("ground_s") or 0                 # наземная модель уже на конце окна миссии - до 24:00 остаток суток
+    rest = sum(min(86400, (h + 1) * 3600) - max(g0, h * 3600) for h in range(int(g0 // 3600), 24)
+               if (h + 1) * 3600 > g0 and sim._night(st, h * 3600)[0] == 1.0) / 86400
+    rest += sum(min(86400, (h + 1) * 3600) - max(g0, h * 3600) for h in range(int(g0 // 3600), 24)
+                if (h + 1) * 3600 > g0 and sim._night(st, h * 3600)[0] != 1.0) / 86400 * sim._night(st, 0)[0]   # ночью медленнее
     sim.end_day(st)
     adv = bn["progress_km"] - km1
     check(st["day"] == 2 and abs(adv - BASELINE["advance_d2_km"] * rest) < 0.05,
-          f"день 2: колонна прошла {adv:.2f} км за остаток суток после вылета ({rest:.0%} суток; за сутки - "
+          f"день 2: колонна прошла {adv:.2f} км за остаток суток после вылета ({rest:.0%} суточного отрыва с учётом ночи; за сутки - "
           f"{BASELINE['advance_d2_km']} км, как в 0.1)")
     tk2 = planner.plan(st)
     check(tk2 is not None and tk2["target_pos"] != tk["target_pos"], "день 2: задача по колонне в новом месте")
@@ -2298,8 +2309,9 @@ def qra_section(tmp: Path) -> None:
     e = q[0]
     pos = st["airbases"][e["task"]["base"]]
     n_near = airwar.alerts_near(st, e["side"], pos, e["tot_s"] + 60)
-    check(n_near >= 1 and airwar.alerts_near(st, e["side"], pos, 0) == 0,
-          f"вне миссии: удар ИИ рядом с базой дежурной пары на смене - её учитывают ({n_near}), вне смены - нет")
+    far = model.offset(pos, 270 if e["side"] == "red" else 90, 600_000)   # в 600 км в тылу противника
+    check(n_near >= 1 and airwar.alerts_near(st, e["side"], far, e["tot_s"] + 60) == 0,
+          f"вне миссии: удар ИИ рядом с базой дежурной пары на смене - её учитывают ({n_near}), далеко от баз - нет")
 
 
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,

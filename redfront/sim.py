@@ -232,10 +232,11 @@ def advance(state: dict, to_s: float, ground: bool = True) -> list[str]:
             for side in model.SIDES:
                 lines += ops.commander(state, side, COMMAND_H / 24)
         lines += airwar.resolve(state, t, t + dt)
-        if ground:
+        if ground:                               # ночью (вне лётного дня) марш и бой медленнее (night_*, доктрина)
+            nm, nb = _night(state, t)
             lines += _checks(state)
-            lines += battles(state, dt / DAY_S, f"-{int(t // 3600)}")
-            lines += movement(state, dt / DAY_S)
+            lines += battles(state, dt / DAY_S * nb, f"-{int(t // 3600)}")
+            lines += movement(state, dt / DAY_S * nm)
             lines += ops.capture(state)
         t += dt
     state["ground_s"] = t
@@ -246,6 +247,16 @@ def advance(state: dict, to_s: float, ground: bool = True) -> list[str]:
         if tuple(u["route"]) == r and u["progress_km"] - k > 0.5:
             lines.append(f"{u['name']}: продвинулся на {u['progress_km'] - k:.0f} км.")
     return lines
+
+
+def _night(state: dict, t: float) -> tuple[float, float]:
+    """Множители марша и боя в момент t: ночью - night_march / night_battle доктрины игрока (одни на обе стороны -
+    ОЦЕНКА), днём - 1."""
+    from . import ato
+    if not ato.is_night(state, t):
+        return 1.0, 1.0
+    sim_ = _sim(state, state["player_side"])
+    return sim_.get("night_march", 1.0), sim_.get("night_battle", 1.0)
 
 
 def ato_hhmm(t: float) -> str:
