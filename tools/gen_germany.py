@@ -233,6 +233,90 @@ RED_SAMS = [
     ("sam1gta", "Зенитная ракетная бригада 1-й гв. ТА (Круг; в DCS - Куб)", "kub", 51.014, 13.760),
 ]
 
+# ---------------------------------------------------------------- объектовая ПВО: позиции по ярусам (ОЦЕНКА)
+# Позиция - место и ярус (long / medium / short), без модели: тип ставит шаблон стороны (ad_templates в составе сил),
+# часть создаётся при new (model.new_campaign). Правила размещения (все пороги - ОЦЕНКИ, не документ):
+#   * short - ПВО объекта у каждого военного аэродрома обеих сторон (AD_AF_OFFSET_KM от центра в сторону фронта);
+#   * medium (красные) - сеть ЗРК ПВО ГДР: жадное покрытие красных аэродромов и пунктов - каждый не дальше AD_MED_KM
+#     от позиции (дальность С-75 ~43 км); позиции не ближе AD_MED_GAP_KM друг к другу и не ближе AD_FRONT_KM к границе;
+#   * long (красные) - до AD_LONG_N позиций С-200 в глубине: дальние от границы пункты (не ближе AD_LONG_FRONT_KM
+#     к ней), не ближе AD_LONG_GAP_KM друг к другу.
+# У синих средний и дальний ярус - пояс HAWK/Patriot из OOB-миссии (BLUE_SAMS), он не генерируется.
+AD_AF_OFFSET_KM = 1.5
+AD_MED_KM, AD_MED_GAP_KM, AD_FRONT_KM = 35, 30, 15
+AD_LONG_N, AD_LONG_GAP_KM, AD_LONG_FRONT_KM = 4, 100, 60
+AD_TEMPLATES = {   # ярус -> варианты; позиция берёт вариант по номеру (variant). Составы - ОЦЕНКИ (одна батарея)
+    "red": {
+        "long": [{"name": "С-200", "composition": [("RLS_19J6", "radar", 1), ("RPC_5N62V", "radar", 1),
+                                                    ("S_200_Launcher", "launcher", 4)]}],
+        "medium": [{"name": "С-75", "composition": [("p-19 s-125 sr", "radar", 1), ("SNR_75V", "radar", 1),
+                                                     ("S_75M_Volhov", "launcher", 4)]},
+                   {"name": "С-125", "composition": [("p-19 s-125 sr", "radar", 1), ("snr s-125 tr", "radar", 1),
+                                                      ("5p73 s-125 ln", "launcher", 4)]}],
+        "short": [{"name": "Оса, ЗСУ-23-4", "composition": [("Osa_9A33_ln", "launcher", 2), ("ZSU_23_4_Shilka", "launcher", 2)]},
+                  {"name": "С-60", "composition": [("SON_9", "radar", 1), ("S-60_Type59_Artillery", "launcher", 4)]}],
+    },
+    "blue": {
+        "short": [{"name": "Roland, Gepard", "composition": [("Roland_Radar", "radar", 1), ("Roland_ADS", "launcher", 2),
+                                                              ("Gepard", "launcher", 2)]}],
+    },
+}
+AD_TIER_TITLE = {"long": "ЗРК большой дальности", "medium": "ЗРК средней дальности", "short": "ПВО объекта"}
+
+
+def ad_sites(places: dict, links: set, airbase_pos: dict) -> list[dict]:
+    """Позиции объектовой ПВО по правилам выше. airbase_pos: id аэродрома -> (широта, долгота, сторона, имя)."""
+    border = [((places[a]["lat"] + places[b]["lat"]) / 2, (places[a]["lon"] + places[b]["lon"]) / 2)
+              for a, b in links if places[a]["side"] != places[b]["side"]]
+    def front_km(p):
+        return min(dist_km(p, q) for q in border)
+    def toward_front(p, km):
+        q = min(border, key=lambda q: dist_km(p, q))
+        d = dist_km(p, q) or 1.0
+        f = min(1.0, km / d)
+        return (p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f)
+    sites = []
+    for bid, (la, lo, side, name) in sorted(airbase_pos.items()):
+        p = toward_front((la, lo), AD_AF_OFFSET_KM)
+        sites.append({"id": f"{side}_ad_af_{bid}", "name": f"ПВО аэродрома {name}", "side": side, "tier": "short",
+                      "covers": f"af_{bid}", "lat": round(p[0], 4), "lon": round(p[1], 4), "variant": len(sites) % 2,
+                      "rule": "ПВО объекта: у каждого военного аэродрома"})
+    red_pts = {n: (p["lat"], p["lon"]) for n, p in places.items() if p["side"] == "red"}
+    red_pts.update({f"af_{b}": (la, lo) for b, (la, lo, s, _n) in airbase_pos.items() if s == "red"})
+    # long: дальние от границы пункты, разнесённые
+    longs = []
+    for n in sorted(red_pts, key=lambda n: -front_km(red_pts[n])):
+        if (n.startswith("af_") or front_km(red_pts[n]) < AD_LONG_FRONT_KM
+                or any(dist_km(red_pts[n], red_pts[m]) < AD_LONG_GAP_KM for m in longs)):
+            continue
+        longs.append(n)
+        if len(longs) == AD_LONG_N:
+            break
+    for i, n in enumerate(longs):
+        la, lo = red_pts[n]
+        sites.append({"id": f"red_ad_long_{n.lower()}", "name": f"ЗРК большой дальности ({n})", "side": "red", "tier": "long",
+                      "lat": round(la, 4), "lon": round(lo, 4), "variant": 0, "rule": "дальний ярус: глубина, разнесены"})
+    # medium: жадное покрытие красных аэродромов и пунктов; кандидаты - сами эти точки, не у самой границы
+    todo = set(red_pts)
+    meds = []
+    cand = [n for n in red_pts if front_km(red_pts[n]) >= AD_FRONT_KM]
+    while todo:
+        valid = [c for c in cand if all(dist_km(red_pts[c], red_pts[m]) >= AD_MED_GAP_KM for m in meds)]
+        cover = {c: {t for t in todo if dist_km(red_pts[c], red_pts[t]) <= AD_MED_KM} for c in valid}
+        best = max(valid, key=lambda c: (len(cover[c]), c), default=None)
+        if best is None or not cover[best]:
+            break                                # остаток - у самой границы, его прикрывают войсковая ПВО и ярус short
+        meds.append(best)
+        todo -= cover[best]
+    for i, n in enumerate(meds):
+        la, lo = red_pts[n]
+        where = n[3:].replace("_", " ").title() if n.startswith("af_") else n
+        sites.append({"id": f"red_ad_med_{n.lower()}", "name": f"ЗРК средней дальности ({where})", "side": "red",
+                      "tier": "medium", "lat": round(la, 4), "lon": round(lo, 4), "variant": i % 2,
+                      "rule": "средний ярус: покрытие аэродромов и пунктов"})
+    return sites
+
+
 # ---------------------------------------------------------------- авиация (метки OOB-миссии)
 # (id, имя, роль, тип pydcs, аэродром, число, радиус, источник/примечание)
 AIR = [
@@ -348,6 +432,13 @@ def main() -> None:
     for side, names in AIRBASES.items():
         for n in names:
             airbases[n.lower().replace(" ", "_")] = {"name": n, "airport": n, "side": side, "military": True}
+    from dcs.terrain.germany import Germany  # координаты аэродромов - из терраина pydcs (как model.new_campaign)
+    terrain = Germany()
+    af_pos = {}
+    for bid, b in airbases.items():
+        ll = terrain.airports[b["airport"]].position.latlng()
+        af_pos[bid] = (ll.lat, ll.lng, b["side"], b["name"])
+    sites = ad_sites(places, links, af_pos)
     sector = {
         "_about": "Театр всей карты Cold War Germany: внутригерманская граница от Балтики до Хофа. Генерирован "
                   "tools/gen_germany.py. Координаты пунктов - ОЦЕНКИ (по памяти, +-2 км), пункты и связи сектора "
@@ -364,6 +455,10 @@ def main() -> None:
         "depots": [{"id": i, "name": n, "side": s, "place": p} for i, n, s, p in DEPOTS],
         "bridges": ham["bridges"],
         "_about_targets": "Склады - в пунктах (уточняются зондом карты), мосты через Эльбу - из сектора Гамбурга.",
+        "ad_sites": sites,
+        "_about_ad_sites": "Позиции объектовой ПВО по ярусам (long / medium / short) - ОЦЕНКА по правилам "
+                           "tools/gen_germany.py (ad_sites), не документ: у аэродромов, покрытие красных аэродромов и "
+                           "пунктов, дальний ярус в глубине. Модель на позиции - шаблон стороны (ad_templates в составе сил).",
     }
     (DATA / "sector_germany.json").write_text(json.dumps(sector, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -434,6 +529,11 @@ def main() -> None:
         "units": units,
         "variants": [{"name": "base", "title": "Удар ОВД по всему фронту (1989)"}],
         "replacements": {"air_per_day": 2, "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."},
+        "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
+                                                                           for t, r, c in v["composition"]]}
+                                       for v in vs] for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
+        "_about_ad_templates": "Объектовая ПВО: сторона -> ярус -> варианты состава батареи на позиции ad_sites сектора "
+                               "(ОЦЕНКИ: одна батарея на позицию). Нет шаблона яруса - позиция стоит пустой.",
     }
     (DATA / "oob_germany.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
     n_g = sum(1 for u in units if u["role"] == "maneuver")

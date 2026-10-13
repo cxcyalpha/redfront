@@ -1300,6 +1300,41 @@ def germany_section(tmp: Path) -> None:
     heavy = max(v["weight"] for g in man["ground"] for v in g["vehicles"])
     check(veh <= 1200 and heavy <= materialize.MAX_WEIGHT * 1.1,      # округление по типам - как и раньше
           f"миссия всего фронта: {len(man['ground'])} групп, {veh} машин (не больше 1200), машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
+    air_defence_section(tmp)
+
+
+def air_defence_section(tmp: Path) -> None:
+    """Объектовая ПВО: позиции сектора + шаблоны стороны; радиогоризонт в коридоре; восстановление и смена позиции."""
+    from redfront import logistics
+    print("\n== объектовая ПВО ==")
+    st = model.new_campaign("ad", sector="sector_germany.json", oob="oob_germany.json", seed=3)
+    sec = model.load_json("sector_germany.json")
+    ad = [u for u in st["units"].values() if u.get("fixed")]
+    tiers = {r: sum(1 for u in ad if u["role"] == r) for r in ("sam_long", "sam_medium", "sam_short")}
+    check(len(ad) == len(sec["ad_sites"]) and all(tiers.values()),
+          f"позиции ПВО сектора заняты шаблонами сторон: {len(ad)} частей ({tiers})")
+    afs = {u["covers"] for u in ad if u.get("covers")}
+    check(afs == {f"af_{b}" for b in st["airbases"]}, f"ПВО объекта у каждого военного аэродрома ({len(afs)})")
+    s200 = next(u for u in ad if u["role"] == "sam_long")
+    p = model.unit_pos(st, s200)
+    a, b = model.offset(p, 90, 80_000, -100_000), model.offset(p, 90, 80_000, 100_000)   # маршрут в 80 км от С-200
+    hi = planner.corridor_threats(st, [(a, b)], "red")
+    lo = planner.corridor_threats(st, [(a, b)], "red", 50)
+    check(s200["id"] in hi and s200["id"] not in lo,
+          f"С-200 в 80 км: угроза по высотной цели, по маршруту на 50 м - нет (радиогоризонт "
+          f"{planner.radar_horizon_km(planner.RADAR_MAST_M, 50):.0f} км)")
+    hawk = st["units"]["blue_sam31"]
+    for u in (hawk, s200):
+        u["lost"] = {c["type"]: float(c["count"]) for c in u["composition"]}    # уничтожены целиком
+    pos0 = {u["id"]: dict(u["pos"]) for u in (hawk, s200)}
+    lines = logistics.air_defence(st)
+    moved = model.dist_km(pos0[hawk["id"]], hawk["pos"])
+    check(0 < model.strength(hawk) < 1 and 0 < model.strength(s200) < 1,
+          f"разбитые ЗРК восстанавливаются: HAWK {model.strength(hawk):.0%}, С-200 {model.strength(s200):.0%} за сутки")
+    check(abs(moved - model.doctrine(st, "blue")["sim"]["sam_relocate_km"]) < 0.5 and s200["pos"] == pos0[s200["id"]],
+          f"раскрытый HAWK сменил позицию на {moved:.1f} км, объектовая ПВО (С-200) - на месте")
+    logistics.air_defence(st)
+    check(model.dist_km(pos0[hawk["id"]], hawk["pos"]) == moved, "без новых потерь ЗРК позицию не меняет")
 
 
 def main() -> int:

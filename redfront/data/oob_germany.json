@@ -5300,5 +5300,130 @@
  "replacements": {
   "air_per_day": 2,
   "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."
- }
+ },
+ "ad_templates": {
+  "red": {
+   "long": [
+    {
+     "name": "С-200",
+     "composition": [
+      {
+       "type": "RLS_19J6",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "RPC_5N62V",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S_200_Launcher",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ],
+   "medium": [
+    {
+     "name": "С-75",
+     "composition": [
+      {
+       "type": "p-19 s-125 sr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "SNR_75V",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S_75M_Volhov",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    },
+    {
+     "name": "С-125",
+     "composition": [
+      {
+       "type": "p-19 s-125 sr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "snr s-125 tr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "5p73 s-125 ln",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ],
+   "short": [
+    {
+     "name": "Оса, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Osa_9A33_ln",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    },
+    {
+     "name": "С-60",
+     "composition": [
+      {
+       "type": "SON_9",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S-60_Type59_Artillery",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Roland, Gepard",
+     "composition": [
+      {
+       "type": "Roland_Radar",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "Roland_ADS",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "Gepard",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_about_ad_templates": "Объектовая ПВО: сторона -> ярус -> варианты состава батареи на позиции ad_sites сектора (ОЦЕНКИ: одна батарея на позицию). Нет шаблона яруса - позиция стоит пустой."
 }

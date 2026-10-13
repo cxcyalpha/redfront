@@ -41,13 +41,26 @@ def ip_point(base: dict, target: dict, offset_km: float) -> dict:
     return model.lerp(target, base, min(1.0, offset_km / d)) if d else dict(target)
 
 
-def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str) -> list[str]:
-    """ЗРК стороны against, которые достают хотя бы один участок маршрута."""
+RADAR_MAST_M = 10       # ОЦЕНКА: высота антенны РЛС ЗРК над местностью (для радиогоризонта)
+
+
+def radar_horizon_km(h1_m: float, h2_m: float) -> float:
+    """Дальность радиогоризонта (стандартная рефракция, 4/3 радиуса Земли) между антенной h1 и целью h2, км.
+    Рельеф не учитывается - в холмах реальная дальность меньше."""
+    return 4.12 * (math.sqrt(max(0.0, h1_m)) + math.sqrt(max(0.0, h2_m)))
+
+
+def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str, low_alt_m: float | None = None) -> list[str]:
+    """ЗРК стороны against, которые достают хотя бы один участок маршрута. low_alt_m - высота маршрута в зонах ЗРК
+    (low_alt_m_agl задачи): радиус угрозы не больше радиогоризонта РЛС по цели на этой высоте - иначе С-200 с
+    дальностью 255 км по высотной цели "достаёт" любой маловысотный маршрут, и подавление назначается на всё подряд."""
     out = []
     for u in state["units"].values():
         if u["side"] != against or model.category(u) != "sam" or u["state"] == "destroyed" or model.strength(u) <= 0:
             continue
         r = threat_radius_km(u)
+        if low_alt_m is not None:
+            r = min(r, radar_horizon_km(RADAR_MAST_M, low_alt_m))
         if any(_seg_dist_km(model.unit_pos(state, u), a, b) <= r for a, b in legs):
             out.append(u["id"])
     return out
@@ -162,7 +175,7 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
             d, perf = best
             base = state["airbases"][perf["base"]]
             ip = ip_point(base, tpos, tdef["ip_offset_km"])
-            threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe)
+            threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe, tdef.get("low_alt_m_agl"))
             groups, why = package(state, tdef, perf, tgt, tpos, ip, threats)
             if groups is None:
                 reasons.append(f"{tdef['title']}: {tgt['name']} - {why}")

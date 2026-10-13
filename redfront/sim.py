@@ -202,6 +202,7 @@ def end_day(state: dict) -> list[str]:
     lines += movement(state)
     lines += ops.capture(state)
     lines += logistics.repairs(state)
+    lines += logistics.air_defence(state)
     lines += logistics.airfields(state)
     lines += logistics.replacements(state)
     state["day"] += 1
