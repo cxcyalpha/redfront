@@ -159,9 +159,21 @@ for _, b in ipairs(BATTLES) do
   env.info("redfront battle site " .. b.key .. ": " .. tostring(msg))
 end
 
--- ПВО: поле (можно у дороги), не на дороге, строения - большой минус; вода и склон исключены
+-- ВПП, рулёжка, стоянка (бетон аэродрома) ближе ad_runway_clear м - нельзя: ПВО не ставится на аэродром и под взлёт
+local function nearRunway(x, y)
+  if surface(x, y) == land.SurfaceType.RUNWAY then return true end
+  for _, r in ipairs({ CFG.ad_runway_clear / 2, CFG.ad_runway_clear }) do
+    for k = 0, 7 do
+      local a = math.pi * k / 4
+      if surface(x + r * math.cos(a), y + r * math.sin(a)) == land.SurfaceType.RUNWAY then return true end
+    end
+  end
+  return false
+end
+
+-- ПВО: поле (можно у дороги), не на дороге, строения - большой минус; вода, склон и аэродром исключены
 local function adScore(x, y)
-  if isWater(x, y) or slope(x, y) > CFG.max_slope then return nil end
+  if isWater(x, y) or slope(x, y) > CFG.max_slope or nearRunway(x, y) then return nil end
   local s
   if surface(x, y) == land.SurfaceType.ROAD then s = CFG.ad_w_road
   else
@@ -170,9 +182,34 @@ local function adScore(x, y)
   return s - CFG.ad_w_building * buildings(x, y, CFG.ad_building_r)
 end
 
+-- позиция целиком: сколько машин нельзя поставить в точку со сдвигом (dx, dy) - вода, склон, аэродром
+local function adBad(a, sx, sy)
+  local n = 0
+  for _, u in ipairs(a.units) do
+    if adScore(u.x + sx, u.y + sy) == nil then n = n + 1 end
+  end
+  return n
+end
+
 local adPlaced = {}
 local function placeAD(a)
   local sh = (a.follow and SHIFT[a.follow]) or { x = 0, y = 0 }
+  local moved = 0
+  local bad = adBad(a, sh.x, sh.y)
+  if bad > 0 and not a.follow then            -- позиция на аэродроме, в воде: вся позиция - на ближнее место, где можно
+    local best = { bad, 0, 0 }
+    for _, r in ipairs(CFG.ad_site_rings) do
+      for k = 0, CFG.ad_dirs - 1 do
+        local ang = 2 * math.pi * k / CFG.ad_dirs
+        local dx, dy = r * math.cos(ang), r * math.sin(ang)
+        local b = adBad(a, sh.x + dx, sh.y + dy)
+        if b < best[1] then best = { b, dx, dy } end
+      end
+      if best[1] == 0 then break end           -- ближнее кольцо, где можно всю позицию
+    end
+    sh = { x = sh.x + best[2], y = sh.y + best[3] }
+    moved = math.sqrt(best[2] ^ 2 + best[3] ^ 2)
+  end
   local new, inTown = {}, 0
   for _, u in ipairs(a.units) do
     local x0, y0 = u.x + sh.x, u.y + sh.y
@@ -198,7 +235,8 @@ local function placeAD(a)
   end
   coalition.addGroup(a.country, Group.Category.GROUND, { name = a.name, groupId = a.groupId, task = "Ground Nothing", units = new,
     route = { points = { { x = new[1].x, y = new[1].y, action = "Off Road", type = "Turning Point", speed = 0, ETA = 0, ETA_locked = false, speed_locked = true } } } })
-  return string.format("ПВО на открытом месте: %d машин, у строений осталось %d", #new, inTown)
+  return string.format("ПВО на открытом месте: %d машин, у строений осталось %d%s", #new, inTown,
+                       moved > 0 and string.format(", позиция сдвинута на %.0f м (аэродром, вода)", moved) or "")
 end
 
 for _, a in ipairs(ADS) do

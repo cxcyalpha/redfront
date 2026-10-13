@@ -239,11 +239,17 @@ RED_SAMS = [
 #   * short - ПВО объекта у каждого военного аэродрома обеих сторон (AD_AF_OFFSET_KM от центра в сторону фронта);
 #   * medium (красные) - сеть ЗРК ПВО ГДР: жадное покрытие красных аэродромов и пунктов - каждый не дальше AD_MED_KM
 #     от позиции (дальность С-75 ~43 км); позиции не ближе AD_MED_GAP_KM друг к другу и не ближе AD_FRONT_KM к границе;
+#     позиция у аэродрома - в AD_MED_AF_OFFSET_KM от него к фронту, у пункта - в AD_MED_TOWN_OFFSET_KM (не на ВПП и не
+#     в городе; на месте её ещё отодвигает от бетона battle_site.lua), не ближе AD_AIRPORT_CLEAR_KM к любому аэродрому;
 #   * long (красные) - до AD_LONG_N позиций С-200 в глубине: дальние от границы пункты (не ближе AD_LONG_FRONT_KM
-#     к ней), не ближе AD_LONG_GAP_KM друг к другу.
+#     к ней), не ближе AD_LONG_GAP_KM друг к другу; позиция - в AD_LONG_OFFSET_KM от пункта в тыл.
 # У синих средний и дальний ярус - пояс HAWK/Patriot из OOB-миссии (BLUE_SAMS), он не генерируется.
 AD_AF_OFFSET_KM = 1.5
 AD_MED_KM, AD_MED_GAP_KM, AD_FRONT_KM = 35, 30, 15
+AD_MED_AF_OFFSET_KM = 5      # ОЦЕНКА: позиция ЗРК, прикрывающая аэродром, - не на нём, а в стольких км к фронту
+AD_MED_TOWN_OFFSET_KM = 3    # ОЦЕНКА: позиция ЗРК у пункта - не в городе, а в стольких км к фронту
+AD_LONG_OFFSET_KM = 4        # ОЦЕНКА: позиция С-200 у пункта - в стольких км в тыл (не там же, где С-75 этого пункта)
+AD_AIRPORT_CLEAR_KM = 3      # позиции ЗРК (кроме ПВО аэродрома) - не ближе к любому аэродрому карты (и гражданскому)
 AD_LONG_N, AD_LONG_GAP_KM, AD_LONG_FRONT_KM = 4, 100, 60
 AD_TEMPLATES = {   # ярус -> варианты; позиция берёт вариант по номеру (variant). Составы - ОЦЕНКИ (одна батарея)
     "red": {
@@ -264,8 +270,9 @@ AD_TEMPLATES = {   # ярус -> варианты; позиция берёт в�
 AD_TIER_TITLE = {"long": "ЗРК большой дальности", "medium": "ЗРК средней дальности", "short": "ПВО объекта"}
 
 
-def ad_sites(places: dict, links: set, airbase_pos: dict) -> list[dict]:
-    """Позиции объектовой ПВО по правилам выше. airbase_pos: id аэродрома -> (широта, долгота, сторона, имя)."""
+def ad_sites(places: dict, links: set, airbase_pos: dict, airports: list[tuple[float, float]] = ()) -> list[dict]:
+    """Позиции объектовой ПВО по правилам выше. airbase_pos: id аэродрома -> (широта, долгота, сторона, имя);
+    airports - все аэродромы карты (широта, долгота): позиции ЗРК от них отодвигаются."""
     border = [((places[a]["lat"] + places[b]["lat"]) / 2, (places[a]["lon"] + places[b]["lon"]) / 2)
               for a, b in links if places[a]["side"] != places[b]["side"]]
     def front_km(p):
@@ -275,6 +282,12 @@ def ad_sites(places: dict, links: set, airbase_pos: dict) -> list[dict]:
         d = dist_km(p, q) or 1.0
         f = min(1.0, km / d)
         return (p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f)
+    def clear(p, km_step):                       # дальше от аэродромов карты: шагами в ту же сторону (к фронту / в тыл)
+        for _ in range(4):
+            if all(dist_km(p, a) >= AD_AIRPORT_CLEAR_KM for a in airports):
+                break
+            p = toward_front(p, km_step)
+        return p
     sites = []
     for bid, (la, lo, side, name) in sorted(airbase_pos.items()):
         p = toward_front((la, lo), AD_AF_OFFSET_KM)
@@ -293,7 +306,7 @@ def ad_sites(places: dict, links: set, airbase_pos: dict) -> list[dict]:
         if len(longs) == AD_LONG_N:
             break
     for i, n in enumerate(longs):
-        la, lo = red_pts[n]
+        la, lo = clear(toward_front(red_pts[n], -AD_LONG_OFFSET_KM), -AD_LONG_OFFSET_KM)
         sites.append({"id": f"red_ad_long_{n.lower()}", "name": f"ЗРК большой дальности ({n})", "side": "red", "tier": "long",
                       "lat": round(la, 4), "lon": round(lo, 4), "variant": 0, "rule": "дальний ярус: глубина, разнесены"})
     # medium: жадное покрытие красных аэродромов и пунктов; кандидаты - сами эти точки, не у самой границы
@@ -309,7 +322,7 @@ def ad_sites(places: dict, links: set, airbase_pos: dict) -> list[dict]:
         meds.append(best)
         todo -= cover[best]
     for i, n in enumerate(meds):
-        la, lo = red_pts[n]
+        la, lo = clear(toward_front(red_pts[n], AD_MED_AF_OFFSET_KM if n.startswith("af_") else AD_MED_TOWN_OFFSET_KM), 2)
         where = n[3:].replace("_", " ").title() if n.startswith("af_") else n
         sites.append({"id": f"red_ad_med_{n.lower()}", "name": f"ЗРК средней дальности ({where})", "side": "red",
                       "tier": "medium", "lat": round(la, 4), "lon": round(lo, 4), "variant": i % 2,
@@ -461,7 +474,8 @@ def main() -> None:
     for bid, b in airbases.items():
         ll = terrain.airports[b["airport"]].position.latlng()
         af_pos[bid] = (ll.lat, ll.lng, b["side"], b["name"])
-    sites = ad_sites(places, links, af_pos)
+    all_af = [(ap.position.latlng().lat, ap.position.latlng().lng) for ap in terrain.airports.values()]
+    sites = ad_sites(places, links, af_pos, all_af)
     sector = {
         "_about": "Театр всей карты Cold War Germany: внутригерманская граница от Балтики до Хофа. Генерирован "
                   "tools/gen_germany.py. Координаты пунктов - ОЦЕНКИ (по памяти, +-2 км), пункты и связи сектора "

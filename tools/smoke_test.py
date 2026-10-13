@@ -787,6 +787,11 @@ def battle_site_section(tmp: Path, m, man: dict, st: dict) -> None:
     pat = next(g for c in m.coalition["blue"].countries.values() for g in c.vehicle_group if g.name == "blue_patriot_1")
     px, py = pat.units[0].position.x, pat.units[0].position.y
     L.execute(f"for i = -6, 6 do for j = -6, 6 do BUILD[#BUILD + 1] = {{ x = {px} + i * 40, y = {py} + j * 40 }} end end")  # Patriot - в посёлке
+    L.execute(f"""local base = land.getSurfaceType                   -- и через позицию Patriot идёт ВПП 3 км x 60 м
+      function land.getSurfaceType(p)
+        if math.abs(p.y - {py}) < 30 and math.abs(p.x - {px}) < 1500 then return 5 end
+        return base(p)
+      end""")
     L.execute(script)
     allg = {d.name: d for d in G.ADDED.values()}
     added = {n: d for n, d in allg.items() if n in names}
@@ -823,6 +828,9 @@ def battle_site_section(tmp: Path, m, man: dict, st: dict) -> None:
     follows = set(re.findall(r'name = "([^"]+)", groupId = \d+, country = \d+, follow = "', script))   # ПВО частей в бою - со сдвигом места боя
     ad_nom = [(u.position.x + (dx if n in follows else 0), u.position.y + (dy if n in follows else 0)) for n, g in adg.items() for u in g.units]
     ad_town0 = sum(1 for q in ad_nom if any(math.hypot(b.x - q[0], b.y - q[1]) <= 60 for b in G.BUILD.values()))
+    rw_m = min(math.hypot(max(0.0, abs(q[0] - px) - 1500), max(0.0, abs(q[1] - py) - 30)) for q in adp)
+    check(rw_m >= 149.9, f"ПВО не на аэродроме: Patriot стоял на ВПП - позиция сдвинута, до бетона не меньше {rw_m:.0f} м "
+                         f"({G.REDFRONT_SITE_LOG['blue_patriot_1']})")
     check(ad_town0 >= 4 and set(ads) == ad_names and ad_bld == 0 and ad_road == 0 and not ad_wet and ad_gap >= 79.9,
           f"ПВО ({len(adp)} машин, {len(ads)} групп; Patriot стоял в посёлке - у строений было {ad_town0}): на открытом месте - у строений 0, на дороге 0, в воде 0, "
           f"между машинами не меньше {ad_gap:.0f} м")
