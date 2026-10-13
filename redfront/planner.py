@@ -110,7 +110,7 @@ def hold_point(state: dict, sam: dict, base: dict, g: dict, at_s: float = 0) -> 
 
 MAX_TASKS = 8   # ОЦЕНКА: сколько задач показывать в плане дня
 STRATEGIC = ("depot", "bridge", "airfield", "factory")
-MAX_PER_KIND = 2   # ОЦЕНКА: задач по объектам тыла одного вида в плане дня   # объекты тыла: цель - точка (склад, мост, аэродром)
+MAX_PER_KIND = 2   # ОЦЕНКА: задач одного вида в плане дня   # объекты тыла: цель - точка (склад, мост, аэродром)
 
 
 def plan(state: dict) -> dict | None:
@@ -171,7 +171,10 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
             if bases:
                 targets.sort(key=lambda t: min(model.dist_km(b, model.unit_pos(state, t)) for b in bases))
             targets = targets[:MAX_PER_KIND]
+        n_kind = 0
         for tgt in targets:
+            if n_kind >= MAX_PER_KIND:           # задач одного вида в плане дня - не больше (иначе план - 8 одинаковых)
+                break
             tpos = model.unit_pos(state, tgt)
             best = None
             for r in performers:
@@ -196,6 +199,7 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
                 reasons.append(f"{tdef['title']}: {tgt['name']} - {why}")
                 continue
             found = True
+            n_kind += 1
             for g in groups:
                 tasked[g["performer"]] = tasked.get(g["performer"], 0) + 1
             if not threats and tdef.get("medium_alt_m_agl"):   # угроз ЗРК в коридоре нет - переход на средних высотах

@@ -1302,6 +1302,28 @@ def germany_section(tmp: Path) -> None:
           f"миссия всего фронта: {len(man['ground'])} групп, {veh} машин (не больше 1200), машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
     air_defence_section(tmp)
     support_air_section(tmp)
+    helo_section(tmp)
+
+
+def helo_section(tmp: Path) -> None:
+    """Боевые вертолёты: части модели, задача по войскам в соприкосновении, предельно малая высота и у ИИ."""
+    import collections
+    print("\n== вертолёты ==")
+    st = model.new_campaign("helo", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    for _ in range(3):
+        sim.end_day(st)
+    kinds = {side: collections.Counter(t["kind"] for t in planner.plan_side(st, side)[0]) for side in model.SIDES}
+    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for n in c.values()) and len(kinds["blue"]) >= 2,
+          f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "cas_helo"), None)
+    check(n is not None, "в плане дня есть удар вертолётов по войскам в соприкосновении")
+    if n:
+        build.build(st, tmp / "helo.miz", task_no=n)
+        m = dcs.Mission(); m.load_file(str(tmp / "helo.miz"))
+        hg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.helicopter_group]
+        check(hg and max(p.alt for g in hg for p in g.points) <= 60,
+              f"вертолёты в миссии: {', '.join(g.units[0].type for g in hg)}, маршрут не выше 60 м")
 
 
 def support_air_section(tmp: Path) -> None:

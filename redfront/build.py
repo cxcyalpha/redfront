@@ -539,6 +539,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         airport = m.terrain.airports[base["airport"]]
         ac = dcstypes.flying(perf["type"])
         is_player = player and g["group"] == fly
+        helo = model.category(perf) == "heli"    # вертолёты: предельно малая высота и для ИИ
         mt = _maintask(ac, g["maintask"])
         if g["objective"]["kind"] == "orbit":    # дежурство: к началу миссии уже в зоне (в воздухе), до конца миссии
             orbit_group(m, state, g, perf, ac, mt, side_g, sortie, spd)
@@ -565,7 +566,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         def wp(p, alt, name, keep_alt=False):
             if not keep_alt and side_g == tk["side"] and in_threat(p, circles):   # в известной зоне ЗРК - на предельно малой высоте
                 alt = min(alt, tdg.get("low_alt_m_agl", alt))
-            if not is_player and alt < AI_LOW_MIN_M:  # ИИ ниже этого бьётся о землю (Су-24М: 3 случая на 40-80 м)
+            if not is_player and not helo and alt < AI_LOW_MIN_M:  # ИИ ниже этого бьётся о землю (Су-24М: 3 случая на 40-80 м)
                 alt = AI_LOW_MIN_M
             w = fg.add_waypoint(_pt(m, p), alt, speed=spd, name=name)
             w.alt_type = "RADIO"
