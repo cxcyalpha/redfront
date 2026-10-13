@@ -828,6 +828,9 @@ def battle_site_section(tmp: Path, m, man: dict, st: dict) -> None:
     follows = set(re.findall(r'name = "([^"]+)", groupId = \d+, country = \d+, follow = "', script))   # ПВО частей в бою - со сдвигом места боя
     ad_nom = [(u.position.x + (dx if n in follows else 0), u.position.y + (dy if n in follows else 0)) for n, g in adg.items() for u in g.units]
     ad_town0 = sum(1 for q in ad_nom if any(math.hypot(b.x - q[0], b.y - q[1]) <= 60 for b in G.BUILD.values()))
+    town = max(sum(1 for b in G.BUILD.values() if math.hypot(b.x - q[0], b.y - q[1]) <= 150) for q in adp)
+    check(town < build.SITE_CFG["ad_town_n"], f"ПВО не в городе: у любой машины ПВО строений ближе 150 м - {town} "
+                                             f"(меньше {build.SITE_CFG['ad_town_n']})")
     rw_m = min(math.hypot(max(0.0, abs(q[0] - px) - 1500), max(0.0, abs(q[1] - py) - 30)) for q in adp)
     check(rw_m >= 149.9, f"ПВО не на аэродроме: Patriot стоял на ВПП - позиция сдвинута, до бетона не меньше {rw_m:.0f} м "
                          f"({G.REDFRONT_SITE_LOG['blue_patriot_1']})")

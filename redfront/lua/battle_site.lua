@@ -182,11 +182,13 @@ local function adScore(x, y)
   return s - CFG.ad_w_building * buildings(x, y, CFG.ad_building_r)
 end
 
--- позиция целиком: сколько машин нельзя поставить в точку со сдвигом (dx, dy) - вода, склон, аэродром
+-- позиция целиком: сколько машин нельзя поставить в точку со сдвигом (dx, dy) - вода, склон, аэродром, город
+-- (строений ближе ad_town_r м - не меньше ad_town_n: из квартала машину за 400 м не вывести)
 local function adBad(a, sx, sy)
   local n = 0
   for _, u in ipairs(a.units) do
-    if adScore(u.x + sx, u.y + sy) == nil then n = n + 1 end
+    local x, y = u.x + sx, u.y + sy
+    if adScore(x, y) == nil or buildings(x, y, CFG.ad_town_r) >= CFG.ad_town_n then n = n + 1 end
   end
   return n
 end
@@ -196,7 +198,7 @@ local function placeAD(a)
   local sh = (a.follow and SHIFT[a.follow]) or { x = 0, y = 0 }
   local moved = 0
   local bad = adBad(a, sh.x, sh.y)
-  if bad > 0 and not a.follow then            -- позиция на аэродроме, в воде: вся позиция - на ближнее место, где можно
+  if bad > 0 and not a.follow then            -- позиция на аэродроме, в воде, в городе: вся позиция - на ближнее место, где можно
     local best = { bad, 0, 0 }
     for _, r in ipairs(CFG.ad_site_rings) do
       for k = 0, CFG.ad_dirs - 1 do
@@ -236,7 +238,7 @@ local function placeAD(a)
   coalition.addGroup(a.country, Group.Category.GROUND, { name = a.name, groupId = a.groupId, task = "Ground Nothing", units = new,
     route = { points = { { x = new[1].x, y = new[1].y, action = "Off Road", type = "Turning Point", speed = 0, ETA = 0, ETA_locked = false, speed_locked = true } } } })
   return string.format("ПВО на открытом месте: %d машин, у строений осталось %d%s", #new, inTown,
-                       moved > 0 and string.format(", позиция сдвинута на %.0f м (аэродром, вода)", moved) or "")
+                       moved > 0 and string.format(", позиция сдвинута на %.0f м (аэродром, вода, город)", moved) or "")
 end
 
 for _, a in ipairs(ADS) do
