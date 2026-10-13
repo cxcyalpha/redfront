@@ -1295,11 +1295,26 @@ def germany_section(tmp: Path) -> None:
             if any(min(ops.path_km(st, p, o) for o in objs) < 60 for p in took)}
     check(len(took) >= 3 and len(axes) >= 2, f"за 8 дней красные взяли {len(took)} пунктов на {len(axes)} осях: {', '.join(sorted(took))}")
     planner.plan(st)
+    tk = st["tasks"][0]
+    st["settings"]["mission_budget"] = 0                               # без бюджета - весь театр
+    full = materialize.theatre(st, tk)
+    n_full = sum(len(g["vehicles"]) for g in full)
+    st["settings"].pop("mission_budget")                               # по умолчанию - MISSION_BUDGET
     man = build.build(st, tmp / "germany.miz", task_no=1)
     veh = sum(len(g["vehicles"]) for g in man["ground"])
     heavy = max(v["weight"] for g in man["ground"] for v in g["vehicles"])
-    check(veh <= 1200 and heavy <= materialize.MAX_WEIGHT * 1.1,      # округление по типам - как и раньше
-          f"миссия всего фронта: {len(man['ground'])} групп, {veh} машин (не больше 1200), машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
+    check(veh <= materialize.MISSION_BUDGET < n_full and heavy <= materialize.MAX_WEIGHT * 1.1,
+          f"миссия всего фронта: без бюджета {n_full} машин, с бюджетом {veh} (не больше {materialize.MISSION_BUDGET}), "
+          f"{len(man['ground'])} групп, машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
+    core = {g["unit"]: len(g["vehicles"]) for g in materialize.window(st, tk)}
+    got = {g["unit"]: len(g["vehicles"]) for g in man["ground"]}
+    check(all(got.get(u) == n for u, n in core.items() if n),
+          f"бюджет не трогает окно задачи игрока ({len(core)} групп: цель, угрозы коридора, ЗРК у маршрута)")
+    by_unit_full = {g["unit"]: sum(v["weight"] for v in g["vehicles"]) for g in full}
+    thinned = [g for g in man["ground"] if len(g["vehicles"]) < len(next(f for f in full if f["unit"] == g["unit"])["vehicles"])]
+    ok_w = all(sum(v["weight"] for v in g["vehicles"]) <= by_unit_full[g["unit"]] + 1e-6 for g in thinned)
+    check(thinned and ok_w, f"дальние группы прорежены ({len(thinned)}): вес машин вырос, сумма не больше модели; "
+                            f"убрано целиком {len(full) - len(man['ground'])} групп")
 
 
 def helo_section(tmp: Path) -> None:

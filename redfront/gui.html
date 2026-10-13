@@ -217,7 +217,9 @@ function render() {
   const p = $("#pane");
   if (TAB === "plan") {
     if (!ST.tasks.length) p.innerHTML = `<p class="meta">${ST.task_reason ? "Задач нет: " + esc(ST.task_reason) : "Плана ещё нет - кнопка «1. План»."}</p>`;
-    else p.innerHTML = ST.tasks.map((t, i) => `<div class="task ${i === SEL ? "sel" : ""}" data-i="${i}">
+    else p.innerHTML = `<div class="row" style="margin-bottom:8px"><span class="meta" style="margin:0">наземных машин в миссии не больше</span>
+      <input id="budget" type="number" min="0" step="50" value="${ST.budget}" style="width:80px" title="бюджет миссии: дальнее прореживается и убирается; 0 - без ограничения"></div>` +
+      ST.tasks.map((t, i) => `<div class="task ${i === SEL ? "sel" : ""}" data-i="${i}">
       <b>${t.n}. ${esc(t.title)}</b>
       <div class="pk">${t.km} км от ${esc(t.base)} · ПВО: ${esc(t.threats.join(", ") || "нет")}</div>
       <div class="pk">${t.package.map(g => `${esc(g.title)}: ${g.size} × ${esc(g.performer)}`).join("<br>")}</div>
@@ -227,7 +229,7 @@ function render() {
         <button class="main go">Собрать миссию</button></div></div>`).join("");
     p.querySelectorAll(".task").forEach(el => {
       el.onclick = e => { if (e.target.closest("select,button")) return; SEL = +el.dataset.i; render(); };
-      el.querySelector(".go").onclick = e => act("build", {task: +el.dataset.i + 1, fly: el.querySelector(".fly").value}, e.target);
+      el.querySelector(".go").onclick = e => act("build", {task: +el.dataset.i + 1, fly: el.querySelector(".fly").value, budget: ($("#budget") || {}).value}, e.target);
     });
   } else if (TAB === "ground") {
     const by = s => ST.ground.filter(g => g.side === s && !g.attached);
@@ -283,7 +285,7 @@ async function loadState() {
 $("#camp").onchange = () => { FILE = $("#camp").value; localStorage.setItem("rf_file", FILE); loadState(); };
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b.dataset.tab; render(); });
 $("#bPlan").onclick = e => { SEL = 0; TAB = "plan"; act("plan", {}, e.currentTarget); };
-$("#bBuild").onclick = e => { TAB = "plan"; act("build", {task: SEL + 1, fly: (document.querySelectorAll(".task .fly")[SEL] || {}).value || "strike"}, e.currentTarget); };
+$("#bBuild").onclick = e => { TAB = "plan"; act("build", {task: SEL + 1, fly: (document.querySelectorAll(".task .fly")[SEL] || {}).value || "strike", budget: ($("#budget") || {}).value}, e.currentTarget); };
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
 $("#bEnd").onclick = e => { if (confirm("Закончить день? Модель сделает ход, план дня сбросится.")) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();

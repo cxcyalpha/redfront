@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import build as build_mod
+from . import build as build_mod, materialize
 from . import debrief, logistics, mapobj, model, ops, planner, roads, sim
 from .menu import missions_dir
 
@@ -119,6 +119,7 @@ def view(st: dict) -> dict:
         "name": st["name"], "day": st["day"], "sortie": st["sortie"], "side": st["player_side"],
         "date": st.get("date"), "scenario": sc.get("title") or sc.get("variant"), "seed": sc.get("seed"),
         "randomness": st["settings"].get("randomness", True),
+        "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open")}
                      for k, b in st["airbases"].items()],
@@ -217,8 +218,11 @@ class App:
             if not st.get("tasks"):
                 planner.plan(st)
             out = missions_dir(self.home) / f"redfront_{p.stem}_day{st['day']}.miz"
+            if str(req.get("budget") or "").strip():
+                st["settings"]["mission_budget"] = max(0, int(req["budget"]))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1))
-            lines.append(f"Миссия: {man['file']}")
+            n = sum(len(g["vehicles"]) for g in man["ground"])
+            lines.append(f"Миссия: {man['file']} (наземных машин {n}, бюджет {st['settings'].get('mission_budget', materialize.MISSION_BUDGET)})")
             lines += man["package_lines"]
         elif action == "debrief":
             f = debrief.find_file(st, self.home)

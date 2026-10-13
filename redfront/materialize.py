@@ -327,6 +327,8 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     ЗРК - полностью. Веса - по правилу сохранения, машина не "дороже" MAX_WEIGHT машин модели."""
     units = state["units"]
     groups = window(state, task, density)
+    for g in groups:
+        g["core"] = True                         # окно задачи игрока - бюджет миссии его не трогает
     placed = {g["unit"] for g in groups}
     far = density * FAR_DENSITY
     center = task.get("target_pos") or model.unit_pos(state, units[task["target"]])
@@ -358,7 +360,94 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
                 and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
                 and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM_ROLE.get(u["role"], SAM_KM)):
             groups.append(sam_site(state, u))
-    return [g for g in groups if g["vehicles"]]
+    groups = [g for g in groups if g["vehicles"]]
+    budget = (state.get("settings") or {}).get("mission_budget", MISSION_BUDGET)
+    return apply_budget(state, task, groups, budget)
+
+
+MISSION_BUDGET = 600    # ОЦЕНКА: наземных машин в миссии по умолчанию (settings.mission_budget, build --budget)
+BUDGET_MIN_KEEP = 2     # ОЦЕНКА: меньше машин в группе при прореживании не оставлять (иначе - убрать группу)
+
+
+def _relevance_km(state: dict, task: dict, g: dict) -> float:
+    """Удаление группы от того, что видит игрок: маршрутов групп пакета (от базы) и объекта задачи, км."""
+    vs = g["vehicles"]
+    c = {"lat": sum(v["lat"] for v in vs) / len(vs), "lon": sum(v["lon"] for v in vs) / len(vs)}
+    legs = []
+    for pg in task.get("package") or []:
+        pts = [state["airbases"][pg["base"]]] + list(pg["route"])
+        legs += list(zip(pts, pts[1:]))
+    tpos = task.get("target_pos")
+    d = model.dist_km(c, tpos) if tpos else float("inf")
+    return min([d] + [planner._seg_dist_km(c, a, b) for a, b in legs])
+
+
+def _thin(g: dict, keep: int) -> int:
+    """Оставить в группе keep машин, пропорционально по типам; вес оставшихся растёт (правило сохранения), но не выше
+    MAX_WEIGHT - остаток части в этой миссии не появляется (как у частей вдали). Возвращает, сколько машин убрано."""
+    vs = g["vehicles"]
+    if keep >= len(vs):
+        return 0
+    by_type: dict[str, list[dict]] = {}
+    for v in vs:
+        by_type.setdefault(v["type"], []).append(v)
+    alive = {t: sum(v["weight"] for v in lst) for t, lst in by_type.items()}
+    counts = _allocate(alive, keep)
+    kept = []
+    for t, lst in by_type.items():
+        k = min(counts.get(t, 0), len(lst))
+        if k <= 0:
+            continue
+        step = len(lst) / k                      # равномерно по строю/колонне: голова, середина, хвост
+        chosen = [lst[int(i * step)] for i in range(k)]
+        w = min(alive[t] / k, MAX_WEIGHT)
+        for v in chosen:
+            v["weight"] = w
+        kept += chosen
+    order = {id(v): i for i, v in enumerate(vs)}
+    g["vehicles"] = sorted(kept, key=lambda v: order[id(v)])
+    return len(vs) - len(g["vehicles"])
+
+
+def apply_budget(state: dict, task: dict, groups: list[dict], budget: int | None) -> list[dict]:
+    """Бюджет миссии: не больше budget наземных машин. Окно задачи игрока (core) не трогается; остальное - по
+    удалённости от маршрутов пакета и объекта, дальние первыми: 1) колонны и боевые порядки прореживаются (меньше
+    машин, вес больше - до MAX_WEIGHT); 2) если мало - дальние группы убираются целиком (бой - весь кластер, колонна -
+    с приданной ПВО, ЗРК - позицией). Убранное живёт в модели, в этой миссии его нет. Все пороги - ОЦЕНКИ."""
+    total = sum(len(g["vehicles"]) for g in groups)
+    if not budget or total <= budget:
+        return groups
+    rel = {id(g): _relevance_km(state, task, g) for g in groups}
+    free = sorted((g for g in groups if not g.get("core")), key=lambda g: -rel[id(g)])
+    # 1. прореживание: дальние колонны и бои - до половины, затем до BUDGET_MIN_KEEP
+    for frac in (0.5, 0.0):
+        for g in free:
+            if total <= budget:
+                break
+            if g["kind"] not in ("column", "battle"):
+                continue
+            keep = max(BUDGET_MIN_KEEP, int(len(g["vehicles"]) * frac))
+            total -= _thin(g, keep)
+    if total <= budget:
+        return groups
+    # 2. дальние группы целиком: связанные - вместе (бой - кластер, колонна - с приданной ПВО)
+    def bundle_key(g):
+        return g.get("cluster") or g.get("route_owner") or g["unit"]
+    bundles: dict[str, list[dict]] = {}
+    for g in groups:
+        bundles.setdefault(bundle_key(g), []).append(g)
+    drop = set()
+    for g in free:
+        if total <= budget:
+            break
+        b = bundles[bundle_key(g)]
+        if any(x.get("core") for x in b) or id(g) in drop:
+            continue
+        for x in b:
+            if id(x) not in drop:
+                drop.add(id(x))
+                total -= len(x["vehicles"])
+    return [g for g in groups if id(g) not in drop]
 
 
 def background_sams(state: dict, task: dict) -> list[str]:
