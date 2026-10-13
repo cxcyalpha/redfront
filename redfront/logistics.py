@@ -192,7 +192,7 @@ def air_defence(state: dict) -> list[str]:
     from . import materialize                                    # materialize импортирует planner -> logistics
     lines = []
     for u in state["units"].values():
-        if model.category(u) != "sam" or u["state"] in ("destroyed", "pending"):
+        if model.category(u) not in ("sam", "gci") or u["state"] in ("destroyed", "pending"):
             continue
         sim = _sim(state, u["side"])
         parent = state["units"].get(u.get("attached_to") or "")

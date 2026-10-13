@@ -1456,6 +1456,22 @@ def air_defence_section(tmp: Path) -> None:
     check(s200["id"] in hi and s200["id"] not in lo,
           f"С-200 в 80 км: угроза по высотной цели, по маршруту на 50 м - нет (радиогоризонт "
           f"{planner.radar_horizon_km(planner.RADAR_MAST_M, 50):.0f} км)")
+    gci = [u for u in st["units"].values() if u["role"] == "gci"]
+    mig_bases = {u["base"] for u in st["units"].values() if u["side"] == "red" and str(u.get("type", "")).startswith("MiG_29")}
+    check(gci and {u["covers"] for u in gci} == {f"af_{b}" for b in mig_bases}
+          and len({u["channel"] for u in gci}) == len(gci) and all(u["radius_km"] == 250 for u in gci),
+          f"КРУ у аэродромов МиГ-29 ({', '.join(sorted(mig_bases))}): у каждого свой канал, радиус 250 км")
+    planner.plan(st)
+    man = build.build(st, tmp / "gci.miz", task_no=1)
+    m = dcs.Mission(); m.load_file(str(tmp / "gci.miz"))
+    gg = {g.name: g for c in m.coalition.values() for cn in c.countries.values() for g in cn.vehicle_group if g.name.startswith("red_gci")}
+    acts = {n: [t.params["action"]["params"] for t in g.points[0].tasks if t.params.get("action", {}).get("id") == "ActivateGCI"]
+            for n, g in gg.items()}
+    check(set(gg) == {u["id"] for u in gci} and all(len(a) == 1 and a[0]["unitId"] == gg[n].units[0].id
+                                                    and a[0]["channel"] == st["units"][n]["channel"] and a[0]["radius"] == 250000
+                                                    for n, a in acts.items())
+          and all(u["name"] in m.description_text() for u in gci),
+          f"в миссии КРУ включены с начала (ActivateGCI: канал, радиус 250 км), каналы - в брифинге")
     hawk = st["units"]["blue_sam31"]
     for u in (hawk, s200):
         u["lost"] = {c["type"]: float(c["count"]) for c in u["composition"]}    # уничтожены целиком

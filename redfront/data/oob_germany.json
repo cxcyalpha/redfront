@@ -5518,6 +5518,18 @@
       }
      ]
     }
+   ],
+   "gci": [
+    {
+     "name": "КРУ",
+     "composition": [
+      {
+       "type": "GCI_station_MiG29",
+       "role": "control",
+       "count": 1
+      }
+     ]
+    }
    ]
   },
   "blue": {

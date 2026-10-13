@@ -81,7 +81,7 @@ def view(st: dict) -> dict:
             air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
                         "count": u.get("count", 0), "count0": u.get("count0", u.get("count", 0)),
                         "available": logistics.available(st, u), "base": b.get("name", u["base"])})
-        elif cat in ("ground", "sam"):
+        elif cat in ("ground", "sam", "gci"):
             if u["state"] == "pending":
                 pos = st["places"][u["route"][0]] if u.get("route") else u.get("pos")
             else:
@@ -96,6 +96,8 @@ def view(st: dict) -> dict:
                  "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", []))}
             if cat == "sam":
                 g["threat_km"] = round(planner.threat_radius_km(u), 1)
+            if cat == "gci":
+                g["types"] += f" · канал {u.get('channel')}, радиус {u.get('radius_km')} км"
             if "route" in u and len(u["route"]) > 1 and u["state"] in ("march", "battle"):
                 pts = model.route_points(st, u)
                 here, i = model.point_at_km(pts, u["progress_km"])

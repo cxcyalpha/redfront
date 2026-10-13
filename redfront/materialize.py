@@ -158,6 +158,17 @@ def sam_site(state: dict, unit: dict) -> dict:
     return {"unit": unit["id"], "side": unit["side"], "kind": "sam_site", "name": unit["id"], "vehicles": vehicles, "waypoints": [], "speed_kmh": 0}
 
 
+def gci_site(state: dict, unit: dict) -> dict:
+    """КРУ (GCI): машина пункта на позиции; канал и радиус наведения - в группе (build ставит ActivateGCI)."""
+    p = model.unit_pos(state, unit)
+    vehicles = [{"name": f"{unit['id']}#{i + 1:02d}", "type": c["type"], "lat": p["lat"], "lon": p["lon"] + i * 0.0004,
+                 "weight": 1.0} for i, c in enumerate(c for c in unit["composition"]
+                                                      for _ in range(int(round(model.alive_by_type(unit)[c["type"]]))))]
+    return {"unit": unit["id"], "side": unit["side"], "kind": "gci_site", "name": unit["id"], "vehicles": vehicles,
+            "waypoints": [], "speed_kmh": 0, "channel": unit.get("channel", 1), "radius_km": unit.get("radius_km", 250),
+            "core": True}                       # бюджет миссии КРУ не трогает: одна машина, нужна игроку
+
+
 def attached_column(state: dict, unit: dict, parent_group: dict, cap: int | None = None) -> dict:
     """Приданная части группа (войсковая ПВО) - отдельной группой в той же колонне, сразу за танками части
     (ОЦЕНКА порядка следования). Отдельной - чтобы ограничение 'огонь только по наземным целям' не касалось ПВО.
@@ -360,6 +371,9 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
                 and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
                 and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM_ROLE.get(u["role"], SAM_KM)):
             groups.append(sam_site(state, u))
+    for u in units.values():                     # КРУ - все исправные (по одной машине; наведение - на 250 км)
+        if model.category(u) == "gci" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0:
+            groups.append(gci_site(state, u))
     groups = [g for g in groups if g["vehicles"]]
     budget = (state.get("settings") or {}).get("mission_budget", MISSION_BUDGET)
     return apply_budget(state, task, groups, budget)

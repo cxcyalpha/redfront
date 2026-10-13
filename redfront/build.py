@@ -101,10 +101,25 @@ def column_spec(m: Mission, state: dict, g: dict, vg) -> dict | None:
     }
 
 
+class ActivateGCI(task.WrappedAction):
+    """Команда DCS: включить КРУ (GCI_station_MiG29) - канал наведения и радиус, м (как в редакторе миссий)."""
+    Key = "ActivateGCI"
+
+    def __init__(self, channel: int = 1, unit_id: int = 0, radius_m: int = 250000):
+        super().__init__()
+        self.auto = True                         # как ставит редактор миссий
+        self.params = {"action": {"id": ActivateGCI.Key,
+                                  "params": {"channel": int(channel), "unitId": int(unit_id), "radius": int(radius_m),
+                                             "x": 0, "y": 0}}}
+
+
+task.wrappedactions.setdefault(ActivateGCI.Key, ActivateGCI)   # pydcs читает миссии с КРУ (тесты, повторная загрузка)
+
+
 def ground_options(state: dict, g: dict) -> list[tuple[int, int]]:
     """Опции наземной группы: всё, кроме ПВО, стреляет только по наземным целям (OptRestrictTargets = GroundUnitsOnly).
     Наземные юниты в DCS по ЛА бьют неестественно точно; ПВО (ЗРК, ЗА) - без ограничения."""
-    if model.category(state["units"][g["unit"]]) == "sam":
+    if model.category(state["units"][g["unit"]]) in ("sam", "gci"):
         return []
     return [(task.OptRestrictTargets.Key, int(task.OptRestrictTargets.Values.GroundUnitsOnly))]
 
@@ -513,6 +528,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     def shift_of(g):
         s_ = sites.get(g.get("cluster")) if (g["kind"] == "battle" or g.get("battle")) else None
         return (s_["x"], s_["y"]) if s_ else (0.0, 0.0)
+    gci_lines: list[str] = []
     tgt_group = next((g for g in groups if g["unit"] == tk["target"]), None)
     bkey = (tgt_group or {}).get("cluster")                                 # бой цели игрока
     for g in groups:
@@ -521,6 +537,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             vg_by_unit[g["unit"]] = platoons[g["unit"]][0][0]
         else:
             vg_by_unit[g["unit"]] = _ground_group(m, state, g, shift_of(g))
+            if g["kind"] == "gci_site":          # КРУ: наведение включено с начала миссии
+                vg = vg_by_unit[g["unit"]]
+                vg.points[0].tasks.append(ActivateGCI(g["channel"], vg.units[0].id, int(g["radius_km"] * 1000)))
+                if g["side"] == tk["side"]:
+                    gci_lines.append(f"{state['units'][g['unit']]['name']}: канал {g['channel']}, радиус {g['radius_km']} км")
     missing = [u for g in pkg if g["objective"]["kind"] == "sam" for u in g["objective"]["units"] if u not in vg_by_unit]
     if missing:                                  # урок пузыря BMS: цель группы ИИ обязана быть развёрнута, иначе ей не по чему бить
         raise RuntimeError(f"цели группы подавления ПВО не развёрнуты в миссии: {', '.join(missing)}")
@@ -767,7 +788,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         + (", ".join(state['units'][t]['name'] for t in tk['threats']) or "не выявлены")
         + (f"\nЗамечания планировщика: {tk['package_notes']}" if tk.get("package_notes") else "")
         + (("\n\nДругие вылеты наших сил в это время:\n" + "\n".join(f"- {ln}" for ln in ai_lines)) if ai_lines else "")
-        + ("\nРазведка: в районе возможна активность авиации противника." if enemy_lines else ""))
+        + ("\nРазведка: в районе возможна активность авиации противника." if enemy_lines else "")
+        + (("\n\nНаведение (КРУ, только МиГ-29):\n" + "\n".join(f"- {ln}" for ln in gci_lines)) if gci_lines else ""))
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -783,6 +805,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "package_lines": lines,
         "enemy_lines": enemy_lines,                      # авиация противника в миссии (в брифинг не выводится)
         "ai_lines": ai_lines,                            # свои группы ИИ по плану дня (в брифинге)
+        "gci_lines": gci_lines,                          # КРУ своей стороны: канал, радиус (в брифинге)
         "column_road": [s["name"] for s in specs],      # колонны, которые миссия переложит на дорогу при старте
         "front": [p["name"] for p in front],             # взводы частей в бою под управлением front.lua
         "battle_key": bkey,                              # бой цели игрока
