@@ -9,6 +9,7 @@
     "attack_helo":    {"title": "боевые вертолёты",             "category": "heli", "strike_radius_km": null},
     "transport_helo": {"title": "транспортные вертолёты",       "category": "heli", "strike_radius_km": null},
     "awacs":          {"title": "самолёты ДРЛО и управления",    "category": "air",  "strike_radius_km": null},
+    "recon":          {"title": "разведывательная авиация",      "category": "air",  "strike_radius_km": null},
     "tanker":         {"title": "самолёты-заправщики",           "category": "air",  "strike_radius_km": null},
     "maneuver":       {"title": "общевойсковая часть (батальон, полк)", "category": "ground"},
     "sam_long":       {"title": "ЗРК большой дальности",        "category": "sam",  "threat_radius_km": null},

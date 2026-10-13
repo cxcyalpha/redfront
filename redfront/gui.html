@@ -95,6 +95,8 @@ dialog input,dialog select{width:100%}
     <label>Театр</label><select id="nTh"></select>
     <label>Сторона игрока</label>
     <select id="nSide"><option value="red">Красные (ВД)</option><option value="blue">Синие (НАТО)</option></select>
+    <label>Состав сил (пресет)</label>
+    <div class="row"><select id="nPreset" style="flex:1"></select><button type="button" id="bCopy" title="копия выбранного пресета в папку presets/ - для правки в текстовом редакторе">Копия для правки</button></div>
     <label>Вариант сценария</label><select id="nVar"></select>
     <label>Seed (пусто - случайный)</label><input id="nSeed" placeholder="например 12345">
     <label><input type="checkbox" id="nNoRand" style="width:auto"> без случайности</label>
@@ -125,7 +127,7 @@ async function api(action, body) {
 const BUSY = {new: "Создаю кампанию (зонды карты и дорог применяются сами - до нескольких минут)",
               plan: "Строю план полётов на сутки", build: "Собираю миссию", debrief: "Применяю дебриф",
               endday: "Конец дня: ход модели", mapimport: "Применяю зонд карты", mapapply: "Применяю зонд карты",
-              roadsapply: "Применяю дороги"};
+              roadsapply: "Применяю дороги", presetcopy: "Копирую пресет"};
 let busyTimer = null;
 function busy(text) {
   const b = $("#busy");
@@ -137,7 +139,7 @@ function busy(text) {
   b.classList.add("on");
 }
 async function act(action, extra, btn) {
-  if (!FILE && action !== "new" && action !== "mapprobe") return out("Сначала создайте или выберите кампанию.", true);
+  if (!FILE && !["new", "mapprobe", "presetcopy"].includes(action)) return out("Сначала создайте или выберите кампанию.", true);
   if (btn) btn.disabled = true;
   document.querySelectorAll(".cycle button, #bNew").forEach(b => b.disabled = true);   // не запускать второе действие поверх
   busy(BUSY[action] || "Выполняю");
@@ -313,11 +315,17 @@ async function loadInfo() {
   if (FILE && c.some(x => x.file === FILE)) $("#camp").value = FILE;
   else FILE = c.length ? c[0].file : "";
   $("#nTh").innerHTML = INFO.theatres.map(t => `<option value="${esc(t.id)}">${esc(t.title)}</option>`).join("");
+  fillPresets();
+}
+function theatre() { return INFO.theatres.find(x => x.id === $("#nTh").value) || INFO.theatres[0]; }
+function fillPresets() {
+  $("#nPreset").innerHTML = theatre().presets.map(p => `<option value="${esc(p.file)}">${esc(p.title)}</option>`).join("");
   fillVariants();
 }
 function fillVariants() {
-  const t = INFO.theatres.find(x => x.id === $("#nTh").value) || INFO.theatres[0];
-  $("#nVar").innerHTML = `<option value="">случайный (по seed)</option>` + t.variants.map(v => `<option value="${esc(v.name)}">${esc(v.title)}</option>`).join("");
+  const t = theatre(), p = t.presets.find(x => x.file === $("#nPreset").value);
+  const vs = p ? p.variants : t.variants;
+  $("#nVar").innerHTML = `<option value="">случайный (по seed)</option>` + vs.map(v => `<option value="${esc(v.name)}">${esc(v.title)}</option>`).join("");
 }
 async function loadState() {
   ST = null;
@@ -332,10 +340,17 @@ $("#bBuild").onclick = e => { TAB = "plan"; act("build", {task: SEL + 1, fly: (d
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
 $("#bEnd").onclick = e => { if (confirm("Закончить день? Модель сделает ход, план дня сбросится.")) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();
-$("#nTh").onchange = fillVariants;
+$("#nTh").onchange = fillPresets;
+$("#nPreset").onchange = fillVariants;
+$("#bCopy").onclick = async () => {
+  const name = prompt("Имя копии пресета (файл presets/<имя>.json):", ($("#nPreset").selectedOptions[0] || {}).text?.split(" (")[0] + " мой");
+  if (!name) return;
+  await act("presetcopy", {theatre: $("#nTh").value, preset: $("#nPreset").value, name: name.trim()});
+  const keep = $("#nTh").value; await loadInfo(); $("#nTh").value = keep; fillPresets();
+};
 $("#dNew").addEventListener("close", () => {
   if ($("#dNew").returnValue !== "ok") return;
-  act("new", {file: $("#nFile").value.trim(), theatre: $("#nTh").value, side: $("#nSide").value, variant: $("#nVar").value, seed: $("#nSeed").value.trim(),
+  act("new", {file: $("#nFile").value.trim(), theatre: $("#nTh").value, preset: $("#nPreset").value, side: $("#nSide").value, variant: $("#nVar").value, seed: $("#nSeed").value.trim(),
               norandom: $("#nNoRand").checked, overwrite: $("#nOver").checked}).then(loadState);
 });
 (async () => { try { await loadInfo(); } catch (e) { out(e.message, true); } await loadState();

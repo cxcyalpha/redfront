@@ -277,7 +277,8 @@ AD_TEMPLATES["red"]["gci"] = [{"name": "КРУ", "composition": [("GCI_station_M
 
 
 def gci_sites(places: dict, links: set, airbase_pos: dict, air: list) -> list[dict]:
-    """КРУ у аэродромов красных, где по составу сил базируется МиГ-29 (AD_GCI_TYPES); канал - по порядку с 1."""
+    """КРУ у аэродромов красных, где МиГ-29 (AD_GCI_TYPES) базируется хотя бы в одном пресете; канал - по порядку
+    с 1. В кампании пункт есть, только если в её составе сил на этом аэродроме МиГ-29 (requires_types, model)."""
     border = [((places[a]["lat"] + places[b]["lat"]) / 2, (places[a]["lon"] + places[b]["lon"]) / 2)
               for a, b in links if places[a]["side"] != places[b]["side"]]
     bases = sorted({base.lower().replace(" ", "_") for _uid, _n, side, _r, typ, base, *_ in air
@@ -289,7 +290,7 @@ def gci_sites(places: dict, links: set, airbase_pos: dict, air: list) -> list[di
         f = min(1.0, AD_GCI_OFFSET_KM / (dist_km((la, lo), q) or 1.0))
         out.append({"id": f"red_gci_{bid}", "name": f"КРУ аэродрома {name}", "side": "red", "tier": "gci",
                     "covers": f"af_{bid}", "lat": round(la + (q[0] - la) * f, 4), "lon": round(lo + (q[1] - lo) * f, 4),
-                    "variant": 0, "channel": k, "radius_km": GCI_RADIUS_KM,
+                    "variant": 0, "channel": k, "radius_km": GCI_RADIUS_KM, "requires_types": list(AD_GCI_TYPES),
                     "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"})
     return out
 
@@ -354,70 +355,164 @@ def ad_sites(places: dict, links: set, airbase_pos: dict, airports: list[tuple[f
     return sites
 
 
-# ---------------------------------------------------------------- авиация (метки OOB-миссии)
-# (id, имя, роль, тип pydcs, аэродром, число, радиус, источник/примечание)
-AIR = [
-    ("r773iap", "773-й иап (МиГ-23МЛД)", "red", "fighter", "MiG_23MLD", "Damgarten", 40, 300, MISSION),
-    ("r33iap", "33-й иап (МиГ-29)", "red", "fighter", "MiG_29_Fulcrum", "Wittstock", 40, 250,
-     MISSION + "; метка у Лаге, аэродром Виттшток - " + MEMORY),
-    ("r19apib", "19-й гв. апиб (МиГ-27К)", "red", "fighter_bomber", "MiG_27K", "Larz", 40, 300, MISSION),
-    ("r20apib", "20-й апиб (Су-17М3; в DCS - Су-17М4)", "red", "fighter_bomber", "Su_17M4", "Neuruppin", 40, 300,
-     MISSION + "; Су-17М3 в DCS нет - замена Су-17М4"),
-    ("r787iap_23", "787-й иап, эскадрильи МиГ-23", "red", "fighter", "MiG_23MLD", "Finow", 20, 300,
-     MISSION + "; МиГ-23М в DCS нет - замена МиГ-23МЛД"),
-    ("r787iap_25", "787-й иап, эскадрилья МиГ-25ПД", "red", "interceptor", "MiG_25PD", "Finow", 20, 300, MISSION),
-    ("r116bap", "Бомбардировочный полк (Су-24М), Бранд", "red", "bomber", "Su_24M", "Brand", 40, 400,
-     MISSION + " ('116 Bomber ~30-60 Su-24M'); номер полка - " + MEMORY),
-    ("r833iap", "833-й иап (МиГ-23)", "red", "fighter", "MiG_23MLD", "Altes Lager", 40, 300, MISSION),
-    ("r73iap", "73-й гв. иап (МиГ-23)", "red", "fighter", "MiG_23MLD", "Kothen", 40, 300, MISSION),
-    ("r85iap", "85-й гв. иап (МиГ-29)", "red", "fighter", "MiG_29_Fulcrum", "Merseburg", 40, 250, MISSION),
-    ("r368oshap", "368-й ошап (Су-25)", "red", "attack", "Su_25", "Tutow", 36, 250, MEMORY + "; в миссии штурмовиков нет"),
-    ("r357oshap", "357-й ошап (Су-25)", "red", "attack", "Su_25", "Brandis", 36, 250, MEMORY + "; в миссии штурмовиков нет"),
-    ("nva_jbg77", "JBG-77 ВВС ННА (Су-22М4)", "red", "fighter_bomber", "Su_17M4", "Laage", 24, 300,
-     MISSION + "; Су-22М4 - экспортный Су-17М4"),
-    ("nva_mfg28", "MFG-28 ННА (Су-22М4)", "red", "fighter_bomber", "Su_17M4", "Laage", 24, 300, MISSION),
-    ("nva_jg2", "JG-2 ВВС ННА (МиГ-21)", "red", "fighter", "MiG_21Bis", "Neubrandenburg", 36, 200, MISSION),
-    ("nva_jg9", "JG-9 ВВС ННА (МиГ-23)", "red", "fighter", "MiG_23MLD", "Peenemunde", 36, 300, MISSION),
-    ("nva_jg8", "JG-8 ВВС ННА (МиГ-21)", "red", "fighter", "MiG_21Bis", "Marxwalde", 36, 200, MISSION),
-    ("nva_jg1", "JG-1 ВВС ННА (МиГ-21)", "red", "fighter", "MiG_21Bis", "Holzdorf", 36, 200, MISSION),
-    ("b_jabog31", "JaboG 31 (Tornado IDS)", "blue", "fighter_bomber", "Tornado_IDS", "Norvenich", 32, 450, MISSION),
-    ("b_jabog33", "JaboG 33 (Tornado IDS)", "blue", "fighter_bomber", "Tornado_IDS", "Buchel", 32, 450, MISSION),
-    ("b_jabog35", "JaboG 35 (F-4F; в DCS - F-4E)", "blue", "fighter_bomber", "F_4E_45MC", "Pferdsfeld", 30, 350,
-     MISSION + "; F-4F в DCS нет - замена F-4E-45MC"),
-    ("b_jg71", "JG 71 (F-4F; в DCS - F-4E)", "blue", "fighter", "F_4E_45MC", "Nordholz", 30, 350,
-     MISSION + "; Витмунд вне карты - перебазирован в Нордхольц (ОЦЕНКА)"),
-    ("b_52tfw", "52-е тактическое авиакрыло (F-16C)", "blue", "fighter_bomber", "F_16C_50", "Spangdahlem", 36, 400,
-     MISSION + "; F-16C блок 50 - замена блока 30 (ОЦЕНКА); F-4G крыла не включены: в DCS нет"),
-    ("b_50tfw", "50-е тактическое авиакрыло (F-16C)", "blue", "fighter_bomber", "F_16C_50", "Hahn", 72, 400, MISSION),
-    ("b_36tfw", "36-е тактическое истребительное крыло (F-15C)", "blue", "fighter", "F_15C", "Bitburg", 72, 450, MISSION),
-    ("b_86tfw", "86-е тактическое истребительное крыло (F-16C)", "blue", "fighter_bomber", "F_16C_50", "Ramstein", 48, 400, MISSION),
-    ("b_a10", "Передовое звено A-10A (81-е крыло)", "blue", "attack", "A_10A", "Norvenich", 8, 250, MISSION),
-    ("b_raf_harrier", "3-я и 4-я эскадрильи RAF (Harrier GR5; в DCS - AV-8B)", "blue", "attack", "AV8BNA", "Gutersloh", 32, 200,
-     MISSION + "; Harrier GR5 в DCS нет - замена AV-8B"),
-    # армейская авиация: боевые вертолёты (задача доктрины "удар вертолётов"; полки, аэродромы, число - ОЦЕНКИ, по памяти).
-    # Ми-24П - чтобы игрок мог лететь (в ГСВГ - Ми-24В и П); Bo-105 PAH-1 в DCS нет - замена SA342M (тоже с ПТУР HOT)
-    ("r_ovp_2gta", "Отдельный вертолётный полк 2-й гв. ТА (Ми-24)", "red", "attack_helo", "Mi_24P", "Parchim", 20, 150,
-     MEMORY + "; число - доля Ми-24 полка (ОЦЕНКА)"),
-    ("r_ovp_3ua", "Отдельный вертолётный полк 3-й УА (Ми-24)", "red", "attack_helo", "Mi_24P", "Mahlwinkel", 20, 150,
-     MEMORY + "; число - доля Ми-24 полка (ОЦЕНКА)"),
-    ("r_ovp_1gta", "Отдельный вертолётный полк 1-й гв. ТА (Ми-24)", "red", "attack_helo", "Mi_24P", "Brandis", 20, 150,
-     MEMORY + "; число - доля Ми-24 полка (ОЦЕНКА)"),
-    ("r_ovp_8ga", "Отдельный вертолётный полк 8-й гв. А (Ми-24)", "red", "attack_helo", "Mi_24P", "Allstedt", 20, 150,
-     MEMORY + "; Нора вне карты - Альштедт (ОЦЕНКА)"),
-    ("b_pahr16", "Противотанковый вертолётный полк 16 (PAH-1; в DCS - SA342M)", "blue", "attack_helo", "SA342M", "Celle", 24, 120,
-     MEMORY + "; Bo-105 PAH-1 в DCS нет - замена SA342M"),
-    ("b_pahr36", "Противотанковый вертолётный полк 36 (PAH-1; в DCS - SA342M)", "blue", "attack_helo", "SA342M", "Fritzlar", 24, 120,
-     MEMORY + "; Bo-105 PAH-1 в DCS нет - замена SA342M"),
-    ("b_us_avn", "Батальон боевых вертолётов армии США (AH-64A)", "blue", "attack_helo", "AH_64A", "Giebelstadt", 18, 150,
-     MEMORY + "; часть и аэродром - ОЦЕНКА"),
-    # обеспечение: ДРЛО и заправщики (задача доктрины "дежурство в зоне"; аэродромы и число - ОЦЕНКИ)
-    ("b_naew", "Силы ДРЛО НАТО (E-3A)", "blue", "awacs", "E_3A", "Norvenich", 3, 1500,
-     MEMORY + "; Гайленкирхен вне карты - Нёрфених (ОЦЕНКА)"),
-    ("b_kc135", "Заправщики ВВС США (KC-135)", "blue", "tanker", "KC_135", "Ramstein", 4, 1500,
-     MEMORY + "; базы заправщиков (Милденхолл) вне карты - Рамштайн (ОЦЕНКА)"),
-    ("r_a50", "Отряд ДРЛО (А-50)", "red", "awacs", "A_50", "Templin", 2, 1500,
-     MEMORY + "; А-50 в ГСВГ на постоянной основе не было - ОЦЕНКА сценария (выдвинуты на время войны)"),
+# ---------------------------------------------------------------- авиация по годам (сводка игрока)
+# Источник по полкам и типам - сводка игрока (USER, места с "?" - источники расходятся); база - аэродром карты
+# (полки с баз вне карты Cold War Germany в состав сил не входят - список OFF_MAP ниже). Тип DCS - ближайший, если
+# исторического в DCS нет (замена указана в имени части). Число самолётов и радиус - ОЦЕНКИ.
+USER = "сводка игрока по ВВС в Германии"
+PRESETS = [   # (год, дата среза, название): состав сил на дату; 1989 - после ротаций июля 1989
+    (1985, "1985-06-01", "Удар ОВД по всему фронту (1985)"),
+    (1987, "1987-06-01", "Удар ОВД по всему фронту (1987)"),
+    (1989, "1989-09-01", "Удар ОВД по всему фронту (1989)"),
 ]
+DEFAULT_PRESET = 1989
+RADIUS = {"MiG_29_Fulcrum": 250, "MiG_23MLD": 300, "MiG_21Bis": 200, "MiG_25PD": 300, "MiG_25RBT": 400,
+          "MiG_27K": 300, "Su_17M4": 300, "Su_24M": 400, "Su_25": 250, "F_15C": 450, "F_16C_50": 400,
+          "F_4E_45MC": 350, "Tornado_IDS": 450, "A_10A": 250, "AV8BNA": 200, "Mi_24P": 150}
+# (id, сторона, роль, число, [(с, по, база, тип DCS, имя части при этом типе, примечание)], источник); даты 'ГГГГ-ММ',
+# по = None - до конца. Часть есть в пресете, если на дату пресета у неё есть период.
+AIR_HISTORY = [
+    # --- ГСВГ (16 ВА), истребители
+    ("r33iap", "red", "fighter", 38, [
+        ("1978-01", "1985-12", "Wittstock", "MiG_23MLD", "33-й иап (МиГ-23М/МЛ; в DCS - МиГ-23МЛД)", ""),
+        ("1985-12", None, "Wittstock", "MiG_29_Fulcrum", "33-й иап (МиГ-29)", "")], USER),
+    ("r773iap", "red", "fighter", 38, [
+        ("1973-01", "1985-01", "Damgarten", "MiG_21Bis", "773-й иап (МиГ-21бис)", ""),
+        ("1985-01", "1989-06", "Damgarten", "MiG_23MLD", "773-й иап (МиГ-23МЛ/МЛД)", ""),
+        ("1989-06", None, "Damgarten", "MiG_29_Fulcrum", "773-й иап (МиГ-29)", "месяц перевооружения в 1989 - ?")], USER),
+    ("r787iap", "red", "fighter", 38, [
+        ("1976-01", "1989-08", "Finow", "MiG_23MLD", "787-й иап, эскадрильи МиГ-23 (МиГ-23М/МЛ; в DCS - МиГ-23МЛД)", ""),
+        ("1989-08", None, "Finow", "MiG_29_Fulcrum", "787-й иап (МиГ-29)", "")], USER),
+    ("r787iap_25", "red", "interceptor", 12, [
+        ("1982-01", "1989-08", "Finow", "MiG_25PD", "787-й иап, эскадрилья МиГ-25ПД/ПУ", "")], USER),
+    ("r31iap", "red", "fighter", 38, [
+        ("1970-01", "1989-03", "Falkenberg", "MiG_23MLD", "31-й гв. иап (МиГ-23М; в DCS - МиГ-23МЛД)", ""),
+        ("1989-03", None, "Falkenberg", "MiG_29_Fulcrum", "31-й гв. иап (МиГ-29)", "")], USER),
+    ("r85iap", "red", "fighter", 38, [
+        ("1976-01", "1986-03", "Merseburg", "MiG_23MLD", "85-й гв. иап (МиГ-23М; в DCS - МиГ-23МЛД)", ""),
+        ("1986-03", None, "Merseburg", "MiG_29_Fulcrum", "85-й гв. иап (МиГ-29)", "с марта 1986 (? другой источник - 1988)")], USER),
+    ("r35iap", "red", "fighter", 38, [
+        ("1975-01", "1982-01", "Zerbst", "MiG_23MLD", "35-й иап (МиГ-23МЛ; в DCS - МиГ-23МЛД)", ""),
+        ("1982-01", "1987-01", "Zerbst", "MiG_23MLD", "35-й иап (МиГ-23МЛ в роли ИБА; в DCS - МиГ-23МЛД)", "в 1982-87 в роли ИБА"),
+        ("1987-01", None, "Zerbst", "MiG_29_Fulcrum", "35-й иап (МиГ-29)", "месяц перевооружения в 1987 - ?")], USER),
+    ("r73iap", "red", "fighter", 38, [
+        ("1974-01", "1987-01", "Kothen", "MiG_23MLD", "73-й гв. иап (МиГ-23М/МЛ; в DCS - МиГ-23МЛД)", ""),
+        ("1987-01", None, "Kothen", "MiG_29_Fulcrum", "73-й гв. иап (МиГ-29)", "месяц перевооружения в 1987 - ?")], USER),
+    ("r833iap", "red", "fighter", 38, [
+        ("1979-01", None, "Altes Lager", "MiG_23MLD", "833-й иап (МиГ-23МЛА/МЛД; в DCS - МиГ-23МЛД)", "")], USER),
+    # --- ИБА, бомбардировщики, штурмовики
+    ("r19apib", "red", "fighter_bomber", 36, [
+        ("1977-01", None, "Larz", "MiG_27K", "19-й гв. апиб (МиГ-27; в DCS - МиГ-27К)", "")], USER),
+    ("r20apib", "red", "fighter_bomber", 36, [
+        ("1981-01", None, "Templin", "Su_17M4", "20-й гв. апиб (Су-17М3/М4; в DCS - Су-17М4)", "Су-17М4 с апреля 1987")], USER),
+    ("r730apib", "red", "fighter_bomber", 36, [
+        ("1980-01", None, "Neuruppin", "Su_17M4", "730-й апиб (Су-17М3/М4; в DCS - Су-17М4)", "Су-17М4 с 1986")], USER),
+    ("r116bap", "red", "bomber", 36, [
+        ("1984-01", "1989-07", "Brand", "Su_24M", "116-й гв. бап (Су-24М)", "в июле 1989 ушёл в Белоруссию")], USER),
+    ("r911apib", "red", "fighter_bomber", 36, [
+        ("1989-07", None, "Brand", "MiG_27K", "911-й апиб (МиГ-27К)", "сменил 116-й гв. бап в июле 1989")], USER),
+    ("r357oshap", "red", "attack", 36, [
+        ("1985-10", "1987-01", "Brandis", "Su_25", "357-й оштап (Су-25)", ""),
+        ("1987-01", "1988-01", "Brandis", "Su_25", "357-й оштап (Су-25; почти весь полк в Афганистане)",
+         "в 1987 почти весь полк в Афганистане - в Германии ОЦЕНКА 8 самолётов", 8),
+        ("1988-01", None, "Brandis", "Su_25", "357-й оштап (Су-25)", "")], USER),
+    ("r368oshap", "red", "attack", 36, [
+        ("1988-12", None, "Tutow", "Su_25", "368-й оштап (Су-25)", "")], USER),
+    # --- разведка (задач у разведки пока нет - часть в составе сил, вылетов не планирует)
+    ("r294orap", "red", "recon", 24, [
+        ("1980-01", None, "Allstedt", "Su_17M4", "294-й орап (Су-17М3Р; в DCS - Су-17М4)", "")], USER),
+    ("r931orap", "red", "recon", 24, [
+        ("1980-01", None, "Werneuchen", "MiG_25RBT", "931-й гв. орап (МиГ-25РБ; в DCS - МиГ-25РБТ)", "? Холм даёт Штендаль")], USER),
+    # --- ВВС ННА
+    ("nva_jg1", "red", "fighter", 36, [
+        ("1970-01", None, "Holzdorf", "MiG_21Bis", "JG-1 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)", "")], USER),
+    ("nva_jg8", "red", "fighter", 36, [
+        ("1970-01", None, "Marxwalde", "MiG_21Bis", "JG-8 ВВС ННА (МиГ-21бис)", "")], USER),
+    ("nva_jg2", "red", "fighter", 36, [
+        ("1970-01", None, "Neubrandenburg", "MiG_21Bis", "JG-2 ВВС ННА (МиГ-21М; в DCS - МиГ-21бис)", "Тролленхаген")], USER),
+    ("nva_jg9", "red", "fighter", 36, [
+        ("1978-01", None, "Peenemunde", "MiG_23MLD", "JG-9 ВВС ННА (МиГ-23МЛ/МФ; в DCS - МиГ-23МЛД)", "")], USER),
+    ("nva_jbg77", "red", "fighter_bomber", 27, [
+        ("1984-01", None, "Laage", "Su_17M4", "JBG-77 ВВС ННА (Су-22М4; в DCS - Су-17М4)", "")], USER),
+    ("nva_mfg28", "red", "fighter_bomber", 27, [
+        ("1984-01", None, "Laage", "Su_17M4", "MFG-28 ННА (Су-22М4; в DCS - Су-17М4)", "")], USER),
+    # --- армейская авиация ГСВГ: обвп - две эскадрильи Ми-24 (~20) + эскадрилья Ми-8; в составе сил - Ми-24
+    ("r172obvp", "red", "attack_helo", 40, [
+        ("1976-01", None, "Parchim", "Mi_24P", "172-й обвп (Ми-24Д/В/П; в DCS - Ми-24П)", "")], USER),
+    ("r178obvp", "red", "attack_helo", 40, [
+        ("1976-01", None, "Stendal", "Mi_24P", "178-й обвп (Ми-24; в DCS - Ми-24П)", "Штендаль (Борштель)")], USER),
+    ("r225obvp", "red", "attack_helo", 40, [
+        ("1977-01", "1985-01", "Brandis", "Mi_24P", "225-й обвп (Ми-24Д; в DCS - Ми-24П)", ""),
+        ("1985-01", None, "Allstedt", "Mi_24P", "225-й обвп (Ми-24; в DCS - Ми-24П)", "в 1985 перебазирован в Альтштедт")], USER),
+    ("r337obvp", "red", "attack_helo", 40, [
+        ("1976-01", None, "Mahlwinkel", "Mi_24P", "337-й обвп (Ми-24; в DCS - Ми-24П)", "")], USER),
+    # --- USAFE
+    ("b_36tfw", "blue", "fighter", 72, [
+        ("1977-01", None, "Bitburg", "F_15C", "36-е тактическое истребительное крыло (F-15C/D)", "ранние годы не проверены")], USER),
+    ("b_50tfw", "blue", "fighter_bomber", 72, [
+        ("1982-06", "1986-01", "Hahn", "F_16C_50", "50-е тактическое истребительное крыло (F-16A/B блок 15; в DCS - F-16C блок 50)", ""),
+        ("1986-01", None, "Hahn", "F_16C_50", "50-е тактическое истребительное крыло (F-16C/D блок 25; в DCS - блок 50)", "")], USER),
+    ("b_86tfw", "blue", "fighter_bomber", 48, [
+        ("1985-01", None, "Ramstein", "F_16C_50", "86-е тактическое истребительное крыло (F-16C блок 25/30; в DCS - блок 50)", "")], USER),
+    ("b_52tfw", "blue", "fighter_bomber", 48, [
+        ("1975-01", None, "Spangdahlem", "F_4E_45MC", "52-е тактическое истребительное крыло (F-4E/F-4G; в DCS - F-4E)",
+         "F-4G (подавление ПВО) в DCS нет")], USER),
+    ("b_52tfw_f16", "blue", "fighter_bomber", 24, [
+        ("1987-07", None, "Spangdahlem", "F_16C_50", "52-е крыло, F-16C (пары hunter/killer с F-4G; в DCS - блок 50)", "")], USER),
+    ("b_26trw", "blue", "recon", 18, [
+        ("1970-01", None, "Zweibrucken", "F_4E_45MC", "26-е тактическое разведывательное крыло (RF-4C; в DCS - F-4E)", "? по памяти")], USER),
+    ("b_a10", "blue", "attack", 8, [
+        ("1980-01", None, "Norvenich", "A_10A", "Передовая площадка A-10A (81-е крыло)", "по плану 1989; Аальхорн и Евер вне карты")], USER),
+    # --- RAF Germany (на карте - только Гютерсло)
+    ("b_raf_harrier", "blue", "attack", 36, [
+        ("1977-01", None, "Gutersloh", "AV8BNA", "3-я и 4-я эскадрильи RAF (Harrier GR.3; в DCS - AV-8B)", "GR.5 в 1989-90 - ?")], USER),
+    # --- Люфтваффе
+    ("b_jabog31", "blue", "fighter_bomber", 32, [
+        ("1983-07", None, "Norvenich", "Tornado_IDS", "JaboG 31 (Tornado IDS)", "")], USER),
+    ("b_jabog33", "blue", "fighter_bomber", 32, [
+        ("1970-01", "1985-08", "Buchel", "F_4E_45MC", "JaboG 33 (F-104G; в DCS - F-4E)", "F-104G в DCS нет - замена (ОЦЕНКА)"),
+        ("1985-08", None, "Buchel", "Tornado_IDS", "JaboG 33 (Tornado IDS)", "")], USER),
+    ("b_jabog35", "blue", "fighter_bomber", 30, [
+        ("1975-01", None, "Pferdsfeld", "F_4E_45MC", "JaboG 35 (F-4F; в DCS - F-4E)", "")], USER),
+    # --- не из сводки (ОЦЕНКИ сценария): армейская авиация НАТО, ДРЛО, заправщики
+    ("b_pahr16", "blue", "attack_helo", 24, [
+        ("1980-01", None, "Celle", "SA342M", "Противотанковый вертолётный полк 16 (PAH-1; в DCS - SA342M)", "")], MEMORY),
+    ("b_pahr36", "blue", "attack_helo", 24, [
+        ("1980-01", None, "Fritzlar", "SA342M", "Противотанковый вертолётный полк 36 (PAH-1; в DCS - SA342M)", "")], MEMORY),
+    ("b_us_avn", "blue", "attack_helo", 18, [
+        ("1986-01", None, "Giebelstadt", "AH_64A", "Батальон боевых вертолётов армии США (AH-64A)", "часть и аэродром - ОЦЕНКА")], MEMORY),
+    ("b_naew", "blue", "awacs", 3, [
+        ("1982-01", None, "Norvenich", "E_3A", "Силы ДРЛО НАТО (E-3A)", "Гайленкирхен вне карты - Нёрфених (ОЦЕНКА)")], MEMORY),
+    ("b_kc135", "blue", "tanker", 4, [
+        ("1970-01", None, "Ramstein", "KC_135", "Заправщики ВВС США (KC-135)", "Милденхолл вне карты - Рамштайн (ОЦЕНКА)")], MEMORY),
+    ("r_a50", "red", "awacs", 2, [
+        ("1985-01", None, "Templin", "A_50", "Отряд ДРЛО (А-50)", "в ГСВГ на постоянной основе не было - ОЦЕНКА сценария")], MEMORY),
+]
+RADIUS.update({"SA342M": 120, "AH_64A": 150, "E_3A": 1500, "KC_135": 1500, "A_50": 1500})
+OFF_MAP = ("ГСВГ: 497 бап / 296 апиб (Гроссенхайн), 559 апиб (Финстервальде), 296 апиб / 968 иап (Альтенбург), "
+           "11 орап (Вельцов), 336 обвп (Нора); ННА: JG-3 и TAFS-47 (Прешен, МиГ-29), JBG-37 и JG-7 (Древиц), "
+           "KHG-3 (Котбус), KHG-5 (Базеполь), учебные FAG-15 и FAG-25; НАТО: RAF Germany (Вильденрат, Брюгген, "
+           "Лаарбрух), JaboG 32 (Лехфельд), JaboG 34 (Меммингем), JaboG 38 (Евер), JaboG 36 (Райне-Хопстен), JG 71 "
+           "(Виттмундхафен), JG 74 (Нойбург), JaboG 43/44/49, AG 51, канадцы (Баден-Зёллинген, Лар), бельгийцы и "
+           "голландцы. Транспорт, РЭБ и вертолёты БУ - без задач в генераторе, в состав сил не входят.")
+
+
+def air_for(date: str) -> list[tuple]:
+    """Авиачасти на дату date ('ГГГГ-ММ-ДД'): (id, имя, сторона, роль, тип, аэродром, число, радиус, источник)."""
+    ym = date[:7]
+    out = []
+    for uid, side, role, count, periods, src in AIR_HISTORY:
+        for per in periods:
+            frm, to, base, typ, name, note = per[:6]
+            if frm <= ym and (to is None or ym < to):
+                n = per[6] if len(per) > 6 else count
+                out.append((uid, name, side, role, typ, base, n, RADIUS.get(typ, 300),
+                            src + (f"; {note}" if note else "")))
+                break
+    return out
+
+
+AIR = [a for d in sorted({p[1] for p in PRESETS}) for a in air_for(d)]   # все годы (для КРУ: базы МиГ-29 любых лет)
 
 # ---------------------------------------------------------------- склады (снабжение; уточняются зондом карты)
 DEPOTS = [  # (id, имя, сторона, пункт)
@@ -577,26 +672,38 @@ def main() -> None:
                       "state": "deployed", "pos": {"lat": la, "lon": lo},
                       "composition": [{"type": t, "count": c, "role": r} for t, (r, c) in tpl.items()],
                       "source": MISSION + "; в модели - одна батарея на батальон/полк (ОЦЕНКА)", "estimate": True})
-    for uid, name, side, role, typ, base, count, radius, src in AIR:
-        units.append({"id": uid, "name": name, "side": side, "role": role, "base": base.lower().replace(" ", "_"),
-                      "type": typ, "count": count, "strike_radius_km": radius,
-                      "source": src + "; радиус действия - ОЦЕНКА", "estimate": True})
-    for u in units:
-        if u.get("base"):
-            assert u["base"] in airbases, u
-    oob = {
-        "_about": "Состав сил всего фронта, 1989. Генерирован tools/gen_germany.py; источники - в поле source каждой части.",
-        "countries": {"red": "Russia", "blue": "Germany"},
-        "units": units,
-        "variants": [{"name": "base", "title": "Удар ОВД по всему фронту (1989)"}],
-        "replacements": {"air_per_day": 2, "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."},
-        "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
-                                                                           for t, r, c in v["composition"]]}
-                                       for v in vs] for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
-        "_about_ad_templates": "Объектовая ПВО: сторона -> ярус -> варианты состава батареи на позиции ad_sites сектора "
-                               "(ОЦЕНКИ: одна батарея на позицию). Нет шаблона яруса - позиция стоит пустой.",
-    }
-    (DATA / "oob_germany.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
+    ground_units = units
+    for year, date, title in PRESETS:
+        units = list(ground_units)
+        for uid, name, side, role, typ, base, count, radius, src in air_for(date):
+            units.append({"id": uid, "name": name, "side": side, "role": role, "base": base.lower().replace(" ", "_"),
+                          "type": typ, "count": count, "strike_radius_km": radius,
+                          "source": src + "; число и радиус действия - ОЦЕНКА", "estimate": True})
+        for u in units:
+            if u.get("base"):
+                assert u["base"] in airbases, u
+        oob = {
+            "_about": f"Состав сил всего фронта на {date}. Генерирован tools/gen_germany.py (пресет {year}); источники - "
+                      "в поле source каждой части. Авиация - по сводке игрока (AIR_HISTORY), на дату пресета.",
+            "theatre": "germany",
+            "preset": {"title": title, "year": year, "date": date},
+            "date": date,
+            "countries": {"red": "Russia", "blue": "Germany"},
+            "units": units,
+            "variants": [{"name": "base", "title": title}],
+            "replacements": {"air_per_day": 2, "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."},
+            "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
+                                                                               for t, r, c in v["composition"]]}
+                                           for v in vs] for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
+            "_about_ad_templates": "Объектовая ПВО: сторона -> ярус -> варианты состава батареи на позиции ad_sites сектора "
+                                   "(ОЦЕНКИ: одна батарея на позицию). Нет шаблона яруса - позиция стоит пустой.",
+            "_off_map": "Не входят (базы вне карты Cold War Germany или нет задач): " + OFF_MAP,
+        }
+        text = json.dumps(oob, ensure_ascii=False, indent=1)
+        # пресет по умолчанию - oob_germany.json (его знают старые кампании и окно), остальные - oob_germany_<год>.json
+        (DATA / ("oob_germany.json" if year == DEFAULT_PRESET else f"oob_germany_{year}.json")).write_text(text, encoding="utf-8")
+        n_air = sum(1 for u in units if u.get("count") is not None and u.get("type"))
+        print(f"пресет {year} ({date}): авиачастей {n_air}")
     n_g = sum(1 for u in units if u["role"] == "maneuver")
     print(f"пунктов {len(places)}, связей {len(links)}, аэродромов {len(airbases)}, частей {n_g}, всего объектов {len(units)}")
 

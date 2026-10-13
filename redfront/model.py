@@ -228,7 +228,7 @@ BUBBLE_KM = 150   # ОЦЕНКА: ЗРК противника, стоящие н
 
 # ---------- кампания ----------
 
-def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
+def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
                  sector: str | Path = "sector_hamburg.json", oob: str | Path = "oob_hamburg.json",
                  player_side: str = "red", packages: dict[str, str] | None = None,
                  column_budget_units: int = 40, seed: int | None = None, variant: str | None = None,
@@ -244,6 +244,7 @@ def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
             raise FileNotFoundError(f"нет пакета доктрины '{pkg}' для стороны {side} (data/doctrine/{pkg}.json)")
     sec = load_json(sector)
     forces = load_json(oob)
+    date = date or forces.get("date") or "2026-05-15"   # дата среза пресета состава сил (1985, 1987, 1989)
     if forces["countries"]["red"] == forces["countries"]["blue"]:
         raise ValueError("у сторон в составе сил одна и та же страна (countries)")
     terrain = Germany()
@@ -288,6 +289,9 @@ def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
         variants = ((forces.get("ad_templates") or {}).get(site["side"]) or {}).get(site["tier"]) or []
         if not variants or site["id"] in units:
             continue                               # нет шаблона яруса у стороны - позиция пустая
+        req = site.get("requires_types")          # КРУ: только если на аэродроме в этом составе сил базируется МиГ-29
+        if req and not any(u.get("type") in req and site.get("covers") == f"af_{u.get('base')}" for u in forces["units"]):
+            continue
         tpl = variants[site.get("variant", 0) % len(variants)]
         name = site["name"] if tpl["name"] in site["name"] else f"{site['name']}: {tpl['name']}"
         units[site["id"]] = {"id": site["id"], "name": name, "side": site["side"],

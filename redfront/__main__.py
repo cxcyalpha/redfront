@@ -92,7 +92,7 @@ def parse_deg(text: str) -> float:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="redfront")
     sp = ap.add_subparsers(dest="cmd", required=True)
-    p = sp.add_parser("new"); p.add_argument("state"); p.add_argument("--name", default="Гамбург"); p.add_argument("--date", default="2026-05-15")
+    p = sp.add_parser("new"); p.add_argument("state"); p.add_argument("--name", default="Гамбург"); p.add_argument("--date", default=None, help="дата кампании; по умолчанию - дата пресета состава сил")
     p.add_argument("--side", choices=model.SIDES, default="red", help="за какую сторону играет игрок")
     p.add_argument("--oob", default="oob_hamburg.json", help="состав сил")
     p.add_argument("--sector", default="sector_hamburg.json", help="сектор (карта)")

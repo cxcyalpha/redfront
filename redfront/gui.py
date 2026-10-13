@@ -146,12 +146,40 @@ class App:
             raise ValueError(f"недопустимое имя файла кампании: {name}")
         return self.root / name
 
+    def presets(self, tid: str) -> list[dict]:
+        """Пресеты состава сил театра: data/oob_<театр>*.json (пресеты по годам) и свои - presets/*.json в папке
+        проекта (копии для правки; театр - поле theatre в файле). file - то, что передаётся в new."""
+        _t, _sec, default, _title = next(t for t in THEATRES if t[0] == tid)
+        out = []
+        files = sorted(model.DATA.glob(f"oob_{tid}*.json"), key=lambda f: (f.name != default, f.name))
+        user = sorted((self.root / "presets").glob("*.json")) if (self.root / "presets").is_dir() else []
+        for f, key in [(f, f.name) for f in files] + [(f, f"presets/{f.name}") for f in user]:
+            try:
+                d = json.loads(f.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if key.startswith("presets/") and d.get("theatre", tid) != tid:
+                continue
+            title = (d.get("preset") or {}).get("title") or f.stem
+            out.append({"file": key, "title": title + (" (свой)" if key.startswith("presets/") else "")
+                        + (" - по умолчанию" if key == default else ""),
+                        "variants": [{"name": v["name"], "title": v.get("title", v["name"])} for v in d.get("variants", [])]})
+        return out
+
+    def preset_path(self, tid: str, key: str | None) -> str | Path:
+        """Файл пресета по ключу из presets() (только из списка - путь извне не принимается)."""
+        _t, _sec, default, _title = next(t for t in THEATRES if t[0] == tid)
+        if not key:
+            return default
+        if key not in {p["file"] for p in self.presets(tid)}:
+            raise ValueError(f"нет пресета '{key}' у театра {tid}")
+        return self.root / key if key.startswith("presets/") else key
+
     def info(self) -> dict:
         th = []
         for tid, sec, oob, title in THEATRES:
-            forces = model.load_json(oob)
-            th.append({"id": tid, "title": title,
-                       "variants": [{"name": v["name"], "title": v.get("title", v["name"])} for v in forces.get("variants", [])]})
+            ps = self.presets(tid)
+            th.append({"id": tid, "title": title, "presets": ps, "variants": ps[0]["variants"] if ps else []})
         return {"campaigns": campaigns(self.root), "theatres": th, "missions_dir": str(missions_dir(self.home))}
 
     def load(self, req: dict) -> tuple[Path, dict]:
@@ -166,6 +194,7 @@ class App:
                 raise ValueError(f"{p.name} уже есть - другое имя или отметьте 'перезаписать'")
             seed = req.get("seed")
             _tid, sec_f, oob_f, _t = next((t for t in THEATRES if t[0] == req.get("theatre")), THEATRES[0])
+            oob_f = self.preset_path(_tid, req.get("preset"))
             st = model.new_campaign(p.stem, player_side=req.get("side", "red"), sector=sec_f, oob=oob_f,
                                     seed=int(seed) if str(seed or "").strip() else None,
                                     variant=req.get("variant") or None, randomness=not req.get("norandom"))
@@ -191,6 +220,23 @@ class App:
             lines.append(f"Создана кампания {p.name}: {sc.get('title') or sc.get('variant')}, seed {sc.get('seed')}.")
             model.save(st, p)
             return {"lines": lines, "file": p.name, "state": view(st)}
+        if action == "presetcopy":                   # копия пресета для правки: presets/<имя>.json в папке проекта
+            tid = req.get("theatre") or THEATRES[0][0]
+            src = self.preset_path(tid, req.get("preset"))
+            name = (req.get("name") or "").strip()
+            if not re.fullmatch(r"[\w\-. а-яА-ЯёЁ]+", name):
+                raise ValueError("имя копии: буквы, цифры, пробел, '-', '.', '_'")
+            dst = self.root / "presets" / f"{name}.json"
+            if dst.exists() and not req.get("overwrite"):
+                raise ValueError(f"{dst.name} уже есть - другое имя или отметьте 'перезаписать'")
+            d = model.load_json(src)
+            d["theatre"] = tid
+            d["preset"] = {**(d.get("preset") or {}), "title": name, "copied_from": str(req.get("preset") or src)}
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+            return {"lines": [f"Копия пресета: {dst}",
+                              "Правьте в текстовом редакторе (части: units - тип type, число count, аэродром base, роль role); "
+                              "в списке пресетов она появится как '(свой)'."]}
         if action in ("mapprobe", "roadsprobe"):
             sec_f = SECTOR
             if req.get("file"):

@@ -1356,6 +1356,49 @@ def helo_section(tmp: Path) -> None:
               f"вертолёты в миссии: {', '.join(g.units[0].type for g in hg)}, маршрут не выше 60 м")
 
 
+def presets_section(tmp: Path) -> None:
+    """Пресеты состава сил по годам (сводка игрока): авиация на дату пресета, КРУ только при МиГ-29, дата кампании;
+    окно - список пресетов, копия для правки в presets/, кампания из своего пресета."""
+    from redfront import gui
+    print("\n== пресеты состава сил ==")
+    camp = {}
+    for f in ("oob_germany_1985.json", "oob_germany_1987.json", "oob_germany.json"):
+        st = model.new_campaign("p", sector="sector_germany.json", oob=f, seed=1)
+        camp[f] = st
+    by = {f: {u["id"]: u for u in st["units"].values() if u.get("type")} for f, st in camp.items()}
+    y85, y87, y89 = by["oob_germany_1985.json"], by["oob_germany_1987.json"], by["oob_germany.json"]
+    check(camp["oob_germany_1985.json"]["date"] == "1985-06-01" and camp["oob_germany.json"]["date"] == "1989-09-01",
+          "дата кампании - дата среза пресета (1985-06-01, 1989-09-01)")
+    check(y85["r85iap"]["type"] == "MiG_23MLD" and y87["r85iap"]["type"] == "MiG_29_Fulcrum"
+          and y85["r116bap"]["type"] == "Su_24M" and "r116bap" not in y89 and y89["r911apib"]["type"] == "MiG_27K"
+          and "r368oshap" not in y87 and "r368oshap" in y89 and y87["r357oshap"]["count"] == 8,
+          "авиация по годам: 85-й гв. иап МиГ-23 -> МиГ-29 (1986), Бранд: Су-24М -> 911 апиб МиГ-27К (7.1989), "
+          "368 оштап с 12.1988, 357 оштап в 1987 почти весь в Афганистане")
+    gci = {f: sorted(u["id"] for u in st["units"].values() if u["role"] == "gci") for f, st in camp.items()}
+    check(not gci["oob_germany_1985.json"] and len(gci["oob_germany.json"]) == 7,
+          f"КРУ только где МиГ-29: 1985 - нет, 1987 - {len(gci['oob_germany_1987.json'])}, 1989 - {len(gci['oob_germany.json'])}")
+    root = tmp / "presets_gui"
+    root.mkdir(exist_ok=True)
+    app = gui.App(root, tmp / "home_presets")
+    keys = [x["file"] for x in app.presets("germany")]
+    app.do("presetcopy", {"theatre": "germany", "preset": "oob_germany_1985.json", "name": "мой 85"})
+    mine = json.loads((root / "presets" / "мой 85.json").read_text(encoding="utf-8"))
+    mine["units"] = [dict(u, count=5) if u["id"] == "r19apib" else u for u in mine["units"]]
+    (root / "presets" / "мой 85.json").write_text(json.dumps(mine, ensure_ascii=False), encoding="utf-8")
+    keys2 = [x["file"] for x in app.presets("germany")]
+    r = app.do("new", {"file": "mine85", "theatre": "germany", "preset": "presets/мой 85.json", "side": "red"})
+    st = model.load(root / "mine85.json")
+    bad = None
+    try:
+        app.do("new", {"file": "x", "theatre": "germany", "preset": "../../etc/passwd"})
+    except ValueError as e:
+        bad = str(e)
+    check(keys[0] == "oob_germany.json" and "oob_germany_1985.json" in keys and "presets/мой 85.json" in keys2
+          and st["units"]["r19apib"]["count"] == 5 and st["date"] == "1985-06-01" and bad,
+          f"окно: пресеты {keys}; копия для правки -> presets/, правка (19 апиб: 5 самолётов) попадает в кампанию; "
+          "чужой путь вместо пресета - отказ")
+
+
 def ato_section(tmp: Path) -> None:
     """План полётов на сутки (ato.py): время вылетов, занятость самолётов, смены дежурства, часы кампании,
     группы, которые к началу миссии уже в воздухе."""
@@ -1678,7 +1721,7 @@ def core_section(tmp: Path) -> None:
 # Разделы теста по порядку: python tools/smoke_test.py - все; pytest (tests/test_smoke.py) - каждый отдельным тестом.
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
-            gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section]
+            gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section]
 
 
 def main() -> int:

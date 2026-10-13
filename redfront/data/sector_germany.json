@@ -2765,6 +2765,78 @@
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
+   "id": "red_gci_damgarten",
+   "name": "КРУ аэродрома Damgarten",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_damgarten",
+   "lat": 54.2535,
+   "lon": 12.4019,
+   "variant": 0,
+   "channel": 1,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_falkenberg",
+   "name": "КРУ аэродрома Falkenberg",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_falkenberg",
+   "lat": 51.5239,
+   "lon": 13.1926,
+   "variant": 0,
+   "channel": 2,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_finow",
+   "name": "КРУ аэродрома Finow",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_finow",
+   "lat": 52.8302,
+   "lon": 13.6496,
+   "variant": 0,
+   "channel": 3,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_kothen",
+   "name": "КРУ аэродрома Kothen",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_kothen",
+   "lat": 51.738,
+   "lon": 11.9271,
+   "variant": 0,
+   "channel": 4,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
    "id": "red_gci_merseburg",
    "name": "КРУ аэродрома Merseburg",
    "side": "red",
@@ -2773,8 +2845,13 @@
    "lat": 51.3683,
    "lon": 11.9073,
    "variant": 0,
-   "channel": 1,
+   "channel": 5,
    "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
    "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
   },
   {
@@ -2786,8 +2863,31 @@
    "lat": 53.1937,
    "lon": 12.4804,
    "variant": 0,
-   "channel": 2,
+   "channel": 6,
    "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_zerbst",
+   "name": "КРУ аэродрома Zerbst",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_zerbst",
+   "lat": 52.0107,
+   "lon": 12.1042,
+   "variant": 0,
+   "channel": 7,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
    "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
   }
  ],
