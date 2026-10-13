@@ -2,7 +2,9 @@
 -- Поиск и спасение сбитых экипажей. Механика - по мотивам DCS-CSAR (ciribob, github.com/ciribob/DCS-CSAR): у него
 -- нет лицензии, поэтому код свой и без MIST.
 --   * экипажи на земле из модели (стоят в .miz) и новые - катапультировавшиеся в этой миссии (появляются у точки
---     катапультирования): бессмертны и невидимы для ИИ (их судьбу - плен - решает модель), огонь не ведут;
+--     катапультирования): бессмертны и невидимы для ИИ (их судьбу - плен - решает модель), огонь не ведут; в начале
+--     миссии (новые - сразу) переносятся на ближайшую открытую площадку (lz.lua), вертолётам ИИ, летящим за ними,
+--     маршрут пересчитывается на неё;
 --   * у каждого - маяк ADF (AM, кГц) - звук маяка в .miz (trigger.action.radioTransmission);
 --   * вертолёт своей стороны ближе near_r - "слышу вас"; сел ближе pickup_r - пилот бежит к нему и садится
 --     (run_mps); завис ближе winch_r и ниже winch_h над ним на winch_s секунд - поднят лебёдкой;
@@ -13,6 +15,7 @@ REDFRONT_CSAR = REDFRONT_CSAR or { rescued = {}, lost = {} }
 local CFG = { sound = "l10n/DEFAULT/@SOUND@", near_r = 3000, pickup_r = 300, run_mps = 3, winch_r = 8, winch_h = 20,
               winch_s = 10, tick = 1 }
 local DOWNED = { @DOWNED@ }       -- { id, group, side, title, freq } - экипажи из модели
+local RESCUERS = { @RESCUERS@ }   -- { group, downed, home, land } - вертолёты ИИ, летящие за экипажем
 local SPAWN = { [1] = { country = @RED_COUNTRY@, type = "Infantry AK" }, [2] = { country = @BLUE_COUNTRY@, type = "Soldier M4" } }
 local OWN_BASES = { [1] = { @RED_BASES@ }, [2] = { @BLUE_BASES@ } }   -- аэродромы сторон (имя DCS -> true)
 local CAPACITY = { ["Mi-8MT"] = 16, ["UH-1H"] = 8, ["UH-60A"] = 8, ["CH-47D"] = 20, ["CH-53E"] = 20, ["Mi-26"] = 40,
@@ -29,6 +32,18 @@ local function msg(u, text, t)
 end
 local function nOnboard(name) local n = 0; for _ in pairs(onboard[name] or {}) do n = n + 1 end; return n end
 
+local function relocate(d)          -- пилот - на ближайшую открытую площадку (lz.lua): туда сможет сесть вертолёт
+  local g = Group.getByName(d.group)
+  local u = g and g:getUnit(1)
+  if not u or not (REDFRONT_LZ and REDFRONT_LZ.find) then return end
+  local p = u:getPoint()
+  local x, y, moved = REDFRONT_LZ.find(p.x, p.z, 800)
+  if moved > 0 then                 -- группа с тем же именем заменяется (coalition.addGroup)
+    coalition.addGroup(SPAWN[d.side].country, Group.Category.GROUND, { name = d.group, task = {}, units = {
+      { name = u:getName(), type = u:getTypeName(), x = x, y = y, heading = 0, skill = "Excellent", playerCanDrive = false } } })
+  end
+end
+
 local function setup(d)
   local g = Group.getByName(d.group)
   if not g then return end
@@ -42,7 +57,7 @@ local function setup(d)
   end
   active[d.id] = d
 end
-for _, d in ipairs(DOWNED) do pcall(setup, d) end
+for _, d in ipairs(DOWNED) do pcall(relocate, d); pcall(setup, d) end
 
 local function helis(side)
   local out = {}
@@ -73,7 +88,23 @@ local function pickup(h, d)
   msg(h, d.title .. " на борту. Доставьте на свой аэродром.", 15)
 end
 
+local retasked = {}
 local function tick()
+  for _, rs in ipairs(RESCUERS) do      -- вертолёты ИИ - на площадку у пилота (когда взлетят)
+    local d = active[rs.downed]
+    local g = Group.getByName(rs.group)
+    local hu = g and g:getUnit(1)
+    if not retasked[rs.group] and d and hu and hu:isExist() and hu:inAir() and REDFRONT_LZ and REDFRONT_LZ.retask then
+      local pg = Group.getByName(d.group)
+      local pu = pg and pg:getUnit(1)
+      if pu then
+        local pp = pu:getPoint()
+        local x, y = REDFRONT_LZ.find(pp.x + 40, pp.z, 300)
+        retasked[rs.group] = true
+        REDFRONT_LZ.retask(rs.group, x, y, rs.land, rs.home)
+      end
+    end
+  end
   for id, d in pairs(active) do
     local g = Group.getByName(d.group)
     local pu = g and g:getUnit(1)
@@ -180,10 +211,12 @@ function H:onEvent(e)
     local id = "ej:" .. name
     if not sp or active[id] then return end
     local p = u:getPoint()
+    local x, y = p.x + 30, p.z + 30
+    if REDFRONT_LZ and REDFRONT_LZ.find then x, y = REDFRONT_LZ.find(x, y, 800) end   -- на открытое место
     seq = seq + 1
     local gname = "redfront csar " .. seq
     coalition.addGroup(sp.country, Group.Category.GROUND, { name = gname, task = {}, units = {
-      { name = gname .. " #1", type = sp.type, x = p.x + 30, y = p.z + 30, heading = 0, skill = "Excellent", playerCanDrive = false } } })
+      { name = gname .. " #1", type = sp.type, x = x, y = y, heading = 0, skill = "Excellent", playerCanDrive = false } } })
     local d = { id = id, group = gname, side = side, title = "экипаж " .. u:getTypeName(), freq = freqNext }
     freqNext = freqNext - 10
     timer.scheduleFunction(function()

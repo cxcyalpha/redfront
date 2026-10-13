@@ -949,8 +949,8 @@ def column_road_section(tmp: Path) -> None:
     trig = m.triggerrules.triggers[0]
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in trig.actions]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
-          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront csar",
-                        "-- redfront debrief hook"],
+          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront lz",
+                        "-- redfront csar", "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
@@ -1872,42 +1872,50 @@ def assault_section(tmp: Path) -> None:
            if gr.name.startswith(perf["id"] + " ")]
     hg = next(gr for gr in hgs if " strike " in gr.name)
     lands = [t for p in hg.points for t in p.tasks if getattr(t, "id", None) == "Land"]
-    troops = next(gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.vehicle_group
-                  if gr.name == tk["target"])
-    script = next(a.text.id for a in m.triggerrules.triggers[0].actions if "redfront assault" in a.text.id)
-    check(lands and troops.late_activation and str(hg.task) == "Transport" and any(x["kind"] == "airhead" for x in man["ground"])
-          and tk["target"] in script and all(u.name in script for gr in hgs for u in gr.units)
+    in_miz = [gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.vehicle_group if gr.name == tk["target"]]
+    acts = [a.text.id for a in m.triggerrules.triggers[0].actions]
+    script = next(t for t in acts if "redfront assault" in t)
+    lz_lua = next(t for t in acts if "redfront lz" in t)
+    ah = next(x for x in man["ground"] if x["kind"] == "airhead")
+    check(lands and not in_miz and str(hg.task) == "Transport" and acts.index(lz_lua) < acts.index(script)
+          and all(v["name"] in script for v in ah["vehicles"]) and all(u.name in script for gr in hgs for u in gr.units)
           and sum(len(gr.units) for gr in hgs) == sum(sizes),
-          f"миссия: {sum(len(gr.units) for gr in hgs)} x {perf['type']} ({len(hgs)} группы) садятся на площадку (Land), рота ({len(troops.units)} фигур) - с поздней "
-          "активацией, скрипт высадки знает борта и роту")
+          f"миссия: {sum(len(gr.units) for gr in hgs)} x {perf['type']} ({len(hgs)} группы) летят на площадку (Land); роты "
+          f"в .miz нет - {len(ah['vehicles'])} фигур с именами модели появятся из бортов; площадки (lz.lua) - раньше десанта")
     if have_lupa():
         import lupa
         L = lupa.LuaRuntime(unpack_returned_tuples=True)
-        L.execute("""
-          T = 0; FN = nil; ACT = {}; MSG = {}
-          timer = { getTime = function() return T end, scheduleFunction = function(f, a, t) FN = f end }
-          trigger = { action = { outText = function(s) MSG[#MSG + 1] = s end } }
-          POS = {}
-          Unit = { getByName = function(n) local p = POS[n]; if not p then return nil end
-                     return { isExist = function() return true end, inAir = function() return p.air end,
-                              getPoint = function() return { x = p.x, y = 0, z = p.z } end } end }
-          Group = { getByName = function(n) return { activate = function() ACT[n] = true end } end }
-        """)
-        L.execute(script)
-        G = L.globals()
-        spec_x = float(script.split("x = ")[1].split(",")[0]); spec_y = float(script.split("y = ")[1].split(",")[0])
+        L.execute(CSAR_MOCK)
+        import re as _re
+        spec_x, spec_y = map(float, _re.search(r"\bx = ([-\d.]+), y = ([-\d.]+)", script).groups())
+        L.execute(f"BUILDINGS = {{ {{ x = {spec_x}, z = {spec_y} }} }}")      # на площадке - строение
         names = [u.name for gr in hgs for u in gr.units]
-        for nm in names:
-            L.execute(f'POS["{nm}"] = {{ x = {spec_x + 5000}, z = {spec_y}, air = true }}')
-        G.FN(None, 0)
-        before = bool(G.ACT[tk["target"]])
-        L.execute(f'POS["{names[0]}"] = {{ x = {spec_x + 100}, z = {spec_y}, air = false }}')
-        L.execute(f'POS["{names[1]}"] = {{ x = {spec_x + 9000}, z = {spec_y}, air = false }}')   # сел не там
-        G.FN(None, 0)
-        rec = G.REDFRONT_ASSAULT[tk["ato_id"]]
-        check(not before and G.ACT[tk["target"]] and rec.landed == 1 and rec.total == len(names),
-              f"assault.lua: пока борта в воздухе - роты нет; первый севший на площадку выпускает роту; "
-              f"сел далеко - не в счёт (село {rec.landed} из {rec.total})")
+        player, ai_n = names[0], names[1]
+        L.execute(f'PL = mkUnit("{player}", {spec_x + 30000}, 0, {spec_y}, 1, "Mi-8MT", false, false)')
+        L.execute(f'AI1 = mkUnit("{ai_n}", {spec_x + 5000}, 300, {spec_y}, 1, "Mi-8MT", true, true)')
+        L.execute(f'AIRBASES[1] = {{ {{ getPoint = function() return {{ x = {spec_x + 30000}, y = 0, z = {spec_y} }} end }} }}')
+        L.execute('UNITS = { ["' + player + '"] = PL, ["' + ai_n + '"] = AI1 }; Unit.getByName = function(n) return UNITS[n] end')
+        L.execute(lz_lua)
+        L.execute(script)
+        Gl = L.globals()
+        rec = Gl.REDFRONT_ASSAULT[tk["ato_id"]]
+        L.execute('for _, h in ipairs(world.handlers) do h:onEvent({ id = 15, initiator = PL }) end')
+        Gl.CMDS["Высадить десант"]()
+        refused = any("нет" in str(x) for x in Gl.MSG.values())
+        Gl.CMDS["Загрузить десант"]()
+        loaded = any("на борту" in str(x) for x in Gl.MSG.values())
+        lz = L.eval("(function() local x, y = REDFRONT_LZ.find(" + f"{spec_x}, {spec_y}" + ") return {x, y} end)()")
+        L.execute(f"AI1.u.p = {{ x = {lz[1] + 50}, y = 0, z = {lz[2]} }}; AI1.u.air = false")
+        Gl.T = 5; L.execute("runDue()")
+        ai_out = rec.landed == 1 and len(Gl.ADDED) == 1
+        L.execute(f"PL.u.p = {{ x = {lz[1] - 100}, y = 0, z = {lz[2]} }}; PL.u.air = false")
+        Gl.CMDS["Высадить десант"]()
+        added = [Gl.ADDED[k] for k in Gl.ADDED]
+        check(refused and loaded and ai_out and rec.landed == 2 and len(added) == 2
+              and (lz[1], lz[2]) != (spec_x, spec_y),
+              f"assault.lua: площадка со строением перенесена на открытое место; борт ИИ, севший на неё, высадил свою долю "
+              f"сам; игрок - меню F10: без загрузки высадка не идёт, загрузка у своего аэродрома, высадка на площадке "
+              f"(село {rec.landed} из {rec.total})")
     else:
         print("SKIP lupa не установлена: assault.lua не исполняется")
     # итог вылета игрока: по дебрифу (село 0 - сорвана, рота в сбитых бортах гибнет)
@@ -1948,16 +1956,30 @@ env = { info = function() end, warning = function() end }
 AI = { Option = { Ground = { id = { ROE = 0 }, val = { ROE = { WEAPON_HOLD = 4 } } } } }
 Unit = { Category = { HELICOPTER = 1 } }
 Group = { Category = { GROUND = 2, HELICOPTER = 1 } }
-world = { event = { S_EVENT_BIRTH = 15, S_EVENT_EJECTION = 6, S_EVENT_LAND = 4, S_EVENT_DEAD = 8, S_EVENT_CRASH = 5 }, handlers = {} }
+world = { event = { S_EVENT_BIRTH = 15, S_EVENT_EJECTION = 6, S_EVENT_LAND = 4, S_EVENT_DEAD = 8, S_EVENT_CRASH = 5 }, handlers = {},
+          VolumeType = { SPHERE = 2 } }
+Object = { Category = { SCENERY = 5 } }
+BUILDINGS = {}; AIRBASES = { [1] = {}, [2] = {} }; CMDS = {}; TASKED = {}
+land = { SurfaceType = { LAND = 1, SHALLOW_WATER = 2, WATER = 3, ROAD = 4, RUNWAY = 5 }, getHeight = function() return 0 end,
+         getSurfaceType = function(p) return 1 end }
+function world.searchObjects(cat, vol, f)
+  local c = vol.params.point
+  for _, b in ipairs(BUILDINGS) do
+    local dx, dz = b.x - c.x, b.z - c.z
+    if math.sqrt(dx * dx + dz * dz) <= vol.params.radius then if not f(b) then return end end
+  end
+end
+function world.getAirbases() return {} end
 function world.addEventHandler(h) world.handlers[#world.handlers + 1] = h end
 trigger = { action = {
   radioTransmission = function(f, p, mod, loop, fr, pw, name) RADIO[name] = fr end,
   stopRadioTransmission = function(name) STOPPED[name] = true end,
   outTextForGroup = function(id, t) MSG[#MSG + 1] = t end, outTextForCoalition = function(s, t) MSG[#MSG + 1] = t end,
   smoke = function() end, signalFlare = function() end } }
-missionCommands = { addSubMenuForGroup = function(g, n) MENUS[#MENUS + 1] = n; return {} end, addCommandForGroup = function() end }
-function mkUnit(name, x, y, z, side, typ, air)
-  local u = { name = name, p = { x = x, y = y, z = z }, side = side, typ = typ, air = air }
+missionCommands = { addSubMenuForGroup = function(g, n) MENUS[#MENUS + 1] = n; return {} end,
+                    addCommandForGroup = function(g, n, root, f) CMDS[n] = f end }
+function mkUnit(name, x, y, z, side, typ, air, ai)
+  local u = { name = name, p = { x = x, y = y, z = z }, side = side, typ = typ, air = air, ai = ai }
   local o = {}
   function o:getName() return u.name end
   function o:getPoint() return u.p end
@@ -1968,7 +1990,7 @@ function mkUnit(name, x, y, z, side, typ, air)
   function o:getTypeName() return u.typ end
   function o:getDesc() return { category = 1 } end
   function o:getGroup() return { getID = function() return 77 end } end
-  function o:getPlayerName() return "Игрок" end
+  function o:getPlayerName() if u.ai then return nil end return "Игрок" end
   o.u = u
   return o
 end
@@ -1977,7 +1999,8 @@ function mkGroup(name, unit)
   local o = {}
   function o:getUnit(i) if not g.dead then return unit end end
   function o:getUnits() return { unit } end
-  function o:getController() return { setCommand = function() end, setOption = function() end, setTask = function() end } end
+  function o:getController() return { setCommand = function() end, setOption = function() end,
+                                        setTask = function(_, t) TASKED[name] = t end } end
   function o:destroy() g.dead = true end
   function o:getName() return name end
   G[name] = { g = g, o = o }
@@ -1986,7 +2009,8 @@ end
 Group.getByName = function(n) local x = G[n]; if x and not x.g.dead then return x.o end end
 coalition = { addGroup = function(c, cat, t) ADDED[#ADDED + 1] = { country = c, name = t.name, type = t.units[1].type }
                 local u = mkUnit(t.units[1].name, t.units[1].x, 0, t.units[1].y, c, t.units[1].type, false); mkGroup(t.name, u) end,
-              getGroups = function(side, cat) local out = {}; for _, h in ipairs(HELIS[side]) do out[#out + 1] = { getUnits = function() return { h } end } end; return out end }
+              getGroups = function(side, cat) local out = {}; for _, h in ipairs(HELIS[side]) do out[#out + 1] = { getUnits = function() return { h } end } end; return out end,
+              getAirbases = function(side) return AIRBASES[side] end }
 """
 
 
@@ -2040,8 +2064,16 @@ def csar_section(tmp: Path) -> None:
         L.execute(CSAR_MOCK)
         L.execute(f'mkGroup("{dn[0]["id"]}", mkUnit("{dn[0]["id"]}#01", 0, 0, 0, 1, "Infantry AK", false))')
         L.execute('H1 = mkUnit("H1", 2000, 300, 0, 1, "Mi-8MT", true); HELIS[1] = { H1 }')
+        L.execute("BUILDINGS = { { x = 0, z = 0 } }")               # пилот у строения - перенесётся
+        lz_lua = next(a.text.id for a in m.triggerrules.triggers[0].actions if "redfront lz" in a.text.id)
+        L.execute(lz_lua)
         L.execute(script)
         Gl = L.globals()
+        moved = Gl.ADDED[1] and Gl.ADDED[1].name == dn[0]["id"]
+        L.execute('mkGroup("AIH", mkUnit("AIH#1", 9000, 300, 0, 1, "Mi-8MT", true, true))')
+        L.execute('REDFRONT_LZ.retask("AIH", 100, 0, 90, nil)')
+        pts = Gl.TASKED["AIH"].params.route.points
+        retask = pts[2].task.params.tasks[1].id == "Land" and pts[2].x == 100
         radio_ok = bool(Gl.RADIO["csar_" + dn[0]["id"]])
         Gl.T = 1; L.execute("runDue()")
         heard = any("слышу" in str(x) for x in Gl.MSG.values())
@@ -2056,11 +2088,12 @@ def csar_section(tmp: Path) -> None:
         L.execute('P1 = mkUnit("P1", 5000, 3000, 5000, 2, "F-16C_50", true)')
         L.execute('for _, h in ipairs(world.handlers) do h:onEvent({ id = 6, initiator = P1 }) end')
         Gl.T = 70; L.execute("runDue()")
-        spawned = Gl.ADDED[1]
-        check(radio_ok and heard and picked and rescued and spawned and spawned.type == "Soldier M4"
+        spawned = Gl.ADDED[2]
+        check(moved and retask and radio_ok and heard and picked and rescued and spawned and spawned.type == "Soldier M4"
               and bool(Gl.RADIO["csar_ej:P1"]),
-              "csar.lua: маяк с начала миссии; вертолёт ближе 3 км - \"слышу\"; сел в 150 м - пилот добежал, на борту, "
-              "маяк выключен; посадка на свой аэродром - спасён; катапультировавшийся в миссии синий - на земле с маяком")
+              "csar.lua: пилот у строения перенесён на открытое место (lz.lua), вертолёту ИИ маршрут - посадка там; маяк с "
+              "начала миссии; вертолёт ближе 3 км - \"слышу\"; сел в 150 м - пилот добежал, на борту, маяк выключен; "
+              "посадка на свой аэродром - спасён; катапультировавшийся в миссии синий - на земле с маяком")
     else:
         print("SKIP lupa не установлена: csar.lua не исполняется")
     # сутки: ИИ-спасение, выход к своим, плен
