@@ -23,7 +23,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
       "strike": {
@@ -137,7 +138,9 @@
       },
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
-      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_column_march": {
       "title": "Удар по колонне на марше",
@@ -159,7 +162,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
       "strike": {
@@ -309,7 +313,9 @@
       },
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
-      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_bridge": {
       "title": "Удар по мосту",
@@ -334,7 +340,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -453,7 +460,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_depot": {
       "title": "Удар по складу",
@@ -478,7 +487,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -597,7 +607,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_factory": {
       "title": "Удар по заводу",
@@ -622,7 +634,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -741,7 +754,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_airfield": {
       "title": "Удар по аэродрому",
@@ -765,7 +780,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -789,6 +805,149 @@
             "expend": "All",
             "group_attack": true
           }
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": true,
+          "required_note": "толкование, не цитата: 1.3.3 - полёт над территорией противника выполняется с преодолением его ПВО через обеспечивающие действия; без группы подавления при ЗРК на маршруте задача не ставится",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ."
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "толкование, не цитата: 3.3.3 - тактическая группа включает группы обеспечения; прикрытие от истребителей противника - зона над районом удара на время удара",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+    },
+    "strike_sam_site": {
+      "title": "Удар по позиции ЗРК",
+      "performers": [
+        "bomber",
+        "fighter_bomber"
+      ],
+      "target": {
+        "category": "sam",
+        "state": "deployed",
+        "fixed": true,
+        "min_strength": 0.5
+      },
+      "method": "sequential_on_call",
+      "method_source": "толкование, не цитата: уничтожение позиций объектовой ПВО противника, прикрывающих его аэродромы и тыл - ОЦЕНКА постановки; цель - позиция ЗРК (fixed), группы подавления - по ЗРК коридора, в т.ч. по ней самой",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 300,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "SEAD",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "sead",
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true
         }
       },
       "support": [

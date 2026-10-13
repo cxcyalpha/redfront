@@ -251,9 +251,11 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
 def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     units = state["units"]
     target = units[task["target"]]
-    if model.category(target) in ("depot", "bridge", "airfield", "factory"):   # объект тыла - сам в миссии как объекты карты
-        groups = []
+    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam"):   # объект тыла - сам в миссии как объекты карты
+        groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
         for sid in task["threats"]:
+            if sid == target["id"]:
+                continue
             parent = units.get(units[sid].get("attached_to") or "")
             if parent and parent["state"] == "march":
                 col = column(state, parent, density * OTHER_DENSITY)

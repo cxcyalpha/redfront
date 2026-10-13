@@ -1335,6 +1335,27 @@ def air_defence_section(tmp: Path) -> None:
           f"раскрытый HAWK сменил позицию на {moved:.1f} км, объектовая ПВО (С-200) - на месте")
     logistics.air_defence(st)
     check(model.dist_km(pos0[hawk["id"]], hawk["pos"]) == moved, "без новых потерь ЗРК позицию не меняет")
+    # план дня: удары по позициям ЗРК, полки по очереди, средние высоты без угроз в коридоре
+    st = model.new_campaign("ad2", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    planner.plan(st)
+    tasks = st["tasks"]
+    perfs = [t["performer"] for t in tasks]
+    check(len(set(perfs)) >= len(perfs) - 2, f"план дня: задачи распределены по полкам ({len(set(perfs))} частей на {len(perfs)} задач)")
+    medium = [t for t in tasks if not t["threats"] and t["kind"].startswith("strike_")]
+    check(medium and all(g.get("transit_alt_m_agl") == 4000 for t in medium for g in t["package"])
+          and all(not g.get("transit_alt_m_agl") for t in tasks if t["threats"] for g in t["package"]),
+          f"без угроз в коридоре - переход на 4000 м ({len(medium)} задач), с угрозами - на малой высоте")
+    n = next((i for i, t in enumerate(tasks, 1) if t["kind"] == "strike_sam_site"), None)
+    check(n is not None, "в плане дня есть удар по позиции ЗРК")
+    if n:
+        man = build.build(st, tmp / "sam_site.miz", task_no=n)
+        m = dcs.Mission(); m.load_file(str(tmp / "sam_site.miz"))
+        tgt = st["tasks"][n - 1]["target"]
+        vg = next(g for c in m.coalition.values() for cn in c.countries.values() for g in cn.vehicle_group if g.name == tgt)
+        sg = strike_group(m)
+        attacks = [t for p_ in sg.points for t in p_.tasks if getattr(t, "id", None) == "AttackGroup"]
+        check(any(t.params.get("groupId") == vg.id for t in attacks),
+              f"удар по позиции ЗРК: позиция в миссии, у ударной группы атака по ней ({tgt})")
 
 
 def main() -> int:

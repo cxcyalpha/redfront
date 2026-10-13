@@ -80,7 +80,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -110,7 +111,9 @@
       },
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
-      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_depot": {
       "title": "Удар по складу",
@@ -135,7 +138,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -170,7 +174,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_factory": {
       "title": "Удар по заводу",
@@ -195,7 +201,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -230,7 +237,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_bridge": {
       "title": "Удар по мосту",
@@ -255,7 +264,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -290,7 +300,9 @@
       "low_alt_m_agl": 50,
       "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
-      "bomb_alt_m": 1000
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
     },
     "strike_airfield": {
       "title": "Удар по аэродрому",
@@ -314,7 +326,8 @@
         "ip_offset_km",
         "low_alt_m_agl",
         "speed_kmh",
-        "transit_alt_m_agl"
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
       ],
       "strike": {
         "title": "ударная группа",
@@ -338,6 +351,65 @@
             "expend": "All",
             "group_attack": true
           }
+        }
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+    },
+    "strike_sam_site": {
+      "title": "Удар по позиции ЗРК",
+      "performers": [
+        "bomber",
+        "fighter_bomber"
+      ],
+      "target": {
+        "category": "sam",
+        "state": "deployed",
+        "fixed": true,
+        "min_strength": 0.5
+      },
+      "method": "on_call",
+      "method_source": "толкование, не цитата: уничтожение позиций объектовой ПВО противника, прикрывающих его аэродромы и тыл - ОЦЕНКА постановки; цель - позиция ЗРК (fixed), группы подавления - по ЗРК коридора, в т.ч. по ней самой",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 300,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "SEAD",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "sead",
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true
         }
       },
       "support": [],

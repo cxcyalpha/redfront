@@ -138,6 +138,7 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
     if not doc["tasks"]:
         return [], f"у пакета '{doc['package']}' стороны {side} нет авиационных задач"
     reasons, tasks = [], []
+    tasked: dict[str, int] = {}                  # задач у части в этом плане
     for kind, tdef in doc["tasks"].items():
         performers = [u for u in state["units"].values()
                       if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0]
@@ -147,16 +148,21 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
             targets = [u for u in state["units"].values() if model.category(u) == cat and u["state"] == "active"
                        and u.get("damage", 0) < 0.95
                        and (logistics.bridge_side(state, u) if cat == "bridge" else u["side"]) == tside]
+        elif cat == "sam":                       # позиции ЗРК противника (fixed - только объектовая ПВО): исправные
+            targets = [u for u in state["units"].values() if u["side"] == tside and model.category(u) == "sam"
+                       and not u.get("attached_to") and u["state"] not in ("destroyed", "pending")
+                       and model.strength(u) >= tdef["target"].get("min_strength", 0.5)
+                       and (u.get("fixed") or not tdef["target"].get("fixed"))]
         else:
             targets = [u for u in state["units"].values()
                        if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]
         if not targets:
             continue
         found = False
-        if cat in STRATEGIC:                     # объекты тыла: не больше MAX_PER_KIND ближних, чтобы не забить план дня
-            ref = performers[0] if performers else None
-            if ref:
-                targets.sort(key=lambda t: model.dist_km(state["airbases"][ref["base"]], model.unit_pos(state, t)))
+        if cat in STRATEGIC or cat == "sam":     # объекты тыла, позиции ЗРК: не больше MAX_PER_KIND ближних к базам исполнителей
+            bases = [state["airbases"][r["base"]] for r in performers]
+            if bases:
+                targets.sort(key=lambda t: min(model.dist_km(b, model.unit_pos(state, t)) for b in bases))
             targets = targets[:MAX_PER_KIND]
         for tgt in targets:
             tpos = model.unit_pos(state, tgt)
@@ -167,12 +173,14 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
                     reasons.append(f"{r['name']}: не задан радиус (strike_radius_km у части или у роли {r['role']})")
                     continue
                 d = model.dist_km(state["airbases"][r["base"]], tpos)
-                if d <= radius and (best is None or d < best[0]):
-                    best = (d, r)
+                # сначала - части с меньшим числом задач в этом плане (вылеты распределяются по полкам), затем ближние
+                key = (tasked.get(r["id"], 0), d)
+                if d <= radius and (best is None or key < best[0]):
+                    best = (key, r)
             if best is None:
                 reasons.append(f"{tdef['title']}: {tgt['name']} - нет исполнителей ({', '.join(tdef['performers'])}) в радиусе")
                 continue
-            d, perf = best
+            (_n, d), perf = best
             base = state["airbases"][perf["base"]]
             ip = ip_point(base, tpos, tdef["ip_offset_km"])
             threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe, tdef.get("low_alt_m_agl"))
@@ -181,6 +189,11 @@ def plan_side(state: dict, side: str) -> tuple[list[dict], str]:
                 reasons.append(f"{tdef['title']}: {tgt['name']} - {why}")
                 continue
             found = True
+            for g in groups:
+                tasked[g["performer"]] = tasked.get(g["performer"], 0) + 1
+            if not threats and tdef.get("medium_alt_m_agl"):   # угроз ЗРК в коридоре нет - переход на средних высотах
+                for g in groups:
+                    g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
             tasks.append({
                 "kind": kind, "side": side, "title": f"{tdef['title']}: {tgt['name']}",
                 "performer": perf["id"], "target": tgt["id"], "group_size": groups[0]["size"], "base": perf["base"],
@@ -244,6 +257,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     avail[perf["id"]] -= size
     if s.get("mode") == "cap_zone":              # прикрытие района (истребители): зона над своими войсками
         route, objective = [tpos], {"kind": "cap_zone", "unit": tgt["id"], "pos": tpos}
+    elif model.category(tgt) == "sam":           # позиция ЗРК: атака группы на позиции
+        route, objective = [ip, tpos], {"kind": "site", "unit": tgt["id"], "pos": tpos}
     elif model.category(tgt) in STRATEGIC:       # объект тыла: удар по точке (бомбы; по мосту - по объекту карты)
         route, objective = [ip, tpos], {"kind": "point", "unit": tgt["id"], "pos": tpos, "object": model.category(tgt)}
     else:
