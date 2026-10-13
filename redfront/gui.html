@@ -42,6 +42,10 @@ nav button.on{color:var(--txt);box-shadow:inset 0 -2px var(--acc)}
 .bar i{display:block;height:100%;border-radius:3px;background:var(--ok)}
 #out{max-height:28vh;overflow:auto;border-top:1px solid var(--line);padding:8px 12px;font-size:12px;background:#171a1e;white-space:pre-wrap}
 #out .err{color:var(--red)}
+#busy{display:none;padding:6px 12px;font-size:12px;border-top:1px solid var(--line);background:#1d2126}
+#busy.on{display:block}
+#busy .bar{height:3px;margin-top:5px;background:linear-gradient(90deg,transparent,var(--acc),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:slide 1.2s linear infinite}
+@keyframes slide{from{background-position:-40% 0}to{background-position:140% 0}}
 .log p{margin:0 0 3px}
 dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:8px;min-width:320px}
 dialog label{display:block;margin:8px 0 2px;color:var(--dim)}
@@ -77,6 +81,7 @@ dialog input,dialog select{width:100%}
       <button data-tab="log">Журнал</button>
     </nav>
     <div id="pane"></div>
+    <div id="busy"><span id="busyText"></span><div class="bar"></div></div>
     <div id="out"></div>
   </div>
   <div id="map"></div>
@@ -116,16 +121,36 @@ async function api(action, body) {
   if (j.error) throw new Error(j.error);
   return j;
 }
+const BUSY = {new: "Создаю кампанию (зонды карты и дорог применяются сами - до нескольких минут)",
+              plan: "Строю план полётов на сутки", build: "Собираю миссию", debrief: "Применяю дебриф",
+              endday: "Конец дня: ход модели", mapimport: "Применяю зонд карты", mapapply: "Применяю зонд карты",
+              roadsapply: "Применяю дороги"};
+let busyTimer = null;
+function busy(text) {
+  const b = $("#busy");
+  clearInterval(busyTimer);
+  if (!text) { b.classList.remove("on"); return; }
+  const t0 = Date.now();
+  const tick = () => { $("#busyText").textContent = `${text}... ${Math.round((Date.now() - t0) / 1000)} с`; };
+  tick(); busyTimer = setInterval(tick, 1000);
+  b.classList.add("on");
+}
 async function act(action, extra, btn) {
   if (!FILE && action !== "new" && action !== "mapprobe") return out("Сначала создайте или выберите кампанию.", true);
   if (btn) btn.disabled = true;
+  document.querySelectorAll(".cycle button, #bNew").forEach(b => b.disabled = true);   // не запускать второе действие поверх
+  busy(BUSY[action] || "Выполняю");
   try {
     const j = await api(action, Object.assign({file: FILE}, extra || {}));
     if (j.lines) out(j.lines);
     if (j.file) { FILE = j.file; localStorage.setItem("rf_file", FILE); await loadInfo(); }
     if (j.state) { ST = j.state; render(); }
   } catch (e) { out(e.message, true); }
-  finally { if (btn) btn.disabled = false; }
+  finally {
+    busy(null);
+    document.querySelectorAll(".cycle button, #bNew").forEach(b => b.disabled = false);
+    if (btn) btn.disabled = false;
+  }
 }
 
 // ---------- карта ----------
