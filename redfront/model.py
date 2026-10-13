@@ -34,16 +34,21 @@ def load_json(name: str | Path) -> dict:
 _AIRCRAFT: dict | None = None
 
 
-def cruise_kmh(type_name: str | None) -> float | None:
-    """Крейсерская скорость типа ЛА, км/ч (data/aircraft.json: V_opt из DCS через tools/dcs_cruise.py или ОЦЕНКА)."""
+def aircraft_info(type_name: str | None) -> dict:
+    """Запись типа ЛА из data/aircraft.json (cruise_kmh, cargo_t); нет - {}."""
     global _AIRCRAFT
     if _AIRCRAFT is None:
         try:
             _AIRCRAFT = load_json("aircraft.json").get("types", {})
         except (OSError, ValueError):
             _AIRCRAFT = {}
-    rec = _AIRCRAFT.get(type_name or "")
-    return float(rec["cruise_kmh"]) if rec and rec.get("cruise_kmh") else None
+    return _AIRCRAFT.get(type_name or "") or {}
+
+
+def cruise_kmh(type_name: str | None) -> float | None:
+    """Крейсерская скорость типа ЛА, км/ч (data/aircraft.json: V_opt из DCS через tools/dcs_cruise.py или ОЦЕНКА)."""
+    rec = aircraft_info(type_name)
+    return float(rec["cruise_kmh"]) if rec.get("cruise_kmh") else None
 
 
 def group_speed_kmh(state: dict, g: dict, tdef: dict) -> float:
@@ -228,7 +233,7 @@ BUBBLE_KM = 150   # ОЦЕНКА: ЗРК противника, стоящие н
 
 # ---------- кампания ----------
 
-def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
+def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
                  sector: str | Path = "sector_hamburg.json", oob: str | Path = "oob_hamburg.json",
                  player_side: str = "red", packages: dict[str, str] | None = None,
                  column_budget_units: int = 40, seed: int | None = None, variant: str | None = None,
@@ -244,6 +249,7 @@ def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
             raise FileNotFoundError(f"нет пакета доктрины '{pkg}' для стороны {side} (data/doctrine/{pkg}.json)")
     sec = load_json(sector)
     forces = load_json(oob)
+    date = date or forces.get("date") or "2026-05-15"   # дата среза пресета состава сил (1985, 1987, 1989)
     if forces["countries"]["red"] == forces["countries"]["blue"]:
         raise ValueError("у сторон в составе сил одна и та же страна (countries)")
     terrain = Germany()
@@ -288,6 +294,9 @@ def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
         variants = ((forces.get("ad_templates") or {}).get(site["side"]) or {}).get(site["tier"]) or []
         if not variants or site["id"] in units:
             continue                               # нет шаблона яруса у стороны - позиция пустая
+        req = site.get("requires_types")          # КРУ: только если на аэродроме в этом составе сил базируется МиГ-29
+        if req and not any(u.get("type") in req and site.get("covers") == f"af_{u.get('base')}" for u in forces["units"]):
+            continue
         tpl = variants[site.get("variant", 0) % len(variants)]
         name = site["name"] if tpl["name"] in site["name"] else f"{site['name']}: {tpl['name']}"
         units[site["id"]] = {"id": site["id"], "name": name, "side": site["side"],
@@ -316,7 +325,7 @@ def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
     for bid, b in bases.items():
         units[f"af_{bid}"] = {"id": f"af_{bid}", "name": f"Аэродром {b['name']}", "side": b["side"], "role": "airfield", "base": bid,
                               "pos": {"lat": b["lat"], "lon": b["lon"]}, "state": "active", "damage": 0.0, "lost": {}, "composition": []}
-    return {
+    st = {
         "version": STATE_VERSION,
         "campaign_id": uuid.uuid4().hex[:8],
         "name": name,
@@ -343,6 +352,8 @@ def new_campaign(name: str, date: str = "2026-05-15", start_hour: int = 7,
         "manifest": None,
         "log": [],
     }
+    init_crews(st)
+    return st
 
 
 def rng(state: dict, purpose: str) -> random.Random | None:
@@ -368,7 +379,20 @@ def load(path: Path) -> dict:
     if st.get("version") != STATE_VERSION:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
     sync_ad_sites(st)
+    init_crews(st)
     return st
+
+
+def init_crews(st: dict) -> None:
+    """Экипажи авиачастей (crews, штат crews0): crew_ratio доктрины стороны на самолёт штата (ОЦЕНКА) - для новых
+    кампаний и старых сохранений."""
+    for u in st.get("units", {}).values():
+        if role_info(u["role"])["category"] in ("air", "heli"):
+            if "crews" not in u:
+                ratio = doctrine(st, u["side"])["sim"].get("crew_ratio", 1.0)
+                u["crews0"] = int(round(u.get("count0", u.get("count", 0)) * ratio))
+                u["crews"] = u["crews0"]
+    st.setdefault("downed", [])          # сбитые экипажи на земле (csar.py)
 
 
 def sync_ad_sites(st: dict) -> None:

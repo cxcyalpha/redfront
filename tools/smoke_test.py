@@ -367,15 +367,23 @@ def front_section(tmp: Path) -> None:
     d = model.dist_km(model.unit_pos(st, a), model.unit_pos(st, b))
     check(a["state"] == b["state"] == "battle" and a["engaged"] == ["blue_pz_bn_1"] and b["engaged"] == ["red_tp_1"] and d <= 5.0,
           f"конец дня 1: танковый полк встретил танковый батальон (выдвинут командованием на рубеж) - соприкосновение на {d:.1f} км, марш остановлен")
-    pw_a, pw_b = sim.power(st, a), sim.power(st, b)
+    import copy as _copy
+    one = _copy.deepcopy(st)                     # один часовой шаг боя: потери = суточная доля / 24, одновременно
+    one["settings"]["randomness"] = False
+    a1, b1 = one["units"][a["id"]], one["units"][b["id"]]
+    pw_a, pw_b = sim.power(one, a1), sim.power(one, b1)
+    sa, sb = model.strength(a1), model.strength(b1)
+    sim.battles(one, 1 / 24)
+    fa = min(0.5, 0.15 * pw_b / pw_a) * (0.6 if a1.get("defending") else 1) / 24
+    fb = min(0.5, 0.15 * pw_a / pw_b) * (0.6 if b1.get("defending") else 1) / 24
+    check(abs((sa - model.strength(a1)) - sa * fa) < 1e-6 and abs((sb - model.strength(b1)) - sb * fb) < 1e-6,
+          f"бой за час: потери одновременно, по соотношению сил ({pw_a:.1f} : {pw_b:.1f}), 1/24 суточной доли; у обороны "
+          f"x0.6 - {sa:.1%}->{model.strength(a1):.1%} и {sb:.1%}->{model.strength(b1):.1%}")
+    check(abs(model.strength(one["units"]["blue_flak_2"]) - model.strength(b1)) < 1e-6, "приданная ПВО несёт потери вместе с частью")
     sa, sb = model.strength(a), model.strength(b)
     sim.end_day(st)
-    fa = min(0.5, 0.15 * pw_b / pw_a) * (0.6 if a.get("defending") else 1)
-    fb = min(0.5, 0.15 * pw_a / pw_b) * (0.6 if b.get("defending") else 1)
-    check(abs((sa - model.strength(a)) - sa * fa) < 1e-6 and abs((sb - model.strength(b)) - sb * fb) < 1e-6,
-          f"бой за сутки: потери одновременно, по соотношению сил ({pw_a:.1f} : {pw_b:.1f}); у обороны x0.6 (встречный бой - без) "
-          f"- {sa:.0%}->{model.strength(a):.0%} и {sb:.0%}->{model.strength(b):.0%}")
-    check(abs(model.strength(U["blue_flak_2"]) - model.strength(b)) < 1e-6, "приданная ПВО несёт потери вместе с частью")
+    check(model.strength(a) < sa and model.strength(b) < sb,
+          f"сутки боя по часам: {sa:.0%}->{model.strength(a):.0%} и {sb:.0%}->{model.strength(b):.0%}")
     tasks = planner.plan(st) and st["tasks"]
     kinds = [t["kind"] for t in tasks]
     check(kinds and kinds[0] == "cas_contact" and all(t["package"][0]["objective"]["kind"] == "column" for t in tasks if t["kind"] == "cas_contact")
@@ -383,6 +391,7 @@ def front_section(tmp: Path) -> None:
           f"день 3: в плане {len(tasks)} задач, первыми - войска в соприкосновении (без доразведки): "
           + ", ".join(t["title"].split(": ")[1] for t in tasks))
     n = next(i for i, t in enumerate(tasks, 1) if t["target"] == "blue_pz_bn_1")
+    tasks[n - 1]["tot_s"] = None                 # без времени плана: модель к миссии не продвигается (это - advance_section)
     man = build.build(st, tmp / "front.miz", task_no=n)
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "front.miz"))
@@ -450,6 +459,7 @@ def theatre_section(tmp: Path) -> None:
            and g["kind"] == "battle"]
     check(far and max(far) < near, f"цель игрока - {near} машин, части вдали - по {min(far)}-{max(far)}")
     keys = {g["cluster"] for g in groups if g.get("cluster")}
+    st["tasks"][0]["tot_s"] = None               # без продвижения модели к миссии: сравниваем с окном, построенным выше
     man = build.build(st, tmp / "theatre.miz", task_no=1)
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "theatre.miz"))
@@ -630,7 +640,9 @@ def ops_section(tmp: Path) -> None:
     check(any("прибыл в район" in ln for ln in log) and U["red_tp_2"]["state"] != "pending" and U["blue_pzbrig_1"]["state"] != "pending",
           "резервы (второй эшелон, бригада) вводятся в свой день")
     took = sorted(owners[-1] - owners[0])
-    check("Luneburg" in owners[-1] and len(took) >= 2, f"красные взяли пункты: {', '.join(took)}; за 20 дней кампания не встала")
+    check(any("Luneburg" in o for o in owners) and len(took) >= 2,   # к 20-м суткам Люнебург могут и отбить
+          f"красные взяли пункты: {', '.join(took)} (Люнебург - на сутках "
+          f"{', '.join(str(i + 1) for i, o in enumerate(owners) if 'Luneburg' in o) or '-'}); за 20 дней кампания не встала")
     fl = ops.front_links(st)
     check(fl and all(ops.owner(st, a) != ops.owner(st, b) for a, b in fl), f"линия фронта: {len(fl)} связей между пунктами сторон")
     # отходящая часть разрывает соприкосновение и не держит пункт
@@ -878,7 +890,7 @@ def air_section(tmp: Path) -> None:
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "air1.miz"))
     red = {g.name.split(" ")[1]: g for g in plane_groups(m)}
-    blue = [g for c in m.coalition["blue"].countries.values() for g in c.plane_group]
+    blue = [g for c in m.coalition["blue"].countries.values() for g in c.plane_group if "_qra_" not in g.name]   # дежурные пары - qra_section
     t = build.timeline(model.doctrine(st, "red")["tasks"][t1["kind"]], st, t1["package"], "strike")
     zone = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "EngageTargetsInZone"]
     orb = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "ControlledTask"]
@@ -886,18 +898,21 @@ def air_section(tmp: Path) -> None:
           and red["cover"].points[1].alt == 3000
           and {d["CLSID"] for d in red["cover"].units[0].pylons.values()} >= {dcs.planes.MiG_29_Fulcrum.Pylon3.R_27R__AA_10_Alamo_A____Semi_Act_Rdr_[1]["clsid"]},
           f"прикрытие: зона 40 км над целью на 3000 м, перехват воздушных целей, до удара + 5 мин; МиГ-29 с Р-27Р и Р-73")
-    en = [fl for fl in man["flights"] if fl.get("side") == "blue"]
-    own_ai = [fl for fl in man["flights"] if fl["group"].startswith("ai")]
+    en = [fl for fl in man["flights"] if fl.get("side") == "blue" and "_qra_" not in fl["group"]]
+    own_ai = [fl for fl in man["flights"] if fl["group"].startswith("ai") and "_qra_" not in fl["group"]]
+    qra_lines = [ln for ln in man["enemy_lines"] + man["ai_lines"] if "в готовности на стоянке" in ln]
     from redfront import ato
     win = [e for e in st["ato"]["entries"] if e["id"] != st["task"].get("ato_id") and not e["ai_only"]
            and ato.in_window(e, man["start_s"], man["end_s"])
            and not (e["times"]["strike"]["takeoff_s"] < man["start_s"] and e["times"]["strike"]["objective_s"] <= man["start_s"] + 60)]
     want = {side_: min(build.AI_FLIGHTS["enemy" if side_ == "blue" else "own"], sum(1 for e in win if e["side"] == side_))
             for side_ in ("red", "blue")}
-    check(len(blue) == len(en) == len(man["enemy_lines"]) and 1 <= len(en) <= build.AI_FLIGHTS["enemy"]
-          and len(en) <= want["blue"] and len(own_ai) <= want["red"] and len(man["ai_lines"]) == len(own_ai)
+    en_lines = [ln for ln in man["enemy_lines"] if ln not in qra_lines]
+    ai_lines = [ln for ln in man["ai_lines"] if ln not in qra_lines]
+    check(len(blue) == len(en) == len(en_lines) and 1 <= len(en) <= build.AI_FLIGHTS["enemy"]
+          and len(en) <= want["blue"] and len(own_ai) <= want["red"] and len(ai_lines) == len(own_ai)
           and "Разведка: в районе возможна активность авиации противника." in m.description_text()
-          and ("Другие вылеты наших сил" in m.description_text()) == bool(own_ai)
+          and ("Другие вылеты наших сил" in m.description_text()) == bool(man["ai_lines"])   # и свои дежурные пары
           and not any(st["units"][fl["performer"]]["name"] in m.description_text() for fl in en),
           f"воздушная война по плану полётов на сутки: в окне миссии {ato.hhmm(man['start_s'])}-{ato.hhmm(man['end_s'])} "
           f"{len(en)} групп противника и {len(own_ai)} своих групп ИИ (в окне вылетов: синих {want['blue']}, своих {want['red']}); "
@@ -938,14 +953,16 @@ def column_road_section(tmp: Path) -> None:
     st = model.new_campaign("colroad", oob=BASE_OOB, sector=BASE_SECTOR)
     bn = st["units"]["blue_pzgren_bn_1"]
     planner.plan(st)
+    st["task"]["tot_s"] = None                   # без продвижения модели к миссии: колонна там, где её посчитал тест
     man = build.build(st, tmp / "colroad.miz")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "colroad.miz"))
     trig = m.triggerrules.triggers[0]
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in trig.actions]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
-          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront debrief hook"],
-          "без известных дорог: в триггере старта скрипт перекладки колонны, затем хук")
+          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront lz",
+                        "-- redfront csar", "-- redfront debrief hook"],
+          "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
         return
@@ -1343,7 +1360,8 @@ def helo_section(tmp: Path) -> None:
     for _ in range(3):
         sim.end_day(st)
     kinds = {side: collections.Counter(t["kind"] for t in planner.plan_side(st, side)[0]) for side in model.SIDES}
-    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for n in c.values()) and len(kinds["blue"]) >= 2,
+    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k not in ("airlift", "qra"))   # перевозки, дежурства - вне лимита
+          and len(kinds["blue"]) >= 2,
           f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
     planner.plan(st)
     n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "cas_helo"), None)
@@ -1354,6 +1372,75 @@ def helo_section(tmp: Path) -> None:
         hg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.helicopter_group]
         check(hg and max(p.alt for g in hg for p in g.points) <= 60,
               f"вертолёты в миссии: {', '.join(g.units[0].type for g in hg)}, маршрут не выше 60 м")
+
+
+def presets_section(tmp: Path) -> None:
+    """Пресеты состава сил по годам (сводка игрока): авиация на дату пресета, КРУ только при МиГ-29, дата кампании;
+    окно - список пресетов, копия для правки в presets/, кампания из своего пресета."""
+    from redfront import gui
+    print("\n== пресеты состава сил ==")
+    camp = {}
+    for f in ("oob_germany_1985.json", "oob_germany_1987.json", "oob_germany.json"):
+        st = model.new_campaign("p", sector="sector_germany.json", oob=f, seed=1)
+        camp[f] = st
+    by = {f: {u["id"]: u for u in st["units"].values() if u.get("type")} for f, st in camp.items()}
+    y85, y87, y89 = by["oob_germany_1985.json"], by["oob_germany_1987.json"], by["oob_germany.json"]
+    check(camp["oob_germany_1985.json"]["date"] == "1985-06-01" and camp["oob_germany.json"]["date"] == "1989-09-01",
+          "дата кампании - дата среза пресета (1985-06-01, 1989-09-01)")
+    check(y85["r85iap"]["type"] == "MiG_23MLD" and y87["r85iap"]["type"] == "MiG_29_Fulcrum"
+          and y85["r116bap"]["type"] == "Su_24M" and "r116bap" not in y89 and y89["r911apib"]["type"] == "MiG_27K"
+          and "r368oshap" not in y87 and "r368oshap" in y89 and y87["r357oshap"]["count"] == 8,
+          "авиация по годам: 85-й гв. иап МиГ-23 -> МиГ-29 (1986), Бранд: Су-24М -> 911 апиб МиГ-27К (7.1989), "
+          "368 оштап с 12.1988, 357 оштап в 1987 почти весь в Афганистане")
+    gci = {f: sorted(u["id"] for u in st["units"].values() if u["role"] == "gci") for f, st in camp.items()}
+    check(not gci["oob_germany_1985.json"] and len(gci["oob_germany.json"]) == 8 and "red_gci_stendal" in gci["oob_germany.json"],
+          f"КРУ только где МиГ-29: 1985 - нет, 1987 - {len(gci['oob_germany_1987.json'])}, 1989 - {len(gci['oob_germany.json'])} "
+          "(в т.ч. Штендаль - МиГ-29 JG-3, перебазированные из Прешена)")
+    oob89 = json.loads((model.DATA / "oob_germany.json").read_text(encoding="utf-8"))
+    st89 = camp["oob_germany.json"]
+    air = [u for u in st89["units"].values() if model.category(u) in ("air", "heli")]
+    reloc = oob89["_relocated"]
+    check(all(u["base"] in st89["airbases"] for u in air) and not any("OFF:" in u["base"] for u in air)
+          and len(reloc) >= 25 and all(st89["units"][k]["base"] == v["to"].lower().replace(" ", "_") for k, v in reloc.items())
+          and y89["r336obvp"]["base"] == y89["r336obvp_8"]["base"] and y89["nva_jg3"]["base"] == y89["nva_jg3_21"]["base"]
+          and "перебазирован" in y89["b_raf_bruggen"]["source"],
+          f"базы вне карты: перебазировано частей - {len(reloc)}, на аэродромы карты своей стороны (подразделения полка - "
+          f"вместе), ни одной базы вне карты; Брюгген -> {reloc['b_raf_bruggen']['to']}, Прешен -> {reloc['nva_jg3']['to']}")
+    per_base: dict[str, int] = {}                # боевые реактивные части по аэродромам, все годы (части - один раз)
+    for uid, u in {u["id"]: u for st in camp.values() for u in st["units"].values() if u.get("base")}.items():
+        if u["role"] not in ("attack_helo", "transport_helo", "transport", "awacs", "tanker"):
+            per_base[u["base"]] = per_base.get(u["base"], 0) + 1
+    empty_before = [b for b in ("cochstedt", "sperenberg", "briest", "wunstorf", "fassberg", "sembach", "nordholz", "kiel")
+                    if not per_base.get(b)]
+    check(not empty_before and max(per_base.values()) <= 4,
+          f"пустующие аэродромы заняты (Кохштедт, Шперенберг, Бриест, Вунсторф, Фасберг, Зембах, Нордхольц, Киль), "
+          f"не больше 4 боевых частей на аэродроме за все годы (max {max(per_base.values())})")
+    trans = [u for u in air if u["role"] in ("transport", "transport_helo")]
+    from redfront import ato as _ato
+    a = _ato.build(st89)
+    tasked = {g["performer"] for e in a["entries"] if e["kind"] not in ("airlift", "air_assault") for g in e["task"]["package"]}
+    check({u["side"] for u in trans} == {"red", "blue"} and len(trans) >= 15 and not tasked & {u["id"] for u in trans},
+          f"транспорт: {len(trans)} частей (самолёты и вертолёты обеих сторон) в составе сил; задачи - только перевозки и десант")
+    root = tmp / "presets_gui"
+    root.mkdir(exist_ok=True)
+    app = gui.App(root, tmp / "home_presets")
+    keys = [x["file"] for x in app.presets("germany")]
+    app.do("presetcopy", {"theatre": "germany", "preset": "oob_germany_1985.json", "name": "мой 85"})
+    mine = json.loads((root / "presets" / "мой 85.json").read_text(encoding="utf-8"))
+    mine["units"] = [dict(u, count=5) if u["id"] == "r19apib" else u for u in mine["units"]]
+    (root / "presets" / "мой 85.json").write_text(json.dumps(mine, ensure_ascii=False), encoding="utf-8")
+    keys2 = [x["file"] for x in app.presets("germany")]
+    r = app.do("new", {"file": "mine85", "theatre": "germany", "preset": "presets/мой 85.json", "side": "red"})
+    st = model.load(root / "mine85.json")
+    bad = None
+    try:
+        app.do("new", {"file": "x", "theatre": "germany", "preset": "../../etc/passwd"})
+    except ValueError as e:
+        bad = str(e)
+    check(keys[0] == "oob_germany.json" and "oob_germany_1985.json" in keys and "presets/мой 85.json" in keys2
+          and st["units"]["r19apib"]["count"] == 5 and st["date"] == "1985-06-01" and bad,
+          f"окно: пресеты {keys}; копия для правки -> presets/, правка (19 апиб: 5 самолётов) попадает в кампанию; "
+          "чужой путь вместо пресета - отказ")
 
 
 def ato_section(tmp: Path) -> None:
@@ -1374,12 +1461,17 @@ def ato_section(tmp: Path) -> None:
     over = [u for u, ivs in busy.items() for t0, _t1, _n in ivs
             if sum(n for a_, b_, n in ivs if a_ <= t0 < b_) > logistics.available(st, st["units"][u])]
     sides = {s_: sum(1 for e in a["entries"] if e["side"] == s_ and not e["ai_only"]) for s_ in model.SIDES}
-    check(all(sides.values()) and not over and all(w0 <= e["tot_s"] <= w1 for e in a["entries"]),
-          f"ATO на сутки: вылетов красных {sides['red']}, синих {sides['blue']}, все в лётном дне "
-          f"{ato.hhmm(w0)}-{ato.hhmm(w1)}, самолётов частей не больше наличия в любой момент")
+    day_ok = all(w0 <= e["tot_s"] <= w1 for e in a["entries"] if not e["ai_only"] and not e.get("night"))
+    night = [e for e in a["entries"] if e.get("night")]
+    night_ok = all(e["tot_s"] >= w1 and e["kind"] in ato.NIGHT_KINDS and ato.night_capable(st, e["task"])
+                   and max(t["land_s"] for t in e["times"].values()) <= 86400 for e in night)
+    check(all(sides.values()) and not over and day_ok and night_ok,
+          f"ATO на сутки: вылетов красных {sides['red']}, синих {sides['blue']}; днём - в лётном дне "
+          f"{ato.hhmm(w0)}-{ato.hhmm(w1)}, ночью - {len(night)} глубоких ударов вечером типами, летающими ночью; "
+          "самолётов частей не больше наличия в любой момент")
     shifts = sorted(e["tot_s"] for e in a["entries"] if e["kind"] == "awacs_orbit" and e["side"] == "blue")
-    check(shifts and shifts[0] == w0 and all(b_ - a_ == 4 * 3600 for a_, b_ in zip(shifts, shifts[1:])),
-          f"дежурство ДРЛО синих - сменами по 4 ч весь лётный день: {', '.join(ato.hhmm(x) for x in shifts)}")
+    check(shifts and shifts[0] < 3600 and shifts[-1] >= 20 * 3600 and all(abs(b_ - a_ - 4 * 3600) < 1 for a_, b_ in zip(shifts, shifts[1:])),
+          f"дежурство ДРЛО синих (E-3A летает ночью) - сменами по 4 ч круглые сутки: {', '.join(ato.hhmm(x) for x in shifts)}")
     from redfront import gui
     v = gui.view(st)
     enemy_rows = [r for r in v["ato"] if r["side"] == "blue"]
@@ -1626,9 +1718,16 @@ def core_section(tmp: Path) -> None:
 
     # ---- конец дня, день 2 ----
     km1 = bn["progress_km"]
+    g0 = st.get("ground_s") or 0                 # наземная модель уже на конце окна миссии - до 24:00 остаток суток
+    rest = sum(min(86400, (h + 1) * 3600) - max(g0, h * 3600) for h in range(int(g0 // 3600), 24)
+               if (h + 1) * 3600 > g0 and sim._night(st, h * 3600)[0] == 1.0) / 86400
+    rest += sum(min(86400, (h + 1) * 3600) - max(g0, h * 3600) for h in range(int(g0 // 3600), 24)
+                if (h + 1) * 3600 > g0 and sim._night(st, h * 3600)[0] != 1.0) / 86400 * sim._night(st, 0)[0]   # ночью медленнее
     sim.end_day(st)
     adv = bn["progress_km"] - km1
-    check(st["day"] == 2 and abs(adv - BASELINE["advance_d2_km"]) < 0.01, f"день 2: колонна прошла {adv:.2f} км за сутки (как в 0.1)")
+    check(st["day"] == 2 and abs(adv - BASELINE["advance_d2_km"] * rest) < 0.05,
+          f"день 2: колонна прошла {adv:.2f} км за остаток суток после вылета ({rest:.0%} суточного отрыва с учётом ночи; за сутки - "
+          f"{BASELINE['advance_d2_km']} км, как в 0.1)")
     tk2 = planner.plan(st)
     check(tk2 is not None and tk2["target_pos"] != tk["target_pos"], "день 2: задача по колонне в новом месте")
     man2 = build.build(st, tmp / "d2.miz")
@@ -1676,9 +1775,549 @@ def core_section(tmp: Path) -> None:
 
 
 # Разделы теста по порядку: python tools/smoke_test.py - все; pytest (tests/test_smoke.py) - каждый отдельным тестом.
+def supply_section(tmp: Path) -> None:
+    """Снабжение в тоннах: запасы складов, подвоз из тыла, расход по состоянию, отрезанный склад, воздушные перевозки
+    транспортной авиацией (план полётов, миссия, сбитые борта), аэродром без снабжения."""
+    from redfront import ato, logistics
+    print("\n== снабжение и перевозки ==")
+    st = model.new_campaign("sup", sector="sector_germany.json", oob="oob_germany.json", seed=3)
+    U = st["units"]
+    logistics.init_depots(st)
+    d = U["red_depot_stendal"]
+    u = next(x for x in U.values() if model.category(x) == "ground" and x["side"] == "red" and "route" in x)
+    check(d["cap_t"] > 0 and d["stock_t"] == d["cap_t"]
+          and abs(logistics.demand_t(st, u, "battle") - 5 * logistics.demand_t(st, u, "defend")) < 1e-6,
+          f"склад - запас в тоннах ({d['cap_t']} т), расход части в бою впятеро больше, чем в обороне "
+          f"({logistics.demand_t(st, u, 'battle'):.0f} / {logistics.demand_t(st, u, 'defend'):.0f} т в сутки)")
+    d["damage"] = 0.5
+    logistics.supply(st)
+    check(d["stock_t"] <= d["cap_t"] * 0.5 + 1e-6, f"повреждение склада 50% уничтожает запас сверх половины ёмкости ({d['stock_t']:.0f} т)")
+    # отрезанный склад: вокруг Галле - противник (аэродром Мерзебург рядом - туда можно возить воздухом)
+    cut = U["red_depot_halle"]
+    for a_, b_ in st["links"]:
+        if cut["place"] in (a_, b_):
+            other = b_ if a_ == cut["place"] else a_
+            st["places"][other]["side"] = "blue"
+    cut["stock_t"] = cut["cap_t"] * 0.2
+    conn = logistics.road_connected(st, "red")
+    before = cut["stock_t"]
+    lines = logistics.supply(st)
+    check(cut["id"] not in conn and cut["stock_t"] <= before and any("отрезан" in ln for ln in lines),
+          "склад в окружении (Галле) - отрезан от подвоза из тыла, запас не пополняется")
+    tdef = model.doctrine(st, "red")["tasks"]["airlift"]
+    needs = [x[0]["id"] for x in planner.airlift_needs(st, "red", tdef)]
+    st["ato"] = None
+    a = ato.ensure(st)
+    lifts = [e for e in a["entries"] if e["kind"] == "airlift" and e["side"] == "red"]
+    to_cut = [e for e in lifts if e["task"]["package"][0]["objective"]["depot"] == cut["id"]]
+    check(needs and needs[0] == cut["id"] and to_cut,
+          f"перевозки: отрезанный склад - первый в очереди, рейсов к нему {len(to_cut)} "
+          f"({to_cut[0]['title'] if to_cut else '-'})")
+    g = to_cut[0]["task"]["package"][0]
+    cargo = logistics.airlift_cargo_t(st, U[g["performer"]])
+    a["lost"] = {to_cut[0]["id"]: 1}             # один борт первого рейса сбит в миссии
+    for e in lifts:
+        if e not in to_cut:
+            a["entries"].remove(e)
+    del a["entries"][a["entries"].index(to_cut[0]) + 1:]   # вылеты после первого рейса - не нужны для подсчёта
+    a["entries"] = [e for e in a["entries"] if e["kind"] == "airlift"]
+    before = cut["stock_t"]
+    logistics.supply(st)
+    got = st["supply_log"]["red"]["air_t"]
+    check(abs(got - (g["size"] - 1) * cargo) < 1.0,
+          f"рейс довёз {got} т ({g['size']} x {U[g['performer']]['type']}, {cargo} т борт; один сбит - его груз не дошёл)")
+    # аэродром без снабжения - меньше самолётов к вылету
+    perf = next(x for x in U.values() if x.get("role") == "fighter" and x["side"] == "red")
+    full = logistics.available(st, perf)
+    st["airbases"][perf["base"]]["supply"] = 0.0
+    check(logistics.available(st, perf) == int(full * model.doctrine(st, "red")["sim"]["unsupplied"]),
+          f"аэродром без снабжения: к вылету {logistics.available(st, perf)} из {full}")
+    st["airbases"][perf["base"]]["supply"] = 1.0
+    # миссия: рейс перевозки в окне - садится на аэродроме назначения; в журнале вылетов - номер рейса плана
+    st = model.new_campaign("sup2", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    logistics.init_depots(st)
+    st["units"]["red_depot_stendal"]["stock_t"] *= 0.3
+    st["units"]["blue_depot_han"]["stock_t"] *= 0.2
+    planner.plan(st)
+    found = None
+    for i in range(1, len(st["tasks"]) + 1):
+        man = build.build(st, tmp / "lift.miz", task_no=i)
+        st["manifest"] = None
+        lf = [f for f in man["flights"] if "_lift" in f["group"]]
+        if lf:
+            found = (i, lf[0])
+            break
+    ok = False
+    if found:
+        m = dcs.Mission(Germany())
+        m.load_file(str(tmp / "lift.miz"))
+        e = next(e for e in st["ato"]["entries"] if e["id"] == found[1]["ato"])
+        dest = st["airbases"][e["task"]["package"][0]["objective"]["airbase"]]["airport"]
+        grp = next(g for c in m.coalition.values() for cn in c.countries.values()
+                   for g in list(cn.helicopter_group) + list(cn.plane_group) if g.name.startswith(found[1]["performer"] + " "))
+        ok = grp.points[-1].type == "Land" and grp.points[-1].airdrome_id == m.terrain.airports[dest].id \
+            and str(grp.task) == "Transport"
+    check(ok, f"миссия: рейс перевозки в окне задачи {found[0] if found else '-'} - взлёт со своей базы, посадка на "
+              f"аэродроме назначения, задача DCS Transport; в журнале вылетов - номер рейса плана")
+
+
+def assault_section(tmp: Path) -> None:
+    """Вертолётный десант: рота в резерве, площадка в тылу противника (отрезать его склады), задача в плане дня,
+    миссия (посадка, рота с поздней активацией, assault.lua), итог высадки - вылет игрока и ИИ, соединение со своими."""
+    from redfront import assault, ato, logistics
+    print("\n== вертолётный десант ==")
+    st = model.new_campaign("aa", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    U = st["units"]
+    res = assault.reserve(st, "red")
+    tdef = model.doctrine(st, "red")["tasks"]["air_assault"]
+    cands = assault.candidates(st, "red", tdef)
+    own = [p for p in st["places"].values() if p["side"] == "red"]
+    g_ = __import__("redfront.ops", fromlist=["graph"]).graph(st)
+    check(len(res) == 3 and cands and all(
+        tdef["assault_min_km"] <= min(model.dist_km(st["places"][c], q) for q in own) <= tdef["assault_max_km"]
+        and not any(st["places"][q]["side"] == "red" for q in g_[c]) for c in cands),
+          f"резерв: {len(res)} роты 35-й одшбр; площадки - пункты противника в {tdef['assault_min_km']}-{tdef['assault_max_km']} км "
+          f"от своих, не соседние со своими (лучшие: {', '.join(cands[:3])})")
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "air_assault"), None)
+    tk = st["tasks"][n - 1] if n else None
+    g = tk["package"][0] if tk else {}
+    perf = U.get(g.get("performer"), {})
+    sizes = [x["size"] for x in tk["package"]] if tk else []
+    check(tk and model.category(perf) == "heli" and sum(sizes) == assault.lift_need(U[tk["target"]], perf["type"])
+          and sum(sizes) <= tdef["max_helos"] and max(sizes) <= 4,
+          f"в плане дня - десант: {tk['title'] if tk else '-'}; {sum(sizes)} x {perf.get('type')} поднимают роту "
+          f"(группы DCS по 4 борта: {sizes})")
+    man = build.build(st, tmp / "assault.miz", task_no=n)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "assault.miz"))
+    hgs = [gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.helicopter_group
+           if gr.name.startswith(perf["id"] + " ")]
+    hg = next(gr for gr in hgs if " strike " in gr.name)
+    lands = [t for p in hg.points for t in p.tasks if getattr(t, "id", None) == "Land"]
+    in_miz = [gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.vehicle_group if gr.name == tk["target"]]
+    acts = [a.text.id for a in m.triggerrules.triggers[0].actions]
+    script = next(t for t in acts if "redfront assault" in t)
+    lz_lua = next(t for t in acts if "redfront lz" in t)
+    ah = next(x for x in man["ground"] if x["kind"] == "airhead")
+    check(lands and not in_miz and str(hg.task) == "Transport" and acts.index(lz_lua) < acts.index(script)
+          and all(v["name"] in script for v in ah["vehicles"]) and all(u.name in script for gr in hgs for u in gr.units)
+          and sum(len(gr.units) for gr in hgs) == sum(sizes),
+          f"миссия: {sum(len(gr.units) for gr in hgs)} x {perf['type']} ({len(hgs)} группы) летят на площадку (Land); роты "
+          f"в .miz нет - {len(ah['vehicles'])} фигур с именами модели появятся из бортов; площадки (lz.lua) - раньше десанта")
+    if have_lupa():
+        import lupa
+        L = lupa.LuaRuntime(unpack_returned_tuples=True)
+        L.execute(CSAR_MOCK)
+        import re as _re
+        spec_x, spec_y = map(float, _re.search(r"\bx = ([-\d.]+), y = ([-\d.]+)", script).groups())
+        L.execute(f"BUILDINGS = {{ {{ x = {spec_x}, z = {spec_y} }} }}")      # на площадке - строение
+        names = [u.name for gr in hgs for u in gr.units]
+        player, ai_n = names[0], names[1]
+        L.execute(f'PL = mkUnit("{player}", {spec_x + 30000}, 0, {spec_y}, 1, "Mi-8MT", false, false)')
+        L.execute(f'AI1 = mkUnit("{ai_n}", {spec_x + 5000}, 300, {spec_y}, 1, "Mi-8MT", true, true)')
+        L.execute(f'AIRBASES[1] = {{ {{ getPoint = function() return {{ x = {spec_x + 30000}, y = 0, z = {spec_y} }} end }} }}')
+        L.execute('UNITS = { ["' + player + '"] = PL, ["' + ai_n + '"] = AI1 }; Unit.getByName = function(n) return UNITS[n] end')
+        L.execute(lz_lua)
+        L.execute(script)
+        Gl = L.globals()
+        rec = Gl.REDFRONT_ASSAULT[tk["ato_id"]]
+        L.execute('for _, h in ipairs(world.handlers) do h:onEvent({ id = 15, initiator = PL }) end')
+        Gl.CMDS["Высадить десант"]()
+        refused = any("нет" in str(x) for x in Gl.MSG.values())
+        Gl.CMDS["Загрузить десант"]()
+        loaded = any("на борту" in str(x) for x in Gl.MSG.values())
+        lz = L.eval("(function() local x, y = REDFRONT_LZ.find(" + f"{spec_x}, {spec_y}" + ") return {x, y} end)()")
+        L.execute(f"AI1.u.p = {{ x = {lz[1] + 50}, y = 0, z = {lz[2]} }}; AI1.u.air = false")
+        Gl.T = 5; L.execute("runDue()")
+        ai_out = rec.landed == 1 and len(Gl.ADDED) == 1
+        L.execute(f"PL.u.p = {{ x = {lz[1] - 100}, y = 0, z = {lz[2]} }}; PL.u.air = false")
+        Gl.CMDS["Высадить десант"]()
+        added = [Gl.ADDED[k] for k in Gl.ADDED]
+        check(refused and loaded and ai_out and rec.landed == 2 and len(added) == 2
+              and (lz[1], lz[2]) != (spec_x, spec_y),
+              f"assault.lua: площадка со строением перенесена на открытое место; борт ИИ, севший на неё, высадил свою долю "
+              f"сам; игрок - меню F10: без загрузки высадка не идёт, загрузка у своего аэродрома, высадка на площадке "
+              f"(село {rec.landed} из {rec.total})")
+    else:
+        print("SKIP lupa не установлена: assault.lua не исполняется")
+    # итог вылета игрока: по дебрифу (село 0 - сорвана, рота в сбитых бортах гибнет)
+    st2 = __import__("copy").deepcopy(st)
+    st2["ato"]["assault"] = {tk["ato_id"]: [0, sum(sizes)]}
+    lines = assault.resolve(st2)
+    u2 = st2["units"][tk["target"]]
+    check(any("сорвана" in ln for ln in lines) and u2["order"] == "reserve" and model.strength(u2) < 1e-6,
+          f"вылет игрока: на площадку никто не сел - высадка сорвана, рота в бортах погибла ({model.strength(u2):.0%})")
+    st["ato"]["assault"] = {tk["ato_id"]: [sum(sizes), sum(sizes)]}
+    lines = assault.resolve(st)
+    u = U[tk["target"]]
+    place = g["objective"]["place"]
+    check(u["order"] == "airhead" and u["route"] == [place] and any("высажена" in ln for ln in lines),
+          f"вылет игрока: сели все {sum(sizes)} бортов - рота держит {place} (order airhead), фронт ею не распоряжается")
+    ai = [e for e in st["ato"]["entries"] if e["kind"] == "air_assault" and e["side"] == "blue"]
+    check(ai and all(e.get("resolved") for e in ai) and any(st["units"][e["task"]["target"]]["order"] in ("airhead", "reserve") for e in ai),
+          f"вылет ИИ (синие): {ai[0]['title'] if ai else '-'} - итог по угрозам коридора")
+    # соединение со своими: пункт свой и снабжение со своих складов
+    st["places"][place]["side"] = "red"
+    u["supply_frac"] = 1.0
+    lines = assault.linkup(st)
+    check(u["order"] is None and any("соединилась" in ln for ln in lines), "пункт взят и снабжение со своих складов - десант соединился со своими, обычная часть")
+
+
+CSAR_MOCK = r"""
+T = 0; SCHED = {}; MSG = {}; RADIO = {}; STOPPED = {}; ADDED = {}; G = {}; HELIS = { [1] = {}, [2] = {} }; MENUS = {}
+timer = { getTime = function() return T end, scheduleFunction = function(f, a, t) SCHED[#SCHED + 1] = { f = f, a = a, t = t } end }
+function runDue()
+  local again = {}
+  for _, s in ipairs(SCHED) do
+    if s.t <= T then local r = s.f(s.a, T); if r then again[#again + 1] = { f = s.f, a = s.a, t = r } end
+    else again[#again + 1] = s end
+  end
+  SCHED = again
+end
+env = { info = function() end, warning = function() end }
+AI = { Option = { Ground = { id = { ROE = 0 }, val = { ROE = { WEAPON_HOLD = 4 } } } } }
+Unit = { Category = { HELICOPTER = 1 } }
+Group = { Category = { GROUND = 2, HELICOPTER = 1 } }
+world = { event = { S_EVENT_BIRTH = 15, S_EVENT_EJECTION = 6, S_EVENT_LAND = 4, S_EVENT_DEAD = 8, S_EVENT_CRASH = 5 }, handlers = {},
+          VolumeType = { SPHERE = 2 } }
+Object = { Category = { SCENERY = 5 } }
+BUILDINGS = {}; AIRBASES = { [1] = {}, [2] = {} }; CMDS = {}; TASKED = {}
+land = { SurfaceType = { LAND = 1, SHALLOW_WATER = 2, WATER = 3, ROAD = 4, RUNWAY = 5 }, getHeight = function() return 0 end,
+         getSurfaceType = function(p) return 1 end }
+function world.searchObjects(cat, vol, f)
+  local c = vol.params.point
+  for _, b in ipairs(BUILDINGS) do
+    local dx, dz = b.x - c.x, b.z - c.z
+    if math.sqrt(dx * dx + dz * dz) <= vol.params.radius then if not f(b) then return end end
+  end
+end
+function world.getAirbases() return {} end
+function world.addEventHandler(h) world.handlers[#world.handlers + 1] = h end
+trigger = { action = {
+  radioTransmission = function(f, p, mod, loop, fr, pw, name) RADIO[name] = fr end,
+  stopRadioTransmission = function(name) STOPPED[name] = true end,
+  outTextForGroup = function(id, t) MSG[#MSG + 1] = t end, outTextForCoalition = function(s, t) MSG[#MSG + 1] = t end,
+  smoke = function() end, signalFlare = function() end } }
+missionCommands = { addSubMenuForGroup = function(g, n) MENUS[#MENUS + 1] = n; return {} end,
+                    addCommandForGroup = function(g, n, root, f) CMDS[n] = f end }
+function mkUnit(name, x, y, z, side, typ, air, ai)
+  local u = { name = name, p = { x = x, y = y, z = z }, side = side, typ = typ, air = air, ai = ai }
+  local o = {}
+  function o:getName() return u.name end
+  function o:getPoint() return u.p end
+  function o:inAir() return u.air end
+  function o:isExist() return true end
+  function o:isActive() return true end
+  function o:getCoalition() return u.side end
+  function o:getTypeName() return u.typ end
+  function o:getDesc() return { category = 1 } end
+  function o:getGroup() return { getID = function() return 77 end } end
+  function o:getPlayerName() if u.ai then return nil end return "Игрок" end
+  o.u = u
+  return o
+end
+function mkGroup(name, unit)
+  local g = { dead = false }
+  local o = {}
+  function o:getUnit(i) if not g.dead then return unit end end
+  function o:getUnits() return { unit } end
+  function o:getController() return { setCommand = function() end, setOption = function() end,
+                                        setTask = function(_, t) TASKED[name] = t end } end
+  function o:destroy() g.dead = true end
+  function o:getName() return name end
+  G[name] = { g = g, o = o }
+  return o
+end
+Group.getByName = function(n) local x = G[n]; if x and not x.g.dead then return x.o end end
+coalition = { addGroup = function(c, cat, t) ADDED[#ADDED + 1] = { country = c, name = t.name, type = t.units[1].type }
+                local u = mkUnit(t.units[1].name, t.units[1].x, 0, t.units[1].y, c, t.units[1].type, false); mkGroup(t.name, u) end,
+              getGroups = function(side, cat) local out = {}; for _, h in ipairs(HELIS[side]) do out[#out + 1] = { getUnits = function() return { h } end } end; return out end,
+              getAirbases = function(side) return AIRBASES[side] end }
+"""
+
+
+def csar_section(tmp: Path) -> None:
+    """Экипажи и поиск-спасение: экипажи полка ограничивают вылеты; дебриф - катапультировался (на земле) / спасён в
+    миссии / погиб; сутки - вышел к своим, плен, спасение ИИ; задача CSAR в плане; миссия (пилот, маяк, csar.lua)."""
+    from redfront import csar, logistics
+    print("\n== экипажи и поиск-спасение ==")
+    st = model.new_campaign("cs", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    U = st["units"]
+    u = U["r33iap"]
+    full = logistics.available(st, u)
+    u["crews"] = 10
+    check(u["crews0"] == round(u["count0"] * 1.2) and logistics.available(st, u) == 10,
+          f"экипажи: штат {u['crews0']} (1.2 на самолёт); осталось 10 экипажей - к вылету 10 из {full}")
+    u["crews"] = u["crews0"]
+    # дебриф: три сбитых МиГ-29 - один катапультировался над ФРГ, второго подобрали в миссии, третий без катапультирования
+    man = {"flights": [{"group": "strike", "performer": "r33iap", "units": ["a", "b", "c"], "player": True}]}
+    from dcs.terrain.germany import Germany as _G
+    from dcs.mapping import LatLng as _LL, Point as _P
+    pt = _P.from_latlng(_LL(53.45, 10.30), _G())
+    data = {"ejected": ["a", "b"], "dead": ["a", "b", "c"], "ejectpos": {"a": [pt.x, pt.y], "b": [pt.x, pt.y]},
+            "csar": {"rescued": ["ej:b"], "lost": []}}
+    c0 = u["crews"]
+    lines = csar.apply_debrief(st, man, data, {"a", "b", "c"})
+    dn = st["downed"]
+    check(len(dn) == 1 and dn[0]["unit"] == "r33iap" and csar.owner_at(st, dn[0]["pos"]) == "blue" and u["crews"] == c0 - 2
+          and any("спасён в миссии" in ln for ln in lines) and any("погиб" in ln for ln in lines),
+          f"дебриф: катапультировался над ФРГ - экипаж на земле (маяк {dn[0]['freq_khz']} кГц), подобран в миссии - в полку, "
+          f"без катапультирования - погиб (экипажей {c0} -> {u['crews']})")
+    # задача CSAR в плане - первой; миссия: пилот на земле, маяк - ресурс миссии, скрипт знает экипаж
+    planner.plan(st)
+    tk = st["tasks"][0]
+    check(tk["kind"] == "csar" and tk["target"] == dn[0]["id"] and model.category(U[tk["performer"]]) == "heli",
+          f"в плане дня первым - {tk['title']} ({tk['package_notes']})")
+    man = build.build(st, tmp / "csar.miz", task_no=1)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "csar.miz"))
+    script = next(a.text.id for a in m.triggerrules.triggers[0].actions if "redfront csar" in a.text.id)
+    pilot = [gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.vehicle_group if gr.name == dn[0]["id"]]
+    hg = next(gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.helicopter_group if " strike " in gr.name)
+    lands = [t for p in hg.points for t in p.tasks if getattr(t, "id", None) == "Land"]
+    res = [f for files in m.map_resource.files.values() for f in files.values()]
+    check(pilot and man["downed"] == [dn[0]["id"]] and lands and any(f.endswith(build.BEACON_FILE) for f in res)
+          and dn[0]["id"] in script and all(dn[0]["id"] != g["unit"] for g in man["ground"]),
+          "миссия: пилот на земле у точки катапультирования, вертолёт садится рядом (Land), звук маяка - ресурс миссии, "
+          "экипаж в скрипте csar.lua, но не в манифесте наземных частей")
+    if have_lupa():
+        import lupa
+        L = lupa.LuaRuntime(unpack_returned_tuples=True)
+        L.execute(CSAR_MOCK)
+        L.execute(f'mkGroup("{dn[0]["id"]}", mkUnit("{dn[0]["id"]}#01", 0, 0, 0, 1, "Infantry AK", false))')
+        L.execute('H1 = mkUnit("H1", 2000, 300, 0, 1, "Mi-8MT", true); HELIS[1] = { H1 }')
+        L.execute("BUILDINGS = { { x = 0, z = 0 } }")               # пилот у строения - перенесётся
+        lz_lua = next(a.text.id for a in m.triggerrules.triggers[0].actions if "redfront lz" in a.text.id)
+        L.execute(lz_lua)
+        L.execute(script)
+        Gl = L.globals()
+        moved = Gl.ADDED[1] and Gl.ADDED[1].name == dn[0]["id"]
+        L.execute('mkGroup("AIH", mkUnit("AIH#1", 9000, 300, 0, 1, "Mi-8MT", true, true))')
+        L.execute('REDFRONT_LZ.retask("AIH", 100, 0, 90, nil)')
+        pts = Gl.TASKED["AIH"].params.route.points
+        retask = pts[2].task.params.tasks[1].id == "Land" and pts[2].x == 100
+        radio_ok = bool(Gl.RADIO["csar_" + dn[0]["id"]])
+        Gl.T = 1; L.execute("runDue()")
+        heard = any("слышу" in str(x) for x in Gl.MSG.values())
+        L.execute("H1.u.p = { x = 150, y = 0, z = 0 }; H1.u.air = false")
+        for t in range(2, 60):
+            Gl.T = t; L.execute("runDue()")
+        picked = Gl.Group.getByName(dn[0]["id"]) is None and bool(Gl.STOPPED["csar_" + dn[0]["id"]])
+        red_base = next(b["airport"] for b in st["airbases"].values() if b["side"] == "red")
+        L.execute(f'for _, h in ipairs(world.handlers) do h:onEvent({{ id = 4, initiator = H1, place = {{ getName = function() return "{red_base}" end, getCoalition = function() return 0 end }} }}) end')
+        rescued = bool(Gl.REDFRONT_CSAR.rescued[dn[0]["id"]])
+        # катапультирование в миссии: экипаж появляется у точки, маяк сверху диапазона
+        L.execute('P1 = mkUnit("P1", 5000, 3000, 5000, 2, "F-16C_50", true)')
+        L.execute('for _, h in ipairs(world.handlers) do h:onEvent({ id = 6, initiator = P1 }) end')
+        Gl.T = 70; L.execute("runDue()")
+        spawned = Gl.ADDED[2]
+        check(moved and retask and radio_ok and heard and picked and rescued and spawned and spawned.type == "Soldier M4"
+              and bool(Gl.RADIO["csar_ej:P1"]),
+              "csar.lua: пилот у строения перенесён на открытое место (lz.lua), вертолёту ИИ маршрут - посадка там; маяк с "
+              "начала миссии; вертолёт ближе 3 км - \"слышу\"; сел в 150 м - пилот добежал, на борту, маяк выключен; "
+              "посадка на свой аэродром - спасён; катапультировавшийся в миссии синий - на земле с маяком")
+    else:
+        print("SKIP lupa не установлена: csar.lua не исполняется")
+    # сутки: ИИ-спасение, выход к своим, плен
+    st2 = model.new_campaign("cs2", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    st2["settings"]["randomness"] = False
+    u2 = st2["units"]["r33iap"]
+    own = csar.add_downed(st2, u2, "x", {"lat": 52.6, "lon": 11.86})        # Штендаль - своя территория
+    foe = csar.add_downed(st2, u2, "y", {"lat": 50.9, "lon": 8.0})          # глубоко у синих, вертолётам не достать
+    c1 = u2["crews"]
+    lines = csar.daily(st2)
+    st2["day"] += 1
+    lines += csar.daily(st2)
+    check(not st2["downed"] and u2["crews"] == c1 + 1 and any("вышел к своим" in ln for ln in lines)
+          and any("в плену" in ln or "пропал" in ln for ln in lines),
+          "сутки: экипаж на своей территории вышел к своим (в полку), на чужой - в плену (без случайности - на вторые сутки)")
+
+
+def convoy_section(tmp: Path) -> None:
+    """Дороги и пути подвоза: граф по длине дорог, потоки складов по путям из тыла, колонны снабжения в миссии,
+    удар по пути подвоза (миссия и ИИ) - недовоз."""
+    from redfront import ato, convoys, logistics, ops, roads
+    print("\n== пути подвоза и колонны снабжения ==")
+    st = model.new_campaign("cv", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    a, b = st["links"][0]
+    pa, pb = st["places"][a], st["places"][b]
+    straight = model.dist_km(pa, pb)
+    bend = model.offset(model.lerp(pa, pb, 0.5), model.bearing_deg(pa, pb) + 90, straight * 300)   # дорога в объезд
+    roads.apply(st, {"paths": {f"{a}>{b}": [dict(pa), bend, dict(pb)]}}, note=False)
+    g = ops.graph(st)
+    check(abs(g[a][b] - st["road_km"][f"{a}>{b}"]) < 1e-6 and g[a][b] > straight * 1.1,
+          f"граф пунктов - по длине дороги, если она известна ({a} - {b}: {g[a][b]:.1f} км по дороге, {straight:.1f} по прямой)")
+    sim.end_day(st)
+    flows = {side: convoys.link_flows(st, side) for side in model.SIDES}
+    rs = convoys.routes(st, "red")
+    check(all(flows.values()) and rs and all(st["places"][r["path"][0]]["side"] == "red"
+                                             and st["units"][r["depot"]]["place"] == r["path"][-1] for r in rs),
+          f"пути подвоза: от пунктов входа (тыл) до складов; участков с потоком - красные {len(flows['red'])}, синие "
+          f"{len(flows['blue'])}; больше всего - {max(flows['blue'], key=flows['blue'].get)} (~{max(flows['blue'].values()):.0f} т/сутки)")
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "strike_supply_route"), None)
+    tk = st["tasks"][n - 1] if n else None
+    check(tk and tk["link"] in flows["blue"] and flows["blue"][tk["link"]] >= convoys.MIN_FLOW_T,
+          f"в плане дня - {tk['title'] if tk else '-'} ({tk['package_notes'] if tk else ''})")
+    man = build.build(st, tmp / "convoy.miz", task_no=n)
+    cv = next(c for c in man["convoys"] if c["link"] == tk["link"])
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "convoy.miz"))
+    vg = next(gr for c in m.coalition.values() for cn in c.countries.values() for gr in cn.vehicle_group if gr.name == cv["unit"])
+    strike = next(gr for gr in plane_groups(m) if " strike " in gr.name)
+    attacks = [t for p in strike.points for t in p.tasks if getattr(t, "id", None) == "AttackGroup"]
+    w = sum(v["weight"] for v in cv["vehicles"])
+    check(len(vg.units) == len(cv["vehicles"]) and abs(w - flows["blue"][tk["link"]] / convoys.TRUCK_T * convoys.WINDOW_SHARE) < 1e-6
+          and attacks and all(g_["unit"] != cv["unit"] for g_ in man["ground"]),
+          f"миссия: колонна {len(vg.units)} грузовиков на участке (вес - {w:.1f} грузовиков потока), ударная группа "
+          "атакует её (AttackGroup); в манифесте частей её нет - отдельно, как колонна снабжения")
+    # дебриф: сожжено 3 машины - недовоз; конец суток - склад получил меньше
+    dead = [v["name"] for v in cv["vehicles"][:3]]
+    data = {"campaign": st["campaign_id"], "sortie": man["sortie"], "dead": dead, "ejected": [], "mission_ended": True}
+    lines = debrief.apply(st, data)
+    lost_t = sum(v["weight"] for v in cv["vehicles"][:3]) * convoys.TRUCK_T
+    got = st["convoy_losses"]["blue"][tk["link"]]
+    check(abs(got - lost_t) < 1e-6 and any("Колонна снабжения" in ln for ln in lines),
+          f"дебриф: сожжено 3 машины колонны - недовоз ~{got:.0f} т на участке")
+    by_depot = convoys.depot_losses(st, "blue")
+    check(abs(sum(by_depot.values()) - got) < 1e-6,
+          f"недовоз ложится на склады, чьи пути идут через участок: {', '.join(f'{k} {v:.0f} т' for k, v in by_depot.items())}")
+    # удар ИИ вне миссии (без случайности - удачный при вероятности от 50%)
+    st2 = model.new_campaign("cv2", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    st2["settings"]["randomness"] = False
+    sim.end_day(st2)
+    a2 = ato.ensure(st2)
+    e = next((e for e in a2["entries"] if e["kind"] == "strike_supply_route"), None)
+    lines = convoys.daily(st2) if e else []
+    foe = model.enemy(e["side"]) if e else "blue"
+    check(e and (st2.get("convoy_losses") or {}).get(foe, {}).get(e["task"]["link"], 0) > 0 and lines,
+          f"удар ИИ по пути подвоза вне миссии: {lines[0] if lines else '-'}")
+
+
+def advance_section(tmp: Path) -> None:
+    """Наземная модель по часам: шаг до времени, командование по 6 ч, итоги вылетов ИИ в своё время, сборка миссии
+    продвигает модель и цель, окно слетанной миссии - только события, план не идёт назад."""
+    from redfront import airwar, ato
+    print("\n== наземная модель по часам ==")
+    st = model.new_campaign("adv", sector="sector_germany.json", oob="oob_germany.json", seed=2)
+    st["settings"]["randomness"] = False
+    sim.end_day(st)
+    a = ato.ensure(st)
+    marching = [u for u in st["units"].values() if u.get("state") == "march"]
+    km0 = {u["id"]: u["progress_km"] for u in marching}
+    strikes = [e for e in a["entries"] if not e["ai_only"] and e["task"]["package"][0]["objective"]["kind"] in ("column", "point", "site")
+               and e["side"] != st["player_side"]]
+    e = min(strikes, key=lambda x: x["tot_s"])
+    tgt = st["units"][e["task"]["package"][0]["objective"]["unit"]]
+    s0, d0 = model.strength(tgt), tgt.get("damage", 0.0)
+    lines = sim.advance(st, e["tot_s"] + 1)
+    moved = [u for u in marching if u["progress_km"] > km0[u["id"]] + 0.1]
+    check(abs(st["ground_s"] - (e["tot_s"] + 1)) < 1 and moved and e.get("resolved")
+          and (model.strength(tgt) < s0 or tgt.get("damage", 0.0) > d0),
+          f"шаг до {sim.ato_hhmm(st['ground_s'])}: на марше продвинулись {len(moved)} частей; вылет ИИ дал итог в своё время "
+          f"({e['title']}: {next((ln for ln in lines if e['title'] in ln), '-')})")
+    before = st["ground_s"]
+    check(sim.advance(st, before - 3600) == [] and st["ground_s"] == before, "модель назад не идёт")
+    # сборка миссии: модель - к её началу, цель - на место
+    planner.plan(st)
+    tasks = st["tasks"]
+    check(tasks and all(t["takeoff_s"] >= before for t in tasks), f"план дня - вылеты не раньше обстановки ({sim.ato_hhmm(before)})")
+    n = next((i for i, t in enumerate(tasks, 1) if t["package"][0]["objective"]["kind"] == "column"), 1)
+    man = build.build(st, tmp / "adv.miz", task_no=n)
+    tk = st["task"]
+    tgt = st["units"].get(tk["package"][0]["objective"].get("unit") or "")
+    check(man["ground_s"] >= before and (not tgt or model.dist_km(model.unit_pos(st, tgt), tk["target_pos"]) < 0.3),
+          f"сборка: обстановка на {sim.ato_hhmm(man['ground_s'])} (начало миссии), цель задачи - на своём месте к этому времени")
+    # окно слетанной миссии: только события, без марша
+    km1 = {u["id"]: u["progress_km"] for u in st["units"].values() if u.get("state") == "march"}
+    data = {"campaign": st["campaign_id"], "sortie": man["sortie"], "dead": [], "ejected": [], "mission_ended": True}
+    debrief.apply(st, data)
+    still = all(abs(st["units"][k]["progress_km"] - v) < 1e-9 for k, v in km1.items() if st["units"][k].get("state") == "march")
+    check(still and st["ground_s"] >= man["end_s"] - 1 and set(st["ato"].get("played", [])) >= {f["ato"] for f in man["flights"] if f.get("ato")},
+          f"дебриф: окно миссии пройдено только событиями (марша нет), обстановка на {sim.ato_hhmm(st['ground_s'])}; "
+          f"группы ИИ миссии - слетаны ({len(st['ato'].get('played', []))})")
+
+
+def qra_section(tmp: Path) -> None:
+    """Дежурные пары ПВО: смены в плане суток, пара на стоянке (поздняя активация) в миссии, взлёт по обнаружению
+    радарами своей стороны (qra.lua), влияние на удары ИИ вне миссии."""
+    from redfront import airwar, ato
+    print("\n== дежурные пары ПВО ==")
+    st = model.new_campaign("qra", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    a = ato.ensure(st)
+    q = [e for e in a["entries"] if e["kind"] == "qra"]
+    bases = {side: {e["task"]["base"] for e in q if e["side"] == side} for side in model.SIDES}
+    tdef = model.doctrine(st, "red")["tasks"]["qra"]
+    check(all(1 <= len(b) <= tdef["qra_bases"] for b in bases.values())
+          and all(e["times"]["strike"]["land_s"] - e["times"]["strike"]["takeoff_s"] <= tdef["shift_h"] * 3600 for e in q),
+          f"дежурство: пары на аэродромах у фронта сменами по {tdef['shift_h']} ч - красные {sorted(bases['red'])}, "
+          f"синие {sorted(bases['blue'])}")
+    planner.plan(st)
+    n = next(i for i, t in enumerate(st["tasks"], 1) if t["package"][0]["objective"]["kind"] in ("column", "point"))
+    man = build.build(st, tmp / "qra.miz", task_no=n)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "qra.miz"))
+    qg = [g for g in plane_groups(m) if "_qra_" in g.name]
+    script = next((a_.text.id for a_ in m.triggerrules.triggers[0].actions if "redfront qra" in a_.text.id), "")
+    eng = all(any(getattr(t, "id", None) == "EngageTargets" for p in g.points for t in p.tasks) for g in qg)
+    check(qg and all(g.late_activation for g in qg) and eng and all(g.name in script for g in qg)
+          and any(f.get("ato") and "_qra_" in f["group"] for f in man["flights"]),
+          f"миссия: {len(qg)} дежурных пар на стоянках с поздней активацией, задача - атака воздушных целей; скрипт их знает")
+    if have_lupa():
+        import lupa
+        L = lupa.LuaRuntime(unpack_returned_tuples=True)
+        L.execute(CSAR_MOCK)
+        L.execute("""
+          Controller = { Detection = { RADAR = 4 } }
+          Group.Category.AIRPLANE = 0
+          ACTIVATED = {}; SEEN = false
+          RADARS = { [1] = {}, [2] = {} }; AIR = { [1] = {}, [2] = {} }
+          local function grp(units, ctrl) return { getUnits = function() return units end, getController = function() return ctrl end } end
+          coalition.getGroups = function(side, cat)
+            if cat == Group.Category.GROUND then return RADARS[side] end
+            if cat == Group.Category.AIRPLANE then return AIR[side] end
+            return {}
+          end
+          function radarGroup(side)
+            local u = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end }
+            local c = { isTargetDetected = function(_, t, d) return SEEN end }
+            RADARS[side][#RADARS[side] + 1] = grp({ u }, c)
+          end
+          function plane(side, x, z)
+            local u = { isExist = function() return true end, inAir = function() return true end,
+                        getPoint = function() return { x = x, y = 5000, z = z } end, getTypeName = function() return "Su-25" end }
+            AIR[side][#AIR[side] + 1] = grp({ u }, nil)
+          end
+        """)
+        import re as _re
+        first = _re.search(r'\{ id = "([^"]+)", group = "([^"]+)", side = (\d), x = ([-\d.]+), y = ([-\d.]+), r = (\d+)', script)
+        qid, gname, side, x, y, r = first.groups()
+        side = int(side); foe = 2 if side == 1 else 1
+        L.execute(f'radarGroup({side}); plane({foe}, {float(x) + float(r) * 0.5}, {y})')
+        L.execute(f'G["{gname}"] = {{ g = {{ dead = false }}, o = {{ activate = function() ACTIVATED["{gname}"] = true end }} }}')
+        L.execute(script)
+        Gl = L.globals()
+        Gl.T = 10; L.execute("runDue()")
+        quiet = not Gl.ACTIVATED[gname]
+        Gl.SEEN = True
+        Gl.T = 20; L.execute("runDue()")
+        check(quiet and Gl.ACTIVATED[gname] and Gl.REDFRONT_QRA[qid],
+              "qra.lua: противник в радиусе, но радары стороны его не видят - пара стоит; увидели - пара поднята, время - в дебриф")
+    else:
+        print("SKIP lupa не установлена: qra.lua не исполняется")
+    e = q[0]
+    pos = st["airbases"][e["task"]["base"]]
+    n_near = airwar.alerts_near(st, e["side"], pos, e["tot_s"] + 60)
+    far = model.offset(pos, 270 if e["side"] == "red" else 90, 600_000)   # в 600 км в тылу противника
+    check(n_near >= 1 and airwar.alerts_near(st, e["side"], far, e["tot_s"] + 60) == 0,
+          f"вне миссии: удар ИИ рядом с базой дежурной пары на смене - её учитывают ({n_near}), далеко от баз - нет")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
-            gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section]
+            gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
+            supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section]
 
 
 def main() -> int:

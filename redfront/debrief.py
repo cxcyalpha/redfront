@@ -116,6 +116,28 @@ def apply(state: dict, data: dict) -> list[str]:
         if lost_ac:
             perf["count"] = max(0, perf["count"] - len(lost_ac))
             lines.append(f"{perf['name']} ({fl['group']}): потеряно {len(lost_ac)} ЛА; в строю {perf['count']}.")
+            if fl.get("ato") and state.get("ato"):   # вылет плана полётов: сбитые борта перевозки груз не довозят
+                lost_by = state["ato"].setdefault("lost", {})
+                lost_by[fl["ato"]] = lost_by.get(fl["ato"], 0) + len(lost_ac)
+    from . import convoys                       # колонны снабжения: сожжённые машины - недовезённые тонны
+    for cv in man.get("convoys") or []:
+        dead_w = sum(v["weight"] for v in cv["vehicles"] if v["name"] in lost)
+        if dead_w > 0:
+            t = dead_w * convoys.TRUCK_T
+            convoys.add_loss(state, cv["side"], cv["link"], t)
+            n = sum(1 for v in cv["vehicles"] if v["name"] in lost)
+            lines.append(f"Колонна снабжения {cv['link'].replace('>', ' - ')}: уничтожено {n} из {len(cv['vehicles'])} машин "
+                         f"(~{dead_w:.1f} грузовиков потока), недовоз ~{t:.0f} т.")
+    for qid in sorted(data.get("qra") or {}):    # дежурные пары, поднятые в миссии (qra.lua)
+        e = next((x for x in (state.get("ato") or {}).get("entries", []) if x["id"] == qid), None)
+        if e:
+            lines.append(f"{e['title']}: пара поднята по тревоге на {int(data['qra'][qid]) // 60}-й минуте.")
+    from . import csar                          # экипажи сбитых и спасения в миссии (csar.lua)
+    lines += csar.apply_debrief(state, man, data, lost)
+    for aid, (landed_n, total) in (data.get("assault") or {}).items():   # десант: сколько бортов село (assault.lua)
+        if state.get("ato"):
+            state["ato"].setdefault("assault", {})[aid] = [int(landed_n), int(total)]
+        lines.append(f"Десант: на площадку село {landed_n} из {total} бортов" + (" - рота высажена." if landed_n else "."))
     if not data.get("mission_ended"):
         lines.append("Внимание: миссия не была завершена штатно - применён последний сохранённый срез.")
     if not lines:
@@ -125,6 +147,14 @@ def apply(state: dict, data: dict) -> list[str]:
     state["manifest"]["applied"] = True
     if man.get("end_s") is not None:            # часы кампании: следующий вылет игрока - после этой миссии (ato.py)
         state["clock_s"] = max(state.get("clock_s") or 0, man["end_s"])
-        if man.get("ato_id") and state.get("ato") and man["ato_id"] not in state["ato"]["done"]:
-            state["ato"]["done"].append(man["ato_id"])
+        a = state.get("ato")
+        if man.get("ato_id") and a and man["ato_id"] not in a["done"]:
+            a["done"].append(man["ato_id"])
+        if a:                                    # группы ИИ этой миссии - слетаны в DCS: итог вне миссии им не считается
+            a["played"] = sorted(set(a.get("played", [])) | {fl["ato"] for fl in flights if fl.get("ato")})
+        from . import sim                        # окно миссии: бой и марш прошли в DCS - модели только события плана полётов
+        ev = sim.advance(state, man["end_s"], ground=False)
+        for ln in ev:
+            model.note(state, ln)
+        lines += ev
     return lines

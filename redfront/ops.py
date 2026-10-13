@@ -29,7 +29,7 @@ def _sim(state: dict, side: str) -> dict:
 
 
 def graph(state: dict) -> dict[str, dict[str, float]]:
-    """Граф пунктов; связи с разрушенным большим мостом закрыты, с разрушенным малым - длиннее на объезд
+    """Граф пунктов (км - по дороге, если она известна); связи с разрушенным большим мостом закрыты, с разрушенным малым - длиннее на объезд
     (logistics.link_open / link_detour - здесь то же правило одним проходом по мостам: граф строится часто)."""
     from . import logistics
     closed, detour = set(), set()
@@ -39,11 +39,12 @@ def graph(state: dict) -> dict[str, dict[str, float]]:
                 (detour if logistics.is_minor(br) else closed).add(frozenset(l))
     extra = model.doctrine(state, state["player_side"])["sim"].get("bridge_detour_km", 0) if detour else 0
     g: dict[str, dict[str, float]] = {p: {} for p in state["places"]}
+    rk = state.get("road_km") or {}              # длина по дороге (roads.apply), иначе - по прямой
     for a, b in state.get("links", []):
         k = frozenset((a, b))
         if k in closed:
             continue
-        d = model.dist_km(state["places"][a], state["places"][b])
+        d = rk.get(f"{a}>{b}") or rk.get(f"{b}>{a}") or model.dist_km(state["places"][a], state["places"][b])
         if k in detour:                                  # разрушен малый мост - объезд (ОЦЕНКА, sim.bridge_detour_km)
             d += extra
         g[a][b] = g[b][a] = d
@@ -171,18 +172,19 @@ def objective(state: dict, side: str, u: dict | None = None) -> str | None:
     return next((o for o in objs if owner(state, o) != side), None)   # цели по порядку: первая не взятая
 
 
-def commander(state: dict, side: str) -> list[str]:
+def commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     global _PK
     if not enabled(state):
         return []
     _PK = {}
     try:
-        return _commander(state, side)
+        return _commander(state, side, frac_day)
     finally:
         _PK = None
 
 
-def _commander(state: dict, side: str) -> list[str]:
+def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
+    """frac_day - доля суток до следующего решения: восстановление в тылу и на месте - за неё (refit_rate в сутки)."""
     sim = _sim(state, side)
     lines = []
     own = _maneuver(state, side)
@@ -212,7 +214,7 @@ def _commander(state: dict, side: str) -> list[str]:
             lines.append(f"{u['name']}: в тылу ({u['route'][-1]}), восстановление.")
         if u["state"] == "refit":                                 # без снабжения - вдвое медленнее
             for c in u["composition"]:
-                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * u.get("supply", 1.0))
+                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * frac_day * u.get("supply", 1.0))
             if model.strength(u) >= sim["refit_ready"]:
                 u["state"] = "defend"
                 lines.append(f"{u['name']}: восстановлена до {model.strength(u):.0%}, в строю.")
@@ -221,7 +223,9 @@ def _commander(state: dict, side: str) -> list[str]:
     for u in free:
         if model.strength(u) < sim["refit_ready"]:
             for c in u["composition"]:
-                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * sim["refit_in_line"])
+                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * frac_day * sim["refit_in_line"])
+    # десант в резерве и высаженный (держит пункт до подхода своих) - не в распоряжении командования фронта (assault.py)
+    free = [u for u in free if u.get("order") not in ("reserve", "airhead")]
     posture = sim.get("posture") or "defense"
     if posture == "offense" and not any(objective(state, side, u) for u in free):
         posture = "defense"                                       # цели операции достигнуты - удерживать

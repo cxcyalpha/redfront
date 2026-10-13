@@ -26,12 +26,14 @@ def _maneuver(state: dict) -> list[dict]:
 
 def power(state: dict, unit: dict) -> float:
     """Боевая сила: исправная техника с весами ролей (ОЦЕНКА, sim.role_weight стороны части); без снабжения -
-    x supply_power_factor."""
+    x supply_power_factor, при части нормы (supply_frac, logistics.supply) - пропорционально между ним и 1."""
     sim = _sim(state, unit["side"])
     w = sim.get("role_weight", {})
     roles = {c["type"]: c["role"] for c in unit["composition"]}
     p = sum(n * w.get(roles[t], 0.0) for t, n in model.alive_by_type(unit).items())
-    return p * (1.0 if unit.get("supply", 1.0) >= 1.0 else sim.get("supply_power_factor", 1.0))
+    frac = unit.get("supply_frac", 1.0 if unit.get("supply", 1.0) >= 1.0 else 0.0)
+    spf = sim.get("supply_power_factor", 1.0)
+    return p * (spf + (1.0 - spf) * frac)
 
 
 def _take_losses(unit: dict, frac: float) -> float:
@@ -49,7 +51,9 @@ def _attached(state: dict, unit: dict) -> list[dict]:
     return [a for a in state["units"].values() if a.get("attached_to") == unit["id"] and a["state"] != "destroyed"]
 
 
-def battles(state: dict) -> list[str]:
+def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
+    """Бой за frac_day суток (шаг наземной модели): потери - суточная доля x frac_day (и потолок loss_cap x frac_day).
+    Строки о потерях - только за целые сутки (frac_day = 1); по часам сводку пишет advance."""
     lines = []
     units = state["units"]
     engaged = [u for u in _maneuver(state) if u["state"] == "battle"]
@@ -61,17 +65,19 @@ def battles(state: dict) -> list[str]:
             continue
         sim = _sim(state, u["side"])
         frac = min(sim["loss_cap"], sim["battle_loss_k"] * enemy / pw[u["id"]])
-        r = model.rng(state, f"battle-{u['id']}")
-        if r:                                    # исход суток боя - с разбросом (ОЦЕНКА, sim.battle_variance)
+        r = model.rng(state, f"battle-{u['id']}{tag}")
+        if r:                                    # исход боя - с разбросом (ОЦЕНКА, sim.battle_variance)
             frac = min(sim["loss_cap"], frac * r.uniform(1 - sim["battle_variance"], 1 + sim["battle_variance"]))
         if u.get("defending"):
             frac *= sim["defend_factor"]
+        frac *= frac_day
         s0 = model.strength(u)
         n = _take_losses(u, frac)
         for a in _attached(state, u):                            # приданная ПВО несёт те же потери
             _take_losses(a, frac)
-        lines.append(f"{u['name']}: бой с {', '.join(f['name'] for f in foes)} - потеряно ~{n:.0f} машин, "
-                     f"боеспособность {s0:.0%} -> {model.strength(u):.0%}.")
+        if frac_day >= 1.0:
+            lines.append(f"{u['name']}: бой с {', '.join(f['name'] for f in foes)} - потеряно ~{n:.0f} машин, "
+                         f"боеспособность {s0:.0%} -> {model.strength(u):.0%}.")
     for u in engaged:
         sim = _sim(state, u["side"])
         if model.strength(u) < sim["combat_ineffective_below"]:
@@ -128,14 +134,15 @@ def current_link(state: dict, u: dict) -> tuple[str, str] | None:
     return (r[-2], r[-1]) if len(r) > 1 else None
 
 
-def movement(state: dict) -> list[str]:
+def movement(state: dict, frac_day: float = 1.0) -> list[str]:
+    """Марш за frac_day суток: суточный отрыв x frac_day. Строки о продвижении - только за целые сутки."""
     lines = []
     units = _maneuver(state)
     budget, start = {}, {}
     for u in units:
         if u["state"] == "march":
             budget[u["id"]] = ((u.get("daily_advance_km") or _sim(state, u["side"])["daily_advance_km"]) * model.strength(u)
-                               * u.get("supply", 1.0))                        # без снабжения - медленнее
+                               * u.get("supply", 1.0) * frac_day)             # без снабжения - медленнее
             cl = current_link(state, u)
             if cl and logistics.link_detour(state, *cl):                       # разрушен малый мост - объезд
                 budget[u["id"]] *= _sim(state, u["side"]).get("bridge_detour_slow", 1.0)
@@ -159,7 +166,7 @@ def movement(state: dict) -> list[str]:
                 u["defending"] = True
                 lines.append(f"{u['name']}: вышел в район {u['route'][-1]}, перешёл к обороне.")
         moving = [u for u in moving if u["state"] == "march" and budget[u["id"]] > 1e-6]
-    for u in units:
+    for u in units if frac_day >= 1.0 else ():
         if u["id"] in start and u["progress_km"] - start[u["id"]] > 0.05:
             lines.append(f"{u['name']}: продвинулся на {u['progress_km'] - start[u['id']]:.0f} км "
                          f"(боеспособность {model.strength(u):.0%}).")
@@ -183,7 +190,13 @@ def arrivals(state: dict) -> list[str]:
     return lines
 
 
-def end_day(state: dict) -> list[str]:
+STEP_H = 1            # шаг наземной модели, ч
+COMMAND_H = 6         # командование сторон решает раз в столько часов (0, 6, 12, 18 ч)
+DAY_S = 86400
+
+
+def _checks(state: dict) -> list[str]:
+    """Уничтожена (боеспособность до 5%) / на марше ниже combat_ineffective_below - остановилась."""
     lines = []
     for u in _maneuver(state):
         if model.strength(u) <= 0.05:
@@ -195,17 +208,80 @@ def end_day(state: dict) -> list[str]:
               and model.strength(u) < _sim(state, u["side"])["combat_ineffective_below"]):
             u["state"] = "halted"
             lines.append(f"{u['name']}: потерял боеспособность ({model.strength(u):.0%}), остановился.")
+    return lines
+
+
+def advance(state: dict, to_s: float, ground: bool = True) -> list[str]:
+    """Наземная модель - до времени суток to_s (с) от state['ground_s'], шагами STEP_H до границы часа: события плана
+    полётов (итоги вылетов ИИ, высадки, удары по путям подвоза - airwar.py) в своё время, бой и марш за долю суток,
+    занятие пунктов; командование - на границах COMMAND_H. Назад время не идёт. Сводка (потери, продвижение за
+    отрезок) - в конце; строки в журнал кампании пишет вызывающий. ground=False - только события плана полётов
+    (окно слетанной миссии: бой и марш в нём уже прошли в DCS, дебриф их применил)."""
+    from . import airwar
+    t = float(state.get("ground_s") or 0)
+    to_s = min(float(to_s), DAY_S)
+    if to_s <= t + 1:
+        return []
+    s0 = {u["id"]: model.strength(u) for u in _maneuver(state)}
+    p0 = {u["id"]: (tuple(u["route"]), u["progress_km"]) for u in _maneuver(state)}
+    lines = []
+    step = STEP_H * 3600
+    while t < to_s - 1:
+        dt = min(step - t % step, to_s - t)
+        if ground and t % (COMMAND_H * 3600) < 1:   # оперативный уровень: задачи частям (ops.py)
+            for side in model.SIDES:
+                lines += ops.commander(state, side, COMMAND_H / 24)
+        lines += airwar.resolve(state, t, t + dt)
+        if ground:                               # ночью (вне лётного дня) марш и бой медленнее (night_*, доктрина)
+            nm, nb = _night(state, t)
+            lines += _checks(state)
+            lines += battles(state, dt / DAY_S * nb, f"-{int(t // 3600)}")
+            lines += movement(state, dt / DAY_S * nm)
+            lines += ops.capture(state)
+        t += dt
+    state["ground_s"] = t
+    for u in _maneuver(state):                   # сводка за отрезок
+        if u["id"] in s0 and s0[u["id"]] - model.strength(u) > 0.005:
+            lines.append(f"{u['name']}: бои к {ato_hhmm(t)} - боеспособность {s0[u['id']]:.0%} -> {model.strength(u):.0%}.")
+        r, k = p0.get(u["id"], ((), 0.0))
+        if tuple(u["route"]) == r and u["progress_km"] - k > 0.5:
+            lines.append(f"{u['name']}: продвинулся на {u['progress_km'] - k:.0f} км.")
+    return lines
+
+
+def _night(state: dict, t: float) -> tuple[float, float]:
+    """Множители марша и боя в момент t: ночью - night_march / night_battle доктрины игрока (одни на обе стороны -
+    ОЦЕНКА), днём - 1."""
+    from . import ato
+    if not ato.is_night(state, t):
+        return 1.0, 1.0
+    sim_ = _sim(state, state["player_side"])
+    return sim_.get("night_march", 1.0), sim_.get("night_battle", 1.0)
+
+
+def ato_hhmm(t: float) -> str:
+    if t >= DAY_S:
+        return "24:00"
+    t = int(t)
+    return f"{t // 3600:02d}:{t % 3600 // 60:02d}"
+
+
+def end_day(state: dict) -> list[str]:
+    """Конец суток: наземная модель - до 24:00 (advance), затем суточный тыл: снабжение, соединение десанта, ремонт,
+    ПВО, аэродромы, пополнение; судьба сбитых экипажей; новые сутки."""
+    from . import assault, ato, csar             # ato -> planner -> logistics
+    ato.ensure(state)                            # план полётов суток - события по часам, перевозки, расход авиации
+    lines = advance(state, DAY_S)
+    lines += _checks(state)
+    lines += csar.daily(state)                   # сбитые экипажи: выход к своим, плен
     lines += logistics.supply(state)
-    lines += battles(state)
-    for side in model.SIDES:                     # оперативный уровень: задачи частям (ops.py)
-        lines += ops.commander(state, side)
-    lines += movement(state)
-    lines += ops.capture(state)
+    lines += assault.linkup(state)
     lines += logistics.repairs(state)
     lines += logistics.air_defence(state)
     lines += logistics.airfields(state)
     lines += logistics.replacements(state)
     state["day"] += 1
+    state["ground_s"] = 0
     lines += arrivals(state)
     for ln in lines:
         model.note(state, ln)

@@ -832,6 +832,30 @@
    "side": "red",
    "military": true
   },
+  "sperenberg": {
+   "name": "Sperenberg",
+   "airport": "Sperenberg",
+   "side": "red",
+   "military": true
+  },
+  "briest": {
+   "name": "Briest",
+   "airport": "Briest",
+   "side": "red",
+   "military": true
+  },
+  "oranienburg": {
+   "name": "Oranienburg",
+   "airport": "Oranienburg",
+   "side": "red",
+   "military": true
+  },
+  "obermehler_schlotheim": {
+   "name": "Obermehler Schlotheim",
+   "airport": "Obermehler Schlotheim",
+   "side": "red",
+   "military": true
+  },
   "wunstorf": {
    "name": "Wunstorf",
    "airport": "Wunstorf",
@@ -943,6 +967,30 @@
   "giebelstadt": {
    "name": "Giebelstadt",
    "airport": "Giebelstadt",
+   "side": "blue",
+   "military": true
+  },
+  "wiesbaden": {
+   "name": "Wiesbaden",
+   "airport": "Wiesbaden",
+   "side": "blue",
+   "military": true
+  },
+  "mendig": {
+   "name": "Mendig",
+   "airport": "Mendig",
+   "side": "blue",
+   "military": true
+  },
+  "kiel": {
+   "name": "Kiel",
+   "airport": "Kiel",
+   "side": "blue",
+   "military": true
+  },
+  "frankfurt": {
+   "name": "Frankfurt",
+   "airport": "Frankfurt",
    "side": "blue",
    "military": true
   }
@@ -2066,6 +2114,17 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
+   "id": "red_ad_af_briest",
+   "name": "ПВО аэродрома Briest",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_briest",
+   "lat": 52.4346,
+   "lon": 12.4324,
+   "variant": 1,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
    "id": "blue_ad_af_buchel",
    "name": "ПВО аэродрома Buchel",
    "side": "blue",
@@ -2073,7 +2132,7 @@
    "covers": "af_buchel",
    "lat": 50.1771,
    "lon": 7.0845,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2084,7 +2143,7 @@
    "covers": "af_buckeburg",
    "lat": 52.2676,
    "lon": 9.0959,
-   "variant": 0,
+   "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2095,7 +2154,7 @@
    "covers": "af_celle",
    "lat": 52.5959,
    "lon": 10.0453,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2106,7 +2165,7 @@
    "covers": "af_cochstedt",
    "lat": 51.8671,
    "lon": 11.4057,
-   "variant": 0,
+   "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2117,7 +2176,7 @@
    "covers": "af_damgarten",
    "lat": 54.2588,
    "lon": 12.4231,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2128,7 +2187,7 @@
    "covers": "af_falkenberg",
    "lat": 51.5352,
    "lon": 13.2043,
-   "variant": 0,
+   "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2139,7 +2198,7 @@
    "covers": "af_fassberg",
    "lat": 52.9157,
    "lon": 10.2063,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2150,6 +2209,17 @@
    "covers": "af_finow",
    "lat": 52.8287,
    "lon": 13.6718,
+   "variant": 1,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_frankfurt",
+   "name": "ПВО аэродрома Frankfurt",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_frankfurt",
+   "lat": 50.0473,
+   "lon": 8.5855,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2220,6 +2290,17 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
+   "id": "blue_ad_af_kiel",
+   "name": "ПВО аэродрома Kiel",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_kiel",
+   "lat": 54.3687,
+   "lon": 10.1585,
+   "variant": 1,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
    "id": "red_ad_af_kothen",
    "name": "ПВО аэродрома Kothen",
    "side": "red",
@@ -2227,7 +2308,7 @@
    "covers": "af_kothen",
    "lat": 51.7297,
    "lon": 11.9443,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2238,7 +2319,7 @@
    "covers": "af_laage",
    "lat": 53.9145,
    "lon": 12.2574,
-   "variant": 0,
+   "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2249,7 +2330,7 @@
    "covers": "af_larz",
    "lat": 53.3012,
    "lon": 12.7318,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2260,7 +2341,7 @@
    "covers": "af_mahlwinkel",
    "lat": 52.3839,
    "lon": 11.8056,
-   "variant": 0,
+   "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2271,6 +2352,17 @@
    "covers": "af_marxwalde",
    "lat": 52.6159,
    "lon": 14.2209,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_mendig",
+   "name": "ПВО аэродрома Mendig",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_mendig",
+   "lat": 50.3679,
+   "lon": 7.3366,
    "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2326,6 +2418,28 @@
    "covers": "af_norvenich",
    "lat": 50.8318,
    "lon": 6.68,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_obermehler_schlotheim",
+   "name": "ПВО аэродрома Obermehler Schlotheim",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_obermehler_schlotheim",
+   "lat": 51.264,
+   "lon": 10.6141,
+   "variant": 1,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_oranienburg",
+   "name": "ПВО аэродрома Oranienburg",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_oranienburg",
+   "lat": 52.7281,
+   "lon": 13.1952,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2396,6 +2510,17 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
+   "id": "red_ad_af_sperenberg",
+   "name": "ПВО аэродрома Sperenberg",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_sperenberg",
+   "lat": 52.1382,
+   "lon": 13.284,
+   "variant": 1,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
    "id": "red_ad_af_stendal",
    "name": "ПВО аэродрома Stendal",
    "side": "red",
@@ -2403,7 +2528,7 @@
    "covers": "af_stendal",
    "lat": 52.6405,
    "lon": 11.808,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2414,7 +2539,7 @@
    "covers": "af_templin",
    "lat": 53.0315,
    "lon": 13.5202,
-   "variant": 0,
+   "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2425,7 +2550,7 @@
    "covers": "af_tutow",
    "lat": 53.9147,
    "lon": 13.1998,
-   "variant": 1,
+   "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2436,7 +2561,7 @@
    "covers": "af_uetersen",
    "lat": 53.6434,
    "lon": 9.7261,
-   "variant": 0,
+   "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
@@ -2447,6 +2572,17 @@
    "covers": "af_werneuchen",
    "lat": 52.6351,
    "lon": 13.7471,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_wiesbaden",
+   "name": "ПВО аэродрома Wiesbaden",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_wiesbaden",
+   "lat": 50.0559,
+   "lon": 8.3444,
    "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2565,13 +2701,23 @@
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
+   "id": "red_ad_med_af_finow",
+   "name": "ЗРК средней дальности (Finow)",
+   "side": "red",
+   "tier": "medium",
+   "lat": 52.8323,
+   "lon": 13.62,
+   "variant": 0,
+   "rule": "средний ярус: покрытие аэродромов и пунктов"
+  },
+  {
    "id": "red_ad_med_rostock",
    "name": "ЗРК средней дальности (Rostock)",
    "side": "red",
    "tier": "medium",
    "lat": 54.0697,
    "lon": 12.0327,
-   "variant": 0,
+   "variant": 1,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
@@ -2581,7 +2727,7 @@
    "tier": "medium",
    "lat": 50.8463,
    "lon": 11.598,
-   "variant": 1,
+   "variant": 0,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
@@ -2591,7 +2737,7 @@
    "tier": "medium",
    "lat": 51.9225,
    "lon": 11.055,
-   "variant": 0,
+   "variant": 1,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
@@ -2601,17 +2747,17 @@
    "tier": "medium",
    "lat": 50.9574,
    "lon": 10.6614,
-   "variant": 1,
+   "variant": 0,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
-   "id": "red_ad_med_af_werneuchen",
-   "name": "ЗРК средней дальности (Werneuchen)",
+   "id": "red_ad_med_af_sperenberg",
+   "name": "ЗРК средней дальности (Sperenberg)",
    "side": "red",
    "tier": "medium",
-   "lat": 52.6427,
-   "lon": 13.6966,
-   "variant": 0,
+   "lat": 52.1412,
+   "lon": 13.2329,
+   "variant": 1,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
@@ -2621,16 +2767,6 @@
    "tier": "medium",
    "lat": 53.5883,
    "lon": 13.2344,
-   "variant": 1,
-   "rule": "средний ярус: покрытие аэродромов и пунктов"
-  },
-  {
-   "id": "red_ad_med_af_holzdorf",
-   "name": "ЗРК средней дальности (Holzdorf)",
-   "side": "red",
-   "tier": "medium",
-   "lat": 51.7847,
-   "lon": 13.102,
    "variant": 0,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
@@ -2655,13 +2791,43 @@
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
+   "id": "red_ad_med_af_obermehler_schlotheim",
+   "name": "ЗРК средней дальности (Obermehler Schlotheim)",
+   "side": "red",
+   "tier": "medium",
+   "lat": 51.2552,
+   "lon": 10.5658,
+   "variant": 1,
+   "rule": "средний ярус: покрытие аэродромов и пунктов"
+  },
+  {
+   "id": "red_ad_med_af_holzdorf",
+   "name": "ЗРК средней дальности (Holzdorf)",
+   "side": "red",
+   "tier": "medium",
+   "lat": 51.7847,
+   "lon": 13.102,
+   "variant": 0,
+   "rule": "средний ярус: покрытие аэродромов и пунктов"
+  },
+  {
+   "id": "red_ad_med_af_briest",
+   "name": "ЗРК средней дальности (Briest)",
+   "side": "red",
+   "tier": "medium",
+   "lat": 52.4274,
+   "lon": 12.3823,
+   "variant": 1,
+   "rule": "средний ярус: покрытие аэродромов и пунктов"
+  },
+  {
    "id": "red_ad_med_af_allstedt",
    "name": "ЗРК средней дальности (Allstedt)",
    "side": "red",
    "tier": "medium",
    "lat": 51.3904,
    "lon": 11.3761,
-   "variant": 1,
+   "variant": 0,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
@@ -2671,7 +2837,7 @@
    "tier": "medium",
    "lat": 52.9943,
    "lon": 11.6459,
-   "variant": 0,
+   "variant": 1,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
@@ -2681,16 +2847,6 @@
    "tier": "medium",
    "lat": 53.8981,
    "lon": 13.1547,
-   "variant": 1,
-   "rule": "средний ярус: покрытие аэродромов и пунктов"
-  },
-  {
-   "id": "red_ad_med_af_templin",
-   "name": "ЗРК средней дальности (Templin)",
-   "side": "red",
-   "tier": "medium",
-   "lat": 53.0303,
-   "lon": 13.4679,
    "variant": 0,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
@@ -2725,12 +2881,12 @@
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
-   "id": "red_ad_med_af_brand",
-   "name": "ЗРК средней дальности (Brand)",
+   "id": "red_ad_med_af_marxwalde",
+   "name": "ЗРК средней дальности (Marxwalde)",
    "side": "red",
    "tier": "medium",
-   "lat": 52.0432,
-   "lon": 13.6739,
+   "lat": 52.6226,
+   "lon": 14.1701,
    "variant": 0,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
@@ -2745,24 +2901,76 @@
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
   {
-   "id": "red_ad_med_nordhausen",
-   "name": "ЗРК средней дальности (Nordhausen)",
+   "id": "red_gci_damgarten",
+   "name": "КРУ аэродрома Damgarten",
    "side": "red",
-   "tier": "medium",
-   "lat": 51.5056,
-   "lon": 10.7477,
+   "tier": "gci",
+   "covers": "af_damgarten",
+   "lat": 54.2535,
+   "lon": 12.4019,
    "variant": 0,
-   "rule": "средний ярус: покрытие аэродромов и пунктов"
+   "channel": 1,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
   },
   {
-   "id": "red_ad_med_brandenburg",
-   "name": "ЗРК средней дальности (Brandenburg)",
+   "id": "red_gci_falkenberg",
+   "name": "КРУ аэродрома Falkenberg",
    "side": "red",
-   "tier": "medium",
-   "lat": 52.407,
-   "lon": 12.4886,
-   "variant": 1,
-   "rule": "средний ярус: покрытие аэродромов и пунктов"
+   "tier": "gci",
+   "covers": "af_falkenberg",
+   "lat": 51.5239,
+   "lon": 13.1926,
+   "variant": 0,
+   "channel": 2,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_finow",
+   "name": "КРУ аэродрома Finow",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_finow",
+   "lat": 52.8302,
+   "lon": 13.6496,
+   "variant": 0,
+   "channel": 3,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_kothen",
+   "name": "КРУ аэродрома Kothen",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_kothen",
+   "lat": 51.738,
+   "lon": 11.9271,
+   "variant": 0,
+   "channel": 4,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
   },
   {
    "id": "red_gci_merseburg",
@@ -2773,8 +2981,31 @@
    "lat": 51.3683,
    "lon": 11.9073,
    "variant": 0,
-   "channel": 1,
+   "channel": 5,
    "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_stendal",
+   "name": "КРУ аэродрома Stendal",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_stendal",
+   "lat": 52.6519,
+   "lon": 11.7961,
+   "variant": 0,
+   "channel": 6,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
    "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
   },
   {
@@ -2786,8 +3017,31 @@
    "lat": 53.1937,
    "lon": 12.4804,
    "variant": 0,
-   "channel": 2,
+   "channel": 7,
    "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
+   "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
+  },
+  {
+   "id": "red_gci_zerbst",
+   "name": "КРУ аэродрома Zerbst",
+   "side": "red",
+   "tier": "gci",
+   "covers": "af_zerbst",
+   "lat": 52.0107,
+   "lon": 12.1042,
+   "variant": 0,
+   "channel": 8,
+   "radius_km": 250,
+   "requires_types": [
+    "MiG_29_Fulcrum",
+    "MiG_29S",
+    "MiG_29A"
+   ],
    "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"
   }
  ],

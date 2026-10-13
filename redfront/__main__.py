@@ -92,7 +92,7 @@ def parse_deg(text: str) -> float:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="redfront")
     sp = ap.add_subparsers(dest="cmd", required=True)
-    p = sp.add_parser("new"); p.add_argument("state"); p.add_argument("--name", default="Гамбург"); p.add_argument("--date", default="2026-05-15")
+    p = sp.add_parser("new"); p.add_argument("state"); p.add_argument("--name", default="Гамбург"); p.add_argument("--date", default=None, help="дата кампании; по умолчанию - дата пресета состава сил")
     p.add_argument("--side", choices=model.SIDES, default="red", help="за какую сторону играет игрок")
     p.add_argument("--oob", default="oob_hamburg.json", help="состав сил")
     p.add_argument("--sector", default="sector_hamburg.json", help="сектор (карта)")
@@ -181,8 +181,9 @@ def main(argv=None) -> int:
         pk = dict(kv.split("=", 1) for kv in a.doctrine)
         st = model.new_campaign(a.name, a.date, sector=a.sector, oob=a.oob, player_side=a.side, packages=pk,
                                 seed=a.seed, variant=a.variant, randomness=not a.no_random)
-        if a.roads:
-            for ln in roads.apply(st, roads.load(Path(a.roads))):
+        rf = Path(a.roads) if a.roads else roads.bundled(roads.sector_id(a.sector))   # без --roads - из поставки, если есть
+        if rf:
+            for ln in roads.apply(st, roads.load(rf)):
                 print(ln)
         model.save(st, path)
         print(status(st))
@@ -253,6 +254,10 @@ def main(argv=None) -> int:
         man = build_mod.build(st, Path(a.out), a.density, player=not a.ai, fly=a.fly, task_no=a.task)
         n = sum(len(g["vehicles"]) for g in man["ground"])
         print(f"Миссия: {man['file']} (вылет {man['sortie']}, наземных юнитов {n})")
+        if man.get("pre_lines"):                 # модель продвинута к началу миссии (sim.advance)
+            print(f"Обстановка на {sim.ato_hhmm(man['ground_s'] or 0)}:")
+            for ln in man["pre_lines"]:
+                print(f"  {ln}")
         for ln in man["package_lines"]:
             print(f"  {ln}")
     elif a.cmd == "debrief":

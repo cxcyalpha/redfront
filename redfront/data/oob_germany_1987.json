@@ -1,0 +1,6467 @@
+{
+ "_about": "Состав сил всего фронта на 1987-06-01. Генерирован tools/gen_germany.py (пресет 1987); источники - в поле source каждой части. Авиация - по сводке игрока (AIR_HISTORY), на дату пресета.",
+ "theatre": "germany",
+ "preset": {
+  "title": "Удар ОВД по всему фронту (1987)",
+  "year": 1987,
+  "date": "1987-06-01"
+ },
+ "date": "1987-06-01",
+ "countries": {
+  "red": "Russia",
+  "blue": "Germany"
+ },
+ "units": [
+  {
+   "id": "red_94gmsd",
+   "name": "94-я гв. мотострелковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Schwerin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "axis": "north",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_94gmsd_pvo",
+   "name": "Войсковая ПВО: 94-я гв. мотострелковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_94gmsd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_21msd",
+   "name": "21-я мотострелковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Wittenberge"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "axis": "altmark",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_21msd_pvo",
+   "name": "Войсковая ПВО: 21-я мотострелковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_21msd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_207msd",
+   "name": "207-я мотострелковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Gustrow"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "axis": "elbe",
+   "note": "метка у Гюстрова; по памяти - Стендаль; день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_207msd_pvo",
+   "name": "Войсковая ПВО: 207-я мотострелковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_207msd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_16gtd",
+   "name": "16-я гв. танковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Neustrelitz"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "axis": "north",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_16gtd_pvo",
+   "name": "Войсковая ПВО: 16-я гв. танковая дивизия (2 гв. ТА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_16gtd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_47gtd",
+   "name": "47-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Haldensleben"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "axis": "center",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_47gtd_pvo",
+   "name": "Войсковая ПВО: 47-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_47gtd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_10gtd",
+   "name": "10-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Burg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "axis": "center",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_10gtd_pvo",
+   "name": "Войсковая ПВО: 10-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_10gtd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_12gtd",
+   "name": "12-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Neuruppin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "axis": "altmark",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_12gtd_pvo",
+   "name": "Войсковая ПВО: 12-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_12gtd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_7gtd",
+   "name": "7-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Kyritz"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "axis": "altmark",
+   "note": "метка '7/3'; по памяти гарнизон - Рослау; день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_7gtd_pvo",
+   "name": "Войсковая ПВО: 7-я гв. танковая дивизия (3 УА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7gtd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_27gmsd",
+   "name": "27-я гв. мотострелковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Halle"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "axis": "harz",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_27gmsd_pvo",
+   "name": "Войсковая ПВО: 27-я гв. мотострелковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_27gmsd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_39gmsd",
+   "name": "39-я гв. мотострелковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Gotha"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "axis": "fulda",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_39gmsd_pvo",
+   "name": "Войсковая ПВО: 39-я гв. мотострелковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_39gmsd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_57gmsd",
+   "name": "57-я гв. мотострелковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Jena"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "axis": "fulda",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_57gmsd_pvo",
+   "name": "Войсковая ПВО: 57-я гв. мотострелковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_57gmsd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_79gtd",
+   "name": "79-я гв. танковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Jena"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "axis": "main",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_79gtd_pvo",
+   "name": "Войсковая ПВО: 79-я гв. танковая дивизия (8 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_79gtd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_9td",
+   "name": "9-я танковая дивизия (1 гв. ТА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Leipzig"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "axis": "hof",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_9td_pvo",
+   "name": "Войсковая ПВО: 9-я танковая дивизия (1 гв. ТА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_9td",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_11gtd",
+   "name": "11-я гв. танковая дивизия (1 гв. ТА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Leipzig"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "axis": "hof",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_11gtd_pvo",
+   "name": "Войсковая ПВО: 11-я гв. танковая дивизия (1 гв. ТА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_11gtd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_20gmsd",
+   "name": "20-я гв. мотострелковая дивизия (1 гв. ТА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Leipzig"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "axis": "hof",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_20gmsd_pvo",
+   "name": "Войсковая ПВО: 20-я гв. мотострелковая дивизия (1 гв. ТА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_20gmsd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_35msd",
+   "name": "35-я мотострелковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Neuruppin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 1,
+   "axis": "center",
+   "note": "резерв фронта; день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_35msd_pvo",
+   "name": "Войсковая ПВО: 35-я мотострелковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_35msd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_90gtd",
+   "name": "90-я гв. танковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Neuruppin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 1,
+   "axis": "altmark",
+   "note": "резерв фронта; день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_90gtd_pvo",
+   "name": "Войсковая ПВО: 90-я гв. танковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_90gtd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_25td",
+   "name": "25-я танковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Neuruppin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 5,
+   "arrives_jitter": 1,
+   "axis": "center",
+   "note": "резерв фронта; день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_25td_pvo",
+   "name": "Войсковая ПВО: 25-я танковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_25td",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_32gtd",
+   "name": "32-я гв. танковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Brandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_80B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - шаблон полков 8-й гв. А из миссии, Т-64 в DCS нет - Т-80Б",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 1,
+   "axis": "harz",
+   "note": "резерв фронта; день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_32gtd_pvo",
+   "name": "Войсковая ПВО: 32-я гв. танковая дивизия (20 гв. А)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_32gtd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "X_2S6_Tunguska",
+     "count": 14,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_10M3",
+     "count": 16,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva8msd",
+   "name": "8-я мотострелковая дивизия ННА (5 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hagenow"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "axis": "north",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva8msd_pvo",
+   "name": "Войсковая ПВО: 8-я мотострелковая дивизия ННА (5 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva8msd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva9pd",
+   "name": "9-я танковая дивизия ННА (5 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Neubrandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "axis": "north",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva9pd_pvo",
+   "name": "Войсковая ПВО: 9-я танковая дивизия ННА (5 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva9pd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva1msd",
+   "name": "1-я мотострелковая дивизия ННА (5 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Brandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "axis": "center",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva1msd_pvo",
+   "name": "Войсковая ПВО: 1-я мотострелковая дивизия ННА (5 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva1msd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva20msd",
+   "name": "20-я мотострелковая дивизия ННА (резерв) (5 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Neubrandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_60",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "arrives_day": 5,
+   "arrives_jitter": 1,
+   "axis": "north",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva20msd_pvo",
+   "name": "Войсковая ПВО: 20-я мотострелковая дивизия ННА (резерв) (5 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva20msd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva4msd",
+   "name": "4-я мотострелковая дивизия ННА (3 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Erfurt"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "axis": "fulda",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva4msd_pvo",
+   "name": "Войсковая ПВО: 4-я мотострелковая дивизия ННА (3 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva4msd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva11msd",
+   "name": "11-я мотострелковая дивизия ННА (3 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Halle"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "axis": "harz",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva11msd_pvo",
+   "name": "Войсковая ПВО: 11-я мотострелковая дивизия ННА (3 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva11msd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva7pd",
+   "name": "7-я танковая дивизия ННА (3 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Leipzig"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 322,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 271,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "axis": "hof",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva7pd_pvo",
+   "name": "Войсковая ПВО: 7-я танковая дивизия ННА (3 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva7pd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_nva17msd",
+   "name": "17-я мотострелковая дивизия ННА (резерв) (3 А ННА)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Halle"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 265,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 185,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_60",
+     "count": 312,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав - советский шаблон (ОЦЕНКА для ННА), техника ННА: Т-72Б вместо Т-72М (ОЦЕНКА)",
+   "estimate": true,
+   "arrives_day": 5,
+   "arrives_jitter": 1,
+   "axis": "harz",
+   "note": "день ввода: 1 - на месте, 2-5 - выдвижение из глубины (ОЦЕНКА)"
+  },
+  {
+   "id": "red_nva17msd_pvo",
+   "name": "Войсковая ПВО: 17-я мотострелковая дивизия ННА (резерв) (3 А ННА)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_nva17msd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb16",
+   "name": "Панцергренадерская бригада 16 (LANDJUT)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Lauenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb16_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 16 (LANDJUT)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb16",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb17",
+   "name": "Панцергренадерская бригада 17 (LANDJUT)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hamburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb17_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 17 (LANDJUT)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb17",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb18",
+   "name": "Панцергренадерская бригада 18 (LANDJUT)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Neumunster"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb18_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 18 (LANDJUT)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb18",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hschb51",
+   "name": "Бригада территориальной обороны 51 (LANDJUT)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "BadSegeberg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 80,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hschb51_pvo",
+   "name": "Войсковая ПВО: Бригада территориальной обороны 51 (LANDJUT)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_hschb51",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb1",
+   "name": "Панцербригада 1 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hannover"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb1_pvo",
+   "name": "Войсковая ПВО: Панцербригада 1 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb1",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb2",
+   "name": "Панцербригада 2 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Braunschweig"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb2_pvo",
+   "name": "Войсковая ПВО: Панцербригада 2 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb2",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb3",
+   "name": "Панцербригада 3 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Nienburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb3_pvo",
+   "name": "Войсковая ПВО: Панцербригада 3 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb3",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb7",
+   "name": "Панцергренадерская бригада 7 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hamburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb7_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 7 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb7",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb8",
+   "name": "Панцербригада 8 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Luneburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb8_pvo",
+   "name": "Войсковая ПВО: Панцербригада 8 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb8",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzlb9",
+   "name": "Учебная панцербригада 9 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Munster"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzlb9_pvo",
+   "name": "Войсковая ПВО: Учебная панцербригада 9 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzlb9",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb31",
+   "name": "Панцергренадерская бригада 31 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bremen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_pzgb31_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 31 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb31",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb32",
+   "name": "Панцергренадерская бригада 32 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bremen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_pzgb32_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 32 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb32",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb33",
+   "name": "Панцербригада 33 (I нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Celle"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb33_pvo",
+   "name": "Войсковая ПВО: Панцербригада 33 (I нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb33",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb4",
+   "name": "Панцергренадерская бригада 4 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Gottingen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb4_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 4 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb4",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb5",
+   "name": "Панцергренадерская бригада 5 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kassel"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb5_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 5 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb5",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb6",
+   "name": "Панцербригада 6 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kassel"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb6_pvo",
+   "name": "Войсковая ПВО: Панцербригада 6 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb6",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb13",
+   "name": "Панцергренадерская бригада 13 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Giessen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_pzgb13_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 13 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb13",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb15",
+   "name": "Панцербригада 15 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Giessen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_pzb15_pvo",
+   "name": "Войсковая ПВО: Панцербригада 15 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb15",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb34",
+   "name": "Панцербригада 34 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Giessen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_pzb34_pvo",
+   "name": "Войсковая ПВО: Панцербригада 34 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb34",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb35",
+   "name": "Панцергренадерская бригада 35 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "BadKissingen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb35_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 35 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb35",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzb36",
+   "name": "Панцербригада 36 (III нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Wurzburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 60,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_pzb36_pvo",
+   "name": "Войсковая ПВО: Панцербригада 36 (III нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzb36",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb10",
+   "name": "Панцергренадерская бригада 10 (II нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Weiden"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb10_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 10 (II нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb10",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb12",
+   "name": "Панцергренадерская бригада 12 (II нем. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Weiden"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 55,
+     "role": "MBT"
+    },
+    {
+     "type": "Marder",
+     "count": 95,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_pzgb12_pvo",
+   "name": "Войсковая ПВО: Панцергренадерская бригада 12 (II нем. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_pzgb12",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 12,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk7",
+   "name": "7-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Rotenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk7_pvo",
+   "name": "Войсковая ПВО: 7-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk7",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk12",
+   "name": "12-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bremen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_uk12_pvo",
+   "name": "Войсковая ПВО: 12-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk12",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk22",
+   "name": "22-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Soltau"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "note": "метка: учебный центр"
+  },
+  {
+   "id": "blue_uk22_pvo",
+   "name": "Войсковая ПВО: 22-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk22",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk4",
+   "name": "4-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bielefeld"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_uk4_pvo",
+   "name": "Войсковая ПВО: 4-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk4",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk6",
+   "name": "6-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_uk6_pvo",
+   "name": "Войсковая ПВО: 6-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk6",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk33",
+   "name": "33-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_uk33_pvo",
+   "name": "Войсковая ПВО: 33-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk33",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk11",
+   "name": "11-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bielefeld"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_uk11_pvo",
+   "name": "Войсковая ПВО: 11-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk11",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_uk20",
+   "name": "20-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bielefeld"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_uk20_pvo",
+   "name": "Войсковая ПВО: 20-я бронетанковая бригада (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk20",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3ad1",
+   "name": "1-я бригада 3-й бронетанковой дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Alsfeld"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3ad1_pvo",
+   "name": "Войсковая ПВО: 1-я бригада 3-й бронетанковой дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us3ad1",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3ad2",
+   "name": "2-я бригада 3-й бронетанковой дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Gelnhausen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3ad2_pvo",
+   "name": "Войсковая ПВО: 2-я бригада 3-й бронетанковой дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us3ad2",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3ad3",
+   "name": "3-я бригада 3-й бронетанковой дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Giessen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3ad3_pvo",
+   "name": "Войсковая ПВО: 3-я бригада 3-й бронетанковой дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us3ad3",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us11acr",
+   "name": "11-й бронекавалерийский полк США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Fulda"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 120,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 115,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "note": "прикрытие Фульдского коридора"
+  },
+  {
+   "id": "blue_us11acr_pvo",
+   "name": "Войсковая ПВО: 11-й бронекавалерийский полк США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us11acr",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us8id1",
+   "name": "1-я бригада 8-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Frankfurt"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_us8id1_pvo",
+   "name": "Войсковая ПВО: 1-я бригада 8-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us8id1",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us8id2",
+   "name": "2-я бригада 8-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Frankfurt"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_us8id2_pvo",
+   "name": "Войсковая ПВО: 2-я бригада 8-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us8id2",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us8id3",
+   "name": "3-я бригада 8-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Frankfurt"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_us8id3_pvo",
+   "name": "Войсковая ПВО: 3-я бригада 8-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us8id3",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1ad1",
+   "name": "1-я бригада 1-й бронетанковой дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Weiden"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1ad1_pvo",
+   "name": "Войсковая ПВО: 1-я бригада 1-й бронетанковой дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us1ad1",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1ad2",
+   "name": "2-я бригада 1-й бронетанковой дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Nurnberg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1ad2_pvo",
+   "name": "Войсковая ПВО: 2-я бригада 1-й бронетанковой дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us1ad2",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1ad3",
+   "name": "3-я бригада 1-й бронетанковой дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Bamberg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1ad3_pvo",
+   "name": "Войсковая ПВО: 3-я бригада 1-й бронетанковой дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us1ad3",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3id1",
+   "name": "1-я бригада 3-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Schweinfurt"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3id1_pvo",
+   "name": "Войсковая ПВО: 1-я бригада 3-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us3id1",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3id2",
+   "name": "2-я бригада 3-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Wurzburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3id2_pvo",
+   "name": "Войсковая ПВО: 2-я бригада 3-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us3id2",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us3id3",
+   "name": "3-я бригада 3-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Hanau"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1
+  },
+  {
+   "id": "blue_us3id3_pvo",
+   "name": "Войсковая ПВО: 3-я бригада 3-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us3id3",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us2acr",
+   "name": "2-й бронекавалерийский полк США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Nurnberg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 120,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 115,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "note": "прикрытие границы с ЧССР и ГДР"
+  },
+  {
+   "id": "blue_us2acr_pvo",
+   "name": "Войсковая ПВО: 2-й бронекавалерийский полк США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us2acr",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us2adf",
+   "name": "Передовая бригада 2-й бронетанковой дивизии США (III амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Bremen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "note": "Гарльштедт"
+  },
+  {
+   "id": "blue_us2adf_pvo",
+   "name": "Войсковая ПВО: Передовая бригада 2-й бронетанковой дивизии США (III амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us2adf",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_nl41",
+   "name": "41-я бронетанковая бригада (Нидерланды) (I нидерл. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Rotenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 50,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 100,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true,
+   "note": "в миссии метка в Нидерландах; по памяти - гарнизон Зедорф, ставим в Ротенбург"
+  },
+  {
+   "id": "blue_nl41_pvo",
+   "name": "Войсковая ПВО: 41-я бронетанковая бригада (Нидерланды) (I нидерл. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_nl41",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 9,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_be4",
+   "name": "4-я механизированная бригада (Бельгия) (I бельг. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); состав бригады - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_be4_pvo",
+   "name": "Войсковая ПВО: 4-я механизированная бригада (Бельгия) (I бельг. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_be4",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_nl42",
+   "name": "42-я бронетанковая бригада (Нидерланды) (I нидерл. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Verden"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 50,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 100,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_nl42_pvo",
+   "name": "Войсковая ПВО: 42-я бронетанковая бригада (Нидерланды) (I нидерл. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_nl42",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 9,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_nl43",
+   "name": "43-я механизированная бригада (Нидерланды) (I нидерл. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Verden"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard_2",
+     "count": 50,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 100,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_nl43_pvo",
+   "name": "Войсковая ПВО: 43-я механизированная бригада (Нидерланды) (I нидерл. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_nl43",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 9,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_be1",
+   "name": "1-я механизированная бригада (Бельгия) (I бельг. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_be1_pvo",
+   "name": "Войсковая ПВО: 1-я механизированная бригада (Бельгия) (I бельг. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_be1",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_be7",
+   "name": "7-я механизированная бригада (Бельгия) (I бельг. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_be7_pvo",
+   "name": "Войсковая ПВО: 7-я механизированная бригада (Бельгия) (I бельг. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_be7",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Gepard",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_dk1",
+   "name": "1-я ютландская бригада (Дания) (LANDJUT)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Rendsburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 80,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_dk2",
+   "name": "2-я ютландская бригада (Дания) (LANDJUT)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Rendsburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Leopard1A3",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "M_113",
+     "count": 80,
+     "role": "APC"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_uk19",
+   "name": "19-я пехотная бригада (Великобритания) (I брит. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Osnabruck"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Chieftain_mk3",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "MCV_80",
+     "count": 45,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 6,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_uk19_pvo",
+   "name": "Войсковая ПВО: 19-я пехотная бригада (Великобритания) (I брит. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_uk19",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Rapier_fsa_launcher",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "Rapier_fsa_optical_tracker_unit",
+     "count": 2,
+     "role": "radar"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us2ad1",
+   "name": "1-я бригада 2-й бронетанковой дивизии США (III амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bremen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 7,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_us2ad1_pvo",
+   "name": "Войсковая ПВО: 1-я бригада 2-й бронетанковой дивизии США (III амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us2ad1",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us2ad2",
+   "name": "2-я бригада 2-й бронетанковой дивизии США (III амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Bremen"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 8,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_us2ad2_pvo",
+   "name": "Войсковая ПВО: 2-я бригада 2-й бронетанковой дивизии США (III амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us2ad2",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1cd",
+   "name": "1-я кавалерийская дивизия США (бригада) (III амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Osnabruck"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 116,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 54,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 9,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_us1cd_pvo",
+   "name": "Войсковая ПВО: 1-я кавалерийская дивизия США (бригада) (III амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us1cd",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us1id1",
+   "name": "1-я бригада 1-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Wurzburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 7,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_us1id1_pvo",
+   "name": "Войсковая ПВО: 1-я бригада 1-й пехотной дивизии США (VII амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us1id1",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_us4id1",
+   "name": "1-я бригада 4-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Frankfurt"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M_1_Abrams",
+     "count": 58,
+     "role": "MBT"
+    },
+    {
+     "type": "M_2_Bradley",
+     "count": 108,
+     "role": "IFV"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 7,
+   "arrives_jitter": 1,
+   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+  },
+  {
+   "id": "blue_us4id1_pvo",
+   "name": "Войсковая ПВО: 1-я бригада 4-й пехотной дивизии США (V амер. АК)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_us4id1",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48_Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam39",
+   "name": "39-й зенитный ракетный батальон HAWK (Эккернфёрде)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 54.481,
+    "lon": 9.793
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam26",
+   "name": "26-й зенитный ракетный батальон Patriot (Хайде)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 54.215,
+    "lon": 9.075
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam37",
+   "name": "37-й зенитный ракетный батальон HAWK (Куксхафен)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 53.841,
+    "lon": 8.552
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam36",
+   "name": "36-й зенитный ракетный батальон HAWK (Бремерфёрде)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 53.491,
+    "lon": 9.134
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam31",
+   "name": "31-й зенитный ракетный батальон HAWK (Вестертимке)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 53.235,
+    "lon": 9.12
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam24",
+   "name": "24-й зенитный ракетный батальон Patriot (Дельменхорст)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 53.047,
+    "lon": 8.623
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam25",
+   "name": "25-й зенитный ракетный батальон Patriot (Эйдельштедт)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 52.715,
+    "lon": 8.536
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam21",
+   "name": "21-й зенитный ракетный батальон Patriot (Мёнезее)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 51.486,
+    "lon": 8.093
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam38",
+   "name": "38-й зенитный ракетный батальон HAWK (Бурбах)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 50.745,
+    "lon": 7.964
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam4_43",
+   "name": "4-я батарея 43-го полка Patriot (Гиссен)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 50.577,
+    "lon": 8.736
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam3_52",
+   "name": "3-я батарея 52-го полка HAWK (Вильдфлеккен)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 50.393,
+    "lon": 9.884
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam43_2",
+   "name": "43-й полк Patriot (Ханау)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 50.177,
+    "lon": 8.959
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam52_6",
+   "name": "52-й полк HAWK (Вюрцбург)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 49.795,
+    "lon": 9.945
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam8_43",
+   "name": "8-я батарея 43-го полка Patriot (Гибельштадт)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 49.659,
+    "lon": 9.991
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam60_3",
+   "name": "60-й полк HAWK (Графенвёр)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 49.727,
+    "lon": 11.908
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "blue_sam43_6",
+   "name": "43-й полк Patriot (Ансбах)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 49.317,
+    "lon": 10.634
+   },
+   "composition": [
+    {
+     "type": "Patriot_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Patriot_ECS",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Patriot_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "red_sam8ga",
+   "name": "Зенитная ракетная бригада 8-й гв. А (Круг; в DCS - Куб)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 50.69,
+    "lon": 11.331
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "red_sam1gta",
+   "name": "Зенитная ракетная бригада 1-й гв. ТА (Круг; в DCS - Куб)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 51.014,
+    "lon": 13.76
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "OOB-миссия Germany_OOB_1989 (метка); в модели - одна батарея на батальон/полк (ОЦЕНКА)",
+   "estimate": true
+  },
+  {
+   "id": "r35odshbr_1",
+   "name": "1-я десантно-штурмовая рота 35-й одшбр",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Brandenburg",
+   "men": 100,
+   "route": [
+    "Brandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r35odshbr_2",
+   "name": "2-я десантно-штурмовая рота 35-й одшбр",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Brandenburg",
+   "men": 100,
+   "route": [
+    "Brandenburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r35odshbr_3",
+   "name": "3-я десантно-штурмовая рота 35-й одшбр",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Magdeburg",
+   "men": 100,
+   "route": [
+    "Magdeburg"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "сводка игрока (35-я одшбр, Котбус - вне карты); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_fschjg271_1",
+   "name": "1./Fallschirmjägerbataillon 271 (Luftlandebrigade 27)",
+   "side": "blue",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Paderborn",
+   "men": 100,
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Soldier_M4_GRG",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier_M249",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "по памяти - проверить (LLBrig 27, Липпштадт); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_fschjg271_2",
+   "name": "2./Fallschirmjägerbataillon 271 (Luftlandebrigade 27)",
+   "side": "blue",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Paderborn",
+   "men": 100,
+   "route": [
+    "Paderborn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Soldier_M4_GRG",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier_M249",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "по памяти - проверить (LLBrig 27, Липпштадт); рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r33iap",
+   "name": "33-й иап (МиГ-29)",
+   "side": "red",
+   "role": "fighter",
+   "base": "wittstock",
+   "type": "MiG_29_Fulcrum",
+   "count": 38,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r773iap",
+   "name": "773-й иап (МиГ-23МЛ/МЛД)",
+   "side": "red",
+   "role": "fighter",
+   "base": "damgarten",
+   "type": "MiG_23MLD",
+   "count": 38,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r787iap",
+   "name": "787-й иап, эскадрильи МиГ-23 (МиГ-23М/МЛ; в DCS - МиГ-23МЛД)",
+   "side": "red",
+   "role": "fighter",
+   "base": "finow",
+   "type": "MiG_23MLD",
+   "count": 38,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r787iap_25",
+   "name": "787-й иап, эскадрилья МиГ-25ПД/ПУ",
+   "side": "red",
+   "role": "interceptor",
+   "base": "finow",
+   "type": "MiG_25PD",
+   "count": 12,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r31iap",
+   "name": "31-й гв. иап (МиГ-23М; в DCS - МиГ-23МЛД)",
+   "side": "red",
+   "role": "fighter",
+   "base": "falkenberg",
+   "type": "MiG_23MLD",
+   "count": 38,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r85iap",
+   "name": "85-й гв. иап (МиГ-29)",
+   "side": "red",
+   "role": "fighter",
+   "base": "merseburg",
+   "type": "MiG_29_Fulcrum",
+   "count": 38,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; с марта 1986 (? другой источник - 1988); число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r35iap",
+   "name": "35-й иап (МиГ-29)",
+   "side": "red",
+   "role": "fighter",
+   "base": "zerbst",
+   "type": "MiG_29_Fulcrum",
+   "count": 38,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; месяц перевооружения в 1987 - ?; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r73iap",
+   "name": "73-й гв. иап (МиГ-29)",
+   "side": "red",
+   "role": "fighter",
+   "base": "kothen",
+   "type": "MiG_29_Fulcrum",
+   "count": 38,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; месяц перевооружения в 1987 - ?; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r833iap",
+   "name": "833-й иап (МиГ-23МЛА/МЛД; в DCS - МиГ-23МЛД)",
+   "side": "red",
+   "role": "fighter",
+   "base": "altes_lager",
+   "type": "MiG_23MLD",
+   "count": 38,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r19apib",
+   "name": "19-й гв. апиб (МиГ-27; в DCS - МиГ-27К)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "larz",
+   "type": "MiG_27K",
+   "count": 36,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r20apib",
+   "name": "20-й гв. апиб (Су-17М3/М4; в DCS - Су-17М4)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "templin",
+   "type": "Su_17M4",
+   "count": 36,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; Су-17М4 с апреля 1987; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r730apib",
+   "name": "730-й апиб (Су-17М3/М4; в DCS - Су-17М4)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "neuruppin",
+   "type": "Su_17M4",
+   "count": 36,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; Су-17М4 с 1986; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r116bap",
+   "name": "116-й гв. бап (Су-24М)",
+   "side": "red",
+   "role": "bomber",
+   "base": "brand",
+   "type": "Su_24M",
+   "count": 36,
+   "strike_radius_km": 400,
+   "source": "сводка игрока по ВВС в Германии; в июле 1989 ушёл в Белоруссию; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r357oshap",
+   "name": "357-й оштап (Су-25; почти весь полк в Афганистане)",
+   "side": "red",
+   "role": "attack",
+   "base": "brandis",
+   "type": "Su_25",
+   "count": 8,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; в 1987 почти весь полк в Афганистане - в Германии ОЦЕНКА 8 самолётов; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r294orap",
+   "name": "294-й орап (Су-17М3Р; в DCS - Су-17М4)",
+   "side": "red",
+   "role": "recon",
+   "base": "allstedt",
+   "type": "Su_17M4",
+   "count": 24,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r931orap",
+   "name": "931-й гв. орап (МиГ-25РБ; в DCS - МиГ-25РБТ)",
+   "side": "red",
+   "role": "recon",
+   "base": "werneuchen",
+   "type": "MiG_25RBT",
+   "count": 24,
+   "strike_radius_km": 400,
+   "source": "сводка игрока по ВВС в Германии; ? Холм даёт Штендаль; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jg1",
+   "name": "JG-1 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)",
+   "side": "red",
+   "role": "fighter",
+   "base": "holzdorf",
+   "type": "MiG_21Bis",
+   "count": 36,
+   "strike_radius_km": 200,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jg8",
+   "name": "JG-8 ВВС ННА (МиГ-21бис)",
+   "side": "red",
+   "role": "fighter",
+   "base": "marxwalde",
+   "type": "MiG_21Bis",
+   "count": 36,
+   "strike_radius_km": 200,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jg2",
+   "name": "JG-2 ВВС ННА (МиГ-21М; в DCS - МиГ-21бис)",
+   "side": "red",
+   "role": "fighter",
+   "base": "neubrandenburg",
+   "type": "MiG_21Bis",
+   "count": 36,
+   "strike_radius_km": 200,
+   "source": "сводка игрока по ВВС в Германии; Тролленхаген; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jg9",
+   "name": "JG-9 ВВС ННА (МиГ-23МЛ/МФ; в DCS - МиГ-23МЛД)",
+   "side": "red",
+   "role": "fighter",
+   "base": "peenemunde",
+   "type": "MiG_23MLD",
+   "count": 36,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jbg77",
+   "name": "JBG-77 ВВС ННА (Су-22М4; в DCS - Су-17М4)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "laage",
+   "type": "Su_17M4",
+   "count": 27,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_mfg28",
+   "name": "MFG-28 ННА (Су-22М4; в DCS - Су-17М4)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "laage",
+   "type": "Su_17M4",
+   "count": 27,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r172obvp",
+   "name": "172-й обвп (Ми-24Д/В/П; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "parchim",
+   "type": "Mi_24P",
+   "count": 40,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r178obvp",
+   "name": "178-й обвп (Ми-24; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "stendal",
+   "type": "Mi_24P",
+   "count": 40,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; Штендаль (Борштель); число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r225obvp",
+   "name": "225-й обвп (Ми-24; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "allstedt",
+   "type": "Mi_24P",
+   "count": 40,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; в 1985 перебазирован в Альтштедт; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r337obvp",
+   "name": "337-й обвп (Ми-24; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "mahlwinkel",
+   "type": "Mi_24P",
+   "count": 40,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_36tfw",
+   "name": "36-е тактическое истребительное крыло (F-15C/D)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "bitburg",
+   "type": "F_15C",
+   "count": 72,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; ранние годы не проверены; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_50tfw",
+   "name": "50-е тактическое истребительное крыло (F-16C/D блок 25; в DCS - блок 50)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hahn",
+   "type": "F_16C_50",
+   "count": 72,
+   "strike_radius_km": 400,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_86tfw",
+   "name": "86-е тактическое истребительное крыло (F-16C блок 25/30; в DCS - блок 50)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "ramstein",
+   "type": "F_16C_50",
+   "count": 48,
+   "strike_radius_km": 400,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_52tfw",
+   "name": "52-е тактическое истребительное крыло (F-4E/F-4G; в DCS - F-4E)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "spangdahlem",
+   "type": "F_4E_45MC",
+   "count": 48,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; F-4G (подавление ПВО) в DCS нет; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_26trw",
+   "name": "26-е тактическое разведывательное крыло (RF-4C; в DCS - F-4E)",
+   "side": "blue",
+   "role": "recon",
+   "base": "zweibrucken",
+   "type": "F_4E_45MC",
+   "count": 18,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; ? по памяти; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_a10",
+   "name": "Передовая площадка A-10A (81-е крыло)",
+   "side": "blue",
+   "role": "attack",
+   "base": "norvenich",
+   "type": "A_10A",
+   "count": 8,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; по плану 1989; Аальхорн и Евер вне карты; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_raf_harrier",
+   "name": "3-я и 4-я эскадрильи RAF (Harrier GR.3; в DCS - AV-8B)",
+   "side": "blue",
+   "role": "attack",
+   "base": "gutersloh",
+   "type": "AV8BNA",
+   "count": 36,
+   "strike_radius_km": 200,
+   "source": "сводка игрока по ВВС в Германии; GR.5 в 1989-90 - ?; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog31",
+   "name": "JaboG 31 (Tornado IDS)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "norvenich",
+   "type": "Tornado_IDS",
+   "count": 32,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog33",
+   "name": "JaboG 33 (Tornado IDS)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "buchel",
+   "type": "Tornado_IDS",
+   "count": 32,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog35",
+   "name": "JaboG 35 (F-4F; в DCS - F-4E)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "pferdsfeld",
+   "type": "F_4E_45MC",
+   "count": 30,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_pahr16",
+   "name": "Противотанковый вертолётный полк 16 (PAH-1; в DCS - SA342M)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "celle",
+   "type": "SA342M",
+   "count": 24,
+   "strike_radius_km": 120,
+   "source": "по памяти - проверить; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_pahr36",
+   "name": "Противотанковый вертолётный полк 36 (PAH-1; в DCS - SA342M)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "fritzlar",
+   "type": "SA342M",
+   "count": 24,
+   "strike_radius_km": 120,
+   "source": "по памяти - проверить; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_us_avn",
+   "name": "Батальон боевых вертолётов армии США (AH-64A)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "giebelstadt",
+   "type": "AH_64A",
+   "count": 18,
+   "strike_radius_km": 150,
+   "source": "по памяти - проверить; часть и аэродром - ОЦЕНКА; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_naew",
+   "name": "Силы ДРЛО НАТО (E-3A)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "norvenich",
+   "type": "E_3A",
+   "count": 3,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; Гайленкирхен вне карты - Нёрфених (ОЦЕНКА); число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_kc135",
+   "name": "Заправщики ВВС США (KC-135)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "ramstein",
+   "type": "KC_135",
+   "count": 4,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; Милденхолл вне карты - Рамштайн (ОЦЕНКА); число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_a50",
+   "name": "Отряд ДРЛО (А-50)",
+   "side": "red",
+   "role": "awacs",
+   "base": "templin",
+   "type": "A_50",
+   "count": 2,
+   "strike_radius_km": 1500,
+   "source": "по памяти - проверить; в ГСВГ на постоянной основе не было - ОЦЕНКА сценария; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r497bap",
+   "name": "497-й бап (Су-24)",
+   "side": "red",
+   "role": "bomber",
+   "base": "sperenberg",
+   "type": "Su_24M",
+   "count": 36,
+   "strike_radius_km": 400,
+   "source": "сводка игрока по ВВС в Германии; Су-17М2 до 1984/85; в июле 1989 ушёл; перебазирован: Гроссенхайн вне карты, здесь - Sperenberg; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r296apib",
+   "name": "296-й апиб (МиГ-21СМТ/МиГ-27; в DCS - МиГ-27К)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "cochstedt",
+   "type": "MiG_27K",
+   "count": 36,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Альтенбург вне карты, здесь - Cochstedt; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r559apib",
+   "name": "559-й апиб (МиГ-27К)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "briest",
+   "type": "MiG_27K",
+   "count": 36,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Финстервальде вне карты, здесь - Briest; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r11orap",
+   "name": "11-й орап (Су-24МР)",
+   "side": "red",
+   "role": "recon",
+   "base": "mahlwinkel",
+   "type": "Su_24MR",
+   "count": 24,
+   "strike_radius_km": 400,
+   "source": "сводка игрока по ВВС в Германии; годы перевооружения - ?; перебазирован: Вельцов вне карты, здесь - Mahlwinkel; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r336obvp",
+   "name": "336-й обвп (Ми-24; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "obermehler_schlotheim",
+   "type": "Mi_24P",
+   "count": 40,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Нора вне карты, здесь - Obermehler Schlotheim; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jg3",
+   "name": "JG-3 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)",
+   "side": "red",
+   "role": "fighter",
+   "base": "stendal",
+   "type": "MiG_21Bis",
+   "count": 36,
+   "strike_radius_km": 200,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Прешен вне карты, здесь - Stendal; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jbg37",
+   "name": "JBG-37 ВВС ННА (МиГ-23БН; в DCS - МиГ-27К)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "parchim",
+   "type": "MiG_27K",
+   "count": 22,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Древиц вне карты, здесь - Parchim; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_jg7",
+   "name": "JG-7 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)",
+   "side": "red",
+   "role": "fighter",
+   "base": "marxwalde",
+   "type": "MiG_21Bis",
+   "count": 36,
+   "strike_radius_km": 200,
+   "source": "сводка игрока по ВВС в Германии; расформирован в 1989 (? месяц); перебазирован: Древиц вне карты, здесь - Marxwalde; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_khg3",
+   "name": "KHG-3 ННА (Ми-24Д; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "brand",
+   "type": "Mi_24P",
+   "count": 24,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Котбус вне карты, здесь - Brand; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_khg5",
+   "name": "KHG-5 ННА (Ми-24Д; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "tutow",
+   "type": "Mi_24P",
+   "count": 24,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; 12 Ми-24П с 15.12.1989; перебазирован: Базеполь вне карты, здесь - Tutow; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_raf_wildenrath",
+   "name": "19-я и 92-я эскадрильи RAF (Phantom FGR.2; в DCS - F-4E)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "wiesbaden",
+   "type": "F_4E_45MC",
+   "count": 24,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Вильденрат вне карты, здесь - Wiesbaden; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_raf_bruggen",
+   "name": "Крыло RAF Брюгген (Tornado GR.1; в DCS - GR.4)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "frankfurt",
+   "type": "Tornado_GR4",
+   "count": 48,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; +9 sqn с 10.1986; перебазирован: Брюгген вне карты, здесь - Frankfurt; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_raf_laarbruch",
+   "name": "Крыло RAF Лаарбрух (Tornado GR.1; в DCS - GR.4)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "buckeburg",
+   "type": "Tornado_GR4",
+   "count": 36,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; +20 sqn с 1984; перебазирован: Лаарбрух вне карты, здесь - Buckeburg; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_raf_2sqn",
+   "name": "2-я эскадрилья RAF (Jaguar GR.1, к концу 80-х Tornado GR.1A; в DCS - Tornado GR.4)",
+   "side": "blue",
+   "role": "recon",
+   "base": "wunstorf",
+   "type": "Tornado_GR4",
+   "count": 12,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; Jaguar в DCS нет; перебазирован: Лаарбрух вне карты, здесь - Wunstorf; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog32",
+   "name": "JaboG 32 (Tornado IDS)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "giebelstadt",
+   "type": "Tornado_IDS",
+   "count": 32,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Лехфельд вне карты, здесь - Giebelstadt; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog34",
+   "name": "JaboG 34 (Tornado IDS)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "sembach",
+   "type": "Tornado_IDS",
+   "count": 32,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; Tornado с 1987 (?); перебазирован: Меммингем вне карты, здесь - Sembach; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog38",
+   "name": "JaboG 38 (Tornado IDS)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "nordholz",
+   "type": "Tornado_IDS",
+   "count": 32,
+   "strike_radius_km": 450,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Евер вне карты, здесь - Nordholz; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog36",
+   "name": "JaboG 36 (F-4F; в DCS - F-4E)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "fassberg",
+   "type": "F_4E_45MC",
+   "count": 36,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Хопстен вне карты, здесь - Fassberg; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jg71",
+   "name": "JG 71 (F-4F; в DCS - F-4E)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "kiel",
+   "type": "F_4E_45MC",
+   "count": 36,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Виттмундхафен вне карты, здесь - Kiel; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jg74",
+   "name": "JG 74 (F-4F; в DCS - F-4E)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "giebelstadt",
+   "type": "F_4E_45MC",
+   "count": 36,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Нойбург вне карты, здесь - Giebelstadt; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog43",
+   "name": "JaboG 43 (Alpha Jet; в DCS - L-39ZA)",
+   "side": "blue",
+   "role": "attack",
+   "base": "nordholz",
+   "type": "L_39ZA",
+   "count": 36,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; Alpha Jet в DCS нет - замена; перебазирован: Ольденбург вне карты, здесь - Nordholz; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog44",
+   "name": "JaboG 44 (Alpha Jet; в DCS - L-39ZA)",
+   "side": "blue",
+   "role": "attack",
+   "base": "sembach",
+   "type": "L_39ZA",
+   "count": 36,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; Alpha Jet в DCS нет - замена; перебазирован: Лайпхайм вне карты, здесь - Sembach; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_jabog49",
+   "name": "JaboG 49 (Alpha Jet; в DCS - L-39ZA)",
+   "side": "blue",
+   "role": "attack",
+   "base": "frankfurt",
+   "type": "L_39ZA",
+   "count": 36,
+   "strike_radius_km": 150,
+   "source": "сводка игрока по ВВС в Германии; Alpha Jet в DCS нет - замена; перебазирован: Фюрстенфельдбрук вне карты, здесь - Frankfurt; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_ag51",
+   "name": "AG 51 (RF-4E; в DCS - F-4E)",
+   "side": "blue",
+   "role": "recon",
+   "base": "ramstein",
+   "type": "F_4E_45MC",
+   "count": 30,
+   "strike_radius_km": 350,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Бремгартен вне карты, здесь - Ramstein; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_cf18",
+   "name": "4-е крыло ВВС Канады (CF-18; в DCS - F/A-18C)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "pferdsfeld",
+   "type": "FA_18C_hornet",
+   "count": 36,
+   "strike_radius_km": 400,
+   "source": "сводка игрока по ВВС в Германии; Баден-Зёллинген и Лар; перевооружение 1985-88 - ?; перебазирован: Баден-Зёллинген вне карты, здесь - Pferdsfeld; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_a10_ahlhorn",
+   "name": "Передовая площадка A-10A Аальхорн (81-е крыло)",
+   "side": "blue",
+   "role": "attack",
+   "base": "wunstorf",
+   "type": "A_10A",
+   "count": 8,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Аальхорн вне карты, здесь - Wunstorf; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_a10_jever",
+   "name": "Передовая площадка A-10A Евер (81-е крыло)",
+   "side": "blue",
+   "role": "attack",
+   "base": "fassberg",
+   "type": "A_10A",
+   "count": 8,
+   "strike_radius_km": 250,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Евер вне карты, здесь - Fassberg; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r226osap",
+   "name": "226-й осап (Ан-12/Ан-26; в DCS - Ан-26Б)",
+   "side": "red",
+   "role": "transport",
+   "base": "sperenberg",
+   "type": "An_26B",
+   "count": 24,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r226osap_8",
+   "name": "226-й осап, вертолёты (Ми-8)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "sperenberg",
+   "type": "Mi_8MT",
+   "count": 12,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r239ovp_6",
+   "name": "239-й овп (Ми-6А; в DCS - Ми-26)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "oranienburg",
+   "type": "Mi_26",
+   "count": 12,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; Ми-6 в DCS нет - замена; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r239ovp_8",
+   "name": "239-й овп (Ми-8МТ)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "oranienburg",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r172obvp_8",
+   "name": "172-й обвп, эскадрилья Ми-8",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "parchim",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r178obvp_8",
+   "name": "178-й обвп, эскадрилья Ми-8",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "stendal",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r225obvp_8",
+   "name": "225-й обвп, эскадрилья Ми-8",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "allstedt",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r336obvp_8",
+   "name": "336-й обвп, эскадрилья Ми-8",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "obermehler_schlotheim",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Нора вне карты, здесь - Obermehler Schlotheim; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r337obvp_8",
+   "name": "337-й обвп, эскадрилья Ми-8",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "mahlwinkel",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_thg34",
+   "name": "THG-34 ННА (Ми-8Т; в DCS - Ми-8МТ)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "briest",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_khg3_8",
+   "name": "KHG-3 ННА, Ми-8ТБ (в DCS - Ми-8МТ)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "brand",
+   "type": "Mi_8MT",
+   "count": 8,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Котбус вне карты, здесь - Brand; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_khg5_8",
+   "name": "KHG-5 ННА, Ми-8ТБ (в DCS - Ми-8МТ)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "tutow",
+   "type": "Mi_8MT",
+   "count": 8,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; перебазирован: Базеполь вне карты, здесь - Tutow; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "nva_tfg44",
+   "name": "TFG-44 ННА (Ту-134/Як-40/Ан-26; в DCS - Як-40)",
+   "side": "red",
+   "role": "transport",
+   "base": "marxwalde",
+   "type": "Yak_40",
+   "count": 8,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_raf_18sqn",
+   "name": "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47D)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "gutersloh",
+   "type": "CH_47D",
+   "count": 12,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_raf_230sqn",
+   "name": "230-я эскадрилья RAF (Puma HC.1; в DCS - UH-1H)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "gutersloh",
+   "type": "UH_1H",
+   "count": 12,
+   "strike_radius_km": 300,
+   "source": "сводка игрока по ВВС в Германии; Puma в DCS нет - замена; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_ltg62",
+   "name": "LTG 62 (C-160 Transall; в DCS - C-130)",
+   "side": "blue",
+   "role": "transport",
+   "base": "wunstorf",
+   "type": "C_130",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "по памяти - проверить; Transall в DCS нет - замена; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_ltg61",
+   "name": "LTG 61 (C-160 Transall; в DCS - C-130)",
+   "side": "blue",
+   "role": "transport",
+   "base": "giebelstadt",
+   "type": "C_130",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "по памяти - проверить; Transall в DCS нет - замена; перебазирован: Пенцинг вне карты, здесь - Giebelstadt; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_ltg63",
+   "name": "LTG 63 (C-160 Transall; в DCS - C-130)",
+   "side": "blue",
+   "role": "transport",
+   "base": "nordholz",
+   "type": "C_130",
+   "count": 20,
+   "strike_radius_km": 300,
+   "source": "по памяти - проверить; Transall в DCS нет - замена; перебазирован: Хон вне карты, здесь - Nordholz; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_us_lift",
+   "name": "Вертолётный батальон армии США (UH-60A)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "wiesbaden",
+   "type": "UH_60A",
+   "count": 24,
+   "strike_radius_km": 300,
+   "source": "по памяти - проверить; часть и аэродром - ОЦЕНКА; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "b_hfr35",
+   "name": "Транспортный вертолётный полк Хересфлигер (CH-53G; в DCS - CH-53E)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "mendig",
+   "type": "CH_53E",
+   "count": 18,
+   "strike_radius_km": 300,
+   "source": "по памяти - проверить; часть - ОЦЕНКА; число и радиус действия - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "variants": [
+  {
+   "name": "base",
+   "title": "Удар ОВД по всему фронту (1987)"
+  }
+ ],
+ "replacements": {
+  "air_per_day": 2,
+  "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "long": [
+    {
+     "name": "С-200",
+     "composition": [
+      {
+       "type": "RLS_19J6",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "RPC_5N62V",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S_200_Launcher",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ],
+   "medium": [
+    {
+     "name": "С-75",
+     "composition": [
+      {
+       "type": "p-19 s-125 sr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "SNR_75V",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S_75M_Volhov",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    },
+    {
+     "name": "С-125",
+     "composition": [
+      {
+       "type": "p-19 s-125 sr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "snr s-125 tr",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "5p73 s-125 ln",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ],
+   "short": [
+    {
+     "name": "Оса, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Osa_9A33_ln",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    },
+    {
+     "name": "С-60",
+     "composition": [
+      {
+       "type": "SON_9",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "S-60_Type59_Artillery",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ],
+   "gci": [
+    {
+     "name": "КРУ",
+     "composition": [
+      {
+       "type": "GCI_station_MiG29",
+       "role": "control",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Roland, Gepard",
+     "composition": [
+      {
+       "type": "Roland_Radar",
+       "role": "radar",
+       "count": 1
+      },
+      {
+       "type": "Roland_ADS",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "Gepard",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_about_ad_templates": "Объектовая ПВО: сторона -> ярус -> варианты состава батареи на позиции ad_sites сектора (ОЦЕНКИ: одна батарея на позицию). Нет шаблона яруса - позиция стоит пустой.",
+ "_relocated": {
+  "r497bap": {
+   "from": "Гроссенхайн",
+   "to": "Sperenberg"
+  },
+  "r296apib": {
+   "from": "Альтенбург",
+   "to": "Cochstedt"
+  },
+  "r559apib": {
+   "from": "Финстервальде",
+   "to": "Briest"
+  },
+  "r11orap": {
+   "from": "Вельцов",
+   "to": "Mahlwinkel"
+  },
+  "r336obvp": {
+   "from": "Нора",
+   "to": "Obermehler Schlotheim"
+  },
+  "nva_jg3": {
+   "from": "Прешен",
+   "to": "Stendal"
+  },
+  "nva_jbg37": {
+   "from": "Древиц",
+   "to": "Parchim"
+  },
+  "nva_jg7": {
+   "from": "Древиц",
+   "to": "Marxwalde"
+  },
+  "nva_khg3": {
+   "from": "Котбус",
+   "to": "Brand"
+  },
+  "nva_khg5": {
+   "from": "Базеполь",
+   "to": "Tutow"
+  },
+  "b_raf_wildenrath": {
+   "from": "Вильденрат",
+   "to": "Wiesbaden"
+  },
+  "b_raf_bruggen": {
+   "from": "Брюгген",
+   "to": "Frankfurt"
+  },
+  "b_raf_laarbruch": {
+   "from": "Лаарбрух",
+   "to": "Buckeburg"
+  },
+  "b_raf_2sqn": {
+   "from": "Лаарбрух",
+   "to": "Wunstorf"
+  },
+  "b_jabog32": {
+   "from": "Лехфельд",
+   "to": "Giebelstadt"
+  },
+  "b_jabog34": {
+   "from": "Меммингем",
+   "to": "Sembach"
+  },
+  "b_jabog38": {
+   "from": "Евер",
+   "to": "Nordholz"
+  },
+  "b_jabog36": {
+   "from": "Хопстен",
+   "to": "Fassberg"
+  },
+  "b_jg71": {
+   "from": "Виттмундхафен",
+   "to": "Kiel"
+  },
+  "b_jg74": {
+   "from": "Нойбург",
+   "to": "Giebelstadt"
+  },
+  "b_jabog43": {
+   "from": "Ольденбург",
+   "to": "Nordholz"
+  },
+  "b_jabog44": {
+   "from": "Лайпхайм",
+   "to": "Sembach"
+  },
+  "b_jabog49": {
+   "from": "Фюрстенфельдбрук",
+   "to": "Frankfurt"
+  },
+  "b_ag51": {
+   "from": "Бремгартен",
+   "to": "Ramstein"
+  },
+  "b_cf18": {
+   "from": "Баден-Зёллинген",
+   "to": "Pferdsfeld"
+  },
+  "b_a10_ahlhorn": {
+   "from": "Аальхорн",
+   "to": "Wunstorf"
+  },
+  "b_a10_jever": {
+   "from": "Евер",
+   "to": "Fassberg"
+  },
+  "r336obvp_8": {
+   "from": "Нора",
+   "to": "Obermehler Schlotheim"
+  },
+  "nva_khg3_8": {
+   "from": "Котбус",
+   "to": "Brand"
+  },
+  "nva_khg5_8": {
+   "from": "Базеполь",
+   "to": "Tutow"
+  },
+  "b_ltg61": {
+   "from": "Пенцинг",
+   "to": "Giebelstadt"
+  },
+  "b_ltg63": {
+   "from": "Хон",
+   "to": "Nordholz"
+  }
+ },
+ "_about_relocated": "Части с баз вне карты Cold War Germany перебазированы на аэродромы карты своей стороны (tools/gen_germany.py, relocate): ближайший к настоящей базе, сначала пустующие, по вместимости стоянок. Транспорт - в составе сил без задач (логистика, десанты, CSAR - позже).",
+ "_not_included": "ННА: учебные FAG-15 и FAG-25, 968 иап (тип - ?); овп БУ, отдельные эскадрильи связи (осаэ), РЭБ; бельгийские и голландские ВВС, 32-я группа F-15 (Зестерберг, Нидерланды)."
+}

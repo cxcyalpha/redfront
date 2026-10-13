@@ -2,8 +2,11 @@
 logistics_note), не из документа.
 
   * Склады (роль depot) в пунктах. Запас = 1 - повреждение. Склад в пункте, который занял противник, потерян.
-  * Снабжение части: есть путь по своей территории и открытым связям до своего склада с запасом от supply_min_stock,
-    не длиннее supply_km - снабжение 1.0, иначе unsupplied (0.5): марш медленнее, бой слабее, восстановление медленнее.
+  * Снабжение - в тоннах (supply): склады с запасом, подвоз из тыла по своей территории, воздушные перевозки
+    транспортной авиацией (задача airlift плана полётов), расход частей (по состоянию: бой больше всего) и авиации
+    (на вылет). Часть берёт со своих складов не дальше supply_km по своей территории; получила меньше нормы -
+    снабжение ниже (до unsupplied): марш медленнее, бой слабее, восстановление медленнее. Аэродром без снабжения
+    выпускает меньше самолётов.
   * Мосты (роль bridge) на связях графа: разрушенный (повреждение 1) закрывает свои связи, пока не починят.
     Малый мост (minor: найден зондом карты, не через Эльбу) связь не закрывает - объезд: путь снабжения по связи
     длиннее на bridge_detour_km, марш по ней медленнее (sim.py). Склад, найденный зондом (supply: false), - цель
@@ -17,7 +20,7 @@ logistics_note), не из документа.
 """
 from __future__ import annotations
 
-from . import model
+from . import convoys, model
 
 
 def _sim(state: dict, side: str) -> dict:
@@ -58,36 +61,255 @@ def bridge_side(state: dict, br: dict) -> str | None:
     return owners.pop() if len(owners) == 1 else None
 
 
+# ---------------------------------------------------------------- снабжение в тоннах (ОЦЕНКИ: раздел sim доктрины)
+CONSUME_T = {"battle": 1.0, "march": 0.5, "refit": 0.3, "defend": 0.2, "halted": 0.2}   # т на исправную машину в сутки
+PRIORITY = ("battle", "march", "refit", "defend", "halted")    # кто первым получает снабжение со склада
+DEPOT_DAYS = 10            # ёмкость складов стороны - столько суток расхода всех частей в обороне
+SUPPLY_INFLOW = 2.5        # подвоз из тыла в сутки - x расход всех частей в обороне (марш - 2.5x: держится; бой - 5x: склады тают)
+SORTIE_T = {"air": 4.0, "heli": 1.5}   # т на один самолёто-/вертолёто-вылет (топливо, боеприпасы)
+ENTRY_N = 3                # пунктов входа подвоза: дальние от фронта свои пункты (если в секторе нет supply_entry)
+WARN_BELOW = 0.75          # о снабжении части - сообщение при переходе через эту долю
+
+
 def depot_stock(d: dict) -> float:
-    return 0.0 if d.get("state") == "lost" else max(0.0, 1.0 - d.get("damage", 0.0))
+    """Запас склада, доля ёмкости. Склад без учёта в тоннах (старая кампания до первых суток) - 1 - повреждение."""
+    if d.get("state") == "lost":
+        return 0.0
+    if d.get("cap_t"):
+        return max(0.0, d.get("stock_t", 0.0) / d["cap_t"])
+    return max(0.0, 1.0 - d.get("damage", 0.0))
+
+
+def _rate(state: dict, side: str, key: str, default):
+    return _sim(state, side).get(key, default)
+
+
+def demand_t(state: dict, u: dict, st: str | None = None) -> float:
+    """Расход части в сутки, т: исправные машины (с приданными) x норма состояния (consume_t доктрины)."""
+    rates = _rate(state, u["side"], "consume_t", CONSUME_T)
+    n = sum(model.alive_by_type(u).values())
+    n += sum(sum(model.alive_by_type(a).values()) for a in state["units"].values()
+             if a.get("attached_to") == u["id"] and a["state"] != "destroyed")
+    return n * rates.get(st or u["state"], rates.get("defend", 0.2))
+
+
+def _side_base_t(state: dict, side: str) -> float:
+    from . import ops
+    return sum(demand_t(state, u, "defend") for u in ops._maneuver(state, side))
+
+
+def init_depots(state: dict) -> None:
+    """Ёмкость и запас складов в тоннах - при первом расчёте (новая кампания и старые сохранения): ёмкость
+    depot_days суток расхода стороны в обороне, поровну по её складам; запас - полный (минус повреждение)."""
+    for side in model.SIDES:
+        ds = [d for d in objects(state, "depot") if d["side"] == side and supplies(d) and not d.get("cap_t")]
+        if not ds:
+            continue
+        n = sum(1 for d in objects(state, "depot") if d["side"] == side and supplies(d))
+        cap = max(100.0, _rate(state, side, "depot_days", DEPOT_DAYS) * _side_base_t(state, side) / n)
+        for d in ds:
+            d["cap_t"] = round(cap)
+            d["stock_t"] = 0.0 if d.get("state") == "lost" else d["cap_t"] * (1.0 - d.get("damage", 0.0))
+
+
+def _clip(d: dict) -> None:
+    """Повреждение склада уничтожает запас: запас не больше ёмкости x (1 - повреждение)."""
+    top = 0.0 if d.get("state") == "lost" else d["cap_t"] * max(0.0, 1.0 - d.get("damage", 0.0))
+    d["stock_t"] = max(0.0, min(d.get("stock_t", 0.0), top))
+
+
+def _room(d: dict) -> float:
+    return 0.0 if d.get("state") == "lost" else max(0.0, d["cap_t"] * (1.0 - d.get("damage", 0.0)) - d.get("stock_t", 0.0))
+
+
+def _reach(state: dict, side: str, sources: list[str], g: dict) -> dict[str, float]:
+    """Км от ближайшего из sources (свои пункты) до каждого пункта: идти можно только через свои пункты (как
+    ops.path(side=...)): чужой пункт получает расстояние, но дальше через него хода нет."""
+    import heapq
+    dist = {p: 0.0 for p in sources if state["places"][p].get("side") == side}
+    q = [(0.0, p) for p in dist]
+    while q:
+        d, u = heapq.heappop(q)
+        if d > dist.get(u, 1e18) or (state["places"][u].get("side") != side):
+            continue
+        for v, w in g[u].items():
+            if d + w < dist.get(v, 1e18):
+                dist[v] = d + w
+                heapq.heappush(q, (d + w, v))
+    return dist
+
+
+def entries(state: dict, side: str) -> list[str]:
+    """Пункты входа подвоза из тыла (вне сектора): supply_entry сектора, иначе ENTRY_N своих пунктов, дальних от фронта."""
+    from . import ops
+    own = [p for p, pl in state["places"].items() if pl.get("side") == side]
+    fixed = [p for p in (state.get("supply_entry") or {}).get(side, []) if p in own]
+    if fixed:
+        return fixed
+    fl = ops.front_links(state)
+    if not fl:
+        return own
+    mids = [model.lerp(state["places"][a], state["places"][b], 0.5) for a, b in fl]
+    return sorted(own, key=lambda p: -min(model.dist_km(state["places"][p], m) for m in mids))[:ENTRY_N]
+
+
+def road_connected(state: dict, side: str, g: dict | None = None) -> set[str]:
+    """Склады стороны, до которых есть путь подвоза из тыла (по своей территории, открытым связям)."""
+    from . import ops
+    g = g or ops.graph(state)
+    dist = _reach(state, side, entries(state, side), g)
+    return {d["id"] for d in objects(state, "depot") if d["side"] == side and d.get("place") in dist}
+
+
+def _depot_maps(state: dict, side: str, g: dict) -> dict[str, dict[str, float]]:
+    return {d["id"]: _reach(state, side, [d["place"]], g) for d in objects(state, "depot")
+            if d["side"] == side and supplies(d) and d.get("state") != "lost" and d.get("place") in state["places"]}
+
+
+def _draw(state: dict, need: float, node: str, maps: dict, max_km: float | None) -> tuple[float, bool]:
+    """Взять need т с ближних складов, до которых от node есть путь (не длиннее max_km). -> (взято, путь есть)."""
+    got, any_path = 0.0, False
+    for did, km in sorted(((did, m[node]) for did, m in maps.items() if node in m), key=lambda x: x[1]):
+        if max_km is not None and km > max_km:
+            break
+        any_path = True
+        d = state["units"][did]
+        take = min(need - got, d.get("stock_t", 0.0))
+        d["stock_t"] = d.get("stock_t", 0.0) - take
+        got += take
+        if got >= need - 1e-9:
+            break
+    return got, any_path
+
+
+def _airbase_node(state: dict, bid: str) -> str:
+    b = state["airbases"][bid]
+    return min(state["places"], key=lambda p: model.dist_km(b, state["places"][p]))
+
+
+def airlift_cargo_t(state: dict, unit: dict) -> float:
+    """Груз одного борта, т: cargo_t типа (aircraft.json), иначе по роли (ОЦЕНКА)."""
+    c = model.aircraft_info(unit.get("type", "")).get("cargo_t")
+    return float(c) if c else (5.0 if unit["role"] == "transport" else 2.0)
 
 
 def supply(state: dict) -> list[str]:
-    """Снабжение частей (u['supply']): путь по своей территории и открытым связям до своего склада с запасом."""
+    """Снабжение за сутки (ОЦЕНКИ, logistics_note доктрины). Склад - запас в тоннах (stock_t) из ёмкости cap_t;
+    повреждение склада уничтожает запас сверх cap_t x (1 - повреждение).
+      1. Воздушные перевозки плана полётов суток (задача airlift): груз бортов (минус сбитые в миссии) - на склад
+         у аэродрома назначения.
+      2. Подвоз из тыла: supply_inflow x расход всех частей стороны в обороне - на склады, до которых есть путь от
+         пунктов входа (тыл сектора) по своей территории; делится по недостаче. Отрезанный склад подвоза не получает.
+      3. Расход: части - по порядку PRIORITY (бой первым), со своих складов не дальше supply_km по своей территории;
+         авиация - sortie_t на самолёто-вылет плана полётов, со складов, до которых от аэродрома есть путь.
+    Снабжение части u['supply'] = unsupplied + (1 - unsupplied) x доля полученного (supply_frac); аэродрома -
+    airbases[...]['supply'] (доля к вылету в available)."""
     from . import ops
     lines = []
     sides_with_depots = {d["side"] for d in objects(state, "depot") if supplies(d)}
-    for u in ops._maneuver(state):
-        sim = _sim(state, u["side"])
-        if u["side"] not in sides_with_depots:   # у стороны нет складов в секторе - тыл не моделируется
-            u["supply"] = 1.0
+    init_depots(state)
+    for d in objects(state, "depot"):
+        if d.get("cap_t"):
+            _clip(d)
+    g = ops.graph(state)
+    a = state.get("ato") or {}
+    for side in model.SIDES:
+        if side not in sides_with_depots:
+            for u in ops._maneuver(state, side):
+                u["supply"], u["supply_frac"] = 1.0, 1.0
             continue
-        here = ops.node_of(state, u)
-        best = None
-        for d in objects(state, "depot"):
-            if d["side"] != u["side"] or not supplies(d) or depot_stock(d) < sim["supply_min_stock"]:
+        sim = _sim(state, side)
+        unsup = sim["unsupplied"]
+        ds = [d for d in objects(state, "depot") if d["side"] == side and supplies(d)]
+        # 1. воздушные перевозки - первыми: груз уже на складе, дороги довозят остальное
+        air = 0.0
+        for e in a.get("entries", []):
+            if e["side"] != side or e["kind"] != "airlift":
                 continue
-            p = ops.path(state, here, d["place"], side=u["side"])
-            if p is not None:
-                km = sum(model.dist_km(state["places"][a], state["places"][b])
-                         + (sim.get("bridge_detour_km", 0) if link_detour(state, a, b) else 0) for a, b in zip(p, p[1:]))
-                best = km if best is None else min(best, km)
-        was = u.get("supply", 1.0)
-        u["supply"] = 1.0 if best is not None and best <= sim["supply_km"] else sim["unsupplied"]
-        if u["supply"] < 1.0 and was >= 1.0:
-            lines.append(f"{u['name']}: без снабжения (нет пути до склада).")
-        elif u["supply"] >= 1.0 and was < 1.0:
-            lines.append(f"{u['name']}: снабжение восстановлено.")
+            grp = e["task"]["package"][0]
+            perf = state["units"].get(grp["performer"])
+            d = state["units"].get(grp["objective"].get("depot"))
+            if not perf or not d or d.get("state") == "lost":
+                continue
+            n = max(0, grp["size"] - (a.get("lost") or {}).get(e["id"], 0))
+            t = min(_room(d), n * airlift_cargo_t(state, perf))
+            d["stock_t"] += t
+            air += t
+        # 2. подвоз из тыла (остаток места после воздушного груза)
+        conn = road_connected(state, side, g)
+        inflow = _rate(state, side, "supply_inflow", SUPPLY_INFLOW) * _side_base_t(state, side)
+        rooms = {d["id"]: _room(d) for d in ds if d["id"] in conn}
+        tot_room = sum(rooms.values())
+        road = min(inflow, tot_room)
+        lost_by = convoys.depot_losses(state, side)   # колонны, разбитые на путях подвоза (миссии и удары ИИ)
+        convoy_lost = 0.0
+        for d in ds:
+            if rooms.get(d["id"]):
+                share = road * rooms[d["id"]] / tot_room
+                lost_here = min(share, lost_by.get(d["id"], 0.0))
+                d["stock_t"] += share - lost_here
+                convoy_lost += lost_here
+        road -= convoy_lost
+        (state.get("convoy_losses") or {}).pop(side, None)
+        cut = [d for d in ds if d["id"] not in conn and d.get("state") != "lost"]
+        for d in cut:
+            if not d.get("_cut"):
+                lines.append(f"{d['name']}: отрезан от подвоза из тыла (только воздухом).")
+            d["_cut"] = True
+        for d in ds:
+            if d["id"] in conn and d.pop("_cut", None):
+                lines.append(f"{d['name']}: подвоз из тыла восстановлен.")
+        # 3. расход: части по приоритету, затем авиация
+        maps = _depot_maps(state, side, g)
+        used = 0.0
+        units = sorted(ops._maneuver(state, side), key=lambda u: PRIORITY.index(u["state"]) if u["state"] in PRIORITY else 9)
+        for u in units:
+            need = demand_t(state, u)
+            got, reach = _draw(state, need, ops.node_of(state, u), maps, sim["supply_km"]) if need > 0 else (0.0, True)
+            used += got
+            frac = 1.0 if need <= 1e-9 else got / need
+            was = u.get("supply", 1.0)
+            u["supply_frac"] = round(frac, 3)
+            u["supply"] = round(unsup + (1.0 - unsup) * frac, 3)
+            if u["supply"] < WARN_BELOW <= was:
+                lines.append(f"{u['name']}: " + (f"не хватает снабжения ({frac:.0%} нормы) - склады пусты." if reach else
+                             f"без снабжения - нет своего склада с запасом в {sim['supply_km']} км по своей территории."))
+            elif u["supply"] >= WARN_BELOW > was:
+                lines.append(f"{u['name']}: снабжение восстановлено ({frac:.0%} нормы).")
+        sorties: dict[str, float] = {}
+        for e in a.get("entries", []):
+            if e["side"] != side or e["kind"] == "airlift":
+                continue
+            for grp in e["task"]["package"]:
+                perf = state["units"].get(grp["performer"])
+                if perf:
+                    sorties[grp["base"]] = sorties.get(grp["base"], 0.0) + grp["size"] * \
+                        _rate(state, side, "sortie_t", SORTIE_T).get(model.category(perf), 4.0)
+        for bid, b in state["airbases"].items():
+            if b.get("side") != side:
+                continue
+            need = sorties.get(bid, 0.0)
+            if need <= 0:
+                b["supply"] = 1.0 if b.get("supply") is None else min(1.0, b["supply"] + 0.5)   # без вылетов - копит
+                continue
+            got, _p = _draw(state, need, _airbase_node(state, bid), maps, None)
+            used += got
+            b["supply"] = round(got / need, 3)
+        # потоки путей подвоза на следующие сутки (convoys.py): недостача складов после расхода, в пределах подвоза
+        need = {d["id"]: _room(d) for d in ds if d["id"] in conn}
+        tot_need = sum(need.values())
+        k = min(1.0, inflow / tot_need) if tot_need else 0.0
+        state.setdefault("supply_routes", {})[side] = convoys.forecast(state, side, {i: n * k for i, n in need.items()}, g)
+        stock = sum(d.get("stock_t", 0.0) for d in ds)
+        cap = sum(d["cap_t"] for d in ds) or 1.0
+        state.setdefault("supply_log", {})[side] = {"day": state["day"], "road_t": round(road), "air_t": round(air),
+                                                   "convoy_lost_t": round(convoy_lost),
+                                                   "used_t": round(used), "stock_t": round(stock), "cap_t": round(cap),
+                                                   "cut": [d["id"] for d in cut]}
+        lines.append(f"Тыл ({'красные' if side == 'red' else 'синие'}): подвоз {road:.0f} т"
+                     + (f" (колонны разбиты - недовезено {convoy_lost:.0f} т)" if convoy_lost >= 0.5 else "")
+                     + f", воздухом {air:.0f} т, "
+                     f"расход {used:.0f} т; запас складов {stock:.0f} т ({stock / cap:.0%}).")
     return lines
 
 
@@ -160,6 +382,14 @@ def repairs(state: dict) -> list[str]:
 def replacements(state: dict) -> list[str]:
     rate = (state.get("replacements") or {}).get("air_per_day", 0)
     lines = []
+    for u in state["units"].values():            # экипажи: crews_per_day доктрины до штата (из училищ и резерва)
+        if "crews" in u and u["crews"] < u.get("crews0", 0):
+            u["crews_acc"] = u.get("crews_acc", 0.0) + _sim(state, u["side"]).get("crews_per_day", 0) * industry(state, u["side"])
+            add = min(int(u["crews_acc"]), u["crews0"] - u["crews"])
+            if add > 0:
+                u["crews"] += add
+                u["crews_acc"] -= add
+                lines.append(f"{u['name']}: пополнение +{add} экипаж(а), экипажей {u['crews']}.")
     for u in state["units"].values():
         if model.category(u) not in ("air", "heli") or u.get("count", 0) >= u.get("count0", 0):
             continue
@@ -179,7 +409,10 @@ def available(state: dict, unit: dict) -> int:
         return 0
     af = state["units"].get(f"af_{unit.get('base')}")
     dmg = af.get("damage", 0.0) if af else 0.0
-    return int(unit.get("count", 0) * (1.0 - dmg))
+    sup = base.get("supply")                     # аэродром без снабжения (supply) - меньше самолётов к вылету
+    k = 1.0 if sup is None else _sim(state, unit["side"])["unsupplied"] + (1.0 - _sim(state, unit["side"])["unsupplied"]) * sup
+    n = int(unit.get("count", 0) * (1.0 - dmg) * k + 1e-9)
+    return min(n, unit["crews"]) if "crews" in unit else n   # без экипажей самолёт не летит (csar.py)
 
 
 def air_defence(state: dict) -> list[str]:

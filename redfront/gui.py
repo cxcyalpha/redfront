@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, debrief, logistics, mapobj, model, ops, planner, roads, sim
+from . import ato, convoys, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -75,12 +75,15 @@ def view(st: dict) -> dict:
         if cat in ("depot", "bridge", "airfield", "factory"):
             objects.append({"id": u["id"], "name": u["name"], "role": cat, "side": u.get("side"), "pos": _ll(u["pos"]),
                             "damage": round(u.get("damage", 0.0), 2), "state": u.get("state"),
-                            "checked": bool(u.get("pos_checked")) or cat == "airfield"})
+                            "checked": bool(u.get("pos_checked")) or cat == "airfield",
+                            **({"stock": round(logistics.depot_stock(u), 2), "stock_t": round(u.get("stock_t", 0)),
+                                "cut": bool(u.get("_cut"))} if cat == "depot" and u.get("cap_t") else {})})
         elif cat in ("air", "heli"):
             b = st["airbases"].get(u["base"], {})
             air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
                         "count": u.get("count", 0), "count0": u.get("count0", u.get("count", 0)),
-                        "available": logistics.available(st, u), "base": b.get("name", u["base"])})
+                        "available": logistics.available(st, u), "base": b.get("name", u["base"]),
+                        "crews": u.get("crews"), "crews0": u.get("crews0")})
         elif cat in ("ground", "sam", "gci"):
             if u["state"] == "pending":
                 pos = st["places"][u["route"][0]] if u.get("route") else u.get("pos")
@@ -90,7 +93,8 @@ def view(st: dict) -> dict:
                 continue
             g = {"id": u["id"], "name": u["name"], "side": u["side"], "cat": cat, "state": u["state"],
                  "order": u.get("order"), "strength": round(model.strength(u), 2), "pos": _ll(pos),
-                 "supply": u.get("supply", 1.0), "attached": bool(u.get("attached_to")),
+                 "supply": u.get("supply", 1.0), "supply_frac": u.get("supply_frac", 1.0 if u.get("supply", 1.0) >= 1 else 0.0),
+                 "attached": bool(u.get("attached_to")),
                  "arrives": u.get("arrives_day"),
                  "engaged": [units[f]["name"] for f in u.get("engaged", []) if f in units],
                  "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", []))}
@@ -128,7 +132,15 @@ def view(st: dict) -> dict:
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open")}
                      for k, b in st["airbases"].items()],
         "tasks": tasks, "task_reason": st.get("task_reason") if not tasks else None,
+        "supply_log": st.get("supply_log") or {},
+        "supply_routes": [{"pts": [_ll(q) for q in model.route_points(st, {"route": l.split(">")})], "t": round(t),
+                           "link": l.replace(">", " - ")}
+                          for l, t in convoys.link_flows(st, st["player_side"]).items()],   # свои пути подвоза (поток, т/сутки)
+        "downed": [{"id": d["id"], "side": d["side"], "pos": _ll(d["pos"]), "freq": d["freq_khz"], "day": d["day"],
+                    "title": csar.title(st, d)} for d in st.get("downed", [])
+                   if d["side"] == st["player_side"]],    # свои сбитые экипажи (чужие - не видны)
         "ato": ato.rows(st), "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
+        "ground_time": ato.hhmm(st.get("ground_s") or 0),          # наземная обстановка - на это время (sim.advance)
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],
     }
@@ -146,12 +158,40 @@ class App:
             raise ValueError(f"недопустимое имя файла кампании: {name}")
         return self.root / name
 
+    def presets(self, tid: str) -> list[dict]:
+        """Пресеты состава сил театра: data/oob_<театр>*.json (пресеты по годам) и свои - presets/*.json в папке
+        проекта (копии для правки; театр - поле theatre в файле). file - то, что передаётся в new."""
+        _t, _sec, default, _title = next(t for t in THEATRES if t[0] == tid)
+        out = []
+        files = sorted(model.DATA.glob(f"oob_{tid}*.json"), key=lambda f: (f.name != default, f.name))
+        user = sorted((self.root / "presets").glob("*.json")) if (self.root / "presets").is_dir() else []
+        for f, key in [(f, f.name) for f in files] + [(f, f"presets/{f.name}") for f in user]:
+            try:
+                d = json.loads(f.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if key.startswith("presets/") and d.get("theatre", tid) != tid:
+                continue
+            title = (d.get("preset") or {}).get("title") or f.stem
+            out.append({"file": key, "title": title + (" (свой)" if key.startswith("presets/") else "")
+                        + (" - по умолчанию" if key == default else ""),
+                        "variants": [{"name": v["name"], "title": v.get("title", v["name"])} for v in d.get("variants", [])]})
+        return out
+
+    def preset_path(self, tid: str, key: str | None) -> str | Path:
+        """Файл пресета по ключу из presets() (только из списка - путь извне не принимается)."""
+        _t, _sec, default, _title = next(t for t in THEATRES if t[0] == tid)
+        if not key:
+            return default
+        if key not in {p["file"] for p in self.presets(tid)}:
+            raise ValueError(f"нет пресета '{key}' у театра {tid}")
+        return self.root / key if key.startswith("presets/") else key
+
     def info(self) -> dict:
         th = []
         for tid, sec, oob, title in THEATRES:
-            forces = model.load_json(oob)
-            th.append({"id": tid, "title": title,
-                       "variants": [{"name": v["name"], "title": v.get("title", v["name"])} for v in forces.get("variants", [])]})
+            ps = self.presets(tid)
+            th.append({"id": tid, "title": title, "presets": ps, "variants": ps[0]["variants"] if ps else []})
         return {"campaigns": campaigns(self.root), "theatres": th, "missions_dir": str(missions_dir(self.home))}
 
     def load(self, req: dict) -> tuple[Path, dict]:
@@ -166,11 +206,12 @@ class App:
                 raise ValueError(f"{p.name} уже есть - другое имя или отметьте 'перезаписать'")
             seed = req.get("seed")
             _tid, sec_f, oob_f, _t = next((t for t in THEATRES if t[0] == req.get("theatre")), THEATRES[0])
+            oob_f = self.preset_path(_tid, req.get("preset"))
             st = model.new_campaign(p.stem, player_side=req.get("side", "red"), sector=sec_f, oob=oob_f,
                                     seed=int(seed) if str(seed or "").strip() else None,
                                     variant=req.get("variant") or None, randomness=not req.get("norandom"))
             sid = roads.sector_id(sec_f)
-            rf = saved_games_file(f"roads_{sid}.json", self.home)
+            rf = saved_games_file(f"roads_{sid}.json", self.home) or roads.bundled(sid)   # свой зонд, иначе - из поставки
             if rf:
                 roads.apply(st, roads.load(rf))
                 lines.append(f"Дороги: {rf}")
@@ -191,6 +232,23 @@ class App:
             lines.append(f"Создана кампания {p.name}: {sc.get('title') or sc.get('variant')}, seed {sc.get('seed')}.")
             model.save(st, p)
             return {"lines": lines, "file": p.name, "state": view(st)}
+        if action == "presetcopy":                   # копия пресета для правки: presets/<имя>.json в папке проекта
+            tid = req.get("theatre") or THEATRES[0][0]
+            src = self.preset_path(tid, req.get("preset"))
+            name = (req.get("name") or "").strip()
+            if not re.fullmatch(r"[\w\-. а-яА-ЯёЁ]+", name):
+                raise ValueError("имя копии: буквы, цифры, пробел, '-', '.', '_'")
+            dst = self.root / "presets" / f"{name}.json"
+            if dst.exists() and not req.get("overwrite"):
+                raise ValueError(f"{dst.name} уже есть - другое имя или отметьте 'перезаписать'")
+            d = model.load_json(src)
+            d["theatre"] = tid
+            d["preset"] = {**(d.get("preset") or {}), "title": name, "copied_from": str(req.get("preset") or src)}
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+            return {"lines": [f"Копия пресета: {dst}",
+                              "Правьте в текстовом редакторе (части: units - тип type, число count, аэродром base, роль role); "
+                              "в списке пресетов она появится как '(свой)'."]}
         if action in ("mapprobe", "roadsprobe"):
             sec_f = SECTOR
             if req.get("file"):
@@ -229,6 +287,9 @@ class App:
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1))
             n = sum(len(g["vehicles"]) for g in man["ground"])
             lines.append(f"Миссия: {man['file']} (наземных машин {n}, бюджет {st['settings'].get('mission_budget', materialize.MISSION_BUDGET)})")
+            if man.get("pre_lines"):             # модель продвинута к началу миссии (sim.advance)
+                lines.append(f"Обстановка на {sim.ato_hhmm(man['ground_s'] or 0)}:")
+                lines += man["pre_lines"]
             lines += man["package_lines"]
         elif action == "debrief":
             f = debrief.find_file(st, self.home)

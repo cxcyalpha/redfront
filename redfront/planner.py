@@ -123,7 +123,7 @@ def plan(state: dict) -> dict | None:
     state["task"] = None
     state["tasks"] = []
     a = ato.ensure(state)
-    clock = state.get("clock_s") or 0
+    clock = max(state.get("clock_s") or 0, state.get("ground_s") or 0)   # наземная модель не идёт назад
     tasks = []
     for e in a["entries"]:                       # вылеты своей стороны по времени; дежурства (ДРЛО, заправщик) - только ИИ
         if e["side"] != state["player_side"] or e["ai_only"] or e["id"] in a["done"]:
@@ -131,7 +131,8 @@ def plan(state: dict) -> dict | None:
         t = e["times"]["strike"]
         if t["takeoff_s"] < clock:
             continue
-        tasks.append({**copy.deepcopy(e["task"]), "ato_id": e["id"], "tot_s": e["tot_s"], "takeoff_s": t["takeoff_s"]})
+        tasks.append({**copy.deepcopy(e["task"]), "ato_id": e["id"], "tot_s": e["tot_s"], "takeoff_s": t["takeoff_s"],
+                      "night": bool(e.get("night"))})
     state["tasks"] = tasks
     if not tasks:
         _t, reason = plan_side(state, state["player_side"])
@@ -159,6 +160,24 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             t = orbit_task(state, side, kind, tdef, performers)
             if t:
                 tasks.append(t)
+            continue
+        if tdef.get("method") == "alert":        # дежурные пары ПВО на аэродромах у фронта (только ИИ)
+            tasks += alert_tasks(state, side, kind, tdef, performers)
+            continue
+        if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
+            tasks += airlift_tasks(state, side, kind, tdef, performers)
+            continue
+        if tdef.get("method") == "interdiction":   # удары по путям подвоза противника (convoys.py)
+            tasks += interdiction_tasks(state, side, kind, tdef, performers, tasked, reasons, per_kind)
+            continue
+        if tdef.get("method") == "csar":         # поиск и спасение своих сбитых экипажей (csar.py)
+            tasks += csar_tasks(state, side, kind, tdef, performers, tasked)
+            continue
+        if tdef.get("method") == "air_assault":  # вертолётный десант в тыл противника (assault.py)
+            t = assault_tasks(state, side, kind, tdef, performers, tasked)
+            if not t:
+                reasons.append(f"{tdef['title']}: нет готовой десантной роты, площадки или вертолётов")
+            tasks += t
             continue
         tside = side if tdef["target"].get("side") == "own" else foe      # прикрытие своих войск - цель своя
         cat = tdef["target"]["category"]
@@ -266,6 +285,271 @@ def orbit_task(state: dict, side: str, kind: str, tdef: dict, performers: list[d
     return {"kind": kind, "side": side, "title": tdef["title"], "performer": perf["id"], "target": f"orbit_{side}_{kind}",
             "group_size": g["size"], "base": perf["base"], "target_pos": pos, "ip": pos, "distance_km": round(d, 1),
             "threats": [], "package": [g], "package_notes": "", "ai_only": True}
+
+
+def alert_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict]) -> list[dict]:
+    """Дежурство ПВО (method alert): до qra_bases пар на разных аэродромах - истребительные части, ближние к линии
+    фронта; зона после взлёта - в cap_offset_km от базы к фронту."""
+    fl = ops.front_links(state)
+    if not fl:
+        return []
+    pl = state["places"]
+    mids = [model.lerp(pl[a], pl[b], 0.5) for a, b in fl]
+    def front_km(p):
+        return min(model.dist_km(p, q) for q in mids)
+    s = tdef["strike"]
+    out, bases = [], set()
+    for r in sorted((r for r in performers if logistics.available(state, r) >= s["size"]),
+                    key=lambda r: front_km(state["airbases"][r["base"]])):
+        if r["base"] in bases:
+            continue
+        bases.add(r["base"])
+        base = state["airbases"][r["base"]]
+        q = min(mids, key=lambda q: model.dist_km(base, q))
+        d = model.dist_km(base, q)
+        cap = model.lerp(base, q, min(1.0, tdef.get("cap_offset_km", 30) / d)) if d > 0 else dict(base)
+        g = {"group": "strike", "title": s["title"], "performer": r["id"], "size": s["size"], "base": r["base"],
+             "route": [cap], "objective": {"kind": "alert", "pos": cap}, "maintask": s["maintask"],
+             "loadout": s.get("loadout", []), "lead_min": 0, "ai": {}, "alt_m": tdef.get("cap_alt_m", 6000)}
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {base['name']} ({r['name']})",
+                    "performer": r["id"], "target": f"qra_{side}_{r['base']}", "group_size": s["size"], "base": r["base"],
+                    "target_pos": cap, "ip": cap, "distance_km": round(model.dist_km(base, cap), 1), "threats": [],
+                    "package": [g], "package_notes": "", "ai_only": True})
+        if len(out) >= tdef.get("qra_bases", 3):
+            break
+    return out
+
+
+def airlift_needs(state: dict, side: str, tdef: dict) -> list[tuple[dict, str]]:
+    """Куда везти: (склад, аэродром назначения) - свои склады с запасом ниже airlift_below, у которых есть свой
+    открытый аэродром не дальше airlift_depot_km; отрезанные от подвоза из тыла - первыми, затем по запасу."""
+    logistics.init_depots(state)
+    conn = logistics.road_connected(state, side)
+    out = []
+    for d in logistics.objects(state, "depot"):
+        if d["side"] != side or not logistics.supplies(d) or d.get("state") == "lost" or not d.get("place"):
+            continue
+        stock = logistics.depot_stock(d)
+        if stock >= tdef.get("airlift_below", 0.9):
+            continue
+        pos = state["places"][d["place"]]
+        bases = [(model.dist_km(b, pos), k) for k, b in state["airbases"].items()
+                 if b.get("side") == side and b.get("state", "open") in ("open", "active")]
+        bases = [x for x in bases if x[0] <= tdef.get("airlift_depot_km", 40)]
+        if bases:
+            out.append(((d["id"] in conn, stock), d, min(bases)[1]))
+    out.sort(key=lambda x: x[0])
+    return [(d, b) for _k, d, b in out]
+
+
+def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict]) -> list[dict]:
+    """Задачи воздушной перевозки (method airlift): по направлению (склад + аэродром назначения) - группа ближней
+    транспортной части, достающей до аэродрома (не с него же); части распределяются по направлениям."""
+    out = []
+    tasked: dict[str, int] = {}
+    s = tdef["strike"]
+    for d, dest in airlift_needs(state, side, tdef)[:tdef.get("airlift_max", 4)]:
+        dpos = state["airbases"][dest]
+        best = None
+        for r in performers:
+            if r["base"] == dest:
+                continue
+            km = model.dist_km(state["airbases"][r["base"]], dpos)
+            radius = strike_radius_km(r)
+            if radius is not None and km > radius:
+                continue
+            key = (tasked.get(r["id"], 0), km)
+            if best is None or key < best[0]:
+                best = (key, r)
+        if best is None:
+            continue
+        (_n, km), perf = best
+        tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        helo = model.category(perf) == "heli"
+        alt = tdef.get("helo_alt_m_agl", 150) if helo else tdef["transit_alt_m_agl"]
+        g = {"group": "strike", "title": s["title"], "performer": perf["id"],
+             "size": min(s["size"], logistics.available(state, perf)), "base": perf["base"], "route": [dict(dpos)],
+             "objective": {"kind": "airlift", "airbase": dest, "depot": d["id"], "pos": {"lat": dpos["lat"], "lon": dpos["lon"]}},
+             "maintask": s["maintask"], "loadout": [], "lead_min": 0, "ai": {}, "alt_m": alt}
+        out.append({"kind": kind, "side": side,
+                    "title": f"{tdef['title']}: {state['airbases'][perf['base']]['name']} -> {dpos['name']} ({d['name']})",
+                    "performer": perf["id"], "target": d["id"], "group_size": g["size"], "base": perf["base"],
+                    "target_pos": g["objective"]["pos"], "ip": g["objective"]["pos"], "distance_km": round(km, 1),
+                    "threats": [], "package": [g], "package_notes": "", "ai_only": True})
+    return out
+
+
+def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict,
+                       reasons: list[str], per_kind: int) -> list[dict]:
+    """Удары по путям подвоза (method interdiction): участки путей подвоза противника с потоком не меньше
+    convoys.MIN_FLOW_T, по убыванию потока; исполнитель - в радиусе, с меньшим числом задач; пакет - как у удара
+    (группы обеспечения доктрины). Цель - псевдочасть роли supply_route (в составе сил её нет)."""
+    from . import convoys
+    foe = model.enemy(side)
+    flows = sorted(((t, l) for l, t in convoys.link_flows(state, foe).items() if t >= convoys.MIN_FLOW_T), reverse=True)
+    out = []
+    for t, link in flows:
+        if len(out) >= min(per_kind, tdef.get("per_day", per_kind)):
+            break
+        tpos = convoys.link_mid(state, link)
+        best = None
+        for r in performers:
+            radius = strike_radius_km(r)
+            d = model.dist_km(state["airbases"][r["base"]], tpos)
+            if radius is not None and d <= radius and (best is None or (tasked.get(r["id"], 0), d) < best[0]):
+                best = ((tasked.get(r["id"], 0), d), r)
+        if best is None:
+            continue
+        (_n, d), perf = best
+        cid = convoys.convoy_id(foe, link)
+        tgt = {"id": cid, "role": "supply_route", "side": foe, "state": "march", "name": f"колонны снабжения {link.replace('>', ' - ')}"}
+        base = state["airbases"][perf["base"]]
+        ip = ip_point(base, tpos, tdef["ip_offset_km"])
+        threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe, tdef.get("low_alt_m_agl"))
+        groups, why = package(state, tdef, perf, tgt, tpos, ip, threats)
+        if groups is None:
+            reasons.append(f"{tdef['title']}: {link} - {why}")
+            continue
+        for g in groups:
+            tasked[g["performer"]] = tasked.get(g["performer"], 0) + 1
+        if not threats and tdef.get("medium_alt_m_agl"):
+            for g in groups:
+                g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {link.replace('>', ' - ')} (~{t:.0f} т/сутки)",
+                    "performer": perf["id"], "target": cid, "target_kind": "convoy", "link": link,
+                    "group_size": groups[0]["size"], "base": perf["base"], "target_pos": tpos, "ip": ip,
+                    "distance_km": round(d, 1), "threats": threats, "package": groups,
+                    "package_notes": "; ".join(x for x in (f"поток ~{t / convoys.TRUCK_T:.0f} грузовиков в сутки", why) if x)})
+    return out
+
+
+def csar_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict) -> list[dict]:
+    """Задачи поиска и спасения (method csar): свои экипажи на земле не на своей территории (со своей выйдут сами),
+    ближние к вертолётным частям первыми; группа - ближняя вертолётная часть в радиусе; не больше per_day."""
+    from . import csar
+    foe = model.enemy(side)
+    out = []
+    downed = [d for d in state.get("downed", []) if d["side"] == side and csar.owner_at(state, d["pos"]) != side]
+    s = tdef["strike"]
+    cands = []
+    for d in downed:
+        best = None
+        for r in performers:
+            km = model.dist_km(state["airbases"][r["base"]], d["pos"])
+            radius = strike_radius_km(r)
+            if (radius is not None and km > radius) or logistics.available(state, r) < 1:
+                continue
+            key = (tasked.get(r["id"], 0), km)
+            if best is None or key < best[0]:
+                best = (key, r)
+        if best:
+            cands.append((best[0][1], d, best[1]))
+    for km, d, perf in sorted(cands, key=lambda x: x[0])[:tdef.get("per_day", 2)]:
+        base = state["airbases"][perf["base"]]
+        size = min(s["size"], logistics.available(state, perf))
+        g = {"group": "strike", "title": s["title"], "performer": perf["id"], "size": size, "base": perf["base"],
+             "route": [dict(d["pos"])], "objective": {"kind": "csar", "downed": d["id"], "pos": dict(d["pos"])},
+             "maintask": s["maintask"], "loadout": [], "lead_min": 0, "ai": {}, "alt_m": tdef["transit_alt_m_agl"]}
+        tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {csar.title(state, d)}",
+                    "performer": perf["id"], "target": d["id"], "group_size": size, "base": perf["base"],
+                    "target_pos": dict(d["pos"]), "ip": dict(d["pos"]), "distance_km": round(km, 1),
+                    "threats": corridor_threats(state, [(base, d["pos"])], foe, tdef.get("low_alt_m_agl")),
+                    "package": [g], "package_notes": f"маяк {d['freq_khz']} кГц (АРК / ADF); на земле с суток {d['day']}"})
+    return out
+
+
+GROUP_MAX = 4   # бортов в группе ЛА DCS
+
+
+def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict) -> list[dict]:
+    """Задачи вертолётного десанта (method air_assault): рота из резерва (assault.reserve) на лучший пункт
+    (assault.candidates); группа - транспортная вертолётная часть, которая поднимает роту не больше чем max_helos
+    бортами и достаёт до площадки; не больше per_day задач."""
+    from . import assault
+    res = sorted(assault.reserve(state, side), key=lambda u: -model.strength(u))
+    if not res:
+        return []
+    foe = model.enemy(side)
+    out, used = [], set()
+    places = assault.candidates(state, side, tdef)
+    for u in res:
+        if len(out) >= tdef.get("per_day", 1):
+            break
+        for place in places:
+            if place in used:
+                continue
+            lz = assault.lz_point(state, side, place, tdef)
+            best = None
+            for r in performers:
+                need = assault.lift_need(u, r["type"])
+                if need > min(logistics.available(state, r), tdef.get("max_helos", 8)):
+                    continue
+                km = model.dist_km(state["airbases"][r["base"]], lz)
+                radius = strike_radius_km(r)
+                if radius is not None and km > radius:
+                    continue
+                key = (tasked.get(r["id"], 0), km)
+                if best is None or key < best[0]:
+                    best = (key, r, need)
+            if best is None:
+                continue
+            (_n, km), perf, need = best
+            base = state["airbases"][perf["base"]]
+            threats = corridor_threats(state, [(base, lz)], foe, tdef.get("low_alt_m_agl"))
+            s = tdef["strike"]
+            groups = []                          # группа ЛА в DCS - не больше 4 бортов: подъём - волнами по 4, через минуту
+            for k in range(0, need, GROUP_MAX):
+                groups.append({"group": "strike" if not k else f"lift{k // GROUP_MAX + 1}",
+                               "title": s["title"] + (f" ({k // GROUP_MAX + 1})" if k else ""), "performer": perf["id"],
+                               "size": min(GROUP_MAX, need - k), "base": perf["base"], "route": [lz],
+                               "objective": {"kind": "air_assault", "unit": u["id"], "place": place, "pos": lz},
+                               "maintask": s["maintask"], "loadout": [], "lead_min": -k // GROUP_MAX, "ai": {},
+                               "alt_m": tdef["transit_alt_m_agl"]})
+            tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+            used.add(place)
+            out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}",
+                        "performer": perf["id"], "target": u["id"], "group_size": need, "base": perf["base"],
+                        "target_pos": lz, "ip": lz, "distance_km": round(km, 1), "threats": threats,
+                        "package": groups, "package_notes": f"площадка в {tdef.get('lz_offset_km', 2)} км от {place}; "
+                                                          f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"})
+            break
+    return out
+
+
+def refresh(state: dict, task: dict) -> list[str]:
+    """Цель задачи - на её место сейчас (после шага наземной модели к времени миссии): точка цели, ИПМ и маршруты
+    групп по цели (удар, прикрытие, доразведка). Рубежи подавления ПВО пересчитывает сборка (build). Цель выбыла
+    (уничтожена, ушла в тыл) - строка-замечание, маршрут прежний."""
+    units = state["units"]
+    tdef = model.doctrine(state, task["side"])["tasks"][task["kind"]]
+    obj0 = task["package"][0]["objective"]
+    tgt = units.get(obj0.get("unit") or "")
+    if not tgt or obj0["kind"] not in ("column", "site", "point", "cap_zone"):
+        return []
+    if tgt.get("state") in ("destroyed", "lost"):
+        return [f"{task['title']}: цель выбыла к времени вылета."]
+    tpos = model.unit_pos(state, tgt)
+    if model.dist_km(tpos, task["target_pos"]) < 0.2:
+        return []
+    moved = model.dist_km(tpos, task["target_pos"])
+    task["target_pos"] = tpos
+    for g in task["package"]:
+        o = g["objective"]
+        base = state["airbases"][g["base"]]
+        if o["kind"] in ("column", "site", "point"):
+            ip = ip_point(base, tpos, tdef["ip_offset_km"])
+            g["route"] = [ip, tpos]
+            if g["group"] == "strike":
+                task["ip"] = ip
+        elif o["kind"] in ("cover_zone", "cap_zone"):
+            g["route"] = [tpos]
+        elif o["kind"] in ("search_zone", "flyover"):
+            g["route"] = [ip_point(base, tpos, tdef["ip_offset_km"]), tpos]
+        else:
+            continue
+        o["pos"] = tpos
+    return [f"{task['title']}: цель сместилась на {moved:.0f} км к времени вылета - маршрут пересчитан."]
 
 
 def choose(state: dict, n: int) -> dict:

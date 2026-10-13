@@ -25,6 +25,7 @@ CAP_MID = 24            # машин в группе ближе DETAIL_KM к ц�
 CAP_TOKEN = 4           # машин в группе дальше DETAIL_KM - присутствие на фронте, а не бой
 CAP_AD_NEAR, CAP_AD_FAR = 8, 2   # приданная ПВО
 DETAIL_KM = 60
+CONVOY_KM = 40          # ОЦЕНКА: колонны снабжения в миссии - на участках ближе стольких км к цели
 SAM_KM = 250            # ЗРК дальше от цели в миссию не ставятся
 SAM_KM_ROLE = {"sam_short": 100}   # ПВО объекта (ближний ярус) - только ближе (ОЦЕНКА: нагрузка на DCS, по маршруту - window)
 
@@ -259,19 +260,77 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
     return out
 
 
+def airhead(state: dict, unit: dict, pos: dict, density: float = 1.0) -> dict:
+    """Десант на площадке: пехота кругом в AIRHEAD_R_M от точки посадки; в миссии - с поздней активацией (выходит
+    из вертолётов при посадке, lua/assault.lua). Веса - по правилу сохранения."""
+    counts, weight = _deploy(state, model.alive_by_type(unit), density, CAP_NEAR)
+    vehicles = []
+    n = sum(counts.values())
+    for t, c in counts.items():
+        for _ in range(c):
+            k = len(vehicles)
+            p = model.offset(pos, 360.0 * k / max(1, n), AIRHEAD_R_M)
+            vehicles.append({"name": f"{unit['id']}#{k + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"],
+                             "weight": weight[t], "heading": 360.0 * k / max(1, n)})
+    return {"unit": unit["id"], "side": unit["side"], "kind": "airhead", "name": unit["id"], "vehicles": vehicles,
+            "waypoints": [], "speed_kmh": 0, "late": True}
+
+
+AIRHEAD_R_M = 60        # ОЦЕНКА: радиус, в котором пехота стоит после высадки
+
+
+def downed_group(state: dict, d: dict) -> dict:
+    """Сбитый экипаж на земле (csar.py): одна фигура пехотинца стороны у точки катапультирования; в манифест
+    наземных частей не входит (это не часть модели) - его спасение пишет lua/csar.lua."""
+    from . import csar
+    return {"unit": d["id"], "side": d["side"], "kind": "downed", "name": d["id"], "waypoints": [], "speed_kmh": 0,
+            "vehicles": [{"name": f"{d['id']}#01", "type": csar.PILOT_FIGURE[d["side"]], "lat": d["pos"]["lat"],
+                          "lon": d["pos"]["lon"], "weight": 0.0}]}
+
+
 def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     units = state["units"]
+    obj = (task.get("package") or [{}])[0].get("objective") or {}
+    if task.get("target_kind") == "convoy":      # удар по пути подвоза: колонна на участке, ЗРК коридора
+        from . import convoys
+        side = model.enemy(task["side"])
+        groups = [convoys.group(state, side, task["link"], convoys.link_flows(state, side).get(task["link"], 0.0), density)]
+        groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
+        groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
+        return [g for g in groups if g["vehicles"]]
+    if obj.get("kind") == "csar":                # поиск и спасение: экипаж на земле, ЗРК коридора
+        d = next((x for x in state.get("downed", []) if x["id"] == obj["downed"]), None)
+        groups = [downed_group(state, d)] if d else []
+        groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
+        groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
+        return [g for g in groups if g["vehicles"]]
     target = units[task["target"]]
+    if obj.get("kind") == "air_assault":         # десант: рота на площадке (появится при посадке), ЗРК коридора
+        groups = [airhead(state, target, obj["pos"], density)]
+        groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
+        groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
+        return [g for g in groups if g["vehicles"]]
     if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam"):   # объект тыла - сам в миссии как объекты карты
         groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
+        placed = set()
         for sid in task["threats"]:
-            if sid == target["id"]:
+            if sid == target["id"] or sid in placed:
                 continue
             parent = units.get(units[sid].get("attached_to") or "")
+            if parent and parent["id"] in placed:
+                continue
             if parent and parent["state"] == "march":
                 col = column(state, parent, density * OTHER_DENSITY)
                 groups += [col, attached_column(state, units[sid], col)]
-            elif not parent:
+                placed |= {parent["id"], sid}
+            elif parent:                         # часть на месте (оборона, бой) - позицией, её ПВО - с ней (цель подавления ПВО)
+                cl = battle_cluster(state, parent["id"]) if parent["state"] == "battle" else [parent["id"]]
+                for uid in cl:
+                    if uid not in placed:
+                        part = _tag(battle_line(state, units[uid], density * OTHER_DENSITY), cl)
+                        groups += part
+                        placed |= {g_["unit"] for g_ in part}
+            else:
                 groups.append(sam_site(state, units[sid]))
         for sid in background_sams(state, task):
             groups.append(sam_site(state, units[sid]))
@@ -371,6 +430,13 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
                 and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
                 and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM_ROLE.get(u["role"], SAM_KM)):
             groups.append(sam_site(state, u))
+    from . import convoys                        # колонны снабжения на участках с потоком рядом (обе стороны)
+    for side, link, t in convoys.near(state, center, CONVOY_KM):
+        if convoys.convoy_id(side, link) not in placed:
+            groups.append(convoys.group(state, side, link, t, far))
+    for d in state.get("downed", []):           # сбитые экипажи обеих сторон рядом - их можно спасти (или перехватить спасателей)
+        if d["id"] not in placed and model.dist_km(d["pos"], center) <= DETAIL_KM:
+            groups.append({**downed_group(state, d), "core": True})   # одна фигура - бюджет её не трогает
     for u in units.values():                     # КРУ - все исправные (по одной машине; наведение - на 250 км)
         if model.category(u) == "gci" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0:
             groups.append(gci_site(state, u))
