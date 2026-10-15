@@ -269,27 +269,39 @@ AD_TEMPLATES = {   # ярус -> варианты; позиция берёт в�
 }
 AD_TIER_TITLE = {"long": "ЗРК большой дальности", "medium": "ЗРК средней дальности", "short": "ПВО объекта"}
 # КРУ (GCI): в DCS наведением пользуется только игрок на МиГ-29 - пункт у каждого аэродрома красных, где базируется
-# МиГ-29, рядом с ПВО аэродрома (в AD_GCI_OFFSET_KM от центра к фронту); у каждого - свой канал, радиус GCI_RADIUS_KM
+# МиГ-29, у стоянки аэродрома (суша; gci_site_pos); у каждого - свой канал, радиус GCI_RADIUS_KM
 AD_GCI_TYPES = ("MiG_29_Fulcrum", "MiG_29S", "MiG_29A")
-AD_GCI_OFFSET_KM = 3
+AD_GCI_PARK_M = 150        # КРУ - у стоянки аэродрома, в стольких м от неё наружу
 GCI_RADIUS_KM = 250
 AD_TEMPLATES["red"]["gci"] = [{"name": "КРУ", "composition": [("GCI_station_MiG29", "control", 1)]}]
 
 
-def gci_sites(places: dict, links: set, airbase_pos: dict, air: list) -> list[dict]:
+def gci_site_pos(terrain, airport_name: str) -> tuple[float, float]:
+    """Позиция КРУ - на суше у аэродрома: стоянка, ближняя к центру стоянок, отодвинутая от центра аэродрома на
+    AD_GCI_PARK_M (на ВПП и рулёжках не стоит). Раньше - в 3 км к фронту: у Дамгартена это залив (данных о воде у
+    pydcs нет; в миссии позицию ещё уточняет battle_site.lua)."""
+    from dcs.mapping import Point
+    ap = terrain.airports[airport_name]
+    slots = [s.position for s in ap.parking_slots] or [ap.position]
+    cx, cy = sum(p.x for p in slots) / len(slots), sum(p.y for p in slots) / len(slots)
+    near = min(slots, key=lambda p: (p.x - cx) ** 2 + (p.y - cy) ** 2)
+    dx, dy = near.x - ap.position.x, near.y - ap.position.y
+    d = (dx * dx + dy * dy) ** 0.5 or 1.0
+    ll = Point(near.x + dx / d * AD_GCI_PARK_M, near.y + dy / d * AD_GCI_PARK_M, terrain).latlng()
+    return ll.lat, ll.lng
+
+
+def gci_sites(places: dict, links: set, airbase_pos: dict, air: list, terrain=None) -> list[dict]:
     """КРУ у аэродромов красных, где МиГ-29 (AD_GCI_TYPES) базируется хотя бы в одном пресете; канал - по порядку
     с 1. В кампании пункт есть, только если в её составе сил на этом аэродроме МиГ-29 (requires_types, model)."""
-    border = [((places[a]["lat"] + places[b]["lat"]) / 2, (places[a]["lon"] + places[b]["lon"]) / 2)
-              for a, b in links if places[a]["side"] != places[b]["side"]]
     bases = sorted({base.lower().replace(" ", "_") for _uid, _n, side, _r, typ, base, *_ in air
                     if side == "red" and typ in AD_GCI_TYPES})
     out = []
     for k, bid in enumerate(bases, 1):
         la, lo, _side, name = airbase_pos[bid]
-        q = min(border, key=lambda q: dist_km((la, lo), q))
-        f = min(1.0, AD_GCI_OFFSET_KM / (dist_km((la, lo), q) or 1.0))
+        la, lo = gci_site_pos(terrain, name) if terrain is not None else (la, lo)
         out.append({"id": f"red_gci_{bid}", "name": f"КРУ аэродрома {name}", "side": "red", "tier": "gci",
-                    "covers": f"af_{bid}", "lat": round(la + (q[0] - la) * f, 4), "lon": round(lo + (q[1] - lo) * f, 4),
+                    "covers": f"af_{bid}", "lat": round(la, 4), "lon": round(lo, 4),
                     "variant": 0, "channel": k, "radius_km": GCI_RADIUS_KM, "requires_types": list(AD_GCI_TYPES),
                     "rule": "КРУ: у аэродрома, где базируется МиГ-29 (наведением в DCS пользуется только он)"})
     return out
@@ -807,7 +819,7 @@ def main() -> None:
         ll = terrain.airports[b["airport"]].position.latlng()
         af_pos[bid] = (ll.lat, ll.lng, b["side"], b["name"])
     all_af = [(ap.position.latlng().lat, ap.position.latlng().lng) for ap in terrain.airports.values()]
-    sites = ad_sites(places, links, af_pos, all_af) + gci_sites(places, links, af_pos, air)
+    sites = ad_sites(places, links, af_pos, all_af) + gci_sites(places, links, af_pos, air, terrain)
     sector = {
         "_about": "Театр всей карты Cold War Germany: внутригерманская граница от Балтики до Хофа. Генерирован "
                   "tools/gen_germany.py. Координаты пунктов - ОЦЕНКИ (по памяти, +-2 км), пункты и связи сектора "
