@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, convoys, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim
+from . import ato, command, convoys, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -123,6 +123,7 @@ def view(st: dict) -> dict:
                                   for g in t.get("package", [])]})
     sc = st.get("scenario") or {}
     man = st.get("manifest") or {}
+    ent = {e["id"]: e for e in (st.get("ato") or {}).get("entries", [])}
     return {
         "name": st["name"], "day": st["day"], "sortie": st["sortie"], "side": st["player_side"],
         "date": st.get("date"), "scenario": sc.get("title") or sc.get("variant"), "seed": sc.get("seed"),
@@ -139,7 +140,9 @@ def view(st: dict) -> dict:
         "downed": [{"id": d["id"], "side": d["side"], "pos": _ll(d["pos"]), "freq": d["freq_khz"], "day": d["day"],
                     "title": csar.title(st, d)} for d in st.get("downed", [])
                    if d["side"] == st["player_side"]],    # свои сбитые экипажи (чужие - не видны)
-        "ato": ato.rows(st), "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
+        "ato": [dict(r, locked=command.why_locked(st, ent[r["id"]]), duty_only=command._is_duty(st, ent[r["id"]]))
+                for r in ato.rows(st)],
+        "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
         "ground_time": ato.hhmm(st.get("ground_s") or 0),          # наземная обстановка - на это время (sim.advance)
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],
@@ -272,6 +275,20 @@ class App:
         p, st = self.load(req)
         if action == "state":
             return {"state": view(st)}
+        if action == "atooptions":                   # режим командующего: что можно выбрать для вылета (без сохранения)
+            return {"options": command.options(st, req["id"])}
+        if action == "atocands":                     # задачи, не вошедшие в план
+            return {"cands": command.candidates(st)}
+        if action in ("atoedit", "atoremove", "atoadd"):
+            if action == "atoedit":
+                lines += command.edit(st, req["id"], tot=req.get("tot") or None, groups=req.get("groups") or {})
+            elif action == "atoremove":
+                lines.append(command.remove(st, req["id"]))
+            else:
+                lines += command.add(st, req["key"], tot=req.get("tot") or None)
+            planner.plan(st)                         # вылеты игрока - из плана полётов
+            model.save(st, p)
+            return {"lines": lines, "state": view(st)}
         if action == "plan":
             if not planner.plan(st):
                 lines.append(f"Задач нет: {st['task_reason']}")
@@ -291,6 +308,7 @@ class App:
                 lines.append(f"Обстановка на {sim.ato_hhmm(man['ground_s'] or 0)}:")
                 lines += man["pre_lines"]
             lines += man["package_lines"]
+            lines += man.get("ctld_lines") or []
         elif action == "debrief":
             f = debrief.find_file(st, self.home)
             lines.append(f"Файл дебрифа: {f}")

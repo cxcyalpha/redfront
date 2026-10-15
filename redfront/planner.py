@@ -126,7 +126,7 @@ def plan(state: dict) -> dict | None:
     clock = max(state.get("clock_s") or 0, state.get("ground_s") or 0)   # наземная модель не идёт назад
     tasks = []
     for e in a["entries"]:                       # вылеты своей стороны по времени; дежурства (ДРЛО, заправщик) - только ИИ
-        if e["side"] != state["player_side"] or e["ai_only"] or e["id"] in a["done"]:
+        if e["side"] != state["player_side"] or (e["ai_only"] and not player_lift(state, e)) or e["id"] in a["done"]:
             continue
         t = e["times"]["strike"]
         if t["takeoff_s"] < clock:
@@ -142,6 +142,12 @@ def plan(state: dict) -> dict | None:
     state["task"] = tasks[0]
     state["task_reason"] = None
     return tasks[0]
+
+
+def player_lift(state: dict, e: dict) -> bool:
+    """Перевозка снабжения вертолётом - её может слетать игрок (груз - ящики CTLD, build.py); самолётом - только ИИ."""
+    g = e["task"]["package"][0]
+    return g["objective"]["kind"] == "airlift" and model.category(state["units"][g["performer"]]) == "heli"
 
 
 def _load(tasked: dict, unit: dict) -> int:

@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 from dcs import Mission, task
-from dcs.action import DoScript
+from dcs.action import DoScript, DoScriptFile
 from dcs.mapping import LatLng, Point, Vector2
 from dcs.mission import StartType
 from dcs.point import PointAction
@@ -34,6 +34,17 @@ CSAR_LUA = Path(__file__).parent / "lua" / "csar.lua"
 LZ_LUA = Path(__file__).parent / "lua" / "lz.lua"
 QRA_LUA = Path(__file__).parent / "lua" / "qra.lua"
 BEACON_FILE = "redfront_beacon.wav"
+# CTLD (lua/ctld/NOTICE.md): погрузка и высадка десанта игрока, ящики снабжения, авианаводчик. ОЦЕНКИ - размеры зон.
+CTLD_DIR = Path(__file__).parent / "lua" / "ctld"
+CTLD_CFG_LUA = Path(__file__).parent / "lua" / "ctld_cfg.lua"
+CTLD_RU_LUA = Path(__file__).parent / "lua" / "ctld_ru.lua"
+CTLD_PICKUP_M = 800             # зона погрузки десанта вокруг стоянки игрока
+CTLD_DROP_M = 2500              # зона выгрузки снабжения вокруг аэродрома назначения
+CTLD_LOGISTIC_M = 50            # машина тыла (у неё берут ящики) - от стоянки игрока, в сторону от центра аэродрома
+CTLD_LOGISTIC = {"red": "Ural-375", "blue": "M 818"}
+CTLD_CRATE_UNIT = {"red": "Ural-375", "blue": "M 818"}   # ящик распакован - машина с грузом (скрипт её убирает: груз - на склад)
+JTAC_TYPES = {"red": "UAZ-469", "blue": "Hummer"}         # пост авианаводчика у своего взвода в бою
+JTAC_CODE = 1688
 
 # Бой наземных частей в миссии (lua/front.lua). Все числа - ОЦЕНКИ.
 PLATOON = 4                # машин во взводе (отдельная группа DCS: застрявшая машина не держит всю часть)
@@ -403,6 +414,58 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str]) -> str | None:
     return None
 
 
+def _lua(v) -> str:
+    """Значение Python -> литерал Lua (для таблиц настройки скриптов)."""
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return repr(v)
+    if isinstance(v, str):
+        return '"' + v.replace("\\", "/").replace('"', "'") + '"'
+    if isinstance(v, dict):
+        return "{ " + ", ".join(f"[{_lua(k)}] = {_lua(x)}" for k, x in v.items()) + " }"
+    return "{ " + ", ".join(_lua(x) for x in v) + " }"
+
+
+def troop_mix(type_ids: list[str]) -> dict:
+    """Состав группы десанта для меню CTLD (inf, mg, at, aa) по типам фигур DCS."""
+    out = {"inf": 0, "mg": 0, "at": 0, "aa": 0}
+    for t in type_ids:
+        low = t.lower()
+        k = ("aa" if any(w in low for w in ("igla", "stinger", "manpad", "strela")) else
+             "at" if "rpg" in low else "mg" if any(w in low for w in ("m249", "pkm", " mg")) else "inf")
+        out[k] += 1
+    return {k: n for k, n in out.items() if n}
+
+
+def ctld_script(state: dict, cfg: dict) -> str:
+    """lua/ctld_cfg.lua: настройка CTLD под вылет (борта игрока, зоны, группы десанта, ящики, авианаводчики)."""
+    body = ", ".join(f"{k} = {_lua(cfg[k])}" for k in ("pilots", "actions", "limits", "cargo", "logistic", "pickup",
+                                                       "groups", "crates", "lifts", "jtacs"))
+    return (CTLD_CFG_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@CFG@", body))
+
+
+def ctld_actions(m: Mission, state: dict, cfg: dict) -> list:
+    """Скрипты CTLD в начале миссии: MIST, CTLD (копия с ctld.dontInitialize = true), русский перевод, настройка."""
+    tmp = Path(tempfile.mkdtemp(prefix="redfront_ctld_"))
+    src = (CTLD_DIR / "CTLD.lua").read_text(encoding="utf-8")
+    patched = src.replace("ctld.dontInitialize = false", "ctld.dontInitialize = true", 1)
+    if patched == src:
+        raise RuntimeError("CTLD.lua: не найдено 'ctld.dontInitialize = false' - другая версия CTLD?")
+    (tmp / "CTLD.lua").write_text(patched, encoding="utf-8")
+    return [DoScriptFile(m.map_resource.add_resource_file(CTLD_DIR / "mist.lua")),
+            DoScriptFile(m.map_resource.add_resource_file(tmp / "CTLD.lua")),
+            DoScript(String(CTLD_RU_LUA.read_text(encoding="utf-8"))),
+            DoScript(String(ctld_script(state, cfg)))]
+
+
+def _away(m: Mission, p: Point, center: Point, d_m: float) -> Point:
+    dx, dy = p.x - center.x, p.y - center.y
+    n = math.hypot(dx, dy) or 1.0
+    return Point(p.x + d_m * dx / n, p.y + d_m * dy / n, m.terrain)
+
+
 def _set_player(unit) -> bool:
     """Посадить игрока. pydcs отказывает типам, которые в базовом DCS только для ИИ (Су-24М, МиГ-31): для мода,
     делающего такой тип летабельным на том же слоте, отказ лишний. Возвращает True, если слот требует мода."""
@@ -696,6 +759,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     assault_specs = []
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
+    ctld = {"pilots": [], "actions": {}, "limits": {}, "cargo": {}, "logistic": [], "pickup": [], "groups": [],
+            "crates": [], "lifts": [], "jtacs": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
+    ctld_assault: list[tuple[dict, str]] = []     # (высадка, борт игрока) - группа десанта CTLD по его доле роты
+    ctld_lines: list[str] = []
     enemy = air_activity(state, tk, times, sortie, m0)
     for g in pkg + enemy:
         tdg = g.get("_tdef") or tdef             # группы противника - по его пакету доктрины
@@ -791,6 +858,28 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(model.lerp(start_p, obj["pos"], 0.5), alt, "Маршрут", keep_alt=True)
             land = m.terrain.airports[dest["airport"]]
             g["_dest"] = dest["name"]
+            if is_player and helo:               # игрок: груз - ящики CTLD у машины тыла, сдать - на аэродроме назначения
+                sd = 1 if side_g == "red" else 2
+                u0 = fg.units[0]
+                lg = m.vehicle_group(_country(m, state, side_g), f"Тыл {sortie}", dcstypes.vehicle(CTLD_LOGISTIC[side_g]),
+                                     _away(m, u0.position, airport.position, CTLD_LOGISTIC_M), heading=0)
+                ctld["logistic"].append(lg.units[0].name)
+                zone = f"Выгрузка {sortie}"
+                m.triggers.add_triggerzone(land.position, radius=CTLD_DROP_M, hidden=False, name=zone)
+                cap = float(model.aircraft_info(perf["type"]).get("cargo_t") or 1.0)
+                kg = 1000 if cap >= 2 else 500
+                wt = kg + (0.11 if sd == 1 else 0.21)           # вес ящика CTLD - уникальный (по нему тип груза)
+                ctld["crates"].append({"weight": wt, "desc": f"Снабжение {kg} кг", "unit": CTLD_CRATE_UNIT[side_g], "side": sd})
+                ctld["pilots"].append(u0.name)
+                ctld["actions"][u0.unit_type.id] = {"crates": True, "troops": False}
+                ctld["cargo"][u0.unit_type.id] = max(1, int(cap * 1000 // kg))
+                d_obj = state["units"].get(obj.get("depot"), {})
+                ctld["lifts"].append({"id": tk.get("ato_id") or f"task-{sortie}", "side": sd, "zone": zone,
+                                      "title": f"{d_obj.get('name', '')} ({dest['name']})"})
+                ctld_lines.append(f"Груз: ящики \"Снабжение {kg} кг\" (до {ctld['cargo'][u0.unit_type.id]} на борт) - у машины "
+                                  f"тыла рядом со стоянкой: F10 -> Перевозки (CTLD) -> Снабжение; взять - висением над ящиком "
+                                  f"или с земли через меню. Сдать - на аэродроме {dest['name']} (зона {CTLD_DROP_M / 1000:.1f} км): "
+                                  f"сбросить ящик или распаковать. На склад идёт то, что лежит в зоне к концу миссии.")
         elif obj["kind"] == "csar":              # поиск и спасение: на малой высоте к экипажу, посадка рядом, домой
             dp = obj["pos"]
             low = int(tdg.get("low_alt_m_agl", 50))
@@ -832,6 +921,18 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 spec["helos"] += [u.name for u in fg.units]
                 if not is_player:
                     spec["groups"].append(fg.name)
+                else:                            # игрок: погрузка и высадка через меню CTLD, зона погрузки - у стоянки
+                    u0 = fg.units[0]
+                    ctld_assault.append((spec, u0.name))
+                    ctld["pilots"].append(u0.name)
+                    ctld["actions"][u0.unit_type.id] = {"crates": False, "troops": True}
+                    ctld["limits"][u0.unit_type.id] = int(model.aircraft_info(perf["type"]).get("troops") or 10)
+                    zone = f"Погрузка {sortie}"
+                    m.triggers.add_triggerzone(u0.position, radius=CTLD_PICKUP_M, hidden=False, name=zone)
+                    ctld["pickup"].append({"zone": zone, "side": spec["side"], "limit": 1})
+                    ctld_lines.append(f"Десант: погрузка у стоянки (зона {CTLD_PICKUP_M} м) - F10 -> Перевозки (CTLD) -> "
+                                      f"Десант -> Погрузить; высадка на площадке (ближе {spec['r']} м) - \"Высадить / забрать "
+                                      f"десант\" (на земле или висением по тросу). Высадили не там - заберите и высадите снова.")
             g["_lz"] = obj["place"]
         elif obj["kind"] in ("column", "site"):    # ударная группа: колонна, часть в бою, позиция ЗРК
             ip, tgt = g["route"]
@@ -996,6 +1097,27 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     beacon = csar.beacon_wav(Path(tempfile.gettempdir()) / BEACON_FILE)
     m.map_resource.add_resource_file(beacon)
     trig.add_action(DoScript(String(lz_script(state["campaign_id"], state["sortie"]))))   # площадки - до csar и десанта
+    for spec, name in ctld_assault:              # группа десанта CTLD - доля роты на борту игрока (assault.lua делит по кругу)
+        idx = spec["helos"].index(name)
+        share = [t[1] for i, t in enumerate(spec["troops"]) if i % len(spec["helos"]) == idx]
+        ctld["groups"].append({"name": f"Десант: {spec['title']}", **(troop_mix(share) or {"inf": 1}), "side": spec["side"]})
+    if player and tdef.get("jtac") and bkey and tk["target"] in platoons:   # авианаводчик у своего взвода в бою цели
+        tvg = platoons[tk["target"]][0][0]
+        own = [vg for g in groups if g["kind"] == "battle" and g.get("cluster") == bkey and g["side"] == tk["side"]
+               for vg, _part in platoons.get(g["unit"], [])]
+        if own:
+            tp = tvg.units[0].position
+            vg = min(own, key=lambda v: v.units[0].position.distance_to_point(tp))
+            sd = 1 if tk["side"] == "red" else 2
+            code = int((tdef.get("jtac") or {}).get("code", JTAC_CODE)) if isinstance(tdef.get("jtac"), dict) else JTAC_CODE
+            ctld["jtacs"].append({"id": f"Авианаводчик {sortie}", "platoon": vg.name, "target": tvg.name, "side": sd,
+                                  "country": _country(m, state, tk["side"]).id, "type": JTAC_TYPES[tk["side"]], "code": code,
+                                  "tx": tp.x, "ty": tp.y, "title": vg.name})
+            ctld_lines.append(f"Авианаводчик (позывной \"Авианаводчик {sortie}\") - у нашего взвода в бою: подсвечивает цели "
+                              f"лазером (код {code}) и дымом; F10 -> Авианаводчик - цель, координаты.")
+    if ctld["pilots"] or ctld["jtacs"]:          # CTLD - только если он нужен вылету
+        for a_ in ctld_actions(m, state, ctld):
+            trig.add_action(a_)
     trig.add_action(DoScript(String(csar_script(m, state, downed, rescuers))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
         trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
@@ -1012,7 +1134,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         + (f"\nЗамечания планировщика: {tk['package_notes']}" if tk.get("package_notes") else "")
         + (("\n\nДругие вылеты наших сил в это время:\n" + "\n".join(f"- {ln}" for ln in ai_lines)) if ai_lines else "")
         + ("\nРазведка: в районе возможна активность авиации противника." if enemy_lines else "")
-        + (("\n\nНаведение (КРУ, только МиГ-29):\n" + "\n".join(f"- {ln}" for ln in gci_lines)) if gci_lines else ""))
+        + (("\n\nНаведение (КРУ, только МиГ-29):\n" + "\n".join(f"- {ln}" for ln in gci_lines)) if gci_lines else "")
+        + (("\n\nПеревозки и наведение (CTLD):\n" + "\n".join(f"- {ln}" for ln in ctld_lines)) if ctld_lines else ""))
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1042,6 +1165,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                      "vehicles": [{"name": v["name"], "weight": v["weight"]} for v in g["vehicles"]]}
                     for g in groups if g["kind"] == "convoy"],
         "downed": [d["id"] for d in downed],             # экипажи на земле в миссии (их может спасти вертолёт)
+        "ctld": {"pilots": ctld["pilots"], "lifts": [x["id"] for x in ctld["lifts"]],   # CTLD в миссии (ctld_cfg.lua)
+                 "jtacs": [x["id"] for x in ctld["jtacs"]]},
+        "ctld_lines": ctld_lines,
     }
     state["manifest"] = manifest
     return manifest

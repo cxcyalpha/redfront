@@ -138,6 +138,10 @@ def apply(state: dict, data: dict) -> list[str]:
         if state.get("ato"):
             state["ato"].setdefault("assault", {})[aid] = [int(landed_n), int(total)]
         lines.append(f"Десант: на площадку село {landed_n} из {total} бортов" + (" - рота высажена." if landed_n else "."))
+    for lid, kg in (data.get("lift") or {}).items():   # перевозка снабжения игроком: ящики CTLD в зоне выгрузки (ctld_cfg.lua)
+        if state.get("ato"):
+            state["ato"].setdefault("lift", {})[lid] = round(int(kg) / 1000, 2)
+        lines.append(f"Перевозка снабжения: доставлено {int(kg) / 1000:.1f} т (на склад - в конце суток).")
     if not data.get("mission_ended"):
         lines.append("Внимание: миссия не была завершена штатно - применён последний сохранённый срез.")
     if not lines:

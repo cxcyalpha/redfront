@@ -129,7 +129,8 @@ async function api(action, body) {
 const BUSY = {new: "Создаю кампанию (зонды карты и дорог применяются сами - до нескольких минут)",
               plan: "Строю план полётов на сутки", build: "Собираю миссию", debrief: "Применяю дебриф",
               endday: "Конец дня: ход модели", mapimport: "Применяю зонд карты", mapapply: "Применяю зонд карты",
-              roadsapply: "Применяю дороги", presetcopy: "Копирую пресет"};
+              roadsapply: "Применяю дороги", presetcopy: "Копирую пресет", atoedit: "Меняю вылет", atoremove: "Снимаю вылет",
+              atoadd: "Ставлю вылет"};
 let busyTimer = null;
 function busy(text) {
   const b = $("#busy");
@@ -290,15 +291,24 @@ function render() {
     const rows = ST.ato.filter(r => sides.includes(r.side));
     p.innerHTML = `<div class="row" style="margin-bottom:8px">
         <label class="meta" style="margin:0"><input type="checkbox" id="atoEnemy" style="width:auto" ${cheat ? "checked" : ""}>
-        план противника (отладка)</label>${ST.clock ? `<span class="meta" style="margin:0">· часы кампании ${esc(ST.clock)}</span>` : ""}<span class="meta" style="margin:0">· обстановка на ${esc(ST.ground_time)}</span></div>` +
+        план противника (отладка)</label>${ST.clock ? `<span class="meta" style="margin:0">· часы кампании ${esc(ST.clock)}</span>` : ""}<span class="meta" style="margin:0">· обстановка на ${esc(ST.ground_time)}</span>
+        ${ST.ato.length ? `<button id="atoAdd" title="режим командующего: задачи, которые планировщик нашёл, но в план не взял">+ вылет</button>` : ""}</div>
+      <div id="atoCands"></div>` +
       (ST.ato.length ? "" : `<p class="meta">План полётов строится кнопкой «1. План».</p>`) +
       sides.map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}${s === ST.side ? " (вы)" : " - противник"}</h4>` +
-        rows.filter(r => r.side === s).map(r => `<div class="item">
+        rows.filter(r => r.side === s).map(r => `<div class="item" data-id="${esc(r.id)}">
           <b>${r.night ? "🌙 " : ""}${esc(r.takeoff)}–${esc(r.land)} · ${esc(r.title)}</b>
           <div class="d">${r.duty ? `в зоне ${esc(r.tot)}–${esc(r.end)}` : `на объекте ${esc(r.tot)}`} · ${esc(r.status)}</div>
           <div class="d">${r.groups.map(esc).join("<br>")}</div>
-          ${r.threats.length ? `<div class="d">ПВО: ${esc(r.threats.join(", "))}</div>` : ""}</div>`).join("")).join("");
+          ${r.threats.length ? `<div class="d">ПВО: ${esc(r.threats.join(", "))}</div>` : ""}
+          ${s === ST.side && !r.locked ? `<div class="row" style="margin-top:4px">${r.duty_only ? "" : `<button class="atoEd">Изменить</button>`}<button class="atoRm">Снять</button></div><div class="atoForm"></div>` : ""}</div>`).join("")).join("");
     $("#atoEnemy").onchange = e => { try { localStorage.setItem("rf_ato_enemy", e.target.checked ? "1" : "0"); } catch (x) {} render(); };
+    p.querySelectorAll(".atoRm").forEach(b => b.onclick = e => {
+      const it = e.target.closest(".item");
+      if (confirm("Снять вылет из плана полётов?")) act("atoremove", {id: it.dataset.id}, e.target);
+    });
+    p.querySelectorAll(".atoEd").forEach(b => b.onclick = e => atoEditor(e.target.closest(".item")));
+    if ($("#atoAdd")) $("#atoAdd").onclick = () => atoCands();
   } else if (TAB === "rear") {
     const unk = ST.objects.filter(o => !o.checked).length;
     const SL = ST.supply_log || {};
@@ -322,6 +332,46 @@ function render() {
     p.innerHTML = `<div class="log">${ST.log.slice().reverse().map(l => `<p>${esc(l)}</p>`).join("")}</div>`;
   }
   drawMap();
+}
+
+// ---------- режим командующего: правка плана полётов (command.py) ----------
+async function atoEditor(it) {
+  const f = it.querySelector(".atoForm");
+  if (f.innerHTML) { f.innerHTML = ""; return; }
+  let o;
+  try { o = (await api("atooptions", {file: FILE, id: it.dataset.id})).options; } catch (e) { return out(e.message, true); }
+  const perfOpt = (g, sel) => g.performers.map(x => `<option value="${esc(x.id)}" ${x.id === sel ? "selected" : ""}>${esc(x.name)} · ${esc(x.type)} · ${esc(x.base)} · к вылету ${x.available}</option>`).join("");
+  const loOpt = (g, pid, sel) => { const x = g.performers.find(q => q.id === pid) || {loadouts: []};
+    return `<option value="">DCS по умолчанию</option>` + x.loadouts.map(c => `<option ${c === sel ? "selected" : ""}>${esc(c)}</option>`).join(""); };
+  f.innerHTML = `<div style="border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:6px">
+    <div class="row"><span class="meta" style="margin:0">на объекте</span><input class="tot" value="${esc(o.tot)}" style="width:70px"></div>` +
+    o.groups.map(g => `<div class="grp" data-g="${esc(g.group)}" style="margin-top:6px"><div class="d">${esc(g.title)}</div>
+      <div class="row"><select class="perf" style="flex:1;min-width:0">${perfOpt(g, g.performer)}</select>
+      <input class="size" type="number" min="1" max="4" value="${g.size}" style="width:52px" title="бортов">
+      <select class="lo">${loOpt(g, g.performer, g.loadout)}</select></div></div>`).join("") +
+    `<div class="row" style="margin-top:6px"><button class="main save">Применить</button><button class="cancel">Отмена</button></div></div>`;
+  f.querySelectorAll(".grp").forEach(el => { const g = o.groups.find(q => q.group === el.dataset.g);
+    el.querySelector(".perf").onchange = e => { el.querySelector(".lo").innerHTML = loOpt(g, e.target.value, ""); }; });
+  f.querySelector(".cancel").onclick = () => { f.innerHTML = ""; };
+  f.querySelector(".save").onclick = e => {
+    const groups = {};
+    f.querySelectorAll(".grp").forEach(el => { groups[el.dataset.g] = {performer: el.querySelector(".perf").value,
+      size: +el.querySelector(".size").value, loadout: el.querySelector(".lo").value}; });
+    act("atoedit", {id: it.dataset.id, tot: f.querySelector(".tot").value.trim(), groups}, e.target);
+  };
+}
+async function atoCands() {
+  const box = $("#atoCands");
+  if (box.innerHTML) { box.innerHTML = ""; return; }
+  box.innerHTML = `<p class="meta">Ищу задачи...</p>`;
+  let c;
+  try { c = (await api("atocands", {file: FILE})).cands; } catch (e) { box.innerHTML = ""; return out(e.message, true); }
+  box.innerHTML = `<h4>Задачи вне плана (${c.length})</h4>` + (c.length ? "" : `<p class="meta">Планировщик больше ничего не находит.</p>`) +
+    c.map(t => `<div class="item" data-key="${esc(t.key)}"><b>${esc(t.title)}</b><div class="d">${t.km} км от ${esc(t.base)}</div>
+      <div class="d">${t.groups.map(esc).join("<br>")}</div>
+      <div class="row" style="margin-top:4px"><input class="tot" placeholder="ЧЧ:ММ" title="время на объекте; пусто - первое, когда хватает самолётов" style="width:70px"><button class="put">Поставить</button></div></div>`).join("");
+  box.querySelectorAll(".put").forEach(b => b.onclick = e => { const it = e.target.closest(".item");
+    act("atoadd", {key: it.dataset.key, tot: it.querySelector(".tot").value.trim()}, e.target); });
 }
 
 async function loadInfo() {
