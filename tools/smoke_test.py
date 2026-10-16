@@ -2356,6 +2356,8 @@ ctld = { i18n = { en = {} }, spawnedCratesRED = {}, spawnedCratesBLUE = {}, CB =
 function ctld.initialize() ctld.INIT = true end
 function ctld.addCallback(f) ctld.CB[#ctld.CB + 1] = f end
 function ctld.JTACAutoLase(name, code, smoke, lock) ctld.LASE[name] = code end
+ctld.MENU = {}
+function ctld.addTransportF10MenuOptions(n) ctld.MENU[n] = true end
 function fire(a) for _, f in ipairs(ctld.CB) do f(a) end end
 ZONES = {}
 trigger.misc = { getZone = function(n) return ZONES[n] end }
@@ -2444,6 +2446,15 @@ def ctld_section(tmp: Path) -> None:
     L.execute('near = mkGroup("ctld near", mkUnit("c2", 0, 0, 0, 1, "Infantry", false))')
     L.execute(f'fire({{ action = "dropped_troops", unit = UNITS["{pilot}"], unloaded = near }})')
     added = [Gl.ADDED[i].name for i in range(1, len(Gl.ADDED) + 1)]
+    # борт игрока уже в кабине до скриптов (в одиночной игре BIRTH пропущен): меню CTLD и CSAR - по опросу
+    csar_lua = next(t for t in texts if t.startswith("-- redfront csar"))
+    L.execute(csar_lua)
+    L.execute(f'coalition.getPlayers = function(side) if side == 1 then return {{ UNITS["{pilot}"] }} end return {{}} end')
+    Gl.T = 6
+    L.execute("runDue()")
+    menus = [Gl.MENUS[i] for i in range(1, len(Gl.MENUS) + 1)]
+    check(Gl.ctld.MENU[pilot] and "CSAR" in menus,
+          "борт игрока родился до скриптов (событие пропущено): меню CTLD и CSAR добавлены опросом")
     check(Gl.ctld.INIT and Gl.REDFRONT_CTLD.pilots[pilot] and off_lz and Gl.REDFRONT_ASSAULT[sid].landed == 1
           and Gl.Group.getByName("ctld near") is None and Gl.Group.getByName("ctld far") is not None
           and any(str(n).startswith(sid) for n in added),

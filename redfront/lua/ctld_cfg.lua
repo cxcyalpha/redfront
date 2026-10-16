@@ -54,6 +54,19 @@ if #CFG.crates > 0 then ctld.spawnableCrates["Снабжение"] = CFG.crates 
 
 ctld.initialize()
 
+-- меню CTLD бортам игрока: CTLD добавляет его по событию рождения, а в одиночной игре борт игрока рождается раньше
+-- скриптов начала миссии (меню F10 не было) - раз в 5 с проверяем борта из списка сами
+local function menus()
+  for _, n in ipairs(CFG.pilots) do
+    local u = Unit.getByName(n)
+    if u and u:isExist() and u.getPlayerName and u:getPlayerName() and ctld.addTransportF10MenuOptions then
+      pcall(ctld.addTransportF10MenuOptions, n)
+    end
+  end
+  return timer.getTime() + 5
+end
+timer.scheduleFunction(menus, nil, timer.getTime() + 1)
+
 local OURS = {}                      -- вес ящика снабжения -> да
 for _, c in ipairs(CFG.crates) do OURS[tostring(c.weight)] = true end
 
