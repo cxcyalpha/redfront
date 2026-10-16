@@ -289,7 +289,7 @@ function drawMap() {
     const st = {open: "открыт", active: "открыт", closed: "закрыт", lost: "потерян"}[b.state] || b.state;
     const used = b.units && b.units.length ? `<br>${b.units.map(esc).join("<br>")}` : "";
     if (b.kind === "farp") {                 // вертолётная площадка: свободные - бледные, на мелком масштабе не видны
-      L.marker(b.pos, {icon: icon(TAC.farp(b), 18, 18, b.units.length ? "tac" : "tac farp-free")})
+      L.marker(b.pos, {icon: icon(TAC.farp(b), 22, 22, b.units.length ? "tac" : "tac farp-free")})
         .bindTooltip(`<b>${esc(b.name)}</b> · вертолётная площадка · ${st}${used}`).addTo(layers.bases);
       continue;
     }
