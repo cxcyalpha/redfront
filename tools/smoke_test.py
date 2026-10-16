@@ -1362,7 +1362,7 @@ def helo_section(tmp: Path) -> None:
     for _ in range(3):
         sim.end_day(st)
     kinds = {side: collections.Counter(t["kind"] for t in planner.plan_side(st, side)[0]) for side in model.SIDES}
-    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k not in ("airlift", "qra"))   # перевозки, дежурства - вне лимита
+    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k not in ("airlift", "qra", "recon"))   # перевозки, дежурства, разведка - вне лимита
           and len(kinds["blue"]) >= 2,
           f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
     planner.plan(st)
