@@ -125,7 +125,7 @@ def threat_axis_deg(state: dict, unit: dict) -> float:
     if unit.get("heading_deg") is not None:
         return float(unit["heading_deg"])
     foe = model.enemy(unit["side"])
-    bases = [b for b in state["airbases"].values() if b.get("side") == foe]
+    bases = [b for b in state["airbases"].values() if b.get("side") == foe and b.get("kind") != "farp"]   # самолёты - с аэродромов
     if not bases:
         return 0.0
     pos = model.unit_pos(state, unit)
@@ -310,6 +310,13 @@ def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
         groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
         groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
         return [g for g in groups if g["vehicles"]]
+    if obj.get("kind") == "air_evac":            # эвакуация: рота у площадки (ждёт вертолёты), ЗРК коридора
+        ev = airhead(state, target, obj["pos"], density)
+        ev.update(kind="evac", late=False)
+        groups = [ev]
+        groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
+        groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
+        return [g for g in groups if g["vehicles"]]
     if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam"):   # объект тыла - сам в миссии как объекты карты
         groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
         placed = set()
@@ -440,7 +447,9 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     for u in units.values():                     # КРУ - все исправные (по одной машине; наведение - на 250 км)
         if model.category(u) == "gci" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0:
             groups.append(gci_site(state, u))
-    groups = [g for g in groups if g["vehicles"]]
+    core = {g["unit"] for g in groups if g.get("core")}
+    # приданная ПВО части уже в окне (угроза коридора) - второй раз с частью не ставится (была двумя группами DCS)
+    groups = [g for g in groups if g["vehicles"] and (g.get("core") or g["unit"] not in core)]
     budget = (state.get("settings") or {}).get("mission_budget", MISSION_BUDGET)
     return apply_budget(state, task, groups, budget)
 

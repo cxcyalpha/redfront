@@ -10,7 +10,7 @@
 """
 from __future__ import annotations
 
-from . import logistics, model, ops
+from . import farp, logistics, model, ops
 
 ACTIVE = ("march", "battle", "defend", "refit")
 
@@ -279,6 +279,7 @@ def end_day(state: dict) -> list[str]:
     lines += logistics.repairs(state)
     lines += logistics.air_defence(state)
     lines += logistics.airfields(state)
+    lines += farp.daily(state)                  # вертолётные части - на передовые площадки и с них
     lines += logistics.replacements(state)
     state["day"] += 1
     state["ground_s"] = 0

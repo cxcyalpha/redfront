@@ -69,7 +69,7 @@ dialog input,dialog select{width:100%}
 .z-near .ulbl{font-size:12px;margin-top:-12px}
 .z-far .ulbl,.z-far .plbl{display:none}
 .z-far .tac.unit svg,.z-far .tac.unit svg.su{transform:scale(.7)}
-.z-far .tac.sam{display:none}
+.z-far .tac.sam,.z-far .tac.farp-free{display:none}
 .z-mid .plbl{font-size:10px}
 .legend .lg{display:flex;align-items:center;gap:6px;margin:2px 0}
 .legend .lgp{display:inline-flex;align-items:center;justify-content:center;min-width:30px}
@@ -280,8 +280,14 @@ function drawMap() {
   for (const b of ST.airbases) {
     const o = AF["Аэродром " + b.name];
     const st = {open: "открыт", active: "открыт", closed: "закрыт", lost: "потерян"}[b.state] || b.state;
+    const used = b.units && b.units.length ? `<br>${b.units.map(esc).join("<br>")}` : "";
+    if (b.kind === "farp") {                 // вертолётная площадка: свободные - бледные, на мелком масштабе не видны
+      L.marker(b.pos, {icon: icon(TAC.farp(b), 18, 18, b.units.length ? "tac" : "tac farp-free")})
+        .bindTooltip(`<b>${esc(b.name)}</b> · вертолётная площадка · ${st}${used}`).addTo(layers.bases);
+      continue;
+    }
     L.marker(b.pos, {icon: icon(TAC.airbase(b), 26, 26)})
-      .bindTooltip(`<b>${esc(b.name)}</b> · ${st}${o && o.damage > 0 ? ` · повреждение ${Math.round(o.damage * 100)}%` : ""}`).addTo(layers.bases);
+      .bindTooltip(`<b>${esc(b.name)}</b> · ${st}${o && o.damage > 0 ? ` · повреждение ${Math.round(o.damage * 100)}%` : ""}${used}`).addTo(layers.bases);
   }
   drawTask();
   if (!fitted && ST.places.length) { map.fitBounds(ST.places.map(p => p.pos), {padding: [30, 30]}); fitted = true; }

@@ -347,7 +347,8 @@ def airfields(state: dict) -> list[str]:
         base = state["airbases"].get(u["base"])
         if base and base.get("state", "open") in ("open", "active"):
             continue
-        cands = [(k, b) for k, b in state["airbases"].items() if b.get("side") == u["side"] and b.get("state", "open") in ("open", "active")]
+        cands = [(k, b) for k, b in state["airbases"].items() if b.get("side") == u["side"] and b.get("state", "open") in ("open", "active")
+                 and (b.get("kind") != "farp" or model.category(u) == "heli")]   # на вертолётную площадку - только вертолёты
         if not cands:
             continue
         k, b = min(cands, key=lambda kb: model.dist_km(kb[1], base or kb[1]))

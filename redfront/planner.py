@@ -9,7 +9,7 @@ from __future__ import annotations
 import copy
 import math
 
-from . import dcstypes, logistics, model, ops
+from . import dcstypes, fitness, logistics, model, ops
 
 
 def strike_radius_km(unit: dict) -> float | None:
@@ -174,6 +174,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     for kind, tdef in doc["tasks"].items():
         performers = [u for u in state["units"].values()
                       if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0]
+        if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
+            from . import assault
+            performers = [u for u in performers if assault.troops(u.get("type", "")) > 0]
         if tdef.get("method") == "orbit":        # дежурство в зоне над своей территорией (ДРЛО, заправщик)
             t = orbit_task(state, side, kind, tdef, performers)
             if t:
@@ -190,6 +193,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             continue
         if tdef.get("method") == "csar":         # поиск и спасение своих сбитых экипажей (csar.py)
             tasks += csar_tasks(state, side, kind, tdef, performers, tasked)
+            continue
+        if tdef.get("method") == "air_evac":     # эвакуация своего десанта из тыла противника (assault.py)
+            tasks += evac_tasks(state, side, kind, tdef, performers, tasked)
             continue
         if tdef.get("method") == "air_assault":  # вертолётный десант в тыл противника (assault.py)
             t = assault_tasks(state, side, kind, tdef, performers, tasked)
@@ -225,14 +231,18 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 break
             tpos = model.unit_pos(state, tgt)
             best = None
+            cls = fitness.task_class(kind, tdef)
             for r in performers:
                 radius = strike_radius_km(r)
                 if radius is None:
                     reasons.append(f"{r['name']}: не задан радиус (strike_radius_km у части или у роли {r['role']})")
                     continue
+                if not fitness.fits(state, r, cls):   # тип для этой задачи слаб на фоне лучших в кампании (fitness.py)
+                    continue
                 d = model.dist_km(state["airbases"][r["base"]], tpos)
-                # сначала - части с меньшим числом задач в этом плане (вылеты распределяются по полкам), затем ближние
-                key = (_load(tasked, r), d)
+                # сначала - пригодный тип (оценка относительно лучшего в кампании) с поправкой на загрузку: задачи
+                # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
+                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)), 3), d)
                 if d <= radius and (best is None or key < best[0]):
                     best = (key, r)
             if best is None:
@@ -370,8 +380,8 @@ def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
         dpos = state["airbases"][dest]
         best = None
         for r in performers:
-            if r["base"] == dest:
-                continue
+            if r["base"] == dest or (state["airbases"][dest].get("kind") == "farp" and model.category(r) != "heli"):
+                continue                         # на вертолётную площадку - только вертолётом
             km = model.dist_km(state["airbases"][r["base"]], dpos)
             radius = strike_radius_km(r)
             if radius is not None and km > radius:
@@ -414,8 +424,10 @@ def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers
         for r in performers:
             radius = strike_radius_km(r)
             d = model.dist_km(state["airbases"][r["base"]], tpos)
-            if radius is not None and d <= radius and (best is None or (_load(tasked, r), d) < best[0]):
-                best = ((_load(tasked, r), d), r)
+            key = (round(fitness.pick_key(state, r, fitness.task_class(kind, tdef), _load(tasked, r)), 3), d)
+            if (radius is not None and d <= radius and fitness.fits(state, r, fitness.task_class(kind, tdef))
+                    and (best is None or key < best[0])):
+                best = (key, r)
         if best is None:
             continue
         (_n, d), perf = best
@@ -534,6 +546,52 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                         "package": groups, "package_notes": f"площадка в {tdef.get('lz_offset_km', 2)} км от {place}; "
                                                           f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"})
             break
+    return out
+
+
+def evac_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict) -> list[dict]:
+    """Эвакуация десанта (method air_evac): рота в тылу противника (assault.evac_needed) - площадка у её пункта в
+    сторону своих; группа - транспортная вертолётная часть, которая поднимает живых не больше чем max_helos бортами и
+    достаёт до площадки; через насыщенную ПВО (больше max_threats ЗРК в коридоре) не идут."""
+    from . import assault
+    foe = model.enemy(side)
+    out = []
+    for u in assault.evac_needed(state, side, tdef)[:tdef.get("per_day", 1)]:
+        place = u["route"][-1]
+        lz = assault.lz_point(state, side, place, tdef)
+        best = None
+        for r in performers:
+            need = assault.lift_need(u, r["type"], alive=True)
+            if need > min(logistics.available(state, r), tdef.get("max_helos", 8)):
+                continue
+            km = model.dist_km(state["airbases"][r["base"]], lz)
+            radius = strike_radius_km(r)
+            if radius is not None and km > radius:
+                continue
+            threats = corridor_threats(state, [(state["airbases"][r["base"]], lz)], foe, tdef.get("low_alt_m_agl"))
+            if len(threats) > tdef.get("max_threats", 1):
+                continue
+            key = (tasked.get(r["id"], 0), km)
+            if best is None or key < best[0]:
+                best = (key, r, need, threats)
+        if best is None:
+            continue
+        (_n, km), perf, need, threats = best
+        s = tdef["strike"]
+        groups = []
+        for k in range(0, need, GROUP_MAX):
+            groups.append({"group": "strike" if not k else f"lift{k // GROUP_MAX + 1}",
+                           "title": s["title"] + (f" ({k // GROUP_MAX + 1})" if k else ""), "performer": perf["id"],
+                           "size": min(GROUP_MAX, need - k), "base": perf["base"], "route": [lz],
+                           "objective": {"kind": "air_evac", "unit": u["id"], "place": place, "pos": lz},
+                           "maintask": s["maintask"], "loadout": [], "lead_min": -k // GROUP_MAX, "ai": {},
+                           "alt_m": tdef["transit_alt_m_agl"]})
+        tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}",
+                    "performer": perf["id"], "target": u["id"], "group_size": need, "base": perf["base"],
+                    "target_pos": lz, "ip": lz, "distance_km": round(km, 1), "threats": threats, "package": groups,
+                    "package_notes": f"рота {model.strength(u):.0%}, в тылу противника с суток {u.get('airhead_day', '?')}; "
+                                     f"{need} x {perf['type']} ({assault.troops(perf['type'])} человек на борт)"})
     return out
 
 
@@ -659,7 +717,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         cands = [u for u in units.values()
                  if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need]
         # сначала те, чей тип умеет основную задачу группы (для подавления ПВО - SEAD), затем та же часть, что ударная, затем ближние
-        cands.sort(key=lambda u: (not _can(u, g["maintask"][0]), u["id"] != perf["id"],
+        gcls = fitness.group_class(g["maintask"], None)   # подавление ПВО - sead, прикрытие - air
+        cands.sort(key=lambda u: (not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
+                                  u["id"] != perf["id"],
                                   model.dist_km(state["airbases"][u["base"]], tpos)))
         chosen = None
         for u in cands:

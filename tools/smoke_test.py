@@ -1330,6 +1330,7 @@ def germany_section(tmp: Path) -> None:
     check(len(took) >= 3 and len(axes) >= 2, f"за 8 дней красные взяли {len(took)} пунктов на {len(axes)} осях: {', '.join(sorted(took))}")
     planner.plan(st)
     tk = st["tasks"][0]
+    tk["tot_s"] = None                           # без продвижения модели к миссии: окно и театр - на одно время
     st["settings"]["mission_budget"] = 0                               # без бюджета - весь театр
     full = materialize.theatre(st, tk)
     n_full = sum(len(g["vehicles"]) for g in full)
@@ -1340,7 +1341,8 @@ def germany_section(tmp: Path) -> None:
     check(veh <= materialize.MISSION_BUDGET < n_full and heavy <= materialize.MAX_WEIGHT * 1.1,
           f"миссия всего фронта: без бюджета {n_full} машин, с бюджетом {veh} (не больше {materialize.MISSION_BUDGET}), "
           f"{len(man['ground'])} групп, машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
-    core = {g["unit"]: len(g["vehicles"]) for g in materialize.window(st, tk)}
+    core = {g["unit"]: len(g["vehicles"]) for g in materialize.window(st, tk)
+            if g["kind"] != "downed"}            # сбитый экипаж - не часть модели, в манифест наземных частей не входит
     got = {g["unit"]: len(g["vehicles"]) for g in man["ground"]}
     check(all(got.get(u) == n for u, n in core.items() if n),
           f"бюджет не трогает окно задачи игрока ({len(core)} групп: цель, угрозы коридора, ЗРК у маршрута)")
@@ -1556,7 +1558,8 @@ def air_defence_section(tmp: Path) -> None:
     check(len(ad) == len(sec["ad_sites"]) and all(tiers.values()),
           f"позиции ПВО сектора заняты шаблонами сторон: {len(ad)} частей ({tiers})")
     afs = {u["covers"] for u in ad if u.get("covers")}
-    check(afs == {f"af_{b}" for b in st["airbases"]}, f"ПВО объекта у каждого военного аэродрома ({len(afs)})")
+    check(afs == {f"af_{b}" for b, x in st["airbases"].items() if x.get("kind") != "farp"},
+          f"ПВО объекта у каждого военного аэродрома ({len(afs)}; вертолётные площадки - без неё)")
     s200 = next(u for u in ad if u["role"] == "sam_long")
     p = model.unit_pos(st, s200)
     a, b = model.offset(p, 90, 80_000, -100_000), model.offset(p, 90, 80_000, 100_000)   # маршрут в 80 км от С-200
@@ -2038,6 +2041,7 @@ function mkGroup(name, unit)
   function o:getController() return { setCommand = function() end, setOption = function() end,
                                         setTask = function(_, t) TASKED[name] = t end } end
   function o:destroy() g.dead = true end
+  function o:isExist() return not g.dead end
   function o:getName() return name end
   G[name] = { g = g, o = o }
   return o
@@ -2427,12 +2431,12 @@ def ctld_section(tmp: Path) -> None:
     # ---- десант: CTLD высадил группу у площадки - вместо неё доля роты из модели; далеко от площадки - не засчитано ----
     acts = _miz_scripts(tmp / "ctld_air_assault.miz")
     texts = [t for a, t in acts if a == "a_do_script"]
-    heads = ("-- redfront: русский", "-- redfront ctld", "-- redfront assault")
+    heads = ("-- redfront ctld", "-- redfront assault")
     pos = [next(i for i, t in enumerate(texts) if t.startswith(h)) for h in heads]
     check([a for a, _t in acts].count("a_do_script_file") == 2 and pos == sorted(pos),
-          "скрипты: MIST и CTLD файлами, затем перевод, настройка CTLD и десант (по порядку)")
-    ru, cfg, asl = (texts[i] for i in pos)
-    L = _ctld_lua([ru, cfg, asl])
+          "скрипты: MIST и CTLD файлами, затем настройка CTLD и десант (по порядку)")
+    cfg, asl = (texts[i] for i in pos)
+    L = _ctld_lua([cfg, asl])
     Gl = L.globals()
     pilot = man_a["ctld"]["pilots"][0]
     m_ = _re.search(r'x = ([-\d.]+), y = ([-\d.]+), r = (\d+)', asl)
@@ -2467,7 +2471,7 @@ def ctld_section(tmp: Path) -> None:
     Gl = L.globals()
     lid = man_l["ctld"]["lifts"][0]
     zone = Gl.ctld.dropOffZones[1][1]
-    w = Gl.ctld.spawnableCrates["Снабжение"][1].weight
+    w = Gl.ctld.spawnableCrates["Supply"][1].weight
     L.execute(f'ZONES["{zone}"] = {{ point = {{ x = 1000, y = 0, z = 1000 }}, radius = 2500 }}')
     L.execute(f'STATICS["in"] = crate(1500, 1000); STATICS["out"] = crate(9000, 1000); '
               f'ctld.spawnedCratesRED["in"] = {{ weight = {w} }}; ctld.spawnedCratesRED["out"] = {{ weight = {w} }}')
@@ -2576,11 +2580,138 @@ def command_section(tmp: Path) -> None:
     check(locked, "план противника не правится")
 
 
+def farp_section(tmp: Path) -> None:
+    """Передовые вертолётные площадки (farp.py): площадки карты - базы модели; вертолётные части выдвигаются на свои
+    ближе к фронту, при угрозе уходят; самолёты на площадки не перебазируются; вылет игрока - с площадки."""
+    from redfront import farp, logistics
+    print("\n== передовые вертолётные площадки ==")
+    st = model.new_campaign("fp", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    fps = {k: b for k, b in st["airbases"].items() if b.get("kind") == "farp"}
+    check(len(fps) > 20 and all(farp.NAME.match(b["airport"]) for b in fps.values()) and {b["side"] for b in fps.values()} == {"red", "blue"},
+          f"площадки карты в модели: {len(fps)} (без медицинских и радарных), у обеих сторон")
+    lines = farp.daily(st)
+    moved = [u for u in st["units"].values() if farp.is_farp(st["airbases"].get(u.get("base")))]
+    ok = all(model.category(u) == "heli" and u.get("home") and farp.FARP_MIN_KM <= st["airbases"][u["base"]]["front_km"] <= farp.FARP_MAX_KM
+             for u in moved) and len({u["base"] for u in moved}) == len(moved)
+    check(moved and ok, f"выдвинулись {len(moved)} вертолётных частей, каждая на свою площадку в {farp.FARP_MIN_KM}-{farp.FARP_MAX_KM} км от "
+                        f"противника: {lines[0]}")
+    u = moved[0]
+    b = st["airbases"][u["base"]]
+    foe = next(x for x in st["units"].values() if x["side"] != u["side"] and model.category(x) == "ground" and x["state"] != "pending")
+    near = min(st["places"], key=lambda q: model.dist_km(b, st["places"][q]))
+    foe["state"], foe["route"], foe["progress_km"] = "defend", [near], 0.0   # противник прорвался к площадке
+    lines = farp.daily(st)
+    check(u["base"] == u["home"] and b["state"] in ("closed", "lost") and any("уход" in ln for ln in lines),
+          f"противник у площадки: она закрыта, часть ушла на основной аэродром ({st['airbases'][u['base']]['name']})")
+    jet = next(x for x in st["units"].values() if model.category(x) == "air")
+    st["airbases"][jet["base"]]["state"] = "closed"
+    logistics.airfields(st)
+    check(not farp.is_farp(st["airbases"][jet["base"]]), "самолёты с закрытого аэродрома на вертолётную площадку не уходят")
+
+
+def evac_section(tmp: Path) -> None:
+    """Эвакуация десанта (assault.evac_*, lua/evac.lua): рота в тылу противника дольше evac_days - задача плана; в
+    миссии рота у площадки группами по вместимости борта, борт ИИ забирает группу сам, игрок - меню CTLD; сбитый борт -
+    группа погибла; итог - вывезенные в резерве, остальные потеряны."""
+    from redfront import assault
+    print("\n== эвакуация десанта ==")
+    st = model.new_campaign("ev", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    u = next(x for x in st["units"].values() if x["side"] == "red" and x.get("air_mobile"))
+    u.update(route=["Uelzen"], progress_km=0.0, state="defend", order="airhead", airhead_day=st["day"] - 3)
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "air_evac"), None)
+    check(n is not None, "рота в тылу противника 3 суток - в плане полётов эвакуация")
+    if n is None:
+        return
+    man = build.build(st, tmp / "evac.miz", task_no=n)
+    g = next(x for x in man["ground"] if x["unit"] == u["id"])
+    check(g["kind"] == "evac" and man["evac"] and man["ctld"]["extract"] and len(man["ctld"]["extract"]) * 6 >= len(g["vehicles"]),
+          f"миссия: рота ({len(g['vehicles'])} фигур) у площадки группами для CTLD ({len(man['ctld']['extract'])}), игрок - через CTLD")
+    if have_lupa():
+        acts = _miz_scripts(tmp / "evac.miz")
+        texts = [t for a, t in acts if a == "a_do_script"]
+        ev = next(t for t in texts if t.startswith("-- redfront evac"))
+        L = _ctld_lua([])
+        L.execute("REDFRONT_LZ = nil")
+        groups = man["ctld"]["extract"]
+        import re as _re
+        m_ = _re.search(r'\["x"\] = ([-\d.e]+), \["y"\] = ([-\d.e]+)', ev)
+        lx, ly = float(m_.group(1)), float(m_.group(2))
+        for k, gn in enumerate(groups):           # группы роты в миссии (заглушки)
+            L.execute(f'mkGroup("{gn}", mkUnit("{gn} u", {lx}, 0, {ly}, 1, "Paratrooper", false))')
+        L.execute(ev)
+        Gl = L.globals()
+        eid = man["evac"][0]
+        helos = _re.findall(r'\["helos"\] = \{ ([^}]*) \}', ev)[0]
+        names = _re.findall(r'"([^"]+)"', helos)
+        player, ai = names[0], names[1]
+        L.execute(f'UNITS["{ai}"] = mkUnit("{ai}", {lx + 100}, 0, {ly}, 1, "Mi-8MT", false, true)')
+        Gl.T = 10
+        L.execute("runDue()")
+        one = Gl.REDFRONT_EVAC[eid].saved
+        L.execute(f'REDFRONT_EVAC_CTLD("{player}", {{ details = {{ groupName = "{groups[1]}", units = {{ {{}}, {{}}, {{}} }} }} }})')
+        two = Gl.REDFRONT_EVAC[eid].saved
+        L.execute(f'for _, h in ipairs(world.handlers) do h:onEvent({{ id = world.event.S_EVENT_DEAD, initiator = UNITS["{ai}"] }}) end')
+        check(one == 1 and two == 4 and Gl.REDFRONT_EVAC[eid].saved == 3 and Gl.Group.getByName(groups[0]) is None,
+              "evac.lua: борт ИИ сел у площадки и забрал группу; игрок забрал группу через CTLD; борт ИИ сбит - его группа погибла")
+    # дебриф: игрок забрал одну группу сам, ведомый ИИ разбился без огня противника (DCS) - не потеря, его доля - по модели
+    a = st["ato"]
+    eid = man["evac"][0]
+    pkg = [fl for fl in man["flights"] if not fl.get("ato") and not fl.get("side")]
+    me = next(fl["units"][0] for fl in pkg if fl.get("player"))
+    wing = next(n for fl in pkg for n in fl["units"] if n != me)
+    perf = st["units"][pkg[0]["performer"]]
+    c0 = perf["count"]
+    import copy
+    st2 = copy.deepcopy(st)                      # для проверки частичной эвакуации - до дебрифа
+    data = {"campaign": st["campaign_id"], "sortie": man["sortie"], "dead": [wing], "ejected": [], "landed": [], "takeoff": [],
+            "hit": [], "evac": {eid: [6, 24, 0, 6]}, "mission_ended": True}
+    lines = debrief.apply(st, data)
+    n_ai = sum(len(fl["units"]) for fl in pkg) - 1
+    want = min(24, 6 + 6 * n_ai)
+    check(perf["count"] == c0 and any("без огня противника" in ln for ln in lines) and a["evac"][eid] == [want, 24],
+          f"дебриф: ведомый ИИ разбился сам - не потеря; вывезено: ваши 6 фигур + доля {n_ai} ведомых ИИ по модели = {want} из 24")
+    check(u["order"] == "reserve" and model.strength(u) > 0.99, "после дебрифа (окно миссии): рота вывезена вся, в резерве")
+    # итог в модели: вывезена половина живых - рота в резерве, половина потеряна
+    st = st2
+    u = st["units"][u["id"]]
+    st["ato"].setdefault("evac", {})[eid] = [12, 24]
+    s0 = model.strength(u)
+    e = next(x for x in st["ato"]["entries"] if x["id"] == eid)
+    lines = assault.evac_resolve(st, e["tot_s"])
+    check(u["order"] == "reserve" and st["places"][u["route"][0]]["side"] == "red" and abs(model.strength(u) - s0 * 0.5) < 0.02,
+          f"итог: {lines[0] if lines else '-'} (боеспособность {s0:.0%} -> {model.strength(u):.0%})")
+    # вместимость - от типа ЛА: Ми-24 берёт солдат, Апач - нет
+    check(assault.troops("Mi_24P") == 8 and assault.troops("AH_64A") == 0 and assault.troops("SA342M") == 0,
+          "солдат на борт - по типу: Ми-24П 8, AH-64A и SA342M - никого")
+
+
+def fitness_section(tmp: Path) -> None:
+    """Пригодность типа для задачи с учётом эпохи (fitness.py): оценка - относительно лучшего типа в кампании."""
+    from redfront import fitness
+    print("\n== пригодность типа ЛА ==")
+    st = model.new_campaign("fit", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    with_a10 = fitness.relative(st, "Su_25", "cas")
+    for u in st["units"].values():               # "другая эпоха": A-10 и Апачей в кампании нет
+        if u.get("type") in ("A_10A", "AH_64A"):
+            u["count"] = 0
+    without = fitness.relative(st, "Su_25", "cas")
+    check(abs(with_a10 - 0.85) < 1e-6 and abs(without - 1.0) < 1e-6,
+          f"Су-25 для удара по войскам: рядом с A-10 - {with_a10:.2f}, без него (своя эпоха) - {without:.2f}")
+    check(fitness.relative(st, "F_15C", "strike") == 0.0 and not fitness.fits(st, {"type": "F_15C"}, "strike")
+          and fitness.relative(st, "Mi_8MT", "cas") == 1.0,
+          "без оценки вида задач у типа с оценками - не годится (F-15C по объектам); тип без оценок - без учёта (Ми-8)")
+    best = fitness.pick_key(st, {"type": "MiG_27K"}, "strike", 0)
+    busy = fitness.pick_key(st, {"type": "MiG_27K"}, "strike", 3)
+    other = fitness.pick_key(st, {"type": "Su_17M4"}, "strike", 0)
+    check(best < other < busy, "выбор: лучший тип - первым, но после трёх задач его очередь уступает следующему типу")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section]
+            command_section, farp_section, evac_section, fitness_section]
 
 
 def main() -> int:

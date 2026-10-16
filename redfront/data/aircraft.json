@@ -2,58 +2,72 @@
   "_about": "Данные типов ЛА для модели (ОЦЕНКИ): cargo_t - груз борта в перевозке, troops - десантников на борт, crew - экипаж, night - летает ночью. Скорость групп - из доктрины (speed_kmh задачи).",
   "types": {
     "Su_17M4": {
+      "fit": {"cas": 0.55, "interdiction": 0.6, "strike": 0.6, "sead": 0.3, "air": 0.1},
       "crew": 1,
       "night": false
     },
     "Su_24M": {
+      "fit": {"cas": 0.4, "interdiction": 0.8, "strike": 0.85, "sead": 0.55, "air": 0.05},
       "crew": 2,
       "night": true
     },
     "Su_25": {
+      "fit": {"cas": 0.85, "interdiction": 0.65, "strike": 0.55, "sead": 0.2, "air": 0.05},
       "crew": 1,
       "night": false
     },
     "MiG_21Bis": {
+      "fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.3, "air": 0.45},
       "crew": 1,
       "night": false
     },
     "MiG_23MLD": {
+      "fit": {"cas": 0.2, "interdiction": 0.25, "strike": 0.25, "air": 0.6},
       "crew": 1,
       "night": false
     },
     "MiG_25PD": {
+      "fit": {"air": 0.55},
       "crew": 1,
       "night": true
     },
     "MiG_27K": {
+      "fit": {"cas": 0.6, "interdiction": 0.7, "strike": 0.7, "sead": 0.35, "air": 0.1},
       "crew": 1,
       "night": false
     },
     "MiG_29_Fulcrum": {
+      "fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.8},
       "crew": 1,
       "night": true
     },
     "F_4E_45MC": {
+      "fit": {"cas": 0.5, "interdiction": 0.6, "strike": 0.6, "sead": 0.45, "air": 0.6},
       "crew": 2,
       "night": true
     },
     "F_15C": {
+      "fit": {"air": 1.0},
       "crew": 1,
       "night": true
     },
     "F_16C_50": {
+      "fit": {"cas": 0.7, "interdiction": 0.75, "strike": 0.75, "sead": 0.8, "air": 0.85},
       "crew": 1,
       "night": true
     },
     "Tornado_IDS": {
+      "fit": {"cas": 0.45, "interdiction": 0.9, "strike": 0.85, "sead": 0.6, "air": 0.1},
       "crew": 2,
       "night": true
     },
     "A_10A": {
+      "fit": {"cas": 1.0, "interdiction": 0.8, "strike": 0.5, "sead": 0.2, "air": 0.05},
       "crew": 1,
       "night": false
     },
     "AV8BNA": {
+      "fit": {"cas": 0.75, "interdiction": 0.6, "strike": 0.55, "air": 0.25},
       "crew": 1,
       "night": false
     },
@@ -70,14 +84,19 @@
       "night": true
     },
     "Mi_24P": {
+      "fit": {"cas": 0.7},
+      "cargo_t": 1.5,
+      "troops": 8,
       "crew": 2,
       "night": false
     },
     "SA342M": {
+      "fit": {"cas": 0.55},
       "crew": 2,
       "night": false
     },
     "AH_64A": {
+      "fit": {"cas": 1.0},
       "crew": 2,
       "night": true
     },
@@ -90,18 +109,22 @@
       "night": true
     },
     "MiG_29A": {
+      "fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.8},
       "crew": 1,
       "night": true
     },
     "Tornado_GR4": {
+      "fit": {"cas": 0.5, "interdiction": 0.9, "strike": 0.9, "sead": 0.55, "air": 0.1},
       "crew": 2,
       "night": true
     },
     "FA_18C_hornet": {
+      "fit": {"cas": 0.75, "interdiction": 0.75, "strike": 0.8, "sead": 0.8, "air": 0.8},
       "crew": 1,
       "night": true
     },
     "L_39ZA": {
+      "fit": {"cas": 0.25, "strike": 0.15, "air": 0.1},
       "crew": 1,
       "night": false
     },
@@ -157,8 +180,9 @@
       "night": true
     }
   },
-  "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность).",
-  "_about_troops": "troops - десантников на борт вертолёта в высадке (ОЦЕНКА по справочной вместимости).",
+  "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность); нет поля - груз не возит (ящики CTLD - тоже по нему).",
+  "_about_fit": "fit - пригодность типа по видам задач на одной шкале для всех эпох (0..1; cas - удар по войскам, interdiction - по колоннам и путям подвоза, strike - по объектам тыла, sead - по ПВО, air - воздушный бой и перехват). Сравнивается с лучшим типом этой кампании (fitness.py): эпоху задаёт состав сил. ОЦЕНКИ по назначению, вооружению и прицельному оборудованию типа.",
+  "_about_troops": "troops - солдат на борт (десант, эвакуация, CTLD): от типа ЛА, не от роли части - Ми-24 берёт 8, Апач и Газель никого; нет поля - солдат не возит (ОЦЕНКА по справочной вместимости).",
   "_about_crew": "crew - человек в экипаже (для сообщений о сбитых и спасённых); в модели экипаж полка считается комплектом на борт.",
   "_about_night": "night - тип летает ночью (ОЦЕНКА по прицельно-навигационному оборудованию эпохи: Су-24М, Tornado, F-15/16, F-4E, МиГ-25/29, ДРЛО, транспорт - да; Су-25, Су-17, МиГ-21/23/27, A-10A, AV-8B, Ми-24, лёгкие вертолёты - нет)."
 }

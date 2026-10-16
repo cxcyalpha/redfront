@@ -46,6 +46,19 @@ def apply(state: dict, data: dict) -> list[str]:
         raise RuntimeError(f"дебриф вылета {man['sortie']} уже применён - повторно потери не списываются")
     lost = set(data.get("dead", [])) | set(data.get("ejected", []))
     lines = []
+    flights = man.get("flights") or [{**man["flight"], "group": "strike"}]   # вылет, собранный до тактической группы: одно звено
+    # ЛА ИИ, потерянный без попадания оружия (врезался в землю, в дерево, столкнулся), - ошибка ИИ DCS, не потеря кампании
+    if "hit" in data:
+        ai_air = {n for fl in flights for n in (fl["units"][1:] if fl.get("player") else fl["units"])}
+        noncombat = {n for n in lost & ai_air if n not in set(data["hit"])}
+        if noncombat:
+            lost -= noncombat
+            lines.append(f"ИИ: {len(noncombat)} ЛА разбились без огня противника (ошибка ИИ DCS) - потерей не считаются.")
+    # вылет игрока: его итог - что сделал он сам; доля ведомых ИИ его группы и остальных групп пакета - по модели:
+    # не сбит огнём противника - сделал свою долю (не садится на дерево вместо площадки)
+    pkg = [fl for fl in flights if not fl.get("ato") and not fl.get("side")]
+    me = next((fl["units"][0] for fl in pkg if fl.get("player")), None)
+    pkg_ai = [n for fl in pkg for n in fl["units"] if n != me]
 
     # ---- дороги, найденные миссией при перекладке колонны (column_road.lua): модель их запоминает ----
     for name, msg in (data.get("column_log") or {}).items():
@@ -109,7 +122,6 @@ def apply(state: dict, data: dict) -> list[str]:
                     u["progress_km"] = head
 
     # ---- своё звено ----
-    flights = man.get("flights") or [{**man["flight"], "group": "strike"}]   # вылет, собранный до тактической группы: одно звено
     for fl in flights:                           # все звенья тактической группы, не только звено игрока
         perf = state["units"][fl["performer"]]
         lost_ac = [n for n in fl["units"] if n in lost]
@@ -134,10 +146,28 @@ def apply(state: dict, data: dict) -> list[str]:
             lines.append(f"{e['title']}: пара поднята по тревоге на {int(data['qra'][qid]) // 60}-й минуте.")
     from . import csar                          # экипажи сбитых и спасения в миссии (csar.lua)
     lines += csar.apply_debrief(state, man, data, lost)
-    for aid, (landed_n, total) in (data.get("assault") or {}).items():   # десант: сколько бортов село (assault.lua)
+    for aid, v in (data.get("assault") or {}).items():   # десант (assault.lua): игрок - сел ли он сам, ведомые ИИ - по модели
+        landed_n, total = int(v[0]), int(v[1])
+        names = set(v[2]) if len(v) > 2 else None
+        if names is not None and me:
+            landed_n = min(total, int(me in names) + sum(1 for n in pkg_ai if n not in lost))
         if state.get("ato"):
-            state["ato"].setdefault("assault", {})[aid] = [int(landed_n), int(total)]
-        lines.append(f"Десант: на площадку село {landed_n} из {total} бортов" + (" - рота высажена." if landed_n else "."))
+            state["ato"].setdefault("assault", {})[aid] = [landed_n, total]
+        lines.append(f"Десант: на площадку села доля {landed_n} из {total} бортов"
+                     + (" (вы - сами, ведомые ИИ - кто не сбит)" if names is not None and me else "")
+                     + (" - рота высажена." if landed_n else "."))
+    for eid, v in (data.get("evac") or {}).items():   # эвакуация десанта (evac.lua): игрок - что забрал сам, ведомые ИИ - по модели
+        saved, total, dead = int(v[0]), int(v[1]), int(v[2])
+        alive = max(0, total - dead)
+        if len(v) > 3 and me:
+            from . import assault
+            e = next((x for x in (state.get("ato") or {}).get("entries", []) if x["id"] == eid), None)
+            perf = state["units"].get(e["task"]["package"][0]["performer"]) if e else None
+            per = max(1, assault.troops((perf or {}).get("type", "")) // 4)   # фигур на борт (фигура - 4 человека)
+            saved = min(alive, int(v[3]) + per * sum(1 for n in pkg_ai if n not in lost))
+        if state.get("ato"):
+            state["ato"].setdefault("evac", {})[eid] = [int(saved), alive]
+        lines.append(f"Эвакуация: вывезено {saved} из {alive} фигур роты на площадке" + (f" (убито на площадке {dead})" if dead else "") + ".")
     for lid, kg in (data.get("lift") or {}).items():   # перевозка снабжения игроком: ящики CTLD в зоне выгрузки (ctld_cfg.lua)
         if state.get("ato"):
             state["ato"].setdefault("lift", {})[lid] = round(int(kg) / 1000, 2)

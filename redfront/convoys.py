@@ -165,7 +165,10 @@ def daily(state: dict, until_s: float | None = None) -> list[str]:
         flow = link_flows(state, foe).get(link, 0.0)
         if not flow:
             continue
-        p = max(0.1, min(0.9, 0.7 - 0.1 * len(e["task"].get("threats", []))))
+        from . import fitness                   # пригодность типа исполнителя (относительно лучшего в кампании)
+        perf = state["units"].get(e["task"]["package"][0]["performer"], {})
+        p = max(0.1, min(0.9, (0.7 - 0.1 * len(e["task"].get("threats", []))) * fitness.outcome_factor(
+            state, perf.get("type", ""), fitness.task_class(e["kind"]))))
         if (a.get("lost") or {}).get(e["id"]):
             p *= 0.5
         r = model.rng(state, f"interdict-{e['id']}")

@@ -132,7 +132,9 @@ def view(st: dict) -> dict:
         "randomness": st["settings"].get("randomness", True),
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
-        "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open")}
+        "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open"),
+                      "kind": b.get("kind", "airfield"),       # farp - вертолётная площадка (farp.py)
+                      "units": [u["name"] for u in units.values() if u.get("base") == k and model.category(u) in ("air", "heli")]}
                      for k, b in st["airbases"].items()],
         "tasks": tasks, "task_reason": st.get("task_reason") if not tasks else None,
         "supply_log": st.get("supply_log") or {},
