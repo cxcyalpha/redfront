@@ -214,7 +214,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         cat = tdef["target"]["category"]
         if cat in STRATEGIC:                     # объекты тыла противника: целы и не потеряны; мост - в тылу противника
             targets = [u for u in state["units"].values() if model.category(u) == cat and u["state"] == "active"
-                       and u.get("damage", 0) < 0.95
+                       and u.get("damage", 0) < 0.95 and (cat != "depot" or logistics.supplies(u))
                        and (logistics.bridge_side(state, u) if cat == "bridge" else u["side"]) == tside]
         elif cat == "sam":                       # позиции ЗРК противника (fixed - только объектовая ПВО): исправные
             targets = [u for u in state["units"].values() if u["side"] == tside and model.category(u) == "sam"

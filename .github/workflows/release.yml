@@ -1,0 +1,62 @@
+name: release
+
+# Сборка программы для Windows (redfront.exe, без установки Python и git): по тегу v* - архив в релиз GitHub,
+# вручную (Actions -> release -> Run workflow) - архив в артефакты прогона.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+      - name: Build redfront.exe
+        run: >
+          python -m PyInstaller --noconfirm --clean --name redfront --icon NONE
+          --collect-data redfront --collect-all dcs --hidden-import redfront.gui
+          packaging/redfront_app.py
+      - name: Smoke test (new campaign, plan, mission)
+        shell: bash
+        run: |
+          mkdir smoke && cd smoke
+          ../dist/redfront/redfront.exe new c.json --oob oob_germany.json --sector sector_germany.json --seed 7
+          ../dist/redfront/redfront.exe plan c.json
+          ../dist/redfront/redfront.exe build c.json m.miz --humans 2
+          test -s m.miz
+      - name: Package
+        shell: bash
+        run: |
+          cp README.md packaging/ЗАПУСК.txt dist/redfront/
+          name="redfront-${GITHUB_REF_NAME//\//-}-windows"
+          echo "ZIP=$name.zip" >> "$GITHUB_ENV"
+          cd dist && 7z a "../$name.zip" redfront > /dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: redfront-windows
+          path: ${{ env.ZIP }}
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # релиз уже создан на сайте (Releases -> Draft a new release) - добавить архив, иначе - создать
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$ZIP" --title "redfront $GITHUB_REF_NAME" \
+              --notes "Windows - распаковать архив и запустить redfront.exe (см. ЗАПУСК.txt внутри)."
+          fi

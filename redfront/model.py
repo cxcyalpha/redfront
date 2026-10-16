@@ -377,6 +377,7 @@ def load(path: Path) -> dict:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
     sync_ad_sites(st)
     init_crews(st)
+    drop_dummy_depots(st)
     from . import farp as _farp                  # вертолётные площадки карты - и в старых кампаниях
     _farp.ensure(st)
     from . import intel as _intel                # разведка позиций ЗРК противника - и в старых кампаниях
@@ -390,6 +391,18 @@ def load(path: Path) -> dict:
         for u in marching:
             u["progress_km"] = project_km(route_points(st, u), before[u["id"]])
     return st
+
+
+def drop_dummy_depots(st: dict) -> None:
+    """Склады, найденные зондом карты (supply: false), - цели без последствий: путали игрока - убраны из кампании."""
+    for uid in [k for k, u in st.get("units", {}).items() if u.get("role") == "depot" and u.get("supply") is False]:
+        del st["units"][uid]
+    ok = lambda t: t.get("target") is None or t.get("target") in st["units"] or t.get("target_kind") == "convoy"
+    st["tasks"] = [t for t in (st.get("tasks") or []) if ok(t)]
+    if st.get("task") and not ok(st["task"]):
+        st["task"] = None
+    if st.get("ato"):
+        st["ato"]["entries"] = [e for e in st["ato"].get("entries", []) if ok(e["task"])]
 
 
 def init_crews(st: dict) -> None:
