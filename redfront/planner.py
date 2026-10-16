@@ -126,7 +126,7 @@ def plan(state: dict) -> dict | None:
     clock = max(state.get("clock_s") or 0, state.get("ground_s") or 0)   # наземная модель не идёт назад
     tasks = []
     for e in a["entries"]:                       # вылеты своей стороны по времени; дежурства (ДРЛО, заправщик) - только ИИ
-        if e["side"] != state["player_side"] or e["ai_only"] or e["id"] in a["done"]:
+        if e["side"] != state["player_side"] or (e["ai_only"] and not player_lift(state, e)) or e["id"] in a["done"]:
             continue
         t = e["times"]["strike"]
         if t["takeoff_s"] < clock:
@@ -142,6 +142,24 @@ def plan(state: dict) -> dict | None:
     state["task"] = tasks[0]
     state["task_reason"] = None
     return tasks[0]
+
+
+def player_lift(state: dict, e: dict) -> bool:
+    """Перевозка снабжения вертолётом - её может слетать игрок (груз - ящики CTLD, build.py); самолётом - только ИИ."""
+    g = e["task"]["package"][0]
+    return g["objective"]["kind"] == "airlift" and model.category(state["units"][g["performer"]]) == "heli"
+
+
+def _load(tasked: dict, unit: dict) -> int:
+    """Загрузка исполнителя в этом плане: задач у его типа ЛА + у самой части. Сначала - менее загруженные: вылеты
+    расходятся по типам, а не достаются пяти полкам МиГ-27 подряд (первый лог Германии)."""
+    return tasked.get("type:" + str(unit.get("type")), 0) + tasked.get(unit["id"], 0)
+
+
+def _book(state: dict, tasked: dict, uid: str) -> None:
+    tasked[uid] = tasked.get(uid, 0) + 1
+    t = "type:" + str(state["units"][uid].get("type"))
+    tasked[t] = tasked.get(t, 0) + 1
 
 
 def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int = MAX_PER_KIND) -> tuple[list[dict], str]:
@@ -214,7 +232,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                     continue
                 d = model.dist_km(state["airbases"][r["base"]], tpos)
                 # сначала - части с меньшим числом задач в этом плане (вылеты распределяются по полкам), затем ближние
-                key = (tasked.get(r["id"], 0), d)
+                key = (_load(tasked, r), d)
                 if d <= radius and (best is None or key < best[0]):
                     best = (key, r)
             if best is None:
@@ -231,7 +249,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             found = True
             n_kind += 1
             for g in groups:
-                tasked[g["performer"]] = tasked.get(g["performer"], 0) + 1
+                _book(state, tasked, g["performer"])
             if not threats and tdef.get("medium_alt_m_agl"):   # угроз ЗРК в коридоре нет - переход на средних высотах
                 for g in groups:
                     g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
@@ -396,8 +414,8 @@ def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers
         for r in performers:
             radius = strike_radius_km(r)
             d = model.dist_km(state["airbases"][r["base"]], tpos)
-            if radius is not None and d <= radius and (best is None or (tasked.get(r["id"], 0), d) < best[0]):
-                best = ((tasked.get(r["id"], 0), d), r)
+            if radius is not None and d <= radius and (best is None or (_load(tasked, r), d) < best[0]):
+                best = ((_load(tasked, r), d), r)
         if best is None:
             continue
         (_n, d), perf = best
@@ -411,7 +429,7 @@ def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers
             reasons.append(f"{tdef['title']}: {link} - {why}")
             continue
         for g in groups:
-            tasked[g["performer"]] = tasked.get(g["performer"], 0) + 1
+            _book(state, tasked, g["performer"])
         if not threats and tdef.get("medium_alt_m_agl"):
             for g in groups:
                 g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
@@ -497,6 +515,8 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
             (_n, km), perf, need = best
             base = state["airbases"][perf["base"]]
             threats = corridor_threats(state, [(base, lz)], foe, tdef.get("low_alt_m_agl"))
+            if len(threats) > tdef.get("max_threats", 1):   # вертолёты через насыщенную ПВО не идут - другая площадка
+                continue
             s = tdef["strike"]
             groups = []                          # группа ЛА в DCS - не больше 4 бортов: подъём - волнами по 4, через минуту
             for k in range(0, need, GROUP_MAX):

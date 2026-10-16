@@ -291,8 +291,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         if req and not any(u.get("type") in req and site.get("covers") == f"af_{u.get('base')}" for u in forces["units"]):
             continue
         tpl = variants[site.get("variant", 0) % len(variants)]
-        name = site["name"] if tpl["name"] in site["name"] else f"{site['name']}: {tpl['name']}"
-        units[site["id"]] = {"id": site["id"], "name": name, "side": site["side"],
+        sname = site["name"] if tpl["name"] in site["name"] else f"{site['name']}: {tpl['name']}"   # не name: это имя кампании
+        units[site["id"]] = {"id": site["id"], "name": sname, "side": site["side"],
                              "role": tier_role[site["tier"]], "state": "deployed", "fixed": True,
                              "pos": {"lat": site["lat"], "lon": site["lon"]}, "covers": site.get("covers"),
                              "composition": copy.deepcopy(tpl["composition"]), "lost": {},
@@ -373,6 +373,14 @@ def load(path: Path) -> dict:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
     sync_ad_sites(st)
     init_crews(st)
+    if st.get("roads"):                          # старые кампании: дороги-крюки DCS - убрать, части - на прежнем месте
+        from . import roads as _roads
+        marching = [u for u in st["units"].values() if "route" in u]
+        before = {u["id"]: unit_pos(st, u) for u in marching}
+        for ln in _roads.sanitize(st):
+            note(st, ln)
+        for u in marching:
+            u["progress_km"] = project_km(route_points(st, u), before[u["id"]])
     return st
 
 

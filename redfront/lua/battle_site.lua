@@ -233,10 +233,17 @@ local function placeAD(a)
     end
     if buildings(px, py, CFG.ad_building_r) > 0 then inTown = inTown + 1 end
     adPlaced[#adPlaced + 1] = { x = px, y = py }
-    new[#new + 1] = { name = u.name, type = u.type, x = px, y = py, heading = u.heading, skill = "High", playerCanDrive = false }
+    new[#new + 1] = { name = u.name, type = u.type, x = px, y = py, heading = u.heading, skill = "High", playerCanDrive = false,
+                      unitId = u.unitId }
+  end
+  local p1 = { x = new[1].x, y = new[1].y, action = "Off Road", type = "Turning Point", speed = 0, ETA = 0, ETA_locked = false, speed_locked = true }
+  if a.gci and new[1].unitId then              -- КРУ: включение наведения - заново (задача точки пересоздаётся с группой)
+    p1.task = { id = "ComboTask", params = { tasks = { { number = 1, auto = true, enabled = true, id = "WrappedAction",
+      params = { action = { id = "ActivateGCI", params = { channel = a.gci.channel, unitId = new[1].unitId,
+                                                            radius = a.gci.radius, x = 0, y = 0 } } } } } } }
   end
   coalition.addGroup(a.country, Group.Category.GROUND, { name = a.name, groupId = a.groupId, task = "Ground Nothing", units = new,
-    route = { points = { { x = new[1].x, y = new[1].y, action = "Off Road", type = "Turning Point", speed = 0, ETA = 0, ETA_locked = false, speed_locked = true } } } })
+    route = { points = { p1 } } })
   return string.format("ПВО на открытом месте: %d машин, у строений осталось %d%s", #new, inTown,
                        moved > 0 and string.format(", позиция сдвинута на %.0f м (аэродром, вода, город)", moved) or "")
 end

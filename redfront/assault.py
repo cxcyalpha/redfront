@@ -105,10 +105,9 @@ def resolve(state: dict, until_s: float | None = None) -> list[str]:
             down = sum(1 for _ in range(left) if r.random() < p) if r else round(left * p)
             landed = left - down
             how = "ИИ"
-        heli = state["units"][g["performer"]]
-        men = u.get("men") or 4 * sum(c["count"] for c in u["composition"])
-        frac = min(1.0, landed * troops(heli["type"]) / men)
-        lost_frac = min(1.0, (size - landed) * troops(heli["type"]) / men)
+        # рота - поровну по бортам (загрузка, а не вместимость: 100 человек на 4 CH-53 - по 25, не по 37)
+        frac = landed / size if size else 0.0
+        lost_frac = (size - landed) / size if size else 0.0
         if lost_frac > 0:                        # рота в сбитых бортах
             for c in u["composition"]:
                 alive = max(0.0, c["count"] - u["lost"].get(c["type"], 0.0))

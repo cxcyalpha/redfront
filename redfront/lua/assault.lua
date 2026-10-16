@@ -5,7 +5,10 @@
 --   * рота делится по бортам (доля каждого - свои фигуры); борт ИИ, севший ближе r к площадке, высаживает свою долю
 --     сам; игрок - через меню F10 "Десант": "Загрузить десант" (на земле, у своего аэродрома), "Высадить десант"
 --     (на земле, ближе r к площадке), "Площадка" (пеленг, дальность, дым);
---   * высаженные фигуры появляются у вертолёта (coalition.addGroup) с именами из модели - их потери пишет хук.
+--   * высаженные фигуры появляются у вертолёта (coalition.addGroup) с именами из модели - их потери пишет хук;
+--   * если в миссии CTLD (ctld_cfg.lua: борт игрока в REDFRONT_CTLD.pilots) - погрузка и высадка игрока через меню CTLD
+--     ("Перевозки (CTLD)" -> "Десант"), своего меню нет: группа, высаженная CTLD ближе r к площадке, заменяется долей
+--     роты (REDFRONT_ASSAULT_CTLD); дальше - остаётся группой CTLD, её можно забрать обратно и высадить на площадке.
 -- Сколько бортов высадили свою долю из скольких - REDFRONT_ASSAULT[id] (модель: assault.py).
 REDFRONT_ASSAULT = REDFRONT_ASSAULT or {}
 local CHECK_S = 3
@@ -135,6 +138,22 @@ local function cmdInfo(name)
       s.moved > 0 and string.format("; перенесена на открытое место (%.0f м)", s.moved) or ""), 15)
 end
 
+-- высадка игрока через CTLD (ctld_cfg.lua): grp - группа, которую создал CTLD
+function REDFRONT_ASSAULT_CTLD(name, grp)
+  local u, s = Unit.getByName(name), specOf(name)
+  if not u or not s then return end
+  local p = u:getPoint()
+  local r = dist(p.x, p.z, s.x, s.y)
+  if r > s.r then
+    msg(u, string.format("Вы не на площадке (до неё %.1f км): высадка не засчитана. Заберите группу обратно (\"Высадить / забрать десант\") и высадите на площадке.", r / 1000), 20)
+    return
+  end
+  if REDFRONT_ASSAULT[s.id].seen[name] then return end
+  pcall(function() grp:destroy() end)                         -- вместо бойцов CTLD - доля роты из модели
+  unload(s, REDFRONT_ASSAULT[s.id], name, u)
+  msg(u, "Десант высажен на площадке. Возвращайтесь.", 15)
+end
+
 local menus = {}
 local H = {}
 function H:onEvent(e)
@@ -142,6 +161,7 @@ function H:onEvent(e)
   local u = e.initiator
   local ok, name = pcall(function() return u:getName() end)
   if not ok or not specOf(name) or not isPlayer(u) then return end
+  if REDFRONT_CTLD and REDFRONT_CTLD.pilots[name] then return end   -- погрузка и высадка - меню CTLD
   local g = u:getGroup()
   if not g or menus[g:getID()] then return end
   menus[g:getID()] = true
