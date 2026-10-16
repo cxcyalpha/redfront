@@ -231,13 +231,16 @@ const TAC = (() => {
     return `<svg width="24" height="24" viewBox="-12 -12 24 24"><path d="${plane}" fill="${off ? "#fffdf6" : c}" stroke="${c}" stroke-width="${off ? 1.2 : .6}"/>` +
            (off ? `<path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="${c}" stroke-width="1.4"/>` : "") + `</svg>`;
   }
-  // посадочная площадка вертолётов (передовая площадка, FARP): кружок с буквой "Т"; занятая частью - ярче
+  // посадочная площадка вертолётов (передовая площадка, FARP): кружок с буквой "Т" цвета стороны, ярко, как аэродром;
+  // занятая частью - заливкой, свободная - контуром; закрыта или потеряна - перечёркнута
   function farp(b) {
     const off = b.state === "closed" || b.state === "lost";
-    const c = off ? GREY : sideCol(b.side);
-    return `<svg width="18" height="18" viewBox="-9 -9 18 18" style="opacity:${b.units && b.units.length ? 1 : .55}">` +
-           `<circle r="7" fill="#fffdf6" stroke="${c}" stroke-width="1.5"/><path d="M-3.5 -3.5 H3.5 M0 -3.5 V4" stroke="${c}" stroke-width="1.6"/>` +
-           (off ? `<path d="M-7 -7 L7 7" stroke="${c}" stroke-width="1.3"/>` : "") + `</svg>`;
+    const c = sideCol(b.side), used = b.units && b.units.length && !off;
+    const t = used ? "#fffdf6" : c;
+    return `<svg width="22" height="22" viewBox="-11 -11 22 22">` +
+           `<circle r="8.5" fill="${used ? c : "#fffdf6"}" stroke="${c}" stroke-width="2"/>` +
+           `<path d="M-4.2 -4.2 H4.2 M0 -4.2 V5" stroke="${t}" stroke-width="2.2"/>` +
+           (off ? `<path d="M-8 -8 L8 8 M8 -8 L-8 8" stroke="${c}" stroke-width="1.6"/>` : "") + `</svg>`;
   }
   function target(o) {
     const dead = o.state === "lost" || o.damage >= 1;
@@ -286,7 +289,7 @@ const TAC = (() => {
       row(line(RED, BLUE), "линия соприкосновения") +
       row(sam({side: "red", branch: "sam", tier: 2}, false) + sam({side: "red", branch: "gci"}, false), "ЗРК (черты - дальность), РЛС (КРУ)") +
       row(airbase({side: "red", state: "open"}) + airbase({side: "red", state: "closed"}), "аэродром; закрыт или потерян") +
-      row(farp({side: "red", state: "open", units: ["x"]}), "вертолётная площадка (бледная - свободна)") +
+      row(farp({side: "red", state: "open", units: ["x"]}) + farp({side: "red", state: "open", units: []}), "вертолётная площадка: занята частью; свободна") +
       row(target({role: "depot", side: "red", stock: .6, checked: true}), "склад (заливка - запас, пунктир - отрезан)") +
       row(target({role: "bridge", checked: true}) + target({role: "bridge", state: "lost", checked: true}), "мост, разрушенный мост") +
       `<div class="lg" style="color:#555">⚠ - часть без полного снабжения</div>`;
