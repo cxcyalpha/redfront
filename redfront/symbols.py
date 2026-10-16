@@ -65,6 +65,27 @@ def branch(unit: dict) -> str:
     return "mech"
 
 
+def vehicle(unit: dict) -> str:
+    """Знак техники части на советской карте: tank (ромб), bmp ("пуля" с чертой), btr ("пуля"), heli (десант),
+    foot (пешие)."""
+    b = branch(unit)
+    if b == "tank":
+        return "tank"
+    if b == "airassault":
+        return "heli"
+    n = {"tank": 0, "ifv": 0, "apc": 0, "inf": 0, "other": 0}
+    for c in unit.get("composition", []):
+        n[_kind(c["type"])] += c["count"]
+    if n["ifv"] + n["apc"] == 0:
+        return "foot"
+    return "bmp" if n["ifv"] >= n["apc"] else "btr"
+
+
+def sam_tier(unit: dict) -> int:
+    """Дальность ЗРК для знака пусковой: 1 - ближнего действия, 2 - малой дальности, 3 - средней и большой."""
+    return {"sam_short": 1, "sam_medium": 2, "sam_long": 3}.get(unit.get("role", ""), 1)
+
+
 def echelon(unit: dict) -> str:
     """Звено - по первому в названии слову звена ('1-я бригада 1-й бронетанковой дивизии' - бригада)."""
     name = unit.get("name", "").split(" (")[0].lower()

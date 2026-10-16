@@ -98,7 +98,8 @@ def view(st: dict) -> dict:
                  "arrives": u.get("arrives_day"),
                  "engaged": [units[f]["name"] for f in u.get("engaged", []) if f in units],
                  "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", [])),
-                 "abbr": symbols.abbr(u), "branch": symbols.branch(u), "echelon": symbols.echelon(u)}   # условный знак
+                 "abbr": symbols.abbr(u), "branch": symbols.branch(u), "echelon": symbols.echelon(u),
+                 "vehicle": symbols.vehicle(u), "tier": symbols.sam_tier(u)}   # условный знак
             if cat == "sam":
                 g["threat_km"] = round(planner.threat_radius_km(u), 1)
             if cat == "gci":

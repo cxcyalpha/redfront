@@ -43,7 +43,7 @@ const TAC = (() => {
       const fade = Math.max(0, 1 - near[n] / opt.maxKm);
       const r = f[n] < 0;
       img.data[n * 4] = r ? 200 : 31; img.data[n * 4 + 1] = r ? 16 : 79; img.data[n * 4 + 2] = r ? 46 : 191;
-      img.data[n * 4 + 3] = Math.round(40 * Math.min(1, 2.5 * fade));      // к краю - плавно на нет
+      img.data[n * 4 + 3] = Math.round(28 * Math.min(1, 2.5 * fade));      // к краю - плавно на нет
     }
     cx.putImageData(img, 0, 0);
     const iso = level => contour(f, near, cols, rows, level, opt.maxKm).map(line => chaikin(chaikin(line)).map(([x, y]) =>
@@ -118,30 +118,68 @@ const TAC = (() => {
     return Math.atan2((b[1] - a[1]) * k, b[0] - a[0]) * 180 / Math.PI;
   }
 
-  // ---------- советские знаки ----------
-  // знак рода войск (маленький, рядом с подписью): танк - капсула, мотострелки - капсула с чертой (БМП/БТР),
-  // десант - купол, пехота - флажок
-  function suGlyph(branch, c) {
-    if (branch === "tank") return `<rect x="-9" y="-4" width="18" height="8" rx="4" fill="none" stroke="${c}" stroke-width="2"/>`;
-    if (branch === "mech") return `<rect x="-9" y="-4" width="18" height="8" rx="4" fill="none" stroke="${c}" stroke-width="2"/><line x1="0" y1="-4" x2="0" y2="4" stroke="${c}" stroke-width="2"/>`;
-    if (branch === "airassault") return `<path d="M-8 3 A8 8 0 0 1 8 3 Z" fill="none" stroke="${c}" stroke-width="2"/><path d="M-8 3 L0 9 L8 3 M0 3 L0 9" fill="none" stroke="${c}" stroke-width="1.4"/>`;
-    return `<path d="M-5 6 L-5 -6 L6 -3 L-5 0" fill="none" stroke="${c}" stroke-width="2"/>`;
+  // ---------- советские знаки (рабочая карта командира: Помбрик, Шевченко 1967; БУ СВ ч. II 1983) ----------
+  // Цвета: наши мотострелки, танкисты, десант, авиация - красным; наши ПВО, артиллерия, спецвойска и ВСЕ надписи
+  // наших - чёрным; противник целиком (знаки и надписи) - синим; маршруты наших - коричневым. Знаки наших направлены
+  // к противнику и наоборот (ПВО - к верхнему обрезу карты). Надписи - горизонтально, наклонным шрифтом.
+  const BROWN = "#7a4a1e";
+  const ink = g => g.side === "blue" ? BLUE : INK;            // надписи: наши - чёрным, противника - синим
+  // знак техники (носом вверх - к противнику): танк - ромб, БМП - "пуля" с чертой у кормы, БТР - "пуля",
+  // вертолёт (десант) - транспортный вертолёт, пешие - без знака
+  function suVehicle(v, c, x, y, rot, sc) {
+    sc = sc || 1;
+    const tf = `transform="translate(${x},${y}) rotate(${rot || 0}) scale(${sc})"`, st = `fill="#fffdf6" stroke="${c}" stroke-width="1.6"`;
+    if (v === "tank") return `<path ${tf} ${st} d="M0 -7 L4 0 L0 7 L-4 0 Z"/>`;
+    if (v === "bmp") return `<g ${tf}><path ${st} d="M0 -7 L3.5 -3 L3.5 6 L-3.5 6 L-3.5 -3 Z"/><path d="M-3.5 3.5 H3.5" stroke="${c}" stroke-width="1.6"/></g>`;
+    if (v === "btr") return `<path ${tf} ${st} d="M0 -7 L3.5 -3 L3.5 6 L-3.5 6 L-3.5 -3 Z"/>`;
+    if (v === "heli") return `<g transform="translate(${x},${y}) scale(${sc})" fill="none" stroke="${c}" stroke-width="1.6"><path d="M-6 -7 L6 -1 M6 -7 L-6 -1 M0 -4 V5"/><rect x="-2.5" y="5" width="5" height="3"/></g>`;
+    return "";
   }
-  // главный знак: оборона (дуга к противнику), бой (дуга + разрыв), район сосредоточения (овал), марш (стрелка - на маршруте)
-  function suShape(g, c, brg) {
-    const w = 2 + 2.5 * g.strength, dash = g.state === "pending" ? ' stroke-dasharray="4 3"' : "";
-    if (["defend", "battle", "halted", "refit", "deployed"].includes(g.state) && g.order !== "reserve") {
-      const blast = g.state === "battle" ? `<path d="M0 -27 l2 4 4 -2 -1 4 4 1 -4 2 2 4 -4 -1 -1 4 -2 -3 -3 3 0 -4 -4 0 3 -3 -3 -3 4 0 z" fill="#f2b705" stroke="${INK}" stroke-width=".6"/>` : "";
-      return `<g transform="rotate(${brg.toFixed(0)})"><path d="M-20 4 A24 24 0 0 1 20 4" fill="none" stroke="${c}" stroke-width="${w.toFixed(1)}"${dash} stroke-linecap="round"/>${blast}</g>`;
+  // поперечные черточки звена на стрелке колонны: батальон - три, рота - две, взвод - одна (полк, дивизия - номером)
+  const ticks = e => ({II: 3, I: 2}[e] || 0);
+  function suShape(g, c, brg, dir) {
+    const dash = g.state === "pending" ? ' stroke-dasharray="4 3"' : "";
+    const big = g.echelon === "XX" ? 1.15 : g.echelon === "X" ? 1 : .85;
+    const rx = (22 * big).toFixed(1), ry = (13 * big).toFixed(1);
+    if (g.state === "march" && dir != null && g.order !== "attack") {     // колонна на технике: стрелка, знак на древке
+      const n = ticks(g.echelon);
+      let t = "";
+      for (let k = 0; k < n; k++) t += `<path d="M-4 ${10 + 3 * k} H4" stroke="${c}" stroke-width="1.6"/>`;
+      return `<g transform="rotate(${dir.toFixed(0)})"><path d="M0 22 V-20" stroke="${c}" stroke-width="2.2"/><path d="M0 -26 L-4 -17 L4 -17 Z" fill="${c}"/>${t}${suVehicle(g.vehicle, c, 0, 0)}</g>`;
     }
-    return `<ellipse cx="0" cy="0" rx="17" ry="10" fill="none" stroke="${c}" stroke-width="${(w * .8).toFixed(1)}"${dash}/>`;
+    if (g.order === "attack" && ["march", "battle"].includes(g.state)) {   // направление наступления: прерывистая стрелка
+      const d = g.state === "march" && dir != null ? dir : brg;
+      return `<g transform="rotate(${d.toFixed(0)})"><path d="M0 18 V-18" stroke="${c}" stroke-width="2.4" stroke-dasharray="7 4"/><path d="M0 -26 L-4.5 -16 L4.5 -16 Z" fill="${c}"/>` +
+             `<path d="M-14 12 Q-14 4 -6 4 M14 12 Q14 4 6 4" fill="none" stroke="${c}" stroke-width="2"/>${suVehicle(g.vehicle, c, 0, 10, 0, .9)}</g>`;
+    }
+    if (g.state === "halted" || g.order === "withdraw") {               // остановлено на рубеже / отход с рубежа
+      const back = g.order === "withdraw";
+      return `<g transform="rotate(${brg.toFixed(0)})"><path d="M-18 4 V-2 Q-18 -6 -14 -6 H14 Q18 -6 18 -2 V4" fill="none" stroke="${c}" stroke-width="2.4"/>` +
+             (back ? `<path d="M0 -6 Q0 -16 6 -13 Q9 -8 2 -2 V10" fill="none" stroke="${c}" stroke-width="1.6"/><path d="M2 14 L-1.5 8 L5.5 8 Z" fill="${c}"/>`
+                   : `<path d="M0 -6 Q-1 -16 5 -15 Q10 -12 4 -8" fill="none" stroke="${c}" stroke-width="1.6"/><path d="M1 -6 L6 -10 L6 -5 Z" fill="${c}"/>`) + `</g>`;
+    }
+    if (g.order === "airhead" || g.vehicle === "heli") {                 // район высадки десанта (до высадки - пунктир)
+      const d2 = g.order === "airhead" ? "" : ' stroke-dasharray="5 3"';
+      return `<ellipse rx="${rx}" ry="${ry}" fill="none" stroke="${c}" stroke-width="2.2"${d2}/>${suVehicle("heli", c, -11, -2)}`;
+    }
+    if (["defend", "battle", "deployed", "refit"].includes(g.state) && g.order !== "reserve") {
+      // расположение в обороне: замкнутый контур, по переднему краю - черточки к противнику, знаки техники на нём
+      let t = "";
+      for (let a = 205; a <= 335; a += 13) {
+        const r = a * Math.PI / 180, x = rx * Math.cos(r), y = ry * Math.sin(r);
+        const nx = Math.cos(r) / rx, ny = Math.sin(r) / ry, nl = Math.hypot(nx, ny);
+        t += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} l${(4 * nx / nl).toFixed(1)} ${(4 * ny / nl).toFixed(1)}" stroke="${c}" stroke-width="1.5"/>`;
+      }
+      const veh = g.vehicle === "foot" ? "" : suVehicle(g.vehicle, c, -9, -ry + 1, 0, .8) + suVehicle(g.vehicle, c, 9, -ry + 1, 0, .8);
+      return `<g transform="rotate(${brg.toFixed(0)})"><ellipse rx="${rx}" ry="${ry}" fill="none" stroke="${c}" stroke-width="2.2"${dash}/>${t}${veh}</g>`;
+    }
+    // район, занимаемый подразделением (резерв, сосредоточение; пунктир - намечен к занятию): знак техники внутри
+    return `<ellipse rx="${rx}" ry="${ry}" fill="none" stroke="${c}" stroke-width="2.2"${dash}/>${suVehicle(g.vehicle, c, -12, 0, brg, .85)}`;
   }
-  function unitSU(g, brg) {
+  function unitSU(g, brg, dir) {
     const c = sideCol(g.side);
-    const op = g.state === "halted" ? .5 : 1;
-    return `<svg width="64" height="64" viewBox="-32 -32 64 64" style="opacity:${op}">${suShape(g, c, brg)}` +
-           `<g transform="translate(0,0)">${suGlyph(g.branch, c)}</g></svg>` +
-           `<div class="ulbl" style="color:${c}">${esc(g.abbr)}${g.supply < 1 ? " ⚠" : ""}</div>`;
+    return `<svg width="64" height="64" viewBox="-32 -32 64 64" class="su">${suShape(g, c, brg, dir)}</svg>` +
+           `<div class="ulbl su" style="color:${ink(g)}">${esc(g.abbr)}${g.supply < 1 ? " ⚠" : ""}</div>`;
   }
 
   // ---------- APP-6 (НАТО) ----------
@@ -172,10 +210,15 @@ const TAC = (() => {
                                       : `<path d="M-8 6 A9 7 0 0 1 8 6" fill="none" stroke="${c}" stroke-width="1.3"/><path d="M0 4 L0 -6 M-2 -3 L0 -6 L2 -3" fill="none" stroke="${c}" stroke-width="1.3"/>`;
       return `<svg width="30" height="30" viewBox="-15 -15 30 30">${frame}${icon}</svg>`;
     }
-    if (g.branch === "gci")       // КРУ: антенна-"тарелка"
-      return `<svg width="26" height="26" viewBox="-13 -13 26 26"><path d="M-8 2 A9 9 0 0 1 4 -8 Z" fill="none" stroke="${c}" stroke-width="2"/><path d="M-2 -3 L-2 8 M-6 8 L2 8" stroke="${c}" stroke-width="2"/></svg>`;
-    // ЗРК: ракета на пусковой (стрелка вверх над полудугой)
-    return `<svg width="26" height="26" viewBox="-13 -13 26 26"><path d="M-9 8 A9 6 0 0 1 9 8" fill="none" stroke="${c}" stroke-width="2"/><path d="M0 6 L0 -9 M-3.5 -5 L0 -10 L3.5 -5" fill="none" stroke="${c}" stroke-width="2"/></svg>`;
+    const k = g.side === "blue" ? BLUE : INK;   // наши ПВО - чёрным, противника - синим; знак всегда к верхнему обрезу
+    if (g.branch === "gci")       // РЛС обнаружения воздушных целей (КРУ): треугольник на мачте, антенна
+      return `<svg width="26" height="26" viewBox="-13 -13 26 26" fill="none" stroke="${k}" stroke-width="1.7"><path d="M-6 9 L0 -1 L6 9 Z M0 -1 V-9 M-5 -9 H5 M-6 -12 l2 2 M6 -12 l-2 2"/></svg>`;
+    // пусковая установка зенитной ракеты: стрелка вверх, черточки - дальность (1 ближнего действия, 2 малой,
+    // 3 средней); в кружке - батарея (позиция ЗРК)
+    let t = "";
+    for (let n = 0; n < (g.tier || 1); n++) t += `<path d="M-3.5 ${3 + 3 * n} H3.5"/>`;
+    return `<svg width="28" height="28" viewBox="-14 -14 28 28" fill="none" stroke="${k}" stroke-width="1.7"><circle r="11.5"/>` +
+           `<path d="M0 9 V-8"/><path d="M0 -10 L-2.8 -4 L2.8 -4 Z" fill="${k}"/>${t}</svg>`;
   }
   function airbase(b) {
     const c = b.state === "lost" || b.state === "closed" ? GREY : sideCol(b.side);
@@ -185,20 +228,23 @@ const TAC = (() => {
   }
   function target(o) {
     const dead = o.state === "lost" || o.damage >= 1;
-    const c = dead ? GREY : o.role === "bridge" ? INK : sideCol(o.side);
-    const dmg = o.damage > 0 && !dead ? `<path d="M-9 -9 L9 9" stroke="${RED}" stroke-width="${(1 + 3 * o.damage).toFixed(1)}" opacity=".85"/>` : "";
-    const x = dead ? `<path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="${INK}" stroke-width="2"/>` : "";
+    const c = o.role === "bridge" ? INK : sideCol(o.side);
     let body;
-    if (o.role === "bridge") body = `<path d="M-8 -7 Q-4 0 -8 7 M8 -7 Q4 0 8 7" fill="none" stroke="${c}" stroke-width="2.2"/>`;
-    else if (o.role === "factory") body = `<path d="M-9 8 L-9 -2 L-4 -5 L-4 -2 L1 -5 L1 -2 L4 -2 L4 -10 L7 -10 L7 8 Z" fill="#fffdf6" stroke="${c}" stroke-width="1.8"/>`;
-    else {                                         // склад: "домик" с заливкой - запас
+    if (o.role === "bridge")        // мост (топографический знак); разрушенный - перечёркнут
+      body = `<path d="M-6 -8 L-3 -5 V5 L-6 8 M6 -8 L3 -5 V5 L6 8" fill="none" stroke="${c}" stroke-width="1.8"/>` +
+             (dead ? `<path d="M-9 -7 L9 7 M9 -7 L-9 7" stroke="${c}" stroke-width="1.8"/>` : o.damage > 0 ? `<path d="M-9 -7 L9 7" stroke="${c}" stroke-width="1.8"/>` : "");
+    else if (o.role === "factory")  // завод
+      body = `<path d="M-9 8 L-9 -2 L-4 -5 L-4 -2 L1 -5 L1 -2 L4 -2 L4 -10 L7 -10 L7 8 Z" fill="#fffdf6" stroke="${c}" stroke-width="1.6"/>` +
+             (dead ? `<path d="M-10 -10 L10 10 M10 -10 L-10 10" stroke="${c}" stroke-width="1.8"/>` : "");
+    else {                          // склад (Г - горючего, Б - боеприпасов): квадрат, заливка - запас; отрезан - пунктир
       const lvl = o.stock == null ? 1 : Math.max(0, Math.min(1, o.stock));
-      const h = 13 * lvl;
-      body = `<path d="M-9 8 L-9 -3 L0 -9 L9 -3 L9 8 Z" fill="#fffdf6" stroke="${c}" stroke-width="1.8"/>` +
-             `<rect x="-7.5" y="${(6.5 - h).toFixed(1)}" width="15" height="${h.toFixed(1)}" fill="${c}" opacity=".55"/>` +
-             (o.cut ? `<circle cx="8" cy="-8" r="3" fill="#f2b705" stroke="${INK}" stroke-width=".8"/>` : "");
+      const h = 15 * lvl;
+      body = `<rect x="-8" y="-8" width="16" height="16" fill="#fffdf6" stroke="${c}" stroke-width="1.8"${o.cut ? ' stroke-dasharray="3 2"' : ""}/>` +
+             `<rect x="-7" y="${(7 - h).toFixed(1)}" width="14" height="${h.toFixed(1)}" fill="${c}" opacity=".25"/>` +
+             `<text y="3.5" text-anchor="middle" font-size="9" font-style="italic" font-weight="700" fill="${c}">ГБ</text>` +
+             (dead ? `<path d="M-10 -10 L10 10 M10 -10 L-10 10" stroke="${c}" stroke-width="1.8"/>` : "");
     }
-    return `<svg width="24" height="24" viewBox="-12 -12 24 24" style="opacity:${o.checked ? 1 : .6}">${body}${dmg}${x}</svg>`;
+    return `<svg width="24" height="24" viewBox="-12 -12 24 24" style="opacity:${o.checked ? 1 : .6}">${body}</svg>`;
   }
   function arrowHead(c) {
     return `<svg width="18" height="18" viewBox="-9 -9 18 18"><path d="M0 -8 L6 6 L0 2 L-6 6 Z" fill="${c}"/></svg>`;
@@ -207,7 +253,7 @@ const TAC = (() => {
   // ---------- условные обозначения ----------
   function legend(nato) {
     const g = (side, state, branch) => ({side, state, branch, strength: .8, supply: 1, abbr: "", echelon: "XX"});
-    const only = h => h.replace(/<div class="ulbl"[\s\S]*$/, "").replace('width="64" height="64"', 'width="34" height="34"');
+    const only = h => h.replace(/<div class="ulbl[\s\S]*$/, "").replace('width="64" height="64"', 'width="36" height="36"');
     const row = (pic, txt) => `<div class="lg"><span class="lgp">${pic}</span><span>${txt}</span></div>`;
     const line = (c1, c2) => `<svg width="30" height="10"><path d="M2 3 H28" stroke="${c1}" stroke-width="3"/><path d="M2 7 H28" stroke="${c2}" stroke-width="3"/></svg>`;
     const arrow = c => `<svg width="30" height="12"><path d="M2 6 H22" stroke="${c}" stroke-width="3"/><path d="M28 6 L20 1 L20 11 Z" fill="${c}"/></svg>`;
@@ -216,16 +262,19 @@ const TAC = (() => {
       row(line(BLUE, RED), "линия фронта") + row(arrow(BLUE), "марш, наступление") +
       row(airbase({side: "blue", state: "open"}), "аэродром") + row(target({role: "depot", side: "blue", stock: .6, checked: true}), "склад (заливка - запас)") +
       row(target({role: "bridge", checked: true}), "мост");
-    return row(only(unitSU(g("red", "defend", "tank"), 0)), "оборона (дуга к противнику); знак - танковые") +
-      row(only(unitSU(g("red", "battle", "mech"), 0)), "ведёт бой; знак - мотострелки") +
-      row(only(unitSU(g("blue", "pending", "tank"), 0)), "противник: район сосредоточения, марш") +
-      row(arrow(RED), "направление марша, наступления") +
-      row(line(RED, BLUE), "передний край: свои / противник") +
-      row(sam({side: "blue", branch: "sam"}, false), "ЗРК (пунктир - зона поражения)") +
+    const G = (side, state, vehicle, order, echelon) => ({side, state, vehicle, order, echelon: echelon || "XX", supply: 1, abbr: ""});
+    return `<div class="lg" style="color:#555">наши - красным (ПВО и надписи - чёрным), противник - синим</div>` +
+      row(only(unitSU(G("red", "defend", "bmp"), 0)), "оборона: передний край к противнику, знаки БМП") +
+      row(only(unitSU(G("red", "pending", "tank", "reserve"), 0)), "район, занимаемый частью (пунктир - намечен); ◇ танки") +
+      row(only(unitSU(G("red", "march", "btr", null, "II"), 0, 0)), "колонна на марше (тб - три черты); ⬠ БТР") +
+      row(only(unitSU(G("red", "battle", "tank", "attack"), 0)), "направление наступления") +
+      row(only(unitSU(G("red", "halted", "tank"), 0)), "остановлена на рубеже") +
+      row(line(RED, BLUE), "линия соприкосновения") +
+      row(sam({side: "red", branch: "sam", tier: 2}, false) + sam({side: "red", branch: "gci"}, false), "ЗРК (черты - дальность), РЛС (КРУ)") +
       row(airbase({side: "red", state: "open"}), "аэродром") +
-      row(target({role: "depot", side: "red", stock: .6, checked: true}), "склад, заливка - запас") +
-      row(target({role: "bridge", checked: true}), "мост") +
-      `<div class="lg" style="color:#666">⚠ - часть без полного снабжения</div>`;
+      row(target({role: "depot", side: "red", stock: .6, checked: true}), "склад (заливка - запас, пунктир - отрезан)") +
+      row(target({role: "bridge", checked: true}) + target({role: "bridge", state: "lost", checked: true}), "мост, разрушенный мост") +
+      `<div class="lg" style="color:#555">⚠ - часть без полного снабжения</div>`;
   }
 
   return {front, bearingTo, bearing, unitSU, unitNATO, sam, airbase, target, arrowHead, legend, sideCol, RED, BLUE, INK};

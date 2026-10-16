@@ -63,8 +63,12 @@ dialog input,dialog select{width:100%}
 .tac.unit{display:flex;flex-direction:column;align-items:center}
 .ulbl{margin-top:-20px;font:700 11px/1.1 "Segoe UI",system-ui,sans-serif;white-space:nowrap;text-align:center;
   text-shadow:0 0 2px #f4efe2,0 0 2px #f4efe2,0 0 3px #f4efe2,0 0 4px #f4efe2;pointer-events:none}
+.ulbl.su{font-style:italic}
+.tac.unit svg.su{transform:scale(1.25)}
+.z-near .tac.unit svg.su{transform:scale(1.6)}
+.z-near .ulbl{font-size:12px;margin-top:-12px}
 .z-far .ulbl,.z-far .plbl{display:none}
-.z-far .tac.unit svg{transform:scale(.65)}
+.z-far .tac.unit svg,.z-far .tac.unit svg.su{transform:scale(.7)}
 .z-far .tac.sam{display:none}
 .z-mid .plbl{font-size:10px}
 .legend .lg{display:flex;align-items:center;gap:6px;margin:2px 0}
@@ -201,7 +205,7 @@ const legend = L.control({position: "bottomright"});
 legend.onAdd = () => { const d = L.DomUtil.create("div", "legend"); d.id = "legend"; return d; };
 legend.addTo(map);
 const zoomCls = () => { const z = map.getZoom(); const c = map.getContainer().classList;
-  c.toggle("z-far", z < 8); c.toggle("z-mid", z >= 8 && z < 9.5); };
+  c.toggle("z-far", z < 8); c.toggle("z-mid", z >= 8 && z < 9.5); c.toggle("z-near", z >= 10.5); };
 map.on("zoomend", zoomCls); zoomCls();
 let fitted = false, frontKey = "", frontCache = null;
 const col = s => TAC.sideCol(s);
@@ -249,12 +253,14 @@ function drawMap() {
         .bindTooltip(tip).addTo(layers.sam);
       continue;
     }
-    if (g.route) {                                     // марш: стрелка по маршруту (резерв из глубины - пунктиром)
-      L.polyline(g.route, {color: c, weight: 2.5, opacity: .6, dashArray: g.state === "march" ? null : "6 6", interactive: false}).addTo(layers.ground);
-      const n = g.route.length;
-      if (n > 1) L.marker(g.route[n - 1], {icon: icon(`<div style="transform:rotate(${TAC.bearing(g.route[n - 2], g.route[n - 1]).toFixed(0)}deg)">${TAC.arrowHead(c)}</div>`, 18, 18), interactive: false}).addTo(layers.ground);
+    if (g.route) {                                     // маршрут: у наших на советской карте - коричневым, у противника - синим пунктиром
+      const rc = nato ? c : g.side === "red" ? "#7a4a1e" : c;
+      L.polyline(g.route.slice(0, 3), {color: rc, weight: 2, opacity: .7, dashArray: !nato && g.side === "red" ? null : "6 5", interactive: false}).addTo(layers.ground);
+      const rr = g.route.slice(0, 3), n = rr.length;
+      if (nato && n > 1) L.marker(rr[n - 1], {icon: icon(`<div style="transform:rotate(${TAC.bearing(rr[n - 2], rr[n - 1]).toFixed(0)}deg)">${TAC.arrowHead(c)}</div>`, 18, 18), interactive: false}).addTo(layers.ground);
     }
-    const html = nato ? TAC.unitNATO(g, friend) : TAC.unitSU(g, TAC.bearingTo(g.pos, enemyOf(g.side)));
+    const dir = g.route && g.route.length > 1 ? TAC.bearing(g.route[0], g.route[1]) : null;   // куда идёт колонна
+    const html = nato ? TAC.unitNATO(g, friend) : TAC.unitSU(g, TAC.bearingTo(g.pos, enemyOf(g.side)), dir);
     L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit"), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip).addTo(layers.ground);
   }
   for (const o of ST.objects) {
