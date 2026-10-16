@@ -124,6 +124,8 @@ def resolve(state: dict, t0: float, t1: float) -> list[str]:
     lines += assault.evac_resolve(state, t1)
     lines += csar.resolve(state, t1)
     lines += convoys.daily(state, t1)
+    from . import recon
+    lines += recon.resolve(state, t1)            # разведывательные вылеты - в журнал разведки после обработки данных
     skip = set(a.get("done", [])) | set(a.get("played", []))
     for e in a["entries"]:
         if e.get("ai_only") or e.get("resolved") or not (t0 < _tot(e) <= t1):

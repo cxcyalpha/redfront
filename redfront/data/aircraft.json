@@ -2,6 +2,7 @@
   "_about": "Данные типов ЛА для модели (ОЦЕНКИ): cargo_t - груз борта в перевозке, troops - десантников на борт, crew - экипаж, night - летает ночью. Скорость групп - из доктрины (speed_kmh задачи).",
   "types": {
     "Su_17M4": {
+      "recon": {"photo": 6, "ir": 3, "elint": 100, "profile": "low", "as": "Су-17М3Р/М4Р с контейнером ККР-1 (в DCS - Су-17М4)"},
       "fit": {"cas": 0.55, "interdiction": 0.6, "strike": 0.6, "sead": 0.3, "air": 0.1},
       "crew": 1,
       "night": false
@@ -17,6 +18,7 @@
       "night": false
     },
     "MiG_21Bis": {
+      "recon": {"photo": 5, "elint": 80, "profile": "low", "as": "МиГ-21Р с контейнером Р (в DCS - МиГ-21бис)"},
       "fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.3, "air": 0.45},
       "crew": 1,
       "night": false
@@ -42,6 +44,7 @@
       "night": true
     },
     "F_4E_45MC": {
+      "recon": {"photo": 6, "ir": 3, "slar": 25, "elint": 150, "profile": "low", "as": "RF-4C/E: KS-87, AN/AAS-18, РЛС БО AN/APQ-102, TEREC (в DCS - F-4E)"},
       "fit": {"cas": 0.5, "interdiction": 0.6, "strike": 0.6, "sead": 0.45, "air": 0.6},
       "crew": 2,
       "night": true
@@ -57,6 +60,7 @@
       "night": true
     },
     "Tornado_IDS": {
+      "recon": {"photo": 5, "ir": 3, "profile": "low", "as": "Tornado IDS с разведывательным контейнером"},
       "fit": {"cas": 0.45, "interdiction": 0.9, "strike": 0.85, "sead": 0.6, "air": 0.1},
       "crew": 2,
       "night": true
@@ -101,10 +105,12 @@
       "night": true
     },
     "MiG_25RBT": {
+      "recon": {"photo": 20, "elint": 250, "profile": "high", "as": "МиГ-25РБ(Т): АФА с 20 км, РТР; высота и скорость"},
       "crew": 1,
       "night": true
     },
     "Su_24MR": {
+      "recon": {"photo": 6, "ir": 3, "tv": 3, "slar": 25, "elint": 150, "profile": "low", "as": "Су-24МР: АФА, ИК \"Зима\", ТВ \"Аист\", РЛС БО \"Штык\", РТР \"Тангаж\""},
       "crew": 2,
       "night": true
     },
@@ -114,6 +120,7 @@
       "night": true
     },
     "Tornado_GR4": {
+      "recon": {"ir": 5, "profile": "low", "as": "Tornado GR.1A: ИК TIRRS и SLIR, без плёнки (в DCS - GR4)"},
       "fit": {"cas": 0.5, "interdiction": 0.9, "strike": 0.9, "sead": 0.55, "air": 0.1},
       "crew": 2,
       "night": true
@@ -178,11 +185,47 @@
       "troops": 37,
       "crew": 3,
       "night": true
+    },
+    "F_4E": {
+      "recon": {"photo": 6, "ir": 3, "slar": 25, "elint": 150, "profile": "low", "as": "RF-4C/E (в DCS - F-4E)"},
+      "crew": 2,
+      "night": true
+    },
+    "F_5E_3": {
+      "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "RF-5E Tigereye (в DCS - F-5E)"},
+      "crew": 1,
+      "night": false
+    },
+    "Mirage_F1CR": {
+      "recon": {"photo": 6, "ir": 3, "slar": 50, "elint": 150, "profile": "low", "as": "Mirage F1CR: АФА, ИК Super Cyclope, контейнеры Raphael и ASTAC"},
+      "crew": 1,
+      "night": true
+    },
+    "AJS37": {
+      "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "SF37 (в DCS - AJS37)"},
+      "crew": 1,
+      "night": false
+    },
+    "F_14A": {
+      "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "F-14A с контейнером TARPS"},
+      "crew": 2,
+      "night": true
+    },
+    "F_16A": {
+      "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "F-16A(R) с контейнером Orpheus (ВВС Нидерландов)"},
+      "crew": 1,
+      "night": true
+    },
+    "An_30M": {
+      "recon": {"photo": 10, "profile": "low", "as": "Ан-30: аэрофотосъёмка с 3-7 км; тихоходный"},
+      "crew": 5,
+      "night": false
     }
   },
   "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность); нет поля - груз не возит (ящики CTLD - тоже по нему).",
   "_about_fit": "fit - пригодность типа по видам задач на одной шкале для всех эпох (0..1; cas - удар по войскам, interdiction - по колоннам и путям подвоза, strike - по объектам тыла, sead - по ПВО, air - воздушный бой и перехват). Сравнивается с лучшим типом этой кампании (fitness.py): эпоху задаёт состав сил. ОЦЕНКИ по назначению, вооружению и прицельному оборудованию типа.",
   "_about_troops": "troops - солдат на борт (десант, эвакуация, CTLD): от типа ЛА, не от роли части - Ми-24 берёт 8, Апач и Газель никого; нет поля - солдат не возит (ОЦЕНКА по справочной вместимости).",
   "_about_crew": "crew - человек в экипаже (для сообщений о сбитых и спасённых); в модели экипаж полка считается комплектом на борт.",
+  "_about_recon": "recon - датчики разведчика (recon.py), полоса в км от линии пути на сторону: photo - АФА (днём), ir - ИК (день и ночь), tv - телевизионная (днём), slar - РЛС бокового обзора (всепогодно), elint - РТР по работающим РЛС (ЗРК, КРУ); profile low - малая высота, high - высотный (достают только дальние ЗРК); as - что этим типом изображается (в DCS нет RF-4C, Су-17М4Р, МиГ-21Р, Tornado GR.1A и др. - ставится ближайший тип). Полосы - ОЦЕНКИ по открытым описаниям аппаратуры.",
   "_about_night": "night - тип летает ночью (ОЦЕНКА по прицельно-навигационному оборудованию эпохи: Су-24М, Tornado, F-15/16, F-4E, МиГ-25/29, ДРЛО, транспорт - да; Су-25, Су-17, МиГ-21/23/27, A-10A, AV-8B, Ми-24, лёгкие вертолёты - нет)."
 }

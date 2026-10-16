@@ -54,10 +54,12 @@ def _rec(state: dict, uid: str) -> dict | None:
     return (state.get("intel") or {}).get(uid)
 
 
-def seen(state: dict, uid: str, src: str = "") -> None:
+def seen(state: dict, uid: str, src: str = "", t: float | None = None) -> None:
+    """Часть видели (t - когда, секунды от начала кампании; по умолчанию - сейчас)."""
     u = state["units"].get(uid)
     if u and tracked(state, u) and u["state"] not in ("destroyed", "pending"):
-        state.setdefault("intel", {})[uid] = {"pos": dict(model.unit_pos(state, u)), "day": state["day"], "t": now(state),
+        state.setdefault("intel", {})[uid] = {"pos": dict(model.unit_pos(state, u)), "day": state["day"],
+                                               "t": now(state) if t is None else t,
                                                "src": src, "state": u["state"], "strength": round(model.strength(u), 2)}
 
 

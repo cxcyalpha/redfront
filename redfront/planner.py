@@ -191,6 +191,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
             tasks += airlift_tasks(state, side, kind, tdef, performers)
             continue
+        if tdef.get("method") == "recon":        # разведывательные вылеты (recon.py; только ИИ)
+            from . import recon
+            tasks += recon.plan_tasks(state, side, kind, tdef, performers)
+            continue
         if tdef.get("method") == "interdiction":   # удары по путям подвоза противника (convoys.py)
             tasks += interdiction_tasks(state, side, kind, tdef, performers, tasked, reasons, per_kind)
             continue
