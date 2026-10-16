@@ -73,6 +73,10 @@ dialog input,dialog select{width:100%}
 .tac.sam.stale{opacity:.5}
 .tac.unit.fog-approx{opacity:.6}
 .tac.unit.fog-presence{opacity:.35}
+.info{font-size:11.5px;color:inherit;opacity:.85;margin-top:3px;line-height:1.35}
+.info div+div{margin-top:2px}
+.pk.goal{color:#e8dcc0;border-left:2px solid #c9b48a;padding-left:6px}
+.leaflet-tooltip.wide{white-space:normal;width:340px}
 .z-mid .plbl{font-size:10px}
 .legend .lg{display:flex;align-items:center;gap:6px;margin:2px 0}
 .legend .lgp{display:inline-flex;align-items:center;justify-content:center;min-width:30px}
@@ -136,7 +140,8 @@ dialog input,dialog select{width:100%}
 <script>
 const $ = s => document.querySelector(s);
 const stockTxt = o => o.stock == null ? "" :   // запас склада (logistics.supply); отрезан - только воздухом
-  ` · запас ${Math.round(o.stock * 100)}% (${o.stock_t} т)` + (o.cut ? " · отрезан от подвоза" : "");
+  (o.stock_est ? ` · запас ~${Math.round(o.stock * 100)}% (оценка)` : ` · запас ${Math.round(o.stock * 100)}% (${o.stock_t} т)`) + (o.cut ? " · отрезан от подвоза" : "");
+const infoTxt = a => a && a.length ? `<div class="info">${a.map(x => `<div>${esc(x)}</div>`).join("")}</div>` : "";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let INFO = null, ST = null, FILE = localStorage.getItem("rf_file") || "", TAB = "plan", SEL = 0;
 
@@ -274,11 +279,11 @@ function drawMap() {
     if (o.role === "airfield") continue;
     const dmg = (o.state === "lost" ? "потерян" : o.damage > 0 ? `повреждение ${Math.round(o.damage * 100)}%` : "цел") + stockTxt(o);
     L.marker(o.pos, {icon: icon(TAC.target(o), 24, 24)})
-      .bindTooltip(`<b>${esc(o.name)}</b><br>${dmg}${o.checked ? "" : "<br>координаты по оценке"}`).addTo(layers.objects);
+      .bindTooltip(`<b>${esc(o.name)}</b><br>${dmg}${o.checked ? "" : "<br>координаты по оценке"}${infoTxt(o.info)}`, {className: "wide"}).addTo(layers.objects);
   }
   for (const r of (ST.supply_routes || []))  // свои пути подвоза: толщина - поток (т/сутки)
     L.polyline(r.pts, {color: "#7a5230", weight: 2 + Math.min(6, r.t / 150), opacity: .6, dashArray: "2 6"})
-      .bindTooltip(`путь подвоза ${esc(r.link)} · ~${r.t} т/сутки`).addTo(layers.supply);
+      .bindTooltip(`<b>путь подвоза ${esc(r.link)}</b>${infoTxt(r.info)}`, {className: "wide"}).addTo(layers.supply);
   for (const d of (ST.downed || [])) {      // свои сбитые экипажи: ждут спасения (CSAR)
     L.marker(d.pos, {icon: L.divIcon({className: "obj", html: "🪂", iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(d.title)}</b><br>на земле с суток ${d.day} · маяк ${d.freq} кГц`).addTo(layers.objects);
@@ -343,6 +348,7 @@ function render() {
       ${t.time ? `<div class="pk">${esc(t.time)}</div>` : ""}
       <div class="pk">${t.km} км от ${esc(t.base)} · ПВО: ${esc(t.threats.join(", ") || "нет")}</div>
       <div class="pk">${t.package.map(g => `${esc(g.title)}: ${g.size} × ${esc(g.performer)}`).join("<br>")}</div>
+      ${t.goal && t.goal.length ? `<div class="pk goal">${t.goal.map(esc).join("<br>")}</div>` : ""}
       ${t.notes ? `<div class="pk">⚠ ${esc(t.notes)}</div>` : ""}
       <div class="row"><span class="meta" style="margin:0">лечу в</span>
         <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
@@ -412,11 +418,12 @@ function render() {
     p.innerHTML = `<div class="row" style="margin-bottom:8px">
         <button id="bProbe">Зонд карты</button><button id="bApply">Применить зонд</button>
         <button id="bRProbe">Зонд дорог</button><button id="bRApply">Применить дороги</button></div>
+      ${(ST.rear || []).length ? `<h4>Что значат тонны</h4>${infoTxt(ST.rear)}` : ""}
       ${tyl ? `<h4>Тыл (прошлые сутки)</h4>${tyl}` : ""}
       <p class="meta" style="margin-top:0">${unk ? `По оценке: ${unk} объект(ов) - запустите «Зонд карты» в DCS, затем «Применить зонд».` : "Все цели тыла на объектах карты."}</p>
       <div class="row" style="margin-bottom:8px"><input id="miz" placeholder="путь к .miz с зонами Assign as... (ROLE/VALUE)" style="flex:1"><button id="bImport">Импорт</button></div>` +
       ST.objects.map(o => `<div class="item" data-pos="${o.pos}"><b>${{depot: "⛽", bridge: "🌉", airfield: "✈", factory: "🏭"}[o.role]} ${esc(o.name)}</b>
-        <div class="d">${o.state === "lost" ? "потерян" : o.state === "closed" ? "закрыт" : o.damage > 0 ? "повреждение " + Math.round(o.damage * 100) + "%" : "цел"}${stockTxt(o)}${o.checked ? "" : " · координаты по оценке"} · ${esc(o.id)}</div></div>`).join("");
+        <div class="d">${o.state === "lost" ? "потерян" : o.state === "closed" ? "закрыт" : o.damage > 0 ? "повреждение " + Math.round(o.damage * 100) + "%" : "цел"}${stockTxt(o)}${o.checked ? "" : " · координаты по оценке"} · ${esc(o.id)}</div>${infoTxt(o.info)}</div>`).join("");
     $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
     $("#bApply").onclick = e => act("mapapply", {}, e.target);
     $("#bRProbe").onclick = e => act("roadsprobe", {}, e.target);

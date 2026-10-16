@@ -11,7 +11,7 @@ from pathlib import Path
 from dcs.mapping import Point
 from dcs.terrain.germany import Germany
 
-from . import model, roads
+from . import explain, model, roads
 
 FULL_DAMAGE = {"depot": 0.5, "airfield": 0.3, "bridge": 0.01, "factory": 0.5}   # ОЦЕНКА: доля разрушенных объектов карты = полное повреждение
 
@@ -84,7 +84,7 @@ def apply(state: dict, data: dict) -> list[str]:
         o["damage"] = min(1.0, before + gain)
         lines.append(f"{o['name']}: разрушено объектов {dead_n} из {n}, повреждение {before:.0%} -> {o['damage']:.0%}"
                      + ((" - объезд, марш и подвоз по этой связи медленнее." if o.get("minor", o.get("found")) else " - движение по мосту закрыто.")
-                        if o["role"] == "bridge" and o["damage"] >= 1.0 else "."))
+                        if o["role"] == "bridge" and o["damage"] >= 1.0 else ".") + explain.damage_effect(state, o, before))
 
     # ---- наземные части ----
     terrain = Germany()
