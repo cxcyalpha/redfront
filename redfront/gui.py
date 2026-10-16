@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, command, convoys, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim
+from . import ato, command, convoys, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -97,7 +97,8 @@ def view(st: dict) -> dict:
                  "attached": bool(u.get("attached_to")),
                  "arrives": u.get("arrives_day"),
                  "engaged": [units[f]["name"] for f in u.get("engaged", []) if f in units],
-                 "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", []))}
+                 "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", [])),
+                 "abbr": symbols.abbr(u), "branch": symbols.branch(u), "echelon": symbols.echelon(u)}   # условный знак
             if cat == "sam":
                 g["threat_km"] = round(planner.threat_radius_km(u), 1)
             if cat == "gci":
