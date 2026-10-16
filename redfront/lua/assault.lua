@@ -155,12 +155,8 @@ function REDFRONT_ASSAULT_CTLD(name, grp)
 end
 
 local menus = {}
-local H = {}
-function H:onEvent(e)
-  if e.id ~= world.event.S_EVENT_BIRTH or not e.initiator or not e.initiator.getName then return end
-  local u = e.initiator
-  local ok, name = pcall(function() return u:getName() end)
-  if not ok or not specOf(name) or not isPlayer(u) then return end
+local function addMenu(u, name)
+  if not specOf(name) or not isPlayer(u) then return end
   if REDFRONT_CTLD and REDFRONT_CTLD.pilots[name] then return end   -- погрузка и высадка - меню CTLD
   local g = u:getGroup()
   if not g or menus[g:getID()] then return end
@@ -171,4 +167,22 @@ function H:onEvent(e)
   missionCommands.addCommandForGroup(gid, "Высадить десант", root, function() pcall(cmdUnload, name) end)
   missionCommands.addCommandForGroup(gid, "Площадка", root, function() pcall(cmdInfo, name) end)
 end
+local H = {}
+function H:onEvent(e)
+  if e.id ~= world.event.S_EVENT_BIRTH or not e.initiator or not e.initiator.getName then return end
+  local u = e.initiator
+  local ok, name = pcall(function() return u:getName() end)
+  if ok then addMenu(u, name) end
+end
 world.addEventHandler(H)
+-- борт игрока мог родиться раньше этого скрипта (BIRTH пропущен): меню - и по опросу бортов высадки
+local function scan()
+  for _, s in ipairs(SPECS) do
+    for _, n in ipairs(s.helos) do
+      local u = Unit.getByName(n)
+      if u and u:isExist() then pcall(addMenu, u, n) end
+    end
+  end
+  return timer.getTime() + 5
+end
+timer.scheduleFunction(scan, nil, timer.getTime() + 1)

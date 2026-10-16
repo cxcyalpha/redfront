@@ -242,3 +242,14 @@ function H:onEvent(e)
   end
 end
 world.addEventHandler(H)
+-- меню и для того, кто уже в кабине: в одиночной игре рождение борта игрока бывает раньше этого скрипта (событие
+-- BIRTH пропущено - меню F10 не было); раз в 5 с - все игроки на вертолётах
+local function scan()
+  for _, side in ipairs({ 1, 2 }) do
+    for _, u in ipairs((coalition.getPlayers and coalition.getPlayers(side)) or {}) do
+      if u and u:isExist() and isHeli(u) then pcall(addMenu, u) end
+    end
+  end
+  return timer.getTime() + 5
+end
+timer.scheduleFunction(scan, nil, timer.getTime() + 1)
