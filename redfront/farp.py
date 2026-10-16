@@ -106,11 +106,12 @@ def daily(state: dict) -> list[str]:
             home = min(own)[1]
         taken.discard(u["base"])
         left.add(u["id"])
+        u.pop("base_fixed", None)                       # вынужденный уход - снова на усмотрение модели
         u["base"] = home
         lines.append(f"{u['name']}: уход с передовой площадки {b['name']} на {bases[home]['name']}.")
     for u in sorted(helos, key=lambda u: u["id"]):      # выдвижение на площадку ближе к фронту
-        if is_farp(bases.get(u["base"])) or u["id"] in left:
-            continue
+        if is_farp(bases.get(u["base"])) or u["id"] in left or u.get("base_fixed"):
+            continue                                    # перебазирована командующим - сама не выдвигается
         home = bases.get(u["base"])
         if not home or home.get("state", "open") not in ("open", "active"):
             continue

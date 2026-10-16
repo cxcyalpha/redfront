@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, command, convoys, csar, debrief, logistics, mapobj, model, ops, planner, roads, sim, symbols
+from . import ato, command, convoys, csar, debrief, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -83,12 +83,13 @@ def view(st: dict) -> dict:
             air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
                         "count": u.get("count", 0), "count0": u.get("count0", u.get("count", 0)),
                         "available": logistics.available(st, u), "base": b.get("name", u["base"]),
-                        "crews": u.get("crews"), "crews0": u.get("crews0")})
+                        "crews": u.get("crews"), "crews0": u.get("crews0"),
+                        "rebase_to": st["airbases"].get(u.get("rebase_to") or "", {}).get("name")})
         elif cat in ("ground", "sam", "gci"):
             if u["state"] == "pending":
                 pos = st["places"][u["route"][0]] if u.get("route") else u.get("pos")
             else:
-                pos = model.unit_pos(st, u)
+                pos = intel.known_pos(st, u)   # ЗРК противника - где его видели последний раз (туман войны)
             if not pos:
                 continue
             g = {"id": u["id"], "name": u["name"], "side": u["side"], "cat": cat, "state": u["state"],
@@ -102,6 +103,10 @@ def view(st: dict) -> dict:
                  "vehicle": symbols.vehicle(u), "tier": symbols.sam_tier(u)}   # условный знак
             if cat == "sam":
                 g["threat_km"] = round(planner.threat_radius_km(u), 1)
+            if intel.tracked(st, u):                 # данные разведки: на какие сутки
+                rec = (st.get("intel") or {}).get(u["id"]) or {}
+                g["intel_day"] = rec.get("day")
+                g["stale"] = st["day"] - rec.get("day", st["day"]) >= intel.STALE_DAYS
             if cat == "gci":
                 g["types"] += f" · канал {u.get('channel')}, радиус {u.get('radius_km')} км"
             if "route" in u and len(u["route"]) > 1 and u["state"] in ("march", "battle"):
@@ -281,6 +286,12 @@ class App:
             return {"state": view(st)}
         if action == "atooptions":                   # режим командующего: что можно выбрать для вылета (без сохранения)
             return {"options": command.options(st, req["id"])}
+        if action == "rebaseoptions":                # режим командующего: куда можно перебазировать часть
+            return {"options": command.base_options(st, req["id"])}
+        if action == "rebase":
+            lines.append(command.rebase(st, req["id"], req["base"]))
+            model.save(st, p)
+            return {"lines": lines, "state": view(st)}
         if action == "atocands":                     # задачи, не вошедшие в план
             return {"cands": command.candidates(st)}
         if action in ("atoedit", "atoremove", "atoadd"):

@@ -2707,11 +2707,55 @@ def fitness_section(tmp: Path) -> None:
     check(best < other < busy, "выбор: лучший тип - первым, но после трёх задач его очередь уступает следующему типу")
 
 
+def fog_section(tmp: Path) -> None:
+    """Смена позиций ЗРК (samroam.py), туман войны (intel.py), перебазирование авиачастей командующим (command.py)."""
+    from redfront import command, intel, samroam
+    print("\n== ЗРК, разведка, перебазирование ==")
+    st = model.new_campaign("fog", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    mob = {samroam.mobility({"composition": [{"type": t, "count": 1} for t in c]}) for c in
+           (["Osa_9A33_ln"],)} | {samroam.mobility({"composition": [{"type": "Patriot_ln", "count": 1}, {"type": "Gepard", "count": 1}]})}
+    check(mob == {"high", "low"} and samroam.front_factor(20) == 1.0 and samroam.front_factor(200) == 0.0,
+          "подвижность - по самому медленному комплексу (Оса - высокая, Пэтриот с Гепардом - низкая); в глубоком тылу не двигаются")
+    free = [u for u in st["units"].values() if model.category(u) == "sam" and not u.get("fixed") and not u.get("attached_to")]
+    start = {u["id"]: dict(u["pos"]) for u in free}
+    moves = 0
+    for _ in range(6):
+        moves += sum(1 for ln in sim.end_day(st) if "смена позиции (" in ln)
+    far = [u for u in free if u["side"] == "blue" and u["state"] != "destroyed"]
+    roam_ok = all(model.dist_km(u["pos"], u.get("anchor", start[u["id"]])) <= samroam.CLASSES[samroam.mobility(u)][3] + 0.1
+                  for u in free if "anchor" in u)
+    check(0 < moves < len(free) * 6 * 0.3 and roam_ok,
+          f"за 6 суток {moves} смен позиций у {len(free)} самостоятельных ЗРК - не перетасовка, каждый в своём районе")
+    moved = [u for u in far if model.dist_km(u["pos"], start[u["id"]]) > 0.5]
+    if moved:
+        u = moved[0]
+        check(model.dist_km(intel.known_pos(st, u), start[u["id"]]) < 0.1,
+              f"туман войны: {u['name']} сменил позицию - игрок видит прежнюю")
+        st["task"] = {"package": [{"base": next(iter(st["airbases"])), "route": [dict(u["pos"])]}]}
+        intel.after_debrief(st, {"ground": [{"unit": u["id"]}]})
+        check(model.dist_km(intel.known_pos(st, u), u["pos"]) < 0.1, "после вылета рядом - позиция уточнена")
+    su = next(u for u in st["units"].values() if u.get("type") == "Su_25" and u["side"] == "red")
+    o = command.base_options(st, su["id"])
+    tgt = o["options"][0]
+    msg = command.rebase(st, su["id"], tgt["id"])
+    base0 = su["base"]
+    lines = sim.end_day(st)
+    check(su["base"] == tgt["id"] != base0 and su.get("base_fixed") and any("перебазирована" in ln for ln in lines),
+          f"командующий: {msg}")
+    try:
+        command.base_options(st, next(u["id"] for u in st["units"].values() if u["side"] == "blue" and model.category(u) == "air"))
+        locked = False
+    except ValueError:
+        locked = True
+    jet_farp = any(x["farp"] for x in o["options"])
+    check(locked and not jet_farp, "чужие части не перебазируются; самолётам вертолётные площадки не предлагаются")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section]
 
 
 def main() -> int:
