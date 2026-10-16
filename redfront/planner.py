@@ -174,6 +174,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     for kind, tdef in doc["tasks"].items():
         performers = [u for u in state["units"].values()
                       if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0]
+        if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
+            from . import assault
+            performers = [u for u in performers if assault.troops(u.get("type", "")) > 0]
         if tdef.get("method") == "orbit":        # дежурство в зоне над своей территорией (ДРЛО, заправщик)
             t = orbit_task(state, side, kind, tdef, performers)
             if t:

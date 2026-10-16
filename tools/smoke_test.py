@@ -2652,14 +2652,36 @@ def evac_section(tmp: Path) -> None:
         L.execute(f'for _, h in ipairs(world.handlers) do h:onEvent({{ id = world.event.S_EVENT_DEAD, initiator = UNITS["{ai}"] }}) end')
         check(one == 1 and two == 4 and Gl.REDFRONT_EVAC[eid].saved == 3 and Gl.Group.getByName(groups[0]) is None,
               "evac.lua: борт ИИ сел у площадки и забрал группу; игрок забрал группу через CTLD; борт ИИ сбит - его группа погибла")
-    # итог в модели: вывезена половина живых - рота в резерве, половина потеряна
+    # дебриф: игрок забрал одну группу сам, ведомый ИИ разбился без огня противника (DCS) - не потеря, его доля - по модели
     a = st["ato"]
-    a.setdefault("evac", {})[man["evac"][0]] = [12, 24]
+    eid = man["evac"][0]
+    pkg = [fl for fl in man["flights"] if not fl.get("ato") and not fl.get("side")]
+    me = next(fl["units"][0] for fl in pkg if fl.get("player"))
+    wing = next(n for fl in pkg for n in fl["units"] if n != me)
+    perf = st["units"][pkg[0]["performer"]]
+    c0 = perf["count"]
+    import copy
+    st2 = copy.deepcopy(st)                      # для проверки частичной эвакуации - до дебрифа
+    data = {"campaign": st["campaign_id"], "sortie": man["sortie"], "dead": [wing], "ejected": [], "landed": [], "takeoff": [],
+            "hit": [], "evac": {eid: [6, 24, 0, 6]}, "mission_ended": True}
+    lines = debrief.apply(st, data)
+    n_ai = sum(len(fl["units"]) for fl in pkg) - 1
+    want = min(24, 6 + 6 * n_ai)
+    check(perf["count"] == c0 and any("без огня противника" in ln for ln in lines) and a["evac"][eid] == [want, 24],
+          f"дебриф: ведомый ИИ разбился сам - не потеря; вывезено: ваши 6 фигур + доля {n_ai} ведомых ИИ по модели = {want} из 24")
+    check(u["order"] == "reserve" and model.strength(u) > 0.99, "после дебрифа (окно миссии): рота вывезена вся, в резерве")
+    # итог в модели: вывезена половина живых - рота в резерве, половина потеряна
+    st = st2
+    u = st["units"][u["id"]]
+    st["ato"].setdefault("evac", {})[eid] = [12, 24]
     s0 = model.strength(u)
-    e = next(x for x in a["entries"] if x["id"] == man["evac"][0])
+    e = next(x for x in st["ato"]["entries"] if x["id"] == eid)
     lines = assault.evac_resolve(st, e["tot_s"])
     check(u["order"] == "reserve" and st["places"][u["route"][0]]["side"] == "red" and abs(model.strength(u) - s0 * 0.5) < 0.02,
           f"итог: {lines[0] if lines else '-'} (боеспособность {s0:.0%} -> {model.strength(u):.0%})")
+    # вместимость - от типа ЛА: Ми-24 берёт солдат, Апач - нет
+    check(assault.troops("Mi_24P") == 8 and assault.troops("AH_64A") == 0 and assault.troops("SA342M") == 0,
+          "солдат на борт - по типу: Ми-24П 8, AH-64A и SA342M - никого")
 
 
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,

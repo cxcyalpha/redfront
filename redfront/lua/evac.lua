@@ -5,7 +5,8 @@
 --   * борт ИИ, севший ближе r к площадке, забирает одну группу роты (она исчезает - "на борту");
 --   * игрок - меню CTLD (Unload / Extract Troops): CTLD сообщает, какую группу забрал (REDFRONT_EVAC_CTLD);
 --   * борт сбит - его группа погибла; фигуры, убитые на площадке, - тоже не вывезены.
--- REDFRONT_EVAC[id] = { saved, total, dead } - сколько фигур вывезено из бывших на площадке (модель: assault.py).
+-- REDFRONT_EVAC[id] = { saved, total, dead, player } - сколько фигур вывезено из бывших на площадке, из них игроком
+-- (модель: итог игрока - его вывезенные, доля ведомых ИИ - по модели: не сбит огнём - вывез свою долю).
 REDFRONT_EVAC = REDFRONT_EVAC or {}
 local CHECK_S = 3
 local SPECS = { @SPECS@ }   -- { id, title, side, country, x, y, r, land, home, helos = {...}, groups = {...}, troops = {{group, units = {{name, type}}}} }
@@ -40,7 +41,7 @@ for _, s in ipairs(SPECS) do
   end
   s.x, s.y = nx, ny
   for _, t in ipairs(s.troops) do for _, u in ipairs(t.units) do figure[u[1]] = s.id end end
-  REDFRONT_EVAC[s.id] = { saved = 0, total = count(s), dead = 0 }
+  REDFRONT_EVAC[s.id] = { saved = 0, total = count(s), dead = 0, player = 0 }
 end
 
 local function specOf(heli)
@@ -49,10 +50,11 @@ local function specOf(heli)
   end
 end
 
-local function board(s, heli, n, gname)
+local function board(s, heli, n, gname, player)
   if gname then boarded[gname] = true end
-  aboard[heli] = { id = s.id, n = (aboard[heli] and aboard[heli].n or 0) + n }
+  aboard[heli] = { id = s.id, n = (aboard[heli] and aboard[heli].n or 0) + n, player = player }
   REDFRONT_EVAC[s.id].saved = REDFRONT_EVAC[s.id].saved + n
+  if player then REDFRONT_EVAC[s.id].player = REDFRONT_EVAC[s.id].player + n end
 end
 
 -- игрок: CTLD забрал группу роты (ctld_cfg.lua, событие extract_troops)
@@ -62,7 +64,7 @@ function REDFRONT_EVAC_CTLD(heli, extracted)
   local gname = extracted.details.groupName
   for _, t in ipairs(s.troops) do
     if t.group == gname and not boarded[gname] then
-      board(s, heli, #(extracted.details.units or {}), gname)
+      board(s, heli, #(extracted.details.units or {}), gname, true)
       trigger.action.outTextForCoalition(s.side, "Эвакуация: группа на борту (" .. s.title .. ")", 10)
       return
     end
@@ -118,6 +120,7 @@ function H:onEvent(e)
   local a = aboard[name]
   if a and a.n > 0 then                                      -- борт сбит - его группа погибла
     REDFRONT_EVAC[a.id].saved = math.max(0, REDFRONT_EVAC[a.id].saved - a.n)
+    if a.player then REDFRONT_EVAC[a.id].player = math.max(0, REDFRONT_EVAC[a.id].player - a.n) end
     aboard[name] = { id = a.id, n = 0 }
   elseif figure[name] then                                   -- фигура убита на площадке
     REDFRONT_EVAC[figure[name]].dead = REDFRONT_EVAC[figure[name]].dead + 1

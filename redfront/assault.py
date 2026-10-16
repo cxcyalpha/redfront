@@ -17,8 +17,8 @@ from . import logistics, model, ops
 
 
 def troops(type_name: str) -> int:
-    """Десантников на борт (aircraft.json troops), ОЦЕНКА по умолчанию - 10."""
-    return int(model.aircraft_info(type_name).get("troops") or 10)
+    """Солдат на борт (aircraft.json troops): от типа ЛА, не от роли части (Ми-24 - 8, Апач - 0); нет поля - 0."""
+    return int(model.aircraft_info(type_name).get("troops") or 0)
 
 
 def men(unit: dict, alive: bool = False) -> float:
@@ -29,7 +29,7 @@ def men(unit: dict, alive: bool = False) -> float:
 
 def lift_need(unit: dict, heli_type: str, alive: bool = False) -> int:
     """Бортов, чтобы поднять подразделение (alive - только живых: эвакуация)."""
-    return max(1, math.ceil(men(unit, alive) / troops(heli_type)))
+    return max(1, math.ceil(men(unit, alive) / max(1, troops(heli_type))))
 
 
 def reserve(state: dict, side: str) -> list[dict]:

@@ -13,6 +13,7 @@ lfs.mkdir(DIR)
 local OUT = DIR .. "\\debrief_@CAMPAIGN@_@SORTIE@.json"
 local TRACK = { @TRACK@ }        -- наземные юниты, пересоздаваемые скриптами при старте (колонна, части в бою); позиции пишем
 local dead, ejected, landed, takeoff = {}, {}, {}, {}
+local hit = {}                   -- по ЛА попало оружие: его потеря - боевая (без попадания ИИ разбился сам - не засчитывается)
 local ejpos = {}                 -- точка катапультирования (x, z DCS): экипаж на земле - модель (csar.py)
 local ended = false
 
@@ -71,7 +72,7 @@ end
 local function assault()
   if type(REDFRONT_ASSAULT) ~= "table" then return "{}" end
   local o = {}
-  for id, a in pairs(REDFRONT_ASSAULT) do o[#o + 1] = string.format('"%s":[%d,%d]', esc(id), a.landed or 0, a.total or 0) end
+  for id, a in pairs(REDFRONT_ASSAULT) do o[#o + 1] = string.format('"%s":[%d,%d,%s]', esc(id), a.landed or 0, a.total or 0, keys(a.seen or {})) end
   return "{" .. table.concat(o, ",") .. "}"
 end
 local function ejectPos()
@@ -95,7 +96,7 @@ end
 local function evacOut()
   if type(REDFRONT_EVAC) ~= "table" then return "{}" end
   local o = {}
-  for id, v in pairs(REDFRONT_EVAC) do o[#o + 1] = string.format('"%s":[%d,%d,%d]', esc(id), v.saved or 0, v.total or 0, v.dead or 0) end
+  for id, v in pairs(REDFRONT_EVAC) do o[#o + 1] = string.format('"%s":[%d,%d,%d,%d]', esc(id), v.saved or 0, v.total or 0, v.dead or 0, v.player or 0) end
   return "{" .. table.concat(o, ",") .. "}"
 end
 -- перевозка снабжения через CTLD (ctld_cfg.lua): сколько кг доставлено в зону выгрузки
@@ -122,8 +123,8 @@ local function dump()
   local f = io.open(OUT, "w")
   if not f then return end
   f:write(string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"evac":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), evacOut()))
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"evac":%s,"hit":%s}',
+    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), evacOut(), keys(hit)))
   f:close()
 end
 local function nameOf(obj)
@@ -145,6 +146,11 @@ if world.event.S_EVENT_UNIT_LOST then LOST[world.event.S_EVENT_UNIT_LOST] = true
 
 local H = {}
 function H:onEvent(e)
+  if e.id == world.event.S_EVENT_HIT then          -- попадание: initiator - стрелок, target - по кому
+    local t = nameOf(e.target)
+    if t and not hit[t] then hit[t] = true end
+    return
+  end
   local n = nameOf(e.initiator)
   if not n then
     if e.id == world.event.S_EVENT_MISSION_END then ended = true; dump() end

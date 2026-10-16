@@ -6,7 +6,8 @@
     "csar": {
       "title": "Поиск и спасение",
       "performers": [
-        "transport_helo"
+        "transport_helo",
+        "attack_helo"
       ],
       "target": {
         "category": "downed"
@@ -53,7 +54,8 @@
     "air_evac": {
       "title": "Эвакуация десанта",
       "performers": [
-        "transport_helo"
+        "transport_helo",
+        "attack_helo"
       ],
       "target": {
         "category": "airhead"
@@ -260,7 +262,8 @@
     "air_assault": {
       "title": "Вертолётный десант",
       "performers": [
-        "transport_helo"
+        "transport_helo",
+        "attack_helo"
       ],
       "target": {
         "category": "place"
