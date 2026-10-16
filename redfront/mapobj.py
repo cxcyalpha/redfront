@@ -483,8 +483,7 @@ def apply(target: dict, probe_: dict, roads_: dict | None = None) -> list[str]:
     lines += apply_depots(target, probe_)
     lines += drop_excluded(target)
     lines += discover_bridges(target, probe_, roads_)
-    lines += discover_depots(target, probe_)
-    lines += discover_depots(target, probe_, "factory")
+    lines += discover_depots(target, probe_, "factory")   # склады - только сценария: найденный склад ни на что не влиял (Alex)
     if is_state:
         target["tasks"] = []                    # маршруты плана дня посчитаны по старым точкам
     return lines

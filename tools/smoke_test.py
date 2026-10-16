@@ -1223,9 +1223,8 @@ def mapobj_section(tmp: Path) -> None:
           f"новый мост над водой на связи {link[0]}-{link[1]} (мост не над водой не взят): " + "; ".join(l for l in lines if "новый мост" in l))
     check(sorted(st2["units"]["br_lauenburg"]["map_objects"]) == ["111", "112"], "известный мост уточнён из зонда всего сектора")
     nd = [u for u in st2["units"].values() if u.get("role") == "depot" and u.get("found")]
-    has_depot = any(d.get("place") == far for d in sec_["depots"])
-    check((len(nd) == 0) if has_depot else (len(nd) == 1 and nd[0]["place"] == far and nd[0]["side"] == st2["places"][far]["side"]),
-          f"новый склад у пункта {far} из скопления объектов: " + "; ".join(l for l in lines if "новый склад" in l))
+    check(not nd and not any("новый склад" in l for l in lines),
+          f"скопление складских объектов у пункта {far} - не цель: найденные склады ни на что не влияли")
     nf = [u for u in st2["units"].values() if u.get("role") == "factory"]
     check(len(nf) == 1 and nf[0]["place"] == fac and nf[0]["side"] == "blue" and len(nf[0]["map_objects"]) == 5,
           f"завод из скопления industrial_* у пункта {fac} (отдельный корпус в стороне не в счёт): "
@@ -1255,9 +1254,14 @@ def mapobj_section(tmp: Path) -> None:
     mover = {"id": "t", "route": [a_, b_], "progress_km": 1.0}
     check(sim_.current_link(st2, mover) == (a_, b_), "часть на связи с разрушенным малым мостом определяется (марш x0.5)")
     nb[0]["damage"] = 0.0
-    d_new = next(u for u in st2["units"].values() if u.get("role") == "depot" and u.get("found"))
-    check(not logistics.supplies(d_new) and logistics.supplies(st2["units"]["red_depot_1"]),
-          "найденный склад - цель без снабжения, склады сценария снабжают")
+    check(not any(u.get("role") == "depot" and u.get("found") for u in st2["units"].values())
+          and logistics.supplies(st2["units"]["red_depot_1"]),
+          "зонд новых складов не создаёт (цели без последствий только путали); склады сценария снабжают")
+    dummy = {"id": "depot_x", "name": "Склад (X)", "role": "depot", "side": "blue", "found": True, "supply": False,
+             "pos": {"lat": 53.0, "lon": 10.5}, "state": "active", "damage": 0.0}
+    st2["units"]["depot_x"] = dummy
+    model.drop_dummy_depots(st2)
+    check("depot_x" not in st2["units"], "старая кампания: найденные зондом склады при загрузке убираются")
     wood = {"id": "br_x_y", "name": "Малый мост на пути X - Y", "role": "bridge", "side": None, "found": True, "minor": True,
             "map_type": "WOODEN_BRIDGE_2LINE", "links": [], "pos": {"lat": 53.0, "lon": 10.5}, "state": "active", "damage": 0.0,
             "lost": {}, "composition": []}
