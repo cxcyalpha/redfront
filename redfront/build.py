@@ -555,6 +555,8 @@ def _path_km(base: dict, route: list[dict]) -> float:
 
 
 AI_FLIGHTS = {"own": 3, "enemy": 4}   # ОЦЕНКА: сколько групп ИИ по плану дня в миссии - своих (кроме пакета игрока) и противника
+AI_RECON = 1                           # ОЦЕНКА: разведчиков каждой стороны в миссии (маршрут не дальше RECON_KM от цели игрока)
+RECON_KM = 150
 AI_AIRLIFT = 2                         # ОЦЕНКА: рейсов воздушной перевозки каждой стороны в миссии (ближние к удару игрока)
 
 
@@ -581,6 +583,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
     out = []
     n = {False: 0, True: 0}
     nl = {False: 0, True: 0}
+    nr = {False: 0, True: 0}
     for e in sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank):
         enemy = e["side"] != tk["side"]
         okind = e["task"]["package"][0]["objective"]["kind"]
@@ -605,6 +608,10 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             continue
         if lift and nl[enemy] >= AI_AIRLIFT:
             continue
+        rec = okind == "recon"                   # разведчик: один на сторону, маршрут рядом с районом удара игрока
+        if rec and (nr[enemy] >= AI_RECON or min(model.dist_km(p, tk["target_pos"])
+                                                   for p in e["task"]["package"][0]["route"]) > RECON_KM):
+            continue
         etask = copy.deepcopy(e["task"])
         planner.refresh(state, etask)            # цель группы ИИ - на её место к времени миссии
         g = dict(etask["package"][0])
@@ -613,7 +620,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             continue
         tdg = model.doctrine(state, e["side"])["tasks"][e["kind"]]
         t = e["times"][g["group"]]
-        if e["ai_only"] and not lift:
+        if e["ai_only"] and not lift and not rec:
             key = f"{'enemy' if enemy else 'ai'}_{e['kind']}_{ato.hhmm(e['tot_s']).replace(':', '')}"
             times[key] = {"start_s": max(0, int(t["objective_s"] - m0)), "late_s": 0,
                           "objective_s": max(0, int(t["objective_s"] - m0)), "until_s": int(t["station_end_s"] - m0)}
@@ -624,6 +631,9 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             if lift:
                 nl[enemy] += 1
                 key = f"{'enemy' if enemy else 'ai'}_lift{nl[enemy]}"
+            elif rec:
+                nr[enemy] += 1
+                key = f"{'enemy' if enemy else 'ai'}_recon{nr[enemy]}"
             else:
                 n[enemy] += 1
                 key = f"{'enemy' if enemy else 'ai'}{n[enemy]}"
@@ -903,6 +913,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                   f"или с земли (CTLD Commands -> Load Nearby Crate(s)). Сдать - на аэродроме {dest['name']} "
                                   f"(зона {CTLD_DROP_M / 1000:.1f} км): Drop Crate(s) или Unpack Any Crate. "
                                   f"На склад идёт то, что лежит в зоне к концу миссии.")
+        elif obj["kind"] == "recon":             # разведка: по точкам маршрута и домой (итог - модель, recon.py)
+            alt = int(g.get("alt_m") or transit)
+            for i, p in enumerate(g["route"], 1):
+                if alt >= 3000:
+                    w = fg.add_waypoint(_pt(m, p), alt, speed=spd, name=f"Разведка {i}")
+                    w.alt_type = "BARO"
+                else:
+                    wp(p, alt, f"Разведка {i}")
         elif obj["kind"] == "csar":              # поиск и спасение: на малой высоте к экипажу, посадка рядом, домой
             dp = obj["pos"]
             low = int(tdg.get("low_alt_m_agl", 50))

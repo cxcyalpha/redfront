@@ -173,6 +173,24 @@ def build(state: dict) -> dict:
                                         "title": t["title"], "task": t, "tot_s": tot, "times": times, "ai_only": True})
                         break
                     tot += SLOT_MIN * 60
+        # разведка: sorties_per_day вылетов на маршрут - на рассвете и к вечеру (данные - к планированию следующих
+        # ударов); вылет - по всему маршруту, самолёты заняты до посадки и подготовки
+        for t in (t for t in tasks if t.get("ai_only") and doc["tasks"][t["kind"]].get("method") == "recon"):
+            tdef = doc["tasks"][t["kind"]]
+            g = t["package"][0]
+            fly = t["distance_km"] * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
+            n = int(tdef.get("sorties_per_day", 2))
+            for i in range(n):
+                tot = w0 + fly / 2 + max(0.0, w1 - w0 - fly) * (i / (n - 1) if n > 1 else 0.5)
+                while tot + fly / 2 <= w1 + 3600:
+                    need = {g["performer"]: (tot - fly / 2, tot + fly / 2 + turn_s, g["size"])}
+                    if pool.fits(need):
+                        pool.book(need)
+                        times = {g["group"]: {"takeoff_s": tot - fly / 2, "objective_s": tot, "land_s": tot + fly / 2}}
+                        entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
+                                        "title": t["title"], "task": t, "tot_s": tot, "times": times, "ai_only": True})
+                        break
+                    tot += SLOT_MIN * 60
         reg = [t for t in tasks if not t.get("ai_only")]
         # ночь: до ATO_NIGHT_TASKS задач, где все группы летают ночью, - из младших по приоритету (глубокие удары -
         # ночью, поддержка войск - днём), вечером после лётного дня (утро суток - только дежурства)

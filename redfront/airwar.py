@@ -45,6 +45,26 @@ def _tot(e: dict) -> float:
     return float(e.get("tot_s") or 0)
 
 
+FIND_KM = 5        # ОЦЕНКА: цель в стольких км от точки, куда летела группа, - находят (поиск в районе цели)
+LOST_KM = 20       # ОЦЕНКА: дальше - не находят (группа уходит с бомбами или бьёт по запасной цели)
+
+
+def _find(state: dict, e: dict, tgt: dict, obj: dict) -> tuple[float, str]:
+    """Множитель успеха по данным разведки - только сторона игрока (противник бьёт по настоящему положению):
+    группа летит туда, где цель видели последний раз (intel.py); насколько та ушла - настолько труднее найти."""
+    from . import intel
+    if e["side"] != state.get("player_side") or not intel.tracked_ground(state, tgt) or "pos" not in obj:
+        return 1.0, ""
+    intel.update(state)
+    aim = intel.aim_pos(state, tgt) or obj["pos"]
+    d = model.dist_km(aim, model.unit_pos(state, tgt))
+    if d <= FIND_KM:
+        return 1.0, ""
+    if d >= LOST_KM:
+        return 0.0, f"ушла на {d:.0f} км от места по данным разведки"
+    return 1.0 - (d - FIND_KM) / (LOST_KM - FIND_KM), ""
+
+
 def _strike(state: dict, e: dict) -> list[str]:
     from . import csar, sim
     g = e["task"]["package"][0]
@@ -70,6 +90,11 @@ def _strike(state: dict, e: dict) -> list[str]:
         lines.append(f"ИИ, {e['title']}: потеряно {down} {perf['type']} ({perf['name']}).")
     from . import fitness                       # пригодность типа для задачи - относительно лучшего в кампании
     fk = fitness.outcome_factor(state, perf.get("type", "") if perf else "", fitness.task_class(e["kind"]))
+    ff, why = _find(state, e, tgt, obj)          # туман войны: нашли ли цель там, куда летели
+    if ff <= 0:
+        lines.append(f"ИИ, {e['title']}: цель не найдена ({why}).")
+        return lines
+    fk *= ff
     p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk))
     if not ((r.random() < p) if r else p >= 0.5):
         lines.append(f"ИИ, {e['title']}: цель не поражена.")
@@ -99,6 +124,8 @@ def resolve(state: dict, t0: float, t1: float) -> list[str]:
     lines += assault.evac_resolve(state, t1)
     lines += csar.resolve(state, t1)
     lines += convoys.daily(state, t1)
+    from . import recon
+    lines += recon.resolve(state, t1)            # разведывательные вылеты - в журнал разведки после обработки данных
     skip = set(a.get("done", [])) | set(a.get("played", []))
     for e in a["entries"]:
         if e.get("ai_only") or e.get("resolved") or not (t0 < _tot(e) <= t1):

@@ -830,6 +830,58 @@
         "estimate": true
       }
     },
+    "recon": {
+      "title": "Воздушная разведка",
+      "performers": [
+        "recon"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "recon",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: разведывательная авиация осматривает районы, где данные о противнике устарели, и пункты противника у линии фронта; вылеты на рассвете и к вечеру; данные - после посадки и обработки (recon.py) - ОЦЕНКА",
+      "speed_kmh": 850,
+      "transit_alt_m_agl": 300,
+      "attack_alt_m_agl": 300,
+      "low_alt_m_agl": 300,
+      "high_alt_m": 18000,
+      "ip_offset_km": 0,
+      "routes": 3,
+      "route_points": 4,
+      "leg_km": 60,
+      "sorties_per_day": 2,
+      "process_h": 1,
+      "estimate_fields": [
+        "speed_kmh",
+        "low_alt_m_agl",
+        "high_alt_m",
+        "routes",
+        "route_points",
+        "leg_km",
+        "sorties_per_day",
+        "process_h"
+      ],
+      "recon_note": "До routes маршрутов в сутки, по route_points точек интереса не дальше leg_km друг от друга; sorties_per_day вылетов на маршрут. Полоса датчиков - по типу ЛА (aircraft.json recon). Сбитый разведчик данных не привозит. ОЦЕНКИ.",
+      "strike": {
+        "title": "разведчик",
+        "group_name": "разведчик",
+        "size": 1,
+        "maintask": [
+          "Reconnaissance"
+        ],
+        "loadout": [],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "только ИИ; маршрут от базы по точкам интереса и обратно",
+        "estimate": true
+      }
+    },
     "qra": {
       "title": "Дежурство ПВО на аэродроме",
       "performers": [

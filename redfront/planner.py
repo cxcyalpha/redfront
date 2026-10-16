@@ -124,6 +124,7 @@ def plan(state: dict) -> dict | None:
     from . import ato                            # ato импортирует planner
     state["task"] = None
     state["tasks"] = []
+    intel.update(state)                          # соприкосновение - что видно у фронта сейчас
     a = ato.ensure(state)
     clock = max(state.get("clock_s") or 0, state.get("ground_s") or 0)   # наземная модель не идёт назад
     tasks = []
@@ -190,6 +191,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
             tasks += airlift_tasks(state, side, kind, tdef, performers)
             continue
+        if tdef.get("method") == "recon":        # разведывательные вылеты (recon.py; только ИИ)
+            from . import recon
+            tasks += recon.plan_tasks(state, side, kind, tdef, performers)
+            continue
         if tdef.get("method") == "interdiction":   # удары по путям подвоза противника (convoys.py)
             tasks += interdiction_tasks(state, side, kind, tdef, performers, tasked, reasons, per_kind)
             continue
@@ -219,19 +224,21 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         else:
             targets = [u for u in state["units"].values()
                        if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]
+            if side == state.get("player_side") and tside == foe:   # туман войны: цели игрока - только известные
+                targets = [u for u in targets if intel.can_target(state, u)]
         if not targets:
             continue
         found = False
         if cat in STRATEGIC or cat == "sam":     # объекты тыла, позиции ЗРК: не больше MAX_PER_KIND ближних к базам исполнителей
             bases = [state["airbases"][r["base"]] for r in performers]
             if bases:
-                targets.sort(key=lambda t: min(model.dist_km(b, model.unit_pos(state, t)) for b in bases))
+                targets.sort(key=lambda t: min(model.dist_km(b, _aim(state, side, t)) for b in bases))
             targets = targets[:per_kind]
         n_kind = 0
         for tgt in targets:
             if n_kind >= per_kind:           # задач одного вида в плане дня - не больше (иначе план - 8 одинаковых)
                 break
-            tpos = model.unit_pos(state, tgt)
+            tpos = _aim(state, side, tgt)
             best = None
             cls = fitness.task_class(kind, tdef)
             for r in performers:
@@ -597,6 +604,13 @@ def evac_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[d
     return out
 
 
+def _aim(state: dict, side: str, tgt: dict) -> dict:
+    """Куда лететь к цели: сторона игрока - по разведке (intel.py), противник - где цель стоит."""
+    if side == state.get("player_side"):
+        return intel.aim_pos(state, tgt) or model.unit_pos(state, tgt)
+    return model.unit_pos(state, tgt)
+
+
 def refresh(state: dict, task: dict) -> list[str]:
     """Цель задачи - на её место сейчас (после шага наземной модели к времени миссии): точка цели, ИПМ и маршруты
     групп по цели (удар, прикрытие, доразведка). Рубежи подавления ПВО пересчитывает сборка (build). Цель выбыла
@@ -609,7 +623,9 @@ def refresh(state: dict, task: dict) -> list[str]:
         return []
     if tgt.get("state") in ("destroyed", "lost"):
         return [f"{task['title']}: цель выбыла к времени вылета."]
-    tpos = model.unit_pos(state, tgt)
+    if task["side"] == state.get("player_side"):
+        intel.update(state)                      # туман войны: цель - где её видели последний раз
+    tpos = _aim(state, task["side"], tgt)
     if model.dist_km(tpos, task["target_pos"]) < 0.2:
         return []
     moved = model.dist_km(tpos, task["target_pos"])

@@ -86,6 +86,10 @@ def view(st: dict) -> dict:
                         "crews": u.get("crews"), "crews0": u.get("crews0"),
                         "rebase_to": st["airbases"].get(u.get("rebase_to") or "", {}).get("name")})
         elif cat in ("ground", "sam", "gci"):
+            fog = intel.tracked_ground(st, u)     # наземная часть противника - только по данным разведки
+            lv = intel.level(st, u["id"]) if fog else None
+            if fog and (u["state"] == "pending" or lv is None):
+                continue                          # не видели - на карте её нет
             if u["state"] == "pending":
                 pos = st["places"][u["route"][0]] if u.get("route") else u.get("pos")
             else:
@@ -101,6 +105,15 @@ def view(st: dict) -> dict:
                  "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", [])),
                  "abbr": symbols.abbr(u), "branch": symbols.branch(u), "echelon": symbols.echelon(u),
                  "vehicle": symbols.vehicle(u), "tier": symbols.sam_tier(u)}   # условный знак
+            if fog:                               # что известно: точно - как есть; примерно и присутствие - как видели
+                rec = st["intel"][u["id"]]
+                g.update({"intel": lv, "intel_age_h": round(intel.age_h(st, u["id"]) or 0), "intel_src": rec.get("src", ""),
+                          "unc_km": round(intel.unc_km(st, u["id"]), 1)})
+                if lv != "exact":
+                    g.update({"state": rec.get("state", "active"), "strength": None, "seen_strength": rec.get("strength"),
+                              "engaged": [], "supply": 1.0, "supply_frac": 1.0, "order": None})
+                    if lv == "presence":
+                        g["types"] = ""
             if cat == "sam":
                 g["threat_km"] = round(planner.threat_radius_km(u), 1)
             if intel.tracked(st, u):                 # данные разведки: на какие сутки
@@ -109,7 +122,7 @@ def view(st: dict) -> dict:
                 g["stale"] = st["day"] - rec.get("day", st["day"]) >= intel.STALE_DAYS
             if cat == "gci":
                 g["types"] += f" · канал {u.get('channel')}, радиус {u.get('radius_km')} км"
-            if "route" in u and len(u["route"]) > 1 and u["state"] in ("march", "battle"):
+            if "route" in u and len(u["route"]) > 1 and u["state"] in ("march", "battle") and lv in (None, "exact"):
                 pts = model.route_points(st, u)
                 here, i = model.point_at_km(pts, u["progress_km"])
                 g["route"] = [_ll(here)] + [_ll(q) for q in pts[i + 1:]]          # остаток маршрута

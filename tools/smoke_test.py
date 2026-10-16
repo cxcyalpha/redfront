@@ -1060,8 +1060,9 @@ def column_road_section(tmp: Path) -> None:
     lines = debrief.apply(st, out)
     check(len(st.get("roads", {})) == 3 and any("участков по дорогам 3 из 3" in ln for ln in lines),
           "дебриф: модель запомнила дороги всех 3 участков")
-    from redfront import sim
+    from redfront import intel, sim
     sim.end_day(st)
+    intel.seen(st, "blue_pzgren_bn_1", "тест")    # колонну видели утром (иначе через сутки - туман, задачи нет)
     planner.plan(st)
     man2 = build.build(st, tmp / "colroad2.miz")
     m2 = dcs.Mission(Germany())
@@ -1361,7 +1362,7 @@ def helo_section(tmp: Path) -> None:
     for _ in range(3):
         sim.end_day(st)
     kinds = {side: collections.Counter(t["kind"] for t in planner.plan_side(st, side)[0]) for side in model.SIDES}
-    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k not in ("airlift", "qra"))   # перевозки, дежурства - вне лимита
+    check(all(n <= planner.MAX_PER_KIND for c in kinds.values() for k, n in c.items() if k not in ("airlift", "qra", "recon"))   # перевозки, дежурства, разведка - вне лимита
           and len(kinds["blue"]) >= 2,
           f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
     planner.plan(st)
@@ -2751,11 +2752,100 @@ def fog_section(tmp: Path) -> None:
     check(locked and not jet_farp, "чужие части не перебазируются; самолётам вертолётные площадки не предлагаются")
 
 
+def ground_fog_section(tmp: Path) -> None:
+    """Туман войны для наземных частей противника (intel.py): журнал, карта, цели игрока, удары своих ИИ."""
+    from redfront import airwar, gui, intel
+    print("\n== Туман войны: наземные части ==")
+    st = model.new_campaign("gfog", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    foe = [u for u in st["units"].values() if intel.tracked_ground(st, u) and u["state"] != "pending"]
+    check(foe and all(intel.level(st, u["id"]) == "exact" for u in foe),
+          f"начало кампании: все {len(foe)} частей противника на местах известны (разведка мирного времени)")
+    pend = [u for u in st["units"].values() if intel.tracked_ground(st, u) and u["state"] == "pending"]
+    v = gui.view(st)
+    shown = {g["id"] for g in v["ground"]}
+    check(not (shown & {u["id"] for u in pend}), "резервы противника из глубины на карте не видны")
+    a, b = foe[0], foe[1]
+    st["intel"][a["id"]]["t"] = intel.now(st) - 30 * 3600          # видели 30 ч назад - примерно
+    st["intel"][a["id"]]["pos"] = model.offset(model.unit_pos(st, a), 0, 25000)
+    del st["intel"][b["id"]]                                        # не видели - неизвестна
+    far = all(model.dist_km(model.unit_pos(st, x), model.unit_pos(st, o)) > intel.CONTACT_KM
+              for x in (a, b) for o in st["units"].values() if o["side"] == st["player_side"] and model.category(o) == "ground")
+    if far:
+        v = gui.view(st)
+        ga = next((g for g in v["ground"] if g["id"] == a["id"]), None)
+        check(ga and ga["intel"] == "approx" and ga["strength"] is None and "route" not in ga and ga["unc_km"] > 0
+              and model.dist_km({"lat": ga["pos"][0], "lon": ga["pos"][1]}, st["intel"][a["id"]]["pos"]) < 0.1
+              and b["id"] not in {g["id"] for g in v["ground"]},
+              f"карта: {a['name']} - где видели, 'примерно', без боеспособности и маршрута; неизвестная - не показана")
+        check(not intel.can_target(st, b) and intel.can_target(st, a) == (a["state"] != "march"),
+              "цели игрока: неизвестная - нет; по примерным данным - только стоящая (не колонна на марше)")
+        tasks, _w = planner.plan_side(st, st["player_side"], max_tasks=99, per_kind=99)
+        check(all(t.get("target") != b["id"] for t in tasks), "план стороны игрока: по неизвестной части задач нет")
+        e = {"side": st["player_side"], "task": {"package": [{"objective": {"pos": st["intel"][a["id"]]["pos"]}}]}}
+        ff, why = airwar._find(st, e, a, e["task"]["package"][0]["objective"])
+        e2 = dict(e, side=model.enemy(st["player_side"]))
+        check(ff == 0.0 and "ушла" in why and airwar._find(st, e2, a, {"pos": {}})[0] == 1.0,
+              "удар своих ИИ по данным 25-км давности - цель не найдена; противник бьёт по настоящему положению")
+    own = next(o for o in st["units"].values() if o["side"] == st["player_side"] and model.category(o) == "ground"
+               and o["state"] not in ("pending", "destroyed") and not o.get("attached_to"))
+    b["pos"] = model.offset(model.unit_pos(st, own), 90, 5000)      # подошла к нашей части - соприкосновение
+    b.pop("route", None)
+    b["state"] = "defend"
+    lines = intel.update(st)
+    check(intel.level(st, b["id"]) == "exact" and lines, f"соприкосновение: {b['name']} у наших - снова известна ({lines[0]})")
+    st["intel"][b["id"]]["t"] = intel.now(st) - 60 * 3600
+    lv0 = intel.level(st, b["id"])
+    intel.update(st)
+    check(lv0 == "presence" and intel.level(st, b["id"]) == "exact", "пока в соприкосновении - данные обновляются")
+
+
+def recon_section(tmp: Path) -> None:
+    """Разведывательные вылеты ИИ (recon.py): маршрут по давним данным, полоса датчиков по типу, сбитый - без данных."""
+    from redfront import ato, intel, recon
+    print("\n== Воздушная разведка ==")
+    check(recon.swath_km("Su_24MR", True) == (25.0, 150.0) and recon.swath_km("MiG_25RBT", True)[0] == 0
+          and recon.swath_km("MiG_25RBT", False) == (20.0, 250.0) and recon.swath_km("Tornado_GR4", True)[0] == 5,
+          "датчики по типу: Су-24МР ночью - РЛС БО 25 км; МиГ-25РБ ночью наземных частей не видит (только фото); Tornado GR.1A - ИК")
+    st = model.new_campaign("recon", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    foe = [u for u in st["units"].values() if intel.tracked_ground(st, u) and u["state"] != "pending"]
+    for u in foe:
+        st["intel"][u["id"]]["t"] = intel.now(st) - 60 * 3600          # всё давнее - только присутствие
+    a = ato.ensure(st)
+    rec = [e for e in a["entries"] if e["kind"] == "recon"]
+    own = [e for e in rec if e["side"] == st["player_side"]]
+    perf_ok = all(st["units"][e["task"]["performer"]]["role"] == "recon" for e in rec)
+    check(own and perf_ok and all(e["ai_only"] for e in rec) and {e["side"] for e in rec} == {"red", "blue"},
+          f"план полётов: {len(own)} разведывательных вылетов своей стороны (только ИИ, части разведки), у противника - тоже")
+    check(not any(t["kind"] == "recon" for t in (planner.plan(st) and st["tasks"]) or []),
+          "игроку разведка не предлагается")
+    e = own[0]
+    g = e["task"]["package"][0]
+    check(len(g["route"]) >= 2 and all(model.dist_km(st["airbases"][g["base"]], p) <= planner.strike_radius_km(st["units"][g["performer"]])
+                                       for p in g["route"]), f"маршрут: {e['title']} ({len(g['route'])} точек, в радиусе части)")
+    lines = recon.resolve(st, ato.DAY_S)
+    fresh = [u for u in foe if intel.level(st, u["id"]) == "exact"]
+    check(fresh and any("Разведка" in ln for ln in lines), f"после вылетов уточнено {len(fresh)} частей: {next(ln for ln in lines if 'Разведка' in ln)}")
+    t_rec = st["intel"][fresh[0]["id"]]["t"]
+    check(any(abs(t_rec - x["tot_s"]) < 1 for x in own), "данные - на время пролёта, не на время итога")
+    st2 = model.new_campaign("recon2", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    for u in st2["units"].values():
+        if intel.tracked_ground(st2, u) and u["id"] in st2["intel"]:
+            st2["intel"][u["id"]]["t"] = intel.now(st2) - 60 * 3600
+    a2 = ato.ensure(st2)
+    mine = [x for x in a2["entries"] if x["kind"] == "recon" and x["side"] == st2["player_side"]]
+    a2["played"] = [x["id"] for x in mine]
+    a2["lost"] = {x["id"]: x["task"]["package"][0]["size"] for x in mine}
+    lines2 = recon.resolve(st2, ato.DAY_S)
+    check(all("не вернулся" in ln for ln in lines2 if "Разведка" in ln) and lines2
+          and not any(intel.level(st2, u["id"]) == "exact" for u in st2["units"].values() if intel.tracked_ground(st2, u)),
+          "разведчик сбит в миссии - данных нет")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section]
 
 
 def main() -> int:
