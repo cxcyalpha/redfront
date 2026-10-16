@@ -473,13 +473,36 @@ def _away(m: Mission, p: Point, center: Point, d_m: float) -> Point:
     return Point(p.x + d_m * dx / n, p.y + d_m * dy / n, m.terrain)
 
 
-def _set_player(unit) -> bool:
-    """Посадить игрока. pydcs отказывает типам, которые в базовом DCS только для ИИ (Су-24М, МиГ-31): для мода,
-    делающего такой тип летабельным на том же слоте, отказ лишний. Возвращает True, если слот требует мода."""
+_CREW: dict = {"names": set(), "pilots": {}}   # лётчики, уже посаженные в эту миссию (сброс - в начале build)
+
+
+def _crew(state: dict, fg, perf: dict) -> None:
+    """Экипажи группы - лётчики полка (pilots.py): имя ЛА в DCS = звание и фамилия; ливрея полка (u['livery'])."""
+    from . import pilots
+    taken = _CREW["pilots"].setdefault(perf["id"], set())
+    for unit, p in zip(fg.units, pilots.crew_for(state, perf, len(fg.units), taken)):
+        taken.add(p["name"])
+        name = pilots.title(perf, p)
+        if name in _CREW["names"]:               # однофамильцы в разных полках
+            name = f"{name} ({perf['id']})"
+        _CREW["names"].add(name)
+        unit.name = name
+    if perf.get("livery"):
+        for unit in fg.units:
+            unit.livery_id = perf["livery"]
+
+
+def _set_player(unit, client: bool = False) -> bool:
+    """Посадить игрока (client - место в мультиплеере). pydcs отказывает типам, которые в базовом DCS только для ИИ
+    (Су-24М, МиГ-31): для мода, делающего такой тип летабельным на том же слоте, отказ лишний. Возвращает True, если
+    слот требует мода."""
     if unit.unit_type.flyable:
-        unit.set_player()
+        if client:
+            unit.set_client()
+        else:
+            unit.set_player()
         return False
-    unit.skill = Skill.Player
+    unit.skill = Skill.Client if client else Skill.Player
     try:
         unit.set_radio_preset()
     except Exception:                            # пресетов радио для типа ИИ в pydcs может не быть - не критично
@@ -660,6 +683,7 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
     pos = _pt(m, g["route"][0])
     fg = m.flight_group_inflight(_country(m, state, side), f"{perf['id']} {g['group']} {sortie}", ac, pos, alt,
                                  speed=int(spd_kmh), maintask=mt, group_size=g["size"])
+    _crew(state, fg, perf)
     fg.start_time = int((t or {}).get("start_s", 0))
     for u in fg.units:
         u.skill = Skill.High
@@ -697,7 +721,7 @@ def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str,
 
 
 def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True, fly: str = "strike",
-          task_no: int | None = None) -> dict:
+          task_no: int | None = None, humans: int = 1) -> dict:
     if task_no is not None:                      # задача плана дня по номеру (plan печатает список)
         planner.choose(state, task_no)
     tk = state["task"]
@@ -783,6 +807,16 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     runway_slots: set = set()
     spd = tdef["speed_kmh"]
     flights, lines, enemy_lines, ai_lines = [], [], [], []
+    _CREW["names"], _CREW["pilots"] = set(), {}
+    # люди в вылете: сначала группа игрока (fly), затем остальные группы тактической группы по порядку
+    hum_left = max(1, int(humans or 1)) if player else 0
+    hum_of: dict[str, int] = {}
+    for g in sorted(pkg, key=lambda g: g["group"] != fly):
+        k = min(hum_left, int(g["size"]))
+        if k > 0:
+            hum_of[g["group"]] = k
+            hum_left -= k
+    multi = sum(hum_of.values()) > 1             # несколько людей - мультиплеер: места Client
     assault_specs = []
     evac_specs: list[dict] = []                  # эвакуация десанта (evac.lua)
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
@@ -801,7 +835,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         base = state["airbases"][g["base"]]
         airport = m.terrain.airports[base["airport"]]
         ac = dcstypes.flying(perf["type"])
-        is_player = player and g["group"] == fly
+        hum = 0 if g.get("_ai") or g.get("_enemy") else hum_of.get(g["group"], 0)
+        is_player = player and hum > 0
         helo = model.category(perf) == "heli"    # вертолёты: предельно малая высота и для ИИ
         mt = _maintask(ac, g["maintask"])
         if g["objective"]["kind"] == "alert":    # дежурная пара ПВО: на стоянке, взлёт по обнаружению (qra.lua)
@@ -811,6 +846,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             except NoParkingSlotError:
                 fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                                  airport, maintask=mt, start_type=StartType.Runway, group_size=g["size"])
+            _crew(state, fg, perf)
             fg.late_activation = True
             _apply_loadout(fg, ac, perf["type"], g["loadout"])
             for u in fg.units:
@@ -848,21 +884,24 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         else:
             try:
                 fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
-                                                 maintask=mt, start_type=StartType.Cold if g["group"] == fly else StartType.Runway,
+                                                 maintask=mt, start_type=StartType.Cold if is_player else StartType.Runway,
                                                  group_size=g["size"])
             except NoParkingSlotError:           # вертолётная площадка: стоянок мало - с площадки (взлёт с полосы)
                 fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                                  maintask=mt, start_type=StartType.Runway, group_size=g["size"])
+        _crew(state, fg, perf)
         st_s = times[g["group"]]["start_s"]
-        if g["group"] != fly and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
+        if not is_player and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
             while (base["airport"], st_s) in runway_slots:
                 st_s += RUNWAY_GAP_S
             runway_slots.add((base["airport"], st_s))
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], g["loadout"])
-        needs_mod = is_player and _set_player(fg.units[0])
-        for u in (fg.units[1:] if is_player else fg.units):
+        needs_mod = False
+        for u in fg.units[:hum] if is_player else []:
+            needs_mod = _set_player(u, client=multi) or needs_mod
+        for u in (fg.units[hum:] if is_player else fg.units):
             u.skill = Skill.High
         def wp(p, alt, name, keep_alt=False):
             if not keep_alt and side_g == tk["side"] and in_threat(p, circles):   # в известной зоне ЗРК - на предельно малой высоте
@@ -896,13 +935,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 lg = m.vehicle_group(_country(m, state, side_g), f"Тыл {sortie}", dcstypes.vehicle(CTLD_LOGISTIC[side_g]),
                                      _away(m, u0.position, airport.position, CTLD_LOGISTIC_M), heading=0)
                 ctld["logistic"].append(lg.units[0].name)
-                zone = f"Выгрузка {sortie}"
+                zone = f"Выгрузка {sortie}" + ("" if g["group"] == fly else f" {g['group']}")
                 m.triggers.add_triggerzone(land.position, radius=CTLD_DROP_M, hidden=False, name=zone)
                 cap = float(model.aircraft_info(perf["type"]).get("cargo_t") or 1.0)
                 kg = 1000 if cap >= 2 else 500
                 wt = kg + (0.11 if sd == 1 else 0.21)           # вес ящика CTLD - уникальный (по нему тип груза)
                 ctld["crates"].append({"weight": wt, "desc": f"Supply {kg} kg", "unit": CTLD_CRATE_UNIT[side_g], "side": sd})
-                ctld["pilots"].append(u0.name)
+                ctld["pilots"] += [u.name for u in fg.units[:hum]]
                 ctld["actions"][u0.unit_type.id] = {"crates": True, "troops": False}
                 ctld["cargo"][u0.unit_type.id] = max(1, int(cap * 1000 // kg))
                 d_obj = state["units"].get(obj.get("depot"), {})
@@ -965,7 +1004,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 else:                            # игрок: забрать группу - меню CTLD (Unload / Extract Troops)
                     from . import assault
                     u0 = fg.units[0]
-                    ctld["pilots"].append(u0.name)
+                    ctld["pilots"] += [u.name for u in fg.units[:hum]]
                     ctld["actions"][u0.unit_type.id] = {"crates": False, "troops": True}
                     ctld["limits"][u0.unit_type.id] = max(1, assault.troops(perf["type"]) // 4)   # фигур (по 4 человека)
                     ctld["extract"] += [vg.name for vg in eg]
@@ -1001,11 +1040,12 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                     spec["groups"].append(fg.name)
                 else:                            # игрок: погрузка и высадка через меню CTLD, зона погрузки - у стоянки
                     u0 = fg.units[0]
-                    ctld_assault.append((spec, u0.name))
-                    ctld["pilots"].append(u0.name)
+                    for u in fg.units[:hum]:
+                        ctld_assault.append((spec, u.name))
+                        ctld["pilots"].append(u.name)
                     ctld["actions"][u0.unit_type.id] = {"crates": False, "troops": True}
                     ctld["limits"][u0.unit_type.id] = int(model.aircraft_info(perf["type"]).get("troops") or 10)
-                    zone = f"Погрузка {sortie}"
+                    zone = f"Погрузка {sortie}" + ("" if g["group"] == fly else f" {g['group']}")
                     m.triggers.add_triggerzone(u0.position, radius=CTLD_PICKUP_M, hidden=False, name=zone)
                     ctld["pickup"].append({"zone": zone, "side": spec["side"], "limit": 1})
                     ctld_lines.append(f"Десант: погрузка у стоянки (зона {CTLD_PICKUP_M} м) - F10 -> CTLD -> Troop Transport -> "
@@ -1120,6 +1160,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                         if g.get("hold") else "")
                      + f"; задача DCS {mt.name}, подвеска {cat or 'DCS по умолчанию'}")
         flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fg.units], "player": is_player,
+                        "humans": [u.name for u in fg.units[:hum]] if is_player else [],
                         **({"ato": g["_ato"]} if g.get("_ato") else {})})
 
     # ---- хук дебрифа ----

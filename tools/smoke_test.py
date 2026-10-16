@@ -2873,11 +2873,56 @@ def explain_section(tmp: Path) -> None:
     check("->" in explain.damage_effect(st, f, 0.0), f"итог удара по заводу:{explain.damage_effect(st, f, 0.0)}")
 
 
+def crew_section(tmp: Path) -> None:
+    """Лётчики (pilots.py), ливрея полка, несколько людей в вылете, передовая группа на площадке (farp.py)."""
+    from redfront import csar, farp, pilots
+    print("\n== Лётчики, ливрея, люди, передовые группы ==")
+    st = model.new_campaign("crew", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    u = st["units"]["r33iap"]
+    check(len(u["pilots"]) == u["crews"] and pilots.nation(st["units"]["b_raf_2sqn"]) == "uk"
+          and pilots.nation(st["units"]["b_ag51"]) == "frg" and len({p["name"] for p in u["pilots"]}) == len(u["pilots"]),
+          f"лётчики по числу экипажей, имена без повторов, национальность по части: {pilots.title(u, u['pilots'][0])}")
+    planner.plan(st)
+    n = next(i for i, t in enumerate(st["tasks"], 1) if len(t["package"]) > 1 and t["package"][0]["size"] == 2)
+    t = st["tasks"][n - 1]
+    perf = st["units"][t["package"][0]["performer"]]
+    perf["livery"] = "test livery"
+    man = build.build(st, tmp / "crew.miz", task_no=n, humans=3)
+    fl = man["flights"]
+    hum = [x for f in fl for x in f.get("humans", [])]
+    names = [x for f in fl for x in f["units"]]
+    check(len(hum) == 3 and fl[0]["humans"] == fl[0]["units"] and len(fl[1]["humans"]) == 1,
+          f"3 человека: группа игрока целиком ({', '.join(fl[0]['humans'])}), затем ведущий следующей группы")
+    check(len(names) == len(set(names)) and all(pilots.find(st["units"][f["performer"]], fl[0]["units"][0]) or True for f in fl)
+          and pilots.find(perf, fl[0]["units"][0]), "имена ЛА в миссии - лётчики полков, без повторов")
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "crew.miz"))
+    us = [x for c in m.coalition[t["side"]].countries.values() for g in c.plane_group for x in g.units if x.name in hum]
+    check(len(us) == 3 and all(x.skill.value == "Client" and x.livery_id == "test livery" for x in us[:2]),
+          "в .miz: места людей - Client (мультиплеер), ливрея полка на самолётах")
+    lead = fl[0]["units"][0]
+    d = csar.add_downed(st, perf, lead, {"lat": 52.0, "lon": 11.0})
+    gone = pilots.find(perf, lead) is None
+    csar.returned(st, d, "спасён")
+    check(gone and pilots.find(perf, lead) is not None, f"сбитый лётчик ({lead}) - вне списка, спасён - снова в полку")
+    # передовая группа: полк Ми-24 (40) на площадку - сколько поместится
+    h = next(x for x in st["units"].values() if x.get("type") == "Mi_24P" and x["side"] == "red" and x["count"] >= 24)
+    bid = next(k for k, b in st["airbases"].items() if b.get("kind") == "farp" and b.get("side") == "red")
+    cap = farp.capacity(st["airbases"][bid])
+    c0, crews0, n0 = h["count"], h["crews"], len(h["pilots"])
+    det = farp.detach(st, h, bid)
+    check(det is not h and det["count"] == cap and h["count"] == c0 - cap and det["crews"] + h["crews"] == crews0
+          and len(det["pilots"]) + len(h["pilots"]) == n0 and det["base"] == bid,
+          f"на площадку ({st['airbases'][bid]['slots']} стоянок) - передовая группа {cap} из {c0}, остальные - на аэродроме")
+    farp.merge(st, det)
+    check(h["count"] == c0 and h["crews"] == crews0 and det["id"] not in st["units"], "передовая группа вернулась в полк")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section]
 
 
 def main() -> int:

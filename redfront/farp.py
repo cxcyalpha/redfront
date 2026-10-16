@@ -21,6 +21,63 @@ FARP_MAX_KM = 50          # ОЦЕНКА: дальше - выигрыш в ра�
 FARP_GAIN_KM = 25         # ОЦЕНКА: выдвигаться, если площадка ближе к фронту хотя бы на столько, чем основной аэродром
 FARP_REACH_KM = 150       # ОЦЕНКА: площадка не дальше этого от основного аэродрома (часть работает на своём участке)
 NAME = re.compile(r"^H (FRG|GDR) \d+$")
+FARP_PER_SLOT = 2         # ОЦЕНКА: вертолётов на стоянку площадки (остальные рассредоточены рядом, взлёт по очереди)
+FARP_MIN_HELOS = 4        # ОЦЕНКА: площадка принимает не меньше звена
+FARP_MAX_HELOS = 12       # ОЦЕНКА: и не больше эскадрильи - полк целиком на площадку не уходит
+
+
+def capacity(b: dict) -> int:
+    """Сколько вертолётов примет площадка: по стоянкам, от звена до эскадрильи."""
+    return max(FARP_MIN_HELOS, min(FARP_MAX_HELOS, int(b.get("slots", 1)) * FARP_PER_SLOT))
+
+
+def detach(state: dict, u: dict, bid: str) -> dict:
+    """Часть - на площадку bid: помещается - целиком, нет - передовая группа (отдельная часть с parent) по вместимости,
+    остальное - на прежнем аэродроме. Возвращает часть на площадке."""
+    cap = capacity(state["airbases"][bid])
+    if u.get("count", 0) <= cap:
+        u["home"] = u.get("home") or u["base"]
+        u["base"] = bid
+        return u
+    did = f"{u['id']}_fwd_{bid}"
+    k = cap / u["count"]
+    d = {key: val for key, val in u.items() if key not in ("rebase_to", "base_fixed", "home", "repl_acc", "crews_acc")}
+    d.update({"id": did, "name": f"{u['name']}, передовая группа", "parent": u["id"], "base": bid, "home": u["base"],
+              "count": cap, "count0": cap})
+    from . import pilots
+    pilots.ensure(state, u)                      # лётчики - до изменения числа экипажей (ensure режет по нему)
+    n = min(u["crews"], round(u["crews"] * k)) if "crews" in u else cap
+    d["crews"] = n
+    pilots.split(u, d, cap)
+    u["count"] -= cap
+    u["count0"] = max(u["count"], u.get("count0", 0) - cap)
+    if "crews" in u:                             # экипажи - по доле машин
+        d["crews0"] = n
+        u["crews"] -= n
+        u["crews0"] = max(u["crews"], u.get("crews0", 0) - n)
+    else:
+        d.pop("crews")
+    state["units"][did] = d
+    return d
+
+
+def merge(state: dict, d: dict) -> dict | None:
+    """Передовая группа - обратно в свой полк (на его аэродром). Возвращает полк."""
+    u = state["units"].get(d.get("parent") or "")
+    if not u:
+        return None
+    u["count"] += d.get("count", 0)
+    u["count0"] = u.get("count0", 0) + d.get("count0", 0)
+    if "crews" in d:
+        u["crews"] = u.get("crews", 0) + d["crews"]
+        u["crews0"] = u.get("crews0", 0) + d.get("crews0", 0)
+    from . import pilots
+    pilots.join(u, d)
+    for x in state.get("downed", []):            # сбитые экипажи группы - экипажи полка
+        if x.get("unit") == d["id"]:
+            x["unit"] = u["id"]
+    del state["units"][d["id"]]
+    return u
 
 
 def _sim(state: dict, side: str, key: str, default: float) -> float:
@@ -89,6 +146,9 @@ def daily(state: dict) -> list[str]:
                       else "closed" if d < _sim(state, side, "farp_min_km", FARP_MIN_KM) else "open")
     taken = {u["base"] for u in state["units"].values() if model.category(u) == "heli" and is_farp(bases.get(u["base"]))}
     helos = [u for u in state["units"].values() if model.category(u) == "heli" and u.get("count", 0) > 0]
+    for u in list(state["units"].values()):          # опустевшая передовая группа (все сбиты) - в полк
+        if u.get("parent") and model.category(u) == "heli" and u.get("count", 0) <= 0 and u["parent"] in state["units"]:
+            merge(state, u)
     left: set[str] = set()                              # ушли с площадки в эти сутки - снова выдвигаются не раньше завтра
     for u in helos:                                     # площадка закрыта, потеряна, чужая или фронт подошёл - уйти
         b = bases.get(u["base"])
@@ -106,11 +166,17 @@ def daily(state: dict) -> list[str]:
             home = min(own)[1]
         taken.discard(u["base"])
         left.add(u["id"])
+        if u.get("parent") and u["parent"] in state["units"]:   # передовая группа - обратно в полк
+            p = merge(state, u)
+            left.add(p["id"])
+            lines.append(f"{u['name']}: уход с площадки {b['name']} - в свой полк ({bases[p['base']]['name']}).")
+            continue
         u.pop("base_fixed", None)                       # вынужденный уход - снова на усмотрение модели
         u["base"] = home
         lines.append(f"{u['name']}: уход с передовой площадки {b['name']} на {bases[home]['name']}.")
     for u in sorted(helos, key=lambda u: u["id"]):      # выдвижение на площадку ближе к фронту
-        if is_farp(bases.get(u["base"])) or u["id"] in left or u.get("base_fixed"):
+        if is_farp(bases.get(u["base"])) or u["id"] in left or u.get("base_fixed") or u.get("parent") \
+                or u["id"] not in state["units"] or any(x.get("parent") == u["id"] for x in state["units"].values()):
             continue                                    # перебазирована командующим - сама не выдвигается
         home = bases.get(u["base"])
         if not home or home.get("state", "open") not in ("open", "active"):
@@ -126,9 +192,8 @@ def daily(state: dict) -> list[str]:
         if not cands:
             continue
         _d, bid, b = min(cands, key=lambda c: c[0])     # ближняя к своему аэродрому: часть работает на своём участке
-        u["home"] = u["base"]
-        u["base"] = bid
+        x = detach(state, u, bid)
         taken.add(bid)
-        lines.append(f"{u['name']}: выдвижение на передовую {b['name']} ({b['front_km']:.0f} км от противника; "
-                     f"основной аэродром {home['name']} - {d_home:.0f} км).")
+        lines.append(f"{x['name']}: выдвижение на передовую {b['name']} ({x['count']} вертолётов, площадка - до "
+                     f"{capacity(b)}; {b['front_km']:.0f} км от противника; основной аэродром {home['name']} - {d_home:.0f} км).")
     return lines

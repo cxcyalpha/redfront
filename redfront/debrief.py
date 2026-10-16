@@ -35,6 +35,13 @@ def read(path: Path) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def _humans(fl: dict) -> list[str]:
+    """Люди в звене: список humans (сборка с несколькими игроками), иначе ведущий звена игрока."""
+    if "humans" in fl:
+        return fl["humans"]
+    return fl["units"][:1] if fl.get("player") else []
+
+
 def apply(state: dict, data: dict) -> list[str]:
     man = state.get("manifest")
     if not man:
@@ -49,7 +56,7 @@ def apply(state: dict, data: dict) -> list[str]:
     flights = man.get("flights") or [{**man["flight"], "group": "strike"}]   # вылет, собранный до тактической группы: одно звено
     # ЛА ИИ, потерянный без попадания оружия (врезался в землю, в дерево, столкнулся), - ошибка ИИ DCS, не потеря кампании
     if "hit" in data:
-        ai_air = {n for fl in flights for n in (fl["units"][1:] if fl.get("player") else fl["units"])}
+        ai_air = {n for fl in flights for n in fl["units"] if n not in _humans(fl)}
         noncombat = {n for n in lost & ai_air if n not in set(data["hit"])}
         if noncombat:
             lost -= noncombat
@@ -57,8 +64,8 @@ def apply(state: dict, data: dict) -> list[str]:
     # вылет игрока: его итог - что сделал он сам; доля ведомых ИИ его группы и остальных групп пакета - по модели:
     # не сбит огнём противника - сделал свою долю (не садится на дерево вместо площадки)
     pkg = [fl for fl in flights if not fl.get("ato") and not fl.get("side")]
-    me = next((fl["units"][0] for fl in pkg if fl.get("player")), None)
-    pkg_ai = [n for fl in pkg for n in fl["units"] if n != me]
+    me = {n for fl in pkg for n in _humans(fl)}  # люди в вылете (один - игрок, несколько - мультиплеер)
+    pkg_ai = [n for fl in pkg for n in fl["units"] if n not in me]
 
     # ---- дороги, найденные миссией при перекладке колонны (column_road.lua): модель их запоминает ----
     for name, msg in (data.get("column_log") or {}).items():
@@ -122,8 +129,10 @@ def apply(state: dict, data: dict) -> list[str]:
                     u["progress_km"] = head
 
     # ---- своё звено ----
+    from . import pilots
     for fl in flights:                           # все звенья тактической группы, не только звено игрока
         perf = state["units"][fl["performer"]]
+        pilots.flown(state, perf, fl["units"])     # лётчикам - вылет (имя ЛА в миссии = лётчик)
         lost_ac = [n for n in fl["units"] if n in lost]
         if lost_ac:
             perf["count"] = max(0, perf["count"] - len(lost_ac))
@@ -150,7 +159,7 @@ def apply(state: dict, data: dict) -> list[str]:
         landed_n, total = int(v[0]), int(v[1])
         names = set(v[2]) if len(v) > 2 else None
         if names is not None and me:
-            landed_n = min(total, int(me in names) + sum(1 for n in pkg_ai if n not in lost))
+            landed_n = min(total, len(me & names) + sum(1 for n in pkg_ai if n not in lost))
         if state.get("ato"):
             state["ato"].setdefault("assault", {})[aid] = [landed_n, total]
         lines.append(f"Десант: на площадку села доля {landed_n} из {total} бортов"

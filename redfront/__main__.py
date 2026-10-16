@@ -4,7 +4,7 @@
                                        [--name NAME] [--date YYYY-MM-DD]
   python -m redfront status <state.json>
   python -m redfront plan   <state.json>
-  python -m redfront build  <state.json> <out.miz> [--task N] [--fly GROUP] [--density 1.0] [--ai]
+  python -m redfront build  <state.json> <out.miz> [--task N] [--fly GROUP] [--humans N] [--density 1.0] [--ai]
   python -m redfront debrief <state.json> <debrief_*.json>
   python -m redfront end-day <state.json>
   python -m redfront roads-probe <out.miz> [--sector FILE] [--oob FILE]   служебная миссия: дороги у DCS (один раз на сектор)
@@ -115,6 +115,8 @@ def main(argv=None) -> int:
     p.add_argument("--budget", type=int, help="наземных машин в миссии не больше (запоминается в кампании; 0 - без ограничения)")
     p.add_argument("--ai", action="store_true", help="звено без игрока (проверочный прогон)")
     p.add_argument("--fly", default="strike", help="в какой группе пакета летит игрок: strike (по умолчанию), sead, recon")
+    p.add_argument("--humans", type=int, default=1,
+                   help="людей в вылете (сначала группа --fly, затем остальные группы пакета; больше 1 - места Client)")
     p.add_argument("--task", type=int, help="номер задачи из плана дня (plan); по умолчанию - первая")
     p = sp.add_parser("map-probe", help="служебная миссия: найти на карте DCS объекты мостов и складов сектора")
     p.add_argument("out"); p.add_argument("--sector", default="sector_hamburg.json")
@@ -251,7 +253,7 @@ def main(argv=None) -> int:
     elif a.cmd == "build":
         if a.budget is not None:
             st["settings"]["mission_budget"] = max(0, a.budget)
-        man = build_mod.build(st, Path(a.out), a.density, player=not a.ai, fly=a.fly, task_no=a.task)
+        man = build_mod.build(st, Path(a.out), a.density, player=not a.ai, fly=a.fly, task_no=a.task, humans=a.humans)
         n = sum(len(g["vehicles"]) for g in man["ground"])
         print(f"Миссия: {man['file']} (вылет {man['sortie']}, наземных юнитов {n})")
         if man.get("pre_lines"):                 # модель продвинута к началу миссии (sim.advance)
