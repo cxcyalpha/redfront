@@ -37,7 +37,6 @@ BEACON_FILE = "redfront_beacon.wav"
 # CTLD (lua/ctld/NOTICE.md): погрузка и высадка десанта игрока, ящики снабжения, авианаводчик. ОЦЕНКИ - размеры зон.
 CTLD_DIR = Path(__file__).parent / "lua" / "ctld"
 CTLD_CFG_LUA = Path(__file__).parent / "lua" / "ctld_cfg.lua"
-CTLD_RU_LUA = Path(__file__).parent / "lua" / "ctld_ru.lua"
 CTLD_PICKUP_M = 800             # зона погрузки десанта вокруг стоянки игрока
 CTLD_DROP_M = 2500              # зона выгрузки снабжения вокруг аэродрома назначения
 CTLD_LOGISTIC_M = 50            # машина тыла (у неё берут ящики) - от стоянки игрока, в сторону от центра аэродрома
@@ -447,7 +446,8 @@ def ctld_script(state: dict, cfg: dict) -> str:
 
 
 def ctld_actions(m: Mission, state: dict, cfg: dict) -> list:
-    """Скрипты CTLD в начале миссии: MIST, CTLD (копия с ctld.dontInitialize = true), русский перевод, настройка."""
+    """Скрипты CTLD в начале миссии: MIST, CTLD (копия с ctld.dontInitialize = true), настройка. Меню CTLD - как в
+    оригинале, по-английски."""
     tmp = Path(tempfile.mkdtemp(prefix="redfront_ctld_"))
     src = (CTLD_DIR / "CTLD.lua").read_text(encoding="utf-8")
     patched = src.replace("ctld.dontInitialize = false", "ctld.dontInitialize = true", 1)
@@ -456,7 +456,6 @@ def ctld_actions(m: Mission, state: dict, cfg: dict) -> list:
     (tmp / "CTLD.lua").write_text(patched, encoding="utf-8")
     return [DoScriptFile(m.map_resource.add_resource_file(CTLD_DIR / "mist.lua")),
             DoScriptFile(m.map_resource.add_resource_file(tmp / "CTLD.lua")),
-            DoScript(String(CTLD_RU_LUA.read_text(encoding="utf-8"))),
             DoScript(String(ctld_script(state, cfg)))]
 
 
@@ -869,17 +868,18 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 cap = float(model.aircraft_info(perf["type"]).get("cargo_t") or 1.0)
                 kg = 1000 if cap >= 2 else 500
                 wt = kg + (0.11 if sd == 1 else 0.21)           # вес ящика CTLD - уникальный (по нему тип груза)
-                ctld["crates"].append({"weight": wt, "desc": f"Снабжение {kg} кг", "unit": CTLD_CRATE_UNIT[side_g], "side": sd})
+                ctld["crates"].append({"weight": wt, "desc": f"Supply {kg} kg", "unit": CTLD_CRATE_UNIT[side_g], "side": sd})
                 ctld["pilots"].append(u0.name)
                 ctld["actions"][u0.unit_type.id] = {"crates": True, "troops": False}
                 ctld["cargo"][u0.unit_type.id] = max(1, int(cap * 1000 // kg))
                 d_obj = state["units"].get(obj.get("depot"), {})
                 ctld["lifts"].append({"id": tk.get("ato_id") or f"task-{sortie}", "side": sd, "zone": zone,
                                       "title": f"{d_obj.get('name', '')} ({dest['name']})"})
-                ctld_lines.append(f"Груз: ящики \"Снабжение {kg} кг\" (до {ctld['cargo'][u0.unit_type.id]} на борт) - у машины "
-                                  f"тыла рядом со стоянкой: F10 -> Перевозки (CTLD) -> Снабжение; взять - висением над ящиком "
-                                  f"или с земли через меню. Сдать - на аэродроме {dest['name']} (зона {CTLD_DROP_M / 1000:.1f} км): "
-                                  f"сбросить ящик или распаковать. На склад идёт то, что лежит в зоне к концу миссии.")
+                ctld_lines.append(f"Груз: ящики \"Supply {kg} kg\" (до {ctld['cargo'][u0.unit_type.id]} на борт) - у машины "
+                                  f"тыла рядом со стоянкой: F10 -> CTLD -> Crates -> Supply; взять - висением над ящиком "
+                                  f"или с земли (CTLD Commands -> Load Nearby Crate(s)). Сдать - на аэродроме {dest['name']} "
+                                  f"(зона {CTLD_DROP_M / 1000:.1f} км): Drop Crate(s) или Unpack Any Crate. "
+                                  f"На склад идёт то, что лежит в зоне к концу миссии.")
         elif obj["kind"] == "csar":              # поиск и спасение: на малой высоте к экипажу, посадка рядом, домой
             dp = obj["pos"]
             low = int(tdg.get("low_alt_m_agl", 50))
@@ -930,9 +930,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                     zone = f"Погрузка {sortie}"
                     m.triggers.add_triggerzone(u0.position, radius=CTLD_PICKUP_M, hidden=False, name=zone)
                     ctld["pickup"].append({"zone": zone, "side": spec["side"], "limit": 1})
-                    ctld_lines.append(f"Десант: погрузка у стоянки (зона {CTLD_PICKUP_M} м) - F10 -> Перевозки (CTLD) -> "
-                                      f"Десант -> Погрузить; высадка на площадке (ближе {spec['r']} м) - \"Высадить / забрать "
-                                      f"десант\" (на земле или висением по тросу). Высадили не там - заберите и высадите снова.")
+                    ctld_lines.append(f"Десант: погрузка у стоянки (зона {CTLD_PICKUP_M} м) - F10 -> CTLD -> Troop Transport -> "
+                                      f"Load Assault...; высадка на площадке (ближе {spec['r']} м) - Unload / Extract Troops "
+                                      f"(на земле или висением по тросу). Высадили не там - заберите (тот же пункт) и высадите снова.")
             g["_lz"] = obj["place"]
         elif obj["kind"] in ("column", "site"):    # ударная группа: колонна, часть в бою, позиция ЗРК
             ip, tgt = g["route"]
@@ -1100,7 +1100,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     for spec, name in ctld_assault:              # группа десанта CTLD - доля роты на борту игрока (assault.lua делит по кругу)
         idx = spec["helos"].index(name)
         share = [t[1] for i, t in enumerate(spec["troops"]) if i % len(spec["helos"]) == idx]
-        ctld["groups"].append({"name": f"Десант: {spec['title']}", **(troop_mix(share) or {"inf": 1}), "side": spec["side"]})
+        ctld["groups"].append({"name": f"Assault: {spec['title']}", **(troop_mix(share) or {"inf": 1}), "side": spec["side"]})
     if player and tdef.get("jtac") and bkey and tk["target"] in platoons:   # авианаводчик у своего взвода в бою цели
         tvg = platoons[tk["target"]][0][0]
         own = [vg for g in groups if g["kind"] == "battle" and g.get("cluster") == bkey and g["side"] == tk["side"]
@@ -1110,11 +1110,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             vg = min(own, key=lambda v: v.units[0].position.distance_to_point(tp))
             sd = 1 if tk["side"] == "red" else 2
             code = int((tdef.get("jtac") or {}).get("code", JTAC_CODE)) if isinstance(tdef.get("jtac"), dict) else JTAC_CODE
-            ctld["jtacs"].append({"id": f"Авианаводчик {sortie}", "platoon": vg.name, "target": tvg.name, "side": sd,
+            ctld["jtacs"].append({"id": f"JTAC {sortie}", "platoon": vg.name, "target": tvg.name, "side": sd,
                                   "country": _country(m, state, tk["side"]).id, "type": JTAC_TYPES[tk["side"]], "code": code,
                                   "tx": tp.x, "ty": tp.y, "title": vg.name})
-            ctld_lines.append(f"Авианаводчик (позывной \"Авианаводчик {sortie}\") - у нашего взвода в бою: подсвечивает цели "
-                              f"лазером (код {code}) и дымом; F10 -> Авианаводчик - цель, координаты.")
+            ctld_lines.append(f"Авианаводчик (позывной \"JTAC {sortie}\") - у нашего взвода в бою: подсвечивает цели "
+                              f"лазером (код {code}) и дымом; F10 -> JTAC Status - цель, координаты.")
     if ctld["pilots"] or ctld["jtacs"]:          # CTLD - только если он нужен вылету
         for a_ in ctld_actions(m, state, ctld):
             trig.add_action(a_)

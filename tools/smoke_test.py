@@ -2427,12 +2427,12 @@ def ctld_section(tmp: Path) -> None:
     # ---- десант: CTLD высадил группу у площадки - вместо неё доля роты из модели; далеко от площадки - не засчитано ----
     acts = _miz_scripts(tmp / "ctld_air_assault.miz")
     texts = [t for a, t in acts if a == "a_do_script"]
-    heads = ("-- redfront: русский", "-- redfront ctld", "-- redfront assault")
+    heads = ("-- redfront ctld", "-- redfront assault")
     pos = [next(i for i, t in enumerate(texts) if t.startswith(h)) for h in heads]
     check([a for a, _t in acts].count("a_do_script_file") == 2 and pos == sorted(pos),
-          "скрипты: MIST и CTLD файлами, затем перевод, настройка CTLD и десант (по порядку)")
-    ru, cfg, asl = (texts[i] for i in pos)
-    L = _ctld_lua([ru, cfg, asl])
+          "скрипты: MIST и CTLD файлами, затем настройка CTLD и десант (по порядку)")
+    cfg, asl = (texts[i] for i in pos)
+    L = _ctld_lua([cfg, asl])
     Gl = L.globals()
     pilot = man_a["ctld"]["pilots"][0]
     m_ = _re.search(r'x = ([-\d.]+), y = ([-\d.]+), r = (\d+)', asl)
@@ -2467,7 +2467,7 @@ def ctld_section(tmp: Path) -> None:
     Gl = L.globals()
     lid = man_l["ctld"]["lifts"][0]
     zone = Gl.ctld.dropOffZones[1][1]
-    w = Gl.ctld.spawnableCrates["Снабжение"][1].weight
+    w = Gl.ctld.spawnableCrates["Supply"][1].weight
     L.execute(f'ZONES["{zone}"] = {{ point = {{ x = 1000, y = 0, z = 1000 }}, radius = 2500 }}')
     L.execute(f'STATICS["in"] = crate(1500, 1000); STATICS["out"] = crate(9000, 1000); '
               f'ctld.spawnedCratesRED["in"] = {{ weight = {w} }}; ctld.spawnedCratesRED["out"] = {{ weight = {w} }}')

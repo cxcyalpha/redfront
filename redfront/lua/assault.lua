@@ -7,7 +7,7 @@
 --     (на земле, ближе r к площадке), "Площадка" (пеленг, дальность, дым);
 --   * высаженные фигуры появляются у вертолёта (coalition.addGroup) с именами из модели - их потери пишет хук;
 --   * если в миссии CTLD (ctld_cfg.lua: борт игрока в REDFRONT_CTLD.pilots) - погрузка и высадка игрока через меню CTLD
---     ("Перевозки (CTLD)" -> "Десант"), своего меню нет: группа, высаженная CTLD ближе r к площадке, заменяется долей
+--     ("CTLD" -> "Troop Transport"), своего меню нет: группа, высаженная CTLD ближе r к площадке, заменяется долей
 --     роты (REDFRONT_ASSAULT_CTLD); дальше - остаётся группой CTLD, её можно забрать обратно и высадить на площадке.
 -- Сколько бортов высадили свою долю из скольких - REDFRONT_ASSAULT[id] (модель: assault.py).
 REDFRONT_ASSAULT = REDFRONT_ASSAULT or {}
@@ -145,7 +145,7 @@ function REDFRONT_ASSAULT_CTLD(name, grp)
   local p = u:getPoint()
   local r = dist(p.x, p.z, s.x, s.y)
   if r > s.r then
-    msg(u, string.format("Вы не на площадке (до неё %.1f км): высадка не засчитана. Заберите группу обратно (\"Высадить / забрать десант\") и высадите на площадке.", r / 1000), 20)
+    msg(u, string.format("Вы не на площадке (до неё %.1f км): высадка не засчитана. Заберите группу обратно (Unload / Extract Troops) и высадите на площадке.", r / 1000), 20)
     return
   end
   if REDFRONT_ASSAULT[s.id].seen[name] then return end

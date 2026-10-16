@@ -1,13 +1,13 @@
 -- redfront ctld | campaign @CAMPAIGN@ | sortie @SORTIE@
 -- Настройка CTLD (Ciribob, Zip, VEAF: github.com/ciribob/DCS-CTLD, lua/ctld/NOTICE.md) под вылет игрока. Нужны
--- mist.lua, CTLD.lua (в копии миссии ctld.dontInitialize = true) и ctld_ru.lua - раньше этого скрипта.
---   * десант (assault.lua): игрок грузит свою долю роты в зоне погрузки у своей стоянки (меню F10 "Перевозки (CTLD)"
+-- mist.lua и CTLD.lua (в копии миссии ctld.dontInitialize = true) - раньше этого скрипта. Меню CTLD - оригинальные.
+--   * десант (assault.lua): игрок грузит свою долю роты в зоне погрузки у своей стоянки (меню F10 "CTLD"
 --     -> "Десант"), высаживает на площадке; севший на площадке десант CTLD заменяется фигурами роты из модели
 --     (REDFRONT_ASSAULT_CTLD в assault.lua) - их потери считает хук;
---   * перевозка снабжения: ящики "Снабжение" - у машины тыла рядом со стоянкой игрока, доставка - на аэродром
+--   * перевозка снабжения: ящики "Supply" - у машины тыла рядом со стоянкой игрока, доставка - на аэродром
 --     назначения (зона выгрузки). Сколько кг лежит в зоне (ящики) и распаковано в ней - REDFRONT_LIFT[id] (хук пишет
 --     в дебриф, модель кладёт тонны на склад: logistics.supply);
---   * авианаводчик (JTAC) у своего взвода в бою цели: ctld.JTACAutoLase - подсветка лазером, дым, F10 "Авианаводчик".
+--   * авианаводчик (JTAC) у своего взвода в бою цели: ctld.JTACAutoLase - подсветка лазером, дым, F10 "JTAC Status".
 -- Остальное CTLD (FOB, ЗРК из ящиков, маяки, техника из ящиков) выключено: в модели кампании этого нет.
 REDFRONT_LIFT = REDFRONT_LIFT or {}
 REDFRONT_CTLD = { pilots = {} }
@@ -19,7 +19,6 @@ local CFG = { @CFG@ }
 
 for _, n in ipairs(CFG.pilots) do REDFRONT_CTLD.pilots[n] = true end
 
-ctld.i18n_lang = "ru"
 ctld.addPlayerAircraftByType = false
 ctld.transportPilotNames = CFG.pilots
 ctld.unitActions = CFG.actions
@@ -50,7 +49,7 @@ ctld.dropOffZones = {}
 for _, l in ipairs(CFG.lifts) do ctld.dropOffZones[#ctld.dropOffZones + 1] = { l.zone, "none", l.side } end
 ctld.loadableGroups = CFG.groups
 ctld.spawnableCrates = {}
-if #CFG.crates > 0 then ctld.spawnableCrates["Снабжение"] = CFG.crates end
+if #CFG.crates > 0 then ctld.spawnableCrates["Supply"] = CFG.crates end
 
 ctld.initialize()
 

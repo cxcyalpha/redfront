@@ -18,5 +18,3 @@
 - Источник: https://github.com/mrSkortch/MissionScriptingTools.
 - Авторы: Speed, Grimes, lukrop.
 - Распространяется вместе с CTLD и встраивается в миссии DCS, как в сообществе принято.
-
-Перевод сообщений CTLD на русский — `redfront/lua/ctld_ru.lua`. Это собственный файл redfront, а не часть CTLD.
