@@ -1330,6 +1330,7 @@ def germany_section(tmp: Path) -> None:
     check(len(took) >= 3 and len(axes) >= 2, f"за 8 дней красные взяли {len(took)} пунктов на {len(axes)} осях: {', '.join(sorted(took))}")
     planner.plan(st)
     tk = st["tasks"][0]
+    tk["tot_s"] = None                           # без продвижения модели к миссии: окно и театр - на одно время
     st["settings"]["mission_budget"] = 0                               # без бюджета - весь театр
     full = materialize.theatre(st, tk)
     n_full = sum(len(g["vehicles"]) for g in full)
@@ -1340,7 +1341,8 @@ def germany_section(tmp: Path) -> None:
     check(veh <= materialize.MISSION_BUDGET < n_full and heavy <= materialize.MAX_WEIGHT * 1.1,
           f"миссия всего фронта: без бюджета {n_full} машин, с бюджетом {veh} (не больше {materialize.MISSION_BUDGET}), "
           f"{len(man['ground'])} групп, машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
-    core = {g["unit"]: len(g["vehicles"]) for g in materialize.window(st, tk)}
+    core = {g["unit"]: len(g["vehicles"]) for g in materialize.window(st, tk)
+            if g["kind"] != "downed"}            # сбитый экипаж - не часть модели, в манифест наземных частей не входит
     got = {g["unit"]: len(g["vehicles"]) for g in man["ground"]}
     check(all(got.get(u) == n for u, n in core.items() if n),
           f"бюджет не трогает окно задачи игрока ({len(core)} групп: цель, угрозы коридора, ЗРК у маршрута)")
@@ -2684,11 +2686,32 @@ def evac_section(tmp: Path) -> None:
           "солдат на борт - по типу: Ми-24П 8, AH-64A и SA342M - никого")
 
 
+def fitness_section(tmp: Path) -> None:
+    """Пригодность типа для задачи с учётом эпохи (fitness.py): оценка - относительно лучшего типа в кампании."""
+    from redfront import fitness
+    print("\n== пригодность типа ЛА ==")
+    st = model.new_campaign("fit", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    with_a10 = fitness.relative(st, "Su_25", "cas")
+    for u in st["units"].values():               # "другая эпоха": A-10 и Апачей в кампании нет
+        if u.get("type") in ("A_10A", "AH_64A"):
+            u["count"] = 0
+    without = fitness.relative(st, "Su_25", "cas")
+    check(abs(with_a10 - 0.85) < 1e-6 and abs(without - 1.0) < 1e-6,
+          f"Су-25 для удара по войскам: рядом с A-10 - {with_a10:.2f}, без него (своя эпоха) - {without:.2f}")
+    check(fitness.relative(st, "F_15C", "strike") == 0.0 and not fitness.fits(st, {"type": "F_15C"}, "strike")
+          and fitness.relative(st, "Mi_8MT", "cas") == 1.0,
+          "без оценки вида задач у типа с оценками - не годится (F-15C по объектам); тип без оценок - без учёта (Ми-8)")
+    best = fitness.pick_key(st, {"type": "MiG_27K"}, "strike", 0)
+    busy = fitness.pick_key(st, {"type": "MiG_27K"}, "strike", 3)
+    other = fitness.pick_key(st, {"type": "Su_17M4"}, "strike", 0)
+    check(best < other < busy, "выбор: лучший тип - первым, но после трёх задач его очередь уступает следующему типу")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section]
+            command_section, farp_section, evac_section, fitness_section]
 
 
 def main() -> int:

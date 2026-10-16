@@ -6,7 +6,7 @@
   * удар ИИ по наземной цели (колонна или часть в бою, позиция ЗРК, объект тыла), не слетанный в миссии (не
     'done' игрока и не 'played' - не был группой ИИ в собранной и слетанной миссии): удача - с вероятностью
     STRIKE_P минус PER_THREAT на ЗРК в коридоре; потери цели - доля на пару самолётов (LOSS), объекту тыла -
-    повреждение (DAMAGE). Сама группа теряет самолёты от ЗРК коридора (LOSS_PER_THREAT на борт); экипаж
+    повреждение (DAMAGE); то и другое - с множителем пригодности типа (fitness.outcome_factor: лучший в кампании - 1.0). Сама группа теряет самолёты от ЗРК коридора (LOSS_PER_THREAT на борт); экипаж
     сбитого катапультируется (EJECT_P) - на земле у цели (csar.py), иначе погиб.
 Дежурные пары ПВО противника на смене рядом с целью (alerts_near) снижают успех удара (QRA_P на пару) и повышают
 потери (QRA_LOSS). Дежурства, перевозки, прикрытие своих войск - без итога здесь (перевозки - в снабжении, logistics.supply).
@@ -68,11 +68,13 @@ def _strike(state: dict, e: dict) -> list[str]:
             elif "crews" in perf:
                 perf["crews"] = max(0, perf["crews"] - 1)
         lines.append(f"ИИ, {e['title']}: потеряно {down} {perf['type']} ({perf['name']}).")
-    p = max(0.1, min(0.9, STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra))
+    from . import fitness                       # пригодность типа для задачи - относительно лучшего в кампании
+    fk = fitness.outcome_factor(state, perf.get("type", "") if perf else "", fitness.task_class(e["kind"]))
+    p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk))
     if not ((r.random() < p) if r else p >= 0.5):
         lines.append(f"ИИ, {e['title']}: цель не поражена.")
         return lines
-    size_k = max(0, g["size"] - down) / 2.0
+    size_k = max(0, g["size"] - down) / 2.0 * fk
     if obj["kind"] == "point":
         role = model.category(tgt)
         before = tgt.get("damage", 0.0)

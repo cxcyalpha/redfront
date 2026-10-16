@@ -447,7 +447,9 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     for u in units.values():                     # КРУ - все исправные (по одной машине; наведение - на 250 км)
         if model.category(u) == "gci" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0:
             groups.append(gci_site(state, u))
-    groups = [g for g in groups if g["vehicles"]]
+    core = {g["unit"] for g in groups if g.get("core")}
+    # приданная ПВО части уже в окне (угроза коридора) - второй раз с частью не ставится (была двумя группами DCS)
+    groups = [g for g in groups if g["vehicles"] and (g.get("core") or g["unit"] not in core)]
     budget = (state.get("settings") or {}).get("mission_budget", MISSION_BUDGET)
     return apply_budget(state, task, groups, budget)
 

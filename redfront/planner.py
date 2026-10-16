@@ -9,7 +9,7 @@ from __future__ import annotations
 import copy
 import math
 
-from . import dcstypes, logistics, model, ops
+from . import dcstypes, fitness, logistics, model, ops
 
 
 def strike_radius_km(unit: dict) -> float | None:
@@ -231,14 +231,18 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 break
             tpos = model.unit_pos(state, tgt)
             best = None
+            cls = fitness.task_class(kind, tdef)
             for r in performers:
                 radius = strike_radius_km(r)
                 if radius is None:
                     reasons.append(f"{r['name']}: не задан радиус (strike_radius_km у части или у роли {r['role']})")
                     continue
+                if not fitness.fits(state, r, cls):   # тип для этой задачи слаб на фоне лучших в кампании (fitness.py)
+                    continue
                 d = model.dist_km(state["airbases"][r["base"]], tpos)
-                # сначала - части с меньшим числом задач в этом плане (вылеты распределяются по полкам), затем ближние
-                key = (_load(tasked, r), d)
+                # сначала - пригодный тип (оценка относительно лучшего в кампании) с поправкой на загрузку: задачи
+                # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
+                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)), 3), d)
                 if d <= radius and (best is None or key < best[0]):
                     best = (key, r)
             if best is None:
@@ -420,8 +424,10 @@ def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers
         for r in performers:
             radius = strike_radius_km(r)
             d = model.dist_km(state["airbases"][r["base"]], tpos)
-            if radius is not None and d <= radius and (best is None or (_load(tasked, r), d) < best[0]):
-                best = ((_load(tasked, r), d), r)
+            key = (round(fitness.pick_key(state, r, fitness.task_class(kind, tdef), _load(tasked, r)), 3), d)
+            if (radius is not None and d <= radius and fitness.fits(state, r, fitness.task_class(kind, tdef))
+                    and (best is None or key < best[0])):
+                best = (key, r)
         if best is None:
             continue
         (_n, d), perf = best
@@ -711,7 +717,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         cands = [u for u in units.values()
                  if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need]
         # сначала те, чей тип умеет основную задачу группы (для подавления ПВО - SEAD), затем та же часть, что ударная, затем ближние
-        cands.sort(key=lambda u: (not _can(u, g["maintask"][0]), u["id"] != perf["id"],
+        gcls = fitness.group_class(g["maintask"], None)   # подавление ПВО - sead, прикрытие - air
+        cands.sort(key=lambda u: (not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
+                                  u["id"] != perf["id"],
                                   model.dist_km(state["airbases"][u["base"]], tpos)))
         chosen = None
         for u in cands:
