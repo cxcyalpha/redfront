@@ -71,6 +71,8 @@ dialog input,dialog select{width:100%}
 .z-far .tac.unit svg,.z-far .tac.unit svg.su{transform:scale(.7)}
 .z-far .tac.sam,.z-far .tac.farp-free{display:none}
 .tac.sam.stale{opacity:.5}
+.tac.unit.fog-approx{opacity:.6}
+.tac.unit.fog-presence{opacity:.35}
 .z-mid .plbl{font-size:10px}
 .legend .lg{display:flex;align-items:center;gap:6px;margin:2px 0}
 .legend .lgp{display:inline-flex;align-items:center;justify-content:center;min-width:30px}
@@ -219,7 +221,8 @@ function drawMap() {
   $("#legend").innerHTML = `<b>${nato ? "Условные знаки (APP-6)" : "Условные знаки"}</b>` + TAC.legend(nato);
   const P = Object.fromEntries(ST.places.map(p => [p.name, p]));
   // линия фронта: территории сторон по пунктам и частям в поле
-  const field = ST.ground.filter(g => g.cat === "ground" && !g.attached && !["pending", "destroyed"].includes(g.state));
+  const field = ST.ground.filter(g => g.cat === "ground" && !g.attached && !["pending", "destroyed"].includes(g.state)
+    && g.intel !== "presence");                      // противник - по данным разведки (давние - линию не двигают)
   const sites = ST.places.filter(p => p.side).map(p => ({lat: p.pos[0], lon: p.pos[1], side: p.side}))
     .concat(field.map(g => ({lat: g.pos[0], lon: g.pos[1], side: g.side})));
   const key = JSON.stringify(sites);
@@ -242,9 +245,9 @@ function drawMap() {
   const enemyOf = s => sites.filter(x => x.side && x.side !== s);
   for (const g of ST.ground) {
     if (g.state === "destroyed" || g.attached) continue;
-    const tip = `<b>${esc(g.name)}</b><br>${esc(stateRu(g))} · боеспособность ${Math.round(g.strength * 100)}%` +
+    const tip = `<b>${esc(g.name)}</b><br>${esc(stateRu(g))} · ${strengthTxt(g)}` +
       (g.engaged.length ? `<br>бой с: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? `<br><b>снабжение ${Math.round(g.supply_frac * 100)}% нормы</b>` : "") +
-      `<br><span style="color:#888">${esc(g.types)}</span>`;
+      `<br><span style="color:#888">${esc(g.types)}</span>` + intelTxt(g);
     const c = col(g.side), friend = g.side === ST.side;
     if (g.cat === "sam" || g.cat === "gci") {
       if (g.cat === "sam" && g.threat_km && g.state !== "pending")
@@ -261,9 +264,11 @@ function drawMap() {
       const rr = g.route.slice(0, 3), n = rr.length;
       if (nato && n > 1) L.marker(rr[n - 1], {icon: icon(`<div style="transform:rotate(${TAC.bearing(rr[n - 2], rr[n - 1]).toFixed(0)}deg)">${TAC.arrowHead(c)}</div>`, 18, 18), interactive: false}).addTo(layers.ground);
     }
+    if (g.intel && g.intel !== "exact" && g.unc_km >= 1)   // противник по устаревшим данным: где может быть
+      L.circle(g.pos, {radius: g.unc_km * 1000, color: c, weight: 1, opacity: .4, fill: false, dashArray: "2 5", interactive: false}).addTo(layers.ground);
     const dir = g.route && g.route.length > 1 ? TAC.bearing(g.route[0], g.route[1]) : null;   // куда идёт колонна
     const html = nato ? TAC.unitNATO(g, friend) : TAC.unitSU(g, TAC.bearingTo(g.pos, enemyOf(g.side)), dir);
-    L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit"), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip).addTo(layers.ground);
+    L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit" + (g.intel && g.intel !== "exact" ? " fog-" + g.intel : "")), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip).addTo(layers.ground);
   }
   for (const o of ST.objects) {
     if (o.role === "airfield") continue;
@@ -310,6 +315,15 @@ function stateRu(g) {
   if (g.state === "march" && g.order) s += {attack: " (наступление)", hold: " (на рубеж)", withdraw: " (отход)"}[g.order] || "";
   return s;
 }
+function strengthTxt(g) {       // противник по устаревшим данным - боеспособность на момент наблюдения
+  if (g.strength != null) return `боеспособность ${Math.round(g.strength * 100)}%`;
+  return g.seen_strength != null && g.intel === "approx" ? `боеспособность ~${Math.round(g.seen_strength * 100)}% (когда видели)` : "боеспособность неизвестна";
+}
+function intelTxt(g) {
+  if (!g.intel) return "";
+  const lv = {exact: "точно", approx: "примерно", presence: "только присутствие"}[g.intel];
+  return `<br><i>разведка: ${lv}, ${g.intel_age_h} ч назад (${esc(g.intel_src)})${g.unc_km >= 1 ? `, могла уйти до ${Math.round(g.unc_km)} км` : ""}</i>`;
+}
 const bar = v => `<span class="bar"><i style="width:${Math.round(v * 100)}%;background:${v < .5 ? "#e0483e" : v < .75 ? "#e6a23c" : "#5cb85c"}"></i></span>`;
 
 function render() {
@@ -339,8 +353,8 @@ function render() {
     });
   } else if (TAB === "ground") {
     const by = s => ST.ground.filter(g => g.side === s && !g.attached);
-    p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` + by(s).map(g =>
-      `<div class="item" data-pos="${g.pos}"><b>${esc(g.name)}</b>${bar(g.strength)} ${Math.round(g.strength * 100)}%
+    p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}${s !== ST.side ? " (по данным разведки)" : ""}</h4>` + by(s).map(g =>
+      `<div class="item" data-pos="${g.pos}"><b>${esc(g.name)}</b>${g.strength != null ? `${bar(g.strength)} ${Math.round(g.strength * 100)}%` : ` <i>${g.intel === "approx" ? "?" : "??"}</i>`}
        <div class="d">${esc(stateRu(g))}${g.engaged.length ? " · против: " + esc(g.engaged.join(", ")) : ""}${g.supply < 1 ? " · снабжение " + Math.round(g.supply_frac * 100) + "% нормы" : ""}</div></div>`).join("")).join("");
     p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
   } else if (TAB === "air") {

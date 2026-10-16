@@ -176,10 +176,12 @@ const TAC = (() => {
     // район, занимаемый подразделением (резерв, сосредоточение; пунктир - намечен к занятию): знак техники внутри
     return `<ellipse rx="${rx}" ry="${ry}" fill="none" stroke="${c}" stroke-width="2.2"${dash}/>${suVehicle(g.vehicle, c, -12, 0, brg, .85)}`;
   }
+  // данные разведки о противнике: примерно - "?", только присутствие - "??" (знак бледнее, CSS fog-*)
+  const fogMark = g => g.intel === "approx" ? "?" : g.intel === "presence" ? "??" : "";
   function unitSU(g, brg, dir) {
     const c = sideCol(g.side);
     return `<svg width="64" height="64" viewBox="-32 -32 64 64" class="su">${suShape(g, c, brg, dir)}</svg>` +
-           `<div class="ulbl su" style="color:${ink(g)}">${esc(g.abbr)}${g.supply < 1 ? " ⚠" : ""}</div>`;
+           `<div class="ulbl su" style="color:${ink(g)}">${esc(g.abbr)}${fogMark(g)}${g.supply < 1 ? " ⚠" : ""}</div>`;
   }
 
   // ---------- APP-6 (НАТО) ----------
@@ -197,7 +199,7 @@ const TAC = (() => {
     const dash = g.state === "pending" ? ' stroke-dasharray="3 2"' : "";
     return `<svg width="64" height="64" viewBox="-32 -32 64 64" style="opacity:${g.state === "halted" ? .5 : 1}">` +
            `<g${dash}>${frame}</g>${ic}<text y="${friend ? -13 : -18}" text-anchor="middle" font-size="9" font-weight="700" fill="${e}">${ech}</text></svg>` +
-           `<div class="ulbl" style="color:${INK}">${esc(g.abbr)}${g.supply < 1 ? " ⚠" : ""}</div>`;
+           `<div class="ulbl" style="color:${INK}">${esc(g.abbr)}${fogMark(g)}${g.supply < 1 ? " ⚠" : ""}</div>`;
   }
 
   // ---------- ПВО, аэродромы, цели тыла ----------
@@ -280,6 +282,7 @@ const TAC = (() => {
       row(only(unitSU(G("red", "march", "btr", null, "II"), 0, 0)), "колонна на марше (тб - три черты); ⬠ БТР") +
       row(only(unitSU(G("red", "battle", "tank", "attack"), 0)), "направление наступления") +
       row(only(unitSU(G("red", "halted", "tank"), 0)), "остановлена на рубеже") +
+      row(`<span style="opacity:.55">${only(unitSU(G("blue", "defend", "tank"), 180))}</span>`, "противник по данным разведки: бледно - устарели (? - примерно, ?? - только присутствие), круг - где может быть") +
       row(line(RED, BLUE), "линия соприкосновения") +
       row(sam({side: "red", branch: "sam", tier: 2}, false) + sam({side: "red", branch: "gci"}, false), "ЗРК (черты - дальность), РЛС (КРУ)") +
       row(airbase({side: "red", state: "open"}) + airbase({side: "red", state: "closed"}), "аэродром; закрыт или потерян") +
