@@ -352,10 +352,12 @@ function render() {
       ${t.notes ? `<div class="pk">⚠ ${esc(t.notes)}</div>` : ""}
       <div class="row"><span class="meta" style="margin:0">лечу в</span>
         <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
+        <span class="meta" style="margin:0" title="людей в вылете: сначала группа игрока, затем остальные группы по порядку; больше одного - места Client (мультиплеер)">людей</span>
+        <select class="hum">${Array.from({length: Math.max(1, t.seats || 1)}, (_, k) => `<option>${k + 1}</option>`).join("")}</select>
         <button class="main go">Собрать миссию</button></div></div>`).join("");
     p.querySelectorAll(".task").forEach(el => {
       el.onclick = e => { if (e.target.closest("select,button")) return; SEL = +el.dataset.i; render(); };
-      el.querySelector(".go").onclick = e => act("build", {task: +el.dataset.i + 1, fly: el.querySelector(".fly").value, budget: ($("#budget") || {}).value}, e.target);
+      el.querySelector(".go").onclick = e => act("build", {task: +el.dataset.i + 1, fly: el.querySelector(".fly").value, humans: el.querySelector(".hum").value, budget: ($("#budget") || {}).value}, e.target);
     });
   } else if (TAB === "ground") {
     const by = s => ST.ground.filter(g => g.side === s && !g.attached);
@@ -368,10 +370,27 @@ function render() {
       ST.air.filter(a => a.side === s).map(a => `<div class="item" data-id="${esc(a.id)}"><b>${esc(a.name)}</b>
        <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0}${a.crews != null ? ` · экипажей ${a.crews}/${a.crews0}` : ""} · к вылету ${a.available}</div>
        ${a.rebase_to ? `<div class="d">→ перебазирование на ${esc(a.rebase_to)} в конце суток</div>` : ""}
-       ${s === ST.side ? `<div class="row" style="margin-top:4px"><button class="rb">Перебазировать</button></div><div class="rbForm"></div>` : ""}</div>`).join("")).join("") +
+       ${a.livery ? `<div class="d">ливрея: ${esc(a.livery)}</div>` : ""}
+       <div class="row" style="margin-top:4px">${s === ST.side ? `<button class="rb">Перебазировать</button>` : ""}<button class="ui">Лётчики, ливрея</button></div>
+       <div class="rbForm"></div><div class="uiForm"></div></div>`).join("")).join("") +
       ((ST.downed || []).length ? `<h4>Сбитые экипажи на земле</h4>` + ST.downed.map(d => `<div class="item" data-pos="${d.pos}"><b>🪂 ${esc(d.title)}</b>
        <div class="d">маяк ${d.freq} кГц · на земле с суток ${d.day}</div></div>`).join("") : "");
     p.querySelectorAll(".item[data-pos]").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
+    p.querySelectorAll(".ui").forEach(b => b.onclick = async e => {     // лётчики полка и ливрея
+      const it = e.target.closest(".item"), f = it.querySelector(".uiForm");
+      if (f.innerHTML) { f.innerHTML = ""; return; }
+      let o;
+      try { o = (await api("unitinfo", {file: FILE, id: it.dataset.id})).info; } catch (x) { return out(x.message, true); }
+      const opts = o.liveries.map(l => `<option value="${esc(l.id)}" ${l.id === o.livery ? "selected" : ""}>${esc(l.name)}</option>`).join("");
+      f.innerHTML = `<div class="d" style="margin-top:6px"><b>Ливрея полка</b> (во всех его вылетах, пока не сменить)</div>
+        <div class="row" style="margin-top:4px">${o.liveries.length ? `<select class="lvSel" style="flex:1;min-width:0"><option value="">по умолчанию DCS</option>${opts}</select>` :
+          `<input class="lvIn" value="${esc(o.livery)}" placeholder="имя папки ливреи (DCS не найден)" style="flex:1;min-width:0">`}<button class="lvOk">Задать</button></div>
+        <div class="d" style="margin-top:6px"><b>Лётчики</b> (${o.pilots.length}; имя в DCS - звание и фамилия, ведущий - старший)</div>
+        <div class="d">${o.pilots.map(x => `${esc(x.name)}${x.sorties ? ` · ${x.sorties} выл.` : ""}`).join("<br>")}</div>
+        ${o.down.length ? `<div class="d" style="margin-top:4px"><b>На земле (сбиты):</b> ${o.down.map(esc).join(", ")}</div>` : ""}
+        ${o.lost.length ? `<div class="d" style="margin-top:4px"><b>Выбыли:</b> ${o.lost.map(x => `${esc(x.name)} - ${esc(x.how)}, сутки ${x.day}`).join("; ")}</div>` : ""}`;
+      f.querySelector(".lvOk").onclick = ev => act("setlivery", {id: it.dataset.id, livery: (f.querySelector(".lvSel") || f.querySelector(".lvIn")).value}, ev.target);
+    });
     p.querySelectorAll(".rb").forEach(b => b.onclick = async e => {     // режим командующего: перебазирование
       const it = e.target.closest(".item"), f = it.querySelector(".rbForm");
       if (f.innerHTML) { f.innerHTML = ""; return; }
@@ -379,7 +398,7 @@ function render() {
       try { o = (await api("rebaseoptions", {file: FILE, id: it.dataset.id})).options; } catch (x) { return out(x.message, true); }
       f.innerHTML = `<div class="row" style="margin-top:4px"><select class="rbSel" style="flex:1;min-width:0">
         <option value="${esc(o.id)}" disabled selected>сейчас: ${esc(o.base)} (${o.front_km} км до противника)</option>` +
-        o.options.map(x => `<option value="${esc(x.id)}">${x.farp ? "площадка " : ""}${esc(x.name)} · до противника ${x.front_km} км · ${x.km} км отсюда · мест ${x.free}</option>`).join("") +
+        o.options.map(x => `<option value="${esc(x.id)}">${x.farp ? "площадка " : ""}${esc(x.name)} · до противника ${x.front_km} км · ${x.km} км отсюда · ${x.helos != null ? `вертолётов до ${x.helos}` : `мест ${x.free}`}</option>`).join("") +
         `</select><button class="main rbGo">Приказ</button>${o.pending ? `<button class="rbNo">Отменить</button>` : ""}</div>`;
       f.querySelector(".rbGo").onclick = ev => { const v = f.querySelector(".rbSel").value; if (v && v !== o.id) act("rebase", {id: it.dataset.id, base: v}, ev.target); };
       const no = f.querySelector(".rbNo");
@@ -505,7 +524,7 @@ async function loadState() {
 $("#camp").onchange = () => { FILE = $("#camp").value; localStorage.setItem("rf_file", FILE); loadState(); };
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b.dataset.tab; render(); });
 $("#bPlan").onclick = e => { SEL = 0; TAB = "plan"; act("plan", {}, e.currentTarget); };
-$("#bBuild").onclick = e => { TAB = "plan"; act("build", {task: SEL + 1, fly: (document.querySelectorAll(".task .fly")[SEL] || {}).value || "strike", budget: ($("#budget") || {}).value}, e.currentTarget); };
+$("#bBuild").onclick = e => { TAB = "plan"; act("build", {task: SEL + 1, fly: (document.querySelectorAll(".task .fly")[SEL] || {}).value || "strike", humans: (document.querySelectorAll(".task .hum")[SEL] || {}).value || 1, budget: ($("#budget") || {}).value}, e.currentTarget); };
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
 $("#bEnd").onclick = e => { if (confirm("Закончить день? Модель сделает ход, план дня сбросится.")) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();

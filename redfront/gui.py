@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, command, convoys, csar, debrief, explain, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
+from . import ato, command, convoys, csar, dcstypes, debrief, explain, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -87,7 +87,8 @@ def view(st: dict) -> dict:
                         "count": u.get("count", 0), "count0": u.get("count0", u.get("count", 0)),
                         "available": logistics.available(st, u), "base": b.get("name", u["base"]),
                         "crews": u.get("crews"), "crews0": u.get("crews0"),
-                        "rebase_to": st["airbases"].get(u.get("rebase_to") or "", {}).get("name")})
+                        "rebase_to": st["airbases"].get(u.get("rebase_to") or "", {}).get("name"),
+                        "livery": u.get("livery") or "", "detached": bool(u.get("parent"))})
         elif cat in ("ground", "sam", "gci"):
             fog = intel.tracked_ground(st, u)     # наземная часть противника - только по данным разведки
             lv = intel.level(st, u["id"]) if fog else None
@@ -142,6 +143,7 @@ def view(st: dict) -> dict:
                       "threats": [units[x]["name"] for x in t.get("threats", []) if x in units],
                       "notes": t.get("package_notes", ""),
                       "goal": explain.task(st, t),                # цель: что это и что даст удар
+                      "seats": sum(int(g["size"]) for g in t.get("package", [])),   # сколько людей может лететь
                       "package": [{"group": g["group"], "title": g["title"], "size": g["size"],
                                    "performer": units[g["performer"]]["name"] if g["performer"] in units else g["performer"]}
                                   for g in t.get("package", [])]})
@@ -174,6 +176,29 @@ def view(st: dict) -> dict:
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],
     }
+
+
+def liveries(st: dict, u: dict) -> list[dict]:
+    """Ливреи типа части для страны её стороны в миссии - из установленного DCS (pydcs сканирует папки DCS и
+    Saved Games), все страны: миссия ставит части в CJTF, а ливрея из .miz применяется к любой стране;
+    DCS не найден - пусто (ливрею можно вписать вручную - имя папки ливреи)."""
+    try:
+        ac = dcstypes.flying(u["type"])
+        return sorted(({"id": lv.id, "name": lv.name + (f" ({', '.join(sorted(lv.countries))})" if lv.countries else "")}
+                       for lv in ac.iter_liveries()), key=lambda x: x["name"])
+    except Exception:                            # DCS не установлен (или pydcs не нашёл папки) - вручную
+        return []
+
+
+def unit_info(st: dict, uid: str) -> dict:
+    from . import pilots
+    u = st["units"][uid]
+    roster = pilots.ensure(st, u)
+    return {"id": uid, "name": u["name"], "livery": u.get("livery") or "", "liveries": liveries(st, u),
+            "pilots": [{"name": pilots.title(u, p), "sorties": p.get("sorties", 0)}
+                       for p in sorted(roster, key=lambda p: (-p.get("rank", 0), -p.get("sorties", 0), p["name"]))],
+            "down": [pilots.title(u, d["pilot"]) for d in st.get("downed", []) if d.get("unit") == uid and d.get("pilot")],
+            "lost": [{"name": pilots.title(u, p), "how": p.get("how", ""), "day": p.get("day")} for p in u.get("pilots_lost", [])]}
 
 
 class App:
@@ -304,6 +329,20 @@ class App:
             return {"state": view(st)}
         if action == "atooptions":                   # режим командующего: что можно выбрать для вылета (без сохранения)
             return {"options": command.options(st, req["id"])}
+        if action == "unitinfo":                     # авиачасть: лётчики, ливрея (pilots.py, ливреи DCS через pydcs)
+            return {"info": unit_info(st, req["id"])}
+        if action == "setlivery":                    # ливрея полка - во все его группы в миссиях, до смены
+            u = st["units"][req["id"]]
+            if model.category(u) not in ("air", "heli"):
+                raise ValueError("ливрея - только у авиачасти")
+            lv = str(req.get("livery") or "").strip()
+            if lv:
+                u["livery"] = lv
+            else:
+                u.pop("livery", None)
+            lines.append(f"{u['name']}: ливрея {lv or 'по умолчанию DCS'}.")
+            model.save(st, p)
+            return {"lines": lines, "state": view(st)}
         if action == "rebaseoptions":                # режим командующего: куда можно перебазировать часть
             return {"options": command.base_options(st, req["id"])}
         if action == "rebase":
@@ -334,7 +373,8 @@ class App:
             out = missions_dir(self.home) / f"redfront_{p.stem}_day{st['day']}.miz"
             if str(req.get("budget") or "").strip():
                 st["settings"]["mission_budget"] = max(0, int(req["budget"]))
-            man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1))
+            man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),
+                                  humans=int(req.get("humans") or 1))
             n = sum(len(g["vehicles"]) for g in man["ground"])
             lines.append(f"Миссия: {man['file']} (наземных машин {n}, бюджет {st['settings'].get('mission_budget', materialize.MISSION_BUDGET)})")
             if man.get("pre_lines"):             # модель продвинута к началу миссии (sim.advance)

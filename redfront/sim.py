@@ -285,6 +285,8 @@ def end_day(state: dict) -> list[str]:
     lines += command.apply_rebases(state)       # перебазирование по приказу командующего
     lines += farp.daily(state)                  # вертолётные части - на передовые площадки и с них
     lines += logistics.replacements(state)
+    from . import pilots
+    pilots.ensure_all(state)                    # пополнение экипажей - новые лётчики
     state["day"] += 1
     state["ground_s"] = 0
     lines += arrivals(state)

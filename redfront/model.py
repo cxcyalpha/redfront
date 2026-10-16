@@ -402,6 +402,8 @@ def init_crews(st: dict) -> None:
                 u["crews0"] = int(round(u.get("count0", u.get("count", 0)) * ratio))
                 u["crews"] = u["crews0"]
     st.setdefault("downed", [])          # сбитые экипажи на земле (csar.py)
+    from . import pilots                  # лётчики полков - по числу экипажей (имена в миссию)
+    pilots.ensure_all(st)
 
 
 def sync_ad_sites(st: dict) -> None:

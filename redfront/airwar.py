@@ -86,6 +86,8 @@ def _strike(state: dict, e: dict) -> list[str]:
             if (r.random() if r else 1.0) < EJECT_P:
                 csar.add_downed(state, perf, f"ai:{e['id']}:{k}", model.offset(obj["pos"], 90.0 * k, 2000 + 500 * k))
             elif "crews" in perf:
+                from . import pilots
+                pilots.killed(perf, pilots.take(perf), "погиб", state["day"])
                 perf["crews"] = max(0, perf["crews"] - 1)
         lines.append(f"ИИ, {e['title']}: потеряно {down} {perf['type']} ({perf['name']}).")
     from . import fitness                       # пригодность типа для задачи - относительно лучшего в кампании

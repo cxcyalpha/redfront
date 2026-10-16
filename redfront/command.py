@@ -340,7 +340,8 @@ def base_options(state: dict, uid: str) -> dict:
             continue
         out.append({"id": bid, "name": b["name"], "farp": b.get("kind") == "farp",
                     "front_km": round(farp.front_km(state, u["side"], b)), "km": round(model.dist_km(cur, b)),
-                    "free": cap - here})
+                    "free": cap - here,
+                    **({"helos": min(u.get("count", 0), farp.capacity(b))} if b.get("kind") == "farp" else {})})
     out.sort(key=lambda x: x["front_km"])
     return {"id": uid, "name": u["name"], "base": cur["name"], "pending": state["airbases"].get(u.get("rebase_to") or "", {}).get("name"),
             "front_km": round(farp.front_km(state, u["side"], cur)), "options": out}
@@ -358,19 +359,35 @@ def rebase(state: dict, uid: str, bid: str) -> str:
     if b is None:
         raise ValueError("на этот аэродром нельзя: не свой, закрыт, нет мест или он не для этого типа")
     u["rebase_to"] = bid
-    return f"{u['name']}: перебазирование {opts['base']} -> {b['name']} в конце суток ({b['km']} км; до противника {b['front_km']} км)."
+    part = (f"; на площадку - передовая группа {b['helos']} из {u['count']} вертолётов, остальные - на {opts['base']}"
+            if b.get("helos") is not None and b["helos"] < u.get("count", 0) else "")
+    return f"{u['name']}: перебазирование {opts['base']} -> {b['name']} в конце суток ({b['km']} км; до противника {b['front_km']} км{part})."
 
 
 def apply_rebases(state: dict) -> list[str]:
     """Конец суток: приказы на перебазирование выполнены (аэродром ещё свой и открыт)."""
     lines = []
-    for u in state["units"].values():
+    for u in list(state["units"].values()):      # передовые группы появляются и уходят в полк по ходу
+        if u["id"] not in state["units"]:
+            continue
         bid = u.pop("rebase_to", None)
         if not bid:
             continue
         b = state["airbases"].get(bid)
         if not b or b.get("side") != u["side"] or b.get("state", "open") not in ("open", "active"):
             lines.append(f"{u['name']}: перебазирование отменено - аэродром недоступен.")
+            continue
+        from . import farp
+        p = state["units"].get(u.get("parent") or "")
+        if p and p["base"] == bid:               # передовая группа - обратно в свой полк
+            farp.merge(state, u)
+            lines.append(f"{u['name']}: вернулась в полк ({b['name']}).")
+            continue
+        if farp.is_farp(b) and model.category(u) == "heli":   # на площадку - сколько поместится
+            x = farp.detach(state, u, bid)
+            x["base_fixed"] = True
+            lines.append(f"{x['name']}: перебазирована на {b['name']} ({x['count']} вертолётов"
+                         + (f"; полк - {u['count']} на {state['airbases'][u['base']]['name']}" if x is not u else "") + ").")
             continue
         u["base"], u["base_fixed"] = bid, True
         u.pop("home", None)

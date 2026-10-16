@@ -172,6 +172,8 @@ def resolve(state: dict, t1: float) -> list[str]:
                     if (r.random() if r else 1.0) < airwar.EJECT_P:
                         csar.add_downed(state, perf, f"ai:{e['id']}:{k}", g["route"][0])
                     elif "crews" in perf:
+                        from . import pilots
+                        pilots.killed(perf, pilots.take(perf), "погиб", state["day"])
                         perf["crews"] = max(0, perf["crews"] - 1)
                 lines.append(f"ИИ, {e['title']}: потеряно {down} {perf['type']} ({perf['name']}).")
             back = g["size"] - down

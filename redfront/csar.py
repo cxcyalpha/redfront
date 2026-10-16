@@ -50,6 +50,10 @@ def add_downed(state: dict, unit: dict, aircraft: str, pos: dict, note: str = ""
     d = {"id": f"downed_{state['_downed_seq']}", "side": unit["side"], "unit": unit["id"], "type": unit.get("type", ""),
          "aircraft": aircraft, "crew": crew_size(unit.get("type", "")), "pos": {"lat": pos["lat"], "lon": pos["lon"]},
          "day": state["day"], "freq_khz": _freq(state)}
+    from . import pilots
+    p = pilots.take(unit, aircraft) if model.category(unit) in ("air", "heli") else None
+    if p:
+        d["pilot"] = p
     state["downed"].append(d)
     if "crews" in unit:
         unit["crews"] = max(0, unit["crews"] - 1)
@@ -58,17 +62,25 @@ def add_downed(state: dict, unit: dict, aircraft: str, pos: dict, note: str = ""
 
 def returned(state: dict, d: dict, how: str) -> str:
     """Экипаж вернулся в полк (спасён или вышел к своим)."""
+    from . import pilots
     u = state["units"].get(d["unit"])
     if u and "crews" in u:
         u["crews"] = min(u.get("crews0", u["crews"] + 1), u["crews"] + 1)
+    if u:
+        pilots.back(u, d.get("pilot"))
     state["downed"] = [x for x in state["downed"] if x["id"] != d["id"]]
-    return f"Экипаж {d['type']} ({u['name'] if u else d['unit']}): {how}, вернулся в часть."
+    who = pilots.title(u, d["pilot"]) + ", " if u and d.get("pilot") else ""
+    return f"Экипаж {d['type']} ({who}{u['name'] if u else d['unit']}): {how}, вернулся в часть."
 
 
 def lost(state: dict, d: dict, how: str) -> str:
+    from . import pilots
     state["downed"] = [x for x in state["downed"] if x["id"] != d["id"]]
     u = state["units"].get(d["unit"])
-    return f"Экипаж {d['type']} ({u['name'] if u else d['unit']}): {how}."
+    if u:
+        pilots.killed(u, d.get("pilot"), how, state["day"])
+    who = pilots.title(u, d["pilot"]) + ", " if u and d.get("pilot") else ""
+    return f"Экипаж {d['type']} ({who}{u['name'] if u else d['unit']}): {how}."
 
 
 def title(state: dict, d: dict) -> str:
@@ -148,8 +160,12 @@ def apply_debrief(state: dict, man: dict, data: dict, lost_names: set) -> list[s
                 lines.append(f"{perf['name']}: экипаж сбитого {perf['type']} катапультировался, на земле "
                              f"({'своя' if owner_at(state, d['pos']) == d['side'] else 'чужая'} территория), маяк {d['freq_khz']} кГц.")
             elif "crews" in perf:
+                from . import pilots
+                p = pilots.take(perf, n)
+                pilots.killed(perf, p, "погиб", state["day"])
                 perf["crews"] = max(0, perf["crews"] - 1)
-                lines.append(f"{perf['name']}: экипаж сбитого {perf['type']} погиб; экипажей {perf['crews']}.")
+                lines.append(f"{perf['name']}: экипаж сбитого {perf['type']} погиб"
+                             + (f" ({pilots.title(perf, p)})" if p else "") + f"; экипажей {perf['crews']}.")
     for d in list(state.get("downed", [])):      # экипажи, спасённые из прошлых вылетов
         if d["id"] in rescued:
             lines.append(returned(state, d, "спасён в миссии"))
