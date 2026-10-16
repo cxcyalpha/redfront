@@ -2841,11 +2841,43 @@ def recon_section(tmp: Path) -> None:
           "разведчик сбит в миссии - данных нет")
 
 
+def explain_section(tmp: Path) -> None:
+    """Пояснения для игрока (explain.py): цели задач, объекты тыла, пути подвоза, итог удара."""
+    from redfront import explain, gui
+    print("\n== Пояснения для игрока ==")
+    st = model.new_campaign("expl", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    sim.end_day(st)
+    planner.plan(st)
+    v = gui.view(st)
+    route = next((t for t in v["tasks"] if "путям подвоза" in t["title"]), None)
+    dep = next((t for t in v["tasks"] if t["title"].startswith("Удар по складу")), None)
+    check(route and any("грузовиков" in x and "подвоза" in x for x in route["goal"]),
+          f"путь подвоза в задаче: {route and route['goal'][0]}")
+    check(dep and any("Ёмкость" in x for x in dep["goal"]) and any("Удар" in x for x in dep["goal"]),
+          f"склад в задаче: {dep and ' / '.join(dep['goal'][:2])}")
+    check(v["rear"] and all(r["info"] for r in v["supply_routes"]) and all(o["info"] for o in v["objects"] if o["role"] != "airfield" or o.get("side")),
+          "вкладка 'Тыл', подсказки путей подвоза и объектов - с пояснениями")
+    check(not any(o.get("stock_t") is not None for o in v["objects"] if o["side"] != st["player_side"]),
+          "запас складов противника - только оценка (без тонн)")
+    d = next(o for o in st["units"].values() if o.get("role") == "depot" and o["side"] != st["player_side"] and o.get("cap_t"))
+    d["stock_t"] = d["cap_t"]
+    d["damage"] = 0.6
+    msg = explain.damage_effect(st, d, 0.0)
+    check("сгорело" in msg and abs(d["stock_t"] - d["cap_t"] * 0.4) < 1, f"итог удара по складу:{msg}")
+    for i in (1, 2):                             # заводы - из зонда карты (в составе сил Германии их нет)
+        st["units"][f"fac{i}"] = {"id": f"fac{i}", "name": f"Завод {i}", "role": "factory", "side": "blue",
+                                  "state": "active", "damage": 0.0, "pos": dict(d["pos"])}
+    f = st["units"]["fac1"]
+    check(any("x1.00 -> x0.75" in x for x in explain.obj(st, f, "red")), f"завод: {explain.obj(st, f, 'red')[1]}")
+    f["damage"] = 1.0
+    check("->" in explain.damage_effect(st, f, 0.0), f"итог удара по заводу:{explain.damage_effect(st, f, 0.0)}")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section]
 
 
 def main() -> int:

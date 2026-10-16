@@ -104,7 +104,8 @@ def _strike(state: dict, e: dict) -> list[str]:
         role = model.category(tgt)
         before = tgt.get("damage", 0.0)
         tgt["damage"] = min(1.0, before + DAMAGE.get(role, 0.3) * size_k)
-        lines.append(f"ИИ, {e['title']}: повреждение {before:.0%} -> {tgt['damage']:.0%}.")
+        from . import explain
+        lines.append(f"ИИ, {e['title']}: повреждение {before:.0%} -> {tgt['damage']:.0%}." + explain.damage_effect(state, tgt, before))
     elif obj["kind"] in LOSS:
         frac = min(0.5, LOSS[obj["kind"]] * size_k)
         s0 = model.strength(tgt)

@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, command, convoys, csar, debrief, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
+from . import ato, command, convoys, csar, debrief, explain, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -76,8 +76,11 @@ def view(st: dict) -> dict:
             objects.append({"id": u["id"], "name": u["name"], "role": cat, "side": u.get("side"), "pos": _ll(u["pos"]),
                             "damage": round(u.get("damage", 0.0), 2), "state": u.get("state"),
                             "checked": bool(u.get("pos_checked")) or cat == "airfield",
-                            **({"stock": round(logistics.depot_stock(u), 2), "stock_t": round(u.get("stock_t", 0)),
-                                "cut": bool(u.get("_cut"))} if cat == "depot" and u.get("cap_t") else {})})
+                            "info": explain.obj(st, u, st["player_side"]),      # что это и что даст удар (explain.py)
+                            **(({"stock": round(logistics.depot_stock(u), 2), "stock_t": round(u.get("stock_t", 0)),
+                                 "cut": bool(u.get("_cut"))} if u["side"] == st["player_side"] else   # свой - точно
+                                {"stock": round(logistics.depot_stock(u) * 4) / 4, "stock_est": True})   # противника - по оценке, четвертями
+                               if cat == "depot" and u.get("cap_t") else {})})
         elif cat in ("air", "heli"):
             b = st["airbases"].get(u["base"], {})
             air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
@@ -138,6 +141,7 @@ def view(st: dict) -> dict:
                       "target": _ll(t["target_pos"]) if t.get("target_pos") else None,
                       "threats": [units[x]["name"] for x in t.get("threats", []) if x in units],
                       "notes": t.get("package_notes", ""),
+                      "goal": explain.task(st, t),                # цель: что это и что даст удар
                       "package": [{"group": g["group"], "title": g["title"], "size": g["size"],
                                    "performer": units[g["performer"]]["name"] if g["performer"] in units else g["performer"]}
                                   for g in t.get("package", [])]})
@@ -156,8 +160,9 @@ def view(st: dict) -> dict:
                      for k, b in st["airbases"].items()],
         "tasks": tasks, "task_reason": st.get("task_reason") if not tasks else None,
         "supply_log": st.get("supply_log") or {},
+        "rear": explain.rear(st),
         "supply_routes": [{"pts": [_ll(q) for q in model.route_points(st, {"route": l.split(">")})], "t": round(t),
-                           "link": l.replace(">", " - ")}
+                           "link": l.replace(">", " - "), "info": explain.route(st, st["player_side"], l, t)}
                           for l, t in convoys.link_flows(st, st["player_side"]).items()],   # свои пути подвоза (поток, т/сутки)
         "downed": [{"id": d["id"], "side": d["side"], "pos": _ll(d["pos"]), "freq": d["freq_khz"], "day": d["day"],
                     "title": csar.title(st, d)} for d in st.get("downed", [])
