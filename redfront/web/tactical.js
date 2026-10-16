@@ -220,11 +220,14 @@ const TAC = (() => {
     return `<svg width="28" height="28" viewBox="-14 -14 28 28" fill="none" stroke="${k}" stroke-width="1.7"><circle r="11.5"/>` +
            `<path d="M0 9 V-8"/><path d="M0 -10 L-2.8 -4 L2.8 -4 Z" fill="${k}"/>${t}</svg>`;
   }
+  // аэродром - топографический знак (силуэт самолёта носом на север): действующий - залитый, закрытый или
+  // потерянный - контурный (как "посадочная площадка") и перечёркнут; цвет - чей (авиация: наши красным)
   function airbase(b) {
-    const c = b.state === "lost" || b.state === "closed" ? GREY : sideCol(b.side);
-    const x = b.state === "closed" || b.state === "lost" ? `<path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="${GREY}" stroke-width="1.6"/>` : "";
-    return `<svg width="26" height="26" viewBox="-13 -13 26 26"><circle r="10" fill="#fffdf6" stroke="${c}" stroke-width="2"/>` +
-           `<path d="M0 -7 L1.4 -2 L7 1 L7 2.6 L1.4 1 L1 5 L3 6.6 L3 7.6 L0 6.8 L-3 7.6 L-3 6.6 L-1 5 L-1.4 1 L-7 2.6 L-7 1 L-1.4 -2 Z" fill="${c}"/>${x}</svg>`;
+    const off = b.state === "closed" || b.state === "lost";
+    const c = sideCol(b.side);
+    const plane = "M0 -10 C1 -10 1.3 -8 1.3 -6 L1.3 -2 L9.5 2.5 L9.5 4.2 L1.3 2 L1 6.5 L3.8 8.6 L3.8 9.8 L0 8.9 L-3.8 9.8 L-3.8 8.6 L-1 6.5 L-1.3 2 L-9.5 4.2 L-9.5 2.5 L-1.3 -2 L-1.3 -6 C-1.3 -8 -1 -10 0 -10 Z";
+    return `<svg width="24" height="24" viewBox="-12 -12 24 24"><path d="${plane}" fill="${off ? "#fffdf6" : c}" stroke="${c}" stroke-width="${off ? 1.2 : .6}"/>` +
+           (off ? `<path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="${c}" stroke-width="1.4"/>` : "") + `</svg>`;
   }
   function target(o) {
     const dead = o.state === "lost" || o.damage >= 1;
@@ -271,7 +274,7 @@ const TAC = (() => {
       row(only(unitSU(G("red", "halted", "tank"), 0)), "остановлена на рубеже") +
       row(line(RED, BLUE), "линия соприкосновения") +
       row(sam({side: "red", branch: "sam", tier: 2}, false) + sam({side: "red", branch: "gci"}, false), "ЗРК (черты - дальность), РЛС (КРУ)") +
-      row(airbase({side: "red", state: "open"}), "аэродром") +
+      row(airbase({side: "red", state: "open"}) + airbase({side: "red", state: "closed"}), "аэродром; закрыт или потерян") +
       row(target({role: "depot", side: "red", stock: .6, checked: true}), "склад (заливка - запас, пунктир - отрезан)") +
       row(target({role: "bridge", checked: true}) + target({role: "bridge", state: "lost", checked: true}), "мост, разрушенный мост") +
       `<div class="lg" style="color:#555">⚠ - часть без полного снабжения</div>`;
