@@ -125,7 +125,7 @@ def threat_axis_deg(state: dict, unit: dict) -> float:
     if unit.get("heading_deg") is not None:
         return float(unit["heading_deg"])
     foe = model.enemy(unit["side"])
-    bases = [b for b in state["airbases"].values() if b.get("side") == foe]
+    bases = [b for b in state["airbases"].values() if b.get("side") == foe and b.get("kind") != "farp"]   # самолёты - с аэродромов
     if not bases:
         return 0.0
     pos = model.unit_pos(state, unit)

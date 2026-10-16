@@ -370,8 +370,8 @@ def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
         dpos = state["airbases"][dest]
         best = None
         for r in performers:
-            if r["base"] == dest:
-                continue
+            if r["base"] == dest or (state["airbases"][dest].get("kind") == "farp" and model.category(r) != "heli"):
+                continue                         # на вертолётную площадку - только вертолётом
             km = model.dist_km(state["airbases"][r["base"]], dpos)
             radius = strike_radius_km(r)
             if radius is not None and km > radius:

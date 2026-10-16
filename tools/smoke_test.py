@@ -1556,7 +1556,8 @@ def air_defence_section(tmp: Path) -> None:
     check(len(ad) == len(sec["ad_sites"]) and all(tiers.values()),
           f"позиции ПВО сектора заняты шаблонами сторон: {len(ad)} частей ({tiers})")
     afs = {u["covers"] for u in ad if u.get("covers")}
-    check(afs == {f"af_{b}" for b in st["airbases"]}, f"ПВО объекта у каждого военного аэродрома ({len(afs)})")
+    check(afs == {f"af_{b}" for b, x in st["airbases"].items() if x.get("kind") != "farp"},
+          f"ПВО объекта у каждого военного аэродрома ({len(afs)}; вертолётные площадки - без неё)")
     s200 = next(u for u in ad if u["role"] == "sam_long")
     p = model.unit_pos(st, s200)
     a, b = model.offset(p, 90, 80_000, -100_000), model.offset(p, 90, 80_000, 100_000)   # маршрут в 80 км от С-200
@@ -2576,11 +2577,40 @@ def command_section(tmp: Path) -> None:
     check(locked, "план противника не правится")
 
 
+def farp_section(tmp: Path) -> None:
+    """Передовые вертолётные площадки (farp.py): площадки карты - базы модели; вертолётные части выдвигаются на свои
+    ближе к фронту, при угрозе уходят; самолёты на площадки не перебазируются; вылет игрока - с площадки."""
+    from redfront import farp, logistics
+    print("\n== передовые вертолётные площадки ==")
+    st = model.new_campaign("fp", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    fps = {k: b for k, b in st["airbases"].items() if b.get("kind") == "farp"}
+    check(len(fps) > 20 and all(farp.NAME.match(b["airport"]) for b in fps.values()) and {b["side"] for b in fps.values()} == {"red", "blue"},
+          f"площадки карты в модели: {len(fps)} (без медицинских и радарных), у обеих сторон")
+    lines = farp.daily(st)
+    moved = [u for u in st["units"].values() if farp.is_farp(st["airbases"].get(u.get("base")))]
+    ok = all(model.category(u) == "heli" and u.get("home") and farp.FARP_MIN_KM <= st["airbases"][u["base"]]["front_km"] <= farp.FARP_MAX_KM
+             for u in moved) and len({u["base"] for u in moved}) == len(moved)
+    check(moved and ok, f"выдвинулись {len(moved)} вертолётных частей, каждая на свою площадку в {farp.FARP_MIN_KM}-{farp.FARP_MAX_KM} км от "
+                        f"противника: {lines[0]}")
+    u = moved[0]
+    b = st["airbases"][u["base"]]
+    foe = next(x for x in st["units"].values() if x["side"] != u["side"] and model.category(x) == "ground" and x["state"] != "pending")
+    near = min(st["places"], key=lambda q: model.dist_km(b, st["places"][q]))
+    foe["state"], foe["route"], foe["progress_km"] = "defend", [near], 0.0   # противник прорвался к площадке
+    lines = farp.daily(st)
+    check(u["base"] == u["home"] and b["state"] in ("closed", "lost") and any("уход" in ln for ln in lines),
+          f"противник у площадки: она закрыта, часть ушла на основной аэродром ({st['airbases'][u['base']]['name']})")
+    jet = next(x for x in st["units"].values() if model.category(x) == "air")
+    st["airbases"][jet["base"]]["state"] = "closed"
+    logistics.airfields(st)
+    check(not farp.is_farp(st["airbases"][jet["base"]]), "самолёты с закрытого аэродрома на вертолётную площадку не уходят")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section]
+            command_section, farp_section]
 
 
 def main() -> int:

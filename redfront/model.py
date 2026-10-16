@@ -346,6 +346,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "log": [],
     }
     init_crews(st)
+    from . import farp as _farp                  # передовые вертолётные площадки (готовые площадки карты)
+    _farp.ensure(st)
     return st
 
 
@@ -373,6 +375,8 @@ def load(path: Path) -> dict:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
     sync_ad_sites(st)
     init_crews(st)
+    from . import farp as _farp                  # вертолётные площадки карты - и в старых кампаниях
+    _farp.ensure(st)
     if st.get("roads"):                          # старые кампании: дороги-крюки DCS - убрать, части - на прежнем месте
         from . import roads as _roads
         marching = [u for u in st["units"].values() if "route" in u]

@@ -229,6 +229,14 @@ const TAC = (() => {
     return `<svg width="24" height="24" viewBox="-12 -12 24 24"><path d="${plane}" fill="${off ? "#fffdf6" : c}" stroke="${c}" stroke-width="${off ? 1.2 : .6}"/>` +
            (off ? `<path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="${c}" stroke-width="1.4"/>` : "") + `</svg>`;
   }
+  // посадочная площадка вертолётов (передовая площадка, FARP): кружок с буквой "Т"; занятая частью - ярче
+  function farp(b) {
+    const off = b.state === "closed" || b.state === "lost";
+    const c = off ? GREY : sideCol(b.side);
+    return `<svg width="18" height="18" viewBox="-9 -9 18 18" style="opacity:${b.units && b.units.length ? 1 : .55}">` +
+           `<circle r="7" fill="#fffdf6" stroke="${c}" stroke-width="1.5"/><path d="M-3.5 -3.5 H3.5 M0 -3.5 V4" stroke="${c}" stroke-width="1.6"/>` +
+           (off ? `<path d="M-7 -7 L7 7" stroke="${c}" stroke-width="1.3"/>` : "") + `</svg>`;
+  }
   function target(o) {
     const dead = o.state === "lost" || o.damage >= 1;
     const c = o.role === "bridge" ? INK : sideCol(o.side);
@@ -275,10 +283,11 @@ const TAC = (() => {
       row(line(RED, BLUE), "линия соприкосновения") +
       row(sam({side: "red", branch: "sam", tier: 2}, false) + sam({side: "red", branch: "gci"}, false), "ЗРК (черты - дальность), РЛС (КРУ)") +
       row(airbase({side: "red", state: "open"}) + airbase({side: "red", state: "closed"}), "аэродром; закрыт или потерян") +
+      row(farp({side: "red", state: "open", units: ["x"]}), "вертолётная площадка (бледная - свободна)") +
       row(target({role: "depot", side: "red", stock: .6, checked: true}), "склад (заливка - запас, пунктир - отрезан)") +
       row(target({role: "bridge", checked: true}) + target({role: "bridge", state: "lost", checked: true}), "мост, разрушенный мост") +
       `<div class="lg" style="color:#555">⚠ - часть без полного снабжения</div>`;
   }
 
-  return {front, bearingTo, bearing, unitSU, unitNATO, sam, airbase, target, arrowHead, legend, sideCol, RED, BLUE, INK};
+  return {front, bearingTo, bearing, unitSU, unitNATO, sam, airbase, farp, target, arrowHead, legend, sideCol, RED, BLUE, INK};
 })();

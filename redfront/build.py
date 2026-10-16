@@ -817,9 +817,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                          _pt(m, g["_air_start"]), max(int(transit), AIR_START_MIN_M), speed=int(spd),
                                          maintask=mt, group_size=g["size"])
         else:
-            fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
-                                             maintask=mt, start_type=StartType.Cold if g["group"] == fly else StartType.Runway,
-                                             group_size=g["size"])
+            try:
+                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                                                 maintask=mt, start_type=StartType.Cold if g["group"] == fly else StartType.Runway,
+                                                 group_size=g["size"])
+            except NoParkingSlotError:           # вертолётная площадка: стоянок мало - с площадки (взлёт с полосы)
+                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                                                 maintask=mt, start_type=StartType.Runway, group_size=g["size"])
         st_s = times[g["group"]]["start_s"]
         if g["group"] != fly and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
             while (base["airport"], st_s) in runway_slots:
