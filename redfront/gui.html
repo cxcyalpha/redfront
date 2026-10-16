@@ -70,6 +70,7 @@ dialog input,dialog select{width:100%}
 .z-far .ulbl,.z-far .plbl{display:none}
 .z-far .tac.unit svg,.z-far .tac.unit svg.su{transform:scale(.7)}
 .z-far .tac.sam,.z-far .tac.farp-free{display:none}
+.tac.sam.stale{opacity:.5}
 .z-mid .plbl{font-size:10px}
 .legend .lg{display:flex;align-items:center;gap:6px;margin:2px 0}
 .legend .lgp{display:inline-flex;align-items:center;justify-content:center;min-width:30px}
@@ -153,7 +154,7 @@ const BUSY = {new: "Создаю кампанию (зонды карты и до
               plan: "Строю план полётов на сутки", build: "Собираю миссию", debrief: "Применяю дебриф",
               endday: "Конец дня: ход модели", mapimport: "Применяю зонд карты", mapapply: "Применяю зонд карты",
               roadsapply: "Применяю дороги", presetcopy: "Копирую пресет", atoedit: "Меняю вылет", atoremove: "Снимаю вылет",
-              atoadd: "Ставлю вылет"};
+              atoadd: "Ставлю вылет", rebase: "Отдаю приказ"};
 let busyTimer = null;
 function busy(text) {
   const b = $("#busy");
@@ -247,10 +248,11 @@ function drawMap() {
     const c = col(g.side), friend = g.side === ST.side;
     if (g.cat === "sam" || g.cat === "gci") {
       if (g.cat === "sam" && g.threat_km && g.state !== "pending")
-        L.circle(g.pos, {radius: g.threat_km * 1000, color: c, weight: 1, opacity: friend ? .15 : .55, fill: !friend, fillOpacity: .04,
+        L.circle(g.pos, {radius: g.threat_km * 1000, color: c, weight: 1, opacity: friend ? .15 : g.stale ? .3 : .55, fill: !friend, fillOpacity: g.stale ? .02 : .04,
           dashArray: "3 5", interactive: false}).addTo(layers.sam);
-      L.marker(g.pos, {icon: icon(TAC.sam(Object.assign({}, g, {branch: g.cat === "gci" ? "gci" : "sam"}), nato, friend), 26, 26, "tac sam")})
-        .bindTooltip(tip).addTo(layers.sam);
+      const itip = g.intel_day != null ? `<br><i>разведка: позиция на сутки ${g.intel_day}${g.stale ? " - устарела, ЗРК мог сменить позицию" : ""}</i>` : "";
+      L.marker(g.pos, {icon: icon(TAC.sam(Object.assign({}, g, {branch: g.cat === "gci" ? "gci" : "sam"}), nato, friend), 26, 26, g.stale ? "tac sam stale" : "tac sam")})
+        .bindTooltip(tip + itip).addTo(layers.sam);
       continue;
     }
     if (g.route) {                                     // маршрут: у наших на советской карте - коричневым, у противника - синим пунктиром
@@ -343,11 +345,26 @@ function render() {
     p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
   } else if (TAB === "air") {
     p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` +
-      ST.air.filter(a => a.side === s).map(a => `<div class="item"><b>${esc(a.name)}</b>
-       <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0}${a.crews != null ? ` · экипажей ${a.crews}/${a.crews0}` : ""} · к вылету ${a.available}</div></div>`).join("")).join("") +
+      ST.air.filter(a => a.side === s).map(a => `<div class="item" data-id="${esc(a.id)}"><b>${esc(a.name)}</b>
+       <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0}${a.crews != null ? ` · экипажей ${a.crews}/${a.crews0}` : ""} · к вылету ${a.available}</div>
+       ${a.rebase_to ? `<div class="d">→ перебазирование на ${esc(a.rebase_to)} в конце суток</div>` : ""}
+       ${s === ST.side ? `<div class="row" style="margin-top:4px"><button class="rb">Перебазировать</button></div><div class="rbForm"></div>` : ""}</div>`).join("")).join("") +
       ((ST.downed || []).length ? `<h4>Сбитые экипажи на земле</h4>` + ST.downed.map(d => `<div class="item" data-pos="${d.pos}"><b>🪂 ${esc(d.title)}</b>
        <div class="d">маяк ${d.freq} кГц · на земле с суток ${d.day}</div></div>`).join("") : "");
     p.querySelectorAll(".item[data-pos]").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
+    p.querySelectorAll(".rb").forEach(b => b.onclick = async e => {     // режим командующего: перебазирование
+      const it = e.target.closest(".item"), f = it.querySelector(".rbForm");
+      if (f.innerHTML) { f.innerHTML = ""; return; }
+      let o;
+      try { o = (await api("rebaseoptions", {file: FILE, id: it.dataset.id})).options; } catch (x) { return out(x.message, true); }
+      f.innerHTML = `<div class="row" style="margin-top:4px"><select class="rbSel" style="flex:1;min-width:0">
+        <option value="${esc(o.id)}" disabled selected>сейчас: ${esc(o.base)} (${o.front_km} км до противника)</option>` +
+        o.options.map(x => `<option value="${esc(x.id)}">${x.farp ? "площадка " : ""}${esc(x.name)} · до противника ${x.front_km} км · ${x.km} км отсюда · мест ${x.free}</option>`).join("") +
+        `</select><button class="main rbGo">Приказ</button>${o.pending ? `<button class="rbNo">Отменить</button>` : ""}</div>`;
+      f.querySelector(".rbGo").onclick = ev => { const v = f.querySelector(".rbSel").value; if (v && v !== o.id) act("rebase", {id: it.dataset.id, base: v}, ev.target); };
+      const no = f.querySelector(".rbNo");
+      if (no) no.onclick = ev => act("rebase", {id: it.dataset.id, base: "__cancel__"}, ev.target);
+    });
   } else if (TAB === "ato") {
     let cheat = false;
     try { cheat = localStorage.getItem("rf_ato_enemy") === "1"; } catch (e) {}

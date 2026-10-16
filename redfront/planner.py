@@ -9,7 +9,7 @@ from __future__ import annotations
 import copy
 import math
 
-from . import dcstypes, fitness, logistics, model, ops
+from . import dcstypes, fitness, intel, logistics, model, ops
 
 
 def strike_radius_km(unit: dict) -> float | None:
@@ -62,7 +62,8 @@ def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str, l
         r = threat_radius_km(u)
         if low_alt_m is not None:
             r = min(r, radar_horizon_km(RADAR_MAST_M, low_alt_m))
-        if any(_seg_dist_km(model.unit_pos(state, u), a, b) <= r for a, b in legs):
+        pos = intel.known_pos(state, u) if against != state.get("player_side") else model.unit_pos(state, u)   # игрок - по разведке
+        if any(_seg_dist_km(pos, a, b) <= r for a, b in legs):
             out.append(u["id"])
     return out
 
@@ -94,7 +95,7 @@ def launch_point(state: dict, sam: dict, base: dict, g: dict, at_s: float = 0) -
     """Рубеж пуска по ЗРК: на линии база-ЗРК, в launch_distance_km от того места, где ЗРК будет через at_s
     от начала миссии (приданная колонне ПВО идёт с ней; скорость - замеренная в DCS, без замера колонна считается
     стоящей). Без standoff_km в доктрине - сам ЗРК (поведение 0.2)."""
-    pos = model.unit_pos_at(state, sam, at_s, default_kmh=0)
+    pos = intel.known_pos(state, sam) if intel.tracked(state, sam) else model.unit_pos_at(state, sam, at_s, default_kmh=0)
     if not g.get("standoff_km"):
         return dict(pos)
     return _toward(pos, base, launch_distance_km(sam, g))
@@ -103,7 +104,8 @@ def launch_point(state: dict, sam: dict, base: dict, g: dict, at_s: float = 0) -
 def hold_point(state: dict, sam: dict, base: dict, g: dict, at_s: float = 0) -> dict:
     """Центр круга ожидания на рубеже: рубеж пуска, отодвинутый к базе на orbit_radius_km (ОЦЕНКА радиуса
     виража ИИ), чтобы круг не заходил ближе рубежа."""
-    pos = model.unit_pos_at(state, sam, at_s, default_kmh=0)   # без замера скорости - где стоит: перелёт к ЗРК опаснее недолёта
+    pos = (intel.known_pos(state, sam) if intel.tracked(state, sam)   # ЗРК противника - где его видели (intel.py)
+           else model.unit_pos_at(state, sam, at_s, default_kmh=0))   # без замера скорости - где стоит: перелёт к ЗРК опаснее недолёта
     if not g.get("standoff_km"):
         return dict(pos)
     return _toward(pos, base, launch_distance_km(sam, g) + g.get("orbit_radius_km", 0))

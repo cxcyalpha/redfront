@@ -10,7 +10,7 @@
 """
 from __future__ import annotations
 
-from . import farp, logistics, model, ops
+from . import farp, intel, logistics, model, ops, samroam
 
 ACTIVE = ("march", "battle", "defend", "refit")
 
@@ -278,7 +278,11 @@ def end_day(state: dict) -> list[str]:
     lines += assault.linkup(state)
     lines += logistics.repairs(state)
     lines += logistics.air_defence(state)
+    lines += samroam.daily(state)               # смена позиций ЗРК по подвижности и близости к фронту
+    intel.ensure(state)                         # новые ЗРК противника (из глубины) - в разведку
     lines += logistics.airfields(state)
+    from . import command
+    lines += command.apply_rebases(state)       # перебазирование по приказу командующего
     lines += farp.daily(state)                  # вертолётные части - на передовые площадки и с них
     lines += logistics.replacements(state)
     state["day"] += 1

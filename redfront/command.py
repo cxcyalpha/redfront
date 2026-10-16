@@ -296,3 +296,83 @@ def add(state: dict, key: str, tot: str | None = None) -> list[str]:
     a["entries"].append(e)
     a["entries"].sort(key=lambda x: x["tot_s"])
     return [f"Поставлен вылет: {ato.hhmm(e['tot_s'])} {e['title']}."]
+
+
+# ---- перебазирование авиачастей (приказ командующего; выполняется в конце суток) ----
+SLOTS_PER_UNIT = {"air": 16, "heli": 12}     # ОЦЕНКА: мест стоянки на часть (как при генерации состава сил)
+
+
+def _capacity(state: dict, bid: str, cat: str) -> int:
+    """Сколько частей класса cat (air, heli) примет аэродром: стоянки / SLOTS_PER_UNIT; площадка - одну вертолётную."""
+    from dcs.terrain.germany import Germany
+    b = state["airbases"][bid]
+    if b.get("kind") == "farp":
+        return 1 if cat == "heli" else 0
+    ap = Germany().airports.get(b.get("airport") or "")
+    if ap is None:
+        return 1
+    n = sum(1 for s in ap.parking_slots if (s.helicopter if cat == "heli" else s.airplanes))
+    return max(1, n // SLOTS_PER_UNIT[cat])
+
+
+def _at(state: dict, bid: str, cat: str, skip: str = "") -> int:
+    return sum(1 for u in state["units"].values() if u["id"] != skip and model.category(u) == cat and u.get("count", 0) > 0
+               and (u.get("rebase_to") or u.get("base")) == bid)
+
+
+def base_options(state: dict, uid: str) -> dict:
+    """Куда можно перебазировать свою авиачасть: свои открытые аэродромы (вертолётам - и площадки) с местом."""
+    from . import farp
+    u = state["units"].get(uid)
+    if not u or u["side"] != state["player_side"] or model.category(u) not in ("air", "heli"):
+        raise ValueError("перебазировать можно только свою авиачасть")
+    cat = model.category(u)
+    cur = state["airbases"][u["base"]]
+    out = []
+    for bid, b in state["airbases"].items():
+        if b.get("side") != u["side"] or b.get("state", "open") not in ("open", "active") or bid == u["base"]:
+            continue
+        if b.get("kind") == "farp" and cat != "heli":
+            continue
+        cap = _capacity(state, bid, cat)
+        here = _at(state, bid, cat, skip=uid)
+        if here >= cap:
+            continue
+        out.append({"id": bid, "name": b["name"], "farp": b.get("kind") == "farp",
+                    "front_km": round(farp.front_km(state, u["side"], b)), "km": round(model.dist_km(cur, b)),
+                    "free": cap - here})
+    out.sort(key=lambda x: x["front_km"])
+    return {"id": uid, "name": u["name"], "base": cur["name"], "pending": state["airbases"].get(u.get("rebase_to") or "", {}).get("name"),
+            "front_km": round(farp.front_km(state, u["side"], cur)), "options": out}
+
+
+def rebase(state: dict, uid: str, bid: str) -> str:
+    """Приказ: перебазировать часть на bid в конце суток (сегодняшние вылеты - с прежнего аэродрома). bid == текущий -
+    приказ отменён. Перебазированная командующим часть сама на площадки не выдвигается (farp.py), пока её аэродром цел."""
+    opts = base_options(state, uid)
+    u = state["units"][uid]
+    if bid in (u["base"], "__cancel__"):
+        u.pop("rebase_to", None)
+        return f"{u['name']}: приказ на перебазирование отменён."
+    b = next((o for o in opts["options"] if o["id"] == bid), None)
+    if b is None:
+        raise ValueError("на этот аэродром нельзя: не свой, закрыт, нет мест или он не для этого типа")
+    u["rebase_to"] = bid
+    return f"{u['name']}: перебазирование {opts['base']} -> {b['name']} в конце суток ({b['km']} км; до противника {b['front_km']} км)."
+
+
+def apply_rebases(state: dict) -> list[str]:
+    """Конец суток: приказы на перебазирование выполнены (аэродром ещё свой и открыт)."""
+    lines = []
+    for u in state["units"].values():
+        bid = u.pop("rebase_to", None)
+        if not bid:
+            continue
+        b = state["airbases"].get(bid)
+        if not b or b.get("side") != u["side"] or b.get("state", "open") not in ("open", "active"):
+            lines.append(f"{u['name']}: перебазирование отменено - аэродром недоступен.")
+            continue
+        u["base"], u["base_fixed"] = bid, True
+        u.pop("home", None)
+        lines.append(f"{u['name']}: перебазирована на {b['name']}.")
+    return lines
