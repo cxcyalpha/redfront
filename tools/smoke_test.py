@@ -2039,6 +2039,7 @@ function mkGroup(name, unit)
   function o:getController() return { setCommand = function() end, setOption = function() end,
                                         setTask = function(_, t) TASKED[name] = t end } end
   function o:destroy() g.dead = true end
+  function o:isExist() return not g.dead end
   function o:getName() return name end
   G[name] = { g = g, o = o }
   return o
@@ -2606,11 +2607,66 @@ def farp_section(tmp: Path) -> None:
     check(not farp.is_farp(st["airbases"][jet["base"]]), "самолёты с закрытого аэродрома на вертолётную площадку не уходят")
 
 
+def evac_section(tmp: Path) -> None:
+    """Эвакуация десанта (assault.evac_*, lua/evac.lua): рота в тылу противника дольше evac_days - задача плана; в
+    миссии рота у площадки группами по вместимости борта, борт ИИ забирает группу сам, игрок - меню CTLD; сбитый борт -
+    группа погибла; итог - вывезенные в резерве, остальные потеряны."""
+    from redfront import assault
+    print("\n== эвакуация десанта ==")
+    st = model.new_campaign("ev", sector="sector_germany.json", oob="oob_germany.json", seed=525990)
+    u = next(x for x in st["units"].values() if x["side"] == "red" and x.get("air_mobile"))
+    u.update(route=["Uelzen"], progress_km=0.0, state="defend", order="airhead", airhead_day=st["day"] - 3)
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "air_evac"), None)
+    check(n is not None, "рота в тылу противника 3 суток - в плане полётов эвакуация")
+    if n is None:
+        return
+    man = build.build(st, tmp / "evac.miz", task_no=n)
+    g = next(x for x in man["ground"] if x["unit"] == u["id"])
+    check(g["kind"] == "evac" and man["evac"] and man["ctld"]["extract"] and len(man["ctld"]["extract"]) * 6 >= len(g["vehicles"]),
+          f"миссия: рота ({len(g['vehicles'])} фигур) у площадки группами для CTLD ({len(man['ctld']['extract'])}), игрок - через CTLD")
+    if have_lupa():
+        acts = _miz_scripts(tmp / "evac.miz")
+        texts = [t for a, t in acts if a == "a_do_script"]
+        ev = next(t for t in texts if t.startswith("-- redfront evac"))
+        L = _ctld_lua([])
+        L.execute("REDFRONT_LZ = nil")
+        groups = man["ctld"]["extract"]
+        import re as _re
+        m_ = _re.search(r'\["x"\] = ([-\d.e]+), \["y"\] = ([-\d.e]+)', ev)
+        lx, ly = float(m_.group(1)), float(m_.group(2))
+        for k, gn in enumerate(groups):           # группы роты в миссии (заглушки)
+            L.execute(f'mkGroup("{gn}", mkUnit("{gn} u", {lx}, 0, {ly}, 1, "Paratrooper", false))')
+        L.execute(ev)
+        Gl = L.globals()
+        eid = man["evac"][0]
+        helos = _re.findall(r'\["helos"\] = \{ ([^}]*) \}', ev)[0]
+        names = _re.findall(r'"([^"]+)"', helos)
+        player, ai = names[0], names[1]
+        L.execute(f'UNITS["{ai}"] = mkUnit("{ai}", {lx + 100}, 0, {ly}, 1, "Mi-8MT", false, true)')
+        Gl.T = 10
+        L.execute("runDue()")
+        one = Gl.REDFRONT_EVAC[eid].saved
+        L.execute(f'REDFRONT_EVAC_CTLD("{player}", {{ details = {{ groupName = "{groups[1]}", units = {{ {{}}, {{}}, {{}} }} }} }})')
+        two = Gl.REDFRONT_EVAC[eid].saved
+        L.execute(f'for _, h in ipairs(world.handlers) do h:onEvent({{ id = world.event.S_EVENT_DEAD, initiator = UNITS["{ai}"] }}) end')
+        check(one == 1 and two == 4 and Gl.REDFRONT_EVAC[eid].saved == 3 and Gl.Group.getByName(groups[0]) is None,
+              "evac.lua: борт ИИ сел у площадки и забрал группу; игрок забрал группу через CTLD; борт ИИ сбит - его группа погибла")
+    # итог в модели: вывезена половина живых - рота в резерве, половина потеряна
+    a = st["ato"]
+    a.setdefault("evac", {})[man["evac"][0]] = [12, 24]
+    s0 = model.strength(u)
+    e = next(x for x in a["entries"] if x["id"] == man["evac"][0])
+    lines = assault.evac_resolve(st, e["tot_s"])
+    check(u["order"] == "reserve" and st["places"][u["route"][0]]["side"] == "red" and abs(model.strength(u) - s0 * 0.5) < 0.02,
+          f"итог: {lines[0] if lines else '-'} (боеспособность {s0:.0%} -> {model.strength(u):.0%})")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section]
+            command_section, farp_section, evac_section]
 
 
 def main() -> int:

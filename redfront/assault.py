@@ -21,10 +21,15 @@ def troops(type_name: str) -> int:
     return int(model.aircraft_info(type_name).get("troops") or 10)
 
 
-def lift_need(unit: dict, heli_type: str) -> int:
-    """Бортов, чтобы поднять подразделение (men - человек, иначе по 4 на фигуру пехоты)."""
-    men = unit.get("men") or 4 * sum(c["count"] for c in unit["composition"])
-    return max(1, math.ceil(men / troops(heli_type)))
+def men(unit: dict, alive: bool = False) -> float:
+    """Человек в подразделении (men, иначе по 4 на фигуру пехоты); alive - с учётом потерь."""
+    n = unit.get("men") or 4 * sum(c["count"] for c in unit["composition"])
+    return n * model.strength(unit) if alive else n
+
+
+def lift_need(unit: dict, heli_type: str, alive: bool = False) -> int:
+    """Бортов, чтобы поднять подразделение (alive - только живых: эвакуация)."""
+    return max(1, math.ceil(men(unit, alive) / troops(heli_type)))
 
 
 def reserve(state: dict, side: str) -> list[dict]:
@@ -119,6 +124,7 @@ def resolve(state: dict, until_s: float | None = None) -> list[str]:
         u["route"] = [place]
         u["progress_km"] = 0.0
         u["state"], u["order"], u["defending"], u["engaged"] = "defend", "airhead", True, []
+        u["airhead_day"] = state["day"]
         lines.append(f"{u['name']}: высажена у {place} ({how}: село {landed} из {size} бортов), держит пункт до подхода своих.")
     return lines
 
@@ -131,4 +137,67 @@ def linkup(state: dict) -> list[str]:
                 and state["places"][u["route"][-1]].get("side") == u["side"]):
             u["order"] = None
             lines.append(f"{u['name']}: соединилась со своими у {u['route'][-1]}.")
+    return lines
+
+
+def evac_needed(state: dict, side: str, tdef: dict) -> list[dict]:
+    """Десант стороны в тылу противника, которому пора на эвакуацию: боеспособность ниже evac_below или держится
+    evac_days суток и больше (не соединился со своими). Слабейшие первыми."""
+    out = []
+    for u in state["units"].values():
+        if u["side"] != side or u.get("order") != "airhead" or u["state"] in ("destroyed", "halted"):
+            continue
+        if state["places"][u["route"][-1]].get("side") == side and u.get("supply_frac", 0) > 0:
+            continue                             # соединился (linkup) - не десант
+        days = state["day"] - u.get("airhead_day", state["day"])
+        if model.strength(u) < tdef.get("evac_below", 0.5) or days >= tdef.get("evac_days", 3):
+            out.append(u)
+    return sorted(out, key=model.strength)
+
+
+def evac_resolve(state: dict, until_s: float | None = None) -> list[str]:
+    """Итог эвакуаций плана полётов суток со временем на цели не позже until_s. Вылет игрока - по дебрифу (сколько
+    фигур роты вывезено из живых к моменту погрузки, lua/evac.lua), ИИ - по сбитым в миссиях и угрозам ЗРК в коридоре.
+    Вывезенные - в резерв (order reserve) в своём пункте у аэродрома группы; кого не вывезли - потеряны (плен)."""
+    a = state.get("ato") or {}
+    results = a.get("evac") or {}
+    lost_by = a.get("lost") or {}
+    lines = []
+    for e in a.get("entries", []):
+        if e["kind"] != "air_evac" or e.get("resolved") or (until_s is not None and e["tot_s"] > until_s):
+            continue
+        g = e["task"]["package"][0]
+        u = state["units"].get(g["objective"].get("unit"))
+        if not u or u.get("order") != "airhead" or u["state"] == "destroyed":
+            continue
+        e["resolved"] = True
+        tdef = model.doctrine(state, e["side"])["tasks"][e["kind"]]
+        perf = state["units"].get(g["performer"])
+        if e["id"] in results:                   # вылет игрока
+            saved, total = results[e["id"]]
+            frac = saved / total if total else 0.0
+            how = "по итогам вылета"
+        elif e["id"] in a.get("done", []):
+            frac, how = 0.0, "по итогам вылета"
+        else:                                    # ИИ: сбитые в миссиях, остальное - по угрозам ЗРК в коридоре
+            size = sum(x["size"] for x in e["task"]["package"] if x["objective"]["kind"] == "air_evac")
+            left = max(0, size - lost_by.get(e["id"], 0))
+            p = min(0.8, tdef.get("ai_loss_per_threat", 0.15) * len(e["task"].get("threats", [])))
+            r = model.rng(state, f"evac-{e['id']}")
+            landed = left - (sum(1 for _ in range(left) if r.random() < p) if r else round(left * p))
+            frac = min(1.0, landed * troops(perf["type"] if perf else "") / max(1.0, men(u, alive=True)))
+            how = "ИИ"
+        if frac <= 0:
+            lines.append(f"{u['name']}: эвакуация сорвана ({how}), рота держится у {u['route'][-1]}.")
+            continue
+        for c in u["composition"]:               # не вывезенные - потеряны
+            alive = max(0.0, c["count"] - u["lost"].get(c["type"], 0.0))
+            u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) + alive * (1.0 - frac)
+        base = state["airbases"].get((perf or {}).get("home") or g["base"]) or state["airbases"][g["base"]]
+        own = [n for n, p in state["places"].items() if p.get("side") == e["side"]]
+        home = min(own, key=lambda n: model.dist_km(base, state["places"][n])) if own else u["route"][-1]
+        u["route"], u["progress_km"] = [home], 0.0
+        u["state"], u["order"], u["defending"], u["engaged"] = "defend", "reserve", True, []
+        u.pop("airhead_day", None)
+        lines.append(f"{u['name']}: эвакуирована ({how}): вывезено {frac:.0%} живых, в резерве у {home}.")
     return lines

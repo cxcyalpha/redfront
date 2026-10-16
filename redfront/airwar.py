@@ -94,13 +94,14 @@ def resolve(state: dict, t0: float, t1: float) -> list[str]:
         return []
     lines = []
     lines += assault.resolve(state, t1)
+    lines += assault.evac_resolve(state, t1)
     lines += csar.resolve(state, t1)
     lines += convoys.daily(state, t1)
     skip = set(a.get("done", [])) | set(a.get("played", []))
     for e in a["entries"]:
         if e.get("ai_only") or e.get("resolved") or not (t0 < _tot(e) <= t1):
             continue
-        if e["kind"] in ("air_assault", "csar", "strike_supply_route", "airlift"):
+        if e["kind"] in ("air_assault", "air_evac", "csar", "strike_supply_route", "airlift"):
             continue
         e["resolved"] = True
         if e["id"] in skip:

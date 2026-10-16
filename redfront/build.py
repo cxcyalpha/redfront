@@ -30,6 +30,7 @@ COLUMN_LUA = Path(__file__).parent / "lua" / "column_road.lua"
 FRONT_LUA = Path(__file__).parent / "lua" / "front.lua"
 SITE_LUA = Path(__file__).parent / "lua" / "battle_site.lua"
 ASSAULT_LUA = Path(__file__).parent / "lua" / "assault.lua"
+EVAC_LUA = Path(__file__).parent / "lua" / "evac.lua"
 CSAR_LUA = Path(__file__).parent / "lua" / "csar.lua"
 LZ_LUA = Path(__file__).parent / "lua" / "lz.lua"
 QRA_LUA = Path(__file__).parent / "lua" / "qra.lua"
@@ -322,6 +323,13 @@ def assault_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
             .replace("@SPECS@", ", ".join(items)))
 
 
+def evac_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
+    """lua/evac.lua: эвакуация - борта и группы ИИ, площадка (x, y DCS), радиус, посадка (с), аэродром возврата, рота
+    группами DCS (имена и типы фигур - пересоздаются у перенесённой площадки)."""
+    return (EVAC_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
+            .replace("@SPECS@", ", ".join(_lua(a) for a in specs)))
+
+
 def csar_script(m: Mission, state: dict, downed: list[dict], rescuers: list[dict] | None = None) -> str:
     """lua/csar.lua: экипажи на земле из модели (группы в .miz), страны сторон для новых катапультировавшихся,
     аэродромы сторон (посадка с экипажем - спасён), звук маяка (ресурс миссии)."""
@@ -440,7 +448,7 @@ def troop_mix(type_ids: list[str]) -> dict:
 def ctld_script(state: dict, cfg: dict) -> str:
     """lua/ctld_cfg.lua: настройка CTLD под вылет (борта игрока, зоны, группы десанта, ящики, авианаводчики)."""
     body = ", ".join(f"{k} = {_lua(cfg[k])}" for k in ("pilots", "actions", "limits", "cargo", "logistic", "pickup",
-                                                       "groups", "crates", "lifts", "jtacs"))
+                                                       "groups", "crates", "lifts", "jtacs", "extract"))
     return (CTLD_CFG_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
             .replace("@SORTIE@", str(int(state["sortie"]))).replace("@CFG@", body))
 
@@ -718,6 +726,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     tgt_group = next((g for g in groups if g["unit"] == tk["target"]), None)
     bkey = (tgt_group or {}).get("cluster")                                 # бой цели игрока
     airheads: dict[str, dict] = {}
+    evac_groups: dict[str, list] = {}            # рота на эвакуацию: группы DCS по вместимости борта
     for g in groups:
         if g["kind"] == "battle":
             platoons[g["unit"]] = _battle_platoons(m, state, g, shift_of(g))
@@ -725,6 +734,15 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         else:
             if g["kind"] == "airhead":           # рота десанта - в .miz её нет: появляется из севших бортов (assault.lua)
                 airheads[g["unit"]] = g
+                continue
+            if g["kind"] == "evac":              # рота у площадки эвакуации - группами по вместимости борта (CTLD забирает
+                from . import assault           # группу целиком; борт ИИ - свою долю, evac.lua)
+                cap = assault.troops(state["units"][tk["package"][0]["performer"]]["type"]) // 4 or 1   # фигура - 4 человека
+                evac_groups[g["unit"]] = []
+                for k in range(0, len(g["vehicles"]), cap):
+                    sub = dict(g, name=f"{g['name']} evac {k // cap + 1}", vehicles=g["vehicles"][k:k + cap])
+                    evac_groups[g["unit"]].append(_ground_group(m, state, sub))
+                vg_by_unit[g["unit"]] = evac_groups[g["unit"]][0]
                 continue
             vg_by_unit[g["unit"]] = _ground_group(m, state, g, shift_of(g))
             if g["kind"] == "gci_site":          # КРУ: наведение включено с начала миссии
@@ -756,10 +774,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     spd = tdef["speed_kmh"]
     flights, lines, enemy_lines, ai_lines = [], [], [], []
     assault_specs = []
+    evac_specs: list[dict] = []                  # эвакуация десанта (evac.lua)
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
     ctld = {"pilots": [], "actions": {}, "limits": {}, "cargo": {}, "logistic": [], "pickup": [], "groups": [],
-            "crates": [], "lifts": [], "jtacs": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
+            "crates": [], "lifts": [], "jtacs": [], "extract": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
     ctld_assault: list[tuple[dict, str]] = []     # (высадка, борт игрока) - группа десанта CTLD по его доле роты
     ctld_lines: list[str] = []
     enemy = air_activity(state, tk, times, sortie, m0)
@@ -899,6 +918,43 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             if not is_player:                    # ИИ: посадку у пилота пересчитает csar.lua (пилот - на открытом месте)
                 rescuers.append({"group": fg.name, "downed": obj["downed"], "home": airport.id,
                                  "land": tdg.get("land_s", 90)})
+        elif obj["kind"] == "air_evac":          # эвакуация: на малой высоте к площадке у роты, посадка на land_s, домой
+            lz = obj["pos"]
+            low = int(tdg.get("low_alt_m_agl", 50))
+            start_p = g.get("_air_start") or base
+            d = model.dist_km(start_p, lz)
+            if d > 8:
+                wp(model.lerp(lz, start_p, 5 / d), low, "Подход")
+            w = wp(lz, low, "Площадка")
+            c = _pt(m, lz)
+            w.tasks.append(task.Land(Vector2(c.x, c.y), duration=int(tdg.get("land_s", 300))))
+            if d > 8:
+                wp(model.lerp(lz, base, 5 / model.dist_km(base, lz)), low, "Отход")
+            eg = evac_groups.get(obj["unit"])
+            if eg:                               # рота в миссии - только у своей задачи
+                sid = tk.get("ato_id") or f"task-{sortie}"
+                spec = next((a for a in evac_specs if a["id"] == sid), None)
+                if spec is None:
+                    spec = {"id": sid, "title": state["units"][obj["unit"]]["name"], "x": c.x, "y": c.y,
+                            "r": tdg.get("lz_radius_m", 800), "land": tdg.get("land_s", 300), "home": airport.id,
+                            "side": 1 if side_g == "red" else 2, "country": _country(m, state, side_g).id,
+                            "helos": [], "groups": [],
+                            "troops": [{"group": vg.name, "units": [(u.name, u.type) for u in vg.units]} for vg in eg]}
+                    evac_specs.append(spec)
+                spec["helos"] += [u.name for u in fg.units]
+                if not is_player:
+                    spec["groups"].append(fg.name)
+                else:                            # игрок: забрать группу - меню CTLD (Unload / Extract Troops)
+                    from . import assault
+                    u0 = fg.units[0]
+                    ctld["pilots"].append(u0.name)
+                    ctld["actions"][u0.unit_type.id] = {"crates": False, "troops": True}
+                    ctld["limits"][u0.unit_type.id] = max(1, assault.troops(perf["type"]) // 4)   # фигур (по 4 человека)
+                    ctld["extract"] += [vg.name for vg in eg]
+                    ctld_lines.append(f"Эвакуация: сядьте у роты (площадка, {spec['r']} м) - F10 -> CTLD -> Troop Transport -> "
+                                      f"Unload / Extract Troops забирает ближнюю группу (до 125 м от вертолёта, по вместимости). "
+                                      f"Вывезено - кто на борту, когда вертолёт цел; сбит - группа на борту погибла.")
+            g["_lz"] = obj["place"]
         elif obj["kind"] == "air_assault":       # десант: на малой высоте к площадке, посадка на land_s, домой
             lz = obj["pos"]
             low = int(tdg.get("low_alt_m_agl", 50))
@@ -1125,6 +1181,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     trig.add_action(DoScript(String(csar_script(m, state, downed, rescuers))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
         trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
+    if evac_specs:                               # эвакуация: рота садится в борта на площадке (evac.lua; игрок - CTLD)
+        trig.add_action(DoScript(String(evac_script(state["campaign_id"], state["sortie"], evac_specs))))
     if assault_specs:                            # десант: рота выходит при посадке бортов на площадку (assault.lua)
         trig.add_action(DoScript(String(assault_script(state["campaign_id"], state["sortie"], assault_specs))))
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода
@@ -1170,7 +1228,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                     for g in groups if g["kind"] == "convoy"],
         "downed": [d["id"] for d in downed],             # экипажи на земле в миссии (их может спасти вертолёт)
         "ctld": {"pilots": ctld["pilots"], "lifts": [x["id"] for x in ctld["lifts"]],   # CTLD в миссии (ctld_cfg.lua)
-                 "jtacs": [x["id"] for x in ctld["jtacs"]]},
+                 "jtacs": [x["id"] for x in ctld["jtacs"]], "extract": ctld["extract"]},
+        "evac": [x["id"] for x in evac_specs],            # эвакуация десанта в миссии (evac.lua)
         "ctld_lines": ctld_lines,
     }
     state["manifest"] = manifest

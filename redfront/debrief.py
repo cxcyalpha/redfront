@@ -138,6 +138,11 @@ def apply(state: dict, data: dict) -> list[str]:
         if state.get("ato"):
             state["ato"].setdefault("assault", {})[aid] = [int(landed_n), int(total)]
         lines.append(f"Десант: на площадку село {landed_n} из {total} бортов" + (" - рота высажена." if landed_n else "."))
+    for eid, (saved, total, dead) in (data.get("evac") or {}).items():   # эвакуация десанта (evac.lua)
+        alive = max(0, int(total) - int(dead))
+        if state.get("ato"):
+            state["ato"].setdefault("evac", {})[eid] = [int(saved), alive]
+        lines.append(f"Эвакуация: вывезено {saved} из {alive} фигур роты на площадке" + (f" (убито на площадке {dead})" if dead else "") + ".")
     for lid, kg in (data.get("lift") or {}).items():   # перевозка снабжения игроком: ящики CTLD в зоне выгрузки (ctld_cfg.lua)
         if state.get("ato"):
             state["ato"].setdefault("lift", {})[lid] = round(int(kg) / 1000, 2)

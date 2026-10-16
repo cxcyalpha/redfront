@@ -28,7 +28,7 @@ MISSION_LEN_S = 75 * 60     # ОЦЕНКА: окно миссии игрока; 
 
 ATO_NIGHT_TASKS = 3         # ОЦЕНКА: задач (кроме дежурств) стороны ночью - из тех, где все исполнители летают ночью
 NIGHT_KINDS = {"strike_bridge", "strike_depot", "strike_factory", "strike_airfield", "strike_supply_route",
-               "strike_sam_site", "air_assault"}   # ночью - глубокие удары и десант; поддержка войск, спасение - днём
+               "strike_sam_site", "air_assault", "air_evac"}   # ночью - глубокие удары и десант; поддержка войск, спасение - днём
 DAY_S = 86400
 
 

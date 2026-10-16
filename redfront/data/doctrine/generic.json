@@ -50,6 +50,48 @@
         "estimate": true
       }
     },
+    "air_evac": {
+      "title": "Эвакуация десанта",
+      "performers": [
+        "transport_helo"
+      ],
+      "target": {
+        "category": "airhead"
+      },
+      "method": "air_evac",
+      "method_source": "толкование, не цитата: десант, не соединившийся со своими, вывозится вертолётами, если он обескровлен или держится дольше evac_days суток - ОЦЕНКА",
+      "speed_kmh": 220,
+      "transit_alt_m_agl": 50,
+      "attack_alt_m_agl": 30,
+      "ip_offset_km": 0,
+      "low_alt_m_agl": 50,
+      "lz_offset_km": 1,
+      "lz_radius_m": 800,
+      "land_s": 300,
+      "max_helos": 8,
+      "per_day": 1,
+      "max_threats": 1,
+      "ai_loss_per_threat": 0.15,
+      "evac_below": 0.5,
+      "evac_days": 3,
+      "estimate_fields": ["speed_kmh", "lz_offset_km", "lz_radius_m", "land_s", "max_helos", "per_day", "max_threats", "ai_loss_per_threat", "evac_below", "evac_days"],
+      "evac_note": "Десант в тылу противника (order airhead), не соединившийся со своими, вывозится, если боеспособность ниже evac_below или он держится evac_days суток и больше. Площадка - в lz_offset_km от пункта в сторону своих, рота выходит к ней. Бортов - сколько нужно поднять живых (troops в aircraft.json), не больше max_helos; посадка на land_s. В миссии борт ИИ забирает свою долю сам (lua/evac.lua), игрок - через меню CTLD (Unload / Extract Troops). Вывезенные - в резерв у своего аэродрома, оставшиеся - потеряны (плен). Вылет ИИ вне миссии: потери - ai_loss_per_threat на ЗРК в коридоре. ОЦЕНКИ.",
+      "strike": {
+        "title": "эвакуационная группа",
+        "group_name": "борт",
+        "size": 4,
+        "maintask": [
+          "Transport"
+        ],
+        "loadout": []
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "игрок может вести эвакуационную группу (Ми-8, UH-1H): сесть у роты и забрать её через меню CTLD",
+        "estimate": true
+      }
+    },
     "cap_own_troops": {
       "title": "Прикрытие войск",
       "performers": [
