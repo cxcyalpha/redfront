@@ -2902,6 +2902,9 @@ def crew_section(tmp: Path) -> None:
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "crew.miz"))
     us = [x for c in m.coalition[t["side"]].countries.values() for g in c.plane_group for x in g.units if x.name in hum]
+    import zipfile
+    ms = zipfile.ZipFile(tmp / "crew.miz").read("mission").decode("utf-8", "replace")
+    check("setCoalition" in ms and "autoCapture(false)" in ms, "стороны аэродромов - и скриптом в начале миссии (без автозахвата)")
     check(len(us) == 3 and all(x.skill.value == "Client" and x.livery_id == "test livery" for x in us[:2]),
           "в .miz: места людей - Client (мультиплеер), ливрея полка на самолётах")
     lead = fl[0]["units"][0]
