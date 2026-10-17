@@ -88,7 +88,7 @@ def view(st: dict) -> dict:
                         "available": logistics.available(st, u), "base": b.get("name", u["base"]),
                         "crews": u.get("crews"), "crews0": u.get("crews0"),
                         "rebase_to": st["airbases"].get(u.get("rebase_to") or "", {}).get("name"),
-                        "livery": u.get("livery") or "", "detached": bool(u.get("parent"))})
+                        "livery": u.get("livery") or "", "detached": bool(u.get("parent")), "added": u.get("added")})
         elif cat in ("ground", "sam", "gci"):
             fog = intel.tracked_ground(st, u)     # наземная часть противника - только по данным разведки
             lv = intel.level(st, u["id"]) if fog else None
@@ -329,6 +329,18 @@ class App:
             return {"state": view(st)}
         if action == "atooptions":                   # режим командующего: что можно выбрать для вылета (без сохранения)
             return {"options": command.options(st, req["id"])}
+        if action == "addoptions":                   # добавить полк: исторические допущения, типы, роли, аэродромы
+            from . import reinforce
+            return {"options": reinforce.options(st)}
+        if action == "addunit":
+            from . import reinforce
+            if req.get("catalog"):
+                lines.append(reinforce.add_historical(st, req["catalog"], req.get("base") or None))
+            else:
+                lines.append(reinforce.add_custom(st, req))
+            model.note(st, lines[-1])
+            model.save(st, p)
+            return {"lines": lines, "state": view(st)}
         if action == "unitinfo":                     # авиачасть: лётчики, ливрея (pilots.py, ливреи DCS через pydcs)
             return {"info": unit_info(st, req["id"])}
         if action == "setlivery":                    # ливрея полка - во все его группы в миссиях, до смены
