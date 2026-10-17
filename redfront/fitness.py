@@ -21,6 +21,7 @@ FIT_LOAD_PENALTY = 0.15     # ОЦЕНКА: минус к оценке за ка
 KIND_CLASS = {               # вид задачи доктрины -> вид оценки (задача может задать свой: tdef["fit"])
     "cas_contact": "cas", "cas_helo": "cas",
     "strike_column_march": "interdiction", "strike_supply_route": "interdiction",
+    "strike_bai": "interdiction", "strike_fofa": "interdiction",     # НАТО: изоляция поля боя, вторые эшелоны
     "strike_bridge": "strike", "strike_depot": "strike", "strike_factory": "strike", "strike_airfield": "strike",
     "strike_sam_site": "strike",          # удар по позиции ЗРК - бомбами; подавление ПВО - группа обеспечения (sead)
     "cap_own_troops": "air", "qra": "air",

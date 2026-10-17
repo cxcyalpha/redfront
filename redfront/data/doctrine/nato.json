@@ -1,0 +1,1916 @@
+{
+  "_about": "Пакет доктрины 'НАТО (Центральный фронт, 1970-1990)'. Работает с ролями (roles.json). Источники - поле source/method_source: RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987); ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999); AJP-3.3(B) Allied Joint Doctrine for Air and Space Operations (2016). Числа высот, скоростей, размеров групп - ОЦЕНКИ общего профиля (estimate_fields), как у пакета generic. Сгенерирован tools/gen_nato.py.",
+  "package": "nato",
+  "title": "НАТО (Центральный фронт)",
+  "tasks": {
+    "csar": {
+      "title": "Поиск и спасение",
+      "performers": [
+        "transport_helo",
+        "attack_helo"
+      ],
+      "target": {
+        "category": "downed"
+      },
+      "method": "csar",
+      "method_source": "толкование, не цитата: поисково-спасательное обеспечение - вертолёт подбирает сбитый экипаж на земле и доставляет на свой аэродром. Механика в миссии (маяк, дым, ракета, подбор посадкой или лебёдкой) - по мотивам DCS-CSAR (ciribob), код свой. ОЦЕНКА",
+      "speed_kmh": 220,
+      "transit_alt_m_agl": 50,
+      "attack_alt_m_agl": 30,
+      "ip_offset_km": 0,
+      "low_alt_m_agl": 50,
+      "land_s": 90,
+      "per_day": 2,
+      "ai_success": 0.7,
+      "ai_loss_per_threat": 0.15,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "land_s",
+        "per_day",
+        "ai_success",
+        "ai_loss_per_threat"
+      ],
+      "csar_note": "Цель - свой сбитый экипаж не на своей территории (со своей выйдет сам), в радиусе вертолётной части; ближние первыми. Вылет ИИ вне миссии: спасён с вероятностью ai_success - ai_loss_per_threat на ЗРК в коридоре. ОЦЕНКИ.",
+      "strike": {
+        "title": "поисково-спасательная группа",
+        "group_name": "борт",
+        "size": 2,
+        "maintask": [
+          "Transport"
+        ],
+        "loadout": [],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "игрок может лететь сам (Ми-8, UH-1H): найти по маяку, сесть рядом или зависнуть, доставить на свой аэродром",
+        "estimate": true
+      }
+    },
+    "air_evac": {
+      "title": "Эвакуация десанта",
+      "performers": [
+        "transport_helo",
+        "attack_helo"
+      ],
+      "target": {
+        "category": "airhead"
+      },
+      "method": "air_evac",
+      "method_source": "толкование, не цитата: десант, не соединившийся со своими, вывозится вертолётами, если он обескровлен или держится дольше evac_days суток - ОЦЕНКА",
+      "speed_kmh": 220,
+      "transit_alt_m_agl": 50,
+      "attack_alt_m_agl": 30,
+      "ip_offset_km": 0,
+      "low_alt_m_agl": 50,
+      "lz_offset_km": 1,
+      "lz_radius_m": 800,
+      "land_s": 300,
+      "max_helos": 8,
+      "per_day": 1,
+      "max_threats": 1,
+      "ai_loss_per_threat": 0.15,
+      "evac_below": 0.5,
+      "evac_days": 3,
+      "estimate_fields": [
+        "speed_kmh",
+        "lz_offset_km",
+        "lz_radius_m",
+        "land_s",
+        "max_helos",
+        "per_day",
+        "max_threats",
+        "ai_loss_per_threat",
+        "evac_below",
+        "evac_days"
+      ],
+      "evac_note": "Десант в тылу противника (order airhead), не соединившийся со своими, вывозится, если боеспособность ниже evac_below или он держится evac_days суток и больше. Площадка - в lz_offset_km от пункта в сторону своих, рота выходит к ней. Бортов - сколько нужно поднять живых (troops в aircraft.json), не больше max_helos; посадка на land_s. В миссии борт ИИ забирает свою долю сам (lua/evac.lua), игрок - через меню CTLD (Unload / Extract Troops). Вывезенные - в резерв у своего аэродрома, оставшиеся - потеряны (плен). Вылет ИИ вне миссии: потери - ai_loss_per_threat на ЗРК в коридоре. ОЦЕНКИ.",
+      "strike": {
+        "title": "эвакуационная группа",
+        "group_name": "борт",
+        "size": 4,
+        "maintask": [
+          "Transport"
+        ],
+        "loadout": []
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "игрок может вести эвакуационную группу (Ми-8, UH-1H): сесть у роты и забрать её через меню CTLD",
+        "estimate": true
+      }
+    },
+    "cas_contact": {
+      "jtac": {
+        "code": 1688,
+        "note": "авианаводчик у своего взвода в бою цели (CTLD, build.py): подсветка лазером, дым, F10 - ОЦЕНКА, не цитата"
+      },
+      "title": "Удар по войскам в соприкосновении",
+      "performers": [
+        "fighter_bomber",
+        "attack"
+      ],
+      "target": {
+        "category": "ground",
+        "state": "battle"
+      },
+      "method": "on_call",
+      "method_source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 401: непосредственная авиационная поддержка (CAS) - по целям в непосредственной близости от своих войск, с детальной увязкой; RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 43: от своих войск до FSCL ~20-30 км",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "CAS",
+          "GroundAttack",
+          "PinpointStrike"
+        ],
+        "loadout": [
+          "anti_armor"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+        }
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "cas_helo": {
+      "jtac": {
+        "code": 1688,
+        "note": "авианаводчик у своего взвода в бою цели (CTLD, build.py): подсветка лазером, дым, F10 - ОЦЕНКА, не цитата"
+      },
+      "title": "Удар вертолётов по войскам в соприкосновении",
+      "performers": [
+        "attack_helo"
+      ],
+      "target": {
+        "category": "ground",
+        "state": "battle"
+      },
+      "method": "on_call",
+      "method_source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 401.4: совместные действия вертолётов и самолётов (JAAT)",
+      "speed_kmh": 220,
+      "transit_alt_m_agl": 60,
+      "attack_alt_m_agl": 30,
+      "ip_offset_km": 8,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа вертолётов",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "CAS",
+          "GroundAttack"
+        ],
+        "loadout": [
+          "anti_armor"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+        }
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 30,
+      "low_alt_source": "ОЦЕНКА: вертолёты над полем боя - на предельно малой высоте, с использованием рельефа",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
+    },
+    "strike_bai": {
+      "title": "Изоляция поля боя (BAI): колонна у переднего края",
+      "performers": [
+        "attack",
+        "fighter_bomber",
+        "bomber"
+      ],
+      "target": {
+        "category": "ground",
+        "state": "march",
+        "depth_km": [
+          15,
+          50
+        ]
+      },
+      "method": "sequential_on_call",
+      "method_source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 28-33: BAI введена в ATP-27(B) (1980) по предложению Великобритании - удары по бронетанковым частям ОВД, ещё не вступившим в бой, в 15-50 км за передним краем (приоритет NORTHAG; своё оружие корпусов - 20-25 км); планирование совместно с сухопутными войсками, исполнение - под руководством ВВС",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "CAS",
+          "GroundAttack"
+        ],
+        "loadout": [
+          "anti_armor"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "from_year": 1980,
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "cap_own_troops": {
+      "title": "Прикрытие войск",
+      "performers": [
+        "fighter",
+        "interceptor"
+      ],
+      "target": {
+        "category": "ground",
+        "state": [
+          "battle",
+          "march"
+        ],
+        "side": "own"
+      },
+      "method": "zone_patrol",
+      "method_source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii, 41: прикрытие войск - оборонительная борьба за господство в воздухе (DCA); у ФРГ - второй приоритет после боя с первым эшелоном",
+      "speed_kmh": 800,
+      "transit_alt_m_agl": 3000,
+      "attack_alt_m_agl": 3000,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "attack_alt_m_agl",
+        "ip_offset_km"
+      ],
+      "strike": {
+        "title": "пара CAP",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "CAP",
+          "Fighter Sweep",
+          "Intercept"
+        ],
+        "loadout": [
+          "cap"
+        ],
+        "mode": "cap_zone",
+        "alt_m": 4000,
+        "zone_km": 40,
+        "cap_min": 25,
+        "estimate_fields": [
+          "size",
+          "alt_m",
+          "zone_km",
+          "cap_min"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      }
+    },
+    "strike_airfield": {
+      "title": "Удар по аэродрому",
+      "performers": [
+        "bomber",
+        "fighter_bomber"
+      ],
+      "target": {
+        "category": "airfield",
+        "state": "active"
+      },
+      "method": "on_call",
+      "method_source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 301-302: воздушная изоляция (AI) - удары за FSCL по военному потенциалу и по тому, что его ограничивает (управление, пути, тыл)",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "PinpointStrike",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "attack": {
+            "weapon": "Bombs",
+            "expend": "All",
+            "group_attack": true
+          }
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "strike_sam_site": {
+      "title": "Удар по позиции ЗРК",
+      "performers": [
+        "bomber",
+        "fighter_bomber"
+      ],
+      "target": {
+        "category": "sam",
+        "state": "deployed",
+        "fixed": true,
+        "min_strength": 0.5
+      },
+      "method": "on_call",
+      "method_source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 301-302: воздушная изоляция (AI) - удары за FSCL по военному потенциалу и по тому, что его ограничивает (управление, пути, тыл)",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "SEAD",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "sead",
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "strike_fofa": {
+      "title": "Удар по вторым эшелонам (FOFA)",
+      "performers": [
+        "attack",
+        "fighter_bomber",
+        "bomber"
+      ],
+      "target": {
+        "category": "ground",
+        "state": "march",
+        "depth_km": [
+          50,
+          150
+        ]
+      },
+      "method": "sequential_on_call",
+      "method_source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 36-44: концепция FOFA (директива SACEUR 80-31 для ACE, 1983) - задержать, разрушить, расстроить вторые эшелоны ОВД до вступления в бой; по ATP-33 это воздушная изоляция; полосы: от FSCL - решение корпуса и группы армий, до ~400 км - крупного командования. Глубина 50-150 км - ОЦЕНКА по радиусу тактической авиации сектора",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "CAS",
+          "GroundAttack"
+        ],
+        "loadout": [
+          "anti_armor"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "from_year": 1983,
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "strike_supply_route": {
+      "title": "Удар по путям подвоза",
+      "performers": [
+        "attack",
+        "fighter_bomber",
+        "bomber"
+      ],
+      "target": {
+        "category": "convoy"
+      },
+      "method": "interdiction",
+      "method_source": "толкование, не цитата: изоляция района боевых действий - удары по колоннам снабжения на путях подвоза противника (участок с наибольшим потоком в радиусе) - ОЦЕНКА",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "PinpointStrike",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "attack": {
+            "weapon": "Bombs",
+            "expend": "All",
+            "group_attack": true
+          }
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "per_day": 2,
+      "interdiction_note": "Цель - участок пути подвоза противника (convoys.py) с наибольшим потоком в радиусе исполнителя; в миссии - колонна грузовиков на участке (по дороге, если известна). Сожжённые машины - недовезённые тонны. ОЦЕНКИ.",
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "strike_bridge": {
+      "title": "Удар по мосту",
+      "performers": [
+        "bomber",
+        "fighter_bomber",
+        "attack"
+      ],
+      "target": {
+        "category": "bridge",
+        "state": "active"
+      },
+      "method": "on_call",
+      "method_source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 301-302: воздушная изоляция (AI) - удары за FSCL по военному потенциалу и по тому, что его ограничивает (управление, пути, тыл)",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "PinpointStrike",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "attack": {
+            "weapon": "Auto",
+            "expend": "All",
+            "group_attack": true
+          }
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "strike_depot": {
+      "title": "Удар по складу",
+      "performers": [
+        "bomber",
+        "fighter_bomber",
+        "attack"
+      ],
+      "target": {
+        "category": "depot",
+        "state": "active"
+      },
+      "method": "on_call",
+      "method_source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 301-302: воздушная изоляция (AI) - удары за FSCL по военному потенциалу и по тому, что его ограничивает (управление, пути, тыл)",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "PinpointStrike",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "attack": {
+            "weapon": "Bombs",
+            "expend": "All",
+            "group_attack": true
+          }
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "strike_factory": {
+      "title": "Удар по заводу",
+      "performers": [
+        "bomber",
+        "fighter_bomber",
+        "attack"
+      ],
+      "target": {
+        "category": "factory",
+        "state": "active"
+      },
+      "method": "on_call",
+      "method_source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 301-302: воздушная изоляция (AI) - удары за FSCL по военному потенциалу и по тому, что его ограничивает (управление, пути, тыл)",
+      "speed_kmh": 650,
+      "transit_alt_m_agl": 30,
+      "attack_alt_m_agl": 150,
+      "ip_offset_km": 20,
+      "estimate_fields": [
+        "attack_alt_m_agl",
+        "bomb_alt_m",
+        "ip_offset_km",
+        "low_alt_m_agl",
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "medium_alt_m_agl"
+      ],
+      "strike": {
+        "title": "ударная группа",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "PinpointStrike",
+          "GroundAttack",
+          "CAS"
+        ],
+        "loadout": [
+          "bombs"
+        ],
+        "estimate_fields": [
+          "size"
+        ],
+        "ai": {
+          "restrict_jettison": true,
+          "attack": {
+            "weapon": "Bombs",
+            "expend": "All",
+            "group_attack": true
+          }
+        }
+      },
+      "support": [
+        {
+          "id": "sead",
+          "title": "группа подавления ПВО",
+          "when": "threats",
+          "required": false,
+          "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "SEAD",
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "sead",
+            "anti_armor"
+          ],
+          "lead_min": 4,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "PassiveDefense",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "ARM",
+              "expend": "All",
+              "group_attack": true
+            },
+            "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
+          },
+          "flights": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "orbit_radius_km": 3,
+          "hold_after_min": 5,
+          "launch_alt_m": 1000,
+          "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": [
+            "us"
+          ],
+          "min_fit": 0.5
+        },
+        {
+          "id": "cover",
+          "title": "группа прикрытия",
+          "when": "enemy_fighters",
+          "required": false,
+          "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 3,
+          "mode": "cover_zone",
+          "alt_m": 3000,
+          "zone_km": 40,
+          "hold_after_min": 5,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km",
+            "hold_after_min"
+          ]
+        }
+      ],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+        "estimate": true
+      },
+      "low_alt_m_agl": 50,
+      "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+      "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+      "bomb_alt_m": 1000,
+      "medium_alt_m_agl": 4000,
+      "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+      "egress_alt_m_agl": 150,
+      "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+    },
+    "air_assault": {
+      "title": "Вертолётный десант",
+      "performers": [
+        "transport_helo",
+        "attack_helo"
+      ],
+      "target": {
+        "category": "place"
+      },
+      "method": "air_assault",
+      "method_source": "толкование, не цитата: тактический воздушный десант (рота) на вертолётах захватывает пункт в тылу противника - узел дорог, через который идёт его подвоз; удерживает до подхода своих - ОЦЕНКА",
+      "speed_kmh": 220,
+      "transit_alt_m_agl": 50,
+      "attack_alt_m_agl": 30,
+      "ip_offset_km": 0,
+      "low_alt_m_agl": 50,
+      "assault_min_km": 8,
+      "assault_max_km": 50,
+      "lz_clear_km": 10,
+      "lz_offset_km": 2,
+      "lz_radius_m": 800,
+      "land_s": 120,
+      "max_helos": 8,
+      "per_day": 1,
+      "fail_below": 0.4,
+      "ai_loss_per_threat": 0.15,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "assault_min_km",
+        "assault_max_km",
+        "lz_clear_km",
+        "lz_offset_km",
+        "lz_radius_m",
+        "land_s",
+        "max_helos",
+        "per_day",
+        "fail_below",
+        "ai_loss_per_threat",
+        "max_threats"
+      ],
+      "assault_note": "Цель - пункт противника в assault_min_km..assault_max_km от своих пунктов, без частей противника ближе lz_clear_km; лучший - тот, после взятия которого больше складов противника отрезано от подвоза из тыла, затем ближний к цели своей оси. Площадка - в lz_offset_km от пункта в сторону своих. Подразделение (рота, men) поднимает группа транспортных вертолётов (troops борта в aircraft.json, не больше max_helos), садится на площадку на land_s, пехота выходит при посадке (в миссии - скрипт assault.lua). Долетело меньше fail_below подразделения - высадка сорвана. Вылет ИИ вне миссии: потери - ai_loss_per_threat на ЗРК в коридоре. Высадившиеся держат пункт (order airhead) до соединения со своими (снабжение со своих складов). ОЦЕНКИ. Площадка, к которой в коридоре (на малой высоте, с радиогоризонтом) больше max_threats ЗРК, не берётся.",
+      "strike": {
+        "title": "десантная группа",
+        "group_name": "борт",
+        "size": 4,
+        "maintask": [
+          "Transport"
+        ],
+        "loadout": [],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "игрок может вести десантную группу (Ми-8, UH-1H): посадить на площадку",
+        "estimate": true
+      },
+      "max_threats": 1
+    },
+    "awacs_orbit": {
+      "title": "Дежурство ДРЛО",
+      "performers": [
+        "awacs"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "orbit",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: ДРЛО и управление над своей территорией за серединой линии фронта, в standoff_km от неё - ОЦЕНКА",
+      "speed_kmh": 750,
+      "transit_alt_m_agl": 9000,
+      "attack_alt_m_agl": 9000,
+      "ip_offset_km": 0,
+      "standoff_km": 150,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "standoff_km"
+      ],
+      "strike": {
+        "title": "дежурство дрло",
+        "group_name": "самолёт",
+        "size": 1,
+        "maintask": [
+          "AWACS"
+        ],
+        "loadout": [],
+        "mode": "orbit",
+        "alt_m": 9000,
+        "estimate_fields": [
+          "size",
+          "alt_m"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+        "estimate": true
+      }
+    },
+    "tanker_orbit": {
+      "title": "Дежурство заправщика",
+      "performers": [
+        "tanker"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "orbit",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: зона дозаправки над своей территорией за серединой линии фронта - ОЦЕНКА",
+      "speed_kmh": 750,
+      "transit_alt_m_agl": 7000,
+      "attack_alt_m_agl": 7000,
+      "ip_offset_km": 0,
+      "standoff_km": 200,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "standoff_km"
+      ],
+      "strike": {
+        "title": "дежурство заправщика",
+        "group_name": "самолёт",
+        "size": 1,
+        "maintask": [
+          "Refueling"
+        ],
+        "loadout": [],
+        "mode": "orbit",
+        "alt_m": 7000,
+        "estimate_fields": [
+          "size",
+          "alt_m"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+        "estimate": true
+      }
+    },
+    "airlift": {
+      "title": "Воздушная перевозка",
+      "performers": [
+        "transport",
+        "transport_helo"
+      ],
+      "target": {
+        "category": "depot",
+        "side": "own"
+      },
+      "method": "airlift",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: транспортная авиация возит снабжение на склады, где его меньше всего (в первую очередь отрезанные от подвоза), на ближний к складу свой аэродром - ОЦЕНКА",
+      "speed_kmh": 400,
+      "transit_alt_m_agl": 3000,
+      "attack_alt_m_agl": 3000,
+      "helo_alt_m_agl": 150,
+      "ip_offset_km": 0,
+      "airlift_below": 0.9,
+      "airlift_depot_km": 40,
+      "airlift_max": 4,
+      "sorties_per_day": 2,
+      "estimate_fields": [
+        "speed_kmh",
+        "transit_alt_m_agl",
+        "helo_alt_m_agl",
+        "airlift_below",
+        "airlift_depot_km",
+        "airlift_max",
+        "sorties_per_day"
+      ],
+      "airlift_note": "Склад с запасом ниже airlift_below ёмкости (отрезанный от подвоза - первым) получает до sorties_per_day рейсов группы транспорта на свой аэродром не дальше airlift_depot_km от склада; направлений в сутки - не больше airlift_max. Груз борта - cargo_t типа (aircraft.json). Сбитый в миссии борт груз не довозит. ОЦЕНКИ.",
+      "strike": {
+        "title": "транспортная группа",
+        "group_name": "борт",
+        "size": 2,
+        "maintask": [
+          "Transport"
+        ],
+        "loadout": [],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "только ИИ; рейс - взлёт со своей базы, посадка на аэродроме назначения",
+        "estimate": true
+      }
+    },
+    "recon": {
+      "title": "Воздушная разведка",
+      "performers": [
+        "recon"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "recon",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: разведывательная авиация осматривает районы, где данные о противнике устарели, и пункты противника у линии фронта; вылеты на рассвете и к вечеру; данные - после посадки и обработки (recon.py) - ОЦЕНКА",
+      "speed_kmh": 850,
+      "transit_alt_m_agl": 300,
+      "attack_alt_m_agl": 300,
+      "low_alt_m_agl": 300,
+      "high_alt_m": 18000,
+      "ip_offset_km": 0,
+      "routes": 3,
+      "route_points": 4,
+      "leg_km": 60,
+      "sorties_per_day": 2,
+      "process_h": 1,
+      "estimate_fields": [
+        "speed_kmh",
+        "low_alt_m_agl",
+        "high_alt_m",
+        "routes",
+        "route_points",
+        "leg_km",
+        "sorties_per_day",
+        "process_h"
+      ],
+      "recon_note": "До routes маршрутов в сутки, по route_points точек интереса не дальше leg_km друг от друга; sorties_per_day вылетов на маршрут. Полоса датчиков - по типу ЛА (aircraft.json recon). Сбитый разведчик данных не привозит. ОЦЕНКИ.",
+      "strike": {
+        "title": "разведчик",
+        "group_name": "разведчик",
+        "size": 1,
+        "maintask": [
+          "Reconnaissance"
+        ],
+        "loadout": [],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "только ИИ; маршрут от базы по точкам интереса и обратно",
+        "estimate": true
+      }
+    },
+    "qra": {
+      "title": "Дежурство ПВО на аэродроме",
+      "performers": [
+        "interceptor",
+        "fighter"
+      ],
+      "target": {
+        "category": "front"
+      },
+      "method": "alert",
+      "ai_only": true,
+      "method_source": "толкование, не цитата: дежурные силы ПВО - пара истребителей в готовности на аэродроме у фронта, взлёт по обнаружению противника радиолокационными средствами своей стороны - ОЦЕНКА",
+      "speed_kmh": 850,
+      "transit_alt_m_agl": 6000,
+      "attack_alt_m_agl": 6000,
+      "ip_offset_km": 0,
+      "qra_bases": 3,
+      "shift_h": 4,
+      "cap_offset_km": 30,
+      "cap_alt_m": 6000,
+      "scramble_km": 150,
+      "engage_km": 80,
+      "cap_min": 40,
+      "mission_km": 300,
+      "estimate_fields": [
+        "qra_bases",
+        "shift_h",
+        "cap_offset_km",
+        "cap_alt_m",
+        "scramble_km",
+        "engage_km",
+        "cap_min",
+        "mission_km"
+      ],
+      "qra_note": "Пара дежурит на qra_bases аэродромах с истребителями, ближних к фронту, сменами shift_h весь лётный день (самолёты заняты в плане). В миссии (база ближе mission_km к цели задачи) - на стоянке с запущенными двигателями (поздняя активация); lua/qra.lua поднимает её, когда радары её стороны (РЛС, ЗРК, ДРЛО) видят противника ближе scramble_km к базе: зона в cap_offset_km к фронту, атака воздушных целей ближе engage_km, cap_min минут, посадка. Вне миссии дежурные пары рядом с целью удара ИИ снижают его успех и повышают потери (airwar.py). ОЦЕНКИ.",
+      "strike": {
+        "title": "дежурная пара",
+        "group_name": "пара",
+        "size": 2,
+        "maintask": [
+          "Intercept",
+          "CAP"
+        ],
+        "loadout": [
+          "cap"
+        ],
+        "estimate_fields": [
+          "size"
+        ]
+      },
+      "support": [],
+      "timing": {
+        "player_cold_start_min": 5,
+        "note": "только ИИ",
+        "estimate": true
+      }
+    }
+  },
+  "march": {
+    "order": [
+      "MBT",
+      "IFV",
+      "APC",
+      "truck"
+    ],
+    "spacing_m": 50,
+    "estimate": true
+  },
+  "sim": {
+    "combat_ineffective_below": 0.5,
+    "estimate": true,
+    "contact_km": 5,
+    "battle_loss_k": 0.15,
+    "loss_cap": 0.5,
+    "defend_factor": 0.6,
+    "step_km": 1.0,
+    "line_offset_km": 1.5,
+    "role_weight": {
+      "MBT": 1.0,
+      "IFV": 0.5,
+      "APC": 0.25,
+      "truck": 0.0,
+      "infantry": 0.04
+    },
+    "sim_note": "Абстрактный бой за сутки (ОЦЕНКИ, не из документа): части противоположных сторон ближе contact_km - в соприкосновении (battle). Потери за сутки = battle_loss_k * (сила противника / своя сила), не больше loss_cap; у обороняющегося x defend_factor. Сила - сумма исправной техники с весами role_weight. Ниже combat_ineffective_below часть выходит из боя (halted). Марш - шагами step_km, до соприкосновения. В миссии части в бою стоят линиями в line_offset_km от середины между ними.",
+    "posture": "defense",
+    "attack_min_strength": 0.7,
+    "withdraw_below": 0.6,
+    "refit_rate": 0.15,
+    "refit_ready": 0.8,
+    "capture_km": 3,
+    "ops_note": "Оперативный уровень (ОЦЕНКИ, не из документа): posture offense - наступление на objectives сектора через соседние пункты противника; defense - удержание пунктов на линии фронта и возврат пустых. Ниже withdraw_below часть выходит из боя и отходит в тыл; в тылу восстанавливает refit_rate потерь в сутки, с refit_ready - снова в строю. Пункт занят, если рядом (capture_km) часть стороны и нет противника. Не в бою на фронте - пополнение refit_in_line от тылового темпа. Отходящие разрывают соприкосновение.",
+    "refit_in_line": 0.33,
+    "daily_advance_km": 25,
+    "battle_variance": 0.3,
+    "choice_width": 3,
+    "random_note": "Случайность (если включена в кампании): потери в бою за сутки x U(1-battle_variance, 1+battle_variance); направление наступления - из choice_width ближних к цели пунктов, с весом 1/расстояние. ОЦЕНКИ.",
+    "supply_km": 80,
+    "supply_min_stock": 0.3,
+    "unsupplied": 0.5,
+    "supply_power_factor": 0.8,
+    "airfield_threat_km": 30,
+    "airfield_lost_km": 3,
+    "repair_depot": 0.15,
+    "repair_bridge": 0.34,
+    "repair_airfield": 0.2,
+    "logistics_note": "Тыл (ОЦЕНКИ, не из документа): снабжение - путь по своей территории до своего склада с запасом от supply_min_stock не длиннее supply_km, иначе марш x unsupplied, сила x supply_power_factor, восстановление медленнее. Аэродром закрыт, если противник ближе airfield_threat_km; потерян - ближе airfield_lost_km. Восстановление повреждений в сутки: repair_depot/bridge/airfield (мост - 3 суток). Заводы (ОЦЕНКИ): среднее повреждение заводов стороны x industry_effect снижает её восстановление тыла (repair_*) и пополнение авиации; завод восстанавливается на repair_factory в сутки. Малые мосты (найдены зондом карты, не через Эльбу; ОЦЕНКИ): разрушенный связь не закрывает - объезд: путь снабжения по связи длиннее на bridge_detour_km, марш по ней x bridge_detour_slow.",
+    "repair_factory": 0.1,
+    "repair_sam": 0.25,
+    "sam_relocate_km": 5,
+    "sam_note": "ЗРК (ОЦЕНКИ, не из документа): потери восстанавливаются на repair_sam в сутки (x промышленность и снабжение; приданная ПВО части в бою - нет). ЗРК на позиции, понёсший потери, на следующие сутки меняет позицию - уходит на sam_relocate_km в сторону тыла.",
+    "industry_effect": 0.5,
+    "bridge_detour_km": 15,
+    "bridge_detour_slow": 0.5,
+    "consume_t": {
+      "battle": 1.0,
+      "march": 0.5,
+      "refit": 0.3,
+      "defend": 0.2,
+      "halted": 0.2
+    },
+    "depot_days": 10,
+    "supply_inflow": 2.5,
+    "sortie_t": {
+      "air": 4.0,
+      "heli": 1.5
+    },
+    "supply_t_note": "Снабжение в тоннах (ОЦЕНКИ, не из документа): расход части в сутки = исправные машины (с приданной ПВО) x consume_t по состоянию (бой, марш, восстановление, оборона); авиация - sortie_t на самолёто-вылет плана полётов. Ёмкость складов стороны - depot_days суток её расхода в обороне, поровну по складам. Подвоз из тыла в сутки - supply_inflow x расход стороны в обороне, на склады, до которых есть путь из тыла сектора по своей территории (по недостаче). Часть получила долю нормы - сила между supply_power_factor и 1, марш - между unsupplied и 1.",
+    "crew_ratio": 1.2,
+    "crews_per_day": 1,
+    "capture_per_day": 0.35,
+    "downed_max_days": 3,
+    "crews_note": "Экипажи (ОЦЕНКИ, не из документа): у полка crew_ratio экипажей на самолёт штата; к вылету - не больше экипажей. Сбит без катапультирования - экипаж погиб; катапультировался - на земле (downed), пока не спасён (CSAR), не вышел к своим (на своей территории - на следующие сутки) или не попал в плен (на территории противника - capture_per_day в сутки, через downed_max_days суток - пропал без вести). Пополнение - crews_per_day экипажей в сутки до штата.",
+    "night_march": 0.6,
+    "night_battle": 0.5,
+    "night_note": "Ночь - часы вне лётного дня (ato.FLYING_HOURS, 06-20). Ночью марш x night_march, потери в бою x night_battle (ОЦЕНКИ). Вылеты ночью - только типы с night в aircraft.json (ato.py)."
+  },
+  "task_priority_note": "Порядок задач = приоритет плана дня: войска в соприкосновении и первый эшелон (CAS, BAI), затем борьба за господство в воздухе (DCA, OCA), подавление ПВО, затем вторые эшелоны и тыл (FOFA, AI). RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 41, 43: приоритеты ФРГ (ген. Альтенбург) - бой с первым эшелоном, ПВО, затем вторые эшелоны; англичане - CAS и BAI ближе к фронту.",
+  "apportionment": {
+    "source": "AJP-3.3(B) Allied Joint Doctrine for Air and Space Operations (2016), 4.5 и пример с. 4-18 (DCA 40, OCA 25, APCLO 25, SEAD 10%) - формат; доли здесь - ОЦЕНКА для обороны Центрального фронта 80-х (RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987): приоритет боя с первым эшелоном у союзников): больше на поддержку войск, меньше на DCA",
+    "classes": {
+      "DCA": [
+        "cap_own_troops"
+      ],
+      "OCA": [
+        "strike_airfield"
+      ],
+      "SEAD": [
+        "strike_sam_site"
+      ],
+      "APCLO": [
+        "cas_contact",
+        "cas_helo",
+        "strike_bai",
+        "strike_fofa",
+        "strike_supply_route",
+        "strike_bridge",
+        "strike_depot",
+        "strike_factory"
+      ]
+    },
+    "shares": [
+      {
+        "from_day": 1,
+        "DCA": 0.25,
+        "OCA": 0.15,
+        "SEAD": 0.1,
+        "APCLO": 0.5
+      },
+      {
+        "from_day": 4,
+        "DCA": 0.2,
+        "OCA": 0.1,
+        "SEAD": 0.1,
+        "APCLO": 0.6
+      }
+    ],
+    "estimate": true
+  },
+  "nation_bonus": {
+    "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. v-vii, 26-28, 43: 2-е ОТАК (Великобритания, ФРГ, Бельгия, Нидерланды, NORTHAG) - тесная увязка с сухопутными войсками, CAS и BAI у переднего края; 4-е ОТАК (ВВС США, CENTAG) - централизованное управление, господство в воздухе первым, удары в глубину. Величины - ОЦЕНКА.",
+    "uk": {
+      "cas": 0.15,
+      "interdiction": 0.1
+    },
+    "frg": {
+      "cas": 0.15
+    },
+    "be": {
+      "cas": 0.1
+    },
+    "nl": {
+      "cas": 0.1
+    },
+    "us": {
+      "air": 0.1,
+      "strike": 0.1,
+      "sead": 0.15
+    }
+  }
+}

@@ -2950,11 +2950,34 @@ def reinforce_section(tmp: Path) -> None:
     check(n > 0, f"Су-24М добавленного полка в плане полётов следующих суток: {n} групп")
 
 
+def nato_section(tmp: Path) -> None:
+    """Доктрина НАТО (nato.json по RAND R-3385, ATP-27(C), AJP-3.3): годы, полосы глубины, доли, SEAD только у США."""
+    from redfront import ato, farp, pilots
+    print("\n== Доктрина НАТО ==")
+    st = model.new_campaign("nato", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    check(st["doctrine"]["blue"] == "nato", "синие по умолчанию - доктрина НАТО")
+    sim.end_day(st)
+    ts, _w = planner.plan_side(st, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
+    reg = [t for t in ts if not t.get("ai_only")]
+    ap = model.doctrine(st, "blue")["apportionment"]
+    dca = sum(1 for t in reg if t["kind"] in ap["classes"]["DCA"])
+    check(reg and dca <= round(0.25 * ato.ATO_MAX_TASKS), f"доли категорий: DCA {dca} из {len(reg)} задач плана")
+    bai = [t for t in reg if t["kind"] == "strike_bai"]
+    ok = all(15 <= farp.front_km(st, "red", t["target_pos"]) <= 50 for t in bai)
+    check(ok, f"BAI - колонны в 15-50 км за передним краем ({len(bai)} задач)")
+    sead = [g for t in reg for g in t["package"] if g["group"].startswith("sead")]
+    check(all(pilots.nation(st["units"][g["performer"]]) == "us" for g in sead),
+          f"подавление ПВО - только части США ({len(sead)} групп), союзники - без него")
+    st["date"] = "1979-06-01"
+    ts79, _w = planner.plan_side(st, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
+    check(not any(t["kind"] in ("strike_bai", "strike_fofa") for t in ts79), "в 1979 году BAI (с 1980) и FOFA (с 1983) нет")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section]
 
 
 def main() -> int:

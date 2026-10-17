@@ -27,7 +27,7 @@ MISSION_LEN_S = 75 * 60     # ОЦЕНКА: окно миссии игрока; 
 
 
 ATO_NIGHT_TASKS = 3         # ОЦЕНКА: задач (кроме дежурств) стороны ночью - из тех, где все исполнители летают ночью
-NIGHT_KINDS = {"strike_bridge", "strike_depot", "strike_factory", "strike_airfield", "strike_supply_route",
+NIGHT_KINDS = {"strike_bridge", "strike_depot", "strike_factory", "strike_airfield", "strike_supply_route", "strike_fofa",
                "strike_sam_site", "air_assault", "air_evac"}   # ночью - глубокие удары и десант; поддержка войск, спасение - днём
 DAY_S = 86400
 
@@ -78,6 +78,9 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
     return out
 
 
+HELO_HOURS_MONTH = 65   # ОЦЕНКА по аналогии (FM 101-20, табл. 1-5: AH-1 65 ч/мес в боевых условиях) - вертолётам без своего значения
+
+
 class _Pool:
     """Занятость самолётов частей по времени: интервалы (с, по, сколько)."""
     def __init__(self, state: dict):
@@ -89,8 +92,23 @@ class _Pool:
         used = sum(n for a, b, n in self.busy.get(uid, []) if a < t1 and t0 < b)   # с запасом: все пересекающиеся
         return cap - used
 
+    def hours_left(self, uid: str) -> float | None:
+        """Налёт части на сутки, ч: вертолёты - число ЛА x combat_hours_month / 30 (FM 101-20, табл. 1-5); None - без предела."""
+        u = self.state["units"][uid]
+        if model.category(u) != "heli":
+            return None
+        per = model.aircraft_info(u.get("type", "")).get("combat_hours_month") or HELO_HOURS_MONTH
+        done = sum(n * (b - a) / 3600 for a, b, n in self.busy.get(uid, []))
+        return logistics.available(self.state, u) * per / 30 - done
+
     def fits(self, need: dict[str, tuple[float, float, int]]) -> bool:
-        return all(self.free(uid, t0, t1) >= n for uid, (t0, t1, n) in need.items())
+        for uid, (t0, t1, n) in need.items():
+            if self.free(uid, t0, t1) < n:
+                return False
+            h = self.hours_left(uid)
+            if h is not None and h < n * (t1 - t0) / 3600:
+                return False                     # налёт части на сутки исчерпан
+        return True
 
     def book(self, need: dict[str, tuple[float, float, int]]) -> None:
         for uid, iv in need.items():
