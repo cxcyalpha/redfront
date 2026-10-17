@@ -7,6 +7,7 @@ from pathlib import Path
 D = Path(__file__).resolve().parent.parent / "redfront" / "data" / "doctrine"
 RAND = "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987)"
 ATP27 = "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999)"
+FM101 = "FM 101-20 United States Army Aviation Planning Manual (1984), табл. 1-5"
 AJP33 = "AJP-3.3(B) Allied Joint Doctrine for Air and Space Operations (2016)"
 
 gen = json.loads((D / "generic.json").read_text(encoding="utf-8"))
@@ -55,10 +56,19 @@ t["cas_helo"]["method_source"] = f"{ATP27}, 401.4: совместные дейс
 t["cap_own_troops"]["method_source"] = f"{RAND}, с. vii, 41: прикрытие войск - оборонительная борьба за господство " \
     "в воздухе (DCA); у ФРГ - второй приоритет после боя с первым эшелоном"
 
+t["strike_bai"], t["strike_fofa"] = bai, fofa
+FM100 = "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5"
+for k, v in t.items():                       # маршруты малой высоты (LLTR/MRR): к цели 100 футов, обратно - выше 500
+    if v.get("method") in ("on_call", "interdiction", "sequential_on_call") and "attack_helo" not in v["performers"]:
+        v["transit_alt_m_agl"] = 30
+        v["egress_alt_m_agl"] = 150
+        v["transit_alt_source"] = f"{FM100}: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - " \
+                                  "к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. " \
+                                  "ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+
 order = ["csar", "air_evac", "cas_contact", "cas_helo", "strike_bai", "cap_own_troops", "strike_airfield",
          "strike_sam_site", "strike_fofa", "strike_supply_route", "strike_bridge", "strike_depot", "strike_factory",
          "air_assault", "awacs_orbit", "tanker_orbit", "airlift", "recon", "qra"]
-t["strike_bai"], t["strike_fofa"] = bai, fofa
 tasks = {k: t[k] for k in order}
 
 doc = {

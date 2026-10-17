@@ -1086,7 +1086,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             else:                                # цель противника вне окна миссии - удар по району её положения
                 c = _pt(m, obj["pos"])
                 w.tasks.append(task.EngageTargetsInZone(Vector2(c.x, c.y), BATTLE_ZONE_M, [task.Targets.All.GroundUnits]))
-            wp(ip, transit, "Отход")
+            wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         elif obj["kind"] == "sam":               # группа подавления ПВО: рубеж пуска по каждому ЗРК, ближний первым
             low = tdg.get("low_alt_m_agl", transit)
             sup = support.get(g.get("support_id"), {})
@@ -1130,7 +1130,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             orbit = task.ControlledTask(task.OrbitAction(altitude=int(g.get("search_alt_m") or SEARCH_ORBIT_ALT_M), speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
             orbit.stop_after_duration(int((g.get("search_min") or 10) * 60))
             w.tasks.append(orbit)
-            wp(ip, transit, "Отход")
+            wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
             g["zone"] = {"center": center, "radius_km": round(radius_km, 1)}
         elif obj["kind"] == "point":             # объект тыла: мост - по объекту карты, склад и аэродром - бомбами по точке
             ip, tgt = g["route"]
@@ -1144,7 +1144,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 w.tasks.append(task.Bombing(Vector2(c.x, c.y), weapon_type=getattr(task.WeaponType, a_.get("weapon", "Auto")),
                                             expend=getattr(task.Expend, a_.get("expend", "Auto")), group_attack=True,
                                             altitude=int(tdg.get("bomb_alt_m", 1000))))
-            wp(ip, transit, "Отход")
+            wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         elif obj["kind"] in ("cap_zone", "cover_zone"):   # прикрытие: зона над войсками / над районом удара
             alt = int(g.get("alt_m") or 3000)
             w = wp(obj["pos"], alt, "Зона прикрытия", keep_alt=True)
@@ -1161,7 +1161,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             ip, tgt = g["route"]
             wp(ip, transit, "ИПМ")
             wp(tgt, transit, "Цель")
-            wp(ip, transit, "Отход")
+            wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         _land(fg, land, spd)
         t = times[g["group"]]
         when = (f"посадка в {g['_dest']} ~{t['objective_s'] // 60} мин" if g.get("_dest")
