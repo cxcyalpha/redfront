@@ -236,7 +236,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     from dcs.terrain.germany import Germany  # координаты аэродромов берём из терраина pydcs, а не вписываем руками
     if player_side not in SIDES:
         raise ValueError(f"сторона должна быть одной из {SIDES}")
-    packages = {**{"red": "wp", "blue": "generic"}, **(packages or {})}
+    packages = {**{"red": "wp", "blue": "nato"}, **(packages or {})}   # синие - доктрина НАТО (data/doctrine/nato.json)
     for side, pkg in packages.items():
         if not (DATA / "doctrine" / f"{pkg}.json").is_file():
             raise FileNotFoundError(f"нет пакета доктрины '{pkg}' для стороны {side} (data/doctrine/{pkg}.json)")

@@ -165,6 +165,47 @@ def _book(state: dict, tasked: dict, uid: str) -> None:
     tasked[t] = tasked.get(t, 0) + 1
 
 
+def campaign_year(state: dict) -> int | None:
+    try:
+        return int(str(state.get("date") or "")[:4])
+    except ValueError:
+        return None
+
+
+def nation_bonus(state: dict, unit: dict, cls: str | None) -> float:
+    """Предпочтение задач по национальности части (доктрина nation_bonus, НАТО: 2-е ОТАК - поддержка войск, 4-е -
+    господство в воздухе и удары в глубину)."""
+    nb = model.doctrine(state, unit["side"]).get("nation_bonus")
+    if not nb or not cls:
+        return 0.0
+    from . import pilots
+    return float((nb.get(pilots.nation(unit)) or {}).get(cls, 0.0))
+
+
+def apportion(state: dict, doc: dict, tasks: list[dict], max_tasks: int) -> list[dict]:
+    """Распределение сил по категориям (доктрина apportionment: DCA, OCA, SEAD, APCLO): категории - не больше своей
+    доли плана (не меньше одной задачи, если доля есть); задачи вне категорий - без ограничения. Порядок - прежний."""
+    ap = doc.get("apportionment")
+    if not ap:
+        return tasks
+    shares = {}
+    for row in sorted(ap["shares"], key=lambda r: r["from_day"]):
+        if state["day"] >= row["from_day"]:
+            shares = row
+    cls_of = {k: c for c, ks in ap["classes"].items() for k in ks}
+    cap = {c: (max(1, round(shares.get(c, 0) * max_tasks)) if shares.get(c, 0) > 0 else 0) for c in ap["classes"]}
+    used: dict[str, int] = {}
+    out = []
+    for t in tasks:
+        c = cls_of.get(t["kind"])
+        if c is not None:
+            if used.get(c, 0) >= cap[c]:
+                continue
+            used[c] = used.get(c, 0) + 1
+        out.append(t)
+    return out
+
+
 def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int = MAX_PER_KIND) -> tuple[list[dict], str]:
     """План дня стороны side (состояние кампании не меняет): (задачи, причина, если задач нет).
     Для стороны противника - так же: по нему в миссию ставятся его ИИ-группы (build.enemy_air)."""
@@ -174,7 +215,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         return [], f"у пакета '{doc['package']}' стороны {side} нет авиационных задач"
     reasons, tasks = [], []
     tasked: dict[str, int] = {}                  # задач у части в этом плане
+    year = campaign_year(state)
     for kind, tdef in doc["tasks"].items():
+        if tdef.get("from_year") and year and year < tdef["from_year"]:
+            continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
         performers = [u for u in state["units"].values()
                       if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0]
         if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
@@ -226,6 +270,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                        if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]
             if side == state.get("player_side") and tside == foe:   # туман войны: цели игрока - только известные
                 targets = [u for u in targets if intel.can_target(state, u)]
+            depth = tdef["target"].get("depth_km")
+            if depth and tside == foe:           # полоса глубины от своих войск (НАТО: BAI 15-50 км, FOFA - глубже)
+                from . import farp
+                targets = [u for u in targets if depth[0] <= farp.front_km(state, foe, _aim(state, side, u)) <= depth[1]]
         if not targets:
             continue
         found = False
@@ -251,7 +299,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 d = model.dist_km(state["airbases"][r["base"]], tpos)
                 # сначала - пригодный тип (оценка относительно лучшего в кампании) с поправкой на загрузку: задачи
                 # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
-                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)), 3), d)
+                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls), 3), d)
                 if d <= radius and (best is None or key < best[0]):
                     best = (key, r)
             if best is None:
@@ -282,7 +330,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if not found and not targets:
             reasons.append(f"{tdef['title']}: целей нет")
     orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
-    return [t for t in tasks if not t.get("ai_only")][:max_tasks] + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
+    regular = apportion(state, doc, [t for t in tasks if not t.get("ai_only")], max_tasks)
+    return regular[:max_tasks] + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
 
 
 def orbit_point(state: dict, side: str, standoff_km: float) -> dict | None:
@@ -441,7 +490,8 @@ def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers
         for r in performers:
             radius = strike_radius_km(r)
             d = model.dist_km(state["airbases"][r["base"]], tpos)
-            key = (round(fitness.pick_key(state, r, fitness.task_class(kind, tdef), _load(tasked, r)), 3), d)
+            key = (round(fitness.pick_key(state, r, fitness.task_class(kind, tdef), _load(tasked, r))
+                         - nation_bonus(state, r, fitness.task_class(kind, tdef)), 3), d)
             if (radius is not None and d <= radius and fitness.fits(state, r, fitness.task_class(kind, tdef))
                     and (best is None or key < best[0])):
                 best = (key, r)
@@ -740,8 +790,11 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             route_of = lambda base: [ip_point(base, tpos, tdef["ip_offset_km"]), tpos]
         flights = int(g.get("flights", 1))       # несколько пар - отдельные группы, у каждой своя задача атаки
         need = g["size"] * flights
+        from . import pilots
         cands = [u for u in units.values()
-                 if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need]
+                 if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need
+                 and (not g.get("nations") or pilots.nation(u) in g["nations"])    # НАТО: средства SEAD - только у США
+                 and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]
         # сначала те, чей тип умеет основную задачу группы (для подавления ПВО - SEAD), затем та же часть, что ударная, затем ближние
         gcls = fitness.group_class(g["maintask"], None)   # подавление ПВО - sead, прикрытие - air
         cands.sort(key=lambda u: (not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
