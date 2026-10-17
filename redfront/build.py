@@ -371,7 +371,7 @@ def airbase_script(m: Mission, state: dict) -> str:
             continue
         side = 0 if b.get("state") == "lost" or b.get("side") not in ("red", "blue") else (1 if b["side"] == "red" else 2)
         rows.append(f'{{{json.dumps(ap.name)}, {side}}}')
-    return ("local L = {" + ", ".join(rows) + "}\n"
+    return ("-- redfront airbases\nlocal L = {" + ", ".join(rows) + "}\n"
             "for _, r in ipairs(L) do\n"
             "  local ab = Airbase.getByName(r[1])\n"
             "  if ab then\n"

@@ -959,8 +959,8 @@ def column_road_section(tmp: Path) -> None:
     m.load_file(str(tmp / "colroad.miz"))
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
-          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront lz",
-                        "-- redfront csar", "-- redfront debrief hook"],
+          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
+                        "-- redfront lz", "-- redfront csar", "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
