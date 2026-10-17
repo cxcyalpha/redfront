@@ -959,8 +959,8 @@ def column_road_section(tmp: Path) -> None:
     m.load_file(str(tmp / "colroad.miz"))
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
-          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront lz",
-                        "-- redfront csar", "-- redfront debrief hook"],
+          and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
+                        "-- redfront lz", "-- redfront csar", "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
@@ -2902,6 +2902,9 @@ def crew_section(tmp: Path) -> None:
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "crew.miz"))
     us = [x for c in m.coalition[t["side"]].countries.values() for g in c.plane_group for x in g.units if x.name in hum]
+    import zipfile
+    ms = zipfile.ZipFile(tmp / "crew.miz").read("mission").decode("utf-8", "replace")
+    check("setCoalition" in ms and "autoCapture(false)" in ms, "стороны аэродромов - и скриптом в начале миссии (без автозахвата)")
     check(len(us) == 3 and all(x.skill.value == "Client" and x.livery_id == "test livery" for x in us[:2]),
           "в .miz: места людей - Client (мультиплеер), ливрея полка на самолётах")
     lead = fl[0]["units"][0]
@@ -2922,11 +2925,36 @@ def crew_section(tmp: Path) -> None:
     check(h["count"] == c0 and h["crews"] == crews0 and det["id"] not in st["units"], "передовая группа вернулась в полк")
 
 
+def reinforce_section(tmp: Path) -> None:
+    """Добавить полк: историческое допущение (Су-24М в 1989) и свой."""
+    from redfront import ato, reinforce
+    print("\n== Добавление полков ==")
+    st = model.new_campaign("reinf", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    cat = {c["id"] for c in reinforce.catalog(st)}
+    check({"r116bap", "r497bap"} <= cat, f"список допущений (части других пресетов): {sorted(cat)}")
+    reinforce.add_historical(st, "r116bap")
+    u = st["units"]["r116bap"]
+    check(u["added"] == "historical" and u["crews"] > 0 and len(u["pilots"]) == u["crews"] and "r116bap" not in
+          {c["id"] for c in reinforce.catalog(st)}, "116-й гв. бап добавлен: экипажи, лётчики, из списка убран")
+    msg = reinforce.add_custom(st, {"name": "Свой полк", "side": "red", "role": "attack_helo", "type": "Mi_24P",
+                                    "count": 12, "base": u["base"]})
+    try:
+        reinforce.add_custom(st, {"name": "x", "side": "red", "role": "bomber", "type": "Mi_24P", "count": 4, "base": u["base"]})
+        bad = False
+    except ValueError:
+        bad = True
+    check("add_red_1" in st["units"] and bad, f"свой полк: {msg}; вертолёт с самолётной ролью - отказ")
+    sim.end_day(st)
+    a = ato.ensure(st)
+    n = sum(1 for e in a["entries"] for g in e["task"]["package"] if g["performer"] == "r116bap")
+    check(n > 0, f"Су-24М добавленного полка в плане полётов следующих суток: {n} групп")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section]
 
 
 def main() -> int:

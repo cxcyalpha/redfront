@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import copy
 import datetime
+import json
 import math
 import tempfile
 from pathlib import Path
@@ -358,6 +359,26 @@ def set_airbase_coalitions(m: Mission, state: dict) -> None:
         if ap is None:
             continue
         ap.set_coalition("neutral" if b.get("state") == "lost" or b.get("side") not in ("red", "blue") else b["side"])
+
+
+def airbase_script(m: Mission, state: dict) -> str:
+    """Сторона аэродромов в DCS - и скриптом в начале миссии: без автозахвата (DCS иначе по своим правилам делает
+    аэродромы без войск рядом нейтральными) и с явной стороной (Airbase.setCoalition)."""
+    rows = []
+    for b in state["airbases"].values():
+        ap = m.terrain.airports.get(b.get("airport") or "")
+        if ap is None:
+            continue
+        side = 0 if b.get("state") == "lost" or b.get("side") not in ("red", "blue") else (1 if b["side"] == "red" else 2)
+        rows.append(f'{{{json.dumps(ap.name)}, {side}}}')
+    return ("-- redfront airbases\nlocal L = {" + ", ".join(rows) + "}\n"
+            "for _, r in ipairs(L) do\n"
+            "  local ab = Airbase.getByName(r[1])\n"
+            "  if ab then\n"
+            "    pcall(function() ab:autoCapture(false) end)\n"
+            "    pcall(function() ab:setCoalition(r[2]) end)\n"
+            "  end\n"
+            "end\n")
 
 
 def _land(fg, airport, spd_kmh: float):
@@ -1215,6 +1236,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     downed = [d for d in state.get("downed", []) if d["id"] in vg_by_unit]
     beacon = csar.beacon_wav(Path(tempfile.gettempdir()) / BEACON_FILE)
     m.map_resource.add_resource_file(beacon)
+    trig.add_action(DoScript(String(airbase_script(m, state))))   # стороны аэродромов - первыми
     trig.add_action(DoScript(String(lz_script(state["campaign_id"], state["sortie"]))))   # площадки - до csar и десанта
     for spec, name in ctld_assault:              # группа десанта CTLD - доля роты на борту игрока (assault.lua делит по кругу)
         idx = spec["helos"].index(name)

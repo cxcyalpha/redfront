@@ -366,8 +366,9 @@ function render() {
        <div class="d">${esc(stateRu(g))}${g.engaged.length ? " · против: " + esc(g.engaged.join(", ")) : ""}${g.supply < 1 ? " · снабжение " + Math.round(g.supply_frac * 100) + "% нормы" : ""}</div></div>`).join("")).join("");
     p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
   } else if (TAB === "air") {
-    p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` +
-      ST.air.filter(a => a.side === s).map(a => `<div class="item" data-id="${esc(a.id)}"><b>${esc(a.name)}</b>
+    p.innerHTML = `<div class="row" style="margin-bottom:8px"><button id="bAdd">Добавить полк</button></div><div id="addForm"></div>` +
+      ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` +
+      ST.air.filter(a => a.side === s).map(a => `<div class="item" data-id="${esc(a.id)}"><b>${esc(a.name)}</b>${a.added ? ` <i class="meta">(${a.added === "custom" ? "свой" : "допущение"})</i>` : ""}
        <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0}${a.crews != null ? ` · экипажей ${a.crews}/${a.crews0}` : ""} · к вылету ${a.available}</div>
        ${a.rebase_to ? `<div class="d">→ перебазирование на ${esc(a.rebase_to)} в конце суток</div>` : ""}
        ${a.livery ? `<div class="d">ливрея: ${esc(a.livery)}</div>` : ""}
@@ -376,6 +377,36 @@ function render() {
       ((ST.downed || []).length ? `<h4>Сбитые экипажи на земле</h4>` + ST.downed.map(d => `<div class="item" data-pos="${d.pos}"><b>🪂 ${esc(d.title)}</b>
        <div class="d">маяк ${d.freq} кГц · на земле с суток ${d.day}</div></div>`).join("") : "");
     p.querySelectorAll(".item[data-pos]").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
+    $("#bAdd").onclick = async () => {               // добавить полк: из списка допущений или свой
+      const f = $("#addForm");
+      if (f.innerHTML) { f.innerHTML = ""; return; }
+      let o;
+      try { o = (await api("addoptions", {file: FILE})).options; } catch (x) { return out(x.message, true); }
+      const sideRu = s => s === "red" ? "красные" : "синие";
+      f.innerHTML = `<div class="item"><div class="d"><b>Из списка</b> - части других дат этого театра (историческое допущение)</div>
+        ${o.catalog.length ? `<div class="row" style="margin-top:4px"><select id="adCat" style="flex:1;min-width:0">${o.catalog.map(c =>
+          `<option value="${esc(c.id)}">${sideRu(c.side)} · ${esc(c.name)} · ${c.count} x ${esc(c.type)} · пресет ${esc(c.year)}</option>`).join("")}</select>
+          <button id="adCatOk">Добавить</button></div>` : `<div class="d">все части других пресетов уже в кампании</div>`}
+        <div class="d" style="margin-top:10px"><b>Свой полк</b></div>
+        <div class="row" style="margin-top:4px"><input id="adName" placeholder="название, напр. 116-й гв. бап" style="flex:1;min-width:0"></div>
+        <div class="row" style="margin-top:4px"><select id="adSide"><option value="${ST.side}">${sideRu(ST.side)}</option><option value="${ST.side === "red" ? "blue" : "red"}">${sideRu(ST.side === "red" ? "blue" : "red")}</option></select>
+          <select id="adRole" style="flex:1;min-width:0">${o.roles.map(r => `<option value="${r.id}" data-cat="${r.cat}">${esc(r.title)}</option>`).join("")}</select></div>
+        <div class="row" style="margin-top:4px"><select id="adType" style="flex:1;min-width:0"></select>
+          <input id="adCount" type="number" min="1" max="72" value="24" style="width:60px" title="ЛА в полку"></div>
+        <div class="row" style="margin-top:4px"><select id="adBase" style="flex:1;min-width:0"></select>
+          <input id="adRadius" type="number" min="0" step="50" placeholder="радиус, км" style="width:90px" title="радиус действия; пусто - по роли или оценка"></div>
+        <div class="row" style="margin-top:4px"><button id="adOk">Добавить свой</button></div>
+        <div class="meta">В план полётов полк попадает со следующих суток.</div></div>`;
+      const fill = () => {
+        const heli = $("#adRole").selectedOptions[0].dataset.cat === "heli", side = $("#adSide").value;
+        $("#adType").innerHTML = o.types.filter(t => t.heli === heli).map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+        $("#adBase").innerHTML = o.bases[side].filter(b => heli || !b.farp).map(b => `<option value="${esc(b.id)}">${b.farp ? "площадка " : ""}${esc(b.name)}</option>`).join("");
+      };
+      $("#adRole").onchange = fill; $("#adSide").onchange = fill; fill();
+      if ($("#adCatOk")) $("#adCatOk").onclick = ev => act("addunit", {catalog: $("#adCat").value}, ev.target);
+      $("#adOk").onclick = ev => act("addunit", {name: $("#adName").value, side: $("#adSide").value, role: $("#adRole").value,
+        type: $("#adType").value, count: $("#adCount").value, base: $("#adBase").value, radius: $("#adRadius").value}, ev.target);
+    };
     p.querySelectorAll(".ui").forEach(b => b.onclick = async e => {     // лётчики полка и ливрея
       const it = e.target.closest(".item"), f = it.querySelector(".uiForm");
       if (f.innerHTML) { f.innerHTML = ""; return; }

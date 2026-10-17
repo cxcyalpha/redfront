@@ -379,6 +379,9 @@ def airlift_needs(state: dict, side: str, tdef: dict) -> list[tuple[dict, str]]:
     return [(d, b) for _k, d, b in out]
 
 
+AIRLIFT_FORWARD_KM = 10   # ОЦЕНКА: аэродром отправки не меньше чем на столько дальше от противника, чем аэродром назначения
+
+
 def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict]) -> list[dict]:
     """Задачи воздушной перевозки (method airlift): по направлению (склад + аэродром назначения) - группа ближней
     транспортной части, достающей до аэродрома (не с него же); части распределяются по направлениям."""
@@ -388,9 +391,14 @@ def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
     for d, dest in airlift_needs(state, side, tdef)[:tdef.get("airlift_max", 4)]:
         dpos = state["airbases"][dest]
         best = None
+        from . import farp
+        d_dest = farp.front_km(state, side, dpos)
         for r in performers:
             if r["base"] == dest or (state["airbases"][dest].get("kind") == "farp" and model.category(r) != "heli"):
                 continue                         # на вертолётную площадку - только вертолётом
+            rb = state["airbases"][r["base"]]
+            if farp.is_farp(rb) or farp.front_km(state, side, rb) < d_dest + AIRLIFT_FORWARD_KM:
+                continue                         # груз - из тыла к фронту: не с площадки, не назад и не встречными рейсами
             km = model.dist_km(state["airbases"][r["base"]], dpos)
             radius = strike_radius_km(r)
             if radius is not None and km > radius:
