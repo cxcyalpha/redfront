@@ -3120,6 +3120,12 @@ def heli_pkg_section(tmp: Path) -> None:
     check(jt and all(g["lead_min"] == 2 and g["size"] == 4 for t in jt for g in t["package"] if g.get("jaat_kind"))
           and not any(t["kind"] == "cas_helo" and t["target"] == jt[0]["target"] for t in st["tasks"]),
           f"совместный удар: звено Ми-24 сведено в пакет Су-25 по той же цели, выходит за 2 мин до самолётов ({len(jt)})")
+    if jt:
+        manj = build.build(st, tmp / "heli_jaat.miz", task_no=st["tasks"].index(jt[0]) + 1)
+        tj = build.timeline(model.doctrine(st, "red")["tasks"][jt[0]["kind"]], st, jt[0]["package"], "strike")
+        check(not any("ОПАЗДЫВАЕТ" in ln for ln in manj["package_lines"]) and all(v["late_s"] == 0 for v in tj.values()),
+              f"совместный удар: время удара - по самой медленной группе, никто не опаздывает "
+              f"(игроку взлёт через ~{tj['strike'].get('takeoff_s', 0) // 60} мин)")
     sb = model.new_campaign("helib", sector="sector_germany.json", oob="oob_germany.json", seed=7, player_side="blue")
     ah = next(u for u in sb["units"].values() if u.get("type") == "AH_64A")
     tgt = min((u for u in sb["units"].values() if u["side"] == "red" and model.category(u) == "ground"),

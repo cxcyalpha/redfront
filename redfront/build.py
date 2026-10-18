@@ -848,12 +848,19 @@ def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str,
     lead = {g["group"]: g.get("lead_min", 0) * 60 for g in groups}
     t_player = tdef["timing"]["player_cold_start_min"] * 60 + fly_s[fly]
     eta_strike = t_player + lead[fly]
+    # время удара - по самой медленной группе: кто не успел бы к выходу игрока (вертолёты с дальней площадки), тот
+    # взлетает с началом миссии, а удар сдвигается; остальные взлетают позже, игрок - тоже позже (по брифингу) или
+    # ждёт в точке сбора: она гасит разницу во времени групп
+    wait = max([0.0] + [-(eta_strike - lead[g["group"]] - fly_s[g["group"]]) for g in groups if g["group"] != fly])
+    eta_strike += wait
     out = {}
     for g in groups:
         k = g["group"]
         start = eta_strike - lead[k] - fly_s[k]
         out[k] = {"start_s": 0 if k == fly else max(0, int(start)), "late_s": 0 if k == fly else max(0, int(-start)),
                   "objective_s": int(eta_strike - lead[k])}
+        if k == fly and wait:                    # игрок: взлёт не раньше (слот в DCS доступен с начала миссии)
+            out[k]["takeoff_s"] = int(tdef["timing"]["player_cold_start_min"] * 60 + wait)
         if g.get("rv"):                          # время в точке сбора: выход на объект минус полёт сбор - объект
             rest = _path_km(g["rv"], g["route"]) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
             out[k]["rv_s"] = int(eta_strike - lead[k] - rest)
@@ -1326,7 +1333,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                             "side": side_g, **({"ato": g["_ato"]} if g.get("_ato") else {})})
             continue
         (ai_lines if g.get("_ai") else lines).append(f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, "
-                     + (("игрок, холодный старт" + (" (в базовом DCS тип только для ИИ - нужен мод)" if needs_mod else ""))
+                     + (("игрок, холодный старт" + (" (в базовом DCS тип только для ИИ - нужен мод)" if needs_mod else "")
+                         + (f", ВЗЛЁТ через ~{t['takeoff_s'] // 60} мин (время удара - по самой медленной группе; "
+                            f"раньше - ждать в точке сбора)" if t.get("takeoff_s") else ""))
                         if is_player else f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин")
                      + (f", {when}" if g.get("_dest") else f", на объекте через ~{t['objective_s'] // 60} мин")
                      + (f", переход на {transit} м (угроз ЗРК в коридоре нет)" if g.get("transit_alt_m_agl") else "")
