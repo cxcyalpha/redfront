@@ -5686,7 +5686,7 @@
    "side": "red",
    "role": "fighter",
    "base": "stendal",
-   "type": "MiG_29A",
+   "type": "MiG_29_Fulcrum",
    "count": 24,
    "strike_radius_km": 250,
    "source": "сводка игрока по ВВС в Германии; МиГ-29 с 1988 (?); перебазирован: Прешен вне карты, здесь - Stendal; число и радиус действия - ОЦЕНКА",

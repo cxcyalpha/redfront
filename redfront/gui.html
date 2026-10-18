@@ -494,7 +494,7 @@ async function atoEditor(it) {
   try { o = (await api("atooptions", {file: FILE, id: it.dataset.id})).options; } catch (e) { return out(e.message, true); }
   const perfOpt = (g, sel) => g.performers.map(x => `<option value="${esc(x.id)}" ${x.id === sel ? "selected" : ""}>${esc(x.name)} · ${esc(x.type)} · ${esc(x.base)} · к вылету ${x.available}</option>`).join("");
   const loOpt = (g, pid, sel) => { const x = g.performers.find(q => q.id === pid) || {loadouts: []};
-    return `<option value="">DCS по умолчанию</option>` + x.loadouts.map(c => `<option ${c === sel ? "selected" : ""}>${esc(c)}</option>`).join(""); };
+    return `<option value="">по задаче (автоматически)</option>` + x.loadouts.map(c => `<option value="${esc(c)}" ${c === sel ? "selected" : ""}>${esc(c.startsWith("rt:") ? c.slice(3) + " (Retribution)" : c)}</option>`).join(""); };
   f.innerHTML = `<div style="border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:6px">
     <div class="row"><span class="meta" style="margin:0">на объекте</span><input class="tot" value="${esc(o.tot)}" style="width:70px"></div>` +
     o.groups.map(g => `<div class="grp" data-g="${esc(g.group)}" style="margin-top:6px"><div class="d">${esc(g.title)}</div>

@@ -80,11 +80,11 @@ def strike_group(m):
     return next(g for g in plane_groups(m) if " strike " in g.name)
 
 
-def pylons_match(unit) -> bool:
-    """Пилоны юнита = ровно записи loadouts.json для Su_25/anti_armor, с теми же CLSID."""
-    want = model.load_json("loadouts.json")["Su_25"]["anti_armor"]["pylons"]
-    ac = dcs.planes.Su_25
-    expect = {int(p): getattr(getattr(ac, f"Pylon{p}"), w)[1]["clsid"] for p, w in want.items()}
+def pylons_match(unit, name: str = "CAS") -> bool:
+    """Пилоны юнита = ровно подвеска name его типа (свои payloads_custom.json - первыми, затем DCS Retribution)."""
+    own = model.load_json("payloads_custom.json")["types"].get(unit.unit_type.id, {}).get(name)
+    want = (own or model.load_json("payloads.json")["types"][unit.unit_type.id][name])["pylons"]
+    expect = {int(p): d["CLSID"] for p, d in want.items()}
     got = {int(p): d["CLSID"] for p, d in unit.pylons.items()}
     return got == expect
 
@@ -270,10 +270,8 @@ def package_section(tmp: Path) -> None:
     ipm = next(p for p in pg["strike"].points if p.name == "ИПМ")
     check(tgt.alt == 50 and ipm.alt == 300, "ударная группа: точка в зоне ЗРК - 50 м, вне зоны (ИПМ) - 300 м")
     check(attack_ids(pg["recon"]) == [], "доразведка: без AttackGroup по конкретной группе - цель ищет сама в районе")
-    arm = {d["CLSID"] for d in pg["sead"].units[0].pylons.values()}
-    want = {getattr(getattr(dcs.planes.Su_24M, f"Pylon{n}"), w)[1]["clsid"]
-            for n, w in model.load_json("loadouts.json")["Su_24M"]["sead"]["pylons"].items()}
-    check(pg["sead"].task == "SEAD" and arm == want, "Су-24М: задача DCS SEAD, подвеска ПРР из loadouts.json")
+    check(pg["sead"].task == "SEAD" and pylons_match(pg["sead"].units[0], "Retribution SEAD"),
+          "Су-24М: задача DCS SEAD, подвеска 'Retribution SEAD' (Х-58У, Р-60М, Л-081 на пилоне 5)")
     roe = [t for p in pg["recon"].points for t in p.tasks if type(t).__name__ == "OptROE"]
     zone = [t for p in pg["recon"].points for t in p.tasks if getattr(t, "id", None) == "EngageTargetsInZone"]
     orbit = [t for p in pg["recon"].points for t in p.tasks if getattr(t, "id", None) == "ControlledTask"]
@@ -879,6 +877,7 @@ def battle_site_section(tmp: Path, m, man: dict, st: dict) -> None:
 
 def air_section(tmp: Path) -> None:
     """Воздушная война (0.5): прикрытие в пакете, задача прикрытия войск, авиация противника в миссии и её потери."""
+    from redfront import weapons
     st = model.new_campaign("air")
     sim.end_day(st)
     planner.plan(st)
@@ -896,7 +895,7 @@ def air_section(tmp: Path) -> None:
     orb = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "ControlledTask"]
     check(zone and list(dict(zone[0].params["targetTypes"]).values()) == ["Air"] and orb and orb[0].params["stopCondition"] == {"time": t["strike"]["objective_s"] + 300}
           and red["cover"].points[1].alt == 3000
-          and {d["CLSID"] for d in red["cover"].units[0].pylons.values()} >= {dcs.planes.MiG_29_Fulcrum.Pylon3.R_27R__AA_10_Alamo_A____Semi_Act_Rdr_[1]["clsid"]},
+          and any("R-27R" in weapons.name_of(d["CLSID"]) for d in red["cover"].units[0].pylons.values()),
           f"прикрытие: зона 40 км над целью на 3000 м, перехват воздушных целей, до удара + 5 мин; МиГ-29 с Р-27Р и Р-73")
     en = [fl for fl in man["flights"] if fl.get("side") == "blue" and "_qra_" not in fl["group"]]
     own_ai = [fl for fl in man["flights"] if fl["group"].startswith("ai") and "_qra_" not in fl["group"]]
@@ -1648,7 +1647,7 @@ def core_section(tmp: Path) -> None:
     check(len(col["vehicles"]) == BASELINE["col_d1"], f"как в 0.1: {BASELINE['col_d1']} машин в колонне")
     check(abs(sum(v["weight"] for v in col["vehicles"]) - model.total(bn)) < 1e-6, "сумма весов колонны = исправной технике модели")
     fg = strike_group(m)
-    check(pylons_match(fg.units[0]), "подвеска Su_25/anti_armor из loadouts.json: ровно её пилоны")
+    check(pylons_match(fg.units[0]), "подвеска Су-25 по колонне - 'CAS' (своя: 2 Х-25МЛ, 2 ОФАБ-250-270, С-8, Р-60М): ровно её пилоны")
 
     # Позиция ЗРК развёрнута на ось угрозы. В 0.2 РЛС Patriot смотрела на север при угрозе с востока - в DCS не было ни засветки.
     sam = st["units"]["blue_patriot_1"]
@@ -1696,7 +1695,7 @@ def core_section(tmp: Path) -> None:
     md.load_file(str(tmp / "dflt.miz"))
     fgd = strike_group(md)
     check(n_default > 6 and pylons_match(fgd.units[0]),
-          f"при загрузке DCS по умолчанию ({n_default} пилонов) остаются только 6 пилонов из loadouts.json")
+          f"при загрузке DCS по умолчанию ({n_default} пилонов) остаётся только подвеска по задаче, без смешения")
 
     # плотность 0.5: машин меньше, сумма весов та же
     half = materialize.column(st, bn, density=0.5)
@@ -1780,8 +1779,8 @@ def core_section(tmp: Path) -> None:
     m3 = dcs.Mission(Germany())
     m3.load_file(str(tmp / "swap.miz"))
     fg3 = strike_group(m3)
-    check(fg3.units[0].type == "A-10A" and man3["sortie"] == 1,
-          "A_10A собран в .miz; подвески в loadouts.json нет - остаётся загрузка DCS по умолчанию")
+    check(fg3.units[0].type == "A-10A" and man3["sortie"] == 1 and fg3.units[0].pylons,
+          "A_10A собран в .miz с подвеской по задаче из DCS Retribution")
 
     st4 = model.new_campaign("blue", oob=BASE_OOB, sector=BASE_SECTOR, player_side="blue")
     check(planner.plan(st4) is None and st4["task_reason"], f"игрок за синих без своей авиации: задачи нет - {st4['task_reason']}")
@@ -2973,11 +2972,36 @@ def nato_section(tmp: Path) -> None:
     check(not any(t["kind"] in ("strike_bai", "strike_fofa") for t in ts79), "в 1979 году BAI (с 1980) и FOFA (с 1983) нет")
 
 
+def payload_section(tmp: Path) -> None:
+    """Подвески по задачам (payloads.json из DCS Retribution) и по году кампании (weapons.py)."""
+    from redfront import weapons
+    print("\n== Подвески по задачам и по году ==")
+    import dcs.planes as _P
+    sub = weapons.substitute(_P.F_16C_50, 3, "AIM-120C AMRAAM - Active Radar AAM", 1985)
+    check(sub and "AIM-9" in sub["name"], f"замена по роли на год: AIM-120C у F-16C в 1985 -> {sub and sub['name']}")
+    check(weapons.year_of("AIM-120C AMRAAM - Active Radar AAM") == 1996 and weapons.year_of("Mk-82 - 500lb GP Bomb LD") == 0
+          and weapons.year_of("AGM-65G - Maverick G") == 1989, "годы оружия: AIM-120C 1996, AGM-65G 1989, Mk-82 - без ограничения")
+    st = model.new_campaign("pl", sector="sector_germany.json", oob="oob_germany_1985.json", seed=7, player_side="blue")
+    planner.plan(st)
+    man = build.build(st, tmp / "pl.miz", task_no=1)
+    lines = [ln for ln in man["package_lines"] if "подвеска" in ln]
+    check(any("Retribution" in ln or "STRIKE" in ln or "CAS" in ln for ln in lines),
+          f"подвеска по виду задачи из payloads.json: {lines[0].split('подвеска')[-1][:80]}")
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "pl.miz"))
+    bad = [weapons.name_of(d["CLSID"]) for c in m.coalition["blue"].countries.values() for g in c.plane_group
+           for u in g.units for d in u.pylons.values() if weapons.year_of(weapons.name_of(d["CLSID"])) > 1985]
+    check(not bad, f"в .miz 1985 года нет оружия новее 1985 (было бы: {bad[:3]})")
+    from redfront import command
+    opts = command.loadouts("F_16C_50")
+    check(any(o.startswith("rt:") for o in opts), f"в редакторе плана - подвески Retribution на выбор ({len(opts)} у F-16C)")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section]
 
 
 def main() -> int:
