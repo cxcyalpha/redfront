@@ -70,6 +70,10 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
         kind = g["objective"]["kind"]
         if kind == "cap_zone":
             dwell = (g.get("cap_min") or 20) * 60
+        elif kind == "sweep_zone":               # расчистка воздуха - до выхода ударной группы на цель
+            dwell = -obj
+        elif kind == "feint":
+            dwell = (g.get("orbit_min") or 6) * 60
         elif kind in ("cover_zone", "sam"):
             dwell = -obj + (g.get("hold_after_min") or 5) * 60
         else:

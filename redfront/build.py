@@ -23,7 +23,7 @@ from dcs.translation import String
 from dcs.triggers import TriggerStart
 from dcs.unit import Skill
 
-from . import csar, dcstypes, materialize, model, planner
+from . import csar, dcstypes, intel, materialize, model, planner
 from .ato import MISSION_LEN_S as ATO_LEN_S
 from .ato import is_night as _ato_night
 
@@ -431,7 +431,7 @@ KIND_CATS = {   # категория подвески по виду задачи
     "strike_bridge": ["strike"], "strike_depot": ["strike"], "strike_factory": ["strike"],
     "cap_own_troops": ["cap"], "qra": ["cap"],
 }
-GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "recon": ["bai", "cas"]}
+GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"]}
 PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retribution (data/payloads.json), по порядку предпочтения
     "cas": ["Retribution CAS", "CAS"],
     "anti_armor": ["Retribution BAI", "Retribution CAS", "CAS"],
@@ -628,6 +628,33 @@ def _attack(group_id: int, ai: dict, altitude: int | None = None):
     return task.AttackGroup(group_id, weapon_type=getattr(task.WeaponType, a.get("weapon", "Auto")),
                             group_attack=bool(a.get("group_attack", False)), expend=getattr(task.Expend, a.get("expend", "Auto")),
                             altitude=altitude)
+
+
+SEAD_SEARCH_KM = 5     # ОЦЕНКА: поиск РЛС ЗРК без свежих данных - район радиусом неточность места + столько
+
+
+def sead_known(state: dict, side: str, sid: str) -> bool:
+    """Позиция ЗРК известна точно (свежие данные разведки) - пуск по нему заранее спланирован. Противник игрока
+    знает всё (как везде в модели)."""
+    return side != state.get("player_side") or intel_exact(state, sid)
+
+
+def intel_exact(state: dict, sid: str) -> bool:
+    """Свежие данные по ЗРК: войсковая ПВО (attached_to) - по данным о своей части; объектовая (fixed) - известна."""
+    u = state["units"][sid]
+    if intel.tracked(state, u):
+        return intel.level(state, sid) == "exact"
+    if u.get("attached_to") in state["units"]:
+        return intel_exact(state, u["attached_to"])
+    return True
+
+
+def _sead_zone(m, state: dict, sid: str):
+    """Нет свежих данных: поиск и поражение средств ПВО в районе, где ЗРК видели (EngageTargetsInZone, Air Defence)."""
+    u = state["units"][sid]
+    c = _pt(m, intel.known_pos(state, u) or model.unit_pos(state, u))
+    r = int((intel.unc_km(state, sid) + SEAD_SEARCH_KM) * 1000)
+    return task.EngageTargetsInZone(Vector2(c.x, c.y), r, [task.Targets.All.GroundUnits.AirDefence])
 
 
 def _engage(group_id: int, ai: dict, altitude: int | None = None):
@@ -1197,7 +1224,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                     wp(model.lerp(sam_pos, base, entry_km / total), transit, "Снижение", keep_alt=True)
                 w = wp(g["route"][0], low, "Рубеж атаки")
                 for sid in obj["units"]:
-                    w.tasks.append(_attack(vg_by_unit[sid].id, ai))
+                    w.tasks.append(_attack(vg_by_unit[sid].id, ai) if sead_known(state, side_g, sid)
+                                   else _sead_zone(m, state, sid))
             elif not sup.get("standoff_km"):     # доктрина без рубежа - атака с прохода по каждому ЗРК (как в 0.2)
                 for sid, p in zip(obj["units"], g["route"]):
                     w = wp(p, low, "Рубеж пуска")
@@ -1213,7 +1241,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                     wp(model.lerp(sam_pos, base, entry_km / total), transit, "Снижение", keep_alt=True)
                 w = wp(g["route"][0], low, "Рубеж пуска")             # подход к рубежу на предельно малой высоте
                 for sid in obj["units"]:                              # атака - по всем ЗРК коридора, пока идёт ожидание
-                    w.tasks.append(_engage(vg_by_unit[sid].id, ai, g.get("launch_alt_m")))
+                    # свежие данные разведки - по группе ЗРК (заранее спланированный пуск), иначе - поиск в районе
+                    w.tasks.append(_engage(vg_by_unit[sid].id, ai, g.get("launch_alt_m")) if sead_known(state, side_g, sid)
+                                   else _sead_zone(m, state, sid))
                 # ожидание: на высоте пуска, если рубеж вне зоны поражения любого из ЗРК, иначе на малой (ОЦЕНКА)
                 inside = any(model.dist_km(g["route"][0], model.unit_pos(state, state["units"][sid]))
                              - sup.get("orbit_radius_km", 0) <= planner.threat_radius_km(state["units"][sid]) for sid in obj["units"])
@@ -1252,14 +1282,22 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                             expend=getattr(task.Expend, a_.get("expend", "Auto")), group_attack=True,
                                             altitude=int(tdg.get("bomb_alt_m", 1000))))
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
-        elif obj["kind"] in ("cap_zone", "cover_zone"):   # прикрытие: зона над войсками / над районом удара
+        elif obj["kind"] == "feint":            # демонстративная: на средней высоте к точке другим направлением, круг, домой
+            alt = int(g.get("alt_m") or 4000)
+            w = fg.add_waypoint(_pt(m, obj["pos"]), alt, speed=spd, name="Демонстрация")
+            w.alt_type = "BARO"
+            orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
+            orbit.stop_after_duration(int((g.get("orbit_min") or 6) * 60))
+            w.tasks.append(orbit)
+        elif obj["kind"] in ("cap_zone", "cover_zone", "sweep_zone"):   # прикрытие / расчистка воздуха
             alt = int(g.get("alt_m") or 3000)
-            w = wp(obj["pos"], alt, "Зона прикрытия", keep_alt=True)
+            w = wp(obj["pos"], alt, "Зона расчистки" if obj["kind"] == "sweep_zone" else "Зона прикрытия", keep_alt=True)
             w.alt_type = "BARO"
             c = _pt(m, obj["pos"])
             w.tasks.append(task.EngageTargetsInZone(Vector2(c.x, c.y), int((g.get("zone_km") or 40) * 1000), [task.Targets.All.Air]))
             orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
             until = (times[g["group"]]["objective_s"] + int((g.get("cap_min") or 20) * 60)) if obj["kind"] == "cap_zone" \
+                else times["strike"]["objective_s"] if obj["kind"] == "sweep_zone" \
                 else (times["strike"]["objective_s"] + int((g.get("hold_after_min") or 5) * 60))
             orbit.stop_after_time(until)
             w.tasks.append(orbit)

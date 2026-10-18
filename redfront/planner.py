@@ -776,12 +776,19 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             continue
         if g["when"] == "enemy_fighters" and not enemy_fighters(state, perf["side"], tpos):
             continue
-        if g["when"] == "threats":
+        if g["when"] == "threats" and g.get("mode") in (None, "kill"):   # подавление и добивание - по ЗРК коридора
             objs = sorted((units[t] for t in threats),
                           key=lambda u: model.dist_km(state["airbases"][perf["base"]], model.unit_pos(state, u)))
             objective = {"kind": "sam", "units": [u["id"] for u in objs]}
             # одно ожидание - на рубеже по ближнему ЗРК; атака - по всем (в бою ЗРК стоят рядом)
             route_of = lambda base, g=g, objs=objs: [hold_point(state, objs[0], base, g)]
+        elif g.get("mode") == "sweep_zone":       # расчистка воздуха: зона на подходе (ИПМ ударной) до выхода удара на цель
+            objective = {"kind": "sweep_zone", "unit": tgt["id"], "pos": dict(ip)}
+            route_of = lambda base: [dict(ip)]
+        elif g.get("mode") == "feint":            # демонстративная: другим направлением на средней высоте, вне зон ЗРК
+            fp = feint_point(state, perf, ip, g, perf["side"])
+            objective = {"kind": "feint", "unit": tgt["id"], "pos": fp}
+            route_of = lambda base, fp=fp: [fp]
         elif g.get("mode") == "cover_zone":       # прикрытие группы: зона над целью на время удара
             objective = {"kind": "cover_zone", "unit": tgt["id"], "pos": tpos}
             route_of = lambda base: [tpos]
@@ -803,7 +810,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         # сначала те, чей тип умеет основную задачу группы (для подавления ПВО - SEAD), затем та же часть, что ударная, затем ближние
         # (killer - сначала с аэродрома своего hunter: смешанные пары одного крыла)
         gcls = fitness.group_class(g["maintask"], None)   # подавление ПВО - sead, прикрытие - air
-        cands.sort(key=lambda u: (pref.index(u["id"]) if u["id"] in pref else len(pref), bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
+        cands.sort(key=lambda u: (pref.index(u["id"]) if u["id"] in pref else len(pref),
+                                  bool(mate) and bool(g.get("prefer_other_type")) and u["type"] == mate["type"],
+                                  bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
                                   u["id"] != perf["id"],
                                   model.dist_km(state["airbases"][u["base"]], tpos)))
         chosen = None
@@ -835,6 +844,27 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     return groups, "; ".join(notes)
 
 
+def feint_point(state: dict, perf: dict, ip: dict, g: dict, side: str) -> dict:
+    """Точка демонстративной группы: направление от аэродрома ударной группы на ИПМ, повёрнутое на feint_deg
+    (в сторону, где меньше известных ЗРК), на 0.8 удаления ИПМ; ближе к своим - пока точка в зоне известного ЗРК."""
+    base = state["airbases"][perf["base"]]
+    d, brg = model.dist_km(base, ip), model.bearing_deg(base, ip)
+    foe = model.enemy(side)
+    sams = [u for u in state["units"].values() if u["side"] == foe and model.category(u) == "sam"
+            and u["state"] != "destroyed" and model.strength(u) > 0]
+    def inside(p):
+        return sum(1 for u in sams if model.dist_km(p, intel.known_pos(state, u) if side == state.get("player_side")
+                                                     else model.unit_pos(state, u)) <= threat_radius_km(u))
+    best = None
+    for sign in (1, -1):
+        for k in (0.8, 0.65, 0.5, 0.35):
+            p = model.offset(base, brg + sign * g.get("feint_deg", 40), d * k * 1000)
+            key = (inside(p), -k)
+            if best is None or key < best[0]:
+                best = (key, p)
+    return {"lat": best[1]["lat"], "lon": best[1]["lon"]}
+
+
 def nation_ok(state: dict, u: dict, g: dict) -> bool:
     """Национальность части годится для группы: nations - список или {нация: с какого года} (Tornado ECR ФРГ и ALARM
     RAF - с 1990)."""
@@ -849,7 +879,7 @@ def nation_ok(state: dict, u: dict, g: dict) -> bool:
 
 
 RV_KM = 40          # ОЦЕНКА: точка сбора тактической группы - за столько км до ИПМ ударной группы, над своей территорией
-RV_KINDS = ("column", "site", "point", "flyover", "search_zone", "cover_zone")   # идут через сбор; подавление ПВО - нет
+RV_KINDS = ("column", "site", "point", "flyover", "search_zone", "cover_zone", "sweep_zone")   # идут через сбор; подавление ПВО - нет
 
 
 def rendezvous(state: dict, tdef: dict, groups: list[dict]) -> None:

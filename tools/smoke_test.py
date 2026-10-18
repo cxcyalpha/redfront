@@ -226,12 +226,12 @@ def package_section(tmp: Path) -> None:
     st = model.new_campaign("pkg", oob=BASE_OOB, sector=BASE_SECTOR)
     tk = planner.plan(st)
     pk = {g["group"]: g for g in tk["package"]}
-    check(list(pk) == ["strike", "sead", "sead2", "recon"] and [g["size"] for g in pk.values()] == [4, 2, 2, 2],
-          "пакет: ударная - звено 4 + подавление ПВО 2 пары (ЗРК в коридоре) + доразведка 2 (цель на марше)")
-    check(pk["sead"]["objective"]["units"] == pk["sead2"]["objective"]["units"] == ["blue_flak_1"],
-          "обе пары подавления ПВО нацелены на войсковую ПВО колонны")
-    check(pk["strike"]["performer"] == "red_shap_1" and pk["sead"]["performer"] == pk["sead2"]["performer"] == "red_bap_1",
-          "подавление ПВО - Су-24М (умеет SEAD), ударная - Су-25")
+    check(list(pk) == ["strike", "sead", "recon", "kill"] and [g["size"] for g in pk.values()] == [4, 2, 2, 2],
+          "пакет: ударная - звено 4 + пара ПРР и пара добивания (ЗРК в коридоре) + доразведка 2 (цель на марше)")
+    check(pk["sead"]["objective"]["units"] == pk["kill"]["objective"]["units"] == ["blue_flak_1"],
+          "пара ПРР и пара добивания нацелены на войсковую ПВО колонны")
+    check(pk["strike"]["performer"] == "red_shap_1" and pk["sead"]["performer"] == "red_bap_1" and pk["kill"]["performer"] == "red_shap_1",
+          "подавление ПВО - Су-24М (умеет SEAD), добивание - другой тип (Су-25), ударная - Су-25")
     flak = st["units"]["blue_flak_1"]
     det, thr = planner.detection_radius_km(flak), planner.threat_radius_km(flak)
     sup = next(x for x in model.doctrine(st, "red")["tasks"]["strike_column_march"]["support"] if x["id"] == "sead")
@@ -240,6 +240,20 @@ def package_section(tmp: Path) -> None:
     check(det == 12 and thr == 8 and d_line == 10 and abs(d_hold - 13) < 0.05,
           f"рубеж пуска ПРР {d_line:.0f} км = обнаружение Roland {det:.0f} - 2, вне зоны поражения {thr:.0f}; центр круга ожидания {d_hold:.1f} км (+3)")
 
+    import copy as _copy
+    st_s = _copy.deepcopy(st)                   # без свежих данных разведки - поиск РЛС в районе
+    st_s.get("intel", {}).pop("blue_pzgren_bn_1", None)
+    build.build(st_s, tmp / "pkg_stale.miz")
+    ms = dcs.Mission(Germany())
+    ms.load_file(str(tmp / "pkg_stale.miz"))
+    pgs = {g.name.split(" ")[1]: g for g in plane_groups(ms)}
+    zs = [t for p in pgs["sead"].points for t in p.tasks if getattr(t, "id", None) == "EngageTargetsInZone"]
+    check(zs and not any(getattr(t, "id", None) == "EngageGroup" for p in pgs["sead"].points for t in p.tasks)
+          and "Air Defence" in str(zs[0].params["targetTypes"]),
+          "нет свежих данных разведки по ЗРК: пара ПРР ищет средства ПВО в районе, где их видели (не по группе)")
+    from redfront import intel as _intel
+    for sid in tk["threats"] + ["blue_pzgren_bn_1"]:   # разведка только что видела колонну с её ПВО - пуск по группе
+        _intel.seen(st, st["units"][sid].get("attached_to") or sid, "разведка", (st["day"] - 1) * 86400 + (tk.get("tot_s") or 0))
     man = build.build(st, tmp / "pkg.miz")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "pkg.miz"))
@@ -247,13 +261,14 @@ def package_section(tmp: Path) -> None:
     vgs = {g.name: g for c in m.coalition["blue"].countries.values() for g in c.vehicle_group}
     def attack_ids(g, kind="AttackGroup"):
         return [t.params["groupId"] for p in g.points for t in p.tasks if getattr(t, "id", None) == kind]
-    check(set(pg) == {"strike", "sead", "sead2", "recon"}, "в .miz четыре группы тактической группы")
+    check(set(pg) == {"strike", "sead", "kill", "recon"}, "в .miz четыре группы тактической группы")
     check(attack_ids(pg["strike"]) == [vgs["blue_pzgren_bn_1"].id], "ударная группа: AttackGroup по колонне")
-    check(attack_ids(pg["sead"], "EngageGroup") == attack_ids(pg["sead2"], "EngageGroup") == [vgs["blue_flak_1"].id]
-          and attack_ids(pg["sead"]) == [],
-          "каждая пара подавления ПВО - своей задачей EngageGroup (действует всё ожидание) по войсковой ПВО")
+    check(attack_ids(pg["sead"], "EngageGroup") == [vgs["blue_flak_1"].id] and attack_ids(pg["sead"]) == []
+          and attack_ids(pg["kill"]) == [vgs["blue_flak_1"].id]
+          and [p.name for p in pg["kill"].points[1:-1]] == ["Снижение", "Рубеж атаки", "Уход"],
+          "пара ПРР - EngageGroup на всё ожидание; пара добивания с её рубежа - AttackGroup по той же войсковой ПВО")
     t_ = build.timeline(model.doctrine(st, "red")["tasks"]["strike_column_march"], st, tk["package"], "strike")
-    for k in ("sead", "sead2"):
+    for k in ("sead",):
         pts_ = pg[k].points
         names = [p.name for p in pts_[1:-1]]
         att_ = next(t for p in pts_ for t in p.tasks if getattr(t, "id", None) == "EngageGroup")
@@ -264,8 +279,6 @@ def package_section(tmp: Path) -> None:
               and hold_.params["task"]["params"]["altitude"] == 1000
               and hold_.params["stopCondition"] == {"time": t_["strike"]["objective_s"] + 300},
               f"{k}: от аэродрома на 300 м, за 20 км до зоны ЗРК - снижение; подход и уход на {build.AI_LOW_MIN_M} м (ИИ не ниже); на рубеже круг на 1000 м до удара + 5 мин ({(t_['strike']['objective_s'] + 300) // 60} мин)")
-    check(pg["sead2"].start_time == pg["sead"].start_time + build.RUNWAY_GAP_S,
-          f"вторая пара взлетает через {build.RUNWAY_GAP_S} с после первой (не в одну секунду с одной полосы)")
     tgt = next(p for p in pg["strike"].points if p.name == "Цель")
     ipm = next(p for p in pg["strike"].points if p.name == "ИПМ")
     check(tgt.alt == 50 and ipm.alt == 300, "ударная группа: точка в зоне ЗРК - 50 м, вне зоны (ИПМ) - 300 м")
@@ -337,6 +350,9 @@ def patriot_close_section(tmp: Path) -> None:
     sead = next(g for g in tk["package"] if g["group"] == "sead")
     check(sorted(tk["threats"]) == ["blue_flak_1", "blue_patriot_1"] and set(sead["objective"]["units"]) == {"blue_flak_1", "blue_patriot_1"},
           "Patriot рядом с маршрутом: в коридоре, группа подавления - по обоим ЗРК")
+    from redfront import intel as _intel
+    for sid in tk["threats"]:                    # свежие данные разведки (перед вылетом) - пуск по группам ЗРК
+        _intel.seen(st, st["units"][sid].get("attached_to") or sid, "разведка", (st["day"] - 1) * 86400 + (tk.get("tot_s") or 0))
     build.build(st, tmp / "pclose.miz")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "pclose.miz"))
@@ -2532,7 +2548,8 @@ def command_section(tmp: Path) -> None:
     planner.plan(st)
     a = st["ato"]
     mine = [e for e in a["entries"] if e["side"] == "red" and not command._is_duty(st, e)]
-    e = mine[0]
+    # вылет с небольшим пакетом: у большого (расчистка, демонстрация) на 15:30 истребителей может не хватить - это верный отказ
+    e = next((x for x in mine if len(x["task"]["package"]) <= 3), mine[0])
     o = command.options(st, e["id"])
     g = o["groups"][0]
     alt = next(p for p in g["performers"] if p["id"] != g["performer"] and p["type"] != st["units"][g["performer"]]["type"])
@@ -2550,7 +2567,7 @@ def command_section(tmp: Path) -> None:
     # самолёты части - по всему плану: другой вылет в то же время той же частью сверх наличия не встаёт
     perf = st["units"][g0["performer"]]
     perf["count"] = 4                            # к вылету 4: 3 уже в этом вылете
-    other = next(x for x in mine[1:] if command.why_locked(st, x) is None
+    other = next(x for x in mine if x is not e and command.why_locked(st, x) is None
                  and perf["role"] in model.doctrine(st, "red")["tasks"][x["kind"]]["performers"]
                  and any(p_["id"] == perf["id"] for p_ in command.options(st, x["id"])["groups"][0]["performers"]))
     try:
@@ -3043,6 +3060,28 @@ def mixed_section(tmp: Path) -> None:
     desc = m.description_text()
     check(order and "Порядок действий группы" in desc and "Выход на объекты" in desc,
           "порядок: подавление ПВО -> доразведка -> удар; в брифинге - сбор и порядок выхода (T-минуты)")
+    from redfront import airwar
+    e_ = {"side": "red", "task": tk}
+    check(airwar.sead_factor(st, e_, tk["threats"]) in (airwar.SEAD_KNOWN, airwar.SEAD_SEARCH)
+          and airwar.sead_factor(st, {"side": "red", "task": {**tk, "package": tk["package"][:1]}}, tk["threats"]) == 1.0,
+          "вне миссии: подавление ПВО снижает потери от ЗРК коридора (по свежим данным - сильнее)")
+    # удар по аэродрому (ОВД): расчистка воздуха и демонстративная группа
+    sg = model.new_campaign("mixg", sector="sector_germany.json", oob="oob_germany_1987.json", seed=7)
+    sim.end_day(sg)
+    planner.plan(sg)
+    af = next((t for t in sg["tasks"] if any(g["group"] == "feint" for g in t["package"])), None)
+    if af:
+        pk2 = {g["group"]: g for g in af["package"]}
+        tdef2 = model.doctrine(sg, "red")["tasks"][af["kind"]]
+        t2 = build.timeline(tdef2, sg, af["package"], "strike")
+        fp = pk2["feint"]["route"][0]
+        hot = [u["name"] for u in sg["units"].values() if u["side"] == "blue" and model.category(u) == "sam"
+               and u["state"] != "destroyed" and model.dist_km(fp, model.unit_pos(sg, u)) <= planner.threat_radius_km(u)]
+        check("sweep" in pk2 and t2["sweep"]["objective_s"] < t2["sead"]["objective_s"] < t2["strike"]["objective_s"]
+              and t2["feint"]["objective_s"] < t2["strike"]["objective_s"] and pk2["feint"]["alt_m"] >= 3000,
+              f"удар по аэродрому: расчистка воздуха и демонстративная группа (средняя высота, другим направлением) - до подавления ПВО и удара; точка демонстрации в зонах ЗРК: {hot or 'нет'}")
+    else:
+        check(False, "в плане ОВД нет удара по аэродрому с демонстративной группой")
     # дебриф: самолёт ИИ разбился без попадания (уходил от ПВО) - потеря; исключение - только вертолёты с посадкой в поле
     ai = next(n for fl in man["flights"] if fl["group"] == "sead" for n in fl["units"])
     perf = st["units"][next(fl["performer"] for fl in man["flights"] if fl["group"] == "sead")]
