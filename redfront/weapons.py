@@ -144,3 +144,24 @@ def degrade(fg, year: int | None) -> list[str]:
     if notes:
         fg.__dict__.setdefault("_rf_degraded", []).extend(notes)
     return notes
+
+
+ARM = r"Kh-58|Kh-25MP|Kh-31P|Kh-28"
+FIXUPS = {   # тип: (образец оружия на подвеске, пилон, образец обязательного контейнера, почему)
+    "Su-24M": (ARM, 5, r"L-081|Fantasmagoria",
+               "ПРР Су-24М пускаются только с контейнером Л-081 'Фантасмагория' на пилоне 5 (проверено в DCS, Alex)"),
+}
+
+
+def fixups(fg) -> None:
+    """Обязательные дополнения подвески: у Су-24М с ПРР - Л-081 на пилоне 5 (без него ракеты не пускаются)."""
+    for u in fg.units:
+        rule = FIXUPS.get(u.unit_type.id)
+        if not rule:
+            continue
+        pat, num, pod, _why = rule
+        if any(re.search(pat, name_of(d.get("CLSID", "")), re.I) for d in u.pylons.values()) and \
+                not re.search(pod, name_of((u.pylons.get(num) or {}).get("CLSID", "")), re.I):
+            w = next((w for w in _pylon_options(u.unit_type, num) if re.search(pod, w["name"], re.I)), None)
+            if w:
+                u.pylons[num] = {"CLSID": w["clsid"]}

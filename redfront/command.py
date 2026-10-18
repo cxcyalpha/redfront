@@ -1,7 +1,7 @@
 """Режим командующего: правка плана полётов своей стороны (ATO) до вылета.
 
 Что можно: снять вылет (любой, в том числе дежурство и перевозку); у вылета задачи - перенести время на объекте,
-сменить у группы часть-исполнителя, число бортов и подвеску (категория loadouts.json или загрузка DCS по умолчанию);
+сменить у группы часть-исполнителя, число бортов и подвеску (подвеска DCS Retribution или по задаче автоматически);
 поставить вылет из задач, которые планировщик нашёл, но в план не взял (лимиты плана ato.ATO_MAX_TASKS / ATO_PER_KIND).
 Править можно только вылеты своей стороны, ещё не взлетевшие (взлёт не раньше часов кампании) и не слетанные.
 
@@ -155,8 +155,8 @@ def _reaches(state: dict, unit: dict, route: list[dict]) -> bool:
 
 
 def loadouts(type_name: str) -> list[str]:
-    """Подвески типа на выбор: свои категории (loadouts.json) и подвески по задачам DCS Retribution ('rt:имя')."""
-    own = [k for k in model.load_json("loadouts.json").get(type_name, {}) if not k.startswith("_")]
+    """Подвески типа на выбор: подвески по задачам DCS Retribution ('rt:имя')."""
+    own: list[str] = []
     from . import dcstypes
     try:
         dcs_id = dcstypes.flying(type_name).id
@@ -232,7 +232,7 @@ def edit(state: dict, eid: str, tot: str | None = None, groups: dict | None = No
             cat = ch["loadout"] or ""
             typ = state["units"][g["performer"]]["type"]
             if cat and cat not in loadouts(typ):
-                raise ValueError(f"{g['title']}: у {typ} нет подвески '{cat}' (loadouts.json, payloads.json)")
+                raise ValueError(f"{g['title']}: у {typ} нет подвески '{cat}' (payloads.json)")
             was = effective_loadout(g, typ)
             if cat != was:
                 g["loadout"] = [cat] + [c for c in g.get("loadout") or [] if c != cat] if cat else []

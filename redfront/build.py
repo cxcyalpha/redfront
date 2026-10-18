@@ -89,11 +89,6 @@ def _country(m: Mission, state: dict, side: str):
     return m.coalition[side].country(name)
 
 
-def _loadout(type_name: str, category: str) -> dict | None:
-    """Пилоны из loadouts.json для типа и категории подвески; None - оставить загрузку DCS по умолчанию для maintask."""
-    return model.load_json("loadouts.json").get(type_name, {}).get(category)
-
-
 def lua_hook(campaign_id: str, sortie: int, track: list[str]) -> str:
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     return (LUA.read_text(encoding="utf-8")
@@ -477,9 +472,9 @@ def _payload(ac, cat: str) -> tuple[str, dict] | None:
 
 
 def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None = None) -> str | None:
-    """Подвеска группы: первая категория, для которой есть запись - сначала свои (loadouts.json), затем подвески по
-    задачам DCS Retribution (payloads.json); затем - по году кампании (weapons.py: новее - замена своим по эпохе или
-    снятие). Ничего - загрузка DCS по умолчанию для maintask (None)."""
+    """Подвеска группы: первая категория, для которой есть подвеска по задачам DCS Retribution (payloads.json); затем -
+    по году кампании (weapons.py: новее - замена своим по эпохе или снятие) и обязательные дополнения (weapons.fixups).
+    Ничего - загрузка DCS по умолчанию для maintask (None)."""
     from . import weapons
     year = weapons.campaign_year(state) if state else None
     for cat in cats:
@@ -492,16 +487,8 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                         if int(num) in ac.pylons:
                             u.pylons[int(num)] = dict(d)
                 weapons.degrade(fg, year)
+                weapons.fixups(fg)
                 return cat[3:]
-            continue
-        lo = _loadout(type_name, cat)
-        if lo:
-            for u in fg.units:
-                u.reset_loadout()                # flight_group_from_airport уже повесил загрузку DCS для maintask: без сброса пилоны смешиваются
-                for pylon, wname in lo["pylons"].items():
-                    u.load_pylon(getattr(getattr(ac, f"Pylon{pylon}"), wname))
-            weapons.degrade(fg, year)
-            return cat
     for cat in cats:
         pl = _payload(ac, cat)
         if pl:
@@ -512,6 +499,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                     if int(num) in ac.pylons:
                         u.pylons[int(num)] = dict(d)
             weapons.degrade(fg, year)
+            weapons.fixups(fg)
             return f"{cat} ({name})"
     weapons.degrade(fg, year)
     return None
