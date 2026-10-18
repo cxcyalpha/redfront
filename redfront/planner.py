@@ -824,4 +824,33 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                            "search_min": g.get("search_min"), "zone_margin_km": g.get("zone_margin_km"),
                            "search_alt_m": g.get("search_alt_m"), "launch_alt_m": g.get("launch_alt_m"),
                            **{k: g[k] for k in ZONE_KEYS if k in g}})
+    rendezvous(state, tdef, groups)
     return groups, "; ".join(notes)
+
+
+RV_KM = 40          # ОЦЕНКА: точка сбора тактической группы - за столько км до ИПМ ударной группы, над своей территорией
+RV_KINDS = ("column", "site", "point", "flyover", "search_zone", "cover_zone")   # идут через сбор; подавление ПВО - нет
+
+
+def rendezvous(state: dict, tdef: dict, groups: list[dict]) -> None:
+    """Точка сбора пакета (RV): группы с разных аэродромов собираются в одной точке на линии база ударной - ИПМ,
+    оттуда выходят по порядку (lead_min: подавление ПВО - первым, затем доразведка и прикрытие, удар - последним).
+    Подавление ПВО идёт на свой рубеж пуска напрямую (раньше всех). Одна группа - без сбора."""
+    joining = [g for g in groups if g["objective"]["kind"] in RV_KINDS]
+    if len(groups) < 2 or len(joining) < 2 or groups[0] not in joining:
+        return
+    strike = groups[0]
+    base = state["airbases"][strike["base"]]
+    first = strike["route"][0]
+    d = model.dist_km(base, first)
+    rv_km = (tdef.get("package") or {}).get("rv_km", RV_KM)
+    if d < 20:                                   # цель рядом с аэродромом - сбор над аэродромом не нужен
+        return
+    rv = model.lerp(first, base, min(0.5, rv_km / d))
+    for g in joining:
+        g["rv"] = {"lat": rv["lat"], "lon": rv["lon"]}
+
+
+def route_points(g: dict) -> list[dict]:
+    """Маршрут группы от аэродрома: точка сбора пакета (если есть), затем точки задачи."""
+    return ([g["rv"]] if g.get("rv") else []) + list(g["route"])

@@ -64,7 +64,7 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
     for g in task["package"]:
         spd = model.group_speed_kmh(state, g, tdef) / 3.6      # скорость задачи доктрины
         base = state["airbases"][g["base"]]
-        fly = _path_km(base, g["route"]) * 1000 / spd
+        fly = _path_km(base, planner.route_points(g)) * 1000 / spd
         back = model.dist_km(g["route"][-1], base) * 1000 / spd
         obj = -g.get("lead_min", 0) * 60
         kind = g["objective"]["kind"]

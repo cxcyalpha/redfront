@@ -57,6 +57,17 @@ t["cap_own_troops"]["method_source"] = f"{RAND}, с. vii, 41: прикрытие
     "в воздухе (DCA); у ФРГ - второй приоритет после боя с первым эшелоном"
 
 t["strike_bai"], t["strike_fofa"] = bai, fofa
+# состав групп: у ВВС США ударная группа - звено (4-ship), у союзников по объектам - тоже звено (RAF Tornado GR.1 по
+# аэродромам - 4 с JP233), вооружённая разведка путей подвоза - пара, A-10 в Европе - парами (ОЦЕНКИ по открытым данным)
+SIZE_SRC = "ОЦЕНКА: удар по объекту и BAI/FOFA - звено (4), вооружённая разведка путей - пара, CAS (A-10 в Европе) - пара; " \
+           "прикрытие ударов в глубину (аэродромы, FOFA) - звено"
+for k, n in {"strike_airfield": 4, "strike_depot": 4, "strike_factory": 4, "strike_bridge": 4, "strike_sam_site": 4,
+             "strike_bai": 4, "strike_fofa": 4, "strike_supply_route": 2, "cas_contact": 2}.items():
+    t[k]["strike"]["size"], t[k]["strike"]["size_source"] = n, SIZE_SRC
+for k in ("strike_airfield", "strike_fofa"):
+    for g in t[k]["support"]:
+        if g["id"] == "cover":
+            g["size"], g["size_source"] = 4, SIZE_SRC
 FM100 = "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5"
 for k, v in t.items():                       # маршруты малой высоты (LLTR/MRR): к цели 100 футов, обратно - выше 500
     if v.get("method") in ("on_call", "interdiction", "sequential_on_call") and "attack_helo" not in v["performers"]:

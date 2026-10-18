@@ -2,6 +2,7 @@
   "_about": "Пакет доктрины 'Варшавский договор'. Работает с ролями (roles.json), не с типами техники. Поля source - раздел учебного пособия 'Тактика ВВС' (военная кафедра МГТУ МИРЭА); estimate=true / estimate_fields - число не из документа.",
   "package": "wp",
   "title": "Варшавский договор",
+  "size_note": "состав групп (size) - ОЦЕНКА по 'Тактика ВВС': удар по объекту и колонне - звено (4), свободная охота на путях подвоза - пара, НАП - звено штурмовиков, прикрытие удара по аэродрому - звено",
   "tasks": {
     "csar": {
       "title": "Поиск и спасение",
@@ -122,7 +123,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "CAS",
           "GroundAttack"
@@ -376,7 +377,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "CAS",
           "GroundAttack"
@@ -553,7 +554,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -842,7 +843,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -989,7 +990,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -1135,7 +1136,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -1218,7 +1219,7 @@
             "fighter",
             "interceptor"
           ],
-          "size": 2,
+          "size": 4,
           "maintask": [
             "CAP",
             "Escort"
@@ -1282,7 +1283,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "SEAD",
           "GroundAttack",
