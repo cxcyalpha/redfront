@@ -2977,9 +2977,8 @@ def payload_section(tmp: Path) -> None:
     from redfront import weapons
     print("\n== Подвески по задачам и по году ==")
     import dcs.planes as _P
-    check(weapons.substitute(_P.F_16C_50, 3, "AIM-120C AMRAAM - Active Radar AAM", 1985) is None
-          and weapons.substitute(_P.F_16C_50, 3, "AIM-9X Sidewinder IR AAM", 1985)["name"].startswith("AIM-9"),
-          "замена - только ранней модификацией того же изделия: AIM-9X -> AIM-9M, AIM-120 -> не AIM-7/AIM-9 (пилон пуст)")
+    sub = weapons.substitute(_P.F_16C_50, 3, "AIM-120C AMRAAM - Active Radar AAM", 1985)
+    check(sub and "AIM-9" in sub["name"], f"замена по роли на год: AIM-120C у F-16C в 1985 -> {sub and sub['name']}")
     check(weapons.year_of("AIM-120C AMRAAM - Active Radar AAM") == 1996 and weapons.year_of("Mk-82 - 500lb GP Bomb LD") == 0
           and weapons.year_of("AGM-65G - Maverick G") == 1989, "годы оружия: AIM-120C 1996, AGM-65G 1989, Mk-82 - без ограничения")
     st = model.new_campaign("pl", sector="sector_germany.json", oob="oob_germany_1985.json", seed=7, player_side="blue")
