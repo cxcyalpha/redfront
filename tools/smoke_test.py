@@ -2966,8 +2966,21 @@ def nato_section(tmp: Path) -> None:
     ok = all(15 <= farp.front_km(st, "red", t["target_pos"]) <= 50 for t in bai)
     check(ok, f"BAI - колонны в 15-50 км за передним краем ({len(bai)} задач)")
     sead = [g for t in reg for g in t["package"] if g["group"].startswith("sead")]
-    check(all(pilots.nation(st["units"][g["performer"]]) == "us" for g in sead),
+    check(all(pilots.nation(st["units"][g["performer"]]) == "us" for g in sead + [g for t in reg for g in t["package"] if g["group"] == "kill"]),
           f"подавление ПВО - только части США ({len(sead)} групп), союзники - без него")
+    hk = [t for t in reg if any(g["group"] == "kill" for g in t["package"])]
+    pk_ = {g["group"]: g for g in hk[0]["package"]} if hk else {}
+    check(hk and pk_["sead"]["performer"] == "b_52tfw" and pk_["kill"]["performer"] == "b_52tfw_f16"
+          and pk_["sead"]["objective"]["units"] == pk_["kill"]["objective"]["units"],
+          "hunter-killer: пара поиска с ПРР - 52-е крыло (F-4E вместо F-4G), пара добивания - F-16C того же крыла, по тем же ЗРК")
+    st90 = model.new_campaign("nato90", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    st90["date"] = "1990-06-01"
+    sim.end_day(st90)
+    ts90, _w = planner.plan_side(st90, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
+    nat90 = {pilots.nation(st90["units"][g["performer"]]) for t in ts90 for g in t["package"] if g["group"] == "sead"}
+    solo = all(not any(g["group"] == "kill" for g in t["package"]) for t in ts90
+               if any(g["group"] == "sead" and pilots.nation(st90["units"][g["performer"]]) != "us" for g in t["package"]))
+    check(nat90 & {"frg", "uk"} and solo, f"с 1990 SEAD своими силами - Tornado ECR (ФРГ) и ALARM (RAF), без пары добивания: {sorted(nat90)}")
     st["date"] = "1979-06-01"
     ts79, _w = planner.plan_side(st, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
     check(not any(t["kind"] in ("strike_bai", "strike_fofa") for t in ts79), "в 1979 году BAI (с 1980) и FOFA (с 1983) нет")

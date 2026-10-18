@@ -24,18 +24,35 @@ sead.update({"required": False, "nations": ["us"], "min_fit": 0.5, "performers":
                        "коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
              "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); "
                               "группа ставится, если есть часть США, которая может её дать"})
+# hunter-killer (52-е крыло, Шпангдахлем): пара поиска F-4G с ПРР (в DCS F-4G нет - F-4E с Shrike или F-16C с HARM) и
+# пара добивания F-4E/F-16C (CBU, Maverick) того же аэродрома; с 1990 SEAD своими средствами - Tornado ECR (ФРГ, HARM;
+# в DCS - Tornado IDS) и Tornado GR.1 с ALARM (RAF; в DCS - GR.4). Годы - ОЦЕНКИ по открытым данным.
+sead.update({"flights": 1, "prefer_units": ["b_52tfw", "b_52tfw_f16"], "title": "группа подавления ПВО (hunter)", "nations": {"us": 0, "frg": 1990, "uk": 1990},
+             "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; "
+                          "Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); "
+                          "Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"})
+kill = copy.deepcopy(sead)
+kill.update({"id": "kill", "title": "группа добивания ЗРК (killer)", "mode": "kill", "pair_with": "sead",
+             "nations": ["us"], "pair_nations": ["us"],
+             "prefer_units": ["b_52tfw_f16", "b_52tfw"], "maintask": ["GroundAttack", "CAS"], "loadout": ["dead", "anti_armor"], "lead_min": 2,
+             "min_fit": 0, "ai": {"react_on_threat": "EvadeFire", "restrict_jettison": True,
+                                  "attack": {"weapon": "Auto", "expend": "All", "group_attack": True}},
+             "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; "
+                          "ставится, только если назначена пара поиска"})
+for k_ in ("hold_after_min", "orbit_radius_km", "launch_alt_m", "sead_note", "required_note"):
+    kill.pop(k_, None)
 cover.update({"source": f"{RAND}, с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - "
                         "истребители прикрытия ударных групп"})
 for k in ("strike_airfield", "strike_bridge", "strike_depot", "strike_factory", "strike_sam_site"):
-    t[k]["support"] = [copy.deepcopy(sead), copy.deepcopy(cover)]
+    t[k]["support"] = [copy.deepcopy(sead), copy.deepcopy(kill), copy.deepcopy(cover)]
     t[k]["method_source"] = f"{ATP27}, 301-302: воздушная изоляция (AI) - удары за FSCL по военному потенциалу и по " \
                             "тому, что его ограничивает (управление, пути, тыл)"
-t["strike_supply_route"]["support"] = [copy.deepcopy(sead)]
+t["strike_supply_route"]["support"] = [copy.deepcopy(sead), copy.deepcopy(kill)]
 
 # BAI - удар по колоннам у переднего края (с ATP-27(B), 1980); FOFA - по вторым эшелонам в глубине (с 1983)
 col = copy.deepcopy(wp["tasks"]["strike_column_march"])
 col["performers"] = ["attack", "fighter_bomber", "bomber"]
-col["support"] = [copy.deepcopy(sead), copy.deepcopy(cover)]   # группа доразведки - понятие ВД (3.3.3), у НАТО - нет
+col["support"] = [copy.deepcopy(sead), copy.deepcopy(kill), copy.deepcopy(cover)]   # группа доразведки - понятие ВД (3.3.3), у НАТО - нет
 bai = copy.deepcopy(col)
 bai.update({"title": "Изоляция поля боя (BAI): колонна у переднего края", "from_year": 1980,
             "method_source": f"{RAND}, с. 28-33: BAI введена в ATP-27(B) (1980) по предложению Великобритании - удары "

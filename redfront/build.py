@@ -431,7 +431,7 @@ KIND_CATS = {   # категория подвески по виду задачи
     "strike_bridge": ["strike"], "strike_depot": ["strike"], "strike_factory": ["strike"],
     "cap_own_troops": ["cap"], "qra": ["cap"],
 }
-GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "recon": ["bai", "cas"]}
+GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "recon": ["bai", "cas"]}
 PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retribution (data/payloads.json), по порядку предпочтения
     "cas": ["Retribution CAS", "CAS"],
     "anti_armor": ["Retribution BAI", "Retribution CAS", "CAS"],
@@ -1189,7 +1189,16 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             low = tdg.get("low_alt_m_agl", transit)
             sup = support.get(g.get("support_id"), {})
             hold_until = times["strike"]["objective_s"] + int(sup.get("hold_after_min", 0) * 60)
-            if not sup.get("standoff_km"):       # доктрина без рубежа - атака с прохода по каждому ЗРК (как в 0.2)
+            if sup.get("mode") == "kill" and g["route"]:   # добивание (killer): за hunter на рубеж, оттуда атака каждого ЗРК
+                sam_pos = model.unit_pos(state, state["units"][obj["units"][0]])
+                entry_km = planner.threat_radius_km(state["units"][obj["units"][0]]) + LOW_ENTRY_KM
+                total = model.dist_km(base, sam_pos)
+                if total > entry_km + 5:
+                    wp(model.lerp(sam_pos, base, entry_km / total), transit, "Снижение", keep_alt=True)
+                w = wp(g["route"][0], low, "Рубеж атаки")
+                for sid in obj["units"]:
+                    w.tasks.append(_attack(vg_by_unit[sid].id, ai))
+            elif not sup.get("standoff_km"):     # доктрина без рубежа - атака с прохода по каждому ЗРК (как в 0.2)
                 for sid, p in zip(obj["units"], g["route"]):
                     w = wp(p, low, "Рубеж пуска")
                     w.tasks.append(_attack(vg_by_unit[sid].id, ai, g.get("launch_alt_m")))

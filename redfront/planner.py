@@ -768,6 +768,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                "maintask": s["maintask"], "loadout": s.get("loadout", []), "lead_min": 0, "ai": s.get("ai") or {},
                **{k: s[k] for k in ZONE_KEYS if k in s}}]
     notes = []
+    chosen_by: dict[str, dict] = {}
     for g in tdef.get("support", []):
         if g["when"] == "threats" and not threats:
             continue
@@ -793,11 +794,16 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         from . import pilots
         cands = [u for u in units.values()
                  if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need
-                 and (not g.get("nations") or pilots.nation(u) in g["nations"])    # НАТО: средства SEAD - только у США
+                 and nation_ok(state, u, g)          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
                  and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]
+        mate = chosen_by.get(g.get("pair_with") or "")
+        if g.get("pair_with") and (mate is None or (g.get("pair_nations") and pilots.nation(mate) not in g["pair_nations"])):
+            continue                             # добивание (killer) - только в паре с назначенной группой поиска (hunter) США
+        pref = g.get("prefer_units") or []       # специализированные части (Wild Weasel 52-го крыла) - первыми
         # сначала те, чей тип умеет основную задачу группы (для подавления ПВО - SEAD), затем та же часть, что ударная, затем ближние
+        # (killer - сначала с аэродрома своего hunter: смешанные пары одного крыла)
         gcls = fitness.group_class(g["maintask"], None)   # подавление ПВО - sead, прикрытие - air
-        cands.sort(key=lambda u: (not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
+        cands.sort(key=lambda u: (pref.index(u["id"]) if u["id"] in pref else len(pref), bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
                                   u["id"] != perf["id"],
                                   model.dist_km(state["airbases"][u["base"]], tpos)))
         chosen = None
@@ -814,6 +820,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             notes.append(msg + " - группа не назначена")
             continue
         avail[chosen["id"]] -= need
+        chosen_by[g["id"]] = chosen
         for k in range(flights):
             groups.append({"group": g["id"] if k == 0 else f"{g['id']}{k + 1}", "support_id": g["id"],
                            "title": g["title"] if flights == 1 else f"{g['title']}, пара {k + 1}",
@@ -826,6 +833,19 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                            **{k: g[k] for k in ZONE_KEYS if k in g}})
     rendezvous(state, tdef, groups)
     return groups, "; ".join(notes)
+
+
+def nation_ok(state: dict, u: dict, g: dict) -> bool:
+    """Национальность части годится для группы: nations - список или {нация: с какого года} (Tornado ECR ФРГ и ALARM
+    RAF - с 1990)."""
+    from . import pilots
+    nat = g.get("nations")
+    if not nat:
+        return True
+    n = pilots.nation(u)
+    if isinstance(nat, dict):
+        return n in nat and (campaign_year(state) or 9999) >= nat[n]
+    return n in nat
 
 
 RV_KM = 40          # ОЦЕНКА: точка сбора тактической группы - за столько км до ИПМ ударной группы, над своей территорией

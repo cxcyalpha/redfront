@@ -276,7 +276,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -317,17 +317,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         },
         {
           "id": "cover",
@@ -485,7 +551,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -526,17 +592,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         },
         {
           "id": "cover",
@@ -636,7 +768,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -677,17 +809,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         },
         {
           "id": "cover",
@@ -787,7 +985,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -828,17 +1026,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         },
         {
           "id": "cover",
@@ -941,7 +1205,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -982,17 +1246,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         }
       ],
       "timing": {
@@ -1065,7 +1395,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -1106,17 +1436,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         },
         {
           "id": "cover",
@@ -1219,7 +1615,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -1260,17 +1656,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         },
         {
           "id": "cover",
@@ -1373,7 +1835,7 @@
       "support": [
         {
           "id": "sead",
-          "title": "группа подавления ПВО",
+          "title": "группа подавления ПВО (hunter)",
           "when": "threats",
           "required": false,
           "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
@@ -1414,17 +1876,83 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
           "hold_after_min": 5,
           "launch_alt_m": 1000,
           "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+          "nations": {
+            "us": 0,
+            "frg": 1990,
+            "uk": 1990
+          },
+          "min_fit": 0.5,
+          "prefer_units": [
+            "b_52tfw",
+            "b_52tfw_f16"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК (killer)",
+          "when": "threats",
+          "required": false,
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+          "estimate_fields": [
+            "detect_margin_km",
+            "flights",
+            "hold_after_min",
+            "launch_alt_m",
+            "lead_min",
+            "orbit_radius_km",
+            "size",
+            "standoff_km"
+          ],
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "flights": 1,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
           "nations": [
             "us"
           ],
-          "min_fit": 0.5
+          "min_fit": 0,
+          "prefer_units": [
+            "b_52tfw_f16",
+            "b_52tfw"
+          ],
+          "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+          "mode": "kill",
+          "pair_with": "sead",
+          "pair_nations": [
+            "us"
+          ],
+          "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
         },
         {
           "id": "cover",
