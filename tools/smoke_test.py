@@ -3006,6 +3006,16 @@ def payload_section(tmp: Path) -> None:
     bad = [weapons.name_of(d["CLSID"]) for c in m.coalition["blue"].countries.values() for g in c.plane_group
            for u in g.units for d in u.pylons.values() if weapons.year_of(weapons.name_of(d["CLSID"])) > 1985]
     check(not bad, f"в .miz 1985 года нет оружия новее 1985 (было бы: {bad[:3]})")
+    fg = m.flight_group_inflight(m.country("USA"), "f4", _P.F_4E_45MC, m.terrain.airports["Spangdahlem"].position, 1000,
+                                 group_size=2)
+    build._apply_loadout(fg, _P.F_4E_45MC, "F_4E_45MC", ["sead"], {"date": "1989-06-01"})
+    arm = [d["CLSID"] for d in fg.units[1].pylons.values() if d["CLSID"] in (weapons.HARM,) or "AGM_45" in d["CLSID"]]
+    fg2 = m.flight_group_inflight(m.country("USA"), "f4b", _P.F_4E_45MC, m.terrain.airports["Spangdahlem"].position, 1000,
+                                  group_size=1)
+    build._apply_loadout(fg2, _P.F_4E_45MC, "F_4E_45MC", ["sead"], {"date": "1983-06-01"})
+    old_ = [d["CLSID"] for d in fg2.units[0].pylons.values() if "AGM_45" in d["CLSID"]]
+    check(arm and all(c == weapons.HARM for c in arm) and old_,
+          f"F-4E (вместо F-4G) в SEAD: с 1985 - HARM на пилонах Shrike ({len(arm)} шт.), в 1983 - Shrike ({len(old_)})")
     from redfront import command
     opts = command.loadouts("F_16C_50")
     check(any(o.startswith("rt:") for o in opts), f"в редакторе плана - подвески Retribution на выбор ({len(opts)} у F-16C)")

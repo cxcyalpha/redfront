@@ -497,7 +497,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                         if int(num) in ac.pylons:
                             u.pylons[int(num)] = dict(d)
                 weapons.degrade(fg, year)
-                weapons.fixups(fg)
+                weapons.fixups(fg, year)
                 return cat[3:]
     for cat in cats:
         pl = _payload(ac, cat, year)
@@ -509,7 +509,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                     if int(num) in ac.pylons:
                         u.pylons[int(num)] = dict(d)
             weapons.degrade(fg, year)
-            weapons.fixups(fg)
+            weapons.fixups(fg, year)
             return f"{cat} ({name})"
     weapons.degrade(fg, year)
     return None

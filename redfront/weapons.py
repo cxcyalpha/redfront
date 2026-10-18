@@ -156,8 +156,28 @@ FIXUPS = {   # тип: (образец оружия на подвеске, пи�
 }
 
 
-def fixups(fg) -> None:
-    """Обязательные дополнения подвески: у Су-24М с ПРР - Л-081 на пилоне 5 (без него ракеты не пускаются)."""
+HARM = "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"   # AGM-88C HARM (CLSID с пилона F-16C)
+SWAPS = {   # тип: (образец оружия, CLSID замены, имя замены, с какого года, почему) - замена вне списка пилонов pydcs
+    "F-4E-45MC": (r"AGM-45", HARM, "AGM-88C HARM", 1985,
+                  "F-4G Wild Weasel (в DCS нет) - F-4E с HARM на пилонах Shrike: подвеска из файла миссии работает "
+                  "в DCS и у игрока, принято на серверах и с проверкой целостности (Alex)"),
+}
+
+
+def fixups(fg, year: int | None = None) -> None:
+    """Обязательные дополнения подвески: у Су-24М с ПРР - Л-081 на пилоне 5 (без него ракеты не пускаются);
+    у F-4E с Shrike с 1985 - HARM на тех же пилонах (изображает F-4G)."""
+    for u in fg.units:
+        sw = SWAPS.get(u.unit_type.id)
+        if sw and (not year or year >= sw[3]):
+            hit = False
+            for num, d in list(u.pylons.items()):
+                if re.search(sw[0], name_of(d.get("CLSID", "")), re.I):
+                    u.pylons[num] = {"CLSID": sw[1]}
+                    hit = True
+            note = f"Shrike -> {sw[2]} (F-4G)"
+            if hit and note not in fg.__dict__.setdefault("_rf_degraded", []):
+                fg.__dict__["_rf_degraded"].append(note)
     for u in fg.units:
         rule = FIXUPS.get(u.unit_type.id)
         if not rule:
