@@ -2973,11 +2973,33 @@ def nato_section(tmp: Path) -> None:
     check(not any(t["kind"] in ("strike_bai", "strike_fofa") for t in ts79), "в 1979 году BAI (с 1980) и FOFA (с 1983) нет")
 
 
+def payload_section(tmp: Path) -> None:
+    """Подвески по задачам (payloads.json из DCS Retribution) и по году кампании (weapons.py)."""
+    from redfront import weapons
+    print("\n== Подвески по задачам и по году ==")
+    check(weapons.year_of("AIM-120C AMRAAM - Active Radar AAM") == 1996 and weapons.year_of("Mk-82 - 500lb GP Bomb LD") == 0
+          and weapons.year_of("AGM-65G - Maverick G") == 1989, "годы оружия: AIM-120C 1996, AGM-65G 1989, Mk-82 - без ограничения")
+    st = model.new_campaign("pl", sector="sector_germany.json", oob="oob_germany_1985.json", seed=7, player_side="blue")
+    planner.plan(st)
+    man = build.build(st, tmp / "pl.miz", task_no=1)
+    lines = [ln for ln in man["package_lines"] if "подвеска" in ln]
+    check(any("Retribution" in ln or "STRIKE" in ln or "CAS" in ln for ln in lines),
+          f"подвеска по виду задачи из payloads.json: {lines[0].split('подвеска')[-1][:80]}")
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "pl.miz"))
+    bad = [weapons.name_of(d["CLSID"]) for c in m.coalition["blue"].countries.values() for g in c.plane_group
+           for u in g.units for d in u.pylons.values() if weapons.year_of(weapons.name_of(d["CLSID"])) > 1985]
+    check(not bad, f"в .miz 1985 года нет оружия новее 1985 (было бы: {bad[:3]})")
+    from redfront import command
+    opts = command.loadouts("F_16C_50")
+    check(any(o.startswith("rt:") for o in opts), f"в редакторе плана - подвески Retribution на выбор ({len(opts)} у F-16C)")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section]
 
 
 def main() -> int:

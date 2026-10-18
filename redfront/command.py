@@ -155,13 +155,23 @@ def _reaches(state: dict, unit: dict, route: list[dict]) -> bool:
 
 
 def loadouts(type_name: str) -> list[str]:
-    return [k for k in model.load_json("loadouts.json").get(type_name, {}) if not k.startswith("_")]
+    """Подвески типа на выбор: свои категории (loadouts.json) и подвески по задачам DCS Retribution ('rt:имя')."""
+    own = [k for k in model.load_json("loadouts.json").get(type_name, {}) if not k.startswith("_")]
+    from . import dcstypes
+    try:
+        dcs_id = dcstypes.flying(type_name).id
+    except KeyError:
+        return own
+    rt = [f"rt:{k}" for k, v in (model.load_json("payloads.json").get("types", {}).get(dcs_id) or {}).items() if v["pylons"]]
+    return own + rt
 
 
 def effective_loadout(g: dict, type_name: str) -> str:
-    """Подвеска группы в миссии: первая категория списка, которая есть у типа (build._apply_loadout); '' - DCS."""
+    """Подвеска, выбранная для группы командующим (loadout_user), иначе первая своя категория списка; '' - по задаче."""
     have = loadouts(type_name)
-    return next((c for c in g.get("loadout") or [] if c in have), "")
+    if g.get("loadout_user"):
+        return g["loadout"][0] if g.get("loadout") else ""
+    return next((c for c in g.get("loadout") or [] if c in have and not c.startswith("rt:")), "")
 
 
 def options(state: dict, eid: str) -> dict:
@@ -222,10 +232,11 @@ def edit(state: dict, eid: str, tot: str | None = None, groups: dict | None = No
             cat = ch["loadout"] or ""
             typ = state["units"][g["performer"]]["type"]
             if cat and cat not in loadouts(typ):
-                raise ValueError(f"{g['title']}: у {typ} нет подвески '{cat}' (loadouts.json)")
+                raise ValueError(f"{g['title']}: у {typ} нет подвески '{cat}' (loadouts.json, payloads.json)")
             was = effective_loadout(g, typ)
             if cat != was:
                 g["loadout"] = [cat] + [c for c in g.get("loadout") or [] if c != cat] if cat else []
+                g["loadout_user"] = bool(cat)    # выбор командующего - первым, раньше подвески по виду задачи
                 lines.append(f"{g['title']}: подвеска {cat or 'DCS по умолчанию'}.")
         if g["group"] == "strike":
             new["task"]["group_size"] = g["size"]

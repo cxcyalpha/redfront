@@ -8,6 +8,7 @@ import copy
 import datetime
 import json
 import math
+import re
 import tempfile
 from pathlib import Path
 
@@ -429,16 +430,90 @@ def _maintask(ac, prefs: list[str]):
     return ac.task_default or getattr(task, prefs[0])
 
 
-def _apply_loadout(fg, ac, type_name: str, cats: list[str]) -> str | None:
-    """Первая категория подвески из списка, для которой есть запись в loadouts.json; None - загрузка DCS по умолчанию."""
+KIND_CATS = {   # категория подвески по виду задачи - первой (затем категории группы из доктрины)
+    "strike_airfield": ["runway"], "strike_sam_site": ["dead"], "cas_contact": ["cas"], "cas_helo": ["cas"],
+    "strike_column_march": ["bai"], "strike_bai": ["bai"], "strike_fofa": ["bai"], "strike_supply_route": ["bai"],
+    "strike_bridge": ["strike"], "strike_depot": ["strike"], "strike_factory": ["strike"],
+    "cap_own_troops": ["cap"], "qra": ["cap"],
+}
+GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "recon": ["bai", "cas"]}
+PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retribution (data/payloads.json), по порядку предпочтения
+    "cas": ["Retribution CAS", "CAS"],
+    "anti_armor": ["Retribution BAI", "Retribution CAS", "CAS"],
+    "bai": ["Retribution BAI", "Retribution CAS", "CAS", "Retribution Strike", "STRIKE"],
+    "strike": ["Retribution Strike", "STRIKE", "Retribution BAI"],
+    "bombs": ["Retribution Strike", "STRIKE", "Retribution BAI"],
+    "runway": ["Retribution OCA/Runway", "Retribution Strike", "STRIKE"],
+    "sead": ["Retribution SEAD", "SEAD", "Retribution SEAD Sweep", "Retribution SEAD Escort"],
+    "dead": ["Retribution DEAD", "Retribution SEAD", "SEAD", "Retribution Strike", "STRIKE"],
+    "cap": ["Retribution BARCAP", "Retribution TARCAP", "CAP", "Retribution Fighter Sweep"],
+    "escort": ["Retribution Escort", "Retribution TARCAP", "CAP", "Retribution BARCAP"],
+}
+
+
+def loadout_cats(kind: str, g: dict) -> list[str]:
+    """Категории подвески группы по порядку: вид задачи (для ударной группы) или роль группы обеспечения, затем
+    категории доктрины (loadout группы)."""
+    first = [] if g.get("loadout_user") else \
+        GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], []) if g.get("group") != "strike" \
+        else KIND_CATS.get(kind, [])
+    out = []
+    for c in first + list(g.get("loadout") or []):
+        if c not in out:
+            out.append(c)
+    return out
+
+
+def _payload(ac, cat: str) -> tuple[str, dict] | None:
+    """Подвеска DCS Retribution для типа и категории: (имя, пилоты) или None."""
+    types = model.load_json("payloads.json").get("types", {})
+    pls = types.get(ac.id) or {}
+    low = {k.lower(): k for k in pls}
+    for name in PAYLOAD_NAMES.get(cat, []):
+        k = low.get(name.lower())
+        if k and pls[k]["pylons"]:
+            return k, pls[k]["pylons"]
+    return None
+
+
+def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None = None) -> str | None:
+    """Подвеска группы: первая категория, для которой есть запись - сначала свои (loadouts.json), затем подвески по
+    задачам DCS Retribution (payloads.json); затем - по году кампании (weapons.py: новее - замена своим по эпохе или
+    снятие). Ничего - загрузка DCS по умолчанию для maintask (None)."""
+    from . import weapons
+    year = weapons.campaign_year(state) if state else None
     for cat in cats:
+        if cat.startswith("rt:"):                # подвеска DCS Retribution по имени (выбор командующего)
+            pls = (model.load_json("payloads.json").get("types", {}).get(ac.id) or {}).get(cat[3:])
+            if pls and pls["pylons"]:
+                for u in fg.units:
+                    u.reset_loadout()
+                    for num, d in pls["pylons"].items():
+                        if int(num) in ac.pylons:
+                            u.pylons[int(num)] = dict(d)
+                weapons.degrade(fg, year)
+                return cat[3:]
+            continue
         lo = _loadout(type_name, cat)
         if lo:
             for u in fg.units:
                 u.reset_loadout()                # flight_group_from_airport уже повесил загрузку DCS для maintask: без сброса пилоны смешиваются
                 for pylon, wname in lo["pylons"].items():
                     u.load_pylon(getattr(getattr(ac, f"Pylon{pylon}"), wname))
+            weapons.degrade(fg, year)
             return cat
+    for cat in cats:
+        pl = _payload(ac, cat)
+        if pl:
+            name, pylons = pl
+            for u in fg.units:
+                u.reset_loadout()
+                for num, d in pylons.items():
+                    if int(num) in ac.pylons:
+                        u.pylons[int(num)] = dict(d)
+            weapons.degrade(fg, year)
+            return f"{cat} ({name})"
+    weapons.degrade(fg, year)
     return None
 
 
@@ -645,7 +720,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             times[key] = {"start_s": 0, "late_s": 0, "objective_s": 0}
             used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
             g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
-                      "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"]})
+                      "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"], "_kind": e["kind"]})
             out.append(g)
             continue
         if not e["ai_only"] and n[enemy] >= AI_FLIGHTS["enemy" if enemy else "own"]:
@@ -690,7 +765,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             times[key] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
         used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
         g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
-                  "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"]})
+                  "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"], "_kind": e["kind"]})
         out.append(g)
     return out
 
@@ -869,7 +944,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                                  airport, maintask=mt, start_type=StartType.Runway, group_size=g["size"])
             _crew(state, fg, perf)
             fg.late_activation = True
-            _apply_loadout(fg, ac, perf["type"], g["loadout"])
+            _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
             for u in fg.units:
                 u.skill = Skill.High
             alt = int(g.get("alt_m") or tdg.get("cap_alt_m", 6000))
@@ -918,7 +993,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             runway_slots.add((base["airport"], st_s))
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
-        cat = _apply_loadout(fg, ac, perf["type"], g["loadout"])
+        cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
         needs_mod = False
         for u in fg.units[:hum] if is_player else []:
             needs_mod = _set_player(u, client=multi) or needs_mod
@@ -1179,7 +1254,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                      + (f", ОПАЗДЫВАЕТ на {t['late_s'] // 60} мин" if t["late_s"] else "")
                      + (f", ожидание на рубеже пуска ({g['hold']['launch_km']:.0f} км от ЗРК) на {g['hold']['alt_m']} м до ~{g['hold']['until_s'] // 60} мин"
                         if g.get("hold") else "")
-                     + f"; задача DCS {mt.name}, подвеска {cat or 'DCS по умолчанию'}")
+                     + f"; задача DCS {mt.name}, подвеска {cat or 'DCS по умолчанию'}"
+                     + (f" (по году: {'; '.join(fg.__dict__.get('_rf_degraded', [])[:4])})" if fg.__dict__.get("_rf_degraded") else ""))
         flights.append({"group": g["group"], "performer": perf["id"], "units": [u.name for u in fg.units], "player": is_player,
                         "humans": [u.name for u in fg.units[:hum]] if is_player else [],
                         **({"ato": g["_ato"]} if g.get("_ato") else {})})
