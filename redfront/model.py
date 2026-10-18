@@ -47,7 +47,7 @@ def aircraft_info(type_name: str | None) -> dict:
 
 def group_speed_kmh(state: dict, g: dict, tdef: dict) -> float:
     """Скорость группы на маршруте и в расчёте времени - скорость задачи доктрины (speed_kmh; ОЦЕНКА)."""
-    return tdef["speed_kmh"]
+    return g.get("speed_kmh") or tdef["speed_kmh"]   # вертолёты в совместном пакете - своя скорость
 
 
 # ---------- роли и доктрина ----------

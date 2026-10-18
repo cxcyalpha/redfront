@@ -64,6 +64,7 @@ FALLBACK = {   # семейство (образец) -> замены по пор
     r"Kh-29|Kh-38|Kh-59": [r"Kh-29", r"Kh-25ML", r"Kh-23"],
     r"KAB-500S": [r"KAB-500Kr", r"KAB-500L"],
     r"9M127|Vikhr": [r"S-8KOM", r"S-5"],
+    r"9M120|Ataka": [r"9M114|Shturm", r"S-8", r"S-5"],
     r"S-8": [r"S-5", r"S-24"],
     r"APKWS": [r"M151", r"Hydra", r"FFAR"],
     r"ALARM": [r"Shrike|AGM-45"],

@@ -331,7 +331,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             reasons.append(f"{tdef['title']}: целей нет")
     orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
     regular = apportion(state, doc, [t for t in tasks if not t.get("ai_only")], max_tasks)
-    return regular[:max_tasks] + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
+    return joint_heli(state, side, regular[:max_tasks]) + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
 
 
 def orbit_point(state: dict, side: str, standoff_km: float) -> dict | None:
@@ -548,15 +548,78 @@ def csar_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[d
              "route": [dict(d["pos"])], "objective": {"kind": "csar", "downed": d["id"], "pos": dict(d["pos"])},
              "maintask": s["maintask"], "loadout": [], "lead_min": 0, "ai": {}, "alt_m": tdef["transit_alt_m_agl"]}
         tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        pkg = [g]
+        heli_escort(state, side, tdef, perf, d["pos"], pkg, tasked, size)
         out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {csar.title(state, d)}",
                     "performer": perf["id"], "target": d["id"], "group_size": size, "base": perf["base"],
                     "target_pos": dict(d["pos"]), "ip": dict(d["pos"]), "distance_km": round(km, 1),
                     "threats": corridor_threats(state, [(base, d["pos"])], foe, tdef.get("low_alt_m_agl")),
-                    "package": [g], "package_notes": f"маяк {d['freq_khz']} кГц (АРК / ADF); на земле с суток {d['day']}"})
+                    "package": pkg, "package_notes": f"маяк {d['freq_khz']} кГц (АРК / ADF); на земле с суток {d['day']}"})
     return out
 
 
 GROUP_MAX = 4   # бортов в группе ЛА DCS
+
+
+def heli_escort(state: dict, side: str, tdef: dict, perf: dict, lz: dict, groups: list[dict], tasked: dict,
+                lift: int) -> None:
+    """Прикрытие транспортных вертолётов (tdef.escort): пара ударных вертолётов (звено - если транспортных больше
+    big_from), выходит на площадку за lead_min до посадки, обрабатывает район и держит его, пока транспортные на земле.
+    Исполнитель - ближняя часть ударных вертолётов в радиусе (не та, что везёт); нет - без прикрытия."""
+    esc = tdef.get("escort")
+    if not esc:
+        return
+    size = esc.get("size_big", 4) if lift > esc.get("big_from", 4) else esc.get("size", 2)
+    best = None
+    for u in state["units"].values():
+        if u["side"] != side or u["role"] not in esc.get("performers", ["attack_helo"]) or u["id"] == perf["id"]:
+            continue
+        n = min(size, logistics.available(state, u))
+        if n < 2:
+            continue
+        km = model.dist_km(state["airbases"][u["base"]], lz)
+        radius = strike_radius_km(u)
+        if radius is not None and km > radius:
+            continue
+        key = (tasked.get(u["id"], 0), km)
+        if best is None or key < best[0]:
+            best = (key, u, n)
+    if best is None:
+        return
+    _k, u, n = best
+    tasked[u["id"]] = tasked.get(u["id"], 0) + 1
+    groups.append({"group": "escort", "title": esc.get("title", "группа прикрытия вертолётов"), "performer": u["id"],
+                   "size": n, "base": u["base"], "route": [dict(lz)], "objective": {"kind": "escort_lz", "pos": dict(lz)},
+                   "maintask": esc.get("maintask", ["CAS", "GroundAttack"]), "loadout": esc.get("loadout", ["cas"]),
+                   "lead_min": esc.get("lead_min", 2), "ai": {}, "alt_m": tdef["transit_alt_m_agl"],
+                   "zone_km": esc.get("zone_km", 3), "land_s": tdef.get("land_s", 120)})
+
+
+JAAT_FW = ("cas_contact", "strike_column_march", "strike_bai")   # удары самолётов, с которыми сводятся вертолёты
+
+
+def joint_heli(state: dict, side: str, tasks: list[dict]) -> list[dict]:
+    """Совместный удар (НАТО - JAAT, ОВД - Ми-24 с Су-25): удар вертолётов и удар самолётов по одной цели сводятся в
+    один пакет; вертолёты выходят на цель за lead_min до самолётов (по ПВО и головным машинам). doctrine.joint_heli."""
+    jd = model.doctrine(state, side).get("joint_heli")
+    if not jd:
+        return tasks
+    heli_tdef = model.doctrine(state, side)["tasks"].get("cas_helo")
+    out = list(tasks)
+    for th in [t for t in tasks if t["kind"] == "cas_helo" and t.get("target")]:
+        fw = next((t for t in out if t["kind"] in JAAT_FW and t.get("target") == th["target"] and not t.get("_joint")), None)
+        if fw is None or heli_tdef is None:
+            continue
+        for g in th["package"]:
+            g = dict(g)
+            g["group"] = "helo" if g["group"] == "strike" else f"helo_{g['group']}"
+            g["lead_min"] = (g.get("lead_min") or 0) + jd.get("lead_min", 2)
+            g["jaat_kind"], g["speed_kmh"] = "cas_helo", heli_tdef["speed_kmh"]
+            fw["package"].append(g)
+        fw["_joint"] = True
+        fw["title"] += f" (совместно с вертолётами {state['units'][th['performer']]['name']})"
+        out.remove(th)
+    return out
 
 
 def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict], tasked: dict) -> list[dict]:
@@ -606,6 +669,7 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                                "maintask": s["maintask"], "loadout": [], "lead_min": -k // GROUP_MAX, "ai": {},
                                "alt_m": tdef["transit_alt_m_agl"]})
             tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+            heli_escort(state, side, tdef, perf, lz, groups, tasked, need)
             used.add(place)
             out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}",
                         "performer": perf["id"], "target": u["id"], "group_size": need, "base": perf["base"],
@@ -654,6 +718,7 @@ def evac_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[d
                            "maintask": s["maintask"], "loadout": [], "lead_min": -k // GROUP_MAX, "ai": {},
                            "alt_m": tdef["transit_alt_m_agl"]})
         tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        heli_escort(state, side, tdef, perf, lz, groups, tasked, need)
         out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}",
                     "performer": perf["id"], "target": u["id"], "group_size": need, "base": perf["base"],
                     "target_pos": lz, "ip": lz, "distance_km": round(km, 1), "threats": threats, "package": groups,
@@ -776,6 +841,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             continue
         if g["when"] == "enemy_fighters" and not enemy_fighters(state, perf["side"], tpos):
             continue
+        if g.get("types") and perf["type"] in g["types"]:   # разведчик-наводчик не нужен, если ударная - сама такого типа
+            continue
         if g["when"] == "threats" and g.get("mode") in (None, "kill"):   # подавление и добивание - по ЗРК коридора
             objs = sorted((units[t] for t in threats),
                           key=lambda u: model.dist_km(state["airbases"][perf["base"]], model.unit_pos(state, u)))
@@ -801,7 +868,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         from . import pilots
         cands = [u for u in units.values()
                  if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need
-                 and nation_ok(state, u, g)          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
+                 and nation_ok(state, u, g) and (not g.get("types") or u.get("type") in g["types"])          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
                  and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]
         mate = chosen_by.get(g.get("pair_with") or "")
         if g.get("pair_with") and (mate is None or (g.get("pair_nations") and pilots.nation(mate) not in g["pair_nations"])):

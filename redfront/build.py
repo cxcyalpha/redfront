@@ -431,7 +431,7 @@ KIND_CATS = {   # категория подвески по виду задачи
     "strike_bridge": ["strike"], "strike_depot": ["strike"], "strike_factory": ["strike"],
     "cap_own_troops": ["cap"], "qra": ["cap"],
 }
-GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"]}
+GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "escort": ["cas"], "helo": ["cas"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"]}
 PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retribution (data/payloads.json), по порядку предпочтения
     "cas": ["Retribution CAS", "CAS"],
     "anti_armor": ["Retribution BAI", "Retribution CAS", "CAS"],
@@ -967,7 +967,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     ctld_lines: list[str] = []
     enemy = air_activity(state, tk, times, sortie, m0)
     for g in pkg + enemy:
-        tdg = g.get("_tdef") or tdef             # группы противника - по его пакету доктрины
+        tdg = g.get("_tdef") or (model.doctrine(state, g.get("_side", tk["side"]))["tasks"].get(g["jaat_kind"]) if g.get("jaat_kind") else None) \
+            or tdef                              # группы противника - по его пакету доктрины; вертолёты совместного удара - по своей
         side_g = g.get("_side", tk["side"])
         spd = model.group_speed_kmh(state, g, tdg)   # скорость задачи доктрины
         transit = g.get("transit_alt_m_agl") or tdg["transit_alt_m_agl"]   # средние высоты, если угроз в коридоре нет (planner)
@@ -1282,6 +1283,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                             expend=getattr(task.Expend, a_.get("expend", "Auto")), group_attack=True,
                                             altitude=int(tdg.get("bomb_alt_m", 1000))))
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
+        elif obj["kind"] == "escort_lz":         # прикрытие вертолётов: к площадке, обработка района, пока транспортные на земле
+            w = wp(obj["pos"], int(g.get("alt_m") or transit), "Площадка (прикрытие)")
+            c = _pt(m, obj["pos"])
+            w.tasks.append(task.EngageTargetsInZone(Vector2(c.x, c.y), int((g.get("zone_km") or 3) * 1000), [task.Targets.All.GroundUnits]))
+            orbit = task.ControlledTask(task.OrbitAction(altitude=int(g.get("alt_m") or transit), speed=spd,
+                                                         pattern=task.OrbitAction.OrbitPattern.Circle))
+            orbit.stop_after_time(times["strike"]["objective_s"] + int(g.get("land_s") or 120) + 120)
+            w.tasks.append(orbit)
         elif obj["kind"] == "feint":            # демонстративная: на средней высоте к точке другим направлением, круг, домой
             alt = int(g.get("alt_m") or 4000)
             w = fg.add_waypoint(_pt(m, obj["pos"]), alt, speed=spd, name="Демонстрация")

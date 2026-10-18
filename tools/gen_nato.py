@@ -85,6 +85,17 @@ for k in ("strike_airfield", "strike_fofa"):
     for g in t[k]["support"]:
         if g["id"] == "cover":
             g["size"], g["size_source"] = 4, SIZE_SRC
+# вертолёты: прикрытие транспортных, ударные - ротой (4), разведчик-наводчик SA342 (Gazelle) при AH-64, JAAT с A-10
+ESC = {'title': 'группа прикрытия (ударные вертолёты)', 'performers': ['attack_helo'], 'size': 2, 'size_big': 4, 'big_from': 4, 'lead_min': 2, 'zone_km': 3, 'maintask': ['CAS', 'GroundAttack'], 'loadout': ['cas'], 'source': 'ОЦЕНКА по FM 1-112/FM 90-4 (аэромобильные действия): ударные вертолёты сопровождают транспортные и готовят площадку огнём; поиск и спасение - с прикрытием'}
+for k_ in ("air_assault", "air_evac", "csar"):
+    t[k_]["escort"] = copy.deepcopy(ESC)
+t["cas_helo"]["strike"]["size"] = 4
+t["cas_helo"]["support"] = [{"id": "scout", "title": "разведчик-наводчик (SA342)", "when": "always", "required": False,
+                             "performers": ["attack_helo"], "types": ["SA342M", "SA342L", "SA342Minigun", "SA342Mistral"],
+                             "size": 2, "maintask": ["CAS", "GroundAttack"], "loadout": ["cas"], "lead_min": 3,
+                             "roe": "return_fire",
+                             "source": "ОЦЕНКА: группа ударных вертолётов США - с лёгкими разведчиками (OH-58, в DCS - SA342), "
+                                       "которые выходят вперёд и наводят; у PAH-1 ФРГ - не нужен (сами SA342 в DCS)"}]
 FM100 = "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5"
 for k, v in t.items():                       # маршруты малой высоты (LLTR/MRR): к цели 100 футов, обратно - выше 500
     if v.get("method") in ("on_call", "interdiction", "sequential_on_call") and "attack_helo" not in v["performers"]:
@@ -123,6 +134,8 @@ doc = {
                    {"from_day": 4, "DCA": 0.2, "OCA": 0.1, "SEAD": 0.1, "APCLO": 0.6}],
         "estimate": True,
     },
+    "joint_heli": {"lead_min": 2, "source": f"{ATP27}, 401.4: совместные действия вертолётов и самолётов (JAAT) - по одной "
+                                            "цели, вертолёты первыми по ПВО и головным машинам; время - ОЦЕНКА"},
     "nation_bonus": {
         "source": f"{RAND}, с. v-vii, 26-28, 43: 2-е ОТАК (Великобритания, ФРГ, Бельгия, Нидерланды, NORTHAG) - тесная "
                   "увязка с сухопутными войсками, CAS и BAI у переднего края; 4-е ОТАК (ВВС США, CENTAG) - "

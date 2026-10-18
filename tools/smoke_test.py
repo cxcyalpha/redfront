@@ -1386,8 +1386,9 @@ def helo_section(tmp: Path) -> None:
           and len(kinds["blue"]) >= 2,
           f"в плане дня не больше {planner.MAX_PER_KIND} задач одного вида: {dict(kinds['blue'])}")
     planner.plan(st)
-    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "cas_helo"), None)
-    check(n is not None, "в плане дня есть удар вертолётов по войскам в соприкосновении")
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["kind"] == "cas_helo"
+              or any(g.get("jaat_kind") == "cas_helo" for g in t["package"])), None)   # или в совместном пакете с самолётами
+    check(n is not None, "в плане дня есть удар вертолётов по войскам в соприкосновении (сам или совместно с самолётами)")
     if n:
         build.build(st, tmp / "helo.miz", task_no=n)
         m = dcs.Mission(); m.load_file(str(tmp / "helo.miz"))
@@ -1525,7 +1526,8 @@ def ato_section(tmp: Path) -> None:
           and m.terrain.airports["Hamburg"].coalition == "NEUTRAL",
           f"коалиция аэродромов - по модели: красных {sum(1 for c in coal.values() if c == 'RED')}, синих "
           f"{sum(1 for c in coal.values() if c == 'BLUE')}; гражданские - нейтральные")
-    sg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.plane_group if " strike " in g.name][0]
+    sg = [g for c in m.coalition.values() for cn in c.countries.values() for g in list(cn.plane_group) + list(cn.helicopter_group)
+          if " strike " in g.name][0]
     perf = st["units"][st["tasks"][n - 1]["performer"]]
     tdef_ = model.doctrine(st, "red")["tasks"][st["tasks"][n - 1]["kind"]]
     land = sg.points[-1]
@@ -1920,7 +1922,7 @@ def assault_section(tmp: Path) -> None:
     tk = st["tasks"][n - 1] if n else None
     g = tk["package"][0] if tk else {}
     perf = U.get(g.get("performer"), {})
-    sizes = [x["size"] for x in tk["package"]] if tk else []
+    sizes = [x["size"] for x in tk["package"] if x["objective"]["kind"] == "air_assault"] if tk else []   # без прикрытия
     check(tk and model.category(perf) == "heli" and sum(sizes) == assault.lift_need(U[tk["target"]], perf["type"])
           and sum(sizes) <= tdef["max_helos"] and max(sizes) <= 4,
           f"в плане дня - десант: {tk['title'] if tk else '-'}; {sum(sizes)} x {perf.get('type')} поднимают роту "
@@ -2549,7 +2551,8 @@ def command_section(tmp: Path) -> None:
     a = st["ato"]
     mine = [e for e in a["entries"] if e["side"] == "red" and not command._is_duty(st, e)]
     # вылет с небольшим пакетом: у большого (расчистка, демонстрация) на 15:30 истребителей может не хватить - это верный отказ
-    e = next((x for x in mine if len(x["task"]["package"]) <= 3), mine[0])
+    e = next((x for x in mine if len(x["task"]["package"]) <= 3
+              and model.category(st["units"][x["task"]["package"][0]["performer"]]) == "air"), mine[0])
     o = command.options(st, e["id"])
     g = o["groups"][0]
     alt = next(p for p in g["performers"] if p["id"] != g["performer"] and p["type"] != st["units"][g["performer"]]["type"])
@@ -3093,11 +3096,50 @@ def mixed_section(tmp: Path) -> None:
           "дебриф: самолёт ИИ, разбившийся без попадания, - потеря (исключение только для вертолётов при посадке в поле)")
 
 
+def heli_pkg_section(tmp: Path) -> None:
+    """Вертолёты: прикрытие десанта и поиска-спасения, звено ударных, разведчик-наводчик НАТО, совместный удар, ночь."""
+    from redfront import ato
+    print("\n== Вертолёты: прикрытие, состав, совместный удар, ночь ==")
+    st = model.new_campaign("heli", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    sim.end_day(st)
+    planner.plan(st)
+    aa = next(t for t in st["tasks"] if t["kind"] == "air_assault")
+    esc = next((g for g in aa["package"] if g["group"] == "escort"), None)
+    check(esc and st["units"][esc["performer"]]["type"] == "Mi_24P" and esc["lead_min"] == 2 and esc["size"] >= 2,
+          f"десант: прикрытие Ми-24 ({esc and esc['size']}) выходит на площадку за 2 мин до посадки Ми-8")
+    man = build.build(st, tmp / "heli_aa.miz", task_no=st["tasks"].index(aa) + 1)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "heli_aa.miz"))
+    eg = next(g for c in m.coalition["red"].countries.values() for g in c.helicopter_group if " escort " in g.name)
+    zt = [t for p in eg.points for t in p.tasks if getattr(t, "id", None) == "EngageTargetsInZone"]
+    check([p.name for p in eg.points[1:-1]] == ["Площадка (прикрытие)"] and zt,
+          "в .miz: прикрытие обрабатывает район площадки и держит его, пока транспортные на земле")
+    cs = [t for t in st["tasks"] if t["kind"] == "csar"]
+    check(not cs or any(g["group"] == "escort" for t in cs for g in t["package"]), "поиск и спасение - с парой прикрытия")
+    jt = [t for t in st["tasks"] if any(g.get("jaat_kind") for g in t["package"])]
+    check(jt and all(g["lead_min"] == 2 and g["size"] == 4 for t in jt for g in t["package"] if g.get("jaat_kind"))
+          and not any(t["kind"] == "cas_helo" and t["target"] == jt[0]["target"] for t in st["tasks"]),
+          f"совместный удар: звено Ми-24 сведено в пакет Су-25 по той же цели, выходит за 2 мин до самолётов ({len(jt)})")
+    sb = model.new_campaign("helib", sector="sector_germany.json", oob="oob_germany.json", seed=7, player_side="blue")
+    ah = next(u for u in sb["units"].values() if u.get("type") == "AH_64A")
+    tgt = min((u for u in sb["units"].values() if u["side"] == "red" and model.category(u) == "ground"),
+              key=lambda u: model.dist_km(sb["airbases"][ah["base"]], model.unit_pos(sb, u)))
+    td = model.doctrine(sb, "blue")["tasks"]["cas_helo"]
+    tp = model.unit_pos(sb, tgt)
+    gs, _w = planner.package(sb, td, ah, tgt, tp, planner.ip_point(sb["airbases"][ah["base"]], tp, td["ip_offset_km"]), [])
+    check([(g["group"], g["size"]) for g in gs] == [("strike", 4), ("scout", 2)] and "SA342" in sb["units"][gs[1]["performer"]]["type"],
+          "НАТО: AH-64A ротой (4) с парой разведчиков-наводчиков SA342 впереди (3 мин)")
+    night = ato.night_capable(sb, {"package": gs[:1]})
+    mi24 = next(u for u in st["units"].values() if u.get("type") == "Mi_24P")
+    check(night and "cas_helo" in ato.NIGHT_KINDS and not ato.night_capable(st, {"package": [{"performer": mi24["id"]}]}),
+          "ночью из ударных вертолётов летает только AH-64A, Ми-24П - днём")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section]
 
 
 def main() -> int:
