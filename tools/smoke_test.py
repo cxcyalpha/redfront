@@ -81,8 +81,9 @@ def strike_group(m):
 
 
 def pylons_match(unit, name: str = "CAS") -> bool:
-    """Пилоны юнита = ровно подвеска DCS Retribution name его типа (payloads.json), с теми же CLSID."""
-    want = model.load_json("payloads.json")["types"][unit.unit_type.id][name]["pylons"]
+    """Пилоны юнита = ровно подвеска name его типа (свои payloads_custom.json - первыми, затем DCS Retribution)."""
+    own = model.load_json("payloads_custom.json")["types"].get(unit.unit_type.id, {}).get(name)
+    want = (own or model.load_json("payloads.json")["types"][unit.unit_type.id][name])["pylons"]
     expect = {int(p): d["CLSID"] for p, d in want.items()}
     got = {int(p): d["CLSID"] for p, d in unit.pylons.items()}
     return got == expect
@@ -1646,7 +1647,7 @@ def core_section(tmp: Path) -> None:
     check(len(col["vehicles"]) == BASELINE["col_d1"], f"как в 0.1: {BASELINE['col_d1']} машин в колонне")
     check(abs(sum(v["weight"] for v in col["vehicles"]) - model.total(bn)) < 1e-6, "сумма весов колонны = исправной технике модели")
     fg = strike_group(m)
-    check(pylons_match(fg.units[0]), "подвеска Су-25 по колонне - 'CAS' из DCS Retribution: ровно её пилоны")
+    check(pylons_match(fg.units[0]), "подвеска Су-25 по колонне - 'CAS' (своя: 2 Х-25МЛ, 2 ОФАБ-250-270, С-8, Р-60М): ровно её пилоны")
 
     # Позиция ЗРК развёрнута на ось угрозы. В 0.2 РЛС Patriot смотрела на север при угрозе с востока - в DCS не было ни засветки.
     sam = st["units"]["blue_patriot_1"]
@@ -2975,6 +2976,10 @@ def payload_section(tmp: Path) -> None:
     """Подвески по задачам (payloads.json из DCS Retribution) и по году кампании (weapons.py)."""
     from redfront import weapons
     print("\n== Подвески по задачам и по году ==")
+    import dcs.planes as _P
+    check(weapons.substitute(_P.F_16C_50, 3, "AIM-120C AMRAAM - Active Radar AAM", 1985) is None
+          and weapons.substitute(_P.F_16C_50, 3, "AIM-9X Sidewinder IR AAM", 1985)["name"].startswith("AIM-9"),
+          "замена - только ранней модификацией того же изделия: AIM-9X -> AIM-9M, AIM-120 -> не AIM-7/AIM-9 (пилон пуст)")
     check(weapons.year_of("AIM-120C AMRAAM - Active Radar AAM") == 1996 and weapons.year_of("Mk-82 - 500lb GP Bomb LD") == 0
           and weapons.year_of("AGM-65G - Maverick G") == 1989, "годы оружия: AIM-120C 1996, AGM-65G 1989, Mk-82 - без ограничения")
     st = model.new_campaign("pl", sector="sector_germany.json", oob="oob_germany_1985.json", seed=7, player_side="blue")

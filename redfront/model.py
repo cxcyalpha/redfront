@@ -376,6 +376,9 @@ def load(path: Path) -> dict:
     if st.get("version") != STATE_VERSION:
         raise RuntimeError(f"файл кампании версии {st.get('version')}, нужна {STATE_VERSION}: создайте кампанию заново (new)")
     sync_ad_sites(st)
+    for u in st.get("units", {}).values():       # МиГ-29А старой модели (ГС3) - модуль MiG-29A Fulcrum (Alex)
+        if u.get("type") == "MiG_29A":
+            u["type"] = "MiG_29_Fulcrum"
     init_crews(st)
     drop_dummy_depots(st)
     from . import farp as _farp                  # вертолётные площадки карты - и в старых кампаниях

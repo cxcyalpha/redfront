@@ -516,7 +516,7 @@ AIR_HISTORY = [
         ("1976-01", None, "OFF:Nohra", "Mi_24P", "336-й обвп (Ми-24; в DCS - Ми-24П)", "")], USER),
     ("nva_jg3", "red", "fighter", 36, [
         ("1970-01", "1988-01", "OFF:Preschen", "MiG_21Bis", "JG-3 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)", ""),
-        ("1988-01", None, "OFF:Preschen", "MiG_29A", "JG-3 ВВС ННА (МиГ-29)", "МиГ-29 с 1988 (?)", 24)], USER),
+        ("1988-01", None, "OFF:Preschen", "MiG_29_Fulcrum", "JG-3 ВВС ННА (МиГ-29)", "МиГ-29 с 1988 (?)", 24)], USER),
     ("nva_jg3_21", "red", "fighter", 12, [
         ("1988-01", None, "OFF:Preschen", "MiG_21Bis", "JG-3 ВВС ННА, эскадрилья МиГ-21МФ (в DCS - МиГ-21бис)", "")], USER),
     ("nva_jbg37", "red", "fighter_bomber", 22, [

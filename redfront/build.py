@@ -459,16 +459,26 @@ def loadout_cats(kind: str, g: dict) -> list[str]:
     return out
 
 
-def _payload(ac, cat: str) -> tuple[str, dict] | None:
-    """Подвеска DCS Retribution для типа и категории: (имя, пилоты) или None."""
-    types = model.load_json("payloads.json").get("types", {})
-    pls = types.get(ac.id) or {}
-    low = {k.lower(): k for k in pls}
-    for name in PAYLOAD_NAMES.get(cat, []):
-        k = low.get(name.lower())
-        if k and pls[k]["pylons"]:
-            return k, pls[k]["pylons"]
-    return None
+def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
+    """Подвеска для типа и категории: (имя, пилоны) или None. Свои (payloads_custom.json) - первыми, затем DCS
+    Retribution; из подвесок категории - первая, где всё оружие есть на год кампании, иначе первая (по году её
+    поправит weapons.degrade)."""
+    from . import weapons
+    found = []
+    for f in ("payloads_custom.json", "payloads.json"):
+        try:
+            pls = model.load_json(f).get("types", {}).get(ac.id) or {}
+        except FileNotFoundError:
+            continue
+        low = {k.lower(): k for k in pls}
+        for name in PAYLOAD_NAMES.get(cat, []) + ([cat] if f == "payloads_custom.json" else []):
+            k = low.get(name.lower())
+            if k and pls[k]["pylons"] and (k, f) not in [(x[0], x[2]) for x in found]:
+                found.append((k, pls[k]["pylons"], f))
+    if not found:
+        return None
+    k, pyl, _f = next((x for x in found if weapons.valid(x[1], year)), found[0])
+    return k, pyl
 
 
 def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None = None) -> str | None:
@@ -490,7 +500,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                 weapons.fixups(fg)
                 return cat[3:]
     for cat in cats:
-        pl = _payload(ac, cat)
+        pl = _payload(ac, cat, year)
         if pl:
             name, pylons = pl
             for u in fg.units:

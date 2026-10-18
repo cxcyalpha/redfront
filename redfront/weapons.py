@@ -4,8 +4,10 @@
 для экспорта и союзников бывает позже). Таблица YEARS - образец имени оружия pydcs (регулярное выражение) -> год;
 первое совпадение. Оружие без строки - без ограничения (старое и общеупотребимое: Mk-82, ФАБ, НАР С-5...).
 
-Замена (FALLBACK): семейство -> по порядку более старые образцы; из оружия, допустимого на этот пилон этого типа
-(pydcs), берётся первое подходящее по году и ближайшее по имени (тот же держатель, то же число); нет - пилон пуст.
+Подвеска сначала выбирается целиком (build: первая подвеска задачи, где всё оружие есть на год кампании). Если такой
+нет - замена только ранней модификацией того же изделия (FALLBACK: AIM-9M -> AIM-9L, R-27ЭР -> R-27Р, Х-25МПУ -> Х-25МП),
+из оружия этого пилона, ближайшей по имени (тот же держатель, то же число); нет - пилон пуст. Другой тип ракеты
+(R-77 -> R-27, Х-31П -> Х-58) - не замена.
 """
 from __future__ import annotations
 
@@ -41,32 +43,17 @@ YEARS = [   # (образец имени, год) - ОЦЕНКИ
     (r"Pave ?Spike", 1974), (r"ALQ-184", 1989), (r"ALQ-131", 1976), (r"ALQ-119", 1970), (r"Damocles", 2007),
     (r"TGM-65|CATM", 0),
 ]
-FALLBACK = {   # семейство (образец) -> замены по порядку (образцы); год проверяется по YEARS
-    r"AIM-120": [r"AIM-7M\b", r"AIM-7F", r"AIM-7E", r"AIM-9M", r"AIM-9L", r"AIM-9P"],   # F-16A/C 80-х - только AIM-9
-    r"AIM-9X|AIM-9M": [r"AIM-9M", r"AIM-9L", r"AIM-9P", r"AIM-9J", r"AIM-9E"],
-    r"AIM-9L": [r"AIM-9P", r"AIM-9J", r"AIM-9E"],
+FALLBACK = {   # только ранние модификации ТОГО ЖЕ изделия (другой тип ракеты - не замена: Alex) -> по порядку
+    r"AIM-120C": [r"AIM-120B"],
+    r"AIM-9[XML]": [r"AIM-9M", r"AIM-9L", r"AIM-9P", r"AIM-9J", r"AIM-9E"],
     r"AIM-7M": [r"AIM-7F", r"AIM-7E"],
-    r"R-77": [r"R-27ER", r"R-27R"],
-    r"R-27E": [r"R-27R", r"R-27T"],
-    r"R-27[RT]": [r"R-24", r"R-23"],
-    r"R-73": [r"R-60M", r"R-60\b"],
+    r"AIM-54C": [r"AIM-54A"],
+    r"R-27ER": [r"R-27R"],
+    r"R-27ET": [r"R-27T"],
+    r"R-60M": [r"R-60\b"],
     r"AGM-65": [r"AGM-65G", r"AGM-65D", r"AGM-65B", r"AGM-65A"],
-    r"AGM-88": [r"AGM-88", r"AGM-45B", r"AGM-45A"],
-    r"GBU-31|GBU-24|GBU-27": [r"GBU-24", r"GBU-10", r"Mk-84"],
-    r"GBU-32": [r"GBU-16", r"Mk-83"],
-    r"GBU-38|GBU-5[0-9]|GBU-39": [r"GBU-12", r"Mk-82\b"],
-    r"CBU-9[7-9]|CBU-10[3-5]": [r"CBU-87", r"Mk-20"],
-    r"CBU-8[79]": [r"Mk-20", r"CBU-52"],
-    r"Kh-31P|Kh-25MPU": [r"Kh-58", r"Kh-25MP\b", r"Kh-28"],
-    r"Kh-29|Kh-38|Kh-59": [r"Kh-29", r"Kh-25ML", r"Kh-23"],
-    r"KAB-500S": [r"KAB-500Kr", r"KAB-500L"],
-    r"9M127|Vikhr": [r"S-8KOM", r"S-5"],
-    r"S-8": [r"S-5", r"S-24"],
-    r"APKWS": [r"M151", r"Hydra", r"FFAR"],
-    r"ALARM": [r"Shrike|AGM-45"],
-    r"Brimstone": [r"BL-755", r"Mk-20"],
-    r"LITENING|Sniper|ATFLIR|AAQ-28": [r"LANTIRN|AAQ-14", r"Pave ?Spike"],
-    r"ALQ-184": [r"ALQ-131", r"ALQ-119"],
+    r"Kh-25MPU": [r"Kh-25MP\b"],
+    r"Kh-59M": [r"Kh-59\b"],
 }
 
 
@@ -165,3 +152,8 @@ def fixups(fg) -> None:
             w = next((w for w in _pylon_options(u.unit_type, num) if re.search(pod, w["name"], re.I)), None)
             if w:
                 u.pylons[num] = {"CLSID": w["clsid"]}
+
+
+def valid(pylons: dict, year: int | None) -> bool:
+    """Всё оружие подвески есть на вооружении к году year."""
+    return not year or all(year_of(name_of(d.get("CLSID", ""))) <= year for d in pylons.values())
