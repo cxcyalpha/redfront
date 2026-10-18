@@ -65,6 +65,19 @@ def _find(state: dict, e: dict, tgt: dict, obj: dict) -> tuple[float, str]:
     return 1.0 - (d - FIND_KM) / (LOST_KM - FIND_KM), ""
 
 
+SEAD_KNOWN = 0.5        # ОЦЕНКА: потери от ЗРК коридора при подавлении по свежим данным разведки (пуск спланирован)
+SEAD_SEARCH = 0.75      # ОЦЕНКА: подавление без свежих данных - поиск РЛС в полёте
+
+
+def sead_factor(state: dict, e: dict, threats: list[str]) -> float:
+    """Множитель потерь от ЗРК коридора: в пакете есть подавление ПВО - меньше; по свежим данным - ещё меньше."""
+    if not threats or not any(g["objective"]["kind"] == "sam" for g in e["task"]["package"]):
+        return 1.0
+    from . import build
+    known = e["side"] != state.get("player_side") or all(build.intel_exact(state, t) for t in threats)
+    return SEAD_KNOWN if known else SEAD_SEARCH
+
+
 def _strike(state: dict, e: dict) -> list[str]:
     from . import csar, sim
     g = e["task"]["package"][0]
@@ -78,7 +91,7 @@ def _strike(state: dict, e: dict) -> list[str]:
     perf = state["units"].get(g["performer"])
     qra = alerts_near(state, model.enemy(e["side"]), obj["pos"], _tot(e))
     # потери группы от ЗРК коридора и дежурных пар ПВО противника
-    pl = min(0.5, LOSS_PER_THREAT * len(threats) + QRA_LOSS * qra)
+    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) + QRA_LOSS * qra)
     down = sum(1 for _ in range(g["size"]) if r.random() < pl) if r else 0
     if perf and down:
         perf["count"] = max(0, perf.get("count", 0) - down)

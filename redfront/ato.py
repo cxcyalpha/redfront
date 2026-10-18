@@ -27,7 +27,7 @@ MISSION_LEN_S = 75 * 60     # ОЦЕНКА: окно миссии игрока; 
 
 
 ATO_NIGHT_TASKS = 3         # ОЦЕНКА: задач (кроме дежурств) стороны ночью - из тех, где все исполнители летают ночью
-NIGHT_KINDS = {"strike_bridge", "strike_depot", "strike_factory", "strike_airfield", "strike_supply_route", "strike_fofa",
+NIGHT_KINDS = {"cas_helo", "strike_bridge", "strike_depot", "strike_factory", "strike_airfield", "strike_supply_route", "strike_fofa",
                "strike_sam_site", "air_assault", "air_evac"}   # ночью - глубокие удары и десант; поддержка войск, спасение - днём
 DAY_S = 86400
 
@@ -64,12 +64,18 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
     for g in task["package"]:
         spd = model.group_speed_kmh(state, g, tdef) / 3.6      # скорость задачи доктрины
         base = state["airbases"][g["base"]]
-        fly = _path_km(base, g["route"]) * 1000 / spd
+        fly = _path_km(base, planner.route_points(g)) * 1000 / spd
         back = model.dist_km(g["route"][-1], base) * 1000 / spd
         obj = -g.get("lead_min", 0) * 60
         kind = g["objective"]["kind"]
         if kind == "cap_zone":
             dwell = (g.get("cap_min") or 20) * 60
+        elif kind == "sweep_zone":               # расчистка воздуха - до выхода ударной группы на цель
+            dwell = -obj
+        elif kind == "escort_lz":                # прикрытие вертолётов: пока транспортные на площадке
+            dwell = -obj + (g.get("land_s") or 120) + 120
+        elif kind == "feint":
+            dwell = (g.get("orbit_min") or 6) * 60
         elif kind in ("cover_zone", "sam"):
             dwell = -obj + (g.get("hold_after_min") or 5) * 60
         else:

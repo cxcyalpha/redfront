@@ -24,18 +24,35 @@ sead.update({"required": False, "nations": ["us"], "min_fit": 0.5, "performers":
                        "коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
              "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); "
                               "группа ставится, если есть часть США, которая может её дать"})
+# hunter-killer (52-е крыло, Шпангдахлем): пара поиска F-4G с ПРР (в DCS F-4G нет - F-4E с Shrike или F-16C с HARM) и
+# пара добивания F-4E/F-16C (CBU, Maverick) того же аэродрома; с 1990 SEAD своими средствами - Tornado ECR (ФРГ, HARM;
+# в DCS - Tornado IDS) и Tornado GR.1 с ALARM (RAF; в DCS - GR.4). Годы - ОЦЕНКИ по открытым данным.
+sead.update({"flights": 1, "prefer_units": ["b_52tfw", "b_52tfw_f16"], "title": "группа подавления ПВО (hunter)", "nations": {"us": 0, "frg": 1990, "uk": 1990},
+             "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; "
+                          "Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); "
+                          "Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990"})
+kill = copy.deepcopy(sead)
+kill.update({"id": "kill", "title": "группа добивания ЗРК (killer)", "mode": "kill", "pair_with": "sead",
+             "nations": ["us"], "pair_nations": ["us"],
+             "prefer_units": ["b_52tfw_f16", "b_52tfw"], "maintask": ["GroundAttack", "CAS"], "loadout": ["dead", "anti_armor"], "lead_min": 2,
+             "min_fit": 0, "ai": {"react_on_threat": "EvadeFire", "restrict_jettison": True,
+                                  "attack": {"weapon": "Auto", "expend": "All", "group_attack": True}},
+             "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; "
+                          "ставится, только если назначена пара поиска"})
+for k_ in ("hold_after_min", "orbit_radius_km", "launch_alt_m", "sead_note", "required_note"):
+    kill.pop(k_, None)
 cover.update({"source": f"{RAND}, с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - "
                         "истребители прикрытия ударных групп"})
 for k in ("strike_airfield", "strike_bridge", "strike_depot", "strike_factory", "strike_sam_site"):
-    t[k]["support"] = [copy.deepcopy(sead), copy.deepcopy(cover)]
+    t[k]["support"] = [copy.deepcopy(sead), copy.deepcopy(kill), copy.deepcopy(cover)]
     t[k]["method_source"] = f"{ATP27}, 301-302: воздушная изоляция (AI) - удары за FSCL по военному потенциалу и по " \
                             "тому, что его ограничивает (управление, пути, тыл)"
-t["strike_supply_route"]["support"] = [copy.deepcopy(sead)]
+t["strike_supply_route"]["support"] = [copy.deepcopy(sead), copy.deepcopy(kill)]
 
 # BAI - удар по колоннам у переднего края (с ATP-27(B), 1980); FOFA - по вторым эшелонам в глубине (с 1983)
 col = copy.deepcopy(wp["tasks"]["strike_column_march"])
 col["performers"] = ["attack", "fighter_bomber", "bomber"]
-col["support"] = [copy.deepcopy(sead), copy.deepcopy(cover)]   # группа доразведки - понятие ВД (3.3.3), у НАТО - нет
+col["support"] = [copy.deepcopy(sead), copy.deepcopy(kill), copy.deepcopy(cover)]   # группа доразведки - понятие ВД (3.3.3), у НАТО - нет
 bai = copy.deepcopy(col)
 bai.update({"title": "Изоляция поля боя (BAI): колонна у переднего края", "from_year": 1980,
             "method_source": f"{RAND}, с. 28-33: BAI введена в ATP-27(B) (1980) по предложению Великобритании - удары "
@@ -57,6 +74,28 @@ t["cap_own_troops"]["method_source"] = f"{RAND}, с. vii, 41: прикрытие
     "в воздухе (DCA); у ФРГ - второй приоритет после боя с первым эшелоном"
 
 t["strike_bai"], t["strike_fofa"] = bai, fofa
+# состав групп: у ВВС США ударная группа - звено (4-ship), у союзников по объектам - тоже звено (RAF Tornado GR.1 по
+# аэродромам - 4 с JP233), вооружённая разведка путей подвоза - пара, A-10 в Европе - парами (ОЦЕНКИ по открытым данным)
+SIZE_SRC = "ОЦЕНКА: удар по объекту и BAI/FOFA - звено (4), вооружённая разведка путей - пара, CAS (A-10 в Европе) - пара; " \
+           "прикрытие ударов в глубину (аэродромы, FOFA) - звено"
+for k, n in {"strike_airfield": 4, "strike_depot": 4, "strike_factory": 4, "strike_bridge": 4, "strike_sam_site": 4,
+             "strike_bai": 4, "strike_fofa": 4, "strike_supply_route": 2, "cas_contact": 2}.items():
+    t[k]["strike"]["size"], t[k]["strike"]["size_source"] = n, SIZE_SRC
+for k in ("strike_airfield", "strike_fofa"):
+    for g in t[k]["support"]:
+        if g["id"] == "cover":
+            g["size"], g["size_source"] = 4, SIZE_SRC
+# вертолёты: прикрытие транспортных, ударные - ротой (4), разведчик-наводчик SA342 (Gazelle) при AH-64, JAAT с A-10
+ESC = {'title': 'группа прикрытия (ударные вертолёты)', 'performers': ['attack_helo'], 'size': 2, 'size_big': 4, 'big_from': 4, 'lead_min': 2, 'zone_km': 3, 'maintask': ['CAS', 'GroundAttack'], 'loadout': ['cas'], 'source': 'ОЦЕНКА по FM 1-112/FM 90-4 (аэромобильные действия): ударные вертолёты сопровождают транспортные и готовят площадку огнём; поиск и спасение - с прикрытием'}
+for k_ in ("air_assault", "air_evac", "csar"):
+    t[k_]["escort"] = copy.deepcopy(ESC)
+t["cas_helo"]["strike"]["size"] = 4
+t["cas_helo"]["support"] = [{"id": "scout", "title": "разведчик-наводчик (SA342)", "when": "always", "required": False,
+                             "performers": ["attack_helo"], "types": ["SA342M", "SA342L", "SA342Minigun", "SA342Mistral"],
+                             "size": 2, "maintask": ["CAS", "GroundAttack"], "loadout": ["cas"], "lead_min": 3,
+                             "roe": "return_fire",
+                             "source": "ОЦЕНКА: группа ударных вертолётов США - с лёгкими разведчиками (OH-58, в DCS - SA342), "
+                                       "которые выходят вперёд и наводят; у PAH-1 ФРГ - не нужен (сами SA342 в DCS)"}]
 FM100 = "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5"
 for k, v in t.items():                       # маршруты малой высоты (LLTR/MRR): к цели 100 футов, обратно - выше 500
     if v.get("method") in ("on_call", "interdiction", "sequential_on_call") and "attack_helo" not in v["performers"]:
@@ -95,6 +134,8 @@ doc = {
                    {"from_day": 4, "DCA": 0.2, "OCA": 0.1, "SEAD": 0.1, "APCLO": 0.6}],
         "estimate": True,
     },
+    "joint_heli": {"lead_min": 2, "source": f"{ATP27}, 401.4: совместные действия вертолётов и самолётов (JAAT) - по одной "
+                                            "цели, вертолёты первыми по ПВО и головным машинам; время - ОЦЕНКА"},
     "nation_bonus": {
         "source": f"{RAND}, с. v-vii, 26-28, 43: 2-е ОТАК (Великобритания, ФРГ, Бельгия, Нидерланды, NORTHAG) - тесная "
                   "увязка с сухопутными войсками, CAS и BAI у переднего края; 4-е ОТАК (ВВС США, CENTAG) - "

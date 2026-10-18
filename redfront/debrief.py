@@ -42,6 +42,14 @@ def _humans(fl: dict) -> list[str]:
     return fl["units"][:1] if fl.get("player") else []
 
 
+FIELD_LANDING = ("air_assault", "air_evac", "csar")   # посадка не на аэродром и не на площадку
+
+
+def _is_heli(state: dict, fl: dict) -> bool:
+    u = state["units"].get(fl.get("performer", ""))
+    return bool(u) and model.category(u) == "heli"
+
+
 def apply(state: dict, data: dict) -> list[str]:
     man = state.get("manifest")
     if not man:
@@ -54,13 +62,17 @@ def apply(state: dict, data: dict) -> list[str]:
     lost = set(data.get("dead", [])) | set(data.get("ejected", []))
     lines = []
     flights = man.get("flights") or [{**man["flight"], "group": "strike"}]   # вылет, собранный до тактической группы: одно звено
-    # ЛА ИИ, потерянный без попадания оружия (врезался в землю, в дерево, столкнулся), - ошибка ИИ DCS, не потеря кампании
+    # вертолёт ИИ с посадкой в поле (десант, эвакуация, поиск и спасение), потерянный без попадания оружия, - ошибка ИИ
+    # DCS при посадке (деревья, склон), не потеря кампании. Самолёты и вертолёты с посадкой на аэродром/площадку - потери
+    # (camp: два Tornado разбились, уходя от ПВО на малой высоте, - это потеря от противодействия)
     if "hit" in data:
-        ai_air = {n for fl in flights for n in fl["units"] if n not in _humans(fl)}
-        noncombat = {n for n in lost & ai_air if n not in set(data["hit"])}
+        field = {n for fl in flights if fl.get("kind") in FIELD_LANDING and _is_heli(state, fl)
+                 for n in fl["units"] if n not in _humans(fl)}
+        noncombat = {n for n in lost & field if n not in set(data["hit"])}
         if noncombat:
             lost -= noncombat
-            lines.append(f"ИИ: {len(noncombat)} ЛА разбились без огня противника (ошибка ИИ DCS) - потерей не считаются.")
+            lines.append(f"ИИ: {len(noncombat)} вертолётов разбились при посадке в поле без огня противника "
+                         f"(ошибка ИИ DCS) - потерей не считаются.")
     # вылет игрока: его итог - что сделал он сам; доля ведомых ИИ его группы и остальных групп пакета - по модели:
     # не сбит огнём противника - сделал свою долю (не садится на дерево вместо площадки)
     pkg = [fl for fl in flights if not fl.get("ato") and not fl.get("side")]

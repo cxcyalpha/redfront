@@ -2,8 +2,11 @@
   "_about": "Пакет доктрины 'Варшавский договор'. Работает с ролями (roles.json), не с типами техники. Поля source - раздел учебного пособия 'Тактика ВВС' (военная кафедра МГТУ МИРЭА); estimate=true / estimate_fields - число не из документа.",
   "package": "wp",
   "title": "Варшавский договор",
+  "joint_heli": {"lead_min": 2, "source": "ОЦЕНКА: совместные действия Ми-24 и Су-25 по одной цели - вертолёты выходят первыми по ПВО и головным машинам"},
+  "size_note": "состав групп (size) - ОЦЕНКА по 'Тактика ВВС': удар по объекту и колонне - звено (4), свободная охота на путях подвоза - пара, НАП - звено штурмовиков, прикрытие удара по аэродрому - звено",
   "tasks": {
     "csar": {
+      "escort": {"title": "группа прикрытия (Ми-24)", "performers": ["attack_helo"], "size": 2, "size_big": 4, "big_from": 4, "lead_min": 2, "zone_km": 3, "maintask": ["CAS", "GroundAttack"], "loadout": ["cas"], "source": "ОЦЕНКА по открытым данным: десант и эвакуация Ми-8 - с прикрытием Ми-24 (пара на звено транспортных, звено - на большую группу), обработка площадки перед посадкой; поиск и спасение - с парой Ми-24"},
       "title": "Поиск и спасение",
       "performers": [
         "transport_helo",
@@ -52,6 +55,7 @@
       }
     },
     "air_evac": {
+      "escort": {"title": "группа прикрытия (Ми-24)", "performers": ["attack_helo"], "size": 2, "size_big": 4, "big_from": 4, "lead_min": 2, "zone_km": 3, "maintask": ["CAS", "GroundAttack"], "loadout": ["cas"], "source": "ОЦЕНКА по открытым данным: десант и эвакуация Ми-8 - с прикрытием Ми-24 (пара на звено транспортных, звено - на большую группу), обработка площадки перед посадкой; поиск и спасение - с парой Ми-24"},
       "title": "Эвакуация десанта",
       "performers": [
         "transport_helo",
@@ -122,7 +126,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "CAS",
           "GroundAttack"
@@ -182,7 +186,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -220,6 +224,47 @@
             "alt_m",
             "zone_km",
             "hold_after_min"
+          ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
           ]
         }
       ],
@@ -261,7 +306,7 @@
       "strike": {
         "title": "ударная группа вертолётов",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "CAS",
           "GroundAttack"
@@ -288,6 +333,7 @@
       "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
     },
     "air_assault": {
+      "escort": {"title": "группа прикрытия (Ми-24)", "performers": ["attack_helo"], "size": 2, "size_big": 4, "big_from": 4, "lead_min": 2, "zone_km": 3, "maintask": ["CAS", "GroundAttack"], "loadout": ["cas"], "source": "ОЦЕНКА по открытым данным: десант и эвакуация Ми-8 - с прикрытием Ми-24 (пара на звено транспортных, звено - на большую группу), обработка площадки перед посадкой; поиск и спасение - с парой Ми-24"},
       "title": "Вертолётный десант",
       "performers": [
         "transport_helo",
@@ -376,7 +422,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "CAS",
           "GroundAttack"
@@ -436,7 +482,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -511,6 +557,47 @@
             "zone_km",
             "hold_after_min"
           ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
+          ]
         }
       ],
       "timing": {
@@ -553,7 +640,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -618,7 +705,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -656,6 +743,76 @@
             "alt_m",
             "zone_km",
             "hold_after_min"
+          ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
+          ]
+        },
+        {
+          "id": "sweep",
+          "title": "группа расчистки воздуха",
+          "when": "enemy_fighters",
+          "required": false,
+          "mode": "sweep_zone",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 6,
+          "alt_m": 4000,
+          "zone_km": 40,
+          "source": "толкование, не цитата: 3.3.3 - группа расчистки воздуха выходит в район удара раньше ударной группы и связывает истребителей противника; уходит к выходу ударной группы на цель (там - прикрытие)",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km"
           ]
         }
       ],
@@ -759,7 +916,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -797,6 +954,47 @@
             "alt_m",
             "zone_km",
             "hold_after_min"
+          ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
           ]
         }
       ],
@@ -842,7 +1040,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -907,7 +1105,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -945,6 +1143,109 @@
             "alt_m",
             "zone_km",
             "hold_after_min"
+          ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
+          ]
+        },
+        {
+          "id": "sweep",
+          "title": "группа расчистки воздуха",
+          "when": "enemy_fighters",
+          "required": false,
+          "mode": "sweep_zone",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 6,
+          "alt_m": 4000,
+          "zone_km": 40,
+          "source": "толкование, не цитата: 3.3.3 - группа расчистки воздуха выходит в район удара раньше ударной группы и связывает истребителей противника; уходит к выходу ударной группы на цель (там - прикрытие)",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km"
+          ]
+        },
+        {
+          "id": "feint",
+          "title": "демонстративная группа",
+          "when": "threats",
+          "required": false,
+          "mode": "feint",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "GroundAttack"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 6,
+          "alt_m": 4000,
+          "feint_deg": 40,
+          "orbit_min": 6,
+          "roe": "return_fire",
+          "source": "толкование, не цитата: 3.3.3 - демонстративные действия: группа на средней высоте другим направлением до удара отвлекает ПВО и истребителей противника, в зоны ЗРК не входит",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "feint_deg",
+            "orbit_min"
           ]
         }
       ],
@@ -989,7 +1290,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -1054,7 +1355,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -1092,6 +1393,109 @@
             "alt_m",
             "zone_km",
             "hold_after_min"
+          ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
+          ]
+        },
+        {
+          "id": "sweep",
+          "title": "группа расчистки воздуха",
+          "when": "enemy_fighters",
+          "required": false,
+          "mode": "sweep_zone",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 6,
+          "alt_m": 4000,
+          "zone_km": 40,
+          "source": "толкование, не цитата: 3.3.3 - группа расчистки воздуха выходит в район удара раньше ударной группы и связывает истребителей противника; уходит к выходу ударной группы на цель (там - прикрытие)",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km"
+          ]
+        },
+        {
+          "id": "feint",
+          "title": "демонстративная группа",
+          "when": "threats",
+          "required": false,
+          "mode": "feint",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "GroundAttack"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 6,
+          "alt_m": 4000,
+          "feint_deg": 40,
+          "orbit_min": 6,
+          "roe": "return_fire",
+          "source": "толкование, не цитата: 3.3.3 - демонстративные действия: группа на средней высоте другим направлением до удара отвлекает ПВО и истребителей противника, в зоны ЗРК не входит",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "feint_deg",
+            "orbit_min"
           ]
         }
       ],
@@ -1135,7 +1539,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "PinpointStrike",
           "GroundAttack",
@@ -1200,7 +1604,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -1218,7 +1622,7 @@
             "fighter",
             "interceptor"
           ],
-          "size": 2,
+          "size": 4,
           "maintask": [
             "CAP",
             "Escort"
@@ -1238,6 +1642,109 @@
             "alt_m",
             "zone_km",
             "hold_after_min"
+          ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
+          ]
+        },
+        {
+          "id": "sweep",
+          "title": "группа расчистки воздуха",
+          "when": "enemy_fighters",
+          "required": false,
+          "mode": "sweep_zone",
+          "performers": [
+            "fighter",
+            "interceptor"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "Escort"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 6,
+          "alt_m": 4000,
+          "zone_km": 40,
+          "source": "толкование, не цитата: 3.3.3 - группа расчистки воздуха выходит в район удара раньше ударной группы и связывает истребителей противника; уходит к выходу ударной группы на цель (там - прикрытие)",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "zone_km"
+          ]
+        },
+        {
+          "id": "feint",
+          "title": "демонстративная группа",
+          "when": "threats",
+          "required": false,
+          "mode": "feint",
+          "performers": [
+            "fighter_bomber",
+            "fighter",
+            "attack"
+          ],
+          "size": 2,
+          "maintask": [
+            "CAP",
+            "GroundAttack"
+          ],
+          "loadout": [
+            "cap"
+          ],
+          "lead_min": 6,
+          "alt_m": 4000,
+          "feint_deg": 40,
+          "orbit_min": 6,
+          "roe": "return_fire",
+          "source": "толкование, не цитата: 3.3.3 - демонстративные действия: группа на средней высоте другим направлением до удара отвлекает ПВО и истребителей противника, в зоны ЗРК не входит",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "alt_m",
+            "feint_deg",
+            "orbit_min"
           ]
         }
       ],
@@ -1282,7 +1789,7 @@
       "strike": {
         "title": "ударная группа",
         "group_name": "пара",
-        "size": 2,
+        "size": 4,
         "maintask": [
           "SEAD",
           "GroundAttack",
@@ -1343,7 +1850,7 @@
             },
             "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса, только пассивная защита."
           },
-          "flights": 2,
+          "flights": 1,
           "standoff_km": 40,
           "detect_margin_km": 2,
           "orbit_radius_km": 3,
@@ -1381,6 +1888,47 @@
             "alt_m",
             "zone_km",
             "hold_after_min"
+          ]
+        },
+        {
+          "id": "kill",
+          "title": "группа добивания ЗРК",
+          "when": "threats",
+          "required": false,
+          "mode": "kill",
+          "pair_with": "sead",
+          "performers": [
+            "attack",
+            "fighter_bomber",
+            "bomber"
+          ],
+          "size": 2,
+          "maintask": [
+            "GroundAttack",
+            "CAS"
+          ],
+          "loadout": [
+            "dead",
+            "anti_armor"
+          ],
+          "lead_min": 2,
+          "standoff_km": 40,
+          "detect_margin_km": 2,
+          "prefer_other_type": true,
+          "ai": {
+            "react_on_threat": "EvadeFire",
+            "restrict_jettison": true,
+            "attack": {
+              "weapon": "Auto",
+              "expend": "All",
+              "group_attack": true
+            }
+          },
+          "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
+          "estimate_fields": [
+            "size",
+            "lead_min",
+            "standoff_km"
           ]
         }
       ],
