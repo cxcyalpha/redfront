@@ -207,9 +207,13 @@ def apportion(state: dict, doc: dict, tasks: list[dict], max_tasks: int) -> list
     return out
 
 
+_SUP_LOAD: dict[str, int] = {}   # ЛА частей, отданные в группы обеспечения за план суток (расходятся по частям, а не все из одной)
+
+
 def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int = MAX_PER_KIND) -> tuple[list[dict], str]:
     """План дня стороны side (состояние кампании не меняет): (задачи, причина, если задач нет).
     Для стороны противника - так же: по нему в миссию ставятся его ИИ-группы (build.enemy_air)."""
+    _SUP_LOAD.clear()
     foe = model.enemy(side)
     doc = model.doctrine(state, side)
     if not doc["tasks"]:
@@ -890,6 +894,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         cands.sort(key=lambda u: (pref.index(u["id"]) if u["id"] in pref else len(pref),
                                   bool(mate) and bool(g.get("prefer_other_type")) and u["type"] == mate["type"],
                                   bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
+                                  round(_SUP_LOAD.get(u["id"], 0) / max(1, u.get("count", 1)), 1),   # загрузка части за сутки
                                   u["id"] != perf["id"],
                                   model.dist_km(state["airbases"][u["base"]], tpos)))
         chosen = None
@@ -906,6 +911,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             notes.append(msg + " - группа не назначена")
             continue
         avail[chosen["id"]] -= need
+        _SUP_LOAD[chosen["id"]] = _SUP_LOAD.get(chosen["id"], 0) + need
         chosen_by[g["id"]] = chosen
         for k in range(flights):
             groups.append({"group": g["id"] if k == 0 else f"{g['id']}{k + 1}", "support_id": g["id"],
