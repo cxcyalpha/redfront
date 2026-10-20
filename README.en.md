@@ -145,6 +145,23 @@ variant), `--no-random` (no randomness), `--roads <file>`.
 
 The campaign window is a browser page (`redfront.exe`, `run.bat` or `python -m redfront gui`).
 
+### Window layout
+
+* **Top bar** — campaign, "New", day cycle buttons, day and situation time; on the right — panel toggles
+  (◧ left, ⬓ matrix, ◨ inspector), ⚙ settings, ? help.
+* **Left** — list tabs (Sorties, Ground, Air units, Logistics, Log) and program messages.
+* **Centre** — the map. For the selected sortie it shows each group's route in its own colour, waypoints with times
+  (takeoff, rendezvous, IP, target, landing) and the SAM zones of the corridor; the legend can be collapsed.
+* **Right — inspector** of the selection: a sortie (time on target, groups, each group's route with waypoint times,
+  threats, "what a strike achieves", mission build, "Edit", "Remove") or a map object (unit, SAM, depot, bridge — click
+  its symbol).
+* **Bottom — synchronization matrix**: one row per sortie group, a bar from takeoff to landing, ○ rendezvous, ◆ on
+  objective, dashed line — the sortie's time on target, shading — night, yellow line — campaign clock. The ⇔ handle of
+  an own sortie can be dragged: the sortie moves in 5-minute steps, the server checks aircraft and timing (if it does
+  not fit, the sortie stays unchanged and the reason is shown). Filters: duty stations, completed; zoom with −/+.
+* Selection is shared: a sortie selected in the list, the matrix or on the map is highlighted everywhere. Panel widths
+  and the matrix height are changed by dragging the borders and remembered in the browser.
+
 ### Header
 
 * campaign selector;
@@ -159,8 +176,8 @@ The window shows the situation time ("Day N, situation at HH:MM").
 ### Tabs
 
 * **Sorties** — your side's sorties from the daily ATO, sorted by time on target (one card per sortie: "takeoff 09:01,
-  on target 09:15"). A card shows the package groups, threats in the corridor and "what a strike achieves"
-  explanations. Choose which group you fly and how many humans are in the sortie, then build the mission.
+  on target 09:15"). The selected sortie opens in the inspector: package groups, threats in the corridor,
+  "what a strike achieves"; there you choose the group you fly and the number of humans, and build the mission.
   **Commander mode** (`redfront/command.py`):
   * "Edit" — time on target; for each package group the performing unit (only with the group's role and within
     range of the objectives; route from its airfield), number of aircraft (1–4), payload ("by task" or any DCS

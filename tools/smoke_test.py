@@ -3229,11 +3229,33 @@ def push_qra_section(tmp: Path) -> None:
           "в миссии ДРЛО обеих сторон (А-50, E-3A) и заправщик синих (KC-135; у ОВД фронтовой авиации заправщиков не было)")
 
 
+def gui_planner_section(tmp: Path) -> None:
+    """Окно: матрица синхронизации и маршруты выбранного вылета (gui.matrix, gui.sortie), английский язык."""
+    from redfront import gui
+    print("\n== окно: матрица и инспектор ==")
+    st = model.new_campaign("guip", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    planner.plan(st)
+    v = gui.view(st)
+    e = next(x for x in st["ato"]["entries"] if len(x["task"]["package"]) > 2 and not x["ai_only"])
+    row = next(r for r in v["matrix"] if r["id"] == e["id"])
+    check(len(v["matrix"]) == len(st["ato"]["entries"]) and len(row["groups"]) == len(e["task"]["package"])
+          and all(g["takeoff"] <= g["objective"] <= g["land"] for g in row["groups"]),
+          f"матрица: все вылеты плана, у групп взлёт <= выход на объект <= посадка ({len(v['matrix'])} вылетов)")
+    so = gui.sortie(st, e["id"])
+    names = [w["name"] for w in so["groups"][0]["route"]]
+    check(names[0] == "Взлёт" and names[-1] == "Посадка" and so["groups"][0]["route"][0]["t"] <= so["tot"],
+          f"инспектор: маршрут ударной группы по точкам со временем: {', '.join(names)}")
+    st["settings"]["lang"] = "en"
+    so2 = gui.sortie(st, e["id"])
+    check(so2["groups"][0]["route"][0]["name"] == "Takeoff" and gui.view(st)["tasks"][0]["title"] != v["tasks"][0]["title"],
+          "английский: точки маршрута и названия задач переведены")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section]
 
 
 def main() -> int:

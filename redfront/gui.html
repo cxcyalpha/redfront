@@ -11,9 +11,65 @@
 :root{--bg:#15181c;--panel:#1d2126;--line:#2c3239;--txt:#d9dde2;--dim:#8a939d;--red:#e0483e;--blue:#3d8ee8;--acc:#e6a23c;--ok:#5cb85c}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:13px/1.4 "Segoe UI",system-ui,sans-serif}
-#app{display:grid;grid-template-columns:380px 1fr;height:100vh}
+#app{display:grid;height:100vh;grid-template-columns:var(--lw) 5px 1fr 5px var(--rw);grid-template-rows:auto 1fr 5px var(--bh);
+  grid-template-areas:"top top top top top" "left sl map sr right" "sb sb sb sb sb" "bottom bottom bottom bottom bottom"}
+:root{--lw:340px;--rw:340px;--bh:240px}
+#top{grid-area:top;display:flex;gap:6px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+#top .brand{letter-spacing:.06em;margin-right:4px}
+#top #camp{max-width:220px}
+#top .cyc{display:flex;gap:4px;margin-left:8px}
+#top .meta{margin:0 0 0 8px}
+#top .sp,.mbar .sp{flex:1}
+#left{grid-area:left;display:flex;flex-direction:column;background:var(--panel);min-height:0;min-width:0;overflow:hidden}
+#right{grid-area:right;background:var(--panel);overflow:auto;min-width:0}
+#map{grid-area:map}
+#sL{grid-area:sl}#sR{grid-area:sr}#sB{grid-area:sb}
+.split{background:var(--line);z-index:5}
+.split.v{cursor:col-resize}.split.h{cursor:row-resize}
+.split:hover{background:var(--acc)}
+#bottom{grid-area:bottom;display:flex;flex-direction:column;background:#171a1e;min-height:0;overflow:hidden}
+.mbar{display:flex;gap:10px;align-items:center;padding:4px 10px;border-bottom:1px solid var(--line)}
+.mbar .meta{margin:0}
+#mx{flex:1;overflow:auto;position:relative}
+#mxIn{position:relative}
+.tick{position:absolute;top:0;border-left:1px solid #2a2f35;pointer-events:none}
+.axis{position:sticky;top:0;height:18px;background:#1d2126;z-index:5;border-bottom:1px solid var(--line)}
+.axis span{position:absolute;top:2px;font-size:10px;color:var(--dim)}
+.legend .lg{cursor:default}.legend b{cursor:pointer}
+.legend.min .lg{display:none}
+.night{position:absolute;top:0;background:rgba(40,60,110,.18);pointer-events:none}
+.now{position:absolute;top:0;border-left:2px solid var(--acc);pointer-events:none;z-index:2}
+.mxe,.mxg{position:absolute;left:0;height:18px;cursor:pointer}
+.mxe{border-top:1px solid #2c3239}
+.mxe.sel .mxl{color:var(--acc);font-weight:600}
+.mxl{position:sticky;left:0;width:228px;padding:0 6px;font-size:11.5px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#171a1e;z-index:4}
+.mxl.gl{color:var(--dim);padding-left:16px}
+.bar2{position:absolute;top:4px;height:10px;border-radius:3px;opacity:.85}
+.bar2.red{background:var(--red)}.bar2.blue{background:var(--blue)}
+.mk{position:absolute}
+.mk.rv{width:8px;height:8px;top:5px;border-radius:50%;background:#fff;border:2px solid #333}
+.mk.ob{width:10px;height:10px;transform:rotate(45deg);background:#ffd54f;border:1px solid #333;top:4px}
+.tot{position:absolute;top:0;border-left:2px dashed #ffd54f;pointer-events:none;z-index:1}
+.hdl{position:absolute;top:1px;min-width:12px;height:16px;font-size:10px;line-height:16px;text-align:center;background:#ffd54f;color:#000;border-radius:3px;cursor:ew-resize;z-index:3;white-space:nowrap;padding:0 2px}
+#insp{padding:10px 12px}
+#insp h3{margin:0 0 4px;font-size:14px}
+.ibox{font-size:12.5px}
+.grpbox{border-top:1px solid var(--line);margin-top:8px;padding-top:6px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+table.wp{border-collapse:collapse;margin-top:3px;font-size:12px}
+table.wp td{padding:1px 8px 1px 0;color:var(--dim)}
+table.wp td:first-child{color:var(--txt);font-variant-numeric:tabular-nums}
+.act{border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:8px}
+.srow{display:grid;grid-template-columns:52px 1fr auto;gap:6px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12.5px}
+.srow:hover{background:#262b31}
+.srow.sel{background:#3a3020}
+.srow.duty{color:var(--dim)}
+.srow .tm{font-variant-numeric:tabular-nums}
+.srow .st{color:var(--dim);font-size:11px}
+.sh{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin:6px 0 2px}
+
 #side{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-height:0}
-#map{height:100%;background:#0e1013}
+#map{min-height:0;background:#0e1013}
 header{padding:10px 12px;border-bottom:1px solid var(--line)}
 header h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em}
 header h1 span{color:var(--dim);font-weight:400}
@@ -91,28 +147,29 @@ details.more summary{cursor:pointer;color:var(--dim)}
 .help p{margin:4px 0}
 .help ol{margin:4px 0 4px 18px;padding:0}
 dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
-@media (max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:55vh 1fr}#map{order:-1}}
+
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="side">
-    <header>
-      <div class="hdr"><h1>REDFRONT <span id="title"></span></h1>
-        <button class="icon-btn" id="bSet" data-t-title="settings">⚙</button>
-        <button class="icon-btn" id="bHelp" data-t-title="help">?</button></div>
-      <div class="row">
-        <select id="camp" style="flex:1"></select>
-        <button id="bNew" data-t="new"></button>
-      </div>
-      <div class="meta" id="meta"></div>
-    </header>
-    <div class="cycle">
-      <button class="main" id="bPlan"><span data-t="c1"></span><small data-t="c1s"></small></button>
-      <button class="main" id="bBuild"><span data-t="c2"></span><small data-t="c2s"></small></button>
-      <button class="main" id="bDebrief"><span data-t="c3"></span><small data-t="c3s"></small></button>
-      <button class="main" id="bEnd"><span data-t="c4"></span><small data-t="c4s"></small></button>
-    </div>
+  <header id="top">
+    <b class="brand">REDFRONT</b>
+    <select id="camp"></select><button id="bNew" data-t="new"></button>
+    <span class="cyc">
+      <button class="main" id="bPlan" data-t="c1" data-t-title="c1s"></button>
+      <button class="main" id="bBuild" data-t="c2" data-t-title="c2s"></button>
+      <button class="main" id="bDebrief" data-t="c3" data-t-title="c3s"></button>
+      <button class="main" id="bEnd" data-t="c4" data-t-title="c4s"></button>
+    </span>
+    <span class="meta" id="meta"></span>
+    <span class="sp"></span>
+    <button class="icon-btn" id="tLeft" data-t-title="togLeft">◧</button>
+    <button class="icon-btn" id="tBottom" data-t-title="togBottom">⬓</button>
+    <button class="icon-btn" id="tRight" data-t-title="togRight">◨</button>
+    <button class="icon-btn" id="bSet" data-t-title="settings">⚙</button>
+    <button class="icon-btn" id="bHelp" data-t-title="help">?</button>
+  </header>
+  <aside id="left">
     <nav>
       <button data-tab="sorties" class="on" data-t="tabSorties"></button>
       <button data-tab="ground" data-t="tabGround"></button>
@@ -123,8 +180,23 @@ dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
     <div id="pane"></div>
     <div id="busy"><span id="busyText"></span><div class="bar"></div></div>
     <div id="out"></div>
-  </div>
-  <div id="map"></div>
+  </aside>
+  <div id="sL" class="split v" data-var="--lw" data-dir="1"></div>
+  <main id="map"></main>
+  <div id="sR" class="split v" data-var="--rw" data-dir="-1"></div>
+  <aside id="right"><div id="insp"></div></aside>
+  <div id="sB" class="split h" data-var="--bh" data-dir="-1"></div>
+  <section id="bottom">
+    <div class="mbar">
+      <b data-t="matrix"></b>
+      <label class="meta"><input type="checkbox" id="mDuty"> <span data-t="mDuty"></span></label>
+      <label class="meta"><input type="checkbox" id="mPast"> <span data-t="mPast"></span></label>
+      <span class="meta" data-t="mHint"></span>
+      <span class="sp"></span>
+      <button class="icon-btn" id="mOut">−</button><button class="icon-btn" id="mIn">+</button>
+    </div>
+    <div id="mx"><div id="mxIn"></div></div>
+  </section>
 </div>
 
 <dialog id="dNew">
@@ -324,6 +396,16 @@ const I18N = {
       <p>Details: README.en.md.</p>`,
   },
 };
+Object.assign(I18N.ru, {matrix: "Матрица синхронизации", mDuty: "дежурства", mPast: "прошедшие", playable: "Можно слетать",
+  mHint: "◆ выход на объект, ○ сбор, пунктир - время удара; ⇔ тянуть - перенести вылет", dragTip: "перенести вылет (шаг 5 мин)",
+  rv: "сбор", inspEmpty: "Выберите вылет в списке, на матрице или объект на карте.", togLeft: "левая панель", togRight: "инспектор",
+  togBottom: "матрица"});
+Object.assign(I18N.en, {matrix: "Synchronization matrix", mDuty: "duty stations", mPast: "completed", playable: "Available to fly",
+  mHint: "◆ on objective, ○ rendezvous, dashed - time on target; drag ⇔ to move the sortie", dragTip: "move the sortie (5 min steps)",
+  rv: "rendezvous", inspEmpty: "Select a sortie in the list or the matrix, or an object on the map.", togLeft: "left panel",
+  togRight: "inspector", togBottom: "matrix"});
+I18N.ru.meta = (s, side) => `День <b>${s.day}</b> · ${esc(s.ground_time || "00:00")} · ${s.date || ""} · <span class="${s.side}">${side}</span>`;
+I18N.en.meta = (s, side) => `Day <b>${s.day}</b> · ${esc(s.ground_time || "00:00")} · ${s.date || ""} · <span class="${s.side}">${side}</span>`;
 let LANG = "ru";
 try { LANG = localStorage.getItem("rf_lang") || "ru"; } catch (e) {}
 const T = k => (I18N[LANG] || I18N.ru)[k] ?? I18N.ru[k] ?? k;
@@ -375,7 +457,8 @@ async function act(action, extra, btn) {
     const j = await api(action, Object.assign({file: FILE}, extra || {}));
     if (j.lines) out(j.lines);
     if (j.file) { FILE = j.file; setPref("rf_file", FILE); await loadInfo(); }
-    if (j.state) { ST = j.state; render(); }
+    if (j.state) { ST = j.state; if (SELID && !ST.ato.some(r => r.id === SELID)) { SELID = null; SORTIE = null; } render();
+      if (SELID) selectSortie(SELID); }
     return j;
   } catch (e) { out(e.message, true); }
   finally {
@@ -422,7 +505,9 @@ function drawMap() {
   Object.values(layers).forEach(l => l.clearLayers());
   if (!ST) return;
   const nato = ST.side === "blue";                     // стиль знаков - по стороне игрока
-  $("#legend").innerHTML = `<b>${nato ? T("legendNATO") : T("legendSU")}</b>` + TAC.legend(nato, LANG === "en");
+  $("#legend").innerHTML = `<b>${pref("rf_legend", "0") === "1" ? "▾" : "▸"} ${nato ? T("legendNATO") : T("legendSU")}</b>` + TAC.legend(nato, LANG === "en");
+  $("#legend").classList.toggle("min", pref("rf_legend", "0") !== "1");
+  $("#legend b").onclick = () => { setPref("rf_legend", pref("rf_legend", "0") === "1" ? "0" : "1"); drawMap(); };
   const P = Object.fromEntries(ST.places.map(p => [p.name, p]));
   const field = ST.ground.filter(g => g.cat === "ground" && !g.attached && !["pending", "destroyed"].includes(g.state)
     && g.intel !== "presence");
@@ -458,7 +543,7 @@ function drawMap() {
           dashArray: "3 5", interactive: false}).addTo(layers.sam);
       const itip = g.intel_day != null ? `<br><i>${T("samPos")} ${g.intel_day}${g.stale ? T("samStale") : ""}</i>` : "";
       L.marker(g.pos, {icon: icon(TAC.sam(Object.assign({}, g, {branch: g.cat === "gci" ? "gci" : "sam"}), nato, friend), 26, 26, g.stale ? "tac sam stale" : "tac sam")})
-        .bindTooltip(tip + itip).addTo(layers.sam);
+        .bindTooltip(tip + itip).on("click", () => selectHtml(tip + itip)).addTo(layers.sam);
       continue;
     }
     if (g.route) {
@@ -471,12 +556,14 @@ function drawMap() {
       L.circle(g.pos, {radius: g.unc_km * 1000, color: c, weight: 1, opacity: .4, fill: false, dashArray: "2 5", interactive: false}).addTo(layers.ground);
     const dir = g.route && g.route.length > 1 ? TAC.bearing(g.route[0], g.route[1]) : null;
     const html = nato ? TAC.unitNATO(g, friend) : TAC.unitSU(g, TAC.bearingTo(g.pos, enemyOf(g.side)), dir);
-    L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit" + (g.intel && g.intel !== "exact" ? " fog-" + g.intel : "")), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip).addTo(layers.ground);
+    L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit" + (g.intel && g.intel !== "exact" ? " fog-" + g.intel : "")), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip)
+      .on("click", () => selectHtml(tip)).addTo(layers.ground);
   }
   for (const o of ST.objects) {
     if (o.role === "airfield") continue;
     L.marker(o.pos, {icon: icon(TAC.target(o), 24, 24)})
-      .bindTooltip(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`, {className: "wide"}).addTo(layers.objects);
+      .bindTooltip(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`, {className: "wide"})
+      .on("click", () => selectHtml(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`)).addTo(layers.objects);
   }
   for (const r of (ST.supply_routes || []))
     L.polyline(r.pts, {color: "#7a5230", weight: 2 + Math.min(6, r.t / 150), opacity: .6, dashArray: "2 6"})
@@ -502,15 +589,194 @@ function drawMap() {
   if (!fitted && ST.places.length) { map.fitBounds(ST.places.map(p => p.pos), {padding: [30, 30]}); fitted = true; }
 }
 
+
+// ---------- выбор: один объект для списка, карты, инспектора и матрицы ----------
+let SELID = null, SORTIE = null, SELHTML = null;     // выбранный вылет (id плана полётов) и его маршруты; или карточка объекта
+async function selectSortie(id) {
+  SELID = id; SELHTML = null; SORTIE = null;
+  const t = ST && ST.tasks.findIndex(x => x.ato_id === id);
+  if (t != null && t >= 0) SEL = t;
+  try { SORTIE = (await api("sortie", {file: FILE, id})).sortie; } catch (e) { out(e.message, true); }
+  if (TAB === "sorties") renderSorties($("#pane"));
+  renderInspector(); renderMatrix(); drawTask();
+  if (SORTIE) {
+    const pts = SORTIE.groups.flatMap(g => g.route.map(w => w.pos));
+    if (pts.length) map.fitBounds(pts, {padding: [40, 40], maxZoom: 10});
+  }
+}
+function selectHtml(html) { SELHTML = html; SELID = null; SORTIE = null; renderInspector(); renderMatrix(); drawTask();
+  if (TAB === "sorties") renderSorties($("#pane")); }
+
+// ---------- вкладка "Вылеты": список; подробности и действия - в инспекторе ----------
+function renderSorties(p) {
+  const showEnemy = pref("rf_ato_enemy", "0") === "1";
+  const playable = new Set(ST.tasks.map(t => t.ato_id));
+  const own = ST.ato.filter(r => r.side === ST.side).slice().sort((a, b) => a.tot.localeCompare(b.tot));
+  const row = (r, mine) => `<div class="srow ${r.id === SELID ? "sel" : ""} ${r.duty ? "duty" : ""}" data-id="${esc(r.id)}">
+      <span class="tm">${r.night ? "🌙" : ""}${esc(r.tot)}</span>
+      <span class="tt">${mine && playable.has(r.id) ? "▶ " : ""}${esc(r.title)}</span>
+      <span class="st">${esc(r.status)}</span></div>`;
+  const play = own.filter(r => playable.has(r.id)), rest = own.filter(r => !playable.has(r.id));
+  let h = `<div class="row" style="margin-bottom:6px">${ST.clock ? `<span class="meta" style="margin:0">${T("clock")} ${esc(ST.clock)} ·</span>` : ""}
+      <span class="meta" style="margin:0">${T("situation")} ${esc(ST.ground_time)}</span>
+      ${ST.ato.length ? `<button id="atoAdd" title="${esc(T("addSortieTip"))}">${T("addSortie")}</button>` : ""}</div><div id="atoCands"></div>`;
+  if (!ST.tasks.length) h += `<p class="meta">${ST.task_reason ? T("noTasks") + esc(ST.task_reason) : T("noPlan")}</p>`;
+  h += `<div class="sh">${T("playable")} (${play.length})</div>` + play.map(r => row(r, true)).join("");
+  if (rest.length) h += `<details class="more"><summary>${T("otherSorties")} (${rest.length})</summary>${rest.map(r => row(r, true)).join("")}</details>`;
+  if (showEnemy) { const en = ST.ato.filter(r => r.side !== ST.side).sort((a, b) => a.tot.localeCompare(b.tot));
+    h += `<details class="more"><summary class="${ST.side === "red" ? "blue" : "red"}">${T("enemySorties")} (${en.length})</summary>${en.map(r => row(r, false)).join("")}</details>`; }
+  p.innerHTML = h;
+  p.querySelectorAll(".srow").forEach(el => el.onclick = () => selectSortie(el.dataset.id));
+  if ($("#atoAdd")) $("#atoAdd").onclick = () => atoCands();
+}
+
+// ---------- инспектор: выбранный вылет (группы, маршрут со временем, угрозы, действия) или объект ----------
+function renderInspector() {
+  const box = $("#insp");
+  if (!ST) { box.innerHTML = ""; return; }
+  if (SELHTML) { box.innerHTML = `<div class="ibox">${SELHTML}</div>`; return; }
+  if (!SELID) { box.innerHTML = `<p class="meta">${T("inspEmpty")}</p>`; return; }
+  const r = ST.ato.find(x => x.id === SELID), s = SORTIE;
+  if (!r) { box.innerHTML = ""; return; }
+  const ti = ST.tasks.findIndex(x => x.ato_id === SELID), t = ti >= 0 ? ST.tasks[ti] : null, own = r.side === ST.side;
+  let h = `<div class="item" data-id="${esc(r.id)}"><h3>${r.night ? "🌙 " : ""}${esc(r.title)}</h3>
+    <div class="d">${r.duty ? `${T("inZone")} ${esc(r.tot)}–${esc(r.end || "")}` : `${T("tot")} <b>${esc(r.tot)}</b>`} · ${esc(r.takeoff)}–${esc(r.land)} · ${esc(r.status)}</div>`;
+  if (t) h += `<div class="d">${t.km} ${T("fromBase")} ${esc(t.base)}</div>` +
+    (t.goal && t.goal.length ? `<div class="pk goal">${t.goal.map(esc).join("<br>")}</div>` : "");
+  if (s && s.threats.length) h += `<div class="d"><b>${T("sam")}:</b> ${s.threats.map(x => esc(x.name)).join(", ")}</div>`;
+  if (s && s.notes) h += `<div class="d">⚠ ${esc(s.notes)}</div>`;
+  if (t) h += `<div class="act"><div class="row"><span class="meta" style="margin:0">${T("fly")}</span>
+      <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
+      <span class="meta" style="margin:0" title="${esc(T("humansTip"))}">${T("humans")}</span>
+      <select class="hum">${Array.from({length: Math.max(1, t.seats || 1)}, (_, k) => `<option>${k + 1}</option>`).join("")}</select></div>
+      <div class="row" style="margin-top:6px"><button class="main go">${T("buildBtn")}</button></div></div>`;
+  if (own && !r.locked) h += `<div class="row" style="margin-top:6px">${r.duty_only ? "" : `<button class="atoEd">${T("edit")}</button>`}<button class="atoRm">${T("remove")}</button></div>`;
+  h += `<div class="atoForm"></div>`;
+  if (s) h += s.groups.map((g, k) => `<div class="grpbox"><div><span class="sw" style="background:${grpCol(k)}"></span><b>${esc(g.title)}</b>: ${g.size} × ${esc(g.type)}</div>
+      <div class="d">${esc(g.unit)} · ${esc(g.base)}</div>
+      <table class="wp">${g.route.map(w => `<tr><td>${esc(w.t)}</td><td>${esc(w.name)}</td></tr>`).join("")}</table></div>`).join("");
+  else h += `<div class="d">${r.groups.map(esc).join("<br>")}</div>`;
+  box.innerHTML = h + `</div>`;
+  const go = box.querySelector(".go");
+  if (go) go.onclick = e => act("build", {task: ti + 1, fly: box.querySelector(".fly").value, humans: box.querySelector(".hum").value,
+    budget: pref("rf_budget", "")}, e.target);
+  const ed = box.querySelector(".atoEd"); if (ed) ed.onclick = () => atoEditor(box.querySelector(".item"));
+  const rm = box.querySelector(".atoRm"); if (rm) rm.onclick = e => { if (confirm(T("removeQ"))) act("atoremove", {id: r.id}, e.target); };
+}
+const GRP = ["#111111", "#b8860b", "#2e7d32", "#6a1b9a", "#c62828", "#00838f", "#5d4037", "#ad1457"];
+const grpCol = k => GRP[k % GRP.length];
+
+// ---------- карта: маршруты выбранного вылета с временем точек и угрозы коридора ----------
 function drawTask() {
   layers.task.clearLayers();
-  const t = ST && ST.tasks[SEL]; if (!t) return;
-  const pts = [t.base_pos, t.ip, t.target].filter(Boolean);
-  L.polyline(pts, {color: "#111", weight: 2.5, dashArray: "8 4"}).addTo(layers.task);
-  if (t.ip) L.circleMarker(t.ip, {radius: 4, color: "#111", fillColor: "#fff", fillOpacity: 1}).bindTooltip(T("ipm")).addTo(layers.task);
-  if (t.target) L.marker(t.target, {icon: icon(`<svg width="30" height="30" viewBox="-15 -15 30 30"><circle r="11" fill="none" stroke="#111" stroke-width="2.5"/><path d="M0 -15 L0 -6 M0 6 L0 15 M-15 0 L-6 0 M6 0 L15 0" stroke="#111" stroke-width="2.5"/></svg>`, 30, 30)})
-    .bindTooltip(T("target") + esc(t.title)).addTo(layers.task);
+  if (!SORTIE) return;
+  SORTIE.threats.forEach(x => L.circle(x.pos, {radius: x.r_km * 1000, color: "#c8102e", weight: 2, fill: true, fillOpacity: .08, interactive: false})
+    .addTo(layers.task));
+  SORTIE.groups.forEach((g, k) => {
+    const c = grpCol(k);
+    L.polyline(g.route.map(w => w.pos), {color: c, weight: k ? 2 : 3, opacity: .85, dashArray: k ? "6 5" : "10 4"})
+      .bindTooltip(`${esc(g.title)}: ${g.size} × ${esc(g.type)}`).addTo(layers.task);
+    g.route.slice(1, -1).forEach(w => L.circleMarker(w.pos, {radius: 4, color: c, weight: 2, fillColor: "#fff", fillOpacity: 1})
+      .bindTooltip(`<b>${esc(w.name)}</b> ${esc(w.t)}<br>${esc(g.title)}`).addTo(layers.task));
+  });
+  if (SORTIE.target) L.marker(SORTIE.target, {icon: icon(`<svg width="30" height="30" viewBox="-15 -15 30 30"><circle r="11" fill="none" stroke="#111" stroke-width="2.5"/><path d="M0 -15 L0 -6 M0 6 L0 15 M-15 0 L-6 0 M6 0 L15 0" stroke="#111" stroke-width="2.5"/></svg>`, 30, 30)})
+    .bindTooltip(T("target") + esc(SORTIE.title)).addTo(layers.task);
 }
+
+// ---------- матрица синхронизации: строки - группы вылетов, полосы взлёт-посадка, сбор, выход на объект, время удара ----------
+let PXM = +pref("rf_pxm", "2");                         // пикселей на минуту
+const hm = s => { s = ((s % 86400) + 86400) % 86400; return `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor(s % 3600 / 60)).padStart(2, "0")}`; };
+function renderMatrix() {
+  const box = $("#mxIn");
+  if (!ST || !ST.matrix) { box.innerHTML = ""; return; }
+  const duty = $("#mDuty").checked, past = $("#mPast").checked, enemy = pref("rf_ato_enemy", "0") === "1";
+  const rowsById = Object.fromEntries(ST.ato.map(r => [r.id, r]));
+  const now = ST.clock_s || 0;
+  const ents = ST.matrix.filter(e => (e.side === ST.side || enemy) && (duty || !e.duty)
+    && (past || !e.groups.length || Math.max(...e.groups.map(g => g.land)) >= now)).sort((a, b) => a.tot - b.tot);
+  const LBL = 230, x = s => LBL + s / 60 * PXM, W = x(86400) + 20, H = 18;
+  const [w0, w1] = ST.window || [21600, 72000];
+  let rows = "", y = 22;
+  for (const e of ents) {
+    const r = rowsById[e.id] || {}, sel = e.id === SELID, drag = e.side === ST.side && !r.locked && !r.duty_only && !e.duty;
+    rows += `<div class="mxe ${sel ? "sel" : ""} ${e.side}" style="top:${y}px;width:${W}px" data-id="${esc(e.id)}">
+      <div class="mxl" title="${esc(e.title)}">${esc(hm(e.tot))} · ${esc(e.title)}</div>
+      ${e.duty ? "" : `<div class="tot" style="left:${x(e.tot)}px;height:${(e.groups.length + 1) * H}px" title="${T("tot")} ${hm(e.tot)}"></div>`}
+      ${drag ? `<div class="hdl" style="left:${x(e.tot) - 6}px" data-tot="${e.tot}" title="${esc(T("dragTip"))}">⇔</div>` : ""}</div>`;
+    y += H;
+    e.groups.forEach((g, k) => {
+      const end = g.end || g.land;
+      rows += `<div class="mxg" style="top:${y}px" data-id="${esc(e.id)}">
+        <div class="mxl gl" title="${esc(g.unit)}">${esc(g.title)} · ${g.size}×${esc(g.type)}</div>
+        <div class="bar2 ${e.side}" style="left:${x(g.takeoff)}px;width:${Math.max(3, x(end) - x(g.takeoff))}px"
+          title="${esc(g.title)}: ${hm(g.takeoff)}–${hm(g.land)}"></div>
+        ${g.rv ? `<div class="mk rv" style="left:${x(g.rv) - 4}px" title="${T("rv")} ${hm(g.rv)}"></div>` : ""}
+        ${e.duty ? "" : `<div class="mk ob" style="left:${x(g.objective) - 5}px" title="${T("onTarget")} ${hm(g.objective)}"></div>`}</div>`;
+      y += H;
+    });
+    y += 4;
+  }
+  let axis = "", lab = "";
+  for (let h = 0; h <= 24; h++) { axis += `<div class="tick" style="left:${x(h * 3600)}px;height:${y}px"></div>`;
+    lab += `<span style="left:${x(h * 3600) + 2}px">${String(h).padStart(2, "0")}:00</span>`; }
+  box.style.width = W + "px"; box.style.height = y + "px";
+  box.innerHTML = `<div class="axis" style="width:${W}px">${lab}</div><div class="night" style="left:${LBL}px;width:${x(w0) - LBL}px;height:${y}px"></div>
+    <div class="night" style="left:${x(w1)}px;width:${W - x(w1)}px;height:${y}px"></div>${axis}
+    ${now ? `<div class="now" style="left:${x(now)}px;height:${y}px" title="${T("clock")} ${hm(now)}"></div>` : ""}${rows}`;
+  box.querySelectorAll(".mxe,.mxg").forEach(el => el.onclick = ev => { if (!ev.target.classList.contains("hdl")) selectSortie(el.dataset.id); });
+  box.querySelectorAll(".hdl").forEach(h => h.onmousedown = ev => dragTot(ev, h, x));
+  const s = box.querySelector(".mxe.sel");
+  if (s) { const m = $("#mx"), e = ents.find(q => q.id === SELID);
+    if (s.offsetTop < m.scrollTop + 20 || s.offsetTop > m.scrollTop + m.clientHeight - 40) m.scrollTop = s.offsetTop - 24;
+    if (e) { const px = x(e.tot); if (px < m.scrollLeft + LBL + 40 || px > m.scrollLeft + m.clientWidth - 40) m.scrollLeft = px - LBL - m.clientWidth / 3; } }
+}
+function dragTot(ev, h, x) {                            // перенос вылета: тянуть метку времени удара, шаг 5 мин
+  ev.preventDefault(); ev.stopPropagation();
+  const id = h.closest(".mxe").dataset.id, tot0 = +h.dataset.tot, x0 = ev.clientX;
+  const line = h.parentElement.querySelector(".tot");
+  let tot = tot0;
+  const mv = e => { tot = Math.round((tot0 + (e.clientX - x0) / PXM * 60) / 300) * 300;
+    const px = x(tot); h.style.left = (px - 6) + "px"; if (line) line.style.left = px + "px"; h.textContent = hm(tot); };
+  const up = async () => {
+    document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up);
+    if (Math.abs(tot - tot0) < 60) { renderMatrix(); return; }
+    SELID = id;
+    const j = await act("atoedit", {id, tot: hm(tot)});   // проверка самолётов и времени - на сервере (command.edit)
+    if (!j) renderMatrix(); else selectSortie(id);
+  };
+  document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up);
+}
+
+// ---------- панели: ширина и высота перетаскиванием, сворачивание; хранится в браузере ----------
+const root = document.documentElement;
+for (const v of ["--lw", "--rw", "--bh"]) { const k = pref("rf" + v, ""); if (k) root.style.setProperty(v, k); }
+document.querySelectorAll(".split").forEach(sp => sp.onmousedown = ev => {
+  ev.preventDefault();
+  const v = sp.dataset.var, dir = +sp.dataset.dir, horiz = sp.classList.contains("h");
+  const start = horiz ? ev.clientY : ev.clientX, s0 = parseFloat(getComputedStyle(root).getPropertyValue(v)) || 0;
+  const mv = e => { const d = ((horiz ? e.clientY : e.clientX) - start) * dir;
+    root.style.setProperty(v, Math.max(0, Math.min(horiz ? innerHeight - 160 : innerWidth / 2, s0 + d)) + "px"); map.invalidateSize(); };
+  const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up);
+    setPref("rf" + v, getComputedStyle(root).getPropertyValue(v).trim()); map.invalidateSize(); };
+  document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up);
+});
+const DEF = {"--lw": "340px", "--rw": "340px", "--bh": "240px"};
+function toggle(v) {
+  const cur = parseFloat(getComputedStyle(root).getPropertyValue(v)) || 0;
+  const val = cur > 10 ? "0px" : (pref("rf" + v + "_open", "") || DEF[v]);
+  if (cur > 10) setPref("rf" + v + "_open", cur + "px");
+  root.style.setProperty(v, val); setPref("rf" + v, val); setTimeout(() => map.invalidateSize(), 50);
+}
+$("#tLeft").onclick = () => toggle("--lw");
+$("#tRight").onclick = () => toggle("--rw");
+$("#tBottom").onclick = () => toggle("--bh");
+$("#mIn").onclick = () => { PXM = Math.min(12, PXM * 1.5); setPref("rf_pxm", PXM); renderMatrix(); };
+$("#mOut").onclick = () => { PXM = Math.max(0.5, PXM / 1.5); setPref("rf_pxm", PXM); renderMatrix(); };
+$("#mDuty").checked = pref("rf_mduty", "0") === "1";
+$("#mPast").checked = pref("rf_mpast", "0") === "1";
+$("#mDuty").onchange = e => { setPref("rf_mduty", e.target.checked ? "1" : "0"); renderMatrix(); };
+$("#mPast").onchange = e => { setPref("rf_mpast", e.target.checked ? "1" : "0"); renderMatrix(); };
+
 function stateTxt(g) {
   const S = T("st");
   let s = g.state === "pending" ? S.pending + g.arrives : (S[g.state] || g.state);
@@ -531,62 +797,11 @@ function intelTxt(g) {
 const bar = v => `<span class="bar"><i style="width:${Math.round(v * 100)}%;background:${v < .5 ? "#e0483e" : v < .75 ? "#e6a23c" : "#5cb85c"}"></i></span>`;
 const sideName = (s, cap) => T(cap ? (s === "red" ? "Red" : "Blue") : s);
 
-// ---------- вкладка "Вылеты": свои вылеты плана полётов по времени на объекте ----------
-function atoRowHtml(r, own) {
-  return `<div class="d">${r.night ? "🌙 " : ""}${esc(r.takeoff)}–${esc(r.land)} · ${r.duty ? `${T("inZone")} ${esc(r.tot)}–${esc(r.end)}` : `${T("onTarget")} ${esc(r.tot)}`} · ${esc(r.status)}</div>
-    <div class="d">${r.groups.map(esc).join("<br>")}</div>
-    ${r.threats.length ? `<div class="d">${T("sam")}: ${esc(r.threats.join(", "))}</div>` : ""}
-    ${own && !r.locked ? `<div class="row" style="margin-top:4px">${r.duty_only ? "" : `<button class="atoEd">${T("edit")}</button>`}<button class="atoRm">${T("remove")}</button></div><div class="atoForm"></div>` : ""}`;
-}
-function renderSorties(p) {
-  const showEnemy = pref("rf_ato_enemy", "0") === "1";
-  const rowsById = Object.fromEntries(ST.ato.map(r => [r.id, r]));
-  const playable = new Set(ST.tasks.map(t => t.ato_id));
-  let h = `<div class="row" style="margin-bottom:8px">${ST.clock ? `<span class="meta" style="margin:0">${T("clock")} ${esc(ST.clock)} ·</span>` : ""}
-      <span class="meta" style="margin:0">${T("situation")} ${esc(ST.ground_time)}</span>
-      ${ST.ato.length ? `<button id="atoAdd" title="${esc(T("addSortieTip"))}">${T("addSortie")}</button>` : ""}</div><div id="atoCands"></div>`;
-  if (!ST.tasks.length) h += `<p class="meta">${ST.task_reason ? T("noTasks") + esc(ST.task_reason) : T("noPlan")}</p>`;
-  h += ST.tasks.map((t, i) => { const r = rowsById[t.ato_id];
-    return `<div class="task item ${i === SEL ? "sel" : ""}" data-i="${i}" data-id="${esc(t.ato_id || "")}">
-      <b>${t.n}. ${t.tot ? esc(t.tot) + " · " : ""}${esc(t.title)}</b>
-      ${t.time ? `<div class="pk">${esc(t.time)}</div>` : ""}
-      <div class="pk">${t.km} ${T("fromBase")} ${esc(t.base)} · ${T("sam")}: ${esc(t.threats.join(", ") || T("none"))}</div>
-      <div class="pk">${t.package.map(g => `${esc(g.title)}: ${g.size} × ${esc(g.performer)}`).join("<br>")}</div>
-      ${t.goal && t.goal.length ? `<div class="pk goal">${t.goal.map(esc).join("<br>")}</div>` : ""}
-      ${t.notes ? `<div class="pk">⚠ ${esc(t.notes)}</div>` : ""}
-      <div class="row"><span class="meta" style="margin:0">${T("fly")}</span>
-        <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
-        <span class="meta" style="margin:0" title="${esc(T("humansTip"))}">${T("humans")}</span>
-        <select class="hum">${Array.from({length: Math.max(1, t.seats || 1)}, (_, k) => `<option>${k + 1}</option>`).join("")}</select>
-        <button class="main go">${T("buildBtn")}</button>
-        ${r && !r.locked ? `${r.duty_only ? "" : `<button class="atoEd">${T("edit")}</button>`}<button class="atoRm">${T("remove")}</button>` : ""}</div>
-      <div class="atoForm"></div></div>`; }).join("");
-  const others = ST.ato.filter(r => r.side === ST.side && !playable.has(r.id));
-  if (others.length) h += `<details class="more"><summary>${T("otherSorties")} (${others.length})</summary>` +
-    others.map(r => `<div class="item" data-id="${esc(r.id)}"><b>${esc(r.title)}</b>${atoRowHtml(r, true)}</div>`).join("") + `</details>`;
-  if (showEnemy) { const en = ST.ato.filter(r => r.side !== ST.side);
-    h += `<details class="more" open><summary class="${ST.side === "red" ? "blue" : "red"}">${T("enemySorties")} (${en.length})</summary>` +
-      en.map(r => `<div class="item"><b>${esc(r.title)}</b>${atoRowHtml(r, false)}</div>`).join("") + `</details>`; }
-  p.innerHTML = h;
-  p.querySelectorAll(".task").forEach(el => {
-    el.onclick = e => { if (e.target.closest("select,button,input,.atoForm")) return; SEL = +el.dataset.i; render(); };
-    el.querySelector(".go").onclick = e => act("build", {task: +el.dataset.i + 1, fly: el.querySelector(".fly").value,
-      humans: el.querySelector(".hum").value, budget: pref("rf_budget", "")}, e.target);
-  });
-  p.querySelectorAll(".atoRm").forEach(b => b.onclick = e => {
-    const it = e.target.closest(".item");
-    if (confirm(T("removeQ"))) act("atoremove", {id: it.dataset.id}, e.target);
-  });
-  p.querySelectorAll(".atoEd").forEach(b => b.onclick = e => atoEditor(e.target.closest(".item")));
-  if ($("#atoAdd")) $("#atoAdd").onclick = () => atoCands();
-}
-
 function render() {
-  if (!ST) { $("#pane").innerHTML = `<p class='meta'>${T("noCamp")}</p>`; drawMap(); return; }
-  $("#title").textContent = "· " + ST.name;
-  $("#meta").innerHTML = T("meta")(ST, sideName(ST.side)) + "<br>" +
-    `${esc(ST.scenario || "")} · ${T("seed")} ${ST.seed ?? "-"}${ST.randomness ? "" : " · " + T("noRandom")}` +
-    (ST.built ? `<br>${T("built")} ${ST.built.sortie}: ${esc(ST.built.file)}` : "");
+  if (!ST) { $("#pane").innerHTML = `<p class='meta'>${T("noCamp")}</p>`; $("#meta").innerHTML = ""; drawMap(); renderInspector(); renderMatrix(); return; }
+  $("#meta").innerHTML = T("meta")(ST, sideName(ST.side));
+  $("#meta").title = `${ST.scenario || ""} · ${T("seed")} ${ST.seed ?? "-"}${ST.randomness ? "" : " · " + T("noRandom")}` +
+    (ST.built ? ` · ${T("built")} ${ST.built.sortie}: ${ST.built.file}` : "");
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === TAB));
   const p = $("#pane");
   if (TAB === "sorties") renderSorties(p);
@@ -611,7 +826,7 @@ function render() {
   } else {
     p.innerHTML = `<div class="log">${ST.log.slice().reverse().map(l => `<p>${esc(l)}</p>`).join("")}</div>`;
   }
-  drawMap();
+  drawMap(); renderInspector(); renderMatrix();
 }
 
 function renderAir(p) {
@@ -751,14 +966,16 @@ async function loadState() {
   if (ST && ST.lang !== LANG) {                        // язык окна - и для брифинга кампании
     try { ST = (await api("setlang", {file: FILE, lang: LANG})).state; } catch (e) { out(e.message, true); }
   }
-  SEL = 0; fitted = false; render();
+  SEL = 0; SELID = null; SORTIE = null; SELHTML = null; fitted = false; render();
+  if (ST && ST.tasks.length && ST.tasks[0].ato_id) selectSortie(ST.tasks[0].ato_id);
 }
 
 $("#camp").onchange = () => { FILE = $("#camp").value; setPref("rf_file", FILE); loadState(); };
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b.dataset.tab; render(); });
-$("#bPlan").onclick = e => { SEL = 0; TAB = "sorties"; act("plan", {}, e.currentTarget); };
-$("#bBuild").onclick = e => { TAB = "sorties"; act("build", {task: SEL + 1, fly: (document.querySelectorAll(".task .fly")[SEL] || {}).value || "strike",
-  humans: (document.querySelectorAll(".task .hum")[SEL] || {}).value || 1, budget: pref("rf_budget", "")}, e.currentTarget); };
+$("#bPlan").onclick = async e => { SEL = 0; TAB = "sorties"; SELID = null; await act("plan", {}, e.currentTarget);
+  if (ST && ST.tasks.length && ST.tasks[0].ato_id) selectSortie(ST.tasks[0].ato_id); };
+$("#bBuild").onclick = e => { act("build", {task: SEL + 1, fly: ($("#insp .fly") || {}).value || "strike",
+  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", "")}, e.currentTarget); };
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
 $("#bEnd").onclick = e => { if (confirm(T("endQ"))) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();
@@ -776,6 +993,7 @@ $("#sLang").onchange = async e => {
 };
 $("#sBudget").onchange = e => setPref("rf_budget", e.target.value);
 $("#sEnemy").onchange = e => { setPref("rf_ato_enemy", e.target.checked ? "1" : "0"); render(); };
+window.addEventListener("resize", () => map.invalidateSize());
 $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
 $("#bApply").onclick = e => act("mapapply", {}, e.target);
 $("#bRProbe").onclick = e => act("roadsprobe", {}, e.target);

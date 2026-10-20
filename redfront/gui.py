@@ -178,11 +178,92 @@ def view(st: dict) -> dict:
                      locked=command.why_locked(st, ent[r["id"]]), duty_only=command._is_duty(st, ent[r["id"]]))
                 for r in ato.rows(st)],
         "lang": lg,
+        "matrix": matrix(st),
+        "clock_s": st.get("clock_s") or 0,
+        "window": list(ato.flying_window(st)),
         "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
         "ground_time": ato.hhmm(st.get("ground_s") or 0),          # наземная обстановка - на это время (sim.advance)
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],
     }
+
+
+POINT_NAMES = {"column": ["ИПМ", "Цель"], "site": ["ИПМ", "Цель"], "point": ["ИПМ", "Цель"], "flyover": ["ИПМ", "Цель"],
+               "sam": ["Рубеж пуска"], "cover_zone": ["Зона прикрытия"], "sweep_zone": ["Зона расчистки"],
+               "cap_zone": ["Зона прикрытия"], "escort_lz": ["Площадка (прикрытие)"], "feint": ["Демонстрация"],
+               "orbit": ["Зона дежурства"], "alert": ["Зона дежурства"], "air_assault": ["Площадка"], "air_evac": ["Площадка"],
+               "csar": ["Экипаж"], "airlift": ["Маршрут"]}
+
+
+def matrix(st: dict) -> list[dict]:
+    """Матрица синхронизации (окно): вылеты плана полётов - группы с временем взлёта, сбора, выхода на объект, посадки
+    (секунды суток)."""
+    lg = i18n.lang(st)
+    units = st["units"]
+    out = []
+    for e in (st.get("ato") or {}).get("entries", []):
+        tdef = model.doctrine(st, e["side"])["tasks"].get(e["kind"], {})
+        groups = []
+        for g in e["task"]["package"]:
+            t = e["times"].get(g["group"])
+            if not t:
+                continue
+            rv = None
+            if g.get("rv") and tdef.get("speed_kmh"):
+                rest = sum(model.dist_km(a, b) for a, b in zip([g["rv"]] + g["route"], g["route"]))
+                rv = t["objective_s"] - rest * 3600 / model.group_speed_kmh(st, g, tdef)
+            groups.append({"group": g["group"], "title": i18n.tr(g["title"], lg), "size": g["size"],
+                           "type": units.get(g["performer"], {}).get("type", ""),
+                           "unit": units.get(g["performer"], {}).get("name", g["performer"]),
+                           "takeoff": round(t["takeoff_s"]), "objective": round(t["objective_s"]), "land": round(t["land_s"]),
+                           "end": round(t["station_end_s"]) if "station_end_s" in t else None, "rv": round(rv) if rv else None})
+        out.append({"id": e["id"], "side": e["side"], "kind": e["kind"], "title": i18n.tr(e["title"], lg), "tot": round(e["tot_s"]),
+                    "duty": e["ai_only"], "groups": groups})
+    return out
+
+
+def sortie(st: dict, eid: str) -> dict:
+    """Выбранный вылет для карты и инспектора: маршрут каждой группы (точки с временем по скорости задачи), угрозы
+    коридора (место и радиус ЗРК)."""
+    lg = i18n.lang(st)
+    e = next((x for x in (st.get("ato") or {}).get("entries", []) if x["id"] == eid), None)
+    if e is None:
+        raise ValueError(f"нет вылета {eid}")
+    tdef = model.doctrine(st, e["side"])["tasks"].get(e["kind"], {})
+    units = st["units"]
+    groups = []
+    for g in e["task"]["package"]:
+        t = e["times"].get(g["group"])
+        base = st["airbases"].get(g["base"], {})
+        if not t or "lat" not in base:
+            continue
+        spd = model.group_speed_kmh(st, g, tdef) if tdef.get("speed_kmh") else 600
+        kind = g["objective"]["kind"]
+        names = POINT_NAMES.get(kind, [])
+        route = list(g["route"])
+        if kind == "recon":
+            names = [f"Разведка {i}" for i in range(1, len(route) + 1)]
+        pts = [(base, "Взлёт")] + ([(g["rv"], "Сбор")] if g.get("rv") else [])
+        pts += [(p, names[i] if i < len(names) else names[-1] if names else "") for i, p in enumerate(route)]
+        dest = st["airbases"].get(g["objective"].get("airbase") or "", base) if kind == "airlift" else base
+        # время: от взлёта по скорости задачи, последняя точка задачи - выход на объект, затем посадка
+        legs = [0.0] + [model.dist_km(a[0], b[0]) for a, b in zip(pts, pts[1:])]
+        cum = [sum(legs[:i + 1]) for i in range(len(legs))]
+        t_obj = t["objective_s"]
+        times = [t_obj - (cum[-1] - c) * 3600 / spd for c in cum]
+        times[0] = t["takeoff_s"]
+        wps = [{"pos": _ll(p), "name": i18n.waypoint(n, lg), "t": ato.hhmm(x)} for (p, n), x in zip(pts, times)]
+        wps.append({"pos": _ll(dest), "name": i18n.waypoint("Посадка", lg), "t": ato.hhmm(t["land_s"])})
+        perf = units.get(g["performer"], {})
+        groups.append({"group": g["group"], "title": i18n.tr(g["title"], lg), "size": g["size"], "type": perf.get("type", ""),
+                       "unit": perf.get("name", g["performer"]), "base": base.get("name", g["base"]), "route": wps,
+                       "loadout": g.get("loadout_user") or "", "player": False})
+    threats = [{"name": units[x]["name"], "pos": _ll(model.unit_pos(st, units[x])),
+                "r_km": round(planner.threat_radius_km(units[x]), 1)} for x in e["task"].get("threats", []) if x in units]
+    return {"id": e["id"], "side": e["side"], "title": i18n.tr(e["title"], lg), "tot": ato.hhmm(e["tot_s"]),
+            "night": ato.is_night(st, e["tot_s"]), "groups": groups, "threats": threats,
+            "notes": e["task"].get("package_notes", ""),
+            "target": _ll(e["task"]["target_pos"]) if e["task"].get("target_pos") else None}
 
 
 def liveries(st: dict, u: dict) -> list[dict]:
@@ -334,6 +415,8 @@ class App:
         p, st = self.load(req)
         if action == "state":
             return {"state": view(st)}
+        if action == "sortie":                       # выбранный вылет: маршруты групп, угрозы (карта, инспектор)
+            return {"sortie": sortie(st, req["id"])}
         if action == "setlang":                      # язык кампании: окно, брифинг миссии (i18n.py)
             st["settings"]["lang"] = "en" if req.get("lang") == "en" else "ru"
             model.save(st, p)
