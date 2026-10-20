@@ -1071,6 +1071,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 vg.points[0].tasks.append(ActivateGCI(g["channel"], vg.units[0].id, int(g["radius_km"] * 1000)))
                 if g["side"] == tk["side"]:
                     gci_lines.append(f"{state['units'][g['unit']]['name']}: канал {g['channel']}, радиус {g['radius_km']} км")
+    from . import frontline                      # линия соприкосновения, территории, пункты и цели - на карте F10
+    frontline.draw(m, state, lambda p: _pt(m, p))
     missing = [u for g in pkg if g["objective"]["kind"] == "sam" for u in g["objective"]["units"] if u not in vg_by_unit]
     if missing:                                  # урок пузыря BMS: цель группы ИИ обязана быть развёрнута, иначе ей не по чему бить
         raise RuntimeError(f"цели группы подавления ПВО не развёрнуты в миссии: {', '.join(missing)}")

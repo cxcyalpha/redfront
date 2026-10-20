@@ -360,6 +360,14 @@ at one per day. The ground model does not track artillery separately — its fir
 * **Campaign:** a destroyed GCI site stays destroyed in the model, and SAMs in its area work without the network in
   later missions. NATO ground radars (NADGE) are not in the order of battle — the blue network node is the E-3A only.
 
+### Front on the F10 map
+
+The mission (`redfront/frontline.py`, mission editor drawings) gets, on each side's layer, that side's picture at
+mission start — the same calculation as in the program window: the line of contact (red and blue lines from the
+sides' places and field units), own territory as a light fill, places as dots with names, and the side's operation
+objectives highlighted ("◎"). The enemy is shown per own intelligence: units known only by presence do not move the
+line. Line and fill are not drawn further than 45 km from places and units. The F10 map shows your coalition's layer.
+
 ### Roads
 
 pydcs has no road network; only DCS knows roads (`land.findPathOnRoads`). If the model does not know the roads of the

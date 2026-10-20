@@ -3343,6 +3343,30 @@ def ground_ops_section(tmp: Path) -> None:
     check(closed and crossing, f"мост {br['name']} разрушен: подвоз закрыт, части форсируют с ходу (путь длиннее на crossing_km)")
 
 
+def frontline_section(tmp: Path) -> None:
+    """Линия соприкосновения, территории, пункты и цели операции на карте F10 (frontline.py, рисунки миссии)."""
+    from redfront import frontline
+    print("\n== фронт на карте F10 ==")
+    st = model.new_campaign("fl", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    sim.end_day(st)
+    planner.plan(st)
+    fr = frontline.compute(st, "red")
+    inside = lambda pt, poly: sum(1 for a, b in zip(poly, poly[1:] + poly[:1])
+                                  if (a["lat"] > pt["lat"]) != (b["lat"] > pt["lat"])
+                                  and pt["lon"] < (b["lon"] - a["lon"]) * (pt["lat"] - a["lat"]) / (b["lat"] - a["lat"]) + a["lon"]) % 2
+    red_pl = [p for n, p in st["places"].items() if p.get("side") == "red"]
+    share = sum(1 for p in red_pl if any(inside(p, poly) for poly in fr["own"])) / len(red_pl)
+    check(fr["red"] and fr["blue"] and share > 0.9, f"линия соприкосновения ({len(fr['red'])} участков), своя территория - "
+          f"покрывает {share:.0%} своих пунктов")
+    build.build(st, tmp / "fl.miz", task_no=1)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "fl.miz"))
+    lay = {l.name: len(l.objects) for l in m.drawings.layers}
+    texts = [o.text for l in m.drawings.layers if l.name == "Red" for o in l.objects if hasattr(o, "text")]
+    check(lay["Red"] > 0 and lay["Blue"] > 0 and lay["Common"] == 0 and any(t.startswith("◎ ") for t in texts),
+          f"в .miz рисунки на слоях сторон (красные {lay['Red']}, синие {lay['Blue']}), пункты подписаны, цели операции выделены")
+
+
 def gui_planner_section(tmp: Path) -> None:
     """Окно: матрица синхронизации и маршруты выбранного вылета (gui.matrix, gui.sortie), английский язык."""
     from redfront import gui
@@ -3369,7 +3393,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section]
 
 
 def main() -> int:
