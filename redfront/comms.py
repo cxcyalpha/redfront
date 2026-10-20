@@ -47,6 +47,7 @@ def plan(sortie: int, dep_airport, arr_airport) -> dict:
 
 CHANNELS = (("pkg", "тактическая группа"), ("awacs", "ДРЛО"), ("dep", "аэродром вылета"), ("arr", "аэродром посадки"),
             ("guard", "аварийная"))
+CHANNELS_EN = {"pkg": "package", "awacs": "AWACS", "dep": "departure airfield", "arr": "landing airfield", "guard": "guard"}
 
 
 def set_presets(unit, nets: dict) -> bool:
@@ -67,7 +68,7 @@ def set_presets(unit, nets: dict) -> bool:
     return done
 
 
-def card(nets: dict, side: str, channels: bool) -> list[str]:
+def card(nets: dict, side: str, channels: bool, lg: str = "ru") -> list[str]:
     """Карточка связи для брифинга."""
     b = PRIMARY[side]
     out = []
@@ -75,6 +76,8 @@ def card(nets: dict, side: str, channels: bool) -> list[str]:
         f = nets.get(key) or {}
         if not f:
             continue
-        both = f"{f['vhf']:.3f} МВ / {f['uhf']:.3f} ДМВ" if f.get("vhf") and f.get("uhf") else f"{f.get(b, 0):.3f}"
-        out.append((f"К{ch} - " if channels else "") + f"{title}: {both}")
+        en = lg == "en"
+        both = (f"{f['vhf']:.3f} {'VHF' if en else 'МВ'} / {f['uhf']:.3f} {'UHF' if en else 'ДМВ'}"
+                if f.get("vhf") and f.get("uhf") else f"{f.get(b, 0):.3f}")
+        out.append(((f"Ch{ch} - " if en else f"К{ch} - ") if channels else "") + f"{CHANNELS_EN[key] if en else title}: {both}")
     return out

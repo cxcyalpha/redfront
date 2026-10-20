@@ -105,6 +105,13 @@ def apply(state: dict, data: dict) -> list[str]:
                      + ((" - объезд, марш и подвоз по этой связи медленнее." if o.get("minor", o.get("found")) else " - движение по мосту закрыто.")
                         if o["role"] == "bridge" and o["damage"] >= 1.0 else ".") + explain.damage_effect(state, o, before))
 
+    # ---- артиллерия частей: потерянные орудия - у части (art_lost), батарея в следующих миссиях меньше ----
+    for a in man.get("artillery", []):
+        u = state["units"].get(a["unit"])
+        n = sum(1 for v in a["vehicles"] if v in lost)
+        if u and n:
+            u["art_lost"] = u.get("art_lost", 0) + n
+            lines.append(f"{u['name']}: артиллерия - потеряно орудий {n}.")
     # ---- наземные части ----
     terrain = Germany()
     for g in man["ground"]:

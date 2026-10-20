@@ -33,7 +33,17 @@ def power(state: dict, unit: dict) -> float:
     p = sum(n * w.get(roles[t], 0.0) for t, n in model.alive_by_type(unit).items())
     frac = unit.get("supply_frac", 1.0 if unit.get("supply", 1.0) >= 1.0 else 0.0)
     spf = sim.get("supply_power_factor", 1.0)
-    return p * (spf + (1.0 - spf) * frac)
+    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit)
+
+
+def artillery_k(state: dict, unit: dict) -> float:
+    """Огонь артиллерии части (батарея поддержки, materialize.ART_GUNS; потерянные орудия - art_lost): сила x (1 +
+    artillery_factor x доля исправных орудий) - ОЦЕНКА, sim.artillery_factor доктрины."""
+    from .materialize import ART_GUNS
+    k = _sim(state, unit["side"]).get("artillery_factor", 0.0)
+    if not k or unit.get("role") == "air_assault":
+        return 1.0
+    return 1.0 + k * max(0, ART_GUNS - int(unit.get("art_lost", 0))) / ART_GUNS
 
 
 def _take_losses(unit: dict, frac: float) -> float:
@@ -70,6 +80,8 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
             frac = min(sim["loss_cap"], frac * r.uniform(1 - sim["battle_variance"], 1 + sim["battle_variance"]))
         if u.get("defending"):
             frac *= sim["defend_factor"]
+            if u.get("dig_h", 0) >= sim.get("prepared_h", 1e9):   # подготовленная оборона: окопы, заграждения, огневая система
+                frac *= sim.get("prepared_factor", 1.0)
         frac *= frac_day
         s0 = model.strength(u)
         n = _take_losses(u, frac)
@@ -143,9 +155,12 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
         if u["state"] == "march":
             budget[u["id"]] = ((u.get("daily_advance_km") or _sim(state, u["side"])["daily_advance_km"]) * model.strength(u)
                                * u.get("supply", 1.0) * frac_day)             # без снабжения - медленнее
+            budget[u["id"]] *= u.get("speed_k", 1.0)        # передовой отряд, ОМГ - быстрее (ops.py)
             cl = current_link(state, u)
             if cl and logistics.link_detour(state, *cl):                       # разрушен малый мост - объезд
                 budget[u["id"]] *= _sim(state, u["side"]).get("bridge_detour_slow", 1.0)
+            elif cl and not logistics.link_open(state, *cl):                   # большой мост разрушен - форсирование с ходу
+                budget[u["id"]] *= _sim(state, u["side"]).get("crossing_slow", 0.3)
             start[u["id"]] = u["progress_km"]
     new_contacts = []
     for a, b in _contacts(state, units):                          # соприкосновение уже есть до марша
@@ -182,9 +197,14 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
 def arrivals(state: dict) -> list[str]:
     """Резервы и вторые эшелоны: часть с arrives_day вводится в сектор в пункте route[0] в этот день."""
     lines = []
+    used: dict[str, int] = {}                    # полосы успеха, куда уже вводятся части этих суток
     for u in state["units"].values():
         if u.get("state") == "pending" and "route" in u and state["day"] >= u.get("arrives_day", 0):
             u["state"] = "defend"
+            entry = ops.success_entry(state, u, used) if _sim(state, u["side"]).get("commit_in_success") else None
+            if entry and entry != u["route"][0]:   # второй эшелон - в полосе успеха, а не в назначенном заранее районе
+                lines.append(f"{u['name']}: вводится в полосе успеха - район {entry} (вместо {u['route'][0]}).")
+                u["route"] = [entry]
             u["route"] = [u["route"][0]]
             u["progress_km"] = 0.0
             for a in _attached(state, u):
@@ -269,6 +289,31 @@ def ato_hhmm(t: float) -> str:
     return f"{t // 3600:02d}:{t % 3600 // 60:02d}"
 
 
+def tempo(state: dict) -> list[str]:
+    """Темп за сутки для стороны в наступлении: занятые пункты и наибольшее продвижение части (по прямой от места
+    на начало суток) против нормы доктрины (sim.tempo_km - ОЦЕНКА). Положения - на следующие сутки."""
+    lines = []
+    prev = state.get("_day_pos") or {}
+    owners = state.get("_day_owner") or {}
+    for side in model.SIDES:
+        sim = _sim(state, side)
+        if sim.get("posture") != "offense" or not prev:
+            continue
+        took = [p for p, o in owners.items() if o != side and state["places"].get(p, {}).get("side") == side]
+        adv = max((model.dist_km({"lat": prev[u["id"]][0], "lon": prev[u["id"]][1]}, model.unit_pos(state, u))
+                   for u in _maneuver(state) if u["side"] == side and u["id"] in prev
+                   and u.get("role") != "air_assault"), default=0.0)   # десант переносится вертолётами - не темп
+        norm = sim.get("tempo_km")
+        lines.append(f"Темп наступления ({'красные' if side == 'red' else 'синие'}): за сутки занято пунктов {len(took)}, "
+                     f"ведущие части продвинулись до {adv:.0f} км" + (f" (норма доктрины ~{norm} км/сутки)" if norm else "") + ".")
+    return lines
+
+
+def _day_snapshot(state: dict) -> None:
+    state["_day_pos"] = {u["id"]: [model.unit_pos(state, u)["lat"], model.unit_pos(state, u)["lon"]] for u in _maneuver(state)}
+    state["_day_owner"] = {p: q.get("side") for p, q in state["places"].items()}
+
+
 def end_day(state: dict) -> list[str]:
     """Конец суток: наземная модель - до 24:00 (advance), затем суточный тыл: снабжение, соединение десанта, ремонт,
     ПВО, аэродромы, пополнение; судьба сбитых экипажей; новые сутки."""
@@ -276,10 +321,14 @@ def end_day(state: dict) -> list[str]:
     ato.ensure(state)                            # план полётов суток - события по часам, перевозки, расход авиации
     lines = advance(state, DAY_S)
     lines += _checks(state)
+    lines += tempo(state)
     lines += csar.daily(state)                   # сбитые экипажи: выход к своим, плен
     lines += logistics.supply(state)
     lines += assault.linkup(state)
     lines += logistics.repairs(state)
+    for u in state["units"].values():            # артиллерия частей: орудие в сутки из ремонта и пополнения (ОЦЕНКА)
+        if u.get("art_lost"):
+            u["art_lost"] -= 1
     lines += logistics.air_defence(state)
     lines += samroam.daily(state)               # смена позиций ЗРК по подвижности и близости к фронту
     intel.ensure(state)                         # новые ЗРК противника (из глубины) - в разведку
@@ -293,6 +342,7 @@ def end_day(state: dict) -> list[str]:
     state["day"] += 1
     state["ground_s"] = 0
     lines += arrivals(state)
+    _day_snapshot(state)                         # для темпа следующих суток
     for ln in lines:
         model.note(state, ln)
     state["task"] = None

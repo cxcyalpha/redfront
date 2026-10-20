@@ -11,9 +11,65 @@
 :root{--bg:#15181c;--panel:#1d2126;--line:#2c3239;--txt:#d9dde2;--dim:#8a939d;--red:#e0483e;--blue:#3d8ee8;--acc:#e6a23c;--ok:#5cb85c}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:13px/1.4 "Segoe UI",system-ui,sans-serif}
-#app{display:grid;grid-template-columns:380px 1fr;height:100vh}
+#app{display:grid;height:100vh;grid-template-columns:var(--lw) 5px 1fr 5px var(--rw);grid-template-rows:auto 1fr 5px var(--bh);
+  grid-template-areas:"top top top top top" "left sl map sr right" "sb sb sb sb sb" "bottom bottom bottom bottom bottom"}
+:root{--lw:340px;--rw:340px;--bh:240px}
+#top{grid-area:top;display:flex;gap:6px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+#top .brand{letter-spacing:.06em;margin-right:4px}
+#top #camp{max-width:220px}
+#top .cyc{display:flex;gap:4px;margin-left:8px}
+#top .meta{margin:0 0 0 8px}
+#top .sp,.mbar .sp{flex:1}
+#left{grid-area:left;display:flex;flex-direction:column;background:var(--panel);min-height:0;min-width:0;overflow:hidden}
+#right{grid-area:right;background:var(--panel);overflow:auto;min-width:0}
+#map{grid-area:map}
+#sL{grid-area:sl}#sR{grid-area:sr}#sB{grid-area:sb}
+.split{background:var(--line);z-index:5}
+.split.v{cursor:col-resize}.split.h{cursor:row-resize}
+.split:hover{background:var(--acc)}
+#bottom{grid-area:bottom;display:flex;flex-direction:column;background:#171a1e;min-height:0;overflow:hidden}
+.mbar{display:flex;gap:10px;align-items:center;padding:4px 10px;border-bottom:1px solid var(--line)}
+.mbar .meta{margin:0}
+#mx{flex:1;overflow:auto;position:relative}
+#mxIn{position:relative}
+.tick{position:absolute;top:0;border-left:1px solid #2a2f35;pointer-events:none}
+.axis{position:sticky;top:0;height:18px;background:#1d2126;z-index:5;border-bottom:1px solid var(--line)}
+.axis span{position:absolute;top:2px;font-size:10px;color:var(--dim)}
+.legend .lg{cursor:default}.legend b{cursor:pointer}
+.legend.min .lg{display:none}
+.night{position:absolute;top:0;background:rgba(40,60,110,.18);pointer-events:none}
+.now{position:absolute;top:0;border-left:2px solid var(--acc);pointer-events:none;z-index:2}
+.mxe,.mxg{position:absolute;left:0;height:18px;cursor:pointer}
+.mxe{border-top:1px solid #2c3239}
+.mxe.sel .mxl{color:var(--acc);font-weight:600}
+.mxl{position:sticky;left:0;width:228px;padding:0 6px;font-size:11.5px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#171a1e;z-index:4}
+.mxl.gl{color:var(--dim);padding-left:16px}
+.bar2{position:absolute;top:4px;height:10px;border-radius:3px;opacity:.85}
+.bar2.red{background:var(--red)}.bar2.blue{background:var(--blue)}
+.mk{position:absolute}
+.mk.rv{width:8px;height:8px;top:5px;border-radius:50%;background:#fff;border:2px solid #333}
+.mk.ob{width:10px;height:10px;transform:rotate(45deg);background:#ffd54f;border:1px solid #333;top:4px}
+.tot{position:absolute;top:0;border-left:2px dashed #ffd54f;pointer-events:none;z-index:1}
+.hdl{position:absolute;top:1px;min-width:12px;height:16px;font-size:10px;line-height:16px;text-align:center;background:#ffd54f;color:#000;border-radius:3px;cursor:ew-resize;z-index:3;white-space:nowrap;padding:0 2px}
+#insp{padding:10px 12px}
+#insp h3{margin:0 0 4px;font-size:14px}
+.ibox{font-size:12.5px}
+.grpbox{border-top:1px solid var(--line);margin-top:8px;padding-top:6px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+table.wp{border-collapse:collapse;margin-top:3px;font-size:12px}
+table.wp td{padding:1px 8px 1px 0;color:var(--dim)}
+table.wp td:first-child{color:var(--txt);font-variant-numeric:tabular-nums}
+.act{border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:8px}
+.srow{display:grid;grid-template-columns:52px 1fr auto;gap:6px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12.5px}
+.srow:hover{background:#262b31}
+.srow.sel{background:#3a3020}
+.srow.duty{color:var(--dim)}
+.srow .tm{font-variant-numeric:tabular-nums}
+.srow .st{color:var(--dim);font-size:11px}
+.sh{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin:6px 0 2px}
+
 #side{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-height:0}
-#map{height:100%;background:#0e1013}
+#map{min-height:0;background:#0e1013}
 header{padding:10px 12px;border-bottom:1px solid var(--line)}
 header h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em}
 header h1 span{color:var(--dim);font-weight:400}
@@ -83,67 +139,292 @@ dialog input,dialog select{width:100%}
 .legend svg{overflow:visible}
 .obj{font-size:15px;text-shadow:0 0 3px #000}
 .legend{background:rgba(250,247,238,.95);padding:6px 8px;border-radius:4px;color:#1d1d1d;font-size:12px;line-height:1.35;border:1px solid #b9b19c;max-width:250px}
-@media (max-width:800px){#app{grid-template-columns:1fr;grid-template-rows:55vh 1fr}#map{order:-1}}
+.hdr{display:flex;gap:6px;align-items:center}
+.hdr h1{flex:1}
+.icon-btn{padding:3px 8px}
+details.more{margin-top:10px}
+details.more summary{cursor:pointer;color:var(--dim)}
+.help p{margin:4px 0}
+.help ol{margin:4px 0 4px 18px;padding:0}
+dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="side">
-    <header>
-      <h1>REDFRONT <span id="title"></span></h1>
-      <div class="row">
-        <select id="camp" style="flex:1"></select>
-        <button id="bNew">Новая</button>
-      </div>
-      <div class="meta" id="meta"></div>
-    </header>
-    <div class="cycle">
-      <button class="main" id="bPlan">1. План<small>задачи дня</small></button>
-      <button class="main" id="bBuild">2. Миссия<small>собрать .miz</small></button>
-      <button class="main" id="bDebrief">3. Дебриф<small>после вылета</small></button>
-      <button class="main" id="bEnd">4. Конец дня<small>ход модели</small></button>
-    </div>
+  <header id="top">
+    <b class="brand">REDFRONT</b>
+    <select id="camp"></select><button id="bNew" data-t="new"></button>
+    <span class="cyc">
+      <button class="main" id="bPlan" data-t="c1" data-t-title="c1s"></button>
+      <button class="main" id="bBuild" data-t="c2" data-t-title="c2s"></button>
+      <button class="main" id="bDebrief" data-t="c3" data-t-title="c3s"></button>
+      <button class="main" id="bEnd" data-t="c4" data-t-title="c4s"></button>
+    </span>
+    <span class="meta" id="meta"></span>
+    <span class="sp"></span>
+    <button class="icon-btn" id="tLeft" data-t-title="togLeft">◧</button>
+    <button class="icon-btn" id="tBottom" data-t-title="togBottom">⬓</button>
+    <button class="icon-btn" id="tRight" data-t-title="togRight">◨</button>
+    <button class="icon-btn" id="bSet" data-t-title="settings">⚙</button>
+    <button class="icon-btn" id="bHelp" data-t-title="help">?</button>
+  </header>
+  <aside id="left">
     <nav>
-      <button data-tab="plan" class="on">План</button>
-      <button data-tab="ground">Войска</button>
-      <button data-tab="air">Авиация</button>
-      <button data-tab="ato">ATO</button>
-      <button data-tab="rear">Тыл</button>
-      <button data-tab="log">Журнал</button>
+      <button data-tab="sorties" class="on" data-t="tabSorties"></button>
+      <button data-tab="ground" data-t="tabGround"></button>
+      <button data-tab="air" data-t="tabAir"></button>
+      <button data-tab="rear" data-t="tabRear"></button>
+      <button data-tab="log" data-t="tabLog"></button>
     </nav>
     <div id="pane"></div>
     <div id="busy"><span id="busyText"></span><div class="bar"></div></div>
     <div id="out"></div>
-  </div>
-  <div id="map"></div>
+  </aside>
+  <div id="sL" class="split v" data-var="--lw" data-dir="1"></div>
+  <main id="map"></main>
+  <div id="sR" class="split v" data-var="--rw" data-dir="-1"></div>
+  <aside id="right"><div id="insp"></div></aside>
+  <div id="sB" class="split h" data-var="--bh" data-dir="-1"></div>
+  <section id="bottom">
+    <div class="mbar">
+      <b data-t="matrix"></b>
+      <label class="meta"><input type="checkbox" id="mDuty"> <span data-t="mDuty"></span></label>
+      <label class="meta"><input type="checkbox" id="mPast"> <span data-t="mPast"></span></label>
+      <span class="meta" data-t="mHint"></span>
+      <span class="sp"></span>
+      <button class="icon-btn" id="mOut">−</button><button class="icon-btn" id="mIn">+</button>
+    </div>
+    <div id="mx"><div id="mxIn"></div></div>
+  </section>
 </div>
 
 <dialog id="dNew">
   <form method="dialog">
-    <b>Новая кампания</b>
-    <label>Файл</label><input id="nFile" value="campaign">
-    <label>Театр</label><select id="nTh"></select>
-    <label>Сторона игрока</label>
-    <select id="nSide"><option value="red">Красные (ВД)</option><option value="blue">Синие (НАТО)</option></select>
-    <label>Состав сил (пресет)</label>
-    <div class="row"><select id="nPreset" style="flex:1"></select><button type="button" id="bCopy" title="копия выбранного пресета в папку presets/ - для правки в текстовом редакторе">Копия для правки</button></div>
-    <label>Вариант сценария</label><select id="nVar"></select>
-    <label>Seed (пусто - случайный)</label><input id="nSeed" placeholder="например 12345">
-    <label><input type="checkbox" id="nNoRand" style="width:auto"> без случайности</label>
-    <label><input type="checkbox" id="nOver" style="width:auto"> перезаписать файл</label>
+    <b data-t="newTitle"></b>
+    <label data-t="nFile"></label><input id="nFile" value="campaign">
+    <label data-t="nTh"></label><select id="nTh"></select>
+    <label data-t="nSide"></label>
+    <select id="nSide"><option value="red" data-t="sideRedWP"></option><option value="blue" data-t="sideBlueNATO"></option></select>
+    <label data-t="nPreset"></label>
+    <div class="row"><select id="nPreset" style="flex:1"></select><button type="button" id="bCopy" data-t="copyPreset" data-t-title="copyPresetTip"></button></div>
+    <label data-t="nVar"></label><select id="nVar"></select>
+    <label data-t="nSeed"></label><input id="nSeed" data-t-ph="nSeedPh">
+    <label><input type="checkbox" id="nNoRand" style="width:auto"> <span data-t="noRand"></span></label>
+    <label><input type="checkbox" id="nOver" style="width:auto"> <span data-t="overwrite"></span></label>
     <div class="row" style="margin-top:12px;justify-content:flex-end">
-      <button value="cancel">Отмена</button><button id="nOk" value="ok" class="main">Создать</button>
+      <button value="cancel" data-t="cancel"></button><button id="nOk" value="ok" class="main" data-t="create"></button>
     </div>
   </form>
 </dialog>
 
+<dialog id="dSet">
+  <form method="dialog">
+    <b data-t="settings"></b>
+    <label data-t="language"></label>
+    <select id="sLang"><option value="ru">Русский</option><option value="en">English</option></select>
+    <label data-t="budget"></label>
+    <input id="sBudget" type="number" min="0" step="50" data-t-title="budgetTip">
+    <label><input type="checkbox" id="sEnemy" style="width:auto"> <span data-t="enemyPlan"></span></label>
+    <div class="sect"><b data-t="mapTools"></b>
+      <div class="meta" data-t="mapToolsTip"></div>
+      <div class="row" style="margin-top:6px">
+        <button type="button" id="bProbe" data-t="probe"></button><button type="button" id="bApply" data-t="probeApply"></button>
+        <button type="button" id="bRProbe" data-t="roadsProbe"></button><button type="button" id="bRApply" data-t="roadsApply"></button></div>
+      <div class="row" style="margin-top:6px"><input id="miz" data-t-ph="mizPh" style="flex:1"><button type="button" id="bImport" data-t="import"></button></div>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:flex-end"><button value="ok" class="main" data-t="close"></button></div>
+  </form>
+</dialog>
+
+<dialog id="dHelp" style="max-width:560px">
+  <form method="dialog">
+    <div class="help" id="helpBody"></div>
+    <div class="row" style="margin-top:12px;justify-content:flex-end"><button value="ok" class="main" data-t="close"></button></div>
+  </form>
+</dialog>
+
 <script>
+const I18N = {
+  ru: {
+    settings: "Настройки", help: "Справка", new: "Новая", c1: "1. План", c1s: "вылеты на сутки", c2: "2. Миссия", c2s: "собрать .miz",
+    c3: "3. Дебриф", c3s: "после полёта", c4: "4. Конец дня", c4s: "ход модели",
+    tabSorties: "Вылеты", tabGround: "Войска", tabAir: "Авиация", tabRear: "Тыл", tabLog: "Журнал",
+    newTitle: "Новая кампания", nFile: "Файл", nTh: "Театр", nSide: "Сторона игрока", sideRedWP: "Красные (Варшавский договор)",
+    sideBlueNATO: "Синие (НАТО)", nPreset: "Состав сил (пресет)", copyPreset: "Копия для правки",
+    copyPresetTip: "копия выбранного пресета в папку presets/ - для правки в текстовом редакторе", nVar: "Вариант сценария",
+    nSeed: "Seed (пусто - случайный)", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
+    cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", budget: "Наземных машин в миссии, не больше",
+    budgetTip: "дальнее прореживается и убирается; 0 - без ограничения", enemyPlan: "показывать план полётов противника (отладка)",
+    mapTools: "Инструменты карты DCS",
+    mapToolsTip: "Уточняют цели и дороги по объектам карты DCS: создать служебную миссию, запустить её в DCS, затем применить результат.",
+    probe: "Зонд карты", probeApply: "Применить зонд", roadsProbe: "Зонд дорог", roadsApply: "Применить дороги",
+    mizPh: "путь к .miz с зонами Assign as... (ROLE/VALUE)", import: "Импорт",
+    needCamp: "Сначала создайте или выберите кампанию.", noCamp: "Создайте кампанию кнопкой «Новая».", noCamps: "нет кампаний",
+    day: "день", oldVer: " (старая версия)", randomVar: "случайный (по seed)",
+    meta: (s, side) => `День <b>${s.day}</b>, обстановка на ${esc(s.ground_time || "00:00")} · ${s.date || ""} · вылетов ${s.sortie} · игрок: <span class="${s.side}">${side}</span>`,
+    red: "красные", blue: "синие", Red: "Красные", Blue: "Синие", seed: "seed", noRandom: "без случайности", built: "собран вылет",
+    noPlan: "Плана ещё нет - кнопка «1. План».", noTasks: "Задач нет: ", fromBase: "км от", sam: "ПВО", none: "нет",
+    fly: "лечу в", humans: "людей", humansTip: "людей в вылете: сначала группа игрока, затем остальные группы по порядку; больше одного - места Client (мультиплеер)",
+    buildBtn: "Собрать миссию", edit: "Изменить", remove: "Снять", addSortie: "+ вылет",
+    addSortieTip: "задачи, которые планировщик нашёл, но в план не взял", otherSorties: "Остальные вылеты своей стороны (ИИ, дежурства, прошедшие)",
+    enemySorties: "План противника (отладка)", onTarget: "на объекте", inZone: "в зоне", removeQ: "Снять вылет из плана полётов?",
+    clock: "часы кампании", situation: "обстановка на", tot: "на объекте", apply: "Применить", auto: "по задаче (автоматически)",
+    avail: "к вылету", seats: "бортов", outOfPlan: "Задачи вне плана", nothingMore: "Планировщик больше ничего не находит.",
+    searching: "Ищу задачи...", put: "Поставить", hhmm: "ЧЧ:ММ", totTip: "время на объекте; пусто - первое, когда хватает самолётов",
+    byIntel: " (по данным разведки)", vs: "против", supplyPct: "снабжение", ofNorm: "% нормы",
+    addRegiment: "Добавить полк", custom: "свой", assumption: "допущение", inService: "в строю", crews: "экипажей", ready: "к вылету",
+    rebaseTo: "перебазирование на", endOfDay: "в конце суток", livery: "ливрея", rebase: "Перебазировать", pilotsLivery: "Лётчики, ливрея",
+    downed: "Сбитые экипажи на земле", beacon: "маяк", sinceDay: "на земле с суток",
+    fromList: "Из списка", fromListTip: "части других дат этого театра (историческое допущение)", add: "Добавить",
+    allIn: "все части других пресетов уже в кампании", ownReg: "Свой полк", regName: "название, напр. 116-й гв. бап",
+    acInReg: "ЛА в полку", radius: "радиус, км", radiusTip: "радиус действия; пусто - по роли или оценка", addOwn: "Добавить свой",
+    nextDay: "В план полётов полк попадает со следующих суток.", farp: "площадка ",
+    regLivery: "Ливрея полка", regLiveryTip: "(во всех его вылетах, пока не сменить)", dcsDefault: "по умолчанию DCS",
+    liveryFolder: "имя папки ливреи (DCS не найден)", set: "Задать", pilots: "Лётчики", pilotsTip: "имя в DCS - звание и фамилия, ведущий - старший",
+    sorties: "выл.", onGround: "На земле (сбиты):", lost: "Выбыли:", dayN: "сутки", now: "сейчас", toEnemy: "до противника", kmFromHere: "км отсюда",
+    helosUpTo: "вертолётов до", slots: "мест", order: "Приказ",
+    whatTonnes: "Что значат тонны", rearDay: "Тыл (прошлые сутки)", stock: "запас складов", of: "из", roadIn: "за сутки подвоз", airIn: "воздухом",
+    used: "расход", cut: "отрезано складов", estObjs: n => `По оценке: ${n} объект(ов) - уточните инструментами карты DCS в настройках.`,
+    allChecked: "Все цели тыла на объектах карты.", lostSt: "потерян", closedSt: "закрыт", damage: "повреждение", intact: "цел",
+    estCoords: "координаты по оценке", stockEst: "запас ~", estimate: "оценка", cutOff: "отрезан от подвоза",
+    st: {march: "марш", battle: "бой", defend: "оборона", halted: "небоеспособна", destroyed: "уничтожена", deployed: "на позиции",
+         refit: "восстановление", pending: "резерв, день "},
+    ord: {attack: " (наступление)", hold: " (на рубеж)", withdraw: " (отход)"},
+    strength: "боеспособность", strengthSeen: "(когда видели)", strengthUnk: "боеспособность неизвестна",
+    intel: {exact: "точно", approx: "примерно", presence: "только присутствие"}, intelW: "разведка", hAgo: "ч назад", couldMove: "могла уйти до",
+    fighting: "бой с", supplyOf: "снабжение", samPos: "разведка: позиция на сутки", samStale: " - устарела, ЗРК мог сменить позицию",
+    ipm: "ИПМ", target: "Цель: ", supplyRoute: "путь подвоза", heliPad: "вертолётная площадка",
+    bst: {open: "открыт", active: "открыт", closed: "закрыт", lost: "потерян"},
+    legendSU: "Условные знаки", legendNATO: "Условные знаки (APP-6)",
+    lay: {front: "Линия фронта", links: "Связи пунктов", places: "Пункты", sam: "Зоны ПВО", ground: "Войска", objects: "Тыл",
+          supply: "Пути подвоза", bases: "Аэродромы", task: "Задача"},
+    bases: {paper: "Карта (бумага)", topo: "Топографическая", none: "Без подложки"},
+    viaFront: " · через линию фронта", closedBridge: " · закрыта (мост)",
+    endQ: "Закончить день? Модель сделает ход, план дня сбросится.", copyName: "Имя копии пресета (файл presets/<имя>.json):", mine: " мой",
+    ready0: "Готово. Цикл дня: План → Миссия → (полёт в DCS) → Дебриф → Конец дня.", working: "Выполняю", sec: "с",
+    busy: {new: "Создаю кампанию (зонды карты и дорог применяются сами - до нескольких минут)", plan: "Строю план полётов на сутки",
+           build: "Собираю миссию", debrief: "Применяю дебриф", endday: "Конец дня: ход модели", mapimport: "Применяю зонд карты",
+           mapapply: "Применяю зонд карты", roadsapply: "Применяю дороги", presetcopy: "Копирую пресет", atoedit: "Меняю вылет",
+           atoremove: "Снимаю вылет", atoadd: "Ставлю вылет", rebase: "Отдаю приказ", setlang: "Меняю язык"},
+    helpHtml: `<b>REDFRONT - генератор динамической кампании DCS (Cold War Germany)</b>
+      <p>Кампания идёт по суткам. Модель ведёт наземный фронт, тыл и воздушную войну обеих сторон; вы летаете вылеты своей стороны в DCS, итог возвращается в модель.</p>
+      <ol><li><b>Новая</b> - создать кампанию: театр, сторона, состав сил (пресет по году).</li>
+      <li><b>1. План</b> - план полётов на сутки (ATO). Вкладка «Вылеты»: свои вылеты по времени на объекте; у каждого - тактическая группа, угрозы, цель.</li>
+      <li>Выберите вылет, группу («лечу в») и число людей, <b>Собрать миссию</b> (или «2. Миссия»). Файл .miz - в Saved Games\\DCS\\Missions.</li>
+      <li>Слетайте в DCS. Хук дебрифа (MissionScripting, см. README) пишет итог вылета.</li>
+      <li><b>3. Дебриф</b> - потери, итог удара, пленные и сбитые - в модель.</li>
+      <li>Можно собрать следующий вылет тех же суток или <b>4. Конец дня</b> - модель доигрывает сутки.</li></ol>
+      <p><b>Вкладки:</b> «Войска» - наземные части (противник - по разведке), «Авиация» - полки (добавить полк, перебазировать, лётчики, ливрея), «Тыл» - снабжение в тоннах, «Журнал» - события.</p>
+      <p><b>Режим командующего:</b> во «Вылетах» вылет своей стороны можно изменить (время, часть, число бортов, подвеска), снять или добавить («+ вылет»).</p>
+      <p><b>Настройки (⚙):</b> язык, бюджет наземных машин в миссии, план противника (отладка), инструменты карты DCS.</p>
+      <p>Подробно - README.md / README.en.md.</p>`,
+  },
+  en: {
+    settings: "Settings", help: "Help", new: "New", c1: "1. Plan", c1s: "daily sorties", c2: "2. Mission", c2s: "build .miz",
+    c3: "3. Debrief", c3s: "after the flight", c4: "4. End of day", c4s: "model turn",
+    tabSorties: "Sorties", tabGround: "Ground", tabAir: "Air units", tabRear: "Logistics", tabLog: "Log",
+    newTitle: "New campaign", nFile: "File", nTh: "Theatre", nSide: "Player side", sideRedWP: "Red (Warsaw Pact)",
+    sideBlueNATO: "Blue (NATO)", nPreset: "Order of battle (preset)", copyPreset: "Copy for editing",
+    copyPresetTip: "copy the selected preset to presets/ for editing in a text editor", nVar: "Scenario variant",
+    nSeed: "Seed (empty - random)", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
+    cancel: "Cancel", create: "Create", close: "Close", language: "Language", budget: "Max ground vehicles in mission",
+    budgetTip: "distant units are thinned out and removed; 0 - unlimited", enemyPlan: "show enemy air tasking order (debug)",
+    mapTools: "DCS map tools",
+    mapToolsTip: "Refine targets and roads from DCS map objects: create a service mission, run it in DCS, then apply the result.",
+    probe: "Map probe", probeApply: "Apply probe", roadsProbe: "Roads probe", roadsApply: "Apply roads",
+    mizPh: "path to a .miz with Assign as... zones (ROLE/VALUE)", import: "Import",
+    needCamp: "Create or select a campaign first.", noCamp: "Create a campaign with the “New” button.", noCamps: "no campaigns",
+    day: "day", oldVer: " (old version)", randomVar: "random (by seed)",
+    meta: (s, side) => `Day <b>${s.day}</b>, situation at ${esc(s.ground_time || "00:00")} · ${s.date || ""} · sorties flown ${s.sortie} · player: <span class="${s.side}">${side}</span>`,
+    red: "red", blue: "blue", Red: "Red", Blue: "Blue", seed: "seed", noRandom: "no randomness", built: "built sortie",
+    noPlan: "No plan yet - press “1. Plan”.", noTasks: "No tasks: ", fromBase: "km from", sam: "Air defence", none: "none",
+    fly: "I fly", humans: "humans", humansTip: "humans in the sortie: the player's group first, then other groups in order; more than one - Client slots (multiplayer)",
+    buildBtn: "Build mission", edit: "Edit", remove: "Remove", addSortie: "+ sortie",
+    addSortieTip: "tasks the planner found but did not schedule", otherSorties: "Other own sorties (AI, duty stations, completed)",
+    enemySorties: "Enemy plan (debug)", onTarget: "on target", inZone: "on station", removeQ: "Remove this sortie from the air tasking order?",
+    clock: "campaign clock", situation: "situation at", tot: "time on target", apply: "Apply", auto: "by task (automatic)",
+    avail: "available", seats: "aircraft", outOfPlan: "Unscheduled tasks", nothingMore: "The planner finds nothing more.",
+    searching: "Searching for tasks...", put: "Schedule", hhmm: "HH:MM", totTip: "time on target; empty - first time aircraft are available",
+    byIntel: " (per intelligence)", vs: "vs", supplyPct: "supply", ofNorm: "% of norm",
+    addRegiment: "Add regiment", custom: "custom", assumption: "assumption", inService: "in service", crews: "crews", ready: "available",
+    rebaseTo: "rebasing to", endOfDay: "at end of day", livery: "livery", rebase: "Rebase", pilotsLivery: "Pilots, livery",
+    downed: "Downed crews on the ground", beacon: "beacon", sinceDay: "on the ground since day",
+    fromList: "From list", fromListTip: "units of other dates of this theatre (historical assumption)", add: "Add",
+    allIn: "all units of other presets are already in the campaign", ownReg: "Custom regiment", regName: "name, e.g. 116th Gds BAP",
+    acInReg: "aircraft in regiment", radius: "radius, km", radiusTip: "combat radius; empty - by role or estimate", addOwn: "Add custom",
+    nextDay: "The regiment enters the air tasking order from the next day.", farp: "FARP ",
+    regLivery: "Regiment livery", regLiveryTip: "(all its sorties until changed)", dcsDefault: "DCS default",
+    liveryFolder: "livery folder name (DCS not found)", set: "Set", pilots: "Pilots", pilotsTip: "name in DCS is rank and surname; the leader is the senior",
+    sorties: "sorties", onGround: "On the ground (downed):", lost: "Lost:", dayN: "day", now: "now", toEnemy: "to enemy", kmFromHere: "km from here",
+    helosUpTo: "helicopters up to", slots: "slots", order: "Order",
+    whatTonnes: "What the tonnes mean", rearDay: "Logistics (previous day)", stock: "depot stock", of: "of", roadIn: "delivered by road",
+    airIn: "by air", used: "consumed", cut: "depots cut off", estObjs: n => `Estimated: ${n} object(s) - refine with the DCS map tools in Settings.`,
+    allChecked: "All rear targets are on map objects.", lostSt: "lost", closedSt: "closed", damage: "damage", intact: "intact",
+    estCoords: "estimated coordinates", stockEst: "stock ~", estimate: "estimate", cutOff: "cut off from supply",
+    st: {march: "march", battle: "battle", defend: "defence", halted: "combat ineffective", destroyed: "destroyed", deployed: "deployed",
+         refit: "refitting", pending: "reserve, day "},
+    ord: {attack: " (attack)", hold: " (to line)", withdraw: " (withdrawal)"},
+    strength: "strength", strengthSeen: "(when seen)", strengthUnk: "strength unknown",
+    intel: {exact: "exact", approx: "approximate", presence: "presence only"}, intelW: "intel", hAgo: "h ago", couldMove: "may have moved up to",
+    fighting: "fighting", supplyOf: "supply", samPos: "intel: position as of day", samStale: " - outdated, the SAM may have relocated",
+    ipm: "IP", target: "Target: ", supplyRoute: "supply route", heliPad: "helicopter pad",
+    bst: {open: "open", active: "open", closed: "closed", lost: "lost"},
+    legendSU: "Map symbols", legendNATO: "Map symbols (APP-6)",
+    lay: {front: "Front line", links: "Place links", places: "Places", sam: "Air defence zones", ground: "Ground forces", objects: "Rear targets",
+          supply: "Supply routes", bases: "Airfields", task: "Task"},
+    bases: {paper: "Map (paper)", topo: "Topographic", none: "No basemap"},
+    viaFront: " · across the front line", closedBridge: " · closed (bridge)",
+    endQ: "End the day? The model will make its turn and the day's plan will be reset.", copyName: "Preset copy name (file presets/<name>.json):", mine: " mine",
+    ready0: "Ready. Day cycle: Plan → Mission → (fly in DCS) → Debrief → End of day.", working: "Working", sec: "s",
+    busy: {new: "Creating campaign (map and road probes are applied automatically - up to a few minutes)", plan: "Building the daily air tasking order",
+           build: "Building mission", debrief: "Applying debrief", endday: "End of day: model turn", mapimport: "Applying map probe",
+           mapapply: "Applying map probe", roadsapply: "Applying roads", presetcopy: "Copying preset", atoedit: "Changing sortie",
+           atoremove: "Removing sortie", atoadd: "Scheduling sortie", rebase: "Issuing order", setlang: "Changing language"},
+    helpHtml: `<b>REDFRONT - DCS dynamic campaign generator (Cold War Germany)</b>
+      <p>The campaign runs day by day. The model runs the ground front, logistics and the air war of both sides; you fly your side's sorties in DCS and the result goes back into the model.</p>
+      <ol><li><b>New</b> - create a campaign: theatre, side, order of battle (preset by year).</li>
+      <li><b>1. Plan</b> - the daily air tasking order (ATO). The “Sorties” tab lists your side's sorties by time on target, each with its package, threats and target.</li>
+      <li>Pick a sortie, the group you fly (“I fly”) and the number of humans, then <b>Build mission</b> (or “2. Mission”). The .miz goes to Saved Games\\DCS\\Missions.</li>
+      <li>Fly it in DCS. The debrief hook (MissionScripting, see README) records the result.</li>
+      <li><b>3. Debrief</b> - losses, strike results, downed crews go into the model.</li>
+      <li>Build another sortie of the same day or press <b>4. End of day</b> - the model plays out the rest of the day.</li></ol>
+      <p><b>Tabs:</b> “Ground” - ground units (enemy per intelligence), “Air units” - regiments (add, rebase, pilots, livery), “Logistics” - supply in tonnes, “Log” - events.</p>
+      <p><b>Commander mode:</b> in “Sorties” your side's sorties can be edited (time, unit, number of aircraft, loadout), removed or added (“+ sortie”).</p>
+      <p><b>Settings (⚙):</b> language, mission ground vehicle budget, enemy plan (debug), DCS map tools.</p>
+      <p>Mission briefings follow the language setting. The event log and target explanations are currently in Russian.</p>
+      <p>Details: README.en.md.</p>`,
+  },
+};
+Object.assign(I18N.ru, {matrix: "Матрица синхронизации", mDuty: "дежурства", mPast: "прошедшие", playable: "Можно слетать",
+  mHint: "◆ выход на объект, ○ сбор, пунктир - время удара; ⇔ тянуть - перенести вылет", dragTip: "перенести вылет (шаг 5 мин)",
+  rv: "сбор", inspEmpty: "Выберите вылет в списке, на матрице или объект на карте.", togLeft: "левая панель", togRight: "инспектор",
+  togBottom: "матрица"});
+Object.assign(I18N.en, {matrix: "Synchronization matrix", mDuty: "duty stations", mPast: "completed", playable: "Available to fly",
+  mHint: "◆ on objective, ○ rendezvous, dashed - time on target; drag ⇔ to move the sortie", dragTip: "move the sortie (5 min steps)",
+  rv: "rendezvous", inspEmpty: "Select a sortie in the list or the matrix, or an object on the map.", togLeft: "left panel",
+  togRight: "inspector", togBottom: "matrix"});
+I18N.ru.meta = (s, side) => `День <b>${s.day}</b> · ${esc(s.ground_time || "00:00")} · ${s.date || ""} · <span class="${s.side}">${side}</span>`;
+I18N.en.meta = (s, side) => `Day <b>${s.day}</b> · ${esc(s.ground_time || "00:00")} · ${s.date || ""} · <span class="${s.side}">${side}</span>`;
+let LANG = "ru";
+try { LANG = localStorage.getItem("rf_lang") || "ru"; } catch (e) {}
+const T = k => (I18N[LANG] || I18N.ru)[k] ?? I18N.ru[k] ?? k;
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = T(el.dataset.t); });
+  document.querySelectorAll("[data-t-title]").forEach(el => { el.title = T(el.dataset.tTitle); });
+  document.querySelectorAll("[data-t-ph]").forEach(el => { el.placeholder = T(el.dataset.tPh); });
+  $("#helpBody").innerHTML = T("helpHtml");
+}
+
 const $ = s => document.querySelector(s);
-const stockTxt = o => o.stock == null ? "" :   // запас склада (logistics.supply); отрезан - только воздухом
-  (o.stock_est ? ` · запас ~${Math.round(o.stock * 100)}% (оценка)` : ` · запас ${Math.round(o.stock * 100)}% (${o.stock_t} т)`) + (o.cut ? " · отрезан от подвоза" : "");
-const infoTxt = a => a && a.length ? `<div class="info">${a.map(x => `<div>${esc(x)}</div>`).join("")}</div>` : "";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let INFO = null, ST = null, FILE = localStorage.getItem("rf_file") || "", TAB = "plan", SEL = 0;
+const stockTxt = o => o.stock == null ? "" :
+  (o.stock_est ? ` · ${T("stockEst")}${Math.round(o.stock * 100)}% (${T("estimate")})` : ` · ${T("stock")} ${Math.round(o.stock * 100)}% (${o.stock_t} t)`) + (o.cut ? " · " + T("cutOff") : "");
+const infoTxt = a => a && a.length ? `<div class="info">${a.map(x => `<div>${esc(x)}</div>`).join("")}</div>` : "";
+let INFO = null, ST = null, FILE = localStorage.getItem("rf_file") || "", TAB = "sorties", SEL = 0;
+const pref = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
+const setPref = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 
 function out(lines, err) {
   const o = $("#out");
@@ -157,31 +438,28 @@ async function api(action, body) {
   if (j.error) throw new Error(j.error);
   return j;
 }
-const BUSY = {new: "Создаю кампанию (зонды карты и дорог применяются сами - до нескольких минут)",
-              plan: "Строю план полётов на сутки", build: "Собираю миссию", debrief: "Применяю дебриф",
-              endday: "Конец дня: ход модели", mapimport: "Применяю зонд карты", mapapply: "Применяю зонд карты",
-              roadsapply: "Применяю дороги", presetcopy: "Копирую пресет", atoedit: "Меняю вылет", atoremove: "Снимаю вылет",
-              atoadd: "Ставлю вылет", rebase: "Отдаю приказ"};
 let busyTimer = null;
 function busy(text) {
   const b = $("#busy");
   clearInterval(busyTimer);
   if (!text) { b.classList.remove("on"); return; }
   const t0 = Date.now();
-  const tick = () => { $("#busyText").textContent = `${text}... ${Math.round((Date.now() - t0) / 1000)} с`; };
+  const tick = () => { $("#busyText").textContent = `${text}... ${Math.round((Date.now() - t0) / 1000)} ${T("sec")}`; };
   tick(); busyTimer = setInterval(tick, 1000);
   b.classList.add("on");
 }
 async function act(action, extra, btn) {
-  if (!FILE && !["new", "mapprobe", "presetcopy"].includes(action)) return out("Сначала создайте или выберите кампанию.", true);
+  if (!FILE && !["new", "mapprobe", "presetcopy"].includes(action)) return out(T("needCamp"), true);
   if (btn) btn.disabled = true;
   document.querySelectorAll(".cycle button, #bNew").forEach(b => b.disabled = true);   // не запускать второе действие поверх
-  busy(BUSY[action] || "Выполняю");
+  busy(T("busy")[action] || T("working"));
   try {
     const j = await api(action, Object.assign({file: FILE}, extra || {}));
     if (j.lines) out(j.lines);
-    if (j.file) { FILE = j.file; localStorage.setItem("rf_file", FILE); await loadInfo(); }
-    if (j.state) { ST = j.state; render(); }
+    if (j.file) { FILE = j.file; setPref("rf_file", FILE); await loadInfo(); }
+    if (j.state) { ST = j.state; if (SELID && !ST.ato.some(r => r.id === SELID)) { SELID = null; SORTIE = null; } render();
+      if (SELID) selectSortie(SELID); }
+    return j;
   } catch (e) { out(e.message, true); }
   finally {
     busy(null);
@@ -193,22 +471,26 @@ async function act(action, extra, btn) {
 // ---------- карта: тактическая (web/tactical.js) ----------
 const map = L.map("map", {preferCanvas: true, zoomSnap: 0.5}).setView([53.2, 10.6], 9);
 const BASES = {
-  "Карта (бумага)": L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 16, className: "tiles-paper", attribution: "© OpenStreetMap"}),
-  "Топографическая": L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {maxZoom: 16, className: "tiles-topo",
-    attribution: "© OpenStreetMap, SRTM · стиль © OpenTopoMap (CC-BY-SA)"}),
-  "Без подложки": L.layerGroup(),
+  paper: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 16, className: "tiles-paper", attribution: "© OpenStreetMap"}),
+  topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {maxZoom: 16, className: "tiles-topo",
+    attribution: "© OpenStreetMap, SRTM · © OpenTopoMap (CC-BY-SA)"}),
+  none: L.layerGroup(),
 };
-let baseName = "Карта (бумага)";
-try { baseName = localStorage.getItem("rf_base") || baseName; } catch (e) {}
-(BASES[baseName] || BASES["Карта (бумага)"]).addTo(map);
-map.on("baselayerchange", e => { try { localStorage.setItem("rf_base", e.name); } catch (x) {} });
+const baseKey = pref("rf_base2", "paper");
+(BASES[baseKey] || BASES.paper).addTo(map);
 map.createPane("terrain").style.zIndex = 350;          // заливка территорий - под линиями и знаками
 const layers = {front: L.layerGroup().addTo(map), links: L.layerGroup(), places: L.layerGroup().addTo(map), sam: L.layerGroup().addTo(map),
                 ground: L.layerGroup().addTo(map), objects: L.layerGroup().addTo(map), bases: L.layerGroup().addTo(map),
                 task: L.layerGroup().addTo(map), supply: L.layerGroup().addTo(map)};
-L.control.layers(BASES, {"Линия фронта": layers.front, "Связи пунктов": layers.links, "Пункты": layers.places, "Зоны ПВО": layers.sam,
-  "Войска": layers.ground, "Тыл": layers.objects, "Пути подвоза": layers.supply, "Аэродромы": layers.bases,
-  "Задача": layers.task}, {collapsed: true}).addTo(map);
+let layerCtl = null;
+function layerControl() {                               // подписи слоёв - на языке окна
+  if (layerCtl) map.removeControl(layerCtl);
+  const bn = T("bases"), ln = T("lay");
+  const bl = Object.fromEntries(Object.entries(BASES).map(([k, v]) => [bn[k], v]));
+  const ov = Object.fromEntries(["front", "links", "places", "sam", "ground", "objects", "supply", "bases", "task"].map(k => [ln[k], layers[k]]));
+  layerCtl = L.control.layers(bl, ov, {collapsed: true}).addTo(map);
+}
+map.on("baselayerchange", e => { const k = Object.keys(BASES).find(k => BASES[k] === e.layer); if (k) setPref("rf_base2", k); });
 const legend = L.control({position: "bottomright"});
 legend.onAdd = () => { const d = L.DomUtil.create("div", "legend"); d.id = "legend"; return d; };
 legend.addTo(map);
@@ -223,11 +505,12 @@ function drawMap() {
   Object.values(layers).forEach(l => l.clearLayers());
   if (!ST) return;
   const nato = ST.side === "blue";                     // стиль знаков - по стороне игрока
-  $("#legend").innerHTML = `<b>${nato ? "Условные знаки (APP-6)" : "Условные знаки"}</b>` + TAC.legend(nato);
+  $("#legend").innerHTML = `<b>${pref("rf_legend", "0") === "1" ? "▾" : "▸"} ${nato ? T("legendNATO") : T("legendSU")}</b>` + TAC.legend(nato, LANG === "en");
+  $("#legend").classList.toggle("min", pref("rf_legend", "0") !== "1");
+  $("#legend b").onclick = () => { setPref("rf_legend", pref("rf_legend", "0") === "1" ? "0" : "1"); drawMap(); };
   const P = Object.fromEntries(ST.places.map(p => [p.name, p]));
-  // линия фронта: территории сторон по пунктам и частям в поле
   const field = ST.ground.filter(g => g.cat === "ground" && !g.attached && !["pending", "destroyed"].includes(g.state)
-    && g.intel !== "presence");                      // противник - по данным разведки (давние - линию не двигают)
+    && g.intel !== "presence");
   const sites = ST.places.filter(p => p.side).map(p => ({lat: p.pos[0], lon: p.pos[1], side: p.side}))
     .concat(field.map(g => ({lat: g.pos[0], lon: g.pos[1], side: g.side})));
   const key = JSON.stringify(sites);
@@ -240,8 +523,8 @@ function drawMap() {
   for (const l of ST.links) {
     const a = P[l.a], b = P[l.b]; if (!a || !b) continue;
     const line = L.polyline([a.pos, b.pos], {color: l.open ? "#555" : "#c8102e", weight: l.open ? 1 : 2, opacity: l.open ? .35 : .8,
-      dashArray: l.open ? null : "4 6"}).bindTooltip(`${l.a} – ${l.b}${l.front ? " · через линию фронта" : ""}${l.open ? "" : " · закрыта (мост)"}`);
-    line.addTo(l.open ? layers.links : layers.objects);   // закрытые связи (мост разрушен) - видны всегда
+      dashArray: l.open ? null : "4 6"}).bindTooltip(`${l.a} – ${l.b}${l.front ? T("viaFront") : ""}${l.open ? "" : T("closedBridge")}`);
+    line.addTo(l.open ? layers.links : layers.objects);
   }
   for (const p of ST.places) {
     L.circleMarker(p.pos, {radius: 2.5, color: "#222", weight: 1, fillColor: "#222", fillOpacity: 1, interactive: false}).addTo(layers.places);
@@ -250,240 +533,371 @@ function drawMap() {
   const enemyOf = s => sites.filter(x => x.side && x.side !== s);
   for (const g of ST.ground) {
     if (g.state === "destroyed" || g.attached) continue;
-    const tip = `<b>${esc(g.name)}</b><br>${esc(stateRu(g))} · ${strengthTxt(g)}` +
-      (g.engaged.length ? `<br>бой с: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? `<br><b>снабжение ${Math.round(g.supply_frac * 100)}% нормы</b>` : "") +
+    const tip = `<b>${esc(g.name)}</b><br>${esc(stateTxt(g))} · ${strengthTxt(g)}` +
+      (g.engaged.length ? `<br>${T("fighting")}: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? `<br><b>${T("supplyOf")} ${Math.round(g.supply_frac * 100)}${T("ofNorm")}</b>` : "") +
       `<br><span style="color:#888">${esc(g.types)}</span>` + intelTxt(g);
     const c = col(g.side), friend = g.side === ST.side;
     if (g.cat === "sam" || g.cat === "gci") {
       if (g.cat === "sam" && g.threat_km && g.state !== "pending")
         L.circle(g.pos, {radius: g.threat_km * 1000, color: c, weight: 1, opacity: friend ? .15 : g.stale ? .3 : .55, fill: !friend, fillOpacity: g.stale ? .02 : .04,
           dashArray: "3 5", interactive: false}).addTo(layers.sam);
-      const itip = g.intel_day != null ? `<br><i>разведка: позиция на сутки ${g.intel_day}${g.stale ? " - устарела, ЗРК мог сменить позицию" : ""}</i>` : "";
+      const itip = g.intel_day != null ? `<br><i>${T("samPos")} ${g.intel_day}${g.stale ? T("samStale") : ""}</i>` : "";
       L.marker(g.pos, {icon: icon(TAC.sam(Object.assign({}, g, {branch: g.cat === "gci" ? "gci" : "sam"}), nato, friend), 26, 26, g.stale ? "tac sam stale" : "tac sam")})
-        .bindTooltip(tip + itip).addTo(layers.sam);
+        .bindTooltip(tip + itip).on("click", () => selectHtml(tip + itip)).addTo(layers.sam);
       continue;
     }
-    if (g.route) {                                     // маршрут: у наших на советской карте - коричневым, у противника - синим пунктиром
+    if (g.route) {
       const rc = nato ? c : g.side === "red" ? "#7a4a1e" : c;
       L.polyline(g.route.slice(0, 3), {color: rc, weight: 2, opacity: .7, dashArray: !nato && g.side === "red" ? null : "6 5", interactive: false}).addTo(layers.ground);
       const rr = g.route.slice(0, 3), n = rr.length;
       if (nato && n > 1) L.marker(rr[n - 1], {icon: icon(`<div style="transform:rotate(${TAC.bearing(rr[n - 2], rr[n - 1]).toFixed(0)}deg)">${TAC.arrowHead(c)}</div>`, 18, 18), interactive: false}).addTo(layers.ground);
     }
-    if (g.intel && g.intel !== "exact" && g.unc_km >= 1)   // противник по устаревшим данным: где может быть
+    if (g.intel && g.intel !== "exact" && g.unc_km >= 1)
       L.circle(g.pos, {radius: g.unc_km * 1000, color: c, weight: 1, opacity: .4, fill: false, dashArray: "2 5", interactive: false}).addTo(layers.ground);
-    const dir = g.route && g.route.length > 1 ? TAC.bearing(g.route[0], g.route[1]) : null;   // куда идёт колонна
+    const dir = g.route && g.route.length > 1 ? TAC.bearing(g.route[0], g.route[1]) : null;
     const html = nato ? TAC.unitNATO(g, friend) : TAC.unitSU(g, TAC.bearingTo(g.pos, enemyOf(g.side)), dir);
-    L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit" + (g.intel && g.intel !== "exact" ? " fog-" + g.intel : "")), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip).addTo(layers.ground);
+    L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit" + (g.intel && g.intel !== "exact" ? " fog-" + g.intel : "")), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip)
+      .on("click", () => selectHtml(tip)).addTo(layers.ground);
   }
   for (const o of ST.objects) {
     if (o.role === "airfield") continue;
-    const dmg = (o.state === "lost" ? "потерян" : o.damage > 0 ? `повреждение ${Math.round(o.damage * 100)}%` : "цел") + stockTxt(o);
     L.marker(o.pos, {icon: icon(TAC.target(o), 24, 24)})
-      .bindTooltip(`<b>${esc(o.name)}</b><br>${dmg}${o.checked ? "" : "<br>координаты по оценке"}${infoTxt(o.info)}`, {className: "wide"}).addTo(layers.objects);
+      .bindTooltip(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`, {className: "wide"})
+      .on("click", () => selectHtml(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`)).addTo(layers.objects);
   }
-  for (const r of (ST.supply_routes || []))  // свои пути подвоза: толщина - поток (т/сутки)
+  for (const r of (ST.supply_routes || []))
     L.polyline(r.pts, {color: "#7a5230", weight: 2 + Math.min(6, r.t / 150), opacity: .6, dashArray: "2 6"})
-      .bindTooltip(`<b>путь подвоза ${esc(r.link)}</b>${infoTxt(r.info)}`, {className: "wide"}).addTo(layers.supply);
-  for (const d of (ST.downed || [])) {      // свои сбитые экипажи: ждут спасения (CSAR)
+      .bindTooltip(`<b>${T("supplyRoute")} ${esc(r.link)}</b>${infoTxt(r.info)}`, {className: "wide"}).addTo(layers.supply);
+  for (const d of (ST.downed || [])) {
     L.marker(d.pos, {icon: L.divIcon({className: "obj", html: "🪂", iconSize: [18, 18]})})
-      .bindTooltip(`<b>${esc(d.title)}</b><br>на земле с суток ${d.day} · маяк ${d.freq} кГц`).addTo(layers.objects);
+      .bindTooltip(`<b>${esc(d.title)}</b><br>${T("sinceDay")} ${d.day} · ${T("beacon")} ${d.freq} kHz`).addTo(layers.objects);
   }
   const AF = Object.fromEntries(ST.objects.filter(o => o.role === "airfield").map(o => [o.name, o]));
   for (const b of ST.airbases) {
     const o = AF["Аэродром " + b.name];
-    const st = {open: "открыт", active: "открыт", closed: "закрыт", lost: "потерян"}[b.state] || b.state;
+    const st = T("bst")[b.state] || b.state;
     const used = b.units && b.units.length ? `<br>${b.units.map(esc).join("<br>")}` : "";
-    if (b.kind === "farp") {                 // вертолётная площадка: свободные - бледные, на мелком масштабе не видны
+    if (b.kind === "farp") {
       L.marker(b.pos, {icon: icon(TAC.farp(b), 22, 22, b.units.length ? "tac" : "tac farp-free")})
-        .bindTooltip(`<b>${esc(b.name)}</b> · вертолётная площадка · ${st}${used}`).addTo(layers.bases);
+        .bindTooltip(`<b>${esc(b.name)}</b> · ${T("heliPad")} · ${st}${used}`).addTo(layers.bases);
       continue;
     }
     L.marker(b.pos, {icon: icon(TAC.airbase(b), 26, 26)})
-      .bindTooltip(`<b>${esc(b.name)}</b> · ${st}${o && o.damage > 0 ? ` · повреждение ${Math.round(o.damage * 100)}%` : ""}${used}`).addTo(layers.bases);
+      .bindTooltip(`<b>${esc(b.name)}</b> · ${st}${o && o.damage > 0 ? ` · ${T("damage")} ${Math.round(o.damage * 100)}%` : ""}${used}`).addTo(layers.bases);
   }
   drawTask();
   if (!fitted && ST.places.length) { map.fitBounds(ST.places.map(p => p.pos), {padding: [30, 30]}); fitted = true; }
 }
 
+
+// ---------- выбор: один объект для списка, карты, инспектора и матрицы ----------
+let SELID = null, SORTIE = null, SELHTML = null;     // выбранный вылет (id плана полётов) и его маршруты; или карточка объекта
+async function selectSortie(id) {
+  SELID = id; SELHTML = null; SORTIE = null;
+  const t = ST && ST.tasks.findIndex(x => x.ato_id === id);
+  if (t != null && t >= 0) SEL = t;
+  try { SORTIE = (await api("sortie", {file: FILE, id})).sortie; } catch (e) { out(e.message, true); }
+  if (TAB === "sorties") renderSorties($("#pane"));
+  renderInspector(); renderMatrix(); drawTask();
+  if (SORTIE) {
+    const pts = SORTIE.groups.flatMap(g => g.route.map(w => w.pos));
+    if (pts.length) map.fitBounds(pts, {padding: [40, 40], maxZoom: 10});
+  }
+}
+function selectHtml(html) { SELHTML = html; SELID = null; SORTIE = null; renderInspector(); renderMatrix(); drawTask();
+  if (TAB === "sorties") renderSorties($("#pane")); }
+
+// ---------- вкладка "Вылеты": список; подробности и действия - в инспекторе ----------
+function renderSorties(p) {
+  const showEnemy = pref("rf_ato_enemy", "0") === "1";
+  const playable = new Set(ST.tasks.map(t => t.ato_id));
+  const own = ST.ato.filter(r => r.side === ST.side).slice().sort((a, b) => a.tot.localeCompare(b.tot));
+  const row = (r, mine) => `<div class="srow ${r.id === SELID ? "sel" : ""} ${r.duty ? "duty" : ""}" data-id="${esc(r.id)}">
+      <span class="tm">${r.night ? "🌙" : ""}${esc(r.tot)}</span>
+      <span class="tt">${mine && playable.has(r.id) ? "▶ " : ""}${esc(r.title)}</span>
+      <span class="st">${esc(r.status)}</span></div>`;
+  const play = own.filter(r => playable.has(r.id)), rest = own.filter(r => !playable.has(r.id));
+  let h = `<div class="row" style="margin-bottom:6px">${ST.clock ? `<span class="meta" style="margin:0">${T("clock")} ${esc(ST.clock)} ·</span>` : ""}
+      <span class="meta" style="margin:0">${T("situation")} ${esc(ST.ground_time)}</span>
+      ${ST.ato.length ? `<button id="atoAdd" title="${esc(T("addSortieTip"))}">${T("addSortie")}</button>` : ""}</div><div id="atoCands"></div>`;
+  if (!ST.tasks.length) h += `<p class="meta">${ST.task_reason ? T("noTasks") + esc(ST.task_reason) : T("noPlan")}</p>`;
+  h += `<div class="sh">${T("playable")} (${play.length})</div>` + play.map(r => row(r, true)).join("");
+  if (rest.length) h += `<details class="more"><summary>${T("otherSorties")} (${rest.length})</summary>${rest.map(r => row(r, true)).join("")}</details>`;
+  if (showEnemy) { const en = ST.ato.filter(r => r.side !== ST.side).sort((a, b) => a.tot.localeCompare(b.tot));
+    h += `<details class="more"><summary class="${ST.side === "red" ? "blue" : "red"}">${T("enemySorties")} (${en.length})</summary>${en.map(r => row(r, false)).join("")}</details>`; }
+  p.innerHTML = h;
+  p.querySelectorAll(".srow").forEach(el => el.onclick = () => selectSortie(el.dataset.id));
+  if ($("#atoAdd")) $("#atoAdd").onclick = () => atoCands();
+}
+
+// ---------- инспектор: выбранный вылет (группы, маршрут со временем, угрозы, действия) или объект ----------
+function renderInspector() {
+  const box = $("#insp");
+  if (!ST) { box.innerHTML = ""; return; }
+  if (SELHTML) { box.innerHTML = `<div class="ibox">${SELHTML}</div>`; return; }
+  if (!SELID) { box.innerHTML = `<p class="meta">${T("inspEmpty")}</p>`; return; }
+  const r = ST.ato.find(x => x.id === SELID), s = SORTIE;
+  if (!r) { box.innerHTML = ""; return; }
+  const ti = ST.tasks.findIndex(x => x.ato_id === SELID), t = ti >= 0 ? ST.tasks[ti] : null, own = r.side === ST.side;
+  let h = `<div class="item" data-id="${esc(r.id)}"><h3>${r.night ? "🌙 " : ""}${esc(r.title)}</h3>
+    <div class="d">${r.duty ? `${T("inZone")} ${esc(r.tot)}–${esc(r.end || "")}` : `${T("tot")} <b>${esc(r.tot)}</b>`} · ${esc(r.takeoff)}–${esc(r.land)} · ${esc(r.status)}</div>`;
+  if (t) h += `<div class="d">${t.km} ${T("fromBase")} ${esc(t.base)}</div>` +
+    (t.goal && t.goal.length ? `<div class="pk goal">${t.goal.map(esc).join("<br>")}</div>` : "");
+  if (s && s.threats.length) h += `<div class="d"><b>${T("sam")}:</b> ${s.threats.map(x => esc(x.name)).join(", ")}</div>`;
+  if (s && s.notes) h += `<div class="d">⚠ ${esc(s.notes)}</div>`;
+  if (t) h += `<div class="act"><div class="row"><span class="meta" style="margin:0">${T("fly")}</span>
+      <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
+      <span class="meta" style="margin:0" title="${esc(T("humansTip"))}">${T("humans")}</span>
+      <select class="hum">${Array.from({length: Math.max(1, t.seats || 1)}, (_, k) => `<option>${k + 1}</option>`).join("")}</select></div>
+      <div class="row" style="margin-top:6px"><button class="main go">${T("buildBtn")}</button></div></div>`;
+  if (own && !r.locked) h += `<div class="row" style="margin-top:6px">${r.duty_only ? "" : `<button class="atoEd">${T("edit")}</button>`}<button class="atoRm">${T("remove")}</button></div>`;
+  h += `<div class="atoForm"></div>`;
+  if (s) h += s.groups.map((g, k) => `<div class="grpbox"><div><span class="sw" style="background:${grpCol(k)}"></span><b>${esc(g.title)}</b>: ${g.size} × ${esc(g.type)}</div>
+      <div class="d">${esc(g.unit)} · ${esc(g.base)}</div>
+      <table class="wp">${g.route.map(w => `<tr><td>${esc(w.t)}</td><td>${esc(w.name)}</td></tr>`).join("")}</table></div>`).join("");
+  else h += `<div class="d">${r.groups.map(esc).join("<br>")}</div>`;
+  box.innerHTML = h + `</div>`;
+  const go = box.querySelector(".go");
+  if (go) go.onclick = e => act("build", {task: ti + 1, fly: box.querySelector(".fly").value, humans: box.querySelector(".hum").value,
+    budget: pref("rf_budget", "")}, e.target);
+  const ed = box.querySelector(".atoEd"); if (ed) ed.onclick = () => atoEditor(box.querySelector(".item"));
+  const rm = box.querySelector(".atoRm"); if (rm) rm.onclick = e => { if (confirm(T("removeQ"))) act("atoremove", {id: r.id}, e.target); };
+}
+const GRP = ["#111111", "#b8860b", "#2e7d32", "#6a1b9a", "#c62828", "#00838f", "#5d4037", "#ad1457"];
+const grpCol = k => GRP[k % GRP.length];
+
+// ---------- карта: маршруты выбранного вылета с временем точек и угрозы коридора ----------
 function drawTask() {
   layers.task.clearLayers();
-  const t = ST && ST.tasks[SEL]; if (!t) return;
-  const pts = [t.base_pos, t.ip, t.target].filter(Boolean);
-  L.polyline(pts, {color: "#111", weight: 2.5, dashArray: "8 4"}).addTo(layers.task);
-  if (t.ip) L.circleMarker(t.ip, {radius: 4, color: "#111", fillColor: "#fff", fillOpacity: 1}).bindTooltip("ИПМ").addTo(layers.task);
-  if (t.target) L.marker(t.target, {icon: icon(`<svg width="30" height="30" viewBox="-15 -15 30 30"><circle r="11" fill="none" stroke="#111" stroke-width="2.5"/><path d="M0 -15 L0 -6 M0 6 L0 15 M-15 0 L-6 0 M6 0 L15 0" stroke="#111" stroke-width="2.5"/></svg>`, 30, 30)})
-    .bindTooltip("Цель: " + esc(t.title)).addTo(layers.task);
+  if (!SORTIE) return;
+  SORTIE.threats.forEach(x => L.circle(x.pos, {radius: x.r_km * 1000, color: "#c8102e", weight: 2, fill: true, fillOpacity: .08, interactive: false})
+    .addTo(layers.task));
+  SORTIE.groups.forEach((g, k) => {
+    const c = grpCol(k);
+    L.polyline(g.route.map(w => w.pos), {color: c, weight: k ? 2 : 3, opacity: .85, dashArray: k ? "6 5" : "10 4"})
+      .bindTooltip(`${esc(g.title)}: ${g.size} × ${esc(g.type)}`).addTo(layers.task);
+    g.route.slice(1, -1).forEach(w => L.circleMarker(w.pos, {radius: 4, color: c, weight: 2, fillColor: "#fff", fillOpacity: 1})
+      .bindTooltip(`<b>${esc(w.name)}</b> ${esc(w.t)}<br>${esc(g.title)}`).addTo(layers.task));
+  });
+  if (SORTIE.target) L.marker(SORTIE.target, {icon: icon(`<svg width="30" height="30" viewBox="-15 -15 30 30"><circle r="11" fill="none" stroke="#111" stroke-width="2.5"/><path d="M0 -15 L0 -6 M0 6 L0 15 M-15 0 L-6 0 M6 0 L15 0" stroke="#111" stroke-width="2.5"/></svg>`, 30, 30)})
+    .bindTooltip(T("target") + esc(SORTIE.title)).addTo(layers.task);
 }
-function stateRu(g) {
-  let s = {march: "марш", battle: "бой", defend: "оборона", halted: "небоеспособна", destroyed: "уничтожена",
-           deployed: "на позиции", refit: "восстановление", pending: `резерв, день ${g.arrives}`}[g.state] || g.state;
-  if (g.state === "march" && g.order) s += {attack: " (наступление)", hold: " (на рубеж)", withdraw: " (отход)"}[g.order] || "";
+
+// ---------- матрица синхронизации: строки - группы вылетов, полосы взлёт-посадка, сбор, выход на объект, время удара ----------
+let PXM = +pref("rf_pxm", "2");                         // пикселей на минуту
+const hm = s => { s = ((s % 86400) + 86400) % 86400; return `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor(s % 3600 / 60)).padStart(2, "0")}`; };
+function renderMatrix() {
+  const box = $("#mxIn");
+  if (!ST || !ST.matrix) { box.innerHTML = ""; return; }
+  const duty = $("#mDuty").checked, past = $("#mPast").checked, enemy = pref("rf_ato_enemy", "0") === "1";
+  const rowsById = Object.fromEntries(ST.ato.map(r => [r.id, r]));
+  const now = ST.clock_s || 0;
+  const ents = ST.matrix.filter(e => (e.side === ST.side || enemy) && (duty || !e.duty)
+    && (past || !e.groups.length || Math.max(...e.groups.map(g => g.land)) >= now)).sort((a, b) => a.tot - b.tot);
+  const LBL = 230, x = s => LBL + s / 60 * PXM, W = x(86400) + 20, H = 18;
+  const [w0, w1] = ST.window || [21600, 72000];
+  let rows = "", y = 22;
+  for (const e of ents) {
+    const r = rowsById[e.id] || {}, sel = e.id === SELID, drag = e.side === ST.side && !r.locked && !r.duty_only && !e.duty;
+    rows += `<div class="mxe ${sel ? "sel" : ""} ${e.side}" style="top:${y}px;width:${W}px" data-id="${esc(e.id)}">
+      <div class="mxl" title="${esc(e.title)}">${esc(hm(e.tot))} · ${esc(e.title)}</div>
+      ${e.duty ? "" : `<div class="tot" style="left:${x(e.tot)}px;height:${(e.groups.length + 1) * H}px" title="${T("tot")} ${hm(e.tot)}"></div>`}
+      ${drag ? `<div class="hdl" style="left:${x(e.tot) - 6}px" data-tot="${e.tot}" title="${esc(T("dragTip"))}">⇔</div>` : ""}</div>`;
+    y += H;
+    e.groups.forEach((g, k) => {
+      const end = g.end || g.land;
+      rows += `<div class="mxg" style="top:${y}px" data-id="${esc(e.id)}">
+        <div class="mxl gl" title="${esc(g.unit)}">${esc(g.title)} · ${g.size}×${esc(g.type)}</div>
+        <div class="bar2 ${e.side}" style="left:${x(g.takeoff)}px;width:${Math.max(3, x(end) - x(g.takeoff))}px"
+          title="${esc(g.title)}: ${hm(g.takeoff)}–${hm(g.land)}"></div>
+        ${g.rv ? `<div class="mk rv" style="left:${x(g.rv) - 4}px" title="${T("rv")} ${hm(g.rv)}"></div>` : ""}
+        ${e.duty ? "" : `<div class="mk ob" style="left:${x(g.objective) - 5}px" title="${T("onTarget")} ${hm(g.objective)}"></div>`}</div>`;
+      y += H;
+    });
+    y += 4;
+  }
+  let axis = "", lab = "";
+  for (let h = 0; h <= 24; h++) { axis += `<div class="tick" style="left:${x(h * 3600)}px;height:${y}px"></div>`;
+    lab += `<span style="left:${x(h * 3600) + 2}px">${String(h).padStart(2, "0")}:00</span>`; }
+  box.style.width = W + "px"; box.style.height = y + "px";
+  box.innerHTML = `<div class="axis" style="width:${W}px">${lab}</div><div class="night" style="left:${LBL}px;width:${x(w0) - LBL}px;height:${y}px"></div>
+    <div class="night" style="left:${x(w1)}px;width:${W - x(w1)}px;height:${y}px"></div>${axis}
+    ${now ? `<div class="now" style="left:${x(now)}px;height:${y}px" title="${T("clock")} ${hm(now)}"></div>` : ""}${rows}`;
+  box.querySelectorAll(".mxe,.mxg").forEach(el => el.onclick = ev => { if (!ev.target.classList.contains("hdl")) selectSortie(el.dataset.id); });
+  box.querySelectorAll(".hdl").forEach(h => h.onmousedown = ev => dragTot(ev, h, x));
+  const s = box.querySelector(".mxe.sel");
+  if (s) { const m = $("#mx"), e = ents.find(q => q.id === SELID);
+    if (s.offsetTop < m.scrollTop + 20 || s.offsetTop > m.scrollTop + m.clientHeight - 40) m.scrollTop = s.offsetTop - 24;
+    if (e) { const px = x(e.tot); if (px < m.scrollLeft + LBL + 40 || px > m.scrollLeft + m.clientWidth - 40) m.scrollLeft = px - LBL - m.clientWidth / 3; } }
+}
+function dragTot(ev, h, x) {                            // перенос вылета: тянуть метку времени удара, шаг 5 мин
+  ev.preventDefault(); ev.stopPropagation();
+  const id = h.closest(".mxe").dataset.id, tot0 = +h.dataset.tot, x0 = ev.clientX;
+  const line = h.parentElement.querySelector(".tot");
+  let tot = tot0;
+  const mv = e => { tot = Math.round((tot0 + (e.clientX - x0) / PXM * 60) / 300) * 300;
+    const px = x(tot); h.style.left = (px - 6) + "px"; if (line) line.style.left = px + "px"; h.textContent = hm(tot); };
+  const up = async () => {
+    document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up);
+    if (Math.abs(tot - tot0) < 60) { renderMatrix(); return; }
+    SELID = id;
+    const j = await act("atoedit", {id, tot: hm(tot)});   // проверка самолётов и времени - на сервере (command.edit)
+    if (!j) renderMatrix(); else selectSortie(id);
+  };
+  document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up);
+}
+
+// ---------- панели: ширина и высота перетаскиванием, сворачивание; хранится в браузере ----------
+const root = document.documentElement;
+for (const v of ["--lw", "--rw", "--bh"]) { const k = pref("rf" + v, ""); if (k) root.style.setProperty(v, k); }
+document.querySelectorAll(".split").forEach(sp => sp.onmousedown = ev => {
+  ev.preventDefault();
+  const v = sp.dataset.var, dir = +sp.dataset.dir, horiz = sp.classList.contains("h");
+  const start = horiz ? ev.clientY : ev.clientX, s0 = parseFloat(getComputedStyle(root).getPropertyValue(v)) || 0;
+  const mv = e => { const d = ((horiz ? e.clientY : e.clientX) - start) * dir;
+    root.style.setProperty(v, Math.max(0, Math.min(horiz ? innerHeight - 160 : innerWidth / 2, s0 + d)) + "px"); map.invalidateSize(); };
+  const up = () => { document.removeEventListener("mousemove", mv); document.removeEventListener("mouseup", up);
+    setPref("rf" + v, getComputedStyle(root).getPropertyValue(v).trim()); map.invalidateSize(); };
+  document.addEventListener("mousemove", mv); document.addEventListener("mouseup", up);
+});
+const DEF = {"--lw": "340px", "--rw": "340px", "--bh": "240px"};
+function toggle(v) {
+  const cur = parseFloat(getComputedStyle(root).getPropertyValue(v)) || 0;
+  const val = cur > 10 ? "0px" : (pref("rf" + v + "_open", "") || DEF[v]);
+  if (cur > 10) setPref("rf" + v + "_open", cur + "px");
+  root.style.setProperty(v, val); setPref("rf" + v, val); setTimeout(() => map.invalidateSize(), 50);
+}
+$("#tLeft").onclick = () => toggle("--lw");
+$("#tRight").onclick = () => toggle("--rw");
+$("#tBottom").onclick = () => toggle("--bh");
+$("#mIn").onclick = () => { PXM = Math.min(12, PXM * 1.5); setPref("rf_pxm", PXM); renderMatrix(); };
+$("#mOut").onclick = () => { PXM = Math.max(0.5, PXM / 1.5); setPref("rf_pxm", PXM); renderMatrix(); };
+$("#mDuty").checked = pref("rf_mduty", "0") === "1";
+$("#mPast").checked = pref("rf_mpast", "0") === "1";
+$("#mDuty").onchange = e => { setPref("rf_mduty", e.target.checked ? "1" : "0"); renderMatrix(); };
+$("#mPast").onchange = e => { setPref("rf_mpast", e.target.checked ? "1" : "0"); renderMatrix(); };
+
+function stateTxt(g) {
+  const S = T("st");
+  let s = g.state === "pending" ? S.pending + g.arrives : (S[g.state] || g.state);
+  if (g.state === "march" && g.order) s += T("ord")[g.order] || "";
   return s;
 }
-function strengthTxt(g) {       // противник по устаревшим данным - боеспособность на момент наблюдения
-  if (g.strength != null) return `боеспособность ${Math.round(g.strength * 100)}%`;
-  return g.seen_strength != null && g.intel === "approx" ? `боеспособность ~${Math.round(g.seen_strength * 100)}% (когда видели)` : "боеспособность неизвестна";
+function objState(o) {
+  return o.state === "lost" ? T("lostSt") : o.state === "closed" ? T("closedSt") : o.damage > 0 ? `${T("damage")} ${Math.round(o.damage * 100)}%` : T("intact");
+}
+function strengthTxt(g) {
+  if (g.strength != null) return `${T("strength")} ${Math.round(g.strength * 100)}%`;
+  return g.seen_strength != null && g.intel === "approx" ? `${T("strength")} ~${Math.round(g.seen_strength * 100)}% ${T("strengthSeen")}` : T("strengthUnk");
 }
 function intelTxt(g) {
   if (!g.intel) return "";
-  const lv = {exact: "точно", approx: "примерно", presence: "только присутствие"}[g.intel];
-  return `<br><i>разведка: ${lv}, ${g.intel_age_h} ч назад (${esc(g.intel_src)})${g.unc_km >= 1 ? `, могла уйти до ${Math.round(g.unc_km)} км` : ""}</i>`;
+  return `<br><i>${T("intelW")}: ${T("intel")[g.intel]}, ${g.intel_age_h} ${T("hAgo")} (${esc(g.intel_src)})${g.unc_km >= 1 ? `, ${T("couldMove")} ${Math.round(g.unc_km)} km` : ""}</i>`;
 }
 const bar = v => `<span class="bar"><i style="width:${Math.round(v * 100)}%;background:${v < .5 ? "#e0483e" : v < .75 ? "#e6a23c" : "#5cb85c"}"></i></span>`;
+const sideName = (s, cap) => T(cap ? (s === "red" ? "Red" : "Blue") : s);
 
 function render() {
-  if (!ST) { $("#pane").innerHTML = "<p class='meta'>Создайте кампанию кнопкой «Новая».</p>"; drawMap(); return; }
-  $("#title").textContent = "· " + ST.name;
-  $("#meta").innerHTML = `День <b>${ST.day}</b>, обстановка на ${esc(ST.ground_time || "00:00")} · ${ST.date || ""} · вылетов ${ST.sortie} · игрок: <span class="${ST.side}">${ST.side === "red" ? "красные" : "синие"}</span><br>` +
-    `${esc(ST.scenario || "")} · seed ${ST.seed ?? "-"}${ST.randomness ? "" : " · без случайности"}` +
-    (ST.built ? `<br>собран вылет ${ST.built.sortie}: ${esc(ST.built.file)}` : "");
+  if (!ST) { $("#pane").innerHTML = `<p class='meta'>${T("noCamp")}</p>`; $("#meta").innerHTML = ""; drawMap(); renderInspector(); renderMatrix(); return; }
+  $("#meta").innerHTML = T("meta")(ST, sideName(ST.side));
+  $("#meta").title = `${ST.scenario || ""} · ${T("seed")} ${ST.seed ?? "-"}${ST.randomness ? "" : " · " + T("noRandom")}` +
+    (ST.built ? ` · ${T("built")} ${ST.built.sortie}: ${ST.built.file}` : "");
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === TAB));
   const p = $("#pane");
-  if (TAB === "plan") {
-    if (!ST.tasks.length) p.innerHTML = `<p class="meta">${ST.task_reason ? "Задач нет: " + esc(ST.task_reason) : "Плана ещё нет - кнопка «1. План»."}</p>`;
-    else p.innerHTML = `<div class="row" style="margin-bottom:8px"><span class="meta" style="margin:0">наземных машин в миссии не больше</span>
-      <input id="budget" type="number" min="0" step="50" value="${ST.budget}" style="width:80px" title="бюджет миссии: дальнее прореживается и убирается; 0 - без ограничения"></div>` +
-      ST.tasks.map((t, i) => `<div class="task ${i === SEL ? "sel" : ""}" data-i="${i}">
-      <b>${t.n}. ${t.time ? esc(t.time.split(",")[0].replace("взлёт ", "")) + " · " : ""}${esc(t.title)}</b>
-      ${t.time ? `<div class="pk">${esc(t.time)}</div>` : ""}
-      <div class="pk">${t.km} км от ${esc(t.base)} · ПВО: ${esc(t.threats.join(", ") || "нет")}</div>
-      <div class="pk">${t.package.map(g => `${esc(g.title)}: ${g.size} × ${esc(g.performer)}`).join("<br>")}</div>
-      ${t.goal && t.goal.length ? `<div class="pk goal">${t.goal.map(esc).join("<br>")}</div>` : ""}
-      ${t.notes ? `<div class="pk">⚠ ${esc(t.notes)}</div>` : ""}
-      <div class="row"><span class="meta" style="margin:0">лечу в</span>
-        <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
-        <span class="meta" style="margin:0" title="людей в вылете: сначала группа игрока, затем остальные группы по порядку; больше одного - места Client (мультиплеер)">людей</span>
-        <select class="hum">${Array.from({length: Math.max(1, t.seats || 1)}, (_, k) => `<option>${k + 1}</option>`).join("")}</select>
-        <button class="main go">Собрать миссию</button></div></div>`).join("");
-    p.querySelectorAll(".task").forEach(el => {
-      el.onclick = e => { if (e.target.closest("select,button")) return; SEL = +el.dataset.i; render(); };
-      el.querySelector(".go").onclick = e => act("build", {task: +el.dataset.i + 1, fly: el.querySelector(".fly").value, humans: el.querySelector(".hum").value, budget: ($("#budget") || {}).value}, e.target);
-    });
-  } else if (TAB === "ground") {
+  if (TAB === "sorties") renderSorties(p);
+  else if (TAB === "ground") {
     const by = s => ST.ground.filter(g => g.side === s && !g.attached);
-    p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}${s !== ST.side ? " (по данным разведки)" : ""}</h4>` + by(s).map(g =>
+    p.innerHTML = ["red", "blue"].map(s => `<h4 class="${s}">${sideName(s, true)}${s !== ST.side ? T("byIntel") : ""}</h4>` + by(s).map(g =>
       `<div class="item" data-pos="${g.pos}"><b>${esc(g.name)}</b>${g.strength != null ? `${bar(g.strength)} ${Math.round(g.strength * 100)}%` : ` <i>${g.intel === "approx" ? "?" : "??"}</i>`}
-       <div class="d">${esc(stateRu(g))}${g.engaged.length ? " · против: " + esc(g.engaged.join(", ")) : ""}${g.supply < 1 ? " · снабжение " + Math.round(g.supply_frac * 100) + "% нормы" : ""}</div></div>`).join("")).join("");
+       <div class="d">${esc(stateTxt(g))}${g.engaged.length ? ` · ${T("vs")}: ` + esc(g.engaged.join(", ")) : ""}${g.supply < 1 ? ` · ${T("supplyPct")} ` + Math.round(g.supply_frac * 100) + T("ofNorm") : ""}</div></div>`).join("")).join("");
     p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
-  } else if (TAB === "air") {
-    p.innerHTML = `<div class="row" style="margin-bottom:8px"><button id="bAdd">Добавить полк</button></div><div id="addForm"></div>` +
-      ["red", "blue"].map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}</h4>` +
-      ST.air.filter(a => a.side === s).map(a => `<div class="item" data-id="${esc(a.id)}"><b>${esc(a.name)}</b>${a.added ? ` <i class="meta">(${a.added === "custom" ? "свой" : "допущение"})</i>` : ""}
-       <div class="d">${esc(a.type)} · ${esc(a.base)} · в строю ${a.count}/${a.count0}${a.crews != null ? ` · экипажей ${a.crews}/${a.crews0}` : ""} · к вылету ${a.available}</div>
-       ${a.rebase_to ? `<div class="d">→ перебазирование на ${esc(a.rebase_to)} в конце суток</div>` : ""}
-       ${a.livery ? `<div class="d">ливрея: ${esc(a.livery)}</div>` : ""}
-       <div class="row" style="margin-top:4px">${s === ST.side ? `<button class="rb">Перебазировать</button>` : ""}<button class="ui">Лётчики, ливрея</button></div>
-       <div class="rbForm"></div><div class="uiForm"></div></div>`).join("")).join("") +
-      ((ST.downed || []).length ? `<h4>Сбитые экипажи на земле</h4>` + ST.downed.map(d => `<div class="item" data-pos="${d.pos}"><b>🪂 ${esc(d.title)}</b>
-       <div class="d">маяк ${d.freq} кГц · на земле с суток ${d.day}</div></div>`).join("") : "");
-    p.querySelectorAll(".item[data-pos]").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
-    $("#bAdd").onclick = async () => {               // добавить полк: из списка допущений или свой
-      const f = $("#addForm");
-      if (f.innerHTML) { f.innerHTML = ""; return; }
-      let o;
-      try { o = (await api("addoptions", {file: FILE})).options; } catch (x) { return out(x.message, true); }
-      const sideRu = s => s === "red" ? "красные" : "синие";
-      f.innerHTML = `<div class="item"><div class="d"><b>Из списка</b> - части других дат этого театра (историческое допущение)</div>
-        ${o.catalog.length ? `<div class="row" style="margin-top:4px"><select id="adCat" style="flex:1;min-width:0">${o.catalog.map(c =>
-          `<option value="${esc(c.id)}">${sideRu(c.side)} · ${esc(c.name)} · ${c.count} x ${esc(c.type)} · пресет ${esc(c.year)}</option>`).join("")}</select>
-          <button id="adCatOk">Добавить</button></div>` : `<div class="d">все части других пресетов уже в кампании</div>`}
-        <div class="d" style="margin-top:10px"><b>Свой полк</b></div>
-        <div class="row" style="margin-top:4px"><input id="adName" placeholder="название, напр. 116-й гв. бап" style="flex:1;min-width:0"></div>
-        <div class="row" style="margin-top:4px"><select id="adSide"><option value="${ST.side}">${sideRu(ST.side)}</option><option value="${ST.side === "red" ? "blue" : "red"}">${sideRu(ST.side === "red" ? "blue" : "red")}</option></select>
-          <select id="adRole" style="flex:1;min-width:0">${o.roles.map(r => `<option value="${r.id}" data-cat="${r.cat}">${esc(r.title)}</option>`).join("")}</select></div>
-        <div class="row" style="margin-top:4px"><select id="adType" style="flex:1;min-width:0"></select>
-          <input id="adCount" type="number" min="1" max="72" value="24" style="width:60px" title="ЛА в полку"></div>
-        <div class="row" style="margin-top:4px"><select id="adBase" style="flex:1;min-width:0"></select>
-          <input id="adRadius" type="number" min="0" step="50" placeholder="радиус, км" style="width:90px" title="радиус действия; пусто - по роли или оценка"></div>
-        <div class="row" style="margin-top:4px"><button id="adOk">Добавить свой</button></div>
-        <div class="meta">В план полётов полк попадает со следующих суток.</div></div>`;
-      const fill = () => {
-        const heli = $("#adRole").selectedOptions[0].dataset.cat === "heli", side = $("#adSide").value;
-        $("#adType").innerHTML = o.types.filter(t => t.heli === heli).map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
-        $("#adBase").innerHTML = o.bases[side].filter(b => heli || !b.farp).map(b => `<option value="${esc(b.id)}">${b.farp ? "площадка " : ""}${esc(b.name)}</option>`).join("");
-      };
-      $("#adRole").onchange = fill; $("#adSide").onchange = fill; fill();
-      if ($("#adCatOk")) $("#adCatOk").onclick = ev => act("addunit", {catalog: $("#adCat").value}, ev.target);
-      $("#adOk").onclick = ev => act("addunit", {name: $("#adName").value, side: $("#adSide").value, role: $("#adRole").value,
-        type: $("#adType").value, count: $("#adCount").value, base: $("#adBase").value, radius: $("#adRadius").value}, ev.target);
-    };
-    p.querySelectorAll(".ui").forEach(b => b.onclick = async e => {     // лётчики полка и ливрея
-      const it = e.target.closest(".item"), f = it.querySelector(".uiForm");
-      if (f.innerHTML) { f.innerHTML = ""; return; }
-      let o;
-      try { o = (await api("unitinfo", {file: FILE, id: it.dataset.id})).info; } catch (x) { return out(x.message, true); }
-      const opts = o.liveries.map(l => `<option value="${esc(l.id)}" ${l.id === o.livery ? "selected" : ""}>${esc(l.name)}</option>`).join("");
-      f.innerHTML = `<div class="d" style="margin-top:6px"><b>Ливрея полка</b> (во всех его вылетах, пока не сменить)</div>
-        <div class="row" style="margin-top:4px">${o.liveries.length ? `<select class="lvSel" style="flex:1;min-width:0"><option value="">по умолчанию DCS</option>${opts}</select>` :
-          `<input class="lvIn" value="${esc(o.livery)}" placeholder="имя папки ливреи (DCS не найден)" style="flex:1;min-width:0">`}<button class="lvOk">Задать</button></div>
-        <div class="d" style="margin-top:6px"><b>Лётчики</b> (${o.pilots.length}; имя в DCS - звание и фамилия, ведущий - старший)</div>
-        <div class="d">${o.pilots.map(x => `${esc(x.name)}${x.sorties ? ` · ${x.sorties} выл.` : ""}`).join("<br>")}</div>
-        ${o.down.length ? `<div class="d" style="margin-top:4px"><b>На земле (сбиты):</b> ${o.down.map(esc).join(", ")}</div>` : ""}
-        ${o.lost.length ? `<div class="d" style="margin-top:4px"><b>Выбыли:</b> ${o.lost.map(x => `${esc(x.name)} - ${esc(x.how)}, сутки ${x.day}`).join("; ")}</div>` : ""}`;
-      f.querySelector(".lvOk").onclick = ev => act("setlivery", {id: it.dataset.id, livery: (f.querySelector(".lvSel") || f.querySelector(".lvIn")).value}, ev.target);
-    });
-    p.querySelectorAll(".rb").forEach(b => b.onclick = async e => {     // режим командующего: перебазирование
-      const it = e.target.closest(".item"), f = it.querySelector(".rbForm");
-      if (f.innerHTML) { f.innerHTML = ""; return; }
-      let o;
-      try { o = (await api("rebaseoptions", {file: FILE, id: it.dataset.id})).options; } catch (x) { return out(x.message, true); }
-      f.innerHTML = `<div class="row" style="margin-top:4px"><select class="rbSel" style="flex:1;min-width:0">
-        <option value="${esc(o.id)}" disabled selected>сейчас: ${esc(o.base)} (${o.front_km} км до противника)</option>` +
-        o.options.map(x => `<option value="${esc(x.id)}">${x.farp ? "площадка " : ""}${esc(x.name)} · до противника ${x.front_km} км · ${x.km} км отсюда · ${x.helos != null ? `вертолётов до ${x.helos}` : `мест ${x.free}`}</option>`).join("") +
-        `</select><button class="main rbGo">Приказ</button>${o.pending ? `<button class="rbNo">Отменить</button>` : ""}</div>`;
-      f.querySelector(".rbGo").onclick = ev => { const v = f.querySelector(".rbSel").value; if (v && v !== o.id) act("rebase", {id: it.dataset.id, base: v}, ev.target); };
-      const no = f.querySelector(".rbNo");
-      if (no) no.onclick = ev => act("rebase", {id: it.dataset.id, base: "__cancel__"}, ev.target);
-    });
-  } else if (TAB === "ato") {
-    let cheat = false;
-    try { cheat = localStorage.getItem("rf_ato_enemy") === "1"; } catch (e) {}
-    const sides = cheat ? ["red", "blue"] : [ST.side];
-    const rows = ST.ato.filter(r => sides.includes(r.side));
-    p.innerHTML = `<div class="row" style="margin-bottom:8px">
-        <label class="meta" style="margin:0"><input type="checkbox" id="atoEnemy" style="width:auto" ${cheat ? "checked" : ""}>
-        план противника (отладка)</label>${ST.clock ? `<span class="meta" style="margin:0">· часы кампании ${esc(ST.clock)}</span>` : ""}<span class="meta" style="margin:0">· обстановка на ${esc(ST.ground_time)}</span>
-        ${ST.ato.length ? `<button id="atoAdd" title="режим командующего: задачи, которые планировщик нашёл, но в план не взял">+ вылет</button>` : ""}</div>
-      <div id="atoCands"></div>` +
-      (ST.ato.length ? "" : `<p class="meta">План полётов строится кнопкой «1. План».</p>`) +
-      sides.map(s => `<h4 class="${s}">${s === "red" ? "Красные" : "Синие"}${s === ST.side ? " (вы)" : " - противник"}</h4>` +
-        rows.filter(r => r.side === s).map(r => `<div class="item" data-id="${esc(r.id)}">
-          <b>${r.night ? "🌙 " : ""}${esc(r.takeoff)}–${esc(r.land)} · ${esc(r.title)}</b>
-          <div class="d">${r.duty ? `в зоне ${esc(r.tot)}–${esc(r.end)}` : `на объекте ${esc(r.tot)}`} · ${esc(r.status)}</div>
-          <div class="d">${r.groups.map(esc).join("<br>")}</div>
-          ${r.threats.length ? `<div class="d">ПВО: ${esc(r.threats.join(", "))}</div>` : ""}
-          ${s === ST.side && !r.locked ? `<div class="row" style="margin-top:4px">${r.duty_only ? "" : `<button class="atoEd">Изменить</button>`}<button class="atoRm">Снять</button></div><div class="atoForm"></div>` : ""}</div>`).join("")).join("");
-    $("#atoEnemy").onchange = e => { try { localStorage.setItem("rf_ato_enemy", e.target.checked ? "1" : "0"); } catch (x) {} render(); };
-    p.querySelectorAll(".atoRm").forEach(b => b.onclick = e => {
-      const it = e.target.closest(".item");
-      if (confirm("Снять вылет из плана полётов?")) act("atoremove", {id: it.dataset.id}, e.target);
-    });
-    p.querySelectorAll(".atoEd").forEach(b => b.onclick = e => atoEditor(e.target.closest(".item")));
-    if ($("#atoAdd")) $("#atoAdd").onclick = () => atoCands();
-  } else if (TAB === "rear") {
+  } else if (TAB === "air") renderAir(p);
+  else if (TAB === "rear") {
     const unk = ST.objects.filter(o => !o.checked).length;
     const SL = ST.supply_log || {};
     const tyl = ["red", "blue"].filter(s => SL[s]).map(s => { const x = SL[s];
-      return `<div class="d"><b class="${s}">${s === "red" ? "Красные" : "Синие"}</b>: запас складов ${x.stock_t} т из ${x.cap_t} (${Math.round(x.stock_t / x.cap_t * 100)}%) · за сутки подвоз ${x.road_t} т, воздухом ${x.air_t} т, расход ${x.used_t} т${x.cut.length ? " · отрезано складов: " + x.cut.length : ""}</div>`; }).join("");
-    p.innerHTML = `<div class="row" style="margin-bottom:8px">
-        <button id="bProbe">Зонд карты</button><button id="bApply">Применить зонд</button>
-        <button id="bRProbe">Зонд дорог</button><button id="bRApply">Применить дороги</button></div>
-      ${(ST.rear || []).length ? `<h4>Что значат тонны</h4>${infoTxt(ST.rear)}` : ""}
-      ${tyl ? `<h4>Тыл (прошлые сутки)</h4>${tyl}` : ""}
-      <p class="meta" style="margin-top:0">${unk ? `По оценке: ${unk} объект(ов) - запустите «Зонд карты» в DCS, затем «Применить зонд».` : "Все цели тыла на объектах карты."}</p>
-      <div class="row" style="margin-bottom:8px"><input id="miz" placeholder="путь к .miz с зонами Assign as... (ROLE/VALUE)" style="flex:1"><button id="bImport">Импорт</button></div>` +
+      return `<div class="d"><b class="${s}">${sideName(s, true)}</b>: ${T("stock")} ${x.stock_t} t ${T("of")} ${x.cap_t} (${Math.round(x.stock_t / x.cap_t * 100)}%) · ${T("roadIn")} ${x.road_t} t, ${T("airIn")} ${x.air_t} t, ${T("used")} ${x.used_t} t${x.cut.length ? ` · ${T("cut")}: ` + x.cut.length : ""}</div>`; }).join("");
+    p.innerHTML = `${(ST.rear || []).length ? `<h4>${T("whatTonnes")}</h4>${infoTxt(ST.rear)}` : ""}
+      ${tyl ? `<h4>${T("rearDay")}</h4>${tyl}` : ""}
+      <p class="meta">${unk ? T("estObjs")(unk) : T("allChecked")}</p>` +
       ST.objects.map(o => `<div class="item" data-pos="${o.pos}"><b>${{depot: "⛽", bridge: "🌉", airfield: "✈", factory: "🏭"}[o.role]} ${esc(o.name)}</b>
-        <div class="d">${o.state === "lost" ? "потерян" : o.state === "closed" ? "закрыт" : o.damage > 0 ? "повреждение " + Math.round(o.damage * 100) + "%" : "цел"}${stockTxt(o)}${o.checked ? "" : " · координаты по оценке"} · ${esc(o.id)}</div>${infoTxt(o.info)}</div>`).join("");
-    $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
-    $("#bApply").onclick = e => act("mapapply", {}, e.target);
-    $("#bRProbe").onclick = e => act("roadsprobe", {}, e.target);
-    $("#bRApply").onclick = e => act("roadsapply", {}, e.target);
-    $("#bImport").onclick = e => act("mapimport", {miz: $("#miz").value.trim()}, e.target);
+        <div class="d">${objState(o)}${stockTxt(o)}${o.checked ? "" : " · " + T("estCoords")}</div>${infoTxt(o.info)}</div>`).join("");
     p.querySelectorAll(".item").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 13));
   } else {
     p.innerHTML = `<div class="log">${ST.log.slice().reverse().map(l => `<p>${esc(l)}</p>`).join("")}</div>`;
   }
-  drawMap();
+  drawMap(); renderInspector(); renderMatrix();
+}
+
+function renderAir(p) {
+  p.innerHTML = `<div class="row" style="margin-bottom:8px"><button id="bAdd">${T("addRegiment")}</button></div><div id="addForm"></div>` +
+    ["red", "blue"].map(s => `<h4 class="${s}">${sideName(s, true)}</h4>` +
+    ST.air.filter(a => a.side === s).map(a => `<div class="item" data-id="${esc(a.id)}"><b>${esc(a.name)}</b>${a.added ? ` <i class="meta">(${a.added === "custom" ? T("custom") : T("assumption")})</i>` : ""}
+     <div class="d">${esc(a.type)} · ${esc(a.base)} · ${T("inService")} ${a.count}/${a.count0}${a.crews != null ? ` · ${T("crews")} ${a.crews}/${a.crews0}` : ""} · ${T("ready")} ${a.available}</div>
+     ${a.rebase_to ? `<div class="d">→ ${T("rebaseTo")} ${esc(a.rebase_to)} ${T("endOfDay")}</div>` : ""}
+     ${a.livery ? `<div class="d">${T("livery")}: ${esc(a.livery)}</div>` : ""}
+     <div class="row" style="margin-top:4px">${s === ST.side ? `<button class="rb">${T("rebase")}</button>` : ""}<button class="ui">${T("pilotsLivery")}</button></div>
+     <div class="rbForm"></div><div class="uiForm"></div></div>`).join("")).join("") +
+    ((ST.downed || []).length ? `<h4>${T("downed")}</h4>` + ST.downed.map(d => `<div class="item" data-pos="${d.pos}"><b>🪂 ${esc(d.title)}</b>
+     <div class="d">${T("beacon")} ${d.freq} kHz · ${T("sinceDay")} ${d.day}</div></div>`).join("") : "");
+  p.querySelectorAll(".item[data-pos]").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
+  $("#bAdd").onclick = async () => {               // добавить полк: из списка допущений или свой
+    const f = $("#addForm");
+    if (f.innerHTML) { f.innerHTML = ""; return; }
+    let o;
+    try { o = (await api("addoptions", {file: FILE})).options; } catch (x) { return out(x.message, true); }
+    f.innerHTML = `<div class="item"><div class="d"><b>${T("fromList")}</b> - ${T("fromListTip")}</div>
+      ${o.catalog.length ? `<div class="row" style="margin-top:4px"><select id="adCat" style="flex:1;min-width:0">${o.catalog.map(c =>
+        `<option value="${esc(c.id)}">${sideName(c.side)} · ${esc(c.name)} · ${c.count} x ${esc(c.type)} · ${esc(c.year)}</option>`).join("")}</select>
+        <button id="adCatOk">${T("add")}</button></div>` : `<div class="d">${T("allIn")}</div>`}
+      <div class="d" style="margin-top:10px"><b>${T("ownReg")}</b></div>
+      <div class="row" style="margin-top:4px"><input id="adName" placeholder="${esc(T("regName"))}" style="flex:1;min-width:0"></div>
+      <div class="row" style="margin-top:4px"><select id="adSide"><option value="${ST.side}">${sideName(ST.side)}</option><option value="${ST.side === "red" ? "blue" : "red"}">${sideName(ST.side === "red" ? "blue" : "red")}</option></select>
+        <select id="adRole" style="flex:1;min-width:0">${o.roles.map(r => `<option value="${r.id}" data-cat="${r.cat}">${esc(r.title)}</option>`).join("")}</select></div>
+      <div class="row" style="margin-top:4px"><select id="adType" style="flex:1;min-width:0"></select>
+        <input id="adCount" type="number" min="1" max="72" value="24" style="width:60px" title="${esc(T("acInReg"))}"></div>
+      <div class="row" style="margin-top:4px"><select id="adBase" style="flex:1;min-width:0"></select>
+        <input id="adRadius" type="number" min="0" step="50" placeholder="${esc(T("radius"))}" style="width:90px" title="${esc(T("radiusTip"))}"></div>
+      <div class="row" style="margin-top:4px"><button id="adOk">${T("addOwn")}</button></div>
+      <div class="meta">${T("nextDay")}</div></div>`;
+    const fill = () => {
+      const heli = $("#adRole").selectedOptions[0].dataset.cat === "heli", side = $("#adSide").value;
+      $("#adType").innerHTML = o.types.filter(t => t.heli === heli).map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+      $("#adBase").innerHTML = o.bases[side].filter(b => heli || !b.farp).map(b => `<option value="${esc(b.id)}">${b.farp ? T("farp") : ""}${esc(b.name)}</option>`).join("");
+    };
+    $("#adRole").onchange = fill; $("#adSide").onchange = fill; fill();
+    if ($("#adCatOk")) $("#adCatOk").onclick = ev => act("addunit", {catalog: $("#adCat").value}, ev.target);
+    $("#adOk").onclick = ev => act("addunit", {name: $("#adName").value, side: $("#adSide").value, role: $("#adRole").value,
+      type: $("#adType").value, count: $("#adCount").value, base: $("#adBase").value, radius: $("#adRadius").value}, ev.target);
+  };
+  p.querySelectorAll(".ui").forEach(b => b.onclick = async e => {     // лётчики полка и ливрея
+    const it = e.target.closest(".item"), f = it.querySelector(".uiForm");
+    if (f.innerHTML) { f.innerHTML = ""; return; }
+    let o;
+    try { o = (await api("unitinfo", {file: FILE, id: it.dataset.id})).info; } catch (x) { return out(x.message, true); }
+    const opts = o.liveries.map(l => `<option value="${esc(l.id)}" ${l.id === o.livery ? "selected" : ""}>${esc(l.name)}</option>`).join("");
+    f.innerHTML = `<div class="d" style="margin-top:6px"><b>${T("regLivery")}</b> ${T("regLiveryTip")}</div>
+      <div class="row" style="margin-top:4px">${o.liveries.length ? `<select class="lvSel" style="flex:1;min-width:0"><option value="">${T("dcsDefault")}</option>${opts}</select>` :
+        `<input class="lvIn" value="${esc(o.livery)}" placeholder="${esc(T("liveryFolder"))}" style="flex:1;min-width:0">`}<button class="lvOk">${T("set")}</button></div>
+      <div class="d" style="margin-top:6px"><b>${T("pilots")}</b> (${o.pilots.length}; ${T("pilotsTip")})</div>
+      <div class="d">${o.pilots.map(x => `${esc(x.name)}${x.sorties ? ` · ${x.sorties} ${T("sorties")}` : ""}`).join("<br>")}</div>
+      ${o.down.length ? `<div class="d" style="margin-top:4px"><b>${T("onGround")}</b> ${o.down.map(esc).join(", ")}</div>` : ""}
+      ${o.lost.length ? `<div class="d" style="margin-top:4px"><b>${T("lost")}</b> ${o.lost.map(x => `${esc(x.name)} - ${esc(x.how)}, ${T("dayN")} ${x.day}`).join("; ")}</div>` : ""}`;
+    f.querySelector(".lvOk").onclick = ev => act("setlivery", {id: it.dataset.id, livery: (f.querySelector(".lvSel") || f.querySelector(".lvIn")).value}, ev.target);
+  });
+  p.querySelectorAll(".rb").forEach(b => b.onclick = async e => {     // режим командующего: перебазирование
+    const it = e.target.closest(".item"), f = it.querySelector(".rbForm");
+    if (f.innerHTML) { f.innerHTML = ""; return; }
+    let o;
+    try { o = (await api("rebaseoptions", {file: FILE, id: it.dataset.id})).options; } catch (x) { return out(x.message, true); }
+    f.innerHTML = `<div class="row" style="margin-top:4px"><select class="rbSel" style="flex:1;min-width:0">
+      <option value="${esc(o.id)}" disabled selected>${T("now")}: ${esc(o.base)} (${o.front_km} km ${T("toEnemy")})</option>` +
+      o.options.map(x => `<option value="${esc(x.id)}">${x.farp ? T("farp") : ""}${esc(x.name)} · ${T("toEnemy")} ${x.front_km} km · ${x.km} ${T("kmFromHere")} · ${x.helos != null ? `${T("helosUpTo")} ${x.helos}` : `${T("slots")} ${x.free}`}</option>`).join("") +
+      `</select><button class="main rbGo">${T("order")}</button>${o.pending ? `<button class="rbNo">${T("cancel")}</button>` : ""}</div>`;
+    f.querySelector(".rbGo").onclick = ev => { const v = f.querySelector(".rbSel").value; if (v && v !== o.id) act("rebase", {id: it.dataset.id, base: v}, ev.target); };
+    const no = f.querySelector(".rbNo");
+    if (no) no.onclick = ev => act("rebase", {id: it.dataset.id, base: "__cancel__"}, ev.target);
+  });
 }
 
 // ---------- режим командующего: правка плана полётов (command.py) ----------
@@ -492,16 +906,16 @@ async function atoEditor(it) {
   if (f.innerHTML) { f.innerHTML = ""; return; }
   let o;
   try { o = (await api("atooptions", {file: FILE, id: it.dataset.id})).options; } catch (e) { return out(e.message, true); }
-  const perfOpt = (g, sel) => g.performers.map(x => `<option value="${esc(x.id)}" ${x.id === sel ? "selected" : ""}>${esc(x.name)} · ${esc(x.type)} · ${esc(x.base)} · к вылету ${x.available}</option>`).join("");
+  const perfOpt = (g, sel) => g.performers.map(x => `<option value="${esc(x.id)}" ${x.id === sel ? "selected" : ""}>${esc(x.name)} · ${esc(x.type)} · ${esc(x.base)} · ${T("avail")} ${x.available}</option>`).join("");
   const loOpt = (g, pid, sel) => { const x = g.performers.find(q => q.id === pid) || {loadouts: []};
-    return `<option value="">по задаче (автоматически)</option>` + x.loadouts.map(c => `<option value="${esc(c)}" ${c === sel ? "selected" : ""}>${esc(c.startsWith("rt:") ? c.slice(3) + " (Retribution)" : c)}</option>`).join(""); };
+    return `<option value="">${T("auto")}</option>` + x.loadouts.map(c => `<option value="${esc(c)}" ${c === sel ? "selected" : ""}>${esc(c.startsWith("rt:") ? c.slice(3) + " (Retribution)" : c)}</option>`).join(""); };
   f.innerHTML = `<div style="border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:6px">
-    <div class="row"><span class="meta" style="margin:0">на объекте</span><input class="tot" value="${esc(o.tot)}" style="width:70px"></div>` +
+    <div class="row"><span class="meta" style="margin:0">${T("tot")}</span><input class="tot" value="${esc(o.tot)}" style="width:70px"></div>` +
     o.groups.map(g => `<div class="grp" data-g="${esc(g.group)}" style="margin-top:6px"><div class="d">${esc(g.title)}</div>
       <div class="row"><select class="perf" style="flex:1;min-width:0">${perfOpt(g, g.performer)}</select>
-      <input class="size" type="number" min="1" max="4" value="${g.size}" style="width:52px" title="бортов">
+      <input class="size" type="number" min="1" max="4" value="${g.size}" style="width:52px" title="${esc(T("seats"))}">
       <select class="lo">${loOpt(g, g.performer, g.loadout)}</select></div></div>`).join("") +
-    `<div class="row" style="margin-top:6px"><button class="main save">Применить</button><button class="cancel">Отмена</button></div></div>`;
+    `<div class="row" style="margin-top:6px"><button class="main save">${T("apply")}</button><button class="cancel">${T("cancel")}</button></div></div>`;
   f.querySelectorAll(".grp").forEach(el => { const g = o.groups.find(q => q.group === el.dataset.g);
     el.querySelector(".perf").onchange = e => { el.querySelector(".lo").innerHTML = loOpt(g, e.target.value, ""); }; });
   f.querySelector(".cancel").onclick = () => { f.innerHTML = ""; };
@@ -515,13 +929,13 @@ async function atoEditor(it) {
 async function atoCands() {
   const box = $("#atoCands");
   if (box.innerHTML) { box.innerHTML = ""; return; }
-  box.innerHTML = `<p class="meta">Ищу задачи...</p>`;
+  box.innerHTML = `<p class="meta">${T("searching")}</p>`;
   let c;
   try { c = (await api("atocands", {file: FILE})).cands; } catch (e) { box.innerHTML = ""; return out(e.message, true); }
-  box.innerHTML = `<h4>Задачи вне плана (${c.length})</h4>` + (c.length ? "" : `<p class="meta">Планировщик больше ничего не находит.</p>`) +
-    c.map(t => `<div class="item" data-key="${esc(t.key)}"><b>${esc(t.title)}</b><div class="d">${t.km} км от ${esc(t.base)}</div>
+  box.innerHTML = `<h4>${T("outOfPlan")} (${c.length})</h4>` + (c.length ? "" : `<p class="meta">${T("nothingMore")}</p>`) +
+    c.map(t => `<div class="item" data-key="${esc(t.key)}"><b>${esc(t.title)}</b><div class="d">${t.km} ${T("fromBase")} ${esc(t.base)}</div>
       <div class="d">${t.groups.map(esc).join("<br>")}</div>
-      <div class="row" style="margin-top:4px"><input class="tot" placeholder="ЧЧ:ММ" title="время на объекте; пусто - первое, когда хватает самолётов" style="width:70px"><button class="put">Поставить</button></div></div>`).join("");
+      <div class="row" style="margin-top:4px"><input class="tot" placeholder="${T("hhmm")}" title="${esc(T("totTip"))}" style="width:70px"><button class="put">${T("put")}</button></div></div>`).join("");
   box.querySelectorAll(".put").forEach(b => b.onclick = e => { const it = e.target.closest(".item");
     act("atoadd", {key: it.dataset.key, tot: it.querySelector(".tot").value.trim()}, e.target); });
 }
@@ -529,8 +943,8 @@ async function atoCands() {
 async function loadInfo() {
   INFO = await api("info");
   const c = INFO.campaigns;
-  $("#camp").innerHTML = c.length ? c.map(x => `<option value="${esc(x.file)}">${esc(x.file)} · день ${x.day}${x.ok ? "" : " (старая версия)"}</option>`).join("")
-                                  : `<option value="">нет кампаний</option>`;
+  $("#camp").innerHTML = c.length ? c.map(x => `<option value="${esc(x.file)}">${esc(x.file)} · ${T("day")} ${x.day}${x.ok ? "" : T("oldVer")}</option>`).join("")
+                                  : `<option value="">${T("noCamps")}</option>`;
   if (FILE && c.some(x => x.file === FILE)) $("#camp").value = FILE;
   else FILE = c.length ? c[0].file : "";
   $("#nTh").innerHTML = INFO.theatres.map(t => `<option value="${esc(t.id)}">${esc(t.title)}</option>`).join("");
@@ -544,25 +958,51 @@ function fillPresets() {
 function fillVariants() {
   const t = theatre(), p = t.presets.find(x => x.file === $("#nPreset").value);
   const vs = p ? p.variants : t.variants;
-  $("#nVar").innerHTML = `<option value="">случайный (по seed)</option>` + vs.map(v => `<option value="${esc(v.name)}">${esc(v.title)}</option>`).join("");
+  $("#nVar").innerHTML = `<option value="">${T("randomVar")}</option>` + vs.map(v => `<option value="${esc(v.name)}">${esc(v.title)}</option>`).join("");
 }
 async function loadState() {
   ST = null;
   if (FILE) { try { ST = (await api("state?file=" + encodeURIComponent(FILE))).state; } catch (e) { out(e.message, true); } }
-  SEL = 0; fitted = false; render();
+  if (ST && ST.lang !== LANG) {                        // язык окна - и для брифинга кампании
+    try { ST = (await api("setlang", {file: FILE, lang: LANG})).state; } catch (e) { out(e.message, true); }
+  }
+  SEL = 0; SELID = null; SORTIE = null; SELHTML = null; fitted = false; render();
+  if (ST && ST.tasks.length && ST.tasks[0].ato_id) selectSortie(ST.tasks[0].ato_id);
 }
 
-$("#camp").onchange = () => { FILE = $("#camp").value; localStorage.setItem("rf_file", FILE); loadState(); };
+$("#camp").onchange = () => { FILE = $("#camp").value; setPref("rf_file", FILE); loadState(); };
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b.dataset.tab; render(); });
-$("#bPlan").onclick = e => { SEL = 0; TAB = "plan"; act("plan", {}, e.currentTarget); };
-$("#bBuild").onclick = e => { TAB = "plan"; act("build", {task: SEL + 1, fly: (document.querySelectorAll(".task .fly")[SEL] || {}).value || "strike", humans: (document.querySelectorAll(".task .hum")[SEL] || {}).value || 1, budget: ($("#budget") || {}).value}, e.currentTarget); };
+$("#bPlan").onclick = async e => { SEL = 0; TAB = "sorties"; SELID = null; await act("plan", {}, e.currentTarget);
+  if (ST && ST.tasks.length && ST.tasks[0].ato_id) selectSortie(ST.tasks[0].ato_id); };
+$("#bBuild").onclick = e => { act("build", {task: SEL + 1, fly: ($("#insp .fly") || {}).value || "strike",
+  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", "")}, e.currentTarget); };
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
-$("#bEnd").onclick = e => { if (confirm("Закончить день? Модель сделает ход, план дня сбросится.")) act("endday", {}, e.currentTarget); };
+$("#bEnd").onclick = e => { if (confirm(T("endQ"))) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();
+$("#bHelp").onclick = () => $("#dHelp").showModal();
+$("#bSet").onclick = () => {
+  $("#sLang").value = LANG;
+  $("#sBudget").value = pref("rf_budget", "") || (ST ? ST.budget : "");
+  $("#sEnemy").checked = pref("rf_ato_enemy", "0") === "1";
+  $("#dSet").showModal();
+};
+$("#sLang").onchange = async e => {
+  LANG = e.target.value; setPref("rf_lang", LANG); applyStatic(); layerControl();
+  if (FILE && ST) await act("setlang", {lang: LANG}); else render();
+  if (INFO) { const keep = FILE; await loadInfo(); FILE = keep; }
+};
+$("#sBudget").onchange = e => setPref("rf_budget", e.target.value);
+$("#sEnemy").onchange = e => { setPref("rf_ato_enemy", e.target.checked ? "1" : "0"); render(); };
+window.addEventListener("resize", () => map.invalidateSize());
+$("#bProbe").onclick = e => act("mapprobe", {}, e.target);
+$("#bApply").onclick = e => act("mapapply", {}, e.target);
+$("#bRProbe").onclick = e => act("roadsprobe", {}, e.target);
+$("#bRApply").onclick = e => act("roadsapply", {}, e.target);
+$("#bImport").onclick = e => act("mapimport", {miz: $("#miz").value.trim()}, e.target);
 $("#nTh").onchange = fillPresets;
 $("#nPreset").onchange = fillVariants;
 $("#bCopy").onclick = async () => {
-  const name = prompt("Имя копии пресета (файл presets/<имя>.json):", ($("#nPreset").selectedOptions[0] || {}).text?.split(" (")[0] + " мой");
+  const name = prompt(T("copyName"), ($("#nPreset").selectedOptions[0] || {}).text?.split(" (")[0] + T("mine"));
   if (!name) return;
   await act("presetcopy", {theatre: $("#nTh").value, preset: $("#nPreset").value, name: name.trim()});
   const keep = $("#nTh").value; await loadInfo(); $("#nTh").value = keep; fillPresets();
@@ -572,8 +1012,8 @@ $("#dNew").addEventListener("close", () => {
   act("new", {file: $("#nFile").value.trim(), theatre: $("#nTh").value, preset: $("#nPreset").value, side: $("#nSide").value, variant: $("#nVar").value, seed: $("#nSeed").value.trim(),
               norandom: $("#nNoRand").checked, overwrite: $("#nOver").checked}).then(loadState);
 });
-(async () => { try { await loadInfo(); } catch (e) { out(e.message, true); } await loadState();
-  out("Готово. Цикл дня: План → Миссия → (полёт в DCS) → Дебриф → Конец дня."); })();
+applyStatic(); layerControl();
+(async () => { try { await loadInfo(); } catch (e) { out(e.message, true); } await loadState(); out(T("ready0")); })();
 </script>
 </body>
 </html>
