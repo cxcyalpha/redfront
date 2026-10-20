@@ -254,6 +254,33 @@ enemy is. Reserves arrive on their day (`arrives_day`). Coefficients are estimat
 — loss spread, in offense — weighted choice of direction. Everything is repeatable with `--seed`; `--variant NAME` —
 explicit variant; `--no-random` — no randomness. Coefficients are estimates (`random_note`).
 
+### Doctrinal operational techniques
+
+Parameters live in the doctrine `sim` section (estimates based on Ionin "Tactics" 1987, Savkin 1972, Donnelly
+"Red Banner" 1988; FM 100-5 1982/1986, FM 71-100 1990, RAND R-3385). Decisions are taken every 6 h together with the
+side commanders (`ops.py`).
+
+* **Artillery in combat** (both sides): unit power ×(1 + `artillery_factor` (0.25) × share of serviceable guns in its
+  supporting battery). Guns destroyed in a mission weaken the unit in the model too.
+* **Prepared defence** (both sides): a unit defending without contact digs in; after `prepared_h` (12 h) its combat
+  losses are ×`prepared_factor` (Warsaw Pact 0.75, NATO 0.65 — emphasis on prepared lines). A new route resets it.
+* **Assault river crossing:** a destroyed major bridge closes supply but not manoeuvre — units cross with a delay
+  (path longer by `crossing_km`: WP 30, NATO 40; march on that link ×`crossing_slow`).
+* **WP — forward detachment:** the strongest free unit (strength 85%+) is sent to a line in depth (`forward_depth`
+  places beyond the front on the way to the operation's objective) and moves faster than the main body (×1.5). One per side.
+* **WP — second echelon committed in the sector of success:** arriving reserves enter not at their pre-assigned area
+  but behind the own front place (within 100 km of it) where own forces are strongest relative to the enemy; a single
+  sector is not flooded.
+* **WP — operational manoeuvre group:** from day `omg_from_day` (2), after a breakthrough (an enemy front place with no
+  enemy units within 15 km) a strong free unit drives into depth towards the nearest enemy depot or bridge (×1.3). A
+  captured place with a depot means the depot is lost to the enemy (its supply stops).
+* **NATO — covering force / delay:** a defending unit facing an enemy twice as strong, with strength below 80%, falls
+  back to the next line instead of fighting to destruction.
+* **NATO — counterattack by reserves:** a strong free unit strikes an enemy unit that has penetrated into own
+  territory if it is 1.2 times stronger and within 60 km.
+* **Tempo:** the daily log shows places taken and the furthest advance of the attacking side's units against the
+  doctrine norm (`tempo_km`, WP ~40 km/day).
+
 ### Hourly ground model
 
 Ground model (`sim.py`, coefficients in the doctrine `sim` section, estimates): units follow routes until contact

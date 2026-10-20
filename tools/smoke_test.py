@@ -2994,8 +2994,9 @@ def nato_section(tmp: Path) -> None:
     check(all(pilots.nation(st["units"][g["performer"]]) == "us" for g in sead + [g for t in reg for g in t["package"] if g["group"] == "kill"]),
           f"подавление ПВО - только части США ({len(sead)} групп), союзники - без него")
     hk = [t for t in reg if any(g["group"] == "kill" for g in t["package"])]
-    pk_ = {g["group"]: g for g in hk[0]["package"]} if hk else {}
-    check(hk and pk_["sead"]["performer"] == "b_52tfw" and pk_["kill"]["performer"] == "b_52tfw_f16"
+    hk52 = [t for t in hk if {g["group"]: g["performer"] for g in t["package"]}.get("sead") == "b_52tfw"]
+    pk_ = {g["group"]: g for g in hk52[0]["package"]} if hk52 else {}
+    check(hk52 and pk_["sead"]["performer"] == "b_52tfw" and pk_["kill"]["performer"] == "b_52tfw_f16"
           and pk_["sead"]["objective"]["units"] == pk_["kill"]["objective"]["units"],
           "hunter-killer: пара поиска с ПРР - 52-е крыло (F-4E вместо F-4G), пара добивания - F-16C того же крыла, по тем же ЗРК")
     st90 = model.new_campaign("nato90", sector="sector_germany.json", oob="oob_germany.json", seed=7)
@@ -3315,6 +3316,33 @@ def formations_section(tmp: Path) -> None:
           "часть в бою: боевой порядок по доктрине и батарея поддержки за ним")
 
 
+def ground_ops_section(tmp: Path) -> None:
+    """Оперативные приёмы в модели: передовой отряд, ввод второго эшелона в полосе успеха, ОМГ (ОВД), сдерживание
+    (НАТО), темп; артиллерия и подготовленная оборона в бою; форсирование разрушенного моста."""
+    from redfront import ops
+    print("\n== оперативные приёмы ==")
+    st = model.new_campaign("gops", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    log = []
+    for _ in range(6):
+        log += sim.end_day(st)
+    has = lambda k: any(k in ln for ln in log)
+    check(has("передовой отряд") and has("полосе успеха") and has("маневренная группа") and has("сдерживание") and has("Темп наступления"),
+          "6 суток: передовой отряд, ввод вторых эшелонов в полосе успеха, ОМГ после прорыва (ОВД); сдерживание - отход на следующий рубеж (НАТО); темп в журнале")
+    u = next(x for x in sim._maneuver(st) if x["side"] == "red" and x.get("role") != "air_assault")
+    a0 = sim.artillery_k(st, u)
+    u["art_lost"] = materialize.ART_GUNS
+    check(a0 > 1.0 and sim.artillery_k(st, u) == 1.0, f"артиллерия в бою: сила части x{a0:.2f}, без орудий - x1.0")
+    u.pop("art_lost")
+    br = next(b for b in st["units"].values() if model.category(b) == "bridge" and not b.get("minor") and not b.get("found") and b.get("links"))
+    a_, b_ = br["links"][0]
+    br["damage"] = 1.0
+    closed = b_ not in ops.graph(st).get(a_, {})
+    ops._CROSS = "red"
+    crossing = b_ in ops.graph(st).get(a_, {})
+    ops._CROSS = None
+    check(closed and crossing, f"мост {br['name']} разрушен: подвоз закрыт, части форсируют с ходу (путь длиннее на crossing_km)")
+
+
 def gui_planner_section(tmp: Path) -> None:
     """Окно: матрица синхронизации и маршруты выбранного вылета (gui.matrix, gui.sortie), английский язык."""
     from redfront import gui
@@ -3341,7 +3369,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section]
 
 
 def main() -> int:

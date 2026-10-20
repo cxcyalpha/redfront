@@ -2424,6 +2424,11 @@
     },
     "sim_note": "Абстрактный бой за сутки (ОЦЕНКИ, не из документа): части противоположных сторон ближе contact_km - в соприкосновении (battle). Потери за сутки = battle_loss_k * (сила противника / своя сила), не больше loss_cap; у обороняющегося x defend_factor. Сила - сумма исправной техники с весами role_weight. Ниже combat_ineffective_below часть выходит из боя (halted). Марш - шагами step_km, до соприкосновения. В миссии части в бою стоят линиями в line_offset_km от середины между ними.",
     "posture": "defense",
+    "artillery_factor": 0.25,
+    "prepared_h": 12,
+    "prepared_factor": 0.65,
+    "crossing_km": 40,
+    "crossing_slow": 0.3,
     "attack_min_strength": 0.7,
     "withdraw_below": 0.6,
     "refit_rate": 0.15,
@@ -2473,7 +2478,13 @@
     "crews_note": "Экипажи (ОЦЕНКИ, не из документа): у полка crew_ratio экипажей на самолёт штата; к вылету - не больше экипажей. Сбит без катапультирования - экипаж погиб; катапультировался - на земле (downed), пока не спасён (CSAR), не вышел к своим (на своей территории - на следующие сутки) или не попал в плен (на территории противника - capture_per_day в сутки, через downed_max_days суток - пропал без вести). Пополнение - crews_per_day экипажей в сутки до штата.",
     "night_march": 0.6,
     "night_battle": 0.5,
-    "night_note": "Ночь - часы вне лётного дня (ato.FLYING_HOURS, 06-20). Ночью марш x night_march, потери в бою x night_battle (ОЦЕНКИ). Вылеты ночью - только типы с night в aircraft.json (ato.py)."
+    "night_note": "Ночь - часы вне лётного дня (ato.FLYING_HOURS, 06-20). Ночью марш x night_march, потери в бою x night_battle (ОЦЕНКИ). Вылеты ночью - только типы с night в aircraft.json (ato.py).",
+    "ground_ops_note": "Оперативные приёмы НАТО (ОЦЕНКИ по смыслу: FM 100-5 Operations 1982/1986, FM 71-100 Division Operations 1990; RAND R-3385): подготовленная оборона по рубежам (prepared_h, prepared_factor); сдерживание - часть в обороне против противника сильнее в delay_ratio раз при боеспособности ниже delay_min_strength отходит на следующий рубеж, не дожидаясь разгрома (covering force); контрудар резервом - свободная сильная часть бьёт по вклинившейся части противника, если сильнее её в counter_ratio раз; форсирование - инженерными средствами, медленнее, чем у ОВД.",
+    "delay_ratio": 2.0,
+    "delay_min_strength": 0.8,
+    "counterattack": true,
+    "counter_ratio": 1.2,
+    "counter_km": 60
   },
   "task_priority_note": "Порядок задач = приоритет плана дня: войска в соприкосновении и первый эшелон (CAS, BAI), затем борьба за господство в воздухе (DCA, OCA), подавление ПВО, затем вторые эшелоны и тыл (FOFA, AI). RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 41, 43: приоритеты ФРГ (ген. Альтенбург) - бой с первым эшелоном, ПВО, затем вторые эшелоны; англичане - CAS и BAI ближе к фронту.",
   "apportionment": {
