@@ -2146,7 +2146,7 @@
     },
     "qra": {
       "title": "Дежурство ПВО на аэродроме",
-      "performers": ["interceptor", "fighter", "fighter_bomber"],
+      "performers": ["interceptor", "fighter"],
       "target": {
         "category": "front"
       },

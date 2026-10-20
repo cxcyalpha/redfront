@@ -136,6 +136,7 @@ def plan(state: dict) -> dict | None:
             continue
         tasks.append({**copy.deepcopy(e["task"]), "ato_id": e["id"], "tot_s": e["tot_s"], "takeoff_s": t["takeoff_s"],
                       "night": bool(e.get("night"))})
+    tasks.sort(key=lambda t: t["takeoff_s"])     # по времени взлёта (вылеты плана идут не по порядку задач)
     state["tasks"] = tasks
     if not tasks:
         _t, reason = plan_side(state, state["player_side"])
@@ -331,7 +332,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             reasons.append(f"{tdef['title']}: целей нет")
     orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
     regular = apportion(state, doc, [t for t in tasks if not t.get("ai_only")], max_tasks)
-    return joint_heli(state, side, regular[:max_tasks]) + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
+    return joint_heli(state, side, _interleave(regular)[:max_tasks]) + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
 
 
 def orbit_point(state: dict, side: str, standoff_km: float) -> dict | None:
@@ -389,7 +390,8 @@ def alert_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[
     def air_ok(r):                               # истребители-бомбардировщики - если тип годится для боя в воздухе (F-16)
         return r["role"] in ("interceptor", "fighter") or \
             (fitness.relative(state, r.get("type", ""), "air") or 0) >= tdef.get("min_fit_air", 1.0)
-    for r in sorted((r for r in performers if logistics.available(state, r) >= s["size"] and air_ok(r)),
+    # на дежурство - части, у которых после него остаются самолёты на другие задачи (не меньше ещё одного звена)
+    for r in sorted((r for r in performers if logistics.available(state, r) >= 2 * s["size"] and air_ok(r)),
                     key=lambda r: front_km(state["airbases"][r["base"]])):
         if r["base"] in bases:
             continue
@@ -942,6 +944,20 @@ def clear_point(state: dict, side: str, p: dict, home: dict, step_km: float = 5,
             return {"lat": q["lat"], "lon": q["lon"]}
         k += step_km
     return {"lat": p["lat"], "lon": p["lon"]}
+
+
+def _interleave(tasks: list[dict]) -> list[dict]:
+    """Задачи по кругу видов (первая каждого вида, затем вторая...), порядок видов - как в доктрине: самолёты суток
+    расходятся на разные задачи, а не на пять ударов по аэродромам до прикрытия войск."""
+    by: dict[str, list[dict]] = {}
+    for t in tasks:
+        by.setdefault(t["kind"], []).append(t)
+    out = []
+    while any(by.values()):
+        for k in list(by):
+            if by[k]:
+                out.append(by[k].pop(0))
+    return out
 
 
 def feint_point(state: dict, perf: dict, ip: dict, g: dict, side: str) -> dict:

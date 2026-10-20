@@ -2340,8 +2340,7 @@
       "title": "Дежурство ПВО на аэродроме",
       "performers": [
         "interceptor",
-        "fighter",
-        "fighter_bomber"
+        "fighter"
       ],
       "target": {
         "category": "front"

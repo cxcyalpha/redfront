@@ -2575,6 +2575,9 @@ def command_section(tmp: Path) -> None:
     other = next(x for x in mine if x is not e and command.why_locked(st, x) is None
                  and perf["role"] in model.doctrine(st, "red")["tasks"][x["kind"]]["performers"]
                  and any(p_["id"] == perf["id"] for p_ in command.options(st, x["id"])["groups"][0]["performers"]))
+    # проверяется только пересечение двух вылетов (план суток плотный): прочие сняты, у второго - без групп обеспечения
+    a["entries"] = [x for x in a["entries"] if x is e or x is other or x["side"] != "red"]
+    other["task"]["package"] = other["task"]["package"][:1]
     try:
         command.edit(st, other["id"], tot="15:30", groups={"strike": {"performer": perf["id"], "size": 2}})
         why = ""
@@ -3199,11 +3202,17 @@ def push_qra_section(tmp: Path) -> None:
     qs, _w = planner.plan_side(st, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
     q = [t for t in qs if t["kind"] == "qra"]
     bases = [st["airbases"][t["base"]] for t in q]
-    check(len(q) >= 4 and all(t["group_size"] == 4 for t in q)
+    check(len(q) >= 3 and all(t["group_size"] == 4 for t in q)
           and all(model.dist_km(a, b) >= 80 for k, a in enumerate(bases) for b in bases[k + 1:]),
           f"дежурные звенья синих (4 ЛА) на {len(q)} аэродромах вдоль фронта: {', '.join(b['name'] for b in bases)}")
     types = {side: [g.units[0].unit_type.id for c in m.coalition[side].countries.values() for g in c.plane_group]
              for side in ("red", "blue")}
+    acn = {side: sum(len(g.units) for c in m.coalition[side].countries.values() for g in list(c.plane_group) + list(c.helicopter_group)
+                     if not any(x in g.name for x in ("awacs", "tanker", "qra"))) for side in ("red", "blue")}
+    check(min(acn.values()) >= build.BALANCE * max(acn.values()) - 4,
+          f"соотношение ЛА сторон в миссии (без дежурств): {acn} - не в разы")
+    check(all(st["units"][t["performer"]]["role"] in ("fighter", "interceptor") for t in q),
+          "на дежурстве - только истребительные и перехватывающие части")
     check("A-50" in types["red"] and "E-3A" in types["blue"] and "KC-135" in types["blue"],
           "в миссии ДРЛО обеих сторон (А-50, E-3A) и заправщик синих (KC-135; у ОВД фронтовой авиации заправщиков не было)")
 

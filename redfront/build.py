@@ -716,6 +716,7 @@ def _path_km(base: dict, route: list[dict]) -> float:
 AI_FLIGHTS = {"own": 3, "enemy": 4}   # ОЦЕНКА: сколько групп ИИ по плану дня в миссии - своих (кроме пакета игрока) и противника
 AI_RECON = 1                           # ОЦЕНКА: разведчиков каждой стороны в миссии (маршрут не дальше RECON_KM от цели игрока)
 RECON_KM = 150
+BALANCE = 0.6                          # ОЦЕНКА: ЛА стороны в миссии - не меньше этой доли от другой (если есть вылеты в окне)
 AI_AIRLIFT = 2                         # ОЦЕНКА: рейсов воздушной перевозки каждой стороны в миссии (ближние к удару игрока)
 
 
@@ -743,7 +744,10 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
     n = {False: 0, True: 0}
     nl = {False: 0, True: 0}
     nr = {False: 0, True: 0}
-    for e in sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank):
+    taken: set[str] = set()
+
+    def add(e, capped: bool = True) -> int:
+        """Вылет плана в миссию: число ЛА (0 - не ставится)."""
         enemy = e["side"] != tk["side"]
         okind = e["task"]["package"][0]["objective"]["kind"]
         lift = e["kind"] == "airlift" or okind == "airlift"
@@ -753,30 +757,30 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
             perf = state["units"][g["performer"]]
             if (model.dist_km(state["airbases"][g["base"]], tk["target_pos"]) > tdg.get("mission_km", 300)
                     or used.get(perf["id"], 0) + g["size"] > perf.get("count", 0)):
-                continue
+                return 0
             key = f"{'enemy' if enemy else 'ai'}_qra_{g['base']}"
             if key in times:
-                continue
+                return 0
             times[key] = {"start_s": 0, "late_s": 0, "objective_s": 0}
             used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
             g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
                       "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"], "_kind": e["kind"]})
             out.append(g)
-            continue
-        if not e["ai_only"] and n[enemy] >= AI_FLIGHTS["enemy" if enemy else "own"]:
-            continue
+            return g["size"]
+        if capped and not e["ai_only"] and n[enemy] >= AI_FLIGHTS["enemy" if enemy else "own"]:
+            return 0
         if lift and nl[enemy] >= AI_AIRLIFT:
-            continue
+            return 0
         rec = okind == "recon"                   # разведчик: один на сторону, маршрут рядом с районом удара игрока
         if rec and (nr[enemy] >= AI_RECON or min(model.dist_km(p, tk["target_pos"])
                                                    for p in e["task"]["package"][0]["route"]) > RECON_KM):
-            continue
+            return 0
         etask = copy.deepcopy(e["task"])
         planner.refresh(state, etask)            # цель группы ИИ - на её место к времени миссии
         g = dict(etask["package"][0])
         perf = state["units"][g["performer"]]
         if g["size"] <= 0 or used.get(perf["id"], 0) + g["size"] > perf.get("count", 0):
-            continue
+            return 0
         tdg = model.doctrine(state, e["side"])["tasks"][e["kind"]]
         t = e["times"][g["group"]]
         if e["ai_only"] and not lift and not rec:
@@ -786,7 +790,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
         else:
             take, obj = t["takeoff_s"] - m0, t["objective_s"] - m0
             if take < 0 and obj <= 60:
-                continue                         # уже над объектом (перевозка - садится) или возвращается - не ставится
+                return 0                         # уже над объектом (перевозка - садится) или возвращается - не ставится
             if lift:
                 nl[enemy] += 1
                 key = f"{'enemy' if enemy else 'ai'}_lift{nl[enemy]}"
@@ -807,6 +811,27 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
         g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
                   "title": f"{'противник' if enemy else 'ИИ'}: {e['title']}", "_ato": e["id"], "_kind": e["kind"]})
         out.append(g)
+        return g["size"]
+    cands = sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank)
+    count = {False: sum(g["size"] for g in tk["package"]), True: 0}   # ЛА в миссии: свои (с пакетом игрока), противника
+    for e in cands:
+        k = add(e)
+        if k:
+            taken.add(e["id"])
+            if e["task"]["package"][0]["objective"]["kind"] not in ("alert", "orbit"):
+                count[e["side"] != tk["side"]] += k
+    # соотношение сил в миссии: у стороны с меньшим числом ЛА - ещё вылеты её плана в окне (сверх лимита групп),
+    # пока не наберётся BALANCE от другой стороны (ОЦЕНКА; иначе 14 своих против двух Tornado)
+    for weak in (True, False):
+        for e in cands:
+            if count[weak] >= BALANCE * count[not weak]:
+                break
+            if e["id"] in taken or (e["side"] != tk["side"]) != weak:
+                continue
+            k = add(e, capped=False)
+            if k:
+                taken.add(e["id"])
+                count[weak] += k
     return out
 
 
