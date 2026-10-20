@@ -136,7 +136,7 @@ def plan(state: dict) -> dict | None:
             continue
         tasks.append({**copy.deepcopy(e["task"]), "ato_id": e["id"], "tot_s": e["tot_s"], "takeoff_s": t["takeoff_s"],
                       "night": bool(e.get("night"))})
-    tasks.sort(key=lambda t: t["takeoff_s"])     # по времени взлёта (вылеты плана идут не по порядку задач)
+    tasks.sort(key=lambda t: t["tot_s"])         # по времени удара (одно на вылет; взлёт у групп пакета - разный)
     state["tasks"] = tasks
     if not tasks:
         _t, reason = plan_side(state, state["player_side"])

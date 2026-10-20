@@ -1503,8 +1503,8 @@ def ato_section(tmp: Path) -> None:
     check(len(v["ato"]) == len(a["entries"]) and enemy_rows and all(r["takeoff"] and r["groups"] for r in v["ato"]),
           f"окно: вкладка ATO - вылеты обеих сторон ({len(v['ato'])}, противника {len(enemy_rows)} - показ по галочке отладки)")
     tk = st["tasks"]
-    check(tk and [t["takeoff_s"] for t in tk] == sorted(t["takeoff_s"] for t in tk) and not any(t.get("ai_only") for t in tk),
-          f"игроку - вылеты своей стороны по времени ({len(tk)}: {ato.hhmm(tk[0]['takeoff_s'])} ... {ato.hhmm(tk[-1]['takeoff_s'])})")
+    check(tk and [t["tot_s"] for t in tk] == sorted(t["tot_s"] for t in tk) and not any(t.get("ai_only") for t in tk),
+          f"игроку - вылеты своей стороны по времени удара ({len(tk)}: {ato.hhmm(tk[0]['tot_s'])} ... {ato.hhmm(tk[-1]['tot_s'])})")
     air = None
     for n in range(1, len(tk) + 1):
         man = build.build(st, tmp / "ato.miz", task_no=n)
@@ -3150,7 +3150,9 @@ PUSH_MOCK = """
 T = 0; FLAGS = {}; CMDS = {}; H = {}; SCHED = nil; ALIVE = {}
 world = { event = { S_EVENT_SHOT = 1 }, addEventHandler = function(h) H[#H + 1] = h end }
 timer = { getTime = function() return T end, scheduleFunction = function(f, a, t) SCHED = f end }
-trigger = { action = { setUserFlag = function(f, v) FLAGS[f] = v end } }
+TEXTS = {}
+trigger = { action = { setUserFlag = function(f, v) FLAGS[f] = v end,
+                       outTextForCoalition = function(side, t, d) TEXTS[#TEXTS + 1] = t end } }
 env = { info = function() end }
 local function grp(n)
   return { isExist = function() return true end, getName = function() return n end,
@@ -3196,8 +3198,18 @@ def push_qra_section(tmp: Path) -> None:
     G2 = run([f'for _, h in ipairs(H) do h:onEvent({{ id = 1, initiator = {{ getGroup = function() return {{ getName = function() return "{sead_name}" end }} end }} }}) end'])
     G3 = run([f'ALIVE["{sead_name}"] = false; T = 20000; SCHED()'])   # подавление сбито, не выстрелив - отмена
     check(G1.REDFRONT_PUSH["push-" + str(man["sortie"])] == "deadline" and G2.REDFRONT_PUSH["push-" + str(man["sortie"])] == "sead"
-          and G3.REDFRONT_PUSH["push-" + str(man["sortie"])] == "abort" and G3.CMDS[1] and G3.FLAGS[build.PUSH_FLAG],
-          "push.lua: пуск группы подавления - удар; подавление сбито, не выстрелив, - удар отменён (домой); нет пусков к сроку - удар")
+          and G3.REDFRONT_PUSH["push-" + str(man["sortie"])] == "abort" and G3.CMDS[1] and G3.FLAGS[build.PUSH_FLAG]
+          and "удар отменён" in G3.TEXTS[1] and "удар разрешён" in G2.TEXTS[1],
+          "push.lua: пуск группы подавления - удар; подавление сбито, не выстрелив, - удар отменён (домой); нет пусков к сроку - удар; сообщения своей стороне")
+    d_ = m.description_text()
+    pl = next(g for c in m.coalition["red"].countries.values() for g in c.plane_group
+              if g.units[0].skill in (dcs.unit.Skill.Client, dcs.unit.Skill.Player))
+    ch = (pl.units[0].radio or {}).get(1, {}).get("channels", {})
+    check("Связь:" in d_ and "К1 - тактическая группа" in d_ and ch and ch[1] == pl.frequency
+          and all(g.frequency == pl.frequency for c in m.coalition["red"].countries.values() for g in c.plane_group
+                  if g.name.split(" ")[1] in pk),
+          f"связь: каналы в радиостанции {pl.units[0].unit_type.id} игрока прописаны (К1 {ch.get(1)} - частота пакета, К2 {ch.get(2)} - ДРЛО), "
+          "все группы пакета на частоте К1, карточка связи и позывные - в брифинге")
     # дежурные звенья: вдоль фронта, у синих - и ближние к фронту истребители-бомбардировщики (F-4F, F-16)
     qs, _w = planner.plan_side(st, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
     q = [t for t in qs if t["kind"] == "qra"]

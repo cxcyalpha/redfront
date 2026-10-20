@@ -311,7 +311,7 @@ def push_script(campaign_id: str, sortie: int, spec: dict) -> str:
     подавления (имя, взлёт, с), флаг, срок (с от начала миссии)."""
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     lst = lambda xs, f=q: "{ " + ", ".join(f(x) for x in xs) + " }"
-    item = (f'{{ id = {q(spec["id"])}, flag = {spec["flag"]}, strikes = {lst(spec["strikes"])}, ip = {lst(spec["ip"], str)}, '
+    item = (f'{{ id = {q(spec["id"])}, side = {spec["side"]}, title = {q(spec["title"])}, flag = {spec["flag"]}, strikes = {lst(spec["strikes"])}, ip = {lst(spec["ip"], str)}, '
             f'home = {lst(spec["home"], str)}, sead = {lst(spec["sead"])}, sead_start = {lst(spec["sead_start"], str)}, '
             f'deadline = {int(spec["deadline"])} }}')
     return (PUSH_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
@@ -863,6 +863,47 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
     return fg
 
 
+def _callsign(u) -> str:
+    d = getattr(u, "callsign_dict", None)
+    if isinstance(d, dict) and d.get("name"):
+        return d["name"][:-1] if d["name"][-1:].isdigit() else d["name"]   # Enfield11 -> Enfield1 (группа)
+    c = getattr(u, "callsign", None)
+    return str(c) if c else ""
+
+
+def radio_setup(m: Mission, state: dict, tk: dict, pkg: list[dict], sortie: int, player_air) -> list[str]:
+    """Связь (comms.py): частоты групп (пакет игрока - одна частота, ДРЛО - своя), каналы радиостанций ЛА игрока,
+    карточка связи и позывные групп для брифинга."""
+    from . import comms
+    from dcs.unit import Skill as _Sk
+    nets = comms.plan(sortie, *(player_air or (None, None)))
+    keys = {x["group"]: x for x in pkg}
+    titles = []
+    channels = False
+    for side in ("red", "blue"):
+        band = comms.PRIMARY[side]
+        i = 0
+        for c in m.coalition[side].countries.values():
+            for grp in list(c.plane_group) + list(c.helicopter_group):
+                parts = grp.name.split(" ")
+                key = parts[1] if len(parts) >= 3 else ""
+                if side == tk["side"] and key in keys:
+                    grp.frequency = nets["pkg"][band]
+                    titles.append(f"{keys[key]['title']} - позывной {_callsign(grp.units[0])}")
+                elif "awacs" in grp.name:
+                    grp.frequency = nets["awacs"][band]
+                else:
+                    i += 1
+                    grp.frequency = comms.net(3 + sortie * 3 + 1 + i)[band]
+                for u in grp.units:
+                    if u.skill in (_Sk.Client, _Sk.Player):
+                        channels = comms.set_presets(u, nets) or channels
+    out = comms.card(nets, tk["side"], channels)
+    if not channels:
+        out.append("каналы у этого типа в DCS не настраиваются - частоты выставить вручную")
+    return out + titles
+
+
 def package_order(pkg: list[dict], times: dict) -> list[str]:
     """Брифинг: сбор пакета (место, время каждой группы) и порядок выхода на объекты относительно удара (T)."""
     out = []
@@ -1015,9 +1056,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     enemy = air_activity(state, tk, times, sortie, m0)
     # удар по готовности подавления ПВО (push.lua): ударные группы ИИ ждут на ИПМ пусков ПРР
     sead_g = [x for x in pkg if x["objective"]["kind"] == "sam" and support.get(x.get("support_id"), {}).get("mode") != "kill"]
-    push_spec = {"id": f"push-{sortie}", "flag": PUSH_FLAG, "strikes": [], "ip": [], "home": [], "deadline": 0,
+    push_spec = {"id": f"push-{sortie}", "side": 1 if tk["side"] == "red" else 2, "title": tk["title"], "flag": PUSH_FLAG, "strikes": [], "ip": [], "home": [], "deadline": 0,
                  "sead": [f"{x['performer']} {x['group']} {sortie}" for x in sead_g],
                  "sead_start": [times[x["group"]]["start_s"] for x in sead_g]}
+    player_air = None
     for g in pkg + enemy:
         tdg = g.get("_tdef") or (model.doctrine(state, g.get("_side", tk["side"]))["tasks"].get(g["jaat_kind"]) if g.get("jaat_kind") else None) \
             or tdef                              # группы противника - по его пакету доктрины; вертолёты совместного удара - по своей
@@ -1083,6 +1125,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                                  maintask=mt, start_type=StartType.Runway, group_size=g["size"])
         _crew(state, fg, perf)
+        if is_player:
+            player_air = (airport, airport)          # аэродром посадки уточняется ниже (перевозка - другой)
         st_s = times[g["group"]]["start_s"]
         if not is_player and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
             while (base["airport"], st_s) in runway_slots:
@@ -1379,6 +1423,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(tgt, transit, "Цель")
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         _land(fg, land, spd)
+        if is_player:
+            player_air = (airport, land)
         if fg.name in push_spec["strikes"]:
             push_spec["home"].append(len(fg.points) - 1)
         t = times[g["group"]]
@@ -1492,11 +1538,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода
     m.triggerrules.triggers.append(trig)
 
+    comm_lines = radio_setup(m, state, tk, pkg, sortie, player_air)
     order_lines = package_order(pkg, times)
     m.set_description_text(
         f"{tk['title']}\n\nДень {state['day']}" + (", НОЧНОЙ ВЫЛЕТ" if _ato_night(state, m0) else "")
         + ". Тактическая группа:\n" + "\n".join(f"- {ln}" for ln in lines)
         + (("\nПорядок действий группы:\n" + "\n".join(f"- {ln}" for ln in order_lines)) if order_lines else "")
+        + (("\n\nСвязь:\n" + "\n".join(f"- {ln}" for ln in comm_lines)) if comm_lines else "")
         + f"\n\nУдаление цели: {tk['distance_km']:.0f} км. Угрозы на маршруте: "
         + (", ".join(state['units'][t]['name'] for t in tk['threats']) or "не выявлены")
         + (f"\nЗамечания планировщика: {tk['package_notes']}" if tk.get("package_notes") else "")

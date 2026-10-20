@@ -4,7 +4,12 @@
 -- на точку посадки). Пусков нет к сроку (РЛС ЗРК молчат) - удар по сроку. Итог - REDFRONT_PUSH (хук пишет в дебриф).
 REDFRONT_PUSH = REDFRONT_PUSH or {}
 local CHECK_S = 5
-local SPECS = { @SPECS@ }   -- { id, flag, strikes = {}, ip = {}, home = {}, sead = {}, sead_start = {}, deadline }
+local SPECS = { @SPECS@ }   -- { id, side, title, flag, strikes = {}, ip = {}, home = {}, sead = {}, sead_start = {}, deadline }
+local SAY = {
+  sead = "подавление ПВО начало пуски - удар разрешён",
+  deadline = "пусков подавления нет, РЛС ПВО молчат - удар по времени",
+  abort = "группы подавления ПВО сбиты - удар отменён, ударным группам - домой",
+}
 
 local function alive(name)
   local g = Group.getByName(name)
@@ -30,6 +35,9 @@ local function push(s, how)
     end
   end
   trigger.action.setUserFlag(s.flag, true)
+  if trigger.action.outTextForCoalition then
+    trigger.action.outTextForCoalition(s.side, s.title .. ": " .. SAY[how], 15)
+  end
   env.info("redfront push: " .. s.id .. " - " .. how)
 end
 
