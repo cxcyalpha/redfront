@@ -267,32 +267,33 @@ const TAC = (() => {
   }
 
   // ---------- условные обозначения ----------
-  function legend(nato) {
+  function legend(nato, en) {
+    const t = (ru, eng) => en ? eng : ru;
     const g = (side, state, branch) => ({side, state, branch, strength: .8, supply: 1, abbr: "", echelon: "XX"});
     const only = h => h.replace(/<div class="ulbl[\s\S]*$/, "").replace('width="64" height="64"', 'width="36" height="36"');
     const row = (pic, txt) => `<div class="lg"><span class="lgp">${pic}</span><span>${txt}</span></div>`;
     const line = (c1, c2) => `<svg width="30" height="10"><path d="M2 3 H28" stroke="${c1}" stroke-width="3"/><path d="M2 7 H28" stroke="${c2}" stroke-width="3"/></svg>`;
     const arrow = c => `<svg width="30" height="12"><path d="M2 6 H22" stroke="${c}" stroke-width="3"/><path d="M28 6 L20 1 L20 11 Z" fill="${c}"/></svg>`;
-    if (nato) return row(only(unitNATO(g("blue", "defend", "tank"), true)), "свои: танковые (APP-6)") +
-      row(only(unitNATO(g("red", "defend", "mech"), false)), "противник: мотопехота") +
-      row(line(BLUE, RED), "линия фронта") + row(arrow(BLUE), "марш, наступление") +
-      row(airbase({side: "blue", state: "open"}), "аэродром") + row(target({role: "depot", side: "blue", stock: .6, checked: true}), "склад (заливка - запас)") +
-      row(target({role: "bridge", checked: true}), "мост");
+    if (nato) return row(only(unitNATO(g("blue", "defend", "tank"), true)), t("свои: танковые (APP-6)", "friendly: armour (APP-6)")) +
+      row(only(unitNATO(g("red", "defend", "mech"), false)), t("противник: мотопехота", "enemy: mechanised infantry")) +
+      row(line(BLUE, RED), t("линия фронта", "front line")) + row(arrow(BLUE), t("марш, наступление", "march, attack")) +
+      row(airbase({side: "blue", state: "open"}), t("аэродром", "airfield")) + row(target({role: "depot", side: "blue", stock: .6, checked: true}), t("склад (заливка - запас)", "depot (fill - stock)")) +
+      row(target({role: "bridge", checked: true}), t("мост", "bridge"));
     const G = (side, state, vehicle, order, echelon) => ({side, state, vehicle, order, echelon: echelon || "XX", supply: 1, abbr: ""});
-    return `<div class="lg" style="color:#555">наши - красным (ПВО и надписи - чёрным), противник - синим</div>` +
-      row(only(unitSU(G("red", "defend", "bmp"), 0)), "оборона: передний край к противнику, знаки БМП") +
-      row(only(unitSU(G("red", "pending", "tank", "reserve"), 0)), "район, занимаемый частью (пунктир - намечен); ◇ танки") +
-      row(only(unitSU(G("red", "march", "btr", null, "II"), 0, 0)), "колонна на марше (тб - три черты); ⬠ БТР") +
-      row(only(unitSU(G("red", "battle", "tank", "attack"), 0)), "направление наступления") +
-      row(only(unitSU(G("red", "halted", "tank"), 0)), "остановлена на рубеже") +
-      row(`<span style="opacity:.55">${only(unitSU(G("blue", "defend", "tank"), 180))}</span>`, "противник по данным разведки: бледно - устарели (? - примерно, ?? - только присутствие), круг - где может быть") +
-      row(line(RED, BLUE), "линия соприкосновения") +
-      row(sam({side: "red", branch: "sam", tier: 2}, false) + sam({side: "red", branch: "gci"}, false), "ЗРК (черты - дальность), РЛС (КРУ)") +
-      row(airbase({side: "red", state: "open"}) + airbase({side: "red", state: "closed"}), "аэродром; закрыт или потерян") +
-      row(farp({side: "red", state: "open", units: ["x"]}) + farp({side: "red", state: "open", units: []}), "вертолётная площадка: занята частью; свободна") +
-      row(target({role: "depot", side: "red", stock: .6, checked: true}), "склад (заливка - запас, пунктир - отрезан)") +
-      row(target({role: "bridge", checked: true}) + target({role: "bridge", state: "lost", checked: true}), "мост, разрушенный мост") +
-      `<div class="lg" style="color:#555">⚠ - часть без полного снабжения</div>`;
+    return `<div class="lg" style="color:#555">${t("наши - красным (ПВО и надписи - чёрным), противник - синим", "own forces in red (air defence and labels in black), enemy in blue")}</div>` +
+      row(only(unitSU(G("red", "defend", "bmp"), 0)), t("оборона: передний край к противнику, знаки БМП", "defence: forward edge toward the enemy, IFV symbols")) +
+      row(only(unitSU(G("red", "pending", "tank", "reserve"), 0)), t("район, занимаемый частью (пунктир - намечен); ◇ танки", "area held by a unit (dashed - planned); ◇ tanks")) +
+      row(only(unitSU(G("red", "march", "btr", null, "II"), 0, 0)), t("колонна на марше (тб - три черты); ⬠ БТР", "column on the march (battalion - three bars); ⬠ APC")) +
+      row(only(unitSU(G("red", "battle", "tank", "attack"), 0)), t("направление наступления", "direction of attack")) +
+      row(only(unitSU(G("red", "halted", "tank"), 0)), t("остановлена на рубеже", "halted on a line")) +
+      row(`<span style="opacity:.55">${only(unitSU(G("blue", "defend", "tank"), 180))}</span>`, t("противник по данным разведки: бледно - устарели (? - примерно, ?? - только присутствие), круг - где может быть", "enemy per intelligence: faded - outdated (? - approximate, ?? - presence only), circle - where it may be")) +
+      row(line(RED, BLUE), t("линия соприкосновения", "line of contact")) +
+      row(sam({side: "red", branch: "sam", tier: 2}, false) + sam({side: "red", branch: "gci"}, false), t("ЗРК (черты - дальность), РЛС (КРУ)", "SAM (bars - range), radar (GCI)")) +
+      row(airbase({side: "red", state: "open"}) + airbase({side: "red", state: "closed"}), t("аэродром; закрыт или потерян", "airfield; closed or lost")) +
+      row(farp({side: "red", state: "open", units: ["x"]}) + farp({side: "red", state: "open", units: []}), t("вертолётная площадка: занята частью; свободна", "helicopter pad: occupied; free")) +
+      row(target({role: "depot", side: "red", stock: .6, checked: true}), t("склад (заливка - запас, пунктир - отрезан)", "depot (fill - stock, dashed - cut off)")) +
+      row(target({role: "bridge", checked: true}) + target({role: "bridge", state: "lost", checked: true}), t("мост, разрушенный мост", "bridge, destroyed bridge")) +
+      `<div class="lg" style="color:#555">${t("⚠ - часть без полного снабжения", "⚠ - unit without full supply")}</div>`;
   }
 
   return {front, bearingTo, bearing, unitSU, unitNATO, sam, airbase, farp, target, arrowHead, legend, sideCol, RED, BLUE, INK};

@@ -19,7 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import build as build_mod, materialize
-from . import ato, command, convoys, csar, dcstypes, debrief, explain, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
+from . import ato, command, convoys, csar, dcstypes, debrief, explain, i18n, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
 HTML = Path(__file__).parent / "gui.html"
@@ -61,8 +61,11 @@ def _ll(p: dict) -> list[float]:
 
 
 def view(st: dict) -> dict:
-    """Состояние кампании для страницы: только то, что рисуется и показывается."""
+    """Состояние кампании для страницы: только то, что рисуется и показывается. Названия задач и групп - на языке
+    кампании (i18n.py)."""
     units = st["units"]
+    lg = i18n.lang(st)
+    tr = lambda x: i18n.tr(x, lg)
     use_ops = ops.enabled(st)
     front = {tuple(sorted(l)) for l in ops.front_links(st)} if use_ops else set()
     places = [{"name": n, "pos": _ll(p), "side": ops.owner(st, n) if use_ops else p.get("side")}
@@ -134,8 +137,10 @@ def view(st: dict) -> dict:
     tasks = []
     for i, t in enumerate(st.get("tasks") or [], 1):
         base = st["airbases"].get(t["base"], {})
-        tasks.append({"n": i, "title": t["title"], "km": round(t["distance_km"]), "base": base.get("name", t["base"]),
-                      "time": (f"взлёт {ato.hhmm(t['takeoff_s'])}, на объекте {ato.hhmm(t['tot_s'])}"
+        tasks.append({"n": i, "ato_id": t.get("ato_id"), "title": tr(t["title"]), "km": round(t["distance_km"]), "base": base.get("name", t["base"]),
+                      "tot": ato.hhmm(t["tot_s"]) if t.get("tot_s") is not None else "",
+                      "time": (i18n.L(lg, f"взлёт {ato.hhmm(t['takeoff_s'])}, на объекте {ato.hhmm(t['tot_s'])}",
+                                      f"takeoff {ato.hhmm(t['takeoff_s'])}, time on target {ato.hhmm(t['tot_s'])}")
                                if t.get("tot_s") is not None else ""),
                       "base_pos": _ll(base) if "lat" in base else None,
                       "ip": _ll(t["ip"]) if t.get("ip") else None,
@@ -144,7 +149,7 @@ def view(st: dict) -> dict:
                       "notes": t.get("package_notes", ""),
                       "goal": explain.task(st, t),                # цель: что это и что даст удар
                       "seats": sum(int(g["size"]) for g in t.get("package", [])),   # сколько людей может лететь
-                      "package": [{"group": g["group"], "title": g["title"], "size": g["size"],
+                      "package": [{"group": g["group"], "title": tr(g["title"]), "size": g["size"],
                                    "performer": units[g["performer"]]["name"] if g["performer"] in units else g["performer"]}
                                   for g in t.get("package", [])]})
     sc = st.get("scenario") or {}
@@ -169,8 +174,10 @@ def view(st: dict) -> dict:
         "downed": [{"id": d["id"], "side": d["side"], "pos": _ll(d["pos"]), "freq": d["freq_khz"], "day": d["day"],
                     "title": csar.title(st, d)} for d in st.get("downed", [])
                    if d["side"] == st["player_side"]],    # свои сбитые экипажи (чужие - не видны)
-        "ato": [dict(r, locked=command.why_locked(st, ent[r["id"]]), duty_only=command._is_duty(st, ent[r["id"]]))
+        "ato": [dict(r, title=tr(r["title"]), status=tr(r["status"]), groups=[tr(x) for x in r["groups"]],
+                     locked=command.why_locked(st, ent[r["id"]]), duty_only=command._is_duty(st, ent[r["id"]]))
                 for r in ato.rows(st)],
+        "lang": lg,
         "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
         "ground_time": ato.hhmm(st.get("ground_s") or 0),          # наземная обстановка - на это время (sim.advance)
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
@@ -327,6 +334,10 @@ class App:
         p, st = self.load(req)
         if action == "state":
             return {"state": view(st)}
+        if action == "setlang":                      # язык кампании: окно, брифинг миссии (i18n.py)
+            st["settings"]["lang"] = "en" if req.get("lang") == "en" else "ru"
+            model.save(st, p)
+            return {"state": view(st)}
         if action == "atooptions":                   # режим командующего: что можно выбрать для вылета (без сохранения)
             return {"options": command.options(st, req["id"])}
         if action == "addoptions":                   # добавить полк: исторические допущения, типы, роли, аэродромы
@@ -375,10 +386,11 @@ class App:
             return {"lines": lines, "state": view(st)}
         if action == "plan":
             if not planner.plan(st):
-                lines.append(f"Задач нет: {st['task_reason']}")
+                lines.append(i18n.L(i18n.lang(st), "Задач нет: ", "No tasks: ") + st['task_reason'])
             else:
-                lines.append(f"План полётов на сутки {st['day']}: своих вылетов для игрока {len(st['tasks'])}"
-                             + (f" (после {ato.hhmm(st['clock_s'])})" if st.get("clock_s") else "") + ".")
+                lines.append(i18n.L(i18n.lang(st), f"План полётов на сутки {st['day']}: своих вылетов для игрока {len(st['tasks'])}",
+                                    f"Air tasking order for day {st['day']}: {len(st['tasks'])} sorties available to the player")
+                             + (f" ({i18n.L(i18n.lang(st), 'после', 'after')} {ato.hhmm(st['clock_s'])})" if st.get("clock_s") else "") + ".")
         elif action == "build":
             if not st.get("tasks"):
                 planner.plan(st)
@@ -388,7 +400,9 @@ class App:
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),
                                   humans=int(req.get("humans") or 1))
             n = sum(len(g["vehicles"]) for g in man["ground"])
-            lines.append(f"Миссия: {man['file']} (наземных машин {n}, бюджет {st['settings'].get('mission_budget', materialize.MISSION_BUDGET)})")
+            lines.append(i18n.L(i18n.lang(st), f"Миссия: {man['file']} (наземных машин {n}, бюджет ",
+                                f"Mission: {man['file']} (ground vehicles {n}, budget ")
+                         + f"{st['settings'].get('mission_budget', materialize.MISSION_BUDGET)})")
             if man.get("pre_lines"):             # модель продвинута к началу миссии (sim.advance)
                 lines.append(f"Обстановка на {sim.ato_hhmm(man['ground_s'] or 0)}:")
                 lines += man["pre_lines"]
@@ -396,12 +410,12 @@ class App:
             lines += man.get("ctld_lines") or []
         elif action == "debrief":
             f = debrief.find_file(st, self.home)
-            lines.append(f"Файл дебрифа: {f}")
+            lines.append(i18n.L(i18n.lang(st), "Файл дебрифа: ", "Debrief file: ") + str(f))
             lines += debrief.apply(st, debrief.read(f))
         elif action == "endday":
             lines += sim.end_day(st)
             if not lines:
-                lines.append("День прошёл без событий.")
+                lines.append(i18n.L(i18n.lang(st), "День прошёл без событий.", "The day passed without events."))
         elif action == "roadsapply":
             rf = saved_games_file(f"roads_{roads.sector_id(sector_of(st))}.json", self.home)
             if not rf:
