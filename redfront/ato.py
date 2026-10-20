@@ -84,6 +84,22 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
     return out
 
 
+SAM_FIRST_MIN = 30   # ОЦЕНКА: удар по цели - не раньше стольких минут после удара по прикрывающей её позиции ЗРК
+
+
+def _covering_sams(state: dict, t: dict) -> list[str]:
+    """ЗРК, прикрывающие цель задачи: в коридоре (threats) или достают до цели."""
+    from . import planner
+    out = list(t.get("threats") or [])
+    pos = t.get("target_pos")
+    if pos:
+        for u in state["units"].values():
+            if model.category(u) == "sam" and u["side"] != t["side"] and u["state"] != "destroyed" \
+                    and model.dist_km(model.unit_pos(state, u), pos) <= planner.threat_radius_km(u):
+                out.append(u["id"])
+    return out
+
+
 HELO_HOURS_MONTH = 65   # ОЦЕНКА по аналогии (FM 101-20, табл. 1-5: AH-1 65 ч/мес в боевых условиях) - вертолётам без своего значения
 
 
@@ -239,6 +255,9 @@ def build(state: dict) -> dict:
                     break
                 tot += SLOT_MIN * 60
         reg = [t for t in reg if t not in night]
+        # удары по позициям ЗРК - раньше ударов, которые эти ЗРК прикрывают: сначала ПВО цели, потом цель
+        reg = [t for t in reg if t["kind"] == "strike_sam_site"] + [t for t in reg if t["kind"] != "strike_sam_site"]
+        sam_tot: dict[str, float] = {}               # ЗРК -> время удара по его позиции (сутки, с)
         span = w1 - w0
         for i, t in enumerate(reg):
             tdef = doc["tasks"][t["kind"]]
@@ -248,6 +267,9 @@ def build(state: dict) -> dict:
             want = w0 + span * (i + 0.5) / max(1, len(reg))
             if rnd:
                 want += rnd.uniform(-0.4, 0.4) * span / max(1, len(reg))
+            after = [sam_tot[x] for x in _covering_sams(state, t) if x in sam_tot]
+            if after:                                # не раньше SAM_FIRST_MIN после удара по прикрывающему ЗРК
+                want = max(want, max(after) + SAM_FIRST_MIN * 60)
             tot = max(want, w0 - first)                  # взлёт - не раньше начала лётного дня
             while tot + last <= w1 + 3600:               # посадка - не позже часа после конца лётного дня
                 need = _need(t, rel, tot, turn_s)
@@ -256,6 +278,8 @@ def build(state: dict) -> dict:
                     times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
                     entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
                                     "title": t["title"], "task": t, "tot_s": tot, "times": times, "ai_only": False})
+                    if t["kind"] == "strike_sam_site" and t.get("target"):
+                        sam_tot[t["target"]] = min(sam_tot.get(t["target"], 1e18), tot)
                     break
                 tot += SLOT_MIN * 60
     entries.sort(key=lambda e: e["tot_s"])

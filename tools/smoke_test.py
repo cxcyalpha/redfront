@@ -1394,7 +1394,8 @@ def helo_section(tmp: Path) -> None:
     if n:
         build.build(st, tmp / "helo.miz", task_no=n)
         m = dcs.Mission(); m.load_file(str(tmp / "helo.miz"))
-        hg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.helicopter_group]
+        hg = [g for c in m.coalition.values() for cn in c.countries.values() for g in cn.helicopter_group
+              if " strike " in g.name or " helo" in g.name]   # группы задачи (не перевозки ИИ)
         check(hg and max(p.alt for g in hg for p in g.points) <= 60,
               f"вертолёты в миссии: {', '.join(g.units[0].type for g in hg)}, маршрут не выше 60 м")
 
@@ -2108,10 +2109,10 @@ def csar_section(tmp: Path) -> None:
           f"без катапультирования - погиб (экипажей {c0} -> {u['crews']})")
     # задача CSAR в плане - первой; миссия: пилот на земле, маяк - ресурс миссии, скрипт знает экипаж
     planner.plan(st)
-    tk = st["tasks"][0]
+    tk = next(t for t in st["tasks"] if t["kind"] == "csar")
     check(tk["kind"] == "csar" and tk["target"] == dn[0]["id"] and model.category(U[tk["performer"]]) == "heli",
-          f"в плане дня первым - {tk['title']} ({tk['package_notes']})")
-    man = build.build(st, tmp / "csar.miz", task_no=1)
+          f"в плане дня - {tk['title']} ({tk['package_notes']})")
+    man = build.build(st, tmp / "csar.miz", task_no=st["tasks"].index(tk) + 1)
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "csar.miz"))
     script = next(a.text.id for a in _do(m) if "redfront csar" in a.text.id)
@@ -2238,7 +2239,8 @@ def convoy_section(tmp: Path) -> None:
     st2["settings"]["randomness"] = False
     sim.end_day(st2)
     a2 = ato.ensure(st2)
-    e = next((e for e in a2["entries"] if e["kind"] == "strike_supply_route"), None)
+    e = next((e for e in a2["entries"] if e["kind"] == "strike_supply_route" and not e["task"].get("threats")),
+             next((e for e in a2["entries"] if e["kind"] == "strike_supply_route"), None))
     lines = convoys.daily(st2) if e else []
     foe = model.enemy(e["side"]) if e else "blue"
     check(e and (st2.get("convoy_losses") or {}).get(foe, {}).get(e["task"]["link"], 0) > 0 and lines,
@@ -2257,7 +2259,7 @@ def advance_section(tmp: Path) -> None:
     marching = [u for u in st["units"].values() if u.get("state") == "march"]
     km0 = {u["id"]: u["progress_km"] for u in marching}
     strikes = [e for e in a["entries"] if not e["ai_only"] and e["task"]["package"][0]["objective"]["kind"] in ("column", "point", "site")
-               and e["side"] != st["player_side"]]
+               and e["side"] != st["player_side"] and e["kind"] != "strike_sam_site"]
     e = min(strikes, key=lambda x: x["tot_s"])
     tgt = st["units"][e["task"]["package"][0]["objective"]["unit"]]
     s0, d0 = model.strength(tgt), tgt.get("damage", 0.0)
@@ -3379,6 +3381,16 @@ def gui_planner_section(tmp: Path) -> None:
     check(len(v["matrix"]) == len(st["ato"]["entries"]) and len(row["groups"]) == len(e["task"]["package"])
           and all(g["takeoff"] <= g["objective"] <= g["land"] for g in row["groups"]),
           f"матрица: все вылеты плана, у групп взлёт <= выход на объект <= посадка ({len(v['matrix'])} вылетов)")
+    from redfront import ato as _ato
+    bad = []
+    for x in st["ato"]["entries"]:
+        if x["kind"] == "strike_sam_site" or x["ai_only"]:
+            continue
+        for y in st["ato"]["entries"]:
+            if y["side"] == x["side"] and y["kind"] == "strike_sam_site" and y["task"].get("target") in _ato._covering_sams(st, x["task"]) \
+                    and y["tot_s"] > x["tot_s"]:
+                bad.append((x["title"], y["title"]))
+    check(not bad, f"удар по позиции ЗРК - раньше ударов по целям, которые этот ЗРК прикрывает (нарушений {len(bad)})")
     so = gui.sortie(st, e["id"])
     names = [w["name"] for w in so["groups"][0]["route"]]
     check(names[0] == "Взлёт" and names[-1] == "Посадка" and so["groups"][0]["route"][0]["t"] <= so["tot"],

@@ -680,6 +680,9 @@ and the briefing.
 * The side's tasks in doctrine priority order are spread over the flying day; a sortie is scheduled only if the unit
   has enough aircraft for the whole sortie plus turnaround (`turnaround_min`, default 90 min), otherwise later, in
   15-minute steps.
+* Strikes on SAM sites are scheduled before strikes on the targets those SAMs cover (in the corridor or reaching the
+  target): the target strike comes at least 30 min after the SAM strike (`ato.SAM_FIRST_MIN`, estimate). Support
+  groups (escort, SEAD) are spread across units by their daily load.
 * Up to 40 tasks per side per day (`ATO_MAX_TASKS`), at most 8 of one kind (`ATO_PER_KIND`); kinds are interleaved
   (the first of each kind, then the second...) so that aviation is not spent entirely on one kind of task. Estimates.
 * Standing tasks (AWACS, tanker, QRA) — 4 h shifts (`shift_h`); without enough aircraft there is a gap.
