@@ -96,6 +96,7 @@ t["cas_helo"]["support"] = [{"id": "scout", "title": "разведчик-нав�
                              "roe": "return_fire",
                              "source": "ОЦЕНКА: группа ударных вертолётов США - с лёгкими разведчиками (OH-58, в DCS - SA342), "
                                        "которые выходят вперёд и наводят; у PAH-1 ФРГ - не нужен (сами SA342 в DCS)"}]
+t["qra"] = copy.deepcopy(wp["tasks"]["qra"])   # дежурные звенья: та же схема у обеих сторон (QRA / дежурные силы ПВО)
 FM100 = "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5"
 for k, v in t.items():                       # маршруты малой высоты (LLTR/MRR): к цели 100 футов, обратно - выше 500
     if v.get("method") in ("on_call", "interdiction", "sequential_on_call") and "attack_helo" not in v["performers"]:

@@ -161,7 +161,10 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
             if b["id"] not in a.get("engaged", []):
                 _engage(a, b); new_contacts.append((a, b))
         for u in moving:
-            if u["state"] == "march" and u["progress_km"] >= _length(state, u) - 1e-6:
+            if u["state"] == "march" and u["progress_km"] >= _length(state, u) - 1e-6 and u.get("order") == "withdraw":
+                u["state"], u["order"] = "refit", None             # дошла до места отхода - сразу восстановление
+                lines.append(f"{u['name']}: в тылу ({u['route'][-1]}), восстановление.")
+            elif u["state"] == "march" and u["progress_km"] >= _length(state, u) - 1e-6:
                 u["state"] = "defend"
                 u["defending"] = True
                 lines.append(f"{u['name']}: вышел в район {u['route'][-1]}, перешёл к обороне.")
