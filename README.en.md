@@ -298,6 +298,41 @@ each other, air defence behind; losses in the mission go into the model.
 * A SAM position faces the threat axis (`heading_deg` on the unit, otherwise the bearing to the nearest enemy
   airfield); otherwise the radar (e.g. Patriot) looks the wrong way.
 
+### Battle formations and artillery
+
+A unit in battle is laid out according to its side's doctrine (`redfront/formations.py`; estimates based on the
+field manuals, distances compressed to the mission vehicle budget): vehicles are split into companies of 10 (tanks and
+IFVs in each company).
+
+* **Warsaw Pact** (Soviet Ground Forces Combat Regulations; Ionin, "Tactics", 1987): defence — company strongpoints,
+  two thirds of the companies in the first echelon (1 km front per company), one third in the second (1.5 km behind);
+  attack — companies in line (700 m front), tanks ahead, IFVs 150 m behind, one third of the companies in the second
+  echelon.
+* **NATO** (FM 71-1, FM 71-2, 1988): defence — company teams in staggered battle positions (1.4 km apart, 600 m
+  stagger), vehicles in an arc; attack — the lead team in a wedge, the others staggered behind in overwatch.
+
+**Artillery.** Each unit in battle gets a supporting battery (6 guns: 2S1 Gvozdika for the Warsaw Pact, M109 for
+NATO; estimate) 6 km behind its line. In the mission it fires 4 fire missions on the enemy line (24 rounds each,
+250 m dispersion). Lost guns are remembered by the unit (the battery is smaller in later missions) and are restored
+at one per day. The ground model does not track artillery separately — its fire is part of combat attrition.
+
+### Air defence network
+
+`lua/iads.lua` (idea from Skynet IADS, own implementation; values are estimates):
+
+* **Network nodes** — the side's GCI/early-warning radars (ground) and AWACS (A-50, E-3A).
+* **Medium- and long-range SAMs that are connected** (a live ground node within 150 km or an AWACS airborne) keep their
+  radars off until the network sees an enemy aircraft closer than their engagement range ×1.15; radars stay on for
+  60 s after the last contact.
+* **Without a connection** (nodes destroyed or too far) SAMs act autonomously: radars on all the time (DCS default AI),
+  revealing themselves earlier.
+* **An anti-radiation missile launched** towards a SAM (±20° cone, up to 120 km): with a probability by type (older
+  SA-2, SA-3, SA-6, Hawk, Rapier — 0.3; Roland, SA-8, SA-19, Gepard, ZSU-23-4 — 0.5) the SAM notices it and shuts its
+  radar down for the missile's flight time plus 120 s — this is suppression: the strike gets through, the SAM
+  survives. Patriot (can shoot down ARMs) keeps radiating.
+* **Campaign:** a destroyed GCI site stays destroyed in the model, and SAMs in its area work without the network in
+  later missions. NATO ground radars (NADGE) are not in the order of battle — the blue network node is the E-3A only.
+
 ### Roads
 
 pydcs has no road network; only DCS knows roads (`land.findPathOnRoads`). If the model does not know the roads of the

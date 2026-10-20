@@ -204,6 +204,29 @@ LINE_WIDTH = 10         # ОЦЕНКА: машин в линии
 AD_BEHIND_M = 800       # ОЦЕНКА: войсковая ПВО за боевым порядком
 
 
+ART_GUNS = 6            # ОЦЕНКА: орудий батареи в миссии (полк ОВД: дивизион 2С1 - 18; бригада НАТО: дивизион M109 - 18-24)
+ART_BEHIND_M = 6000     # ОЦЕНКА: огневые позиции за боевым порядком (2С1 - до 15 км, M109 - до 18 км)
+ART_TYPES = {"red": "SAU_Gvozdika", "blue": "M_109"}   # 2С1 "Гвоздика", M109
+
+
+def artillery(state: dict, unit: dict, center: dict, axis: float, target: dict) -> list[dict]:
+    """Артиллерия части в бою (батарея поддержки): за боевым порядком, развёрнута к противнику; цель огня - линия
+    противника (FireAtPoint в build). Потери орудий - у части (art_lost), восстанавливаются по одному в сутки."""
+    if model.category(unit) != "ground" or unit.get("role") == "air_assault":
+        return []
+    n = max(0, ART_GUNS - int(unit.get("art_lost", 0)))
+    t = ART_TYPES.get(unit["side"])
+    if not n or not t:
+        return []
+    vs = []
+    for k in range(n):
+        p = model.offset(center, axis, -ART_BEHIND_M, (k - (n - 1) / 2) * 120)
+        vs.append({"name": f"{unit['id']}@art#{k + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"], "weight": 0.0,
+                   "heading": axis})
+    return [{"unit": unit["id"], "side": unit["side"], "kind": "artillery", "name": f"{unit['id']} art", "vehicles": vs,
+             "waypoints": [], "speed_kmh": 0, "fire_at": dict(target)}]
+
+
 def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None = None) -> list[dict]:
     """Часть в бою: боевой порядок линиями фронтом к противнику (танки впереди), в line_offset_km (ОЦЕНКА, раздел sim
     доктрины) от середины между ней и противником - так стороны в миссии стоят в дальности огня и ведут бой.
@@ -226,14 +249,15 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
     rank = {r: i for i, r in enumerate(march["order"])}
     roles = {c["type"]: c["role"] for c in unit["composition"]}
     order = sorted((t for t in counts if counts[t] > 0), key=lambda t: rank.get(roles[t], len(rank)))
-    vehicles, i = [], 0
-    for t in order:
-        w = weight[t]
-        for _ in range(counts[t]):
-            row, col_ = divmod(i, LINE_WIDTH)
-            p = model.offset(center, axis, -row * LINE_ROW_M, (col_ - (LINE_WIDTH - 1) / 2) * LINE_SPACING_M)
-            vehicles.append({"name": f"{unit['id']}#{i + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"], "weight": w, "heading": axis})
-            i += 1
+    seq = [t for t in order for _ in range(counts[t])]
+    # боевой порядок - по доктрине стороны (formations.py): роты, эшелоны, позиции; оборона или наступление
+    from . import formations
+    offs = formations.layout((state.get("doctrine") or {}).get(unit["side"], ""),
+                             "defend" if unit.get("defending") else "attack", len(seq), [roles[t] for t in seq])
+    vehicles = []
+    for i, (t, (fwd, right)) in enumerate(zip(seq, offs)):
+        p = model.offset(center, axis, fwd, right)
+        vehicles.append({"name": f"{unit['id']}#{i + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"], "weight": weight[t], "heading": axis})
     # Наступающий (не обороняющийся) идёт развёрнутым строем на позицию противника - иначе в DCS линии стоят в 3 км
     # и не стреляют (camp4, день 2: ни одной потери в танках за 16 мин; рельеф и застройка закрывают видимость).
     wps, spd = [], 0
@@ -244,6 +268,9 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
     out = [{"unit": unit["id"], "side": unit["side"], "kind": "battle", "name": unit["id"], "vehicles": vehicles,
             "waypoints": wps, "speed_kmh": spd, "formation": "line", "attack": attack, "center": center,
             "engaged": [f["id"] for f in foes]}]
+    if foes:                                     # для батареи поддержки (artillery, ставит build): ось и линия противника
+        out[0]["axis"] = axis
+        out[0]["fire_at"] = model.offset(mid, axis, sim.get("line_offset_km", 1.5) * 1000)
     for a in units.values():
         if a.get("attached_to") != unit["id"] or a["state"] == "destroyed":
             continue

@@ -280,6 +280,9 @@ def end_day(state: dict) -> list[str]:
     lines += logistics.supply(state)
     lines += assault.linkup(state)
     lines += logistics.repairs(state)
+    for u in state["units"].values():            # артиллерия частей: орудие в сутки из ремонта и пополнения (ОЦЕНКА)
+        if u.get("art_lost"):
+            u["art_lost"] -= 1
     lines += logistics.air_defence(state)
     lines += samroam.daily(state)               # смена позиций ЗРК по подвижности и близости к фронту
     intel.ensure(state)                         # новые ЗРК противника (из глубины) - в разведку

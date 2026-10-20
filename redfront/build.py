@@ -37,6 +37,15 @@ CSAR_LUA = Path(__file__).parent / "lua" / "csar.lua"
 LZ_LUA = Path(__file__).parent / "lua" / "lz.lua"
 QRA_LUA = Path(__file__).parent / "lua" / "qra.lua"
 PUSH_LUA = Path(__file__).parent / "lua" / "push.lua"
+IADS_LUA = Path(__file__).parent / "lua" / "iads.lua"
+IADS_NET_KM = 150        # ОЦЕНКА: ЗРК на связи, если живой узел сети (РЛС, КРУ) не дальше
+IADS_NET_MIN_KM = 15     # ЗРК с зоной поражения не меньше - в сети (средней и большой дальности); меньше - сами по себе
+# вероятность распознать пуск ПРР и выключить РЛС (ОЦЕНКИ; идея - Skynet IADS): старые ЗРК замечают ПРР поздно
+ARM_P = [(r"Patriot", None), (r"Kub|S-?75|SNR|S-?125|Hawk|Rapier", 0.3), (r"Roland|Osa|Tor|Tunguska|Gepard|Shilka|ZSU", 0.5),
+         (r"Strela|Chaparral|Vulcan|Igla|Stinger", 0.0)]
+ART_MISSIONS = 4         # ОЦЕНКА: огневых налётов батареи за миссию
+ART_ROUNDS = 24          # ОЦЕНКА: снарядов на налёт (батарея)
+ART_RADIUS_M = 250       # ОЦЕНКА: рассеивание по площади
 PUSH_FLAG = 7001         # флаг DCS: ударные группы ИИ уходят с ИПМ на цель
 PUSH_WAIT_S = 180        # ОЦЕНКА: сколько ударная группа ждёт пусков ПРР на ИПМ сверх расчётного времени
 BEACON_FILE = "redfront_beacon.wav"
@@ -304,6 +313,42 @@ def qra_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
              f'r = {a["r"]:.0f}, title = {q(a["title"])} }}' for a in specs]
     return (QRA_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
             .replace("@SPECS@", ", ".join(items)))
+
+
+def iads_spec(m: Mission, state: dict, vg_by_unit: dict) -> tuple[list[dict], list[dict]]:
+    """Сеть ПВО в миссии (iads.lua): ЗРК (группа, сторона, зона поражения, в сети ли, вероятность распознать ПРР,
+    сбивает ли ПРР) и узлы сети (КРУ / РЛС обнаружения - наземные, ДРЛО - самолёты)."""
+    import re as _re
+    sams, net = [], []
+    for uid, vg in vg_by_unit.items():
+        u = state["units"].get(uid)
+        if not u:
+            continue
+        cat = model.category(u)
+        if cat == "gci":
+            net.append({"group": vg.name, "side": 1 if u["side"] == "red" else 2, "air": False})
+        elif cat == "sam":
+            r = planner.threat_radius_km(u)
+            types = " ".join(c["type"] for c in u.get("composition", []))
+            p = next((x for rx, x in ARM_P if _re.search(rx, types, _re.I)), 0.4)
+            sams.append({"group": vg.name, "side": 1 if u["side"] == "red" else 2, "r": r * 1000,
+                         "net": r >= IADS_NET_MIN_KM, "arm_p": p or 0.0, "harm_ok": p is None})
+    for side, sd in (("red", 1), ("blue", 2)):
+        for c in m.coalition[side].countries.values():
+            for g in c.plane_group:
+                if "awacs" in g.name:
+                    net.append({"group": g.name, "side": sd, "air": True})
+    return sams, net
+
+
+def iads_script(campaign_id: str, sortie: int, sams: list[dict], net: list[dict]) -> str:
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    b = lambda v: "true" if v else "false"
+    si = ", ".join(f'{{ group = {q(a["group"])}, side = {a["side"]}, r = {a["r"]:.0f}, net = {b(a["net"])}, '
+                   f'arm_p = {a["arm_p"]:.2f}, harm_ok = {b(a["harm_ok"])} }}' for a in sams)
+    ni = ", ".join(f'{{ group = {q(a["group"])}, side = {a["side"]}, air = {b(a["air"])} }}' for a in net)
+    return (IADS_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
+            .replace("@NET_M@", str(int(IADS_NET_KM * 1000))).replace("@SAMS@", si).replace("@NET@", ni))
 
 
 def push_script(campaign_id: str, sortie: int, spec: dict) -> str:
@@ -986,14 +1031,24 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     keys = sorted({g["cluster"] for g in groups if g.get("cluster")})        # бои (кластеры) - у каждого своё место
     sites = {k: (state.get("battle_sites") or {}).get(k) for k in keys}
     def shift_of(g):
-        s_ = sites.get(g.get("cluster")) if (g["kind"] == "battle" or g.get("battle")) else None
+        s_ = sites.get(g.get("cluster")) if (g["kind"] in ("battle", "artillery") or g.get("battle")) else None
         return (s_["x"], s_["y"]) if s_ else (0.0, 0.0)
     gci_lines: list[str] = []
     tgt_group = next((g for g in groups if g["unit"] == tk["target"]), None)
     bkey = (tgt_group or {}).get("cluster")                                 # бой цели игрока
     airheads: dict[str, dict] = {}
     evac_groups: dict[str, list] = {}            # рота на эвакуацию: группы DCS по вместимости борта
-    for g in groups:
+    arts = [dict(a, cluster=g.get("cluster")) for g in groups if g["kind"] == "battle" and g.get("fire_at")
+            for a in materialize.artillery(state, state["units"][g["unit"]], g["center"], g["axis"], g["fire_at"])]
+    for g in groups + arts:
+        if g["kind"] == "artillery":             # батарея части в бою: огневые налёты по линии противника
+            vg = _ground_group(m, state, g, shift_of(g))
+            sx, sy = shift_of(g)
+            c = _pt(m, g["fire_at"])
+            for k in range(ART_MISSIONS):        # налёты подряд: по линии противника, со сдвигом по фронту (ОЦЕНКА)
+                off = (k - (ART_MISSIONS - 1) / 2) * 300
+                vg.points[0].tasks.append(task.FireAtPoint(Vector2(c.x + sx + off, c.y + sy), rounds=ART_ROUNDS, radius=ART_RADIUS_M))
+            continue
         if g["kind"] == "battle":
             platoons[g["unit"]] = _battle_platoons(m, state, g, shift_of(g))
             vg_by_unit[g["unit"]] = platoons[g["unit"]][0][0]
@@ -1540,6 +1595,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for a_ in ctld_actions(m, state, ctld):
             trig.add_action(a_)
     trig.add_action(DoScript(String(csar_script(m, state, downed, rescuers))))
+    iads_sams, iads_net = iads_spec(m, state, vg_by_unit)
+    if iads_sams:                                # сеть ПВО: ЗРК на связи молчат до цели в зоне, реакция на ПРР
+        trig.add_action(DoScript(String(iads_script(state["campaign_id"], state["sortie"], iads_sams, iads_net))))
     if push_spec["strikes"]:                     # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], push_spec))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
@@ -1595,8 +1653,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "objects": [o["id"] for o in objs],              # объекты тыла, по которым миссия считает разрушения
         "ground_s": state.get("ground_s"),               # наземная модель - на это время суток (sim.advance)
         "pre_lines": pre_lines,                          # что изменилось к началу миссии (бой, марш, вылеты ИИ)
+        "artillery": [{"unit": g["unit"], "vehicles": [v["name"] for v in g["vehicles"]]} for g in arts],
         "ground": [{"unit": g["unit"], "kind": g["kind"], "cluster": g.get("cluster"), "vehicles": [{"name": v["name"], "type": v["type"], "weight": v["weight"]} for v in g["vehicles"]]}
-                   for g in groups if g["kind"] not in ("downed", "convoy")],   # экипажи, колонны снабжения - не части модели
+                   for g in groups if g["kind"] not in ("downed", "convoy", "artillery")],   # экипажи, колонны снабжения, батареи - не части модели
         "convoys": [{"unit": g["unit"], "side": g["side"], "link": g["link"],      # колонны снабжения: потери - недовоз (convoys.py)
                      "vehicles": [{"name": v["name"], "weight": v["weight"]} for v in g["vehicles"]]}
                     for g in groups if g["kind"] == "convoy"],

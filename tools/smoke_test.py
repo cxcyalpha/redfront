@@ -975,7 +975,7 @@ def column_road_section(tmp: Path) -> None:
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
           and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
-                        "-- redfront lz", "-- redfront csar", "-- redfront debrief hook"],
+                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
@@ -3229,6 +3229,92 @@ def push_qra_section(tmp: Path) -> None:
           "в миссии ДРЛО обеих сторон (А-50, E-3A) и заправщик синих (KC-135; у ОВД фронтовой авиации заправщиков не было)")
 
 
+IADS_MOCK = """
+T = 0; H = {}; SCHED = nil; ALARM = {}; ALIVE = {}; POS = {}; SEEN = {}
+AI = { Option = { Ground = { id = { ALARM_STATE = 9 }, val = { ALARM_STATE = { GREEN = 1, RED = 2 } } } } }
+Controller = { Detection = { RADAR = 1 } }; Object = { Category = { UNIT = 1 } }
+Weapon = { GuidanceType = { RADAR_PASSIVE = 5 } }
+world = { event = { S_EVENT_SHOT = 1 }, addEventHandler = function(h) H[#H + 1] = h end }
+timer = { getTime = function() return T end, scheduleFunction = function(f, a, t) SCHED = f end }
+math.random = function() return 0 end
+local function unit(n) return { isExist = function() return ALIVE[n] end, getLife = function() return 1 end,
+  getPoint = function() return { x = POS[n][1], y = 0, z = POS[n][2] } end } end
+function plane(n, side) local u = unit(n); u.getCategory = function() return 1 end; u.getCoalition = function() return side end
+  u.inAir = function() return true end; return u end
+Group = { getByName = function(n) if POS[n] == nil then return nil end
+  return { isExist = function() return true end, getUnits = function() return { unit(n) } end,
+    getController = function() return { setOption = function(_, id, v) ALARM[n] = v end,
+      getDetectedTargets = function() local o = {}; for _, t in ipairs(SEEN[n] or {}) do o[#o + 1] = { object = t } end; return o end } end } end }
+"""
+
+
+def iads_section(tmp: Path) -> None:
+    """Сеть ПВО (iads.lua): ЗРК на связи молчат до цели в зоне, без связи - сами по себе, реакция на ПРР."""
+    import lupa
+    print("\n== сеть ПВО (iads.lua) ==")
+    script = build.iads_script("c", 1, [{"group": "sam", "side": 1, "r": 40000, "net": True, "arm_p": 1.0, "harm_ok": False}],
+                               [{"group": "ewr", "side": 1, "air": False}])
+    L = lupa.LuaRuntime(unpack_returned_tuples=True)
+    L.execute(IADS_MOCK)
+    L.execute('ALIVE["sam"] = true; ALIVE["ewr"] = true; POS["sam"] = {0, 0}; POS["ewr"] = {50000, 0}; '
+              'ALIVE["f"] = true; POS["f"] = {100000, 0}; SEEN["ewr"] = { plane("f", 2) }')
+    L.execute(script)
+    G = L.globals()
+    L.execute("T = 5; SCHED()")
+    dark_far = G.ALARM["sam"] == 1
+    L.execute('POS["f"] = {30000, 0}; T = 10; SCHED()')
+    live_near = G.ALARM["sam"] == 2
+    L.execute('POS["f"] = {200000, 0}; T = 100; SCHED()')
+    dark_after = G.ALARM["sam"] == 1
+    L.execute('ALIVE["ewr"] = false; T = 110; SCHED()')
+    auto_cut = G.ALARM["sam"] == 2
+    L.execute('ALIVE["ewr"] = true; POS["f"] = {30000, 0}; T = 120; SCHED()')
+    L.execute('for _, h in ipairs(H) do h:onEvent({ id = 1, weapon = { getDesc = function() return { guidance = 5 } end, '
+              'getPoint = function() return { x = 20000, y = 0, z = 0 } end, getVelocity = function() return { x = -600, y = 0, z = 0 } end } }) end')
+    L.execute("T = 125; SCHED()")
+    harm_dark = G.ALARM["sam"] == 1
+    check(dark_far and live_near and dark_after and auto_cut and harm_dark,
+          "iads.lua: ЗРК на связи молчит, пока сеть не видит цель в его зоне; включается по цели; без узлов сети - сам по себе "
+          "(РЛС включены); пуск ПРР в его сторону - выключает РЛС (подавление)")
+    st = model.new_campaign("iads", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    sim.end_day(st)
+    planner.plan(st)
+    man = build.build(st, tmp / "iads.miz", task_no=2)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "iads.miz"))
+    txt = next(a.text.id for r in m.triggerrules.triggers for a in r.actions if hasattr(a, "text") and "redfront iads" in getattr(a.text, "id", ""))
+    check("harm_ok = true" in txt and "air = true" in txt and "red_gci_" in txt,
+          "в миссии: сеть ПВО обеих сторон - КРУ и ДРЛО как узлы, Patriot сбивает ПРР и РЛС не выключает")
+    # артиллерия и боевые порядки
+    arts = man.get("artillery", [])
+    check(all(len(a["vehicles"]) <= materialize.ART_GUNS for a in arts),
+          f"артиллерия частей в бою: батарей в миссии {len(arts)} (2С1 / M109), огневые налёты по линии противника")
+
+
+def formations_section(tmp: Path) -> None:
+    """Боевые порядки по доктрине (formations.py): ОВД - роты линией, эшелоны, танки впереди; НАТО - позиции уступом, клин."""
+    from redfront import formations
+    print("\n== боевые порядки ==")
+    roles = ["MBT"] * 10 + ["IFV"] * 20
+    wd = formations.layout("wp", "defend", 30, roles)
+    tanks_front = max(x for (x, y), r in zip(wd, roles) if r == "MBT") >= max(x for (x, y), r in zip(wd, roles) if r == "IFV")
+    second = min(x for x, y in wd) <= -formations.DEPTH_M
+    nd = formations.layout("nato", "defend", 30, roles)
+    stagger = len({round(x / 100) for x, y in nd}) > 3
+    na = formations.layout("nato", "attack", 10, roles[:10])
+    wedge = na[0][0] == max(x for x, y in na)
+    check(tanks_front and second and stagger and wedge and len(set(wd)) == 30,
+          "ОВД: танки в первой линии, треть рот во втором эшелоне; НАТО: позиции уступом, наступление клином")
+    st = model.new_campaign("form")
+    planner.plan(st)
+    sim.end_day(st)
+    st["doctrine"]["red"] = "wp"
+    g = materialize.battle_line(st, st["units"]["red_tp_1"])
+    art = materialize.artillery(st, st["units"]["red_tp_1"], g[0]["center"], g[0]["axis"], g[0]["fire_at"]) if g[0].get("fire_at") else []
+    check(g[0]["kind"] == "battle" and art and art[0]["vehicles"][0]["type"] == "SAU_Gvozdika",
+          "часть в бою: боевой порядок по доктрине и батарея поддержки за ним")
+
+
 def gui_planner_section(tmp: Path) -> None:
     """Окно: матрица синхронизации и маршруты выбранного вылета (gui.matrix, gui.sortie), английский язык."""
     from redfront import gui
@@ -3255,7 +3341,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section]
 
 
 def main() -> int:
