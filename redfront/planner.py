@@ -385,9 +385,16 @@ def alert_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[
         return min(model.dist_km(p, q) for q in mids)
     s = tdef["strike"]
     out, bases = [], set()
-    for r in sorted((r for r in performers if logistics.available(state, r) >= s["size"]),
+    spacing = tdef.get("qra_spacing_km", 0)
+    def air_ok(r):                               # истребители-бомбардировщики - если тип годится для боя в воздухе (F-16)
+        return r["role"] in ("interceptor", "fighter") or \
+            (fitness.relative(state, r.get("type", ""), "air") or 0) >= tdef.get("min_fit_air", 1.0)
+    for r in sorted((r for r in performers if logistics.available(state, r) >= s["size"] and air_ok(r)),
                     key=lambda r: front_km(state["airbases"][r["base"]])):
         if r["base"] in bases:
+            continue
+        # базы - вдоль всего фронта: не ближе qra_spacing_km к уже выбранной (иначе все звенья - в одном углу)
+        if any(model.dist_km(state["airbases"][r["base"]], state["airbases"][b]) < spacing for b in bases):
             continue
         bases.add(r["base"])
         base = state["airbases"][r["base"]]
@@ -849,9 +856,10 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             objective = {"kind": "sam", "units": [u["id"] for u in objs]}
             # одно ожидание - на рубеже по ближнему ЗРК; атака - по всем (в бою ЗРК стоят рядом)
             route_of = lambda base, g=g, objs=objs: [hold_point(state, objs[0], base, g)]
-        elif g.get("mode") == "sweep_zone":       # расчистка воздуха: зона на подходе (ИПМ ударной) до выхода удара на цель
-            objective = {"kind": "sweep_zone", "unit": tgt["id"], "pos": dict(ip)}
-            route_of = lambda base: [dict(ip)]
+        elif g.get("mode") == "sweep_zone":       # расчистка воздуха: зона на подходе до выхода удара на цель, вне зон ЗРК
+            sp = clear_point(state, perf["side"], ip, state["airbases"][perf["base"]])
+            objective = {"kind": "sweep_zone", "unit": tgt["id"], "pos": sp}
+            route_of = lambda base, sp=sp: [sp]
         elif g.get("mode") == "feint":            # демонстративная: другим направлением на средней высоте, вне зон ЗРК
             fp = feint_point(state, perf, ip, g, perf["side"])
             objective = {"kind": "feint", "unit": tgt["id"], "pos": fp}
@@ -909,6 +917,31 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                            **{k: g[k] for k in ZONE_KEYS if k in g}})
     rendezvous(state, tdef, groups)
     return groups, "; ".join(notes)
+
+
+def _known_sams(state: dict, side: str) -> list[tuple[dict, float]]:
+    """(место, радиус поражения) известных стороне side ЗРК противника."""
+    foe = model.enemy(side)
+    out = []
+    for u in state["units"].values():
+        if u["side"] == foe and model.category(u) == "sam" and u["state"] != "destroyed" and model.strength(u) > 0:
+            p = intel.known_pos(state, u) if side == state.get("player_side") else model.unit_pos(state, u)
+            if p:
+                out.append((p, threat_radius_km(u)))
+    return out
+
+
+def clear_point(state: dict, side: str, p: dict, home: dict, step_km: float = 5, max_km: float = 80) -> dict:
+    """Ближайшая к p точка на линии p - home вне зон поражения известных ЗРК (зона расчистки воздуха)."""
+    sams = _known_sams(state, side)
+    d = model.dist_km(p, home)
+    k = 0.0
+    while k <= min(max_km, d):
+        q = model.lerp(p, home, k / d) if d else dict(p)
+        if not any(model.dist_km(q, c) <= r for c, r in sams):
+            return {"lat": q["lat"], "lon": q["lon"]}
+        k += step_km
+    return {"lat": p["lat"], "lon": p["lon"]}
 
 
 def feint_point(state: dict, perf: dict, ip: dict, g: dict, side: str) -> dict:

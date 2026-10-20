@@ -661,7 +661,7 @@ def ops_section(tmp: Path) -> None:
     check(fl and all(ops.owner(st, a) != ops.owner(st, b) for a, b in fl), f"линия фронта: {len(fl)} связей между пунктами сторон")
     # отходящая часть разрывает соприкосновение и не держит пункт
     w = next((u for u in ops._maneuver(st) if u.get("order") == "withdraw"), None)
-    check(w is None or w["state"] == "march", "отходящая часть - на марше, не в бою")
+    check(w is None or w["state"] == "march", f"отходящая часть - на марше, не в бою{(' (' + w['id'] + ': ' + w['state'] + ', ' + str(w.get('route')) + ')') if w else ''}")
 
 
 def front_lua_section(m, man: dict, st: dict) -> None:
@@ -1253,7 +1253,9 @@ def mapobj_section(tmp: Path) -> None:
     planner.plan(st2)
     kinds = [t["kind"] for t in st2["tasks"]]
     fk = [t for t in st2["tasks"] if t["kind"] == "strike_factory"]
-    check(bool(fk) or len(kinds) >= planner.MAX_TASKS, f"в плане дня есть удар по заводу (или план заполнен): {kinds}")
+    cand = [t["kind"] for t in planner.plan_side(st2, "red")[0]]   # задачи до расстановки по самолётам суток
+    check(bool(fk) or "strike_factory" in cand or len(kinds) >= planner.MAX_TASKS,
+          f"удар по заводу - в задачах планировщика (в плане дня - если хватило самолётов): {kinds}")
     if fk:
         man = build.build(st2, tmp / "factory.miz", task_no=st2["tasks"].index(fk[0]) + 1)
         objs = [o if isinstance(o, str) else o.get("id") for o in man.get("objects", [])]
@@ -3141,11 +3143,76 @@ def heli_pkg_section(tmp: Path) -> None:
           "ночью из ударных вертолётов летает только AH-64A, Ми-24П - днём")
 
 
+PUSH_MOCK = """
+T = 0; FLAGS = {}; CMDS = {}; H = {}; SCHED = nil; ALIVE = {}
+world = { event = { S_EVENT_SHOT = 1 }, addEventHandler = function(h) H[#H + 1] = h end }
+timer = { getTime = function() return T end, scheduleFunction = function(f, a, t) SCHED = f end }
+trigger = { action = { setUserFlag = function(f, v) FLAGS[f] = v end } }
+env = { info = function() end }
+local function grp(n)
+  return { isExist = function() return true end, getName = function() return n end,
+           getUnits = function() return { { isExist = function() return ALIVE[n] end, getLife = function() return 1 end } } end,
+           getController = function() return { setCommand = function(_, c) CMDS[#CMDS + 1] = { n, c } end } end }
+end
+Group = { getByName = function(n) return grp(n) end }
+"""
+
+
+def push_qra_section(tmp: Path) -> None:
+    """Удар по готовности подавления ПВО (push.lua), дежурные звенья вдоль фронта, ДРЛО и заправщики в миссии."""
+    import lupa
+    from redfront import ato
+    print("\n== push.lua, дежурные звенья, ДРЛО ==")
+    st = model.new_campaign("push", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    sim.end_day(st)
+    planner.plan(st)
+    i = next(i for i, t in enumerate(st["tasks"]) if any(g["group"] == "sead" for g in t["package"]))
+    pk = {g["group"]: g for g in st["tasks"][i]["package"]}
+    fly = "cover" if "cover" in pk else "sead"
+    man = build.build(st, tmp / "push.miz", task_no=i + 1, fly=fly)
+    m = dcs.Mission(Germany())
+    m.load_file(str(tmp / "push.miz"))
+    sg = next(g for c in m.coalition["red"].countries.values() for g in c.plane_group if " strike " in g.name)
+    ipi = next(k for k, p in enumerate(sg.points) if p.name == "ИПМ")
+    hold = [t for t in sg.points[ipi].tasks if getattr(t, "id", None) == "ControlledTask"]
+    check(hold and hold[0].params["stopCondition"].get("userFlag") == str(build.PUSH_FLAG),
+          "ударная группа ИИ ждёт на ИПМ (круг до флага) - пусков ПРР группы подавления")
+    script = next(a.text.id for r in m.triggerrules.triggers for a in r.actions
+                  if hasattr(a, "text") and "redfront push" in getattr(a.text, "id", ""))
+    sead_name = next(g.name for c in m.coalition["red"].countries.values() for g in c.plane_group if " sead " in g.name)
+    def run(events):
+        L = lupa.LuaRuntime(unpack_returned_tuples=True)
+        L.execute(PUSH_MOCK)
+        L.execute(f'ALIVE["{sead_name}"] = true')
+        L.execute(script)
+        Gl = L.globals()
+        for ev in events:
+            L.execute(ev)
+        return Gl
+    G1 = run(['T = 30000; SCHED()'])                                   # срок прошёл, подавление живо - удар по сроку
+    G2 = run([f'for _, h in ipairs(H) do h:onEvent({{ id = 1, initiator = {{ getGroup = function() return {{ getName = function() return "{sead_name}" end }} end }} }}) end'])
+    G3 = run([f'ALIVE["{sead_name}"] = false; T = 20000; SCHED()'])   # подавление сбито, не выстрелив - отмена
+    check(G1.REDFRONT_PUSH["push-" + str(man["sortie"])] == "deadline" and G2.REDFRONT_PUSH["push-" + str(man["sortie"])] == "sead"
+          and G3.REDFRONT_PUSH["push-" + str(man["sortie"])] == "abort" and G3.CMDS[1] and G3.FLAGS[build.PUSH_FLAG],
+          "push.lua: пуск группы подавления - удар; подавление сбито, не выстрелив, - удар отменён (домой); нет пусков к сроку - удар")
+    # дежурные звенья: вдоль фронта, у синих - и ближние к фронту истребители-бомбардировщики (F-4F, F-16)
+    qs, _w = planner.plan_side(st, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
+    q = [t for t in qs if t["kind"] == "qra"]
+    bases = [st["airbases"][t["base"]] for t in q]
+    check(len(q) >= 4 and all(t["group_size"] == 4 for t in q)
+          and all(model.dist_km(a, b) >= 80 for k, a in enumerate(bases) for b in bases[k + 1:]),
+          f"дежурные звенья синих (4 ЛА) на {len(q)} аэродромах вдоль фронта: {', '.join(b['name'] for b in bases)}")
+    types = {side: [g.units[0].unit_type.id for c in m.coalition[side].countries.values() for g in c.plane_group]
+             for side in ("red", "blue")}
+    check("A-50" in types["red"] and "E-3A" in types["blue"] and "KC-135" in types["blue"],
+          "в миссии ДРЛО обеих сторон (А-50, E-3A) и заправщик синих (KC-135; у ОВД фронтовой авиации заправщиков не было)")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section]
 
 
 def main() -> int:

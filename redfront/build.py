@@ -36,6 +36,9 @@ EVAC_LUA = Path(__file__).parent / "lua" / "evac.lua"
 CSAR_LUA = Path(__file__).parent / "lua" / "csar.lua"
 LZ_LUA = Path(__file__).parent / "lua" / "lz.lua"
 QRA_LUA = Path(__file__).parent / "lua" / "qra.lua"
+PUSH_LUA = Path(__file__).parent / "lua" / "push.lua"
+PUSH_FLAG = 7001         # флаг DCS: ударные группы ИИ уходят с ИПМ на цель
+PUSH_WAIT_S = 180        # ОЦЕНКА: сколько ударная группа ждёт пусков ПРР на ИПМ сверх расчётного времени
 BEACON_FILE = "redfront_beacon.wav"
 # CTLD (lua/ctld/NOTICE.md): погрузка и высадка десанта игрока, ящики снабжения, авианаводчик. ОЦЕНКИ - размеры зон.
 CTLD_DIR = Path(__file__).parent / "lua" / "ctld"
@@ -301,6 +304,18 @@ def qra_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
              f'r = {a["r"]:.0f}, title = {q(a["title"])} }}' for a in specs]
     return (QRA_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
             .replace("@SPECS@", ", ".join(items)))
+
+
+def push_script(campaign_id: str, sortie: int, spec: dict) -> str:
+    """lua/push.lua: удар по готовности подавления ПВО - ударные группы (имя, точка ИПМ, точка посадки), группы
+    подавления (имя, взлёт, с), флаг, срок (с от начала миссии)."""
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    lst = lambda xs, f=q: "{ " + ", ".join(f(x) for x in xs) + " }"
+    item = (f'{{ id = {q(spec["id"])}, flag = {spec["flag"]}, strikes = {lst(spec["strikes"])}, ip = {lst(spec["ip"], str)}, '
+            f'home = {lst(spec["home"], str)}, sead = {lst(spec["sead"])}, sead_start = {lst(spec["sead_start"], str)}, '
+            f'deadline = {int(spec["deadline"])} }}')
+    return (PUSH_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
+            .replace("@SPECS@", item))
 
 
 def lz_script(campaign_id: str, sortie: int) -> str:
@@ -973,6 +988,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     ctld_assault: list[tuple[dict, str]] = []     # (высадка, борт игрока) - группа десанта CTLD по его доле роты
     ctld_lines: list[str] = []
     enemy = air_activity(state, tk, times, sortie, m0)
+    # удар по готовности подавления ПВО (push.lua): ударные группы ИИ ждут на ИПМ пусков ПРР
+    sead_g = [x for x in pkg if x["objective"]["kind"] == "sam" and support.get(x.get("support_id"), {}).get("mode") != "kill"]
+    push_spec = {"id": f"push-{sortie}", "flag": PUSH_FLAG, "strikes": [], "ip": [], "home": [], "deadline": 0,
+                 "sead": [f"{x['performer']} {x['group']} {sortie}" for x in sead_g],
+                 "sead_start": [times[x["group"]]["start_s"] for x in sead_g]}
     for g in pkg + enemy:
         tdg = g.get("_tdef") or (model.doctrine(state, g.get("_side", tk["side"]))["tasks"].get(g["jaat_kind"]) if g.get("jaat_kind") else None) \
             or tdef                              # группы противника - по его пакету доктрины; вертолёты совместного удара - по своей
@@ -1068,6 +1088,16 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         ai = g.get("ai") or {}
         for opt in _ai_options(ai):              # поведение ИИ из доктрины (группа подавления ПВО: не бросать атаку)
             fg.points[0].tasks.append(opt)
+        def push_hold(w, ip, tgt):               # ударная группа ИИ при подавлении ПВО - круг на ИПМ до флага (push.lua)
+            if is_player or g["group"] != "strike" or g.get("_ai") or not push_spec["sead"]:
+                return
+            hold = task.ControlledTask(task.OrbitAction(altitude=int(w.alt), speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
+            hold.stop_if_user_flag(PUSH_FLAG, True)
+            w.tasks.append(hold)
+            push_spec["strikes"].append(fg.name)
+            push_spec["ip"].append(len(fg.points) - 1)
+            push_spec["deadline"] = int(times["strike"]["objective_s"] - model.dist_km(ip, tgt) * 3600 / spd
+                                        + PUSH_WAIT_S)
         obj = g["objective"]
         land = airport
         if g.get("rv") and obj["kind"] in planner.RV_KINDS:   # сбор пакета: ИИ приходит к своему времени (ETA), игрок - по брифингу
@@ -1208,7 +1238,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             g["_lz"] = obj["place"]
         elif obj["kind"] in ("column", "site"):    # ударная группа: колонна, часть в бою, позиция ЗРК
             ip, tgt = g["route"]
-            wp(ip, transit, "ИПМ")
+            push_hold(wp(ip, transit, "ИПМ"), ip, tgt)
             w = wp(tgt, tdg["attack_alt_m_agl"], "Цель")
             if obj["unit"] in platoons:          # часть в бою - взводами: удар по району её боевого порядка
                 bg = next(x for x in groups if x["unit"] == obj["unit"])
@@ -1279,7 +1309,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             g["zone"] = {"center": center, "radius_km": round(radius_km, 1)}
         elif obj["kind"] == "point":             # объект тыла: мост - по объекту карты, склад и аэродром - бомбами по точке
             ip, tgt = g["route"]
-            wp(ip, transit, "ИПМ")
+            push_hold(wp(ip, transit, "ИПМ"), ip, tgt)
             w = wp(tgt, tdg["attack_alt_m_agl"], "Цель")
             c = _pt(m, tgt)
             a_ = (g.get("ai") or {}).get("attack") or {}
@@ -1324,6 +1354,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(tgt, transit, "Цель")
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         _land(fg, land, spd)
+        if fg.name in push_spec["strikes"]:
+            push_spec["home"].append(len(fg.points) - 1)
         t = times[g["group"]]
         when = (f"посадка в {g['_dest']} ~{t['objective_s'] // 60} мин" if g.get("_dest")
                 else f"в районе ~{t['objective_s'] // 60} мин")
@@ -1424,6 +1456,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for a_ in ctld_actions(m, state, ctld):
             trig.add_action(a_)
     trig.add_action(DoScript(String(csar_script(m, state, downed, rescuers))))
+    if push_spec["strikes"]:                     # удар по готовности подавления ПВО
+        trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], push_spec))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
         trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
     if evac_specs:                               # эвакуация: рота садится в борта на площадке (evac.lua; игрок - CTLD)
