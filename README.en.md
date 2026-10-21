@@ -693,8 +693,12 @@ Weather in the air tasking order (`weather.blocks`, minima `weather.MINIMA`, est
 visibility 1.5 km; visual attack (column, site, landing zone, CSAR) — 600 m and 5 km; photo recon — 1000 m and 5 km;
 all-weather types (aircraft.json `night`: Su-24M, Tornado etc.), fighters, AWACS, tankers and airlift — airfield
 minima (60 m, 800 m). Checked at takeoff and at the objective; a sortie is moved later (morning fog lifts by
-10–11 h) or cancelled if no window is found (logged and shown in the window). Disable with
-`settings.weather_effects = false`.
+10–11 h) or cancelled if no window is found (logged and shown in the window). Weather settings (⚙ → "Campaign", action `setweather`): climate and season (default), fair only (high pressure
+and post-frontal, no fog, cloud base at least 1200 m — e.g. for helicopter flying) or fixed (weather type for every
+day and morning fog); the "weather affects the air tasking order" box is `settings.weather_effects`. The campaign
+start date is set when creating a campaign (default — the preset date) and can be changed later (`setdate`): it sets
+the weather season and mission dates; forces stay as in the preset. After a change the weather is recomputed from
+today if nothing has been flown today (the ATO is rebuilt), otherwise from tomorrow.
 
 Kneeboard (`kneeboard.py`, needs Pillow): pages for the player aircraft type — mission (target, threats, package,
 sequence, route with times and altitudes), comms, weather and airfields. DCS shows kneeboards per aircraft type, so

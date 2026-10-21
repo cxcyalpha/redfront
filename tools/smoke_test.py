@@ -1345,6 +1345,28 @@ def gui_section(tmp: Path) -> None:
     r = app.do("endday", {"file": "g1.json"})
     check(r["state"]["day"] == 2, "конец дня из окна")
     check(app.path("../x").parent == root, "имя файла кампании не выходит из папки проекта")
+    # дата начала и настройки погоды: из окна при создании и потом
+    r = app.do("new", {"file": "g2", "side": "red", "seed": "42", "date": "1985-12-10"})
+    check(r["state"]["date"] == "1985-12-10", "новая кампания с заданной датой начала")
+    app.do("plan", {"file": "g2.json"})
+    r = app.do("setweather", {"file": "g2.json", "mode": "fixed", "type": "low", "fog": False, "effects": True})
+    st2 = model.load(root / "g2.json")
+    from redfront import weather as _wx
+    days = [_wx.day(st2, d)["type"] for d in range(1, 8)]
+    check(set(days) == {"low"} and not r["state"]["tasks"] and "сегодня" in r["lines"][0],
+          f"погода 'заданная - циклон': все сутки - циклон; сегодня ещё не летали - план заново ({r['lines'][0]})")
+    app.do("setweather", {"file": "g2.json", "mode": "fair", "effects": True})
+    st2 = model.load(root / "g2.json")
+    fair = [_wx.day(st2, d) for d in range(1, 31)]
+    check(all(w["type"] in ("high", "post") and not w["fog"] and (_wx.cloud_base(w) or 9999) >= 1200 for w in fair),
+          "погода 'только хорошая': 30 суток без тумана и облаков ниже 1200 м")
+    r = app.do("setdate", {"file": "g2.json", "date": "1985-07-01"})
+    check(r["state"]["date"] == "1985-07-01" and _wx._month(model.load(root / "g2.json")) == 7, "дата начала меняется из окна (сезон погоды)")
+    try:
+        app.do("setdate", {"file": "g2.json", "date": "1985-13-40"}); bad = False
+    except ValueError:
+        bad = True
+    check(bad, "неверная дата не принимается")
 
 
 def germany_section(tmp: Path) -> None:

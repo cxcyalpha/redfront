@@ -275,6 +275,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     sec = load_json(sector)
     forces = load_json(oob)
     date = date or forces.get("date") or "2026-05-15"   # дата среза пресета состава сил (1985, 1987, 1989)
+    import datetime
+    date = datetime.date.fromisoformat(str(date)).isoformat()   # своя дата - ГГГГ-ММ-ДД, иначе ошибка сразу
     if forces["countries"]["red"] == forces["countries"]["blue"]:
         raise ValueError("у сторон в составе сил одна и та же страна (countries)")
     terrain = Germany()
@@ -420,6 +422,17 @@ def rng(state: dict, purpose: str) -> random.Random | None:
     if not state.get("settings", {}).get("randomness"):
         return None
     return random.Random(f"{(state.get('scenario') or {}).get('seed', 0)}-{state['day']}-{purpose}")
+
+
+def set_date(state: dict, date: str) -> str:
+    """Дата начала кампании (ГГГГ-ММ-ДД): сезон погоды, дата миссий. Состав сил - по пресету, не меняется."""
+    import datetime
+    d = datetime.date.fromisoformat(str(date).strip())
+    if not 1950 <= d.year <= 2010:
+        raise ValueError("дата - 1950-2010 (эпоха театра)")
+    state["date"] = d.isoformat()
+    from . import weather
+    return weather.reset(state)
 
 
 def note(state: dict, text: str) -> None:

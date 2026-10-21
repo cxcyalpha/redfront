@@ -167,6 +167,8 @@ def view(st: dict) -> dict:
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
         "weather": wx_lines[0], "weather_text": "\n".join(wx_lines[1:] + wx_cancel),
+        "wx": {k: st["settings"].get(k, v) for k, v in (("weather_mode", "climate"), ("weather_type", "high"),
+                                                         ("weather_fog", False), ("weather_effects", True))},
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open"),
                       "kind": b.get("kind", "airfield"),       # farp - вертолётная площадка (farp.py)
@@ -325,6 +327,7 @@ class App:
             title = (d.get("preset") or {}).get("title") or f.stem
             out.append({"file": key, "title": title + (" (свой)" if key.startswith("presets/") else "")
                         + (" - по умолчанию" if key == default else ""),
+                        "date": d.get("date"),
                         "variants": [{"name": v["name"], "title": v.get("title", v["name"])} for v in d.get("variants", [])]})
         return out
 
@@ -359,7 +362,8 @@ class App:
             oob_f = self.preset_path(_tid, req.get("preset"))
             st = model.new_campaign(p.stem, player_side=req.get("side", "red"), sector=sec_f, oob=oob_f,
                                     seed=int(seed) if str(seed or "").strip() else None,
-                                    variant=req.get("variant") or None, randomness=not req.get("norandom"))
+                                    variant=req.get("variant") or None, randomness=not req.get("norandom"),
+                                    date=str(req.get("date") or "").strip() or None)
             sid = roads.sector_id(sec_f)
             rf = saved_games_file(f"roads_{sid}.json", self.home) or roads.bundled(sid)   # свой зонд, иначе - из поставки
             if rf:
@@ -424,6 +428,21 @@ class App:
             return {"state": view(st)}
         if action == "sortie":                       # выбранный вылет: маршруты групп, угрозы (карта, инспектор)
             return {"sortie": sortie(st, req["id"])}
+        if action == "setdate":                      # дата начала кампании (сезон, погода)
+            ln = model.set_date(st, req.get("date"))
+            model.note(st, f"Дата начала кампании: {st['date']}; {ln}.")
+            model.save(st, p)
+            return {"state": view(st), "lines": [ln]}
+        if action == "setweather":                   # настройки погоды: режим, тип, туман, влияние на план полётов
+            from . import weather as _wx
+            cfg = st["settings"]
+            mode = req.get("mode") if req.get("mode") in _wx.MODES else "climate"
+            cfg["weather_mode"], cfg["weather_type"] = mode, req.get("type") if req.get("type") in _wx.TRANS else "high"
+            cfg["weather_fog"], cfg["weather_effects"] = bool(req.get("fog")), bool(req.get("effects", True))
+            ln = _wx.reset(st)
+            model.note(st, f"Погода: режим {mode}; {ln}.")
+            model.save(st, p)
+            return {"state": view(st), "lines": [ln]}
         if action == "setlang":                      # язык кампании: окно, брифинг миссии (i18n.py)
             st["settings"]["lang"] = "en" if req.get("lang") == "en" else "ru"
             model.save(st, p)

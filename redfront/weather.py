@@ -46,6 +46,22 @@ def _month(state: dict) -> int:
     return (datetime.date(y, mo, d) + datetime.timedelta(days=state["day"] - 1)).month
 
 
+MODES = ("climate", "fair", "fixed")   # settings.weather_mode: по климату / хорошая / заданный тип погоды (weather_type)
+
+
+def reset(state: dict) -> str:
+    """Погода пересчитывается после смены настроек погоды или даты: с завтрашних суток, а если в эти сутки ещё не
+    летали (нет слетанных вылетов) - и сегодня, с новым планом полётов. Возвращает строку для журнала."""
+    a = state.get("ato") or {}
+    today_free = a.get("day") != state["day"] or not a.get("done")   # done - слетанные вылеты суток
+    first = state["day"] if today_free else state["day"] + 1
+    state["weather"] = {k: v for k, v in (state.get("weather") or {}).items() if int(k) < first}
+    if today_free:
+        state["ato"], state["tasks"], state["task"] = None, [], None
+        return "погода пересчитана с сегодняшних суток - план полётов будет построен заново"
+    return "погода пересчитана с завтрашних суток (сегодня уже летали)"
+
+
 def day(state: dict, d: int | None = None) -> dict:
     """Погода суток d (по умолчанию - текущих); считается один раз и хранится в кампании (state["weather"])."""
     d = d or state["day"]
@@ -65,8 +81,14 @@ def day(state: dict, d: int | None = None) -> dict:
         k = cyc / 0.45                           # сезон: зимой циклоны чаще
         w["low"] *= k
         w["front"] *= k
+    cfg = state.get("settings") or {}
+    mode = cfg.get("weather_mode", "climate")
+    if mode == "fair":                           # хорошая погода: антициклон или тыл циклона, без тумана и низких облаков
+        w = {"high": 0.6, "post": 0.4}
+    elif mode == "fixed" and cfg.get("weather_type") in TRANS:
+        w = {cfg["weather_type"]: 1.0}
     t = r.choices(list(w), weights=list(w.values()))[0]
-    preset = r.choice(PRESETS[t])
+    preset = r.choice([p for p in PRESETS[t] if mode != "fair" or not (p or "").startswith(("Broken", "Overcast"))] or [None])
     wdir0, spread, v0, v1, qnh = WIND[t]
     wdir = (wdir0 + r.uniform(-spread, spread)) % 360
     wspd = r.uniform(v0, v1) * (1.2 if mo in (11, 12, 1, 2, 3) else 1.0)
@@ -80,9 +102,12 @@ def day(state: dict, d: int | None = None) -> dict:
         lo, hi = max(p.min_base, 150), p.max_base
         k = {"low": 0.12, "front": 0.25, "post": 0.4, "high": 0.5}[t] * r.uniform(0.3, 1.6)
         base = int(round(lo + (hi - lo) * min(k, 0.9), -1))
+        if mode == "fair":
+            base = max(base, 1200)
     out = {"type": t, "preset": preset, "base_m": base, "wind_dir": round(wdir), "wind_mps": round(wspd, 1),
            "qnh_hpa": round(qnh + r.uniform(-6, 6)), "tmax_c": round(tmax), "swing_c": swing,
-           "fog": t == "high" and r.random() < fog_p, "rain": rain,
+           "fog": (bool(cfg.get("weather_fog")) if mode == "fixed" else mode != "fair" and t == "high" and r.random() < fog_p),
+           "rain": rain,
            "vis_km": round(r.uniform(5, 10) if rain else r.uniform(15, 30) if t in ("low", "front") else r.uniform(30, 80))}
     if out["fog"]:
         out["fog_vis_m"] = round(r.uniform(400, 1500), -1)
