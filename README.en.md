@@ -765,7 +765,10 @@ with a 10 m antenna, ignoring terrain); otherwise S-200 or Patriot would "reach"
   the area.
 * No jammers (Yak-28PP, Su-24MP, Mi-8PPA) — they do not exist in DCS.
 
-**Strike on SEAD readiness** (`lua/push.lua`). The AI strike group orbits at the IP until the SEAD group starts
+**AI sorties in the mission fly as full packages:** the strike group and its support groups (SEAD, kill, escort,
+sweep, feint) with their own ATO times; the SEAD group only if its SAMs are placed in the mission.
+
+**Strike on SEAD readiness** (`lua/push.lua`). The AI strike group (of the player's package and of every AI sortie, each with its own flag) orbits at the IP until the SEAD group starts
 launching; no launches by planned time + 3 min (SAM radars silent) — strike on schedule; SEAD groups shot down
 without firing — strike cancelled.
 

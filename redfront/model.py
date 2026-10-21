@@ -398,9 +398,11 @@ def load(path: Path) -> dict:
 
 def drop_dummy_depots(st: dict) -> None:
     """Склады, найденные зондом карты (supply: false), - цели без последствий: путали игрока - убраны из кампании."""
-    for uid in [k for k, u in st.get("units", {}).items() if u.get("role") == "depot" and u.get("supply") is False]:
+    gone = [k for k, u in st.get("units", {}).items() if u.get("role") == "depot" and u.get("supply") is False]
+    for uid in gone:
         del st["units"][uid]
-    ok = lambda t: t.get("target") is None or t.get("target") in st["units"] or t.get("target_kind") == "convoy"
+    # только задачи по удалённым складам; цели дежурств, перевозок, разведки (orbit_..., qra_...) - не части
+    ok = lambda t: t.get("target") not in gone
     st["tasks"] = [t for t in (st.get("tasks") or []) if ok(t)]
     if st.get("task") and not ok(st["task"]):
         st["task"] = None
