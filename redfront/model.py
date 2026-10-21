@@ -8,10 +8,11 @@
 """
 from __future__ import annotations
 
+import bisect
 import copy
 import json
-import random
 import math
+import random
 import uuid
 from pathlib import Path
 
@@ -193,11 +194,42 @@ def strength(unit: dict) -> float:
     return sum(alive_by_type(unit).values()) / t if t else 0.0
 
 
+_GEOM: dict = {}
+
+
+def _route_geom(state: dict, route: list[str]) -> tuple[list[dict], list[float]]:
+    """Геометрия маршрута и накопленные км по точкам - с кэшем: место части спрашивается сотни тысяч раз за сутки
+    (бой, марш, снабжение), а маршрут меняется редко. Только для чтения."""
+    roads, places = state.get("roads") or {}, state["places"]
+    links = [f"{a}>{b}" for a, b in zip(route, route[1:])]
+    key = (tuple((places[p]["lat"], places[p]["lon"]) for p in route),        # не id словарей: кампаний за сеанс много
+           tuple((len(roads.get(k) or ()), len(roads.get(">".join(reversed(k.split(">")))) or ())) for k in links))
+    g = _GEOM.get(key)
+    if g is None:
+        if len(_GEOM) > 20000:
+            _GEOM.clear()
+        pts = route_points(state, {"route": route})
+        cum = [0.0]
+        for i in range(len(pts) - 1):
+            cum.append(cum[-1] + dist_km(pts[i], pts[i + 1]))
+        g = _GEOM[key] = (pts, cum)
+    return g
+
+
+def route_km(state: dict, unit: dict) -> float:
+    """Длина маршрута части, км (route_length_km(route_points(...)) по кэшу геометрии)."""
+    return _route_geom(state, unit["route"])[1][-1]
+
+
 def unit_pos(state: dict, unit: dict) -> dict:
     if unit.get("attached_to"):                 # приданная часть (войсковая ПВО) - там же, где её часть
         return unit_pos(state, state["units"][unit["attached_to"]])
-    if "route" in unit:
-        return point_at_km(route_points(state, unit), unit["progress_km"])[0]
+    if "route" in unit:                          # как point_at_km(route_points(...)), по кэшу геометрии
+        pts, cum = _route_geom(state, unit["route"])
+        km = max(0.0, unit["progress_km"])
+        i = min(max(0, bisect.bisect_right(cum, km) - 1), len(pts) - 2)
+        seg = cum[i + 1] - cum[i]
+        return lerp(pts[i], pts[i + 1], min(1.0, (km - cum[i]) / seg if seg else 0.0))
     if "pos" in unit:
         return unit["pos"]
     base = state["airbases"][unit["base"]]
@@ -243,6 +275,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     sec = load_json(sector)
     forces = load_json(oob)
     date = date or forces.get("date") or "2026-05-15"   # дата среза пресета состава сил (1985, 1987, 1989)
+    import datetime
+    date = datetime.date.fromisoformat(str(date)).isoformat()   # своя дата - ГГГГ-ММ-ДД, иначе ошибка сразу
     if forces["countries"]["red"] == forces["countries"]["blue"]:
         raise ValueError("у сторон в составе сил одна и та же страна (countries)")
     terrain = Germany()
@@ -350,7 +384,37 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     _farp.ensure(st)
     from . import intel as _intel                # туман войны: известные позиции ЗРК противника
     _intel.ensure(st)
+    for side in (chosen or {}).get("assembly", []):   # вариант: первый эшелон стороны - в исходных районах у границы
+        assembly_areas(st, side)
     return st
+
+
+ASSEMBLY_PER_PLACE = 2   # ОЦЕНКА: дивизий (бригад) первого эшелона в исходном районе у одного пункта
+
+
+def assembly_areas(state: dict, side: str) -> list[str]:
+    """Первый эшелон стороны (части на месте с первого дня, не десант и не резерв) - в исходных районах: в пунктах
+    своей стороны на линии фронта, ближних по дорогам к месту дислокации (не больше ASSEMBLY_PER_PLACE на пункт).
+    Так внезапное наступление начинается с границы в первые часы, а не после марша из гарнизонов (ОЦЕНКА замысла:
+    выход в исходные районы до начала операции)."""
+    from . import ops
+    front = ops.front_nodes(state, side)
+    used: dict[str, int] = {}
+    lines = []
+    own = sorted((u for u in state["units"].values() if u["side"] == side and role_info(u["role"])["category"] == "ground"
+                  and u.get("role") == "maneuver" and u["state"] == "defend" and not u.get("attached_to")
+                  and u.get("order") not in ("reserve", "airhead") and len(u.get("route", [])) == 1), key=lambda u: u["id"])
+    for u in own:
+        here = u["route"][0]
+        free = [p for p in front if used.get(p, 0) < ASSEMBLY_PER_PLACE] or front
+        if not free or here in front:
+            continue
+        t = min(free, key=lambda p: ops.path_km(state, here, p))
+        used[t] = used.get(t, 0) + 1
+        u["route"], u["progress_km"] = [t], 0.0
+        u["garrison"] = here
+        lines.append(f"{u['name']}: исходный район у {t} (из {here}).")
+    return lines
 
 
 def rng(state: dict, purpose: str) -> random.Random | None:
@@ -358,6 +422,17 @@ def rng(state: dict, purpose: str) -> random.Random | None:
     if not state.get("settings", {}).get("randomness"):
         return None
     return random.Random(f"{(state.get('scenario') or {}).get('seed', 0)}-{state['day']}-{purpose}")
+
+
+def set_date(state: dict, date: str) -> str:
+    """Дата начала кампании (ГГГГ-ММ-ДД): сезон погоды, дата миссий. Состав сил - по пресету, не меняется."""
+    import datetime
+    d = datetime.date.fromisoformat(str(date).strip())
+    if not 1950 <= d.year <= 2010:
+        raise ValueError("дата - 1950-2010 (эпоха театра)")
+    state["date"] = d.isoformat()
+    from . import weather
+    return weather.reset(state)
 
 
 def note(state: dict, text: str) -> None:

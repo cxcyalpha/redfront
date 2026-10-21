@@ -288,6 +288,14 @@ Ground model (`sim.py`, coefficients in the doctrine `sim` section, estimates): 
 loses less) and leave combat below the combat-effectiveness threshold. A unit that reaches the end of its route
 occupies an area (defence). Attached air defence takes losses together with its unit.
 
+March rate: out of contact (enemy farther than `road_clear_km`, 15 km — the deployment line) a unit moves as a march
+column at `road_march_km` per day (150 km, estimate); closer — at the attack rate (`daily_advance_km`, 25 km). A unit
+may set its own `road_march_km` (0 — always the attack rate; used in the Hamburg training scenario). In the "Warsaw
+Pact strike along the whole front" scenario (variant `assembly`) the WP first echelon starts in assembly areas at the
+border and day-1 NATO brigades in border towns (forward defence); combat begins in the first hours of day 1
+(`model.assembly_areas`). Unit positions on the road (`model.unit_pos`) use a cached route geometry: the end of day
+for the whole front takes seconds rather than minutes.
+
 The model follows the campaign clock (`sim.advance`): step — 1 h, combat and march per step — 1/24 of the daily norm
 (strength recalculated every hour), place capture — every hour, command decisions — at 00, 06, 12 and 18 h (rear-area
 recovery — 6 h). Supply, repair, replacements and the fate of downed crews — once a day, at its end.
@@ -652,7 +660,7 @@ positions, SAMs in full. Density far away — 0.35 of the column budget, one veh
 (estimates: `FAR_DENSITY`, `MAX_WEIGHT`). In the whole-map theatre: units within 60 km — partially (up to 24
 vehicles), farther — a presence marker (4 vehicles); point air defence — within 100 km of the target
 (`materialize.SAM_KM_ROLE`), other SAMs — within 250 km: full sites up to 150 km, beyond that a marker (radars and 2
-launchers, launcher weight by the conservation rule; `SAM_FULL_KM`, `SAM_TOKEN_LN`). Organic air defence of units more
+launchers, launcher weight up to 3 model vehicles; `SAM_FULL_KM`, `SAM_TOKEN_LN`). Organic air defence of units more
 than 60 km from the target (not in combat) is not placed; outside the task window attached air defence carries at most
 2 radar vehicles (`AD_RADAR_MAX`), the rest are MANPADS, optical SAMs and guns. Site SAM launchers follow the
 establishment (SA-2 and SA-5 — 6, SA-3 and SA-6 — 4, HAWK — 6, Patriot — 8), laid out per system (`SITE_LAYOUT`;
@@ -679,7 +687,18 @@ Weather is per day, with memory (`weather.py`): the regime (high, front, low, po
 probabilities from yesterday, adjusted by season; clouds are DCS presets; wind at ground, 2000 and 8000 m; temperature
 for the sortie hour; QNH, visibility, rain, morning fog under a high in the cold season. Climate after Hannover
 normals (DWD 1961–1990); probabilities and thresholds are estimates. A METAR-style summary goes into the briefing and
-the kneeboard. Weather does not affect the air tasking order yet.
+the kneeboard, and in the window top bar.
+
+Weather in the air tasking order (`weather.blocks`, minima `weather.MINIMA`, estimates): helicopters — ceiling 150 m,
+visibility 1.5 km; visual attack (column, site, landing zone, CSAR) — 600 m and 5 km; photo recon — 1000 m and 5 km;
+all-weather types (aircraft.json `night`: Su-24M, Tornado etc.), fighters, AWACS, tankers and airlift — airfield
+minima (60 m, 800 m). Checked at takeoff and at the objective; a sortie is moved later (morning fog lifts by
+10–11 h) or cancelled if no window is found (logged and shown in the window). Weather settings (⚙ → "Campaign", action `setweather`): climate and season (default), fair only (high pressure
+and post-frontal, no fog, cloud base at least 1200 m — e.g. for helicopter flying) or fixed (weather type for every
+day and morning fog); the "weather affects the air tasking order" box is `settings.weather_effects`. The campaign
+start date is set when creating a campaign (default — the preset date) and can be changed later (`setdate`): it sets
+the weather season and mission dates; forces stay as in the preset. After a change the weather is recomputed from
+today if nothing has been flown today (the ATO is rebuilt), otherwise from tomorrow.
 
 Kneeboard (`kneeboard.py`, needs Pillow): pages for the player aircraft type — mission (target, threats, package,
 sequence, route with times and altitudes), comms, weather and airfields. DCS shows kneeboards per aircraft type, so

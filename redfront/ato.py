@@ -15,7 +15,7 @@
 """
 from __future__ import annotations
 
-from . import logistics, model, planner
+from . import logistics, model, planner, weather
 
 FLYING_HOURS = (6, 20)      # ОЦЕНКА: лётный день (часы, местное время миссии); ночью летают только типы с night (aircraft.json)
 TURNAROUND_MIN = 90         # ОЦЕНКА: подготовка к повторному вылету, если в доктрине нет sim.turnaround_min
@@ -155,6 +155,7 @@ def build(state: dict) -> dict:
     w0, w1 = flying_window(state)
     pool = _Pool(state)
     entries = []
+    wx_why: dict[str, str] = {}                  # задача -> почему не нашлось слота по погоде (отменена)
     for side in model.SIDES:
         doc = model.doctrine(state, side)
         turn_s = doc["sim"].get("turnaround_min", TURNAROUND_MIN) * 60
@@ -206,7 +207,8 @@ def build(state: dict) -> dict:
                 tot = max(w0 + fly, w0 + (w1 - w0) * (i + 0.5) / n + (rnd.uniform(-0.3, 0.3) * (w1 - w0) / n if rnd else 0))
                 while tot <= w1:
                     need = {g["performer"]: (tot - fly, tot + fly + turn_s, g["size"])}
-                    if pool.fits(need):
+                    why = weather.blocks(state, t, {g["group"]: {"takeoff_s": tot - fly, "objective_s": tot}})
+                    if pool.fits(need) and not why:
                         pool.book(need)
                         times = {g["group"]: {"takeoff_s": tot - fly, "objective_s": tot, "land_s": tot}}
                         entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
@@ -224,7 +226,8 @@ def build(state: dict) -> dict:
                 tot = w0 + fly / 2 + max(0.0, w1 - w0 - fly) * (i / (n - 1) if n > 1 else 0.5)
                 while tot + fly / 2 <= w1 + 3600:
                     need = {g["performer"]: (tot - fly / 2, tot + fly / 2 + turn_s, g["size"])}
-                    if pool.fits(need):
+                    why = weather.blocks(state, t, {g["group"]: {"takeoff_s": tot - fly / 2, "objective_s": tot}})
+                    if pool.fits(need) and not why:
                         pool.book(need)
                         times = {g["group"]: {"takeoff_s": tot - fly / 2, "objective_s": tot, "land_s": tot + fly / 2}}
                         entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
@@ -246,7 +249,12 @@ def build(state: dict) -> dict:
             tot = lo + (hi - lo) * (i + 0.5) / len(night)
             while tot <= hi:
                 need = _need(t, rel, tot, turn_s)
-                if pool.fits(need):
+                times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
+                why = weather.blocks(state, t, times)
+                if why:                              # погода: этот слот нельзя - позже (туман рассеется) или отмена
+                    wx_why[f"{side}: {t['title']}"] = why
+                if pool.fits(need) and not why:
+                    wx_why.pop(f"{side}: {t['title']}", None)
                     pool.book(need)
                     times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
                     entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
@@ -273,7 +281,12 @@ def build(state: dict) -> dict:
             tot = max(want, w0 - first)                  # взлёт - не раньше начала лётного дня
             while tot + last <= w1 + 3600:               # посадка - не позже часа после конца лётного дня
                 need = _need(t, rel, tot, turn_s)
-                if pool.fits(need):
+                times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
+                why = weather.blocks(state, t, times)
+                if why:                              # погода: этот слот нельзя - позже (туман рассеется) или отмена
+                    wx_why[f"{side}: {t['title']}"] = why
+                if pool.fits(need) and not why:
+                    wx_why.pop(f"{side}: {t['title']}", None)
                     pool.book(need)
                     times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
                     entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
@@ -283,7 +296,11 @@ def build(state: dict) -> dict:
                     break
                 tot += SLOT_MIN * 60
     entries.sort(key=lambda e: e["tot_s"])
-    state["ato"] = {"day": state["day"], "entries": entries, "done": []}
+    state["ato"] = {"day": state["day"], "entries": entries, "done": [],
+                    "weather_cancelled": [{"title": k, "why": v} for k, v in wx_why.items()]}
+    for k, v in wx_why.items():                  # в журнал: отмена по погоде (сторона игрока)
+        if k.startswith(f"{state.get('player_side')}:"):
+            model.note(state, f"Погода: отменён вылет «{k.split(': ', 1)[1]}» - {v}.")
     return state["ato"]
 
 

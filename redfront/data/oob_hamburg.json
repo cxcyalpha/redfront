@@ -43,6 +43,7 @@
       "progress_km": 6.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "Marder",
@@ -129,6 +130,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "T_72B",
@@ -185,6 +187,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "T_80UD",
@@ -234,6 +237,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 0,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "Leopard1A3",
@@ -315,6 +319,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "Leopard_2",
@@ -366,6 +371,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "T_80UD",
@@ -416,6 +422,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "Marder",
@@ -462,6 +469,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "Leopard_2",
@@ -512,6 +520,7 @@
       "progress_km": 0.0,
       "march_kmh": 30,
       "daily_advance_km": 25,
+      "road_march_km": 0,
       "composition": [
         {
           "type": "T_72B",

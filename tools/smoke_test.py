@@ -28,8 +28,22 @@ from dcs.terrain.germany import Germany  # noqa: E402
 
 from redfront import build, debrief, materialize, model, planner, roads, sim  # noqa: E402
 
+_new_campaign = getattr(model.new_campaign, "_orig", model.new_campaign)   # модуль может грузиться дважды
+
+
+def _campaign_fair_weather(*a, **k):
+    """Проверки плана и миссий - без влияния погоды на план полётов (погода случайна по seed); погоду проверяет
+    weather_kneeboard_section, включая её явно."""
+    st = _new_campaign(*a, **k)
+    st["settings"]["weather_effects"] = False
+    return st
+
+
+_campaign_fair_weather._orig = _new_campaign
+model.new_campaign = _campaign_fair_weather
+
 # Проверки с точными числами - без случайности (базовый вариант сценария); случайность - отдельно (random_section).
-_new_campaign = model.new_campaign
+_new_campaign = getattr(model.new_campaign, "_orig", model.new_campaign)   # модуль может грузиться дважды
 def _new_no_random(*a, **kw):
     kw.setdefault("randomness", False)
     return _new_campaign(*a, **kw)
@@ -1331,6 +1345,28 @@ def gui_section(tmp: Path) -> None:
     r = app.do("endday", {"file": "g1.json"})
     check(r["state"]["day"] == 2, "конец дня из окна")
     check(app.path("../x").parent == root, "имя файла кампании не выходит из папки проекта")
+    # дата начала и настройки погоды: из окна при создании и потом
+    r = app.do("new", {"file": "g2", "side": "red", "seed": "42", "date": "1985-12-10"})
+    check(r["state"]["date"] == "1985-12-10", "новая кампания с заданной датой начала")
+    app.do("plan", {"file": "g2.json"})
+    r = app.do("setweather", {"file": "g2.json", "mode": "fixed", "type": "low", "fog": False, "effects": True})
+    st2 = model.load(root / "g2.json")
+    from redfront import weather as _wx
+    days = [_wx.day(st2, d)["type"] for d in range(1, 8)]
+    check(set(days) == {"low"} and not r["state"]["tasks"] and "сегодня" in r["lines"][0],
+          f"погода 'заданная - циклон': все сутки - циклон; сегодня ещё не летали - план заново ({r['lines'][0]})")
+    app.do("setweather", {"file": "g2.json", "mode": "fair", "effects": True})
+    st2 = model.load(root / "g2.json")
+    fair = [_wx.day(st2, d) for d in range(1, 31)]
+    check(all(w["type"] in ("high", "post") and not w["fog"] and (_wx.cloud_base(w) or 9999) >= 1200 for w in fair),
+          "погода 'только хорошая': 30 суток без тумана и облаков ниже 1200 м")
+    r = app.do("setdate", {"file": "g2.json", "date": "1985-07-01"})
+    check(r["state"]["date"] == "1985-07-01" and _wx._month(model.load(root / "g2.json")) == 7, "дата начала меняется из окна (сезон погоды)")
+    try:
+        app.do("setdate", {"file": "g2.json", "date": "1985-13-40"}); bad = False
+    except ValueError:
+        bad = True
+    check(bad, "неверная дата не принимается")
 
 
 def germany_section(tmp: Path) -> None:
@@ -2242,6 +2278,8 @@ def convoy_section(tmp: Path) -> None:
     a2 = ato.ensure(st2)
     e = next((e for e in a2["entries"] if e["kind"] == "strike_supply_route" and not e["task"].get("threats")),
              next((e for e in a2["entries"] if e["kind"] == "strike_supply_route"), None))
+    if e:                                        # механизм, а не обстановка: без угроз коридора (ЗРК у фронта - по-разному)
+        e["task"]["threats"] = []
     lines = convoys.daily(st2) if e else []
     foe = model.enemy(e["side"]) if e else "blue"
     check(e and (st2.get("convoy_losses") or {}).get(foe, {}).get(e["task"]["link"], 0) > 0 and lines,
@@ -3110,8 +3148,7 @@ def heli_pkg_section(tmp: Path) -> None:
     from redfront import ato
     print("\n== Вертолёты: прикрытие, состав, совместный удар, ночь ==")
     st = model.new_campaign("heli", sector="sector_germany.json", oob="oob_germany.json", seed=7)
-    sim.end_day(st)
-    planner.plan(st)
+    planner.plan(st)                             # день 1: десант ещё есть куда (после - фронт плотнее, площадок меньше)
     aa = next(t for t in st["tasks"] if t["kind"] == "air_assault")
     esc = next((g for g in aa["package"] if g["group"] == "escort"), None)
     check(esc and st["units"][esc["performer"]]["type"] == "Mi_24P" and esc["lead_min"] == 2 and esc["size"] >= 2,
@@ -3125,6 +3162,8 @@ def heli_pkg_section(tmp: Path) -> None:
           "в .miz: прикрытие обрабатывает район площадки и держит его, пока транспортные на земле")
     cs = [t for t in st["tasks"] if t["kind"] == "csar"]
     check(not cs or any(g["group"] == "escort" for t in cs for g in t["package"]), "поиск и спасение - с парой прикрытия")
+    sim.end_day(st)                              # день 2: бои на фронте - совместные удары и вертолёты НАТО
+    planner.plan(st)
     jt = [t for t in st["tasks"] if any(g.get("jaat_kind") for g in t["package"])]
     check(jt and all(g["lead_min"] == 2 and g["size"] == 4 for t in jt for g in t["package"] if g.get("jaat_kind"))
           and not any(t["kind"] == "cas_helo" and t["target"] == jt[0]["target"] for t in st["tasks"]),
@@ -3137,8 +3176,10 @@ def heli_pkg_section(tmp: Path) -> None:
               f"(игроку взлёт через ~{tj['strike'].get('takeoff_s', 0) // 60} мин)")
     sb = model.new_campaign("helib", sector="sector_germany.json", oob="oob_germany.json", seed=7, player_side="blue")
     ah = next(u for u in sb["units"].values() if u.get("type") == "AH_64A")
-    tgt = min((u for u in sb["units"].values() if u["side"] == "red" and model.category(u) == "ground"),
-              key=lambda u: model.dist_km(sb["airbases"][ah["base"]], model.unit_pos(sb, u)))
+    sc = [sb["airbases"][u["base"]] for u in sb["units"].values() if "SA342" in str(u.get("type"))]
+    tgt = min((u for u in sb["units"].values() if u["side"] == "red" and model.category(u) == "ground"),   # в досягаемости обоих
+              key=lambda u: max(model.dist_km(sb["airbases"][ah["base"]], model.unit_pos(sb, u)),
+                                min(model.dist_km(b, model.unit_pos(sb, u)) for b in sc)))
     td = model.doctrine(sb, "blue")["tasks"]["cas_helo"]
     tp = model.unit_pos(sb, tgt)
     gs, _w = planner.package(sb, td, ah, tgt, tp, planner.ip_point(sb["airbases"][ah["base"]], tp, td["ip_offset_km"]), [])
@@ -3427,10 +3468,10 @@ def mission_ad_section(tmp: Path) -> None:
            and model.dist_km(model.unit_pos(st, st["units"][g["unit"]]), center) > materialize.SAM_FULL_KM]
     ok_far = all(sum(1 for v in g["vehicles"] if any(c["type"] == v["type"] and c["role"] == "launcher"
                      for c in st["units"][g["unit"]]["composition"])) <= materialize.SAM_TOKEN_LN for g in far)
-    w_ok = all(abs(sum(v["weight"] for v in g["vehicles"]) - sum(model.alive_by_type(st["units"][g["unit"]]).values())) < 1e-6
-               for g in far)
+    w_ok = all(sum(v["weight"] for v in g["vehicles"]) <= sum(model.alive_by_type(st["units"][g["unit"]]).values()) + 1e-6
+               and max(v["weight"] for v in g["vehicles"]) <= materialize.MAX_WEIGHT for g in far)
     check(far and ok_far and w_ok, f"ЗРК дальше {materialize.SAM_FULL_KM} км - знаком: РЛС и не больше "
-          f"{materialize.SAM_TOKEN_LN} ПУ, веса = исправным ({len(far)} позиций)")
+          f"{materialize.SAM_TOKEN_LN} ПУ, вес машины не больше {materialize.MAX_WEIGHT} ({len(far)} позиций)")
     att = [g for g in gs if g["unit"] in st["units"] and st["units"][g["unit"]].get("attached_to") and not g.get("core")]
     radar = max([sum(1 for v in g["vehicles"] if v["type"] in materialize.AD_RADAR_TYPES) for g in att] or [0])
     far_ad = [g for g in att if model.dist_km(model.unit_pos(st, st["units"][st["units"][g["unit"]]["attached_to"]]), center)
@@ -3452,9 +3493,10 @@ def weather_kneeboard_section(tmp: Path) -> None:
     """Погода суток (weather.py), планшет (kneeboard.py), лимит ЛА миссии и одна смена ДРЛО на зону (build.air_activity)."""
     import re
     import zipfile
-    from redfront import weather
+    from redfront import ato, weather
     print("\n== погода, планшет, лимит ЛА ==")
     st = model.new_campaign("wx", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    st0 = copy.deepcopy(st)
     planner.plan(st)
     w1 = weather.day(st)
     st2 = copy.deepcopy(st)
@@ -3468,12 +3510,28 @@ def weather_kneeboard_section(tmp: Path) -> None:
     kb = [n for n in z.namelist() if n.startswith("KNEEBOARD/")]
     check((g := re.search(r'\["atGround"\]=\s*\{\s*\["dir"\]=(\d+),\s*\["speed"\]=([\d.]+)', mis))
           and int(g[1]) == (w1["wind_dir"] + 180) % 360 and abs(float(g[2]) - w1["wind_mps"]) < 1e-6
-          and ('["preset"]="' in mis) == bool(w1["preset"]),
+          and bool(re.search(r'\["clouds"\]=\s*\{[^}]*\["preset"\]="', mis)) == bool(w1["preset"]),
           f"погода в миссии: ветер, давление, облачность ({weather.summary(st, st['start_hour']).splitlines()[0]})")
     check(len(kb) >= 3 and man["kneeboard_pages"] == len(kb), f"планшет: {len(kb)} страниц в .miz ({kb[0] if kb else '-'})")
     orb = [f["group"] for f in man["flights"] if f["kind"] == "orbit"]
     zones = {(g.split("_")[0], "_".join(g.split("_")[1:-1])) for g in orb}
     check(len(orb) == len(zones), f"дежурство: одна смена на зону в миссии ({', '.join(orb)})")
+    # погода и план полётов: туман утром - удары после его рассеяния; облака ниже 150 м - вертолёты не летают
+    fog = {"type": "high", "preset": None, "wind_dir": 90, "wind_mps": 2, "qnh_hpa": 1025, "tmax_c": 12, "swing_c": 8,
+           "fog": True, "fog_vis_m": 500, "fog_top_m": 200, "rain": False, "vis_km": 30}
+    low = {"type": "low", "preset": "Broken7", "base_m": 120, "wind_dir": 220, "wind_mps": 9, "qnh_hpa": 995, "tmax_c": 9,
+           "swing_c": 4, "fog": False, "rain": False, "vis_km": 8}
+    st0["settings"]["weather_effects"] = True
+    sf, sl = copy.deepcopy(st0), copy.deepcopy(st0)
+    sf["weather"], sl["weather"] = {"1": fog}, {"1": low}
+    af, al, a0 = ato.build(sf), ato.build(sl), ato.build(copy.deepcopy(st0))
+    early = [e for e in af["entries"] if not e["ai_only"] and e["tot_s"] < 10.5 * 3600
+             and any(weather.rule(sf, g) in ("visual", "heli") for g in e["task"]["package"])]
+    heli = lambda a, s_: sum(1 for e in a["entries"] if any(model.category(s_["units"][g["performer"]]) == "heli" for g in e["task"]["package"]))
+    check(not early and heli(al, sl) == 0 < heli(a0, st0) and al["weather_cancelled"],
+          f"погода в плане: утренний туман - визуальные удары и вертолёты после 10:30; облака 120 м - вертолётов 0 "
+          f"(в ясную погоду {heli(a0, st0)}), отменено {len(al['weather_cancelled'])}, например: "
+          f"{al['weather_cancelled'][0]['title'] if al['weather_cancelled'] else '-'} ({al['weather_cancelled'][0]['why'] if al['weather_cancelled'] else ''})")
     st["settings"]["mission_air"] = 20
     man2 = build.build(st, tmp / "wx2.miz", task_no=1)
     n_air = sum(len(f["units"]) for f in man2["flights"])

@@ -209,6 +209,7 @@ dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
     <label data-t="nPreset"></label>
     <div class="row"><select id="nPreset" style="flex:1"></select><button type="button" id="bCopy" data-t="copyPreset" data-t-title="copyPresetTip"></button></div>
     <label data-t="nVar"></label><select id="nVar"></select>
+    <label data-t="nDate"></label><input id="nDate" type="date" data-t-title="nDateTip">
     <label data-t="nSeed"></label><input id="nSeed" data-t-ph="nSeedPh">
     <label><input type="checkbox" id="nNoRand" style="width:auto"> <span data-t="noRand"></span></label>
     <label><input type="checkbox" id="nOver" style="width:auto"> <span data-t="overwrite"></span></label>
@@ -228,6 +229,17 @@ dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
     <label data-t="airBudget"></label>
     <input id="sAir" type="number" min="0" step="10" data-t-title="airBudgetTip">
     <label><input type="checkbox" id="sEnemy" style="width:auto"> <span data-t="enemyPlan"></span></label>
+    <div class="sect"><b data-t="campSet"></b>
+      <label data-t="nDate"></label>
+      <div class="row"><input id="sDate" type="date" style="flex:1"><button type="button" id="bDate" data-t="apply"></button></div>
+      <label data-t="wxMode"></label>
+      <select id="sWxMode"><option value="climate" data-t="wxClimate"></option><option value="fair" data-t="wxFair"></option><option value="fixed" data-t="wxFixed"></option></select>
+      <div id="wxFixed"><label data-t="wxType"></label>
+        <select id="sWxType"><option value="high" data-t="wxHigh"></option><option value="post" data-t="wxPost"></option><option value="front" data-t="wxFront"></option><option value="low" data-t="wxLow"></option></select>
+        <label><input type="checkbox" id="sWxFog" style="width:auto"> <span data-t="wxFog"></span></label></div>
+      <label><input type="checkbox" id="sWxEff" style="width:auto"> <span data-t="wxEff"></span></label>
+      <div class="row" style="margin-top:6px"><button type="button" id="bWx" data-t="apply"></button><span class="meta" data-t="wxTip"></span></div>
+    </div>
     <div class="sect"><b data-t="mapTools"></b>
       <div class="meta" data-t="mapToolsTip"></div>
       <div class="row" style="margin-top:6px">
@@ -255,7 +267,11 @@ const I18N = {
     newTitle: "Новая кампания", nFile: "Файл", nTh: "Театр", nSide: "Сторона игрока", sideRedWP: "Красные (Варшавский договор)",
     sideBlueNATO: "Синие (НАТО)", nPreset: "Состав сил (пресет)", copyPreset: "Копия для правки",
     copyPresetTip: "копия выбранного пресета в папку presets/ - для правки в текстовом редакторе", nVar: "Вариант сценария",
-    nSeed: "Seed (пусто - случайный)", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
+    nSeed: "Seed (пусто - случайный)", nDate: "Дата начала кампании", nDateTip: "сезон: погода, температура; состав сил - по пресету",
+    campSet: "Кампания", apply: "Применить", wxMode: "Погода", wxClimate: "по климату и сезону", wxFair: "только хорошая (без тумана и низких облаков)",
+    wxFixed: "заданная", wxType: "Тип погоды", wxHigh: "антициклон: ясно, слабый ветер", wxPost: "тыл циклона: кучевые, ветер СЗ",
+    wxFront: "фронт: значительная облачность, дождь", wxLow: "циклон: сплошная низкая облачность, дождь, ветер",
+    wxFog: "утренний туман", wxEff: "погода влияет на план полётов (минимумы)", wxTip: "пересчёт: сегодня, если ещё не летали, иначе с завтра", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
     cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
     airBudgetTip: "с пакетом игрока; вылеты ИИ дальше от удара игрока не ставятся (в модели они летают); 0 - без ограничения",
     budgetTip: "дальнее прореживается и убирается; 0 - без ограничения", enemyPlan: "показывать план полётов противника (отладка)",
@@ -265,7 +281,7 @@ const I18N = {
     mizPh: "путь к .miz с зонами Assign as... (ROLE/VALUE)", import: "Импорт",
     needCamp: "Сначала создайте или выберите кампанию.", noCamp: "Создайте кампанию кнопкой «Новая».", noCamps: "нет кампаний",
     day: "день", oldVer: " (старая версия)", randomVar: "случайный (по seed)",
-    meta: (s, side) => `День <b>${s.day}</b>, обстановка на ${esc(s.ground_time || "00:00")} · ${s.date || ""} · вылетов ${s.sortie} · игрок: <span class="${s.side}">${side}</span>`,
+    meta: (s, side) => `День <b>${s.day}</b>, обстановка на ${esc(s.ground_time || "00:00")} · ${s.date || ""} · вылетов ${s.sortie} · игрок: <span class="${s.side}">${side}</span>` + (s.weather ? ` · <span title="${esc(s.weather_text)}">☁ ${esc(s.weather)}</span>` : ""),
     red: "красные", blue: "синие", Red: "Красные", Blue: "Синие", seed: "seed", noRandom: "без случайности", built: "собран вылет",
     noPlan: "Плана ещё нет - кнопка «1. План».", noTasks: "Задач нет: ", fromBase: "км от", sam: "ПВО", none: "нет",
     fly: "лечу в", humans: "людей", humansTip: "людей в вылете: сначала группа игрока, затем остальные группы по порядку; больше одного - места Client (мультиплеер)",
@@ -330,7 +346,11 @@ const I18N = {
     newTitle: "New campaign", nFile: "File", nTh: "Theatre", nSide: "Player side", sideRedWP: "Red (Warsaw Pact)",
     sideBlueNATO: "Blue (NATO)", nPreset: "Order of battle (preset)", copyPreset: "Copy for editing",
     copyPresetTip: "copy the selected preset to presets/ for editing in a text editor", nVar: "Scenario variant",
-    nSeed: "Seed (empty - random)", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
+    nSeed: "Seed (empty - random)", nDate: "Campaign start date", nDateTip: "season: weather, temperature; forces follow the preset",
+    campSet: "Campaign", apply: "Apply", wxMode: "Weather", wxClimate: "climate and season", wxFair: "fair only (no fog or low cloud)",
+    wxFixed: "fixed", wxType: "Weather type", wxHigh: "high pressure: clear, light wind", wxPost: "post-frontal: cumulus, NW wind",
+    wxFront: "frontal: broken cloud, rain", wxLow: "low pressure: low overcast, rain, wind",
+    wxFog: "morning fog", wxEff: "weather affects the air tasking order (minima)", wxTip: "recomputed today if nothing flown yet, otherwise from tomorrow", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
     cancel: "Cancel", create: "Create", close: "Close", language: "Language", budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
     airBudgetTip: "including the player package; AI sorties farther from the player strike are left out (the model still flies them); 0 - unlimited",
     budgetTip: "distant units are thinned out and removed; 0 - unlimited", enemyPlan: "show enemy air tasking order (debug)",
@@ -340,7 +360,7 @@ const I18N = {
     mizPh: "path to a .miz with Assign as... zones (ROLE/VALUE)", import: "Import",
     needCamp: "Create or select a campaign first.", noCamp: "Create a campaign with the “New” button.", noCamps: "no campaigns",
     day: "day", oldVer: " (old version)", randomVar: "random (by seed)",
-    meta: (s, side) => `Day <b>${s.day}</b>, situation at ${esc(s.ground_time || "00:00")} · ${s.date || ""} · sorties flown ${s.sortie} · player: <span class="${s.side}">${side}</span>`,
+    meta: (s, side) => `Day <b>${s.day}</b>, situation at ${esc(s.ground_time || "00:00")} · ${s.date || ""} · sorties flown ${s.sortie} · player: <span class="${s.side}">${side}</span>` + (s.weather ? ` · <span title="${esc(s.weather_text)}">☁ ${esc(s.weather)}</span>` : ""),
     red: "red", blue: "blue", Red: "Red", Blue: "Blue", seed: "seed", noRandom: "no randomness", built: "built sortie",
     noPlan: "No plan yet - press “1. Plan”.", noTasks: "No tasks: ", fromBase: "km from", sam: "Air defence", none: "none",
     fly: "I fly", humans: "humans", humansTip: "humans in the sortie: the player's group first, then other groups in order; more than one - Client slots (multiplayer)",
@@ -961,6 +981,7 @@ function fillPresets() {
 }
 function fillVariants() {
   const t = theatre(), p = t.presets.find(x => x.file === $("#nPreset").value);
+  $("#nDate").value = (p && p.date) || "";
   const vs = p ? p.variants : t.variants;
   $("#nVar").innerHTML = `<option value="">${T("randomVar")}</option>` + vs.map(v => `<option value="${esc(v.name)}">${esc(v.title)}</option>`).join("");
 }
@@ -989,6 +1010,11 @@ $("#bSet").onclick = () => {
   $("#sBudget").value = pref("rf_budget", "") || (ST ? ST.budget : "");
   $("#sAir").value = pref("rf_air", "") || (ST ? ST.air_budget : "");
   $("#sEnemy").checked = pref("rf_ato_enemy", "0") === "1";
+  const wx = (ST && ST.wx) || {};
+  $("#sDate").value = (ST && ST.date) || ""; $("#sWxMode").value = wx.weather_mode || "climate";
+  $("#sWxType").value = wx.weather_type || "high"; $("#sWxFog").checked = !!wx.weather_fog;
+  $("#sWxEff").checked = wx.weather_effects !== false; wxShow();
+  ["sDate", "bDate", "sWxMode", "sWxType", "sWxFog", "sWxEff", "bWx"].forEach(id => $("#" + id).disabled = !ST);
   $("#dSet").showModal();
 };
 $("#sLang").onchange = async e => {
@@ -998,6 +1024,11 @@ $("#sLang").onchange = async e => {
 };
 $("#sBudget").onchange = e => setPref("rf_budget", e.target.value);
 $("#sAir").onchange = e => setPref("rf_air", e.target.value);
+function wxShow() { $("#wxFixed").style.display = $("#sWxMode").value === "fixed" ? "" : "none"; }
+$("#sWxMode").onchange = wxShow;
+$("#bDate").onclick = e => act("setdate", {date: $("#sDate").value}, e.target);
+$("#bWx").onclick = e => act("setweather", {mode: $("#sWxMode").value, type: $("#sWxType").value, fog: $("#sWxFog").checked,
+  effects: $("#sWxEff").checked}, e.target);
 $("#sEnemy").onchange = e => { setPref("rf_ato_enemy", e.target.checked ? "1" : "0"); render(); };
 window.addEventListener("resize", () => map.invalidateSize());
 $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
@@ -1015,7 +1046,7 @@ $("#bCopy").onclick = async () => {
 };
 $("#dNew").addEventListener("close", () => {
   if ($("#dNew").returnValue !== "ok") return;
-  act("new", {file: $("#nFile").value.trim(), theatre: $("#nTh").value, preset: $("#nPreset").value, side: $("#nSide").value, variant: $("#nVar").value, seed: $("#nSeed").value.trim(),
+  act("new", {file: $("#nFile").value.trim(), theatre: $("#nTh").value, preset: $("#nPreset").value, side: $("#nSide").value, variant: $("#nVar").value, seed: $("#nSeed").value.trim(), date: $("#nDate").value,
               norandom: $("#nNoRand").checked, overwrite: $("#nOver").checked}).then(loadState);
 });
 applyStatic(); layerControl();

@@ -120,6 +120,7 @@ doc = {
     "tasks": tasks,
     "march": gen["march"],
     "sim": {**gen["sim"],
+            "road_march_km": 150,               # ОЦЕНКА: суточный марш бригады (FM 55-30 - колонна 25-40 км/ч)
             "ground_ops_note": "Оперативные приёмы НАТО (ОЦЕНКИ по смыслу: FM 100-5 Operations 1982/1986, FM 71-100 Division "
                                "Operations 1990; RAND R-3385): подготовленная оборона по рубежам (prepared_h, prepared_factor); "
                                "сдерживание - часть в обороне против противника сильнее в delay_ratio раз при боеспособности ниже "
