@@ -3397,6 +3397,12 @@ def gui_planner_section(tmp: Path) -> None:
                     and y["tot_s"] > x["tot_s"]:
                 bad.append((x["title"], y["title"]))
     check(not bad, f"удар по позиции ЗРК - раньше ударов по целям, которые этот ЗРК прикрывает (нарушений {len(bad)})")
+    pth = tmp / "guip.json"
+    model.save(st, pth)
+    st_l = model.load(pth)                       # сохранение и загрузка (окно грузит кампанию на каждое действие)
+    kinds_l = {x["kind"] for x in st_l["ato"]["entries"] if x["ai_only"]}
+    check({"awacs_orbit", "qra"} <= kinds_l and len(st_l["ato"]["entries"]) == len(st["ato"]["entries"]),
+          f"после загрузки кампании план полётов цел, с дежурствами и перевозками: {sorted(kinds_l)}")
     so = gui.sortie(st, e["id"])
     names = [w["name"] for w in so["groups"][0]["route"]]
     check(names[0] == "Взлёт" and names[-1] == "Посадка" and so["groups"][0]["route"][0]["t"] <= so["tot"],
