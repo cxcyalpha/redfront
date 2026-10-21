@@ -1345,6 +1345,14 @@ def gui_section(tmp: Path) -> None:
     r = app.do("endday", {"file": "g1.json"})
     check(r["state"]["day"] == 2, "конец дня из окна")
     check(app.path("../x").parent == root, "имя файла кампании не выходит из папки проекта")
+    # ливреи полков по умолчанию: из кампании - в новые кампании театра
+    st1 = model.load(root / "g1.json")
+    ac = next(u for u in st1["units"].values() if model.category(u) == "air")
+    app.do("setlivery", {"file": "g1.json", "id": ac["id"], "livery": "test_livery"})
+    r = app.do("liverydefaults", {"file": "g1.json"})
+    r2 = app.do("new", {"file": "g3", "side": "red", "seed": "7"})
+    check(model.load(root / "g3.json")["units"][ac["id"]].get("livery") == "test_livery" and any("Ливреи" in ln for ln in r2["lines"]),
+          f"ливреи по умолчанию: сохранены из кампании, новая кампания театра получает их ({r['lines'][0]})")
     # дата начала и настройки погоды: из окна при создании и потом
     r = app.do("new", {"file": "g2", "side": "red", "seed": "42", "date": "1985-12-10"})
     check(r["state"]["date"] == "1985-12-10", "новая кампания с заданной датой начала")

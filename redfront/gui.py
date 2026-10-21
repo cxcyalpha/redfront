@@ -331,6 +331,10 @@ class App:
                         "variants": [{"name": v["name"], "title": v.get("title", v["name"])} for v in d.get("variants", [])]})
         return out
 
+    def livery_file(self, st: dict) -> Path:
+        """Ливреи полков по умолчанию для театра кампании: liveries_<театр>.json в папке кампаний."""
+        return self.root / f"liveries_{roads.sector_id(st['sector'])}.json"
+
     def preset_path(self, tid: str, key: str | None) -> str | Path:
         """Файл пресета по ключу из presets() (только из списка - путь извне не принимается)."""
         _t, _sec, default, _title = next(t for t in THEATRES if t[0] == tid)
@@ -382,6 +386,19 @@ class App:
                 lines += res
             else:
                 lines.append("Зонда карты нет: склады и мосты по оценочным координатам (кнопка 'Зонд карты').")
+            lf = self.livery_file(st)                # ливреи по умолчанию (кнопка на вкладке «Авиация»): полк того же типа
+            if lf.exists():
+                try:
+                    lv = json.loads(lf.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    lv = {}
+                n = 0
+                for uid, x in lv.items():
+                    u = st["units"].get(uid)
+                    if u and u.get("type") == x.get("type") and x.get("livery"):
+                        u["livery"], n = x["livery"], n + 1
+                if n:
+                    lines.append(f"Ливреи по умолчанию: {n} полков ({lf.name}).")
             sc = st.get("scenario") or {}
             lines.append(f"Создана кампания {p.name}: {sc.get('title') or sc.get('variant')}, seed {sc.get('seed')}.")
             model.save(st, p)
@@ -475,6 +492,13 @@ class App:
             lines.append(f"{u['name']}: ливрея {lv or 'по умолчанию DCS'}.")
             model.save(st, p)
             return {"lines": lines, "state": view(st)}
+        if action == "liverydefaults":               # ливреи полков кампании - по умолчанию для новых кампаний театра
+            f = self.livery_file(st)
+            data = {u["id"]: {"type": u.get("type"), "livery": u["livery"]} for u in st["units"].values()
+                    if model.category(u) in ("air", "heli") and u.get("livery")}
+            f.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+            lines.append(f"Ливреи по умолчанию ({len(data)} полков) - {f.name}: новые кампании театра получат их сразу.")
+            return {"lines": lines}
         if action == "rebaseoptions":                # режим командующего: куда можно перебазировать часть
             return {"options": command.base_options(st, req["id"])}
         if action == "rebase":

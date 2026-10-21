@@ -624,6 +624,9 @@ off the list until rescued; killed or captured pilots leave; replacements get ne
 **Regiment livery** — "Air" → "Pilots, livery"; applies to all the regiment's groups in all missions. The list comes
 from the installed DCS (pydcs scans DCS and Saved Games livery folders); if DCS is not found, type the livery folder
 name.
+The "Liveries as default" button on the "Air" tab saves the campaign's regiment liveries (`liveries_<theatre>.json`
+in the campaigns folder): new campaigns of this theatre get them at once — same regiment, same type (a re-equipped
+regiment does not inherit it).
 
 **Task `csar`** (most urgent, up to 2 per day): an own crew not on own territory, nearest helicopter unit in range. The
 player can fly a Mi-8 or UH-1H; an AI sortie outside the mission succeeds with 70% minus 15% per SAM in the corridor.
