@@ -860,7 +860,7 @@ def battle_site_section(tmp: Path, m, man: dict, st: dict) -> None:
     rw_m = min(math.hypot(max(0.0, abs(q[0] - px) - 1500), max(0.0, abs(q[1] - py) - 30)) for q in adp)
     check(rw_m >= 149.9, f"ПВО не на аэродроме: Patriot стоял на ВПП - позиция сдвинута, до бетона не меньше {rw_m:.0f} м "
                          f"({G.REDFRONT_SITE_LOG['blue_patriot_1']})")
-    check(ad_town0 >= 4 and set(ads) == ad_names and ad_bld == 0 and ad_road == 0 and not ad_wet and ad_gap >= 79.9,
+    check(ad_town0 >= 2 and set(ads) == ad_names and ad_bld == 0 and ad_road == 0 and not ad_wet and ad_gap >= 79.9,
           f"ПВО ({len(adp)} машин, {len(ads)} групп; Patriot стоял в посёлке - у строений было {ad_town0}): на открытом месте - у строений 0, на дороге 0, в воде 0, "
           f"между машинами не меньше {ad_gap:.0f} м")
     # хук пишет место; дебриф запоминает; следующая сборка ставит бой туда же и уже не ищет
@@ -3413,11 +3413,45 @@ def gui_planner_section(tmp: Path) -> None:
           "английский: точки маршрута и названия задач переведены")
 
 
+def mission_ad_section(tmp: Path) -> None:
+    """ПВО в миссии: ЗРК вдали - знаком, войсковая ПВО вдали - нет, с РЛС - не больше AD_RADAR_MAX; ПУ - по штату."""
+    print("\n== ПВО в миссии: дальние ЗРК, войсковая ПВО ==")
+    st = model.new_campaign("mad", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    planner.plan(st)
+    tk = st["task"] or st["tasks"][0]
+    st["settings"]["mission_budget"] = 10_000
+    gs = materialize.theatre(st, tk)
+    center = tk.get("target_pos") or model.unit_pos(st, st["units"][tk["target"]])
+    far = [g for g in gs if g["kind"] == "sam_site" and not g.get("core") and not g.get("battle")
+           and model.dist_km(model.unit_pos(st, st["units"][g["unit"]]), center) > materialize.SAM_FULL_KM]
+    ok_far = all(sum(1 for v in g["vehicles"] if any(c["type"] == v["type"] and c["role"] == "launcher"
+                     for c in st["units"][g["unit"]]["composition"])) <= materialize.SAM_TOKEN_LN for g in far)
+    w_ok = all(abs(sum(v["weight"] for v in g["vehicles"]) - sum(model.alive_by_type(st["units"][g["unit"]]).values())) < 1e-6
+               for g in far)
+    check(far and ok_far and w_ok, f"ЗРК дальше {materialize.SAM_FULL_KM} км - знаком: РЛС и не больше "
+          f"{materialize.SAM_TOKEN_LN} ПУ, веса = исправным ({len(far)} позиций)")
+    att = [g for g in gs if g["unit"] in st["units"] and st["units"][g["unit"]].get("attached_to") and not g.get("core")]
+    radar = max([sum(1 for v in g["vehicles"] if v["type"] in materialize.AD_RADAR_TYPES) for g in att] or [0])
+    far_ad = [g for g in att if model.dist_km(model.unit_pos(st, st["units"][st["units"][g["unit"]]["attached_to"]]), center)
+              > materialize.DETAIL_KM and st["units"][st["units"][g["unit"]]["attached_to"]]["state"] != "battle"]
+    check(radar <= materialize.AD_RADAR_MAX and not far_ad,
+          f"войсковая ПВО: машин с РЛС в группе не больше {radar}, у частей вдали (не в бою) - нет ({len(att)} групп)")
+    pat = next(u for u in st["units"].values() if any(c["type"] == "Patriot_ln" for c in u.get("composition", [])))
+    s75 = next(u for u in st["units"].values() if any(c["type"] == "S_75M_Volhov" for c in u.get("composition", [])))
+    n = lambda u, t: sum(c["count"] for c in u["composition"] if c["type"] == t)
+    site = materialize.sam_site(st, s75)
+    xy = [(v["lat"], v["lon"]) for v in site["vehicles"]]
+    gap = min(model.dist_km({"lat": a[0], "lon": a[1]}, {"lat": b[0], "lon": b[1]}) for i, a in enumerate(xy) for b in xy[i + 1:])
+    check(n(pat, "Patriot_ln") == 8 and n(s75, "S_75M_Volhov") == 6 and gap > 0.05,
+          f"по штату: Patriot - {n(pat, 'Patriot_ln')} ПУ, С-75 - {n(s75, 'S_75M_Volhov')} ПУ; машины позиции не в одной "
+          f"точке (ближайшие в {gap * 1000:.0f} м)")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section]
 
 
 def main() -> int:

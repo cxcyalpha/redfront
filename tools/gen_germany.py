@@ -206,8 +206,8 @@ REINF = [
 ]
 
 # ---------------------------------------------------------------- ЗРК (метки OOB-миссии)
-HAWK = {"Hawk_sr": ("radar", 1), "Hawk_tr": ("radar", 1), "Hawk_pcp": ("control", 1), "Hawk_ln": ("launcher", 4)}
-PATRIOT = {"Patriot_str": ("radar", 1), "Patriot_ECS": ("control", 1), "Patriot_ln": ("launcher", 6)}
+HAWK = {"Hawk_sr": ("radar", 1), "Hawk_tr": ("radar", 1), "Hawk_pcp": ("control", 1), "Hawk_ln": ("launcher", 6)}
+PATRIOT = {"Patriot_str": ("radar", 1), "Patriot_ECS": ("control", 1), "Patriot_ln": ("launcher", 8)}
 BLUE_SAMS = [   # (id, имя, тип, широта, долгота); батальон = одна батарея в модели (ОЦЕНКА: нагрузка на DCS)
     ("sam39", "39-й зенитный ракетный батальон HAWK (Эккернфёрде)", "hawk", 54.481, 9.793),
     ("sam26", "26-й зенитный ракетный батальон Patriot (Хайде)", "patriot", 54.215, 9.075),
@@ -227,7 +227,7 @@ BLUE_SAMS = [   # (id, имя, тип, широта, долгота); батал
     ("sam43_6", "43-й полк Patriot (Ансбах)", "patriot", 49.317, 10.634),
 ]
 # ЗРК армий ГСВГ: в миссии - "3 дивизиона по 27 SA-4". 2К11 "Круг" в DCS нет - замена "Куб" (ОЦЕНКА, другая система)
-KUB = {"Kub_1S91_str": ("radar", 1), "Kub_2P25_ln": ("launcher", 4)}
+KUB = {"Kub_1S91_str": ("radar", 1), "Kub_2P25_ln": ("launcher", 4)}   # батарея: СОУ 1С91 + 4 СПУ 2П25
 RED_SAMS = [
     ("sam8ga", "Зенитная ракетная бригада 8-й гв. А (Круг; в DCS - Куб)", "kub", 50.690, 11.331),
     ("sam1gta", "Зенитная ракетная бригада 1-й гв. ТА (Круг; в DCS - Куб)", "kub", 51.014, 13.760),
@@ -251,12 +251,14 @@ AD_MED_TOWN_OFFSET_KM = 3    # ОЦЕНКА: позиция ЗРК у пункт
 AD_LONG_OFFSET_KM = 4        # ОЦЕНКА: позиция С-200 у пункта - в стольких км в тыл (не там же, где С-75 этого пункта)
 AD_AIRPORT_CLEAR_KM = 3      # позиции ЗРК (кроме ПВО аэродрома) - не ближе к любому аэродрому карты (и гражданскому)
 AD_LONG_N, AD_LONG_GAP_KM, AD_LONG_FRONT_KM = 4, 100, 60
+# Пусковые по штату огневого подразделения (по открытым справочникам, ОЦЕНКА при расхождениях): дивизион С-75 - 6 ПУ
+# СМ-90, С-125 - 4 ПУ 5П73, С-200 - 6 ПУ 5П72; батарея Improved HAWK - 6 ПУ (2 огневых взвода по 3), Patriot - до 8 ПУ М901.
 AD_TEMPLATES = {   # ярус -> варианты; позиция берёт вариант по номеру (variant). Составы - ОЦЕНКИ (одна батарея)
     "red": {
         "long": [{"name": "С-200", "composition": [("RLS_19J6", "radar", 1), ("RPC_5N62V", "radar", 1),
-                                                    ("S_200_Launcher", "launcher", 4)]}],
+                                                    ("S_200_Launcher", "launcher", 6)]}],
         "medium": [{"name": "С-75", "composition": [("p-19 s-125 sr", "radar", 1), ("SNR_75V", "radar", 1),
-                                                     ("S_75M_Volhov", "launcher", 4)]},
+                                                     ("S_75M_Volhov", "launcher", 6)]},
                    {"name": "С-125", "composition": [("p-19 s-125 sr", "radar", 1), ("snr s-125 tr", "radar", 1),
                                                       ("5p73 s-125 ln", "launcher", 4)]}],
         "short": [{"name": "Оса, ЗСУ-23-4", "composition": [("Osa_9A33_ln", "launcher", 2), ("ZSU_23_4_Shilka", "launcher", 2)]},
