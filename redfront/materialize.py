@@ -27,6 +27,14 @@ CAP_AD_NEAR, CAP_AD_FAR = 8, 2   # приданная ПВО
 DETAIL_KM = 60
 CONVOY_KM = 40          # ОЦЕНКА: колонны снабжения в миссии - на участках ближе стольких км к цели
 SAM_KM = 250            # ЗРК дальше от цели в миссию не ставятся
+SAM_FULL_KM = 150       # ОЦЕНКА: ЗРК ближе - позицией целиком; дальше (до SAM_KM) - знаком: РЛС и SAM_TOKEN_LN пусковых
+SAM_TOKEN_LN = 2        # (в сети ПВО и на СПО они есть, а нагрузка на DCS меньше; веса пусковых - по правилу сохранения)
+# Войсковая ПВО частей вдали (дальше DETAIL_KM от цели, не в бою) в миссию не ставится: колонна в тылу - без ПВО.
+# Машин с РЛС (ЗСУ, ЗРК с РЛС) в приданной ПВО не больше AD_RADAR_MAX - остальное место - ПЗРК/ЗРК с оптикой, пушки
+# (ОЦЕНКА: нагрузка на DCS - РЛС опрашивают цели постоянно; в окне задачи - все, как раньше).
+AD_RADAR_MAX = 2
+AD_RADAR_TYPES = {"Gepard", "ZSU_23_4_Shilka", "X_2S6_Tunguska", "Osa_9A33_ln", "Roland_ADS", "Roland_Radar",
+                  "Rapier_fsa_blindfire_radar", "SON_9", "Kub_1S91_str", "Tor 9A331", "M6 Linebacker"}
 SAM_KM_ROLE = {"sam_short": 100}   # ПВО объекта (ближний ярус) - только ближе (ОЦЕНКА: нагрузка на DCS, по маршруту - window)
 
 
@@ -61,12 +69,17 @@ def _deploy(state: dict, alive: dict[str, float], density: float, cap: int | Non
 
 
 def _deploy_ad(alive: dict[str, float], cap: int | None) -> tuple[dict[str, int], dict[str, float]]:
-    """Приданная ПВО: без ограничения - все исправные (как раньше), с ограничением - cap машин, вес по доле."""
+    """Приданная ПВО: без ограничения - все исправные (как раньше), с ограничением - cap машин (из них с РЛС - не
+    больше AD_RADAR_MAX), вес по доле."""
     n_alive = sum(alive.values())
-    if cap is None or round(n_alive) <= cap:
+    radar = {t: a for t, a in alive.items() if t in AD_RADAR_TYPES}
+    other = {t: a for t, a in alive.items() if t not in AD_RADAR_TYPES}
+    if cap is None or (round(n_alive) <= cap and round(sum(radar.values())) <= AD_RADAR_MAX):
         counts = {t: int(round(a)) for t, a in alive.items()}
         return counts, {t: alive[t] / c for t, c in counts.items() if c > 0}
-    counts = _allocate(alive, cap)
+    n_r = min(int(round(sum(radar.values()))), AD_RADAR_MAX, cap)    # с РЛС - не больше AD_RADAR_MAX
+    n_o = min(int(round(sum(other.values()))), cap - n_r)
+    counts = {**_allocate(radar, n_r), **_allocate(other, n_o)}
     return counts, {t: min(alive[t] / c, MAX_WEIGHT) for t, c in counts.items() if c > 0}
 
 
@@ -133,28 +146,56 @@ def threat_axis_deg(state: dict, unit: dict) -> float:
     return model.bearing_deg(pos, near)
 
 
-def sam_site(state: dict, unit: dict) -> dict:
-    """Шаблон позиции ЗРК: РЛС в центре, пункт управления рядом, пусковые по кругу (ОЦЕНКА: расстояния условные).
-    Все машины развёрнуты на ось угрозы (threat_axis_deg)."""
+# Расстановка пусковых вокруг РЛС наведения по системе: (радиус, м; сектор, град.; центр сектора: "ring" - круг,
+# "front" - к оси угрозы, "rear" - от неё). ОЦЕНКИ по снимкам позиций и описаниям: С-75 - "звезда" из 6 обвалований,
+# С-125 - 4 ПУ ближе к кабине, С-200 - ПУ полукругом у кабины, Куб - СПУ рассредоточены вокруг СОУ; HAWK - огневые
+# взводы впереди РЛС; Patriot - ПУ веером позади РЛС (РЛС смотрит в сектор, ПУ до ~1 км от неё).
+SITE_LAYOUT = {
+    "S_75M_Volhov": (250, 360, "ring"), "5p73 s-125 ln": (150, 360, "ring"), "S_200_Launcher": (200, 180, "rear"),
+    "Kub_2P25_ln": (400, 360, "ring"), "Hawk_ln": (250, 120, "front"), "Patriot_ln": (400, 140, "rear"),
+}
+SITE_RADAR_GAP_M = 120   # ОЦЕНКА: РЛС позиции - не в одной точке (обнаружения - в стороне от наведения)
+
+
+def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
+    """Позиция ЗРК: РЛС в центре (каждая следующая - в SITE_RADAR_GAP_M в стороне), пункт управления рядом, пусковые -
+    по SITE_LAYOUT системы (иначе - по кругу 300 м). Все машины развёрнуты на ось угрозы (threat_axis_deg).
+    token - ЗРК вдали от задачи: РЛС и не больше SAM_TOKEN_LN пусковых, вес пусковой - по правилу сохранения."""
     c = model.unit_pos(state, unit)
     axis = threat_axis_deg(state, unit)
     k = math.cos(math.radians(c["lat"]))
-    def off(dx_m, dy_m):
-        return {"lat": c["lat"] + dy_m / 111_320.0, "lon": c["lon"] + dx_m / (111_320.0 * k)}
+    def off(fwd_m, right_m):                     # смещение по оси угрозы: вперёд, вправо
+        a = math.radians(axis)
+        dx = fwd_m * math.sin(a) + right_m * math.cos(a)
+        dy = fwd_m * math.cos(a) - right_m * math.sin(a)
+        return {"lat": c["lat"] + dy / 111_320.0, "lon": c["lon"] + dx / (111_320.0 * k)}
     alive = model.alive_by_type(unit)
-    vehicles, i = [], 0
+    vehicles, i, n_radar, n_ctl = [], 0, 0, 0
     for comp in unit["composition"]:
         n = int(round(alive[comp["type"]]))
-        for j in range(n):
+        if n <= 0:
+            continue
+        shown, w = n, 1.0
+        if token and comp["role"] == "launcher" and n > SAM_TOKEN_LN:
+            shown, w = SAM_TOKEN_LN, alive[comp["type"]] / SAM_TOKEN_LN
+        r, arc, face = SITE_LAYOUT.get(comp["type"], (300, 360, "ring"))
+        full = max(comp.get("count", n), shown)
+        for j in range(shown):
             if comp["role"] == "radar":
-                p = off(0, 0)
+                p = off(0, n_radar * SITE_RADAR_GAP_M * (1 if n_radar % 2 else -1))
+                n_radar += 1
             elif comp["role"] == "launcher":
-                a = 2 * math.pi * j / max(1, comp["count"])
-                p = off(300 * math.cos(a), 300 * math.sin(a))
+                slot = j * full / shown          # знак - пусковые по всему сектору, а не подряд
+                if arc >= 360:
+                    b = 2 * math.pi * slot / full
+                else:
+                    b = math.radians(-arc / 2 + arc * (slot + 0.5) / full) + (math.pi if face == "rear" else 0.0)
+                p = off(r * math.cos(b), r * math.sin(b))
             else:
-                p = off(80 + 20 * j, -60)
+                p = off(-60, 80 + 20 * n_ctl)
+                n_ctl += 1
             vehicles.append({"name": f"{unit['id']}#{i + 1:02d}", "type": comp["type"], "lat": p["lat"], "lon": p["lon"],
-                             "weight": 1.0, "heading": axis})
+                             "weight": w, "heading": axis})
             i += 1
     return {"unit": unit["id"], "side": unit["side"], "kind": "sam_site", "name": unit["id"], "vehicles": vehicles, "waypoints": [], "speed_kmh": 0}
 
@@ -227,7 +268,7 @@ def artillery(state: dict, unit: dict, center: dict, axis: float, target: dict) 
              "waypoints": [], "speed_kmh": 0, "fire_at": dict(target)}]
 
 
-def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None = None) -> list[dict]:
+def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None = None, with_ad: bool = True) -> list[dict]:
     """Часть в бою: боевой порядок линиями фронтом к противнику (танки впереди), в line_offset_km (ОЦЕНКА, раздел sim
     доктрины) от середины между ней и противником - так стороны в миссии стоят в дальности огня и ведут бой.
     Приданная ПВО - отдельной группой позади. Число машин - по бюджету колонны, веса - по правилу сохранения."""
@@ -272,7 +313,7 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
         out[0]["axis"] = axis
         out[0]["fire_at"] = model.offset(mid, axis, sim.get("line_offset_km", 1.5) * 1000)
     for a in units.values():
-        if a.get("attached_to") != unit["id"] or a["state"] == "destroyed":
+        if a.get("attached_to") != unit["id"] or a["state"] == "destroyed" or not with_ad:
             continue
         av = []
         a_counts, a_weight = _deploy_ad(model.alive_by_type(a), _ad_cap(cap))
@@ -451,19 +492,19 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
         elif u["state"] == "march":
             col = column(state, u, far, cap_of(u))
             groups.append(col)
-            for a in units.values():
-                if a.get("attached_to") == u["id"] and a["state"] != "destroyed":
+            for a in units.values():                 # вдали от задачи колонна - без ПВО (AD_RADAR_MAX)
+                if a.get("attached_to") == u["id"] and a["state"] != "destroyed" and cap_of(u) != CAP_TOKEN:
                     groups.append(attached_column(state, a, col))
             placed.add(u["id"])
-        else:                                    # оборона, тыл, небоеспособна - позиция у пункта
-            groups += _tag(battle_line(state, u, far, cap_of(u)), [u["id"]])
+        else:                                    # оборона, тыл, небоеспособна - позиция у пункта (вдали - без ПВО)
+            groups += _tag(battle_line(state, u, far, cap_of(u), with_ad=cap_of(u) != CAP_TOKEN), [u["id"]])
             placed.add(u["id"])
     placed |= {g["unit"] for g in groups}
     for u in units.values():                     # ЗРК - полностью, но не дальше SAM_KM (по роли - SAM_KM_ROLE) от цели
         if (model.category(u) == "sam" and u["id"] not in placed and not u.get("attached_to")
                 and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
                 and model.dist_km(model.unit_pos(state, u), center) <= SAM_KM_ROLE.get(u["role"], SAM_KM)):
-            groups.append(sam_site(state, u))
+            groups.append(sam_site(state, u, token=model.dist_km(model.unit_pos(state, u), center) > SAM_FULL_KM))
     from . import convoys                        # колонны снабжения на участках с потоком рядом (обе стороны)
     for side, link, t in convoys.near(state, center, CONVOY_KM):
         if convoys.convoy_id(side, link) not in placed:
