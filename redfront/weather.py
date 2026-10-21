@@ -29,7 +29,8 @@ PRESETS = {        # пресеты облачности DCS по типу по�
     "high": ["LightScattered1", "LightScattered2", "HighScattered1", "HighScattered2", "HighScattered3", None],
     "post": ["Scattered1", "Scattered2", "Scattered3", "Scattered4", "Scattered5", "Broken1", "Broken3"],
     "front": ["Broken4", "Broken5", "Broken6", "Broken7", "Overcast1", "Overcast3", "OvercastAndRain2"],
-    "low": ["Overcast2", "Overcast4", "Overcast5", "Overcast6", "Overcast7", "OvercastAndRain1", "OvercastAndRain3"],
+    "low": ["Overcast2", "Overcast4", "Overcast5", "Overcast6", "Overcast7", "OvercastAndRain1", "OvercastAndRain3",
+            "Broken5", "Broken7", "Broken8"],    # Broken5-8 - облака от земли: низкая облачность 150-500 м
 }
 WIND = {           # (направление у земли, откуда, °; разброс, °; скорость у земли, м/с: от, до; давление QNH, гПа)
     "high": (90, 120, 1, 4, 1026), "post": (300, 40, 4, 8, 1014),
@@ -54,7 +55,7 @@ def day(state: dict, d: int | None = None) -> dict:
     import random
     prev = day(state, d - 1)["type"] if d > 1 else None
     seed = (state.get("scenario") or {}).get("seed", 0)
-    r = random.Random(f"wx-{state.get('campaign_id')}-{seed}-{d}")
+    r = random.Random(f"wx-{seed}-{state.get('date')}-{d}")   # один seed - одна погода
     mo = _month(state)
     tmax, swing, fog_p, cyc = CLIMATE[mo]
     if prev is None:
@@ -72,7 +73,14 @@ def day(state: dict, d: int | None = None) -> dict:
     tmax = tmax + {"high": 2 if mo in range(4, 10) else -2, "post": -2, "front": 0, "low": 1 if mo in (11, 12, 1, 2) else -2}[t] \
         + r.uniform(-3, 3)
     rain = bool(preset and preset.startswith("OvercastAndRain"))
-    out = {"type": t, "preset": preset, "wind_dir": round(wdir), "wind_mps": round(wspd, 1),
+    base = None
+    if preset:                                   # нижняя граница: в пределах пресета, при циклоне - ниже (ОЦЕНКА)
+        from dcs.cloud_presets import Clouds
+        p = Clouds[preset].value
+        lo, hi = max(p.min_base, 150), p.max_base
+        k = {"low": 0.12, "front": 0.25, "post": 0.4, "high": 0.5}[t] * r.uniform(0.3, 1.6)
+        base = int(round(lo + (hi - lo) * min(k, 0.9), -1))
+    out = {"type": t, "preset": preset, "base_m": base, "wind_dir": round(wdir), "wind_mps": round(wspd, 1),
            "qnh_hpa": round(qnh + r.uniform(-6, 6)), "tmax_c": round(tmax), "swing_c": swing,
            "fog": t == "high" and r.random() < fog_p, "rain": rain,
            "vis_km": round(r.uniform(5, 10) if rain else r.uniform(15, 30) if t in ("low", "front") else r.uniform(30, 80))}
@@ -123,7 +131,9 @@ def cloud_base(w: dict) -> int | None:
     """Нижняя граница облаков, м: в пределах пресета DCS, ближе к нижнему краю при циклоне (ОЦЕНКА)."""
     if not w.get("preset"):
         return None
-    from dcs.cloud_presets import Clouds
+    if w.get("base_m"):
+        return w["base_m"]
+    from dcs.cloud_presets import Clouds                 # погода, сохранённая до base_m
     p = Clouds[w["preset"]].value
     lo, hi = max(p.min_base, 300), p.max_base
     k = {"low": 0.1, "front": 0.25, "post": 0.4, "high": 0.5}[w["type"]]
@@ -156,3 +166,53 @@ def summary(state: dict, hour: float, lg: str = "ru") -> str:
               else L(f"; видимость {w['vis_km']} км", f"; visibility {w['vis_km']} km"))
            + L(f"; {h['temp_c']}°C, QNH {w['qnh_hpa']} гПа", f"; {h['temp_c']}°C, QNH {w['qnh_hpa']} hPa ({w['qnh_hpa'] * 0.02953:.2f} inHg)"))
     return f"{metar}\n{txt}"
+
+
+# Минимумы погоды для вылета (нижняя граница облаков BKN/OVC, м; видимость, м) - ОЦЕНКИ по смыслу наставлений:
+# вертолёты - полёт ниже облаков на малой высоте; удар с визуальным поиском цели (бомбы, НАР, пушка, ТВ/лазерные ракеты)
+# и фоторазведка - нужна цель под облаками и время на поиск; всепогодные типы (aircraft.json night: РЛС, прицельные
+# системы для слепого бомбометания) и задачи в воздухе (истребители, ДРЛО, заправщики, перевозки) - по минимуму аэродрома.
+MINIMA = {"heli": (150, 1500), "visual": (600, 5000), "photo": (1000, 5000), "field": (60, 800)}
+VISUAL_KINDS = ("column", "site", "point", "escort_lz", "csar", "air_assault", "air_evac")
+
+
+def conditions(state: dict, t_s: float) -> dict:
+    """Погода в момент t_s (с от полуночи текущих суток): нижняя граница облаков (BKN/OVC, иначе None), видимость, м."""
+    w = day(state)
+    h = at_hour(w, (t_s % 86400) / 3600)
+    ceil = cloud_base(w) if cover(w) in ("BKN", "OVC") else None
+    vis = w["fog_vis_m"] if h["fog"] else w["vis_km"] * 1000
+    return {"ceiling_m": ceil, "vis_m": vis, "fog": h["fog"]}
+
+
+def rule(state: dict, g: dict) -> str:
+    """Какой минимум у группы: heli, photo, visual или field (всепогодный тип / задача в воздухе)."""
+    from . import model
+    perf = state["units"].get(g["performer"]) or {}
+    kind = (g.get("objective") or {}).get("kind")
+    if model.category(perf) == "heli":
+        return "heli"
+    if model.aircraft_info(perf.get("type")).get("night"):
+        return "field"
+    if kind == "recon":
+        return "photo"
+    return "visual" if kind in VISUAL_KINDS else "field"
+
+
+def blocks(state: dict, task: dict, times: dict) -> str | None:
+    """Причина отмены вылета по погоде (None - можно): каждая группа - на своём выходе на объект; минимум аэродрома -
+    на взлёте. times - время групп (с от полуночи)."""
+    if not (state.get("settings") or {}).get("weather_effects", True):
+        return None
+    for g in task["package"]:
+        t = times.get(g["group"])
+        if not t:
+            continue
+        r = rule(state, g)
+        for when, mins in ((t.get("takeoff_s", t["objective_s"]), MINIMA["field"]), (t["objective_s"], MINIMA[r])):
+            c = conditions(state, when)
+            if c["vis_m"] < mins[1]:
+                return f"видимость {c['vis_m']:.0f} м" + (" (туман)" if c["fog"] else "")
+            if c["ceiling_m"] is not None and c["ceiling_m"] < mins[0]:
+                return f"нижняя граница облаков {c['ceiling_m']} м"
+    return None

@@ -687,7 +687,14 @@ Weather is per day, with memory (`weather.py`): the regime (high, front, low, po
 probabilities from yesterday, adjusted by season; clouds are DCS presets; wind at ground, 2000 and 8000 m; temperature
 for the sortie hour; QNH, visibility, rain, morning fog under a high in the cold season. Climate after Hannover
 normals (DWD 1961–1990); probabilities and thresholds are estimates. A METAR-style summary goes into the briefing and
-the kneeboard. Weather does not affect the air tasking order yet.
+the kneeboard, and in the window top bar.
+
+Weather in the air tasking order (`weather.blocks`, minima `weather.MINIMA`, estimates): helicopters — ceiling 150 m,
+visibility 1.5 km; visual attack (column, site, landing zone, CSAR) — 600 m and 5 km; photo recon — 1000 m and 5 km;
+all-weather types (aircraft.json `night`: Su-24M, Tornado etc.), fighters, AWACS, tankers and airlift — airfield
+minima (60 m, 800 m). Checked at takeoff and at the objective; a sortie is moved later (morning fog lifts by
+10–11 h) or cancelled if no window is found (logged and shown in the window). Disable with
+`settings.weather_effects = false`.
 
 Kneeboard (`kneeboard.py`, needs Pillow): pages for the player aircraft type — mission (target, threats, package,
 sequence, route with times and altitudes), comms, weather and airfields. DCS shows kneeboards per aircraft type, so

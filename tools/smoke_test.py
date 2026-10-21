@@ -28,8 +28,22 @@ from dcs.terrain.germany import Germany  # noqa: E402
 
 from redfront import build, debrief, materialize, model, planner, roads, sim  # noqa: E402
 
+_new_campaign = getattr(model.new_campaign, "_orig", model.new_campaign)   # модуль может грузиться дважды
+
+
+def _campaign_fair_weather(*a, **k):
+    """Проверки плана и миссий - без влияния погоды на план полётов (погода случайна по seed); погоду проверяет
+    weather_kneeboard_section, включая её явно."""
+    st = _new_campaign(*a, **k)
+    st["settings"]["weather_effects"] = False
+    return st
+
+
+_campaign_fair_weather._orig = _new_campaign
+model.new_campaign = _campaign_fair_weather
+
 # Проверки с точными числами - без случайности (базовый вариант сценария); случайность - отдельно (random_section).
-_new_campaign = model.new_campaign
+_new_campaign = getattr(model.new_campaign, "_orig", model.new_campaign)   # модуль может грузиться дважды
 def _new_no_random(*a, **kw):
     kw.setdefault("randomness", False)
     return _new_campaign(*a, **kw)
@@ -3457,9 +3471,10 @@ def weather_kneeboard_section(tmp: Path) -> None:
     """Погода суток (weather.py), планшет (kneeboard.py), лимит ЛА миссии и одна смена ДРЛО на зону (build.air_activity)."""
     import re
     import zipfile
-    from redfront import weather
+    from redfront import ato, weather
     print("\n== погода, планшет, лимит ЛА ==")
     st = model.new_campaign("wx", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    st0 = copy.deepcopy(st)
     planner.plan(st)
     w1 = weather.day(st)
     st2 = copy.deepcopy(st)
@@ -3473,12 +3488,28 @@ def weather_kneeboard_section(tmp: Path) -> None:
     kb = [n for n in z.namelist() if n.startswith("KNEEBOARD/")]
     check((g := re.search(r'\["atGround"\]=\s*\{\s*\["dir"\]=(\d+),\s*\["speed"\]=([\d.]+)', mis))
           and int(g[1]) == (w1["wind_dir"] + 180) % 360 and abs(float(g[2]) - w1["wind_mps"]) < 1e-6
-          and ('["preset"]="' in mis) == bool(w1["preset"]),
+          and bool(re.search(r'\["clouds"\]=\s*\{[^}]*\["preset"\]="', mis)) == bool(w1["preset"]),
           f"погода в миссии: ветер, давление, облачность ({weather.summary(st, st['start_hour']).splitlines()[0]})")
     check(len(kb) >= 3 and man["kneeboard_pages"] == len(kb), f"планшет: {len(kb)} страниц в .miz ({kb[0] if kb else '-'})")
     orb = [f["group"] for f in man["flights"] if f["kind"] == "orbit"]
     zones = {(g.split("_")[0], "_".join(g.split("_")[1:-1])) for g in orb}
     check(len(orb) == len(zones), f"дежурство: одна смена на зону в миссии ({', '.join(orb)})")
+    # погода и план полётов: туман утром - удары после его рассеяния; облака ниже 150 м - вертолёты не летают
+    fog = {"type": "high", "preset": None, "wind_dir": 90, "wind_mps": 2, "qnh_hpa": 1025, "tmax_c": 12, "swing_c": 8,
+           "fog": True, "fog_vis_m": 500, "fog_top_m": 200, "rain": False, "vis_km": 30}
+    low = {"type": "low", "preset": "Broken7", "base_m": 120, "wind_dir": 220, "wind_mps": 9, "qnh_hpa": 995, "tmax_c": 9,
+           "swing_c": 4, "fog": False, "rain": False, "vis_km": 8}
+    st0["settings"]["weather_effects"] = True
+    sf, sl = copy.deepcopy(st0), copy.deepcopy(st0)
+    sf["weather"], sl["weather"] = {"1": fog}, {"1": low}
+    af, al, a0 = ato.build(sf), ato.build(sl), ato.build(copy.deepcopy(st0))
+    early = [e for e in af["entries"] if not e["ai_only"] and e["tot_s"] < 10.5 * 3600
+             and any(weather.rule(sf, g) in ("visual", "heli") for g in e["task"]["package"])]
+    heli = lambda a, s_: sum(1 for e in a["entries"] if any(model.category(s_["units"][g["performer"]]) == "heli" for g in e["task"]["package"]))
+    check(not early and heli(al, sl) == 0 < heli(a0, st0) and al["weather_cancelled"],
+          f"погода в плане: утренний туман - визуальные удары и вертолёты после 10:30; облака 120 м - вертолётов 0 "
+          f"(в ясную погоду {heli(a0, st0)}), отменено {len(al['weather_cancelled'])}, например: "
+          f"{al['weather_cancelled'][0]['title'] if al['weather_cancelled'] else '-'} ({al['weather_cancelled'][0]['why'] if al['weather_cancelled'] else ''})")
     st["settings"]["mission_air"] = 20
     man2 = build.build(st, tmp / "wx2.miz", task_no=1)
     n_air = sum(len(f["units"]) for f in man2["flights"])

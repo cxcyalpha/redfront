@@ -154,6 +154,11 @@ def view(st: dict) -> dict:
                                   for g in t.get("package", [])]})
     sc = st.get("scenario") or {}
     man = st.get("manifest") or {}
+    from . import weather as _wx                # погода суток: сводка и вылеты, отменённые по погоде
+    wx_lines = _wx.summary(st, st.get("start_hour", 7), i18n.lang(st)).split("\n")
+    wx_cancel = [f"{i18n.L(i18n.lang(st), 'отменён по погоде', 'cancelled by weather')}: {c['title']} ({c['why']})"
+                 for c in (st.get("ato") or {}).get("weather_cancelled", [])
+                 if c["title"].startswith(st["player_side"] + ":") or (st.get("settings") or {}).get("show_enemy_ato")]
     ent = {e["id"]: e for e in (st.get("ato") or {}).get("entries", [])}
     return {
         "name": st["name"], "day": st["day"], "sortie": st["sortie"], "side": st["player_side"],
@@ -161,6 +166,7 @@ def view(st: dict) -> dict:
         "randomness": st["settings"].get("randomness", True),
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
+        "weather": wx_lines[0], "weather_text": "\n".join(wx_lines[1:] + wx_cancel),
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open"),
                       "kind": b.get("kind", "airfield"),       # farp - вертолётная площадка (farp.py)
