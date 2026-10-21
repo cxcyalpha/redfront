@@ -1,2 +1,3 @@
 # pydcs из основного репозитория, закреплён на коммите с экспортом DCS 2.29 (терраин "germany")
 pydcs @ git+https://github.com/pydcs/dcs@55dc18adbd6907ea17d87de559445c4f9bc39146
+Pillow>=9

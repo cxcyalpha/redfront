@@ -160,6 +160,7 @@ def view(st: dict) -> dict:
         "date": st.get("date"), "scenario": sc.get("title") or sc.get("variant"), "seed": sc.get("seed"),
         "randomness": st["settings"].get("randomness", True),
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
+        "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open"),
                       "kind": b.get("kind", "airfield"),       # farp - вертолётная площадка (farp.py)
@@ -480,6 +481,8 @@ class App:
             out = missions_dir(self.home) / f"redfront_{p.stem}_day{st['day']}.miz"
             if str(req.get("budget") or "").strip():
                 st["settings"]["mission_budget"] = max(0, int(req["budget"]))
+            if str(req.get("air") or "").strip():
+                st["settings"]["mission_air"] = max(0, int(req["air"]))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),
                                   humans=int(req.get("humans") or 1))
             n = sum(len(g["vehicles"]) for g in man["ground"])
