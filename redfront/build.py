@@ -351,16 +351,18 @@ def iads_script(campaign_id: str, sortie: int, sams: list[dict], net: list[dict]
             .replace("@NET_M@", str(int(IADS_NET_KM * 1000))).replace("@SAMS@", si).replace("@NET@", ni))
 
 
-def push_script(campaign_id: str, sortie: int, spec: dict) -> str:
+def push_script(campaign_id: str, sortie: int, specs) -> str:
     """lua/push.lua: удар по готовности подавления ПВО - ударные группы (имя, точка ИПМ, точка посадки), группы
     подавления (имя, взлёт, с), флаг, срок (с от начала миссии)."""
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     lst = lambda xs, f=q: "{ " + ", ".join(f(x) for x in xs) + " }"
-    item = (f'{{ id = {q(spec["id"])}, side = {spec["side"]}, title = {q(spec["title"])}, flag = {spec["flag"]}, strikes = {lst(spec["strikes"])}, ip = {lst(spec["ip"], str)}, '
-            f'home = {lst(spec["home"], str)}, sead = {lst(spec["sead"])}, sead_start = {lst(spec["sead_start"], str)}, '
-            f'deadline = {int(spec["deadline"])} }}')
+    if isinstance(specs, dict):
+        specs = [specs]
+    items = [(f'{{ id = {q(spec["id"])}, side = {spec["side"]}, title = {q(spec["title"])}, flag = {spec["flag"]}, strikes = {lst(spec["strikes"])}, ip = {lst(spec["ip"], str)}, '
+              f'home = {lst(spec["home"], str)}, sead = {lst(spec["sead"])}, sead_start = {lst(spec["sead_start"], str)}, '
+              f'deadline = {int(spec["deadline"])} }}') for spec in specs]
     return (PUSH_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
-            .replace("@SPECS@", item))
+            .replace("@SPECS@", ", ".join(items)))
 
 
 def lz_script(campaign_id: str, sortie: int) -> str:
@@ -765,12 +767,13 @@ BALANCE = 0.6                          # ОЦЕНКА: ЛА стороны в м
 AI_AIRLIFT = 2                         # ОЦЕНКА: рейсов воздушной перевозки каждой стороны в миссии (ближние к удару игрока)
 
 
-def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> list[dict]:
+def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, placed=None) -> list[dict]:
     """Воздушная война в миссии - по плану полётов на сутки (ato.py) обеих сторон: вылеты, которые в окне миссии
     [m0, m0 + ato.MISSION_LEN_S] в воздухе. Свои (кроме пакета игрока) - не больше AI_FLIGHTS["own"] групп, противника -
     AI_FLIGHTS["enemy"], ближние по времени и месту к удару игрока первыми; дежурства (ДРЛО, заправщик) - все, вне лимита.
     Кто к началу миссии уже в воздухе на пути к объекту - стоит на своём маршруте (в воздухе), кто позже - взлетает по
-    расписанию, кто уже возвращается - в миссию не ставится. Летит ударная группа задачи (без групп обеспечения).
+    расписанию, кто уже возвращается - в миссию не ставится. Летит весь пакет: ударная группа и группы обеспечения
+    со своим временем (группа подавления ПВО - если её ЗРК развёрнуты в миссии: placed - развёрнутые части).
     Самолёты эскадрилий не расходуются сверх наличия (с учётом пакета игрока). Время - секунды от начала миссии."""
     from . import ato
     if "strike" not in times:
@@ -853,10 +856,43 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float) -> 
                 g["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
             times[key] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
         used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
-        g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
-                  "title": i18n.L(i18n.lang(state), 'противник' if enemy else 'ИИ', 'enemy' if enemy else 'AI') + ": " + i18n.tr(e['title'], i18n.lang(state)), "_ato": e["id"], "_kind": e["kind"]})
+        lg = i18n.lang(state)
+        who = i18n.L(lg, 'противник' if enemy else 'ИИ', 'enemy' if enemy else 'AI') + ": " + i18n.tr(e['title'], lg)
+        t_strike = int(e["times"]["strike"]["objective_s"] - m0)
+        g.update({"group": key, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True, "title": who,
+                  "_ato": e["id"], "_kind": e["kind"], "_t_strike": t_strike})
         out.append(g)
-        return g["size"]
+        total = g["size"]
+        # группы обеспечения вылета ИИ (подавление ПВО, прикрытие, расчистка...) - в миссии вместе с ударной, со своим
+        # временем по плану полётов; группа подавления - только если её ЗРК развёрнуты в миссии
+        if not e["ai_only"] and not lift and not rec:
+            sup = {x["id"]: x for x in tdg.get("support", [])}
+            for sg in etask["package"][1:]:
+                st_ = e["times"].get(sg["group"])
+                sp = state["units"].get(sg["performer"])
+                if not st_ or not sp or sg["size"] <= 0 or used.get(sp["id"], 0) + sg["size"] > sp.get("count", 0):
+                    continue
+                if sg["objective"]["kind"] == "sam" and not all(x in (placed or ()) for x in sg["objective"]["units"]):
+                    continue
+                take, obj = st_["takeoff_s"] - m0, st_["objective_s"] - m0
+                if take < 0 and obj <= 60:
+                    continue
+                g2 = dict(sg)
+                k2 = f"{key}_{sg['group']}"
+                if take < 0:
+                    base = state["airbases"][g2["base"]]
+                    first = g2["route"][0]
+                    leg = model.dist_km(base, first)
+                    done_km = -take * model.group_speed_kmh(state, g2, tdg) / 3600
+                    g2["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
+                times[k2] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
+                used[sp["id"]] = used.get(sp["id"], 0) + sg["size"]
+                g2.update({"group": k2, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
+                           "title": f"{who} - {i18n.tr(sg['title'], lg)}", "_ato": e["id"], "_kind": e["kind"],
+                           "_t_strike": t_strike, "_support": sup.get(sg.get("support_id"), {})})
+                out.append(g2)
+                total += sg["size"]
+        return total
     cands = sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank)
     count = {False: sum(g["size"] for g in tk["package"]), True: 0}   # ЛА в миссии: свои (с пакетом игрока), противника
     for e in cands:
@@ -1114,17 +1150,30 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             "crates": [], "lifts": [], "jtacs": [], "extract": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
     ctld_assault: list[tuple[dict, str]] = []     # (высадка, борт игрока) - группа десанта CTLD по его доле роты
     ctld_lines: list[str] = []
-    enemy = air_activity(state, tk, times, sortie, m0)
-    # удар по готовности подавления ПВО (push.lua): ударные группы ИИ ждут на ИПМ пусков ПРР
-    sead_g = [x for x in pkg if x["objective"]["kind"] == "sam" and support.get(x.get("support_id"), {}).get("mode") != "kill"]
-    push_spec = {"id": f"push-{sortie}", "side": 1 if tk["side"] == "red" else 2, "title": tk["title"], "flag": PUSH_FLAG, "strikes": [], "ip": [], "home": [], "deadline": 0,
-                 "sead": [f"{x['performer']} {x['group']} {sortie}" for x in sead_g],
-                 "sead_start": [times[x["group"]]["start_s"] for x in sead_g]}
+    enemy = air_activity(state, tk, times, sortie, m0, set(vg_by_unit))
+    # удар по готовности подавления ПВО (push.lua): ударные группы ИИ ждут на ИПМ пусков ПРР - в пакете игрока и в
+    # каждом вылете ИИ с группой подавления (у каждого пакета - свой флаг)
+    def _spec(pid, title, side, sead_groups, k):
+        return {"id": f"push-{sortie}-{k}", "side": 1 if side == "red" else 2, "title": title, "flag": PUSH_FLAG + k,
+                "strikes": [], "ip": [], "home": [], "deadline": 0,
+                "sead": [f"{x['performer']} {x['group']} {sortie}" for x in sead_groups],
+                "sead_start": [times[x["group"]]["start_s"] for x in sead_groups]}
+    push_specs = {"player": _spec("player", tk["title"], tk["side"],
+                                  [x for x in pkg if x["objective"]["kind"] == "sam"
+                                   and support.get(x.get("support_id"), {}).get("mode") != "kill"], 0)}
+    for x in enemy:
+        if x.get("_ato") and x["objective"]["kind"] == "sam" and (x.get("_support") or {}).get("mode") != "kill":
+            sp = push_specs.get(x["_ato"])
+            if sp is None:
+                sp = push_specs[x["_ato"]] = _spec(x["_ato"], x["title"].split(" - ")[0], x["_side"], [], len(push_specs))
+            sp["sead"].append(f"{x['performer']} {x['group']} {sortie}")
+            sp["sead_start"].append(times[x["group"]]["start_s"])
     player_air = None
     for g in pkg + enemy:
         tdg = g.get("_tdef") or (model.doctrine(state, g.get("_side", tk["side"]))["tasks"].get(g["jaat_kind"]) if g.get("jaat_kind") else None) \
             or tdef                              # группы противника - по его пакету доктрины; вертолёты совместного удара - по своей
         side_g = g.get("_side", tk["side"])
+        t_strk = g.get("_t_strike", times["strike"]["objective_s"])   # время удара своего вылета (у ИИ - по плану полётов)
         spd = model.group_speed_kmh(state, g, tdg)   # скорость задачи доктрины
         transit = g.get("transit_alt_m_agl") or tdg["transit_alt_m_agl"]   # средние высоты, если угроз в коридоре нет (planner)
         perf = state["units"][g["performer"]]
@@ -1222,15 +1271,20 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for opt in _ai_options(ai):              # поведение ИИ из доктрины (группа подавления ПВО: не бросать атаку)
             fg.points[0].tasks.append(opt)
         def push_hold(w, ip, tgt):               # ударная группа ИИ при подавлении ПВО - круг на ИПМ до флага (push.lua)
-            if is_player or g["group"] != "strike" or g.get("_ai") or not push_spec["sead"]:
+            if is_player:
+                return
+            if g.get("_ai"):                     # вылет ИИ: ударная группа - без группы обеспечения (_support)
+                sp = push_specs.get(g.get("_ato")) if not g.get("_support") else None
+            else:
+                sp = push_specs["player"] if g["group"] == "strike" else None
+            if not sp or not sp["sead"]:
                 return
             hold = task.ControlledTask(task.OrbitAction(altitude=int(w.alt), speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
-            hold.stop_if_user_flag(PUSH_FLAG, True)
+            hold.stop_if_user_flag(sp["flag"], True)
             w.tasks.append(hold)
-            push_spec["strikes"].append(fg.name)
-            push_spec["ip"].append(len(fg.points) - 1)
-            push_spec["deadline"] = int(times["strike"]["objective_s"] - model.dist_km(ip, tgt) * 3600 / spd
-                                        + PUSH_WAIT_S)
+            sp["strikes"].append(fg.name)
+            sp["ip"].append(len(fg.points) - 1)
+            sp["deadline"] = int(t_strk - model.dist_km(ip, tgt) * 3600 / spd + PUSH_WAIT_S)
         obj = g["objective"]
         land = airport
         if g.get("rv") and obj["kind"] in planner.RV_KINDS:   # сбор пакета: ИИ приходит к своему времени (ETA), игрок - по брифингу
@@ -1385,8 +1439,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         elif obj["kind"] == "sam":               # группа подавления ПВО: рубеж пуска по каждому ЗРК, ближний первым
             low = tdg.get("low_alt_m_agl", transit)
-            sup = support.get(g.get("support_id"), {})
-            hold_until = times["strike"]["objective_s"] + int(sup.get("hold_after_min", 0) * 60)
+            sup = g.get("_support") or support.get(g.get("support_id"), {})
+            hold_until = t_strk + int(sup.get("hold_after_min", 0) * 60)
             if sup.get("mode") == "kill" and g["route"]:   # добивание (killer): за hunter на рубеж, оттуда атака каждого ЗРК
                 sam_pos = model.unit_pos(state, state["units"][obj["units"][0]])
                 entry_km = planner.threat_radius_km(state["units"][obj["units"][0]]) + LOW_ENTRY_KM
@@ -1459,7 +1513,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             w.tasks.append(task.EngageTargetsInZone(Vector2(c.x, c.y), int((g.get("zone_km") or 3) * 1000), [task.Targets.All.GroundUnits]))
             orbit = task.ControlledTask(task.OrbitAction(altitude=int(g.get("alt_m") or transit), speed=spd,
                                                          pattern=task.OrbitAction.OrbitPattern.Circle))
-            orbit.stop_after_time(times["strike"]["objective_s"] + int(g.get("land_s") or 120) + 120)
+            orbit.stop_after_time(t_strk + int(g.get("land_s") or 120) + 120)
             w.tasks.append(orbit)
         elif obj["kind"] == "feint":            # демонстративная: на средней высоте к точке другим направлением, круг, домой
             alt = int(g.get("alt_m") or 4000)
@@ -1476,8 +1530,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             w.tasks.append(task.EngageTargetsInZone(Vector2(c.x, c.y), int((g.get("zone_km") or 40) * 1000), [task.Targets.All.Air]))
             orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
             until = (times[g["group"]]["objective_s"] + int((g.get("cap_min") or 20) * 60)) if obj["kind"] == "cap_zone" \
-                else times["strike"]["objective_s"] if obj["kind"] == "sweep_zone" \
-                else (times["strike"]["objective_s"] + int((g.get("hold_after_min") or 5) * 60))
+                else t_strk if obj["kind"] == "sweep_zone" \
+                else (t_strk + int((g.get("hold_after_min") or 5) * 60))
             orbit.stop_after_time(until)
             w.tasks.append(orbit)
             g["until_s"] = until
@@ -1489,8 +1543,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)
-        if fg.name in push_spec["strikes"]:
-            push_spec["home"].append(len(fg.points) - 1)
+        for sp in push_specs.values():
+            if fg.name in sp["strikes"]:
+                sp["home"].append(len(fg.points) - 1)
         t = times[g["group"]]
         when = (i18n.L(i18n.lang(state), f"посадка в {g['_dest']} ~{t['objective_s'] // 60} мин", f"landing at {g['_dest']} ~{t['objective_s'] // 60} min")
                 if g.get("_dest") else i18n.L(i18n.lang(state), f"в районе ~{t['objective_s'] // 60} мин", f"in the area ~{t['objective_s'] // 60} min"))
@@ -1600,8 +1655,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     iads_sams, iads_net = iads_spec(m, state, vg_by_unit)
     if iads_sams:                                # сеть ПВО: ЗРК на связи молчат до цели в зоне, реакция на ПРР
         trig.add_action(DoScript(String(iads_script(state["campaign_id"], state["sortie"], iads_sams, iads_net))))
-    if push_spec["strikes"]:                     # удар по готовности подавления ПВО
-        trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], push_spec))))
+    specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
+    if specs_p:                                  # удар по готовности подавления ПВО
+        trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
         trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
     if evac_specs:                               # эвакуация: рота садится в борта на площадке (evac.lua; игрок - CTLD)

@@ -3185,6 +3185,12 @@ def push_qra_section(tmp: Path) -> None:
     hold = [t for t in sg.points[ipi].tasks if getattr(t, "id", None) == "ControlledTask"]
     check(hold and hold[0].params["stopCondition"].get("userFlag") == str(build.PUSH_FLAG),
           "ударная группа ИИ ждёт на ИПМ (круг до флага) - пусков ПРР группы подавления")
+    ai_sup = [fl for fl in man["flights"] if fl.get("ato") and "_" in fl["group"] and fl["group"].startswith("ai")]
+    ai_hold = [g for c in m.coalition["red"].countries.values() for g in c.plane_group if " ai" in g.name
+               and any(t.params.get("stopCondition", {}).get("userFlag") not in (None, str(build.PUSH_FLAG))
+                       for p in g.points for t in p.tasks if getattr(t, "id", None) == "ControlledTask")]
+    check(ai_sup and ai_hold, f"вылеты ИИ в миссии - полным пакетом ({len(ai_sup)} групп обеспечения), их ударные группы "
+          f"ждут своего подавления ПВО ({len(ai_hold)})")
     script = next(a.text.id for r in m.triggerrules.triggers for a in r.actions
                   if hasattr(a, "text") and "redfront push" in getattr(a.text, "id", ""))
     sead_name = next(g.name for c in m.coalition["red"].countries.values() for g in c.plane_group if " sead " in g.name)
@@ -3200,8 +3206,8 @@ def push_qra_section(tmp: Path) -> None:
     G1 = run(['T = 30000; SCHED()'])                                   # срок прошёл, подавление живо - удар по сроку
     G2 = run([f'for _, h in ipairs(H) do h:onEvent({{ id = 1, initiator = {{ getGroup = function() return {{ getName = function() return "{sead_name}" end }} end }} }}) end'])
     G3 = run([f'ALIVE["{sead_name}"] = false; T = 20000; SCHED()'])   # подавление сбито, не выстрелив - отмена
-    check(G1.REDFRONT_PUSH["push-" + str(man["sortie"])] == "deadline" and G2.REDFRONT_PUSH["push-" + str(man["sortie"])] == "sead"
-          and G3.REDFRONT_PUSH["push-" + str(man["sortie"])] == "abort" and G3.CMDS[1] and G3.FLAGS[build.PUSH_FLAG]
+    check(G1.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "deadline" and G2.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "sead"
+          and G3.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "abort" and G3.CMDS[1] and G3.FLAGS[build.PUSH_FLAG]
           and "удар отменён" in G3.TEXTS[1] and "удар разрешён" in G2.TEXTS[1],
           "push.lua: пуск группы подавления - удар; подавление сбито, не выстрелив, - удар отменён (домой); нет пусков к сроку - удар; сообщения своей стороне")
     d_ = m.description_text()
