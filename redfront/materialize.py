@@ -160,7 +160,7 @@ SITE_RADAR_GAP_M = 120   # ОЦЕНКА: РЛС позиции - не в одн�
 def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
     """Позиция ЗРК: РЛС в центре (каждая следующая - в SITE_RADAR_GAP_M в стороне), пункт управления рядом, пусковые -
     по SITE_LAYOUT системы (иначе - по кругу 300 м). Все машины развёрнуты на ось угрозы (threat_axis_deg).
-    token - ЗРК вдали от задачи: РЛС и не больше SAM_TOKEN_LN пусковых, вес пусковой - по правилу сохранения."""
+    token - ЗРК вдали от задачи: РЛС и не больше SAM_TOKEN_LN пусковых, вес пусковой - не больше MAX_WEIGHT."""
     c = model.unit_pos(state, unit)
     axis = threat_axis_deg(state, unit)
     k = math.cos(math.radians(c["lat"]))
@@ -177,7 +177,7 @@ def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
             continue
         shown, w = n, 1.0
         if token and comp["role"] == "launcher" and n > SAM_TOKEN_LN:
-            shown, w = SAM_TOKEN_LN, alive[comp["type"]] / SAM_TOKEN_LN
+            shown, w = SAM_TOKEN_LN, min(alive[comp["type"]] / SAM_TOKEN_LN, MAX_WEIGHT)   # остальное - не в миссии
         r, arc, face = SITE_LAYOUT.get(comp["type"], (300, 360, "ring"))
         full = max(comp.get("count", n), shown)
         for j in range(shown):

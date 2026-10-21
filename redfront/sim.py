@@ -107,7 +107,7 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
 
 
 def _length(state: dict, u: dict) -> float:
-    return model.route_length_km(model.route_points(state, u))
+    return model.route_km(state, u)
 
 
 def _contacts(state: dict, units: list[dict]) -> list[tuple[dict, dict]]:
@@ -140,7 +140,7 @@ def current_link(state: dict, u: dict) -> tuple[str, str] | None:
     r = u.get("route") or []
     km = 0.0
     for a, b in zip(r, r[1:]):
-        km += model.route_length_km(model.route_points(state, {"route": [a, b]}))
+        km += model.route_km(state, {"route": [a, b]})
         if u["progress_km"] < km - 1e-6:
             return a, b
     return (r[-2], r[-1]) if len(r) > 1 else None
@@ -151,10 +151,18 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
     lines = []
     units = _maneuver(state)
     budget, start = {}, {}
+    foes = {s: [model.unit_pos(state, x) for x in units if x["side"] != s and x["state"] in ACTIVE] for s in model.SIDES}
     for u in units:
         if u["state"] == "march":
-            budget[u["id"]] = ((u.get("daily_advance_km") or _sim(state, u["side"])["daily_advance_km"]) * model.strength(u)
-                               * u.get("supply", 1.0) * frac_day)             # без снабжения - медленнее
+            sm = _sim(state, u["side"])
+            pos = model.unit_pos(state, u)
+            road = u.get("road_march_km", sm.get("road_march_km"))   # у части - своё (0 - всегда темп наступления)
+            rear = road and all(model.dist_km(pos, f) > sm.get("road_clear_km", 15) for f in foes[u["side"]])
+            if rear:                                 # марш по своему тылу - темпом колонны, а не наступления (ОЦЕНКА)
+                budget[u["id"]] = road * u.get("supply", 1.0) * frac_day
+            else:
+                budget[u["id"]] = ((u.get("daily_advance_km") or sm["daily_advance_km"]) * model.strength(u)
+                                   * u.get("supply", 1.0) * frac_day)         # без снабжения - медленнее
             budget[u["id"]] *= u.get("speed_k", 1.0)        # передовой отряд, ОМГ - быстрее (ops.py)
             cl = current_link(state, u)
             if cl and logistics.link_detour(state, *cl):                       # разрушен малый мост - объезд

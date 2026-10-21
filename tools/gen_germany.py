@@ -923,7 +923,8 @@ def main() -> None:
             "date": date,
             "countries": {"red": "Russia", "blue": "Germany"},
             "units": units,
-            "variants": [{"name": "base", "title": title}],
+            "variants": [{"name": "base", "title": title, "assembly": ["red", "blue"],
+                          "_about_assembly": "первый эшелон ОВД - в исходных районах у границы; НАТО - передовая оборона (Vorneverteidigung): бригады первого дня - в пунктах у границы (model.assembly_areas)"}],
             "replacements": {"air_per_day": 2, "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."},
             "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                                for t, r, c in v["composition"]]}

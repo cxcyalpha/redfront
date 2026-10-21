@@ -288,6 +288,14 @@ Ground model (`sim.py`, coefficients in the doctrine `sim` section, estimates): 
 loses less) and leave combat below the combat-effectiveness threshold. A unit that reaches the end of its route
 occupies an area (defence). Attached air defence takes losses together with its unit.
 
+March rate: out of contact (enemy farther than `road_clear_km`, 15 km — the deployment line) a unit moves as a march
+column at `road_march_km` per day (150 km, estimate); closer — at the attack rate (`daily_advance_km`, 25 km). A unit
+may set its own `road_march_km` (0 — always the attack rate; used in the Hamburg training scenario). In the "Warsaw
+Pact strike along the whole front" scenario (variant `assembly`) the WP first echelon starts in assembly areas at the
+border and day-1 NATO brigades in border towns (forward defence); combat begins in the first hours of day 1
+(`model.assembly_areas`). Unit positions on the road (`model.unit_pos`) use a cached route geometry: the end of day
+for the whole front takes seconds rather than minutes.
+
 The model follows the campaign clock (`sim.advance`): step — 1 h, combat and march per step — 1/24 of the daily norm
 (strength recalculated every hour), place capture — every hour, command decisions — at 00, 06, 12 and 18 h (rear-area
 recovery — 6 h). Supply, repair, replacements and the fate of downed crews — once a day, at its end.
@@ -652,7 +660,7 @@ positions, SAMs in full. Density far away — 0.35 of the column budget, one veh
 (estimates: `FAR_DENSITY`, `MAX_WEIGHT`). In the whole-map theatre: units within 60 km — partially (up to 24
 vehicles), farther — a presence marker (4 vehicles); point air defence — within 100 km of the target
 (`materialize.SAM_KM_ROLE`), other SAMs — within 250 km: full sites up to 150 km, beyond that a marker (radars and 2
-launchers, launcher weight by the conservation rule; `SAM_FULL_KM`, `SAM_TOKEN_LN`). Organic air defence of units more
+launchers, launcher weight up to 3 model vehicles; `SAM_FULL_KM`, `SAM_TOKEN_LN`). Organic air defence of units more
 than 60 km from the target (not in combat) is not placed; outside the task window attached air defence carries at most
 2 radar vehicles (`AD_RADAR_MAX`), the rest are MANPADS, optical SAMs and guns. Site SAM launchers follow the
 establishment (SA-2 and SA-5 — 6, SA-3 and SA-6 — 4, HAWK — 6, Patriot — 8), laid out per system (`SITE_LAYOUT`;

@@ -2242,6 +2242,8 @@ def convoy_section(tmp: Path) -> None:
     a2 = ato.ensure(st2)
     e = next((e for e in a2["entries"] if e["kind"] == "strike_supply_route" and not e["task"].get("threats")),
              next((e for e in a2["entries"] if e["kind"] == "strike_supply_route"), None))
+    if e:                                        # механизм, а не обстановка: без угроз коридора (ЗРК у фронта - по-разному)
+        e["task"]["threats"] = []
     lines = convoys.daily(st2) if e else []
     foe = model.enemy(e["side"]) if e else "blue"
     check(e and (st2.get("convoy_losses") or {}).get(foe, {}).get(e["task"]["link"], 0) > 0 and lines,
@@ -3110,8 +3112,7 @@ def heli_pkg_section(tmp: Path) -> None:
     from redfront import ato
     print("\n== Вертолёты: прикрытие, состав, совместный удар, ночь ==")
     st = model.new_campaign("heli", sector="sector_germany.json", oob="oob_germany.json", seed=7)
-    sim.end_day(st)
-    planner.plan(st)
+    planner.plan(st)                             # день 1: десант ещё есть куда (после - фронт плотнее, площадок меньше)
     aa = next(t for t in st["tasks"] if t["kind"] == "air_assault")
     esc = next((g for g in aa["package"] if g["group"] == "escort"), None)
     check(esc and st["units"][esc["performer"]]["type"] == "Mi_24P" and esc["lead_min"] == 2 and esc["size"] >= 2,
@@ -3125,6 +3126,8 @@ def heli_pkg_section(tmp: Path) -> None:
           "в .miz: прикрытие обрабатывает район площадки и держит его, пока транспортные на земле")
     cs = [t for t in st["tasks"] if t["kind"] == "csar"]
     check(not cs or any(g["group"] == "escort" for t in cs for g in t["package"]), "поиск и спасение - с парой прикрытия")
+    sim.end_day(st)                              # день 2: бои на фронте - совместные удары и вертолёты НАТО
+    planner.plan(st)
     jt = [t for t in st["tasks"] if any(g.get("jaat_kind") for g in t["package"])]
     check(jt and all(g["lead_min"] == 2 and g["size"] == 4 for t in jt for g in t["package"] if g.get("jaat_kind"))
           and not any(t["kind"] == "cas_helo" and t["target"] == jt[0]["target"] for t in st["tasks"]),
@@ -3137,8 +3140,10 @@ def heli_pkg_section(tmp: Path) -> None:
               f"(игроку взлёт через ~{tj['strike'].get('takeoff_s', 0) // 60} мин)")
     sb = model.new_campaign("helib", sector="sector_germany.json", oob="oob_germany.json", seed=7, player_side="blue")
     ah = next(u for u in sb["units"].values() if u.get("type") == "AH_64A")
-    tgt = min((u for u in sb["units"].values() if u["side"] == "red" and model.category(u) == "ground"),
-              key=lambda u: model.dist_km(sb["airbases"][ah["base"]], model.unit_pos(sb, u)))
+    sc = [sb["airbases"][u["base"]] for u in sb["units"].values() if "SA342" in str(u.get("type"))]
+    tgt = min((u for u in sb["units"].values() if u["side"] == "red" and model.category(u) == "ground"),   # в досягаемости обоих
+              key=lambda u: max(model.dist_km(sb["airbases"][ah["base"]], model.unit_pos(sb, u)),
+                                min(model.dist_km(b, model.unit_pos(sb, u)) for b in sc)))
     td = model.doctrine(sb, "blue")["tasks"]["cas_helo"]
     tp = model.unit_pos(sb, tgt)
     gs, _w = planner.package(sb, td, ah, tgt, tp, planner.ip_point(sb["airbases"][ah["base"]], tp, td["ip_offset_km"]), [])
@@ -3427,10 +3432,10 @@ def mission_ad_section(tmp: Path) -> None:
            and model.dist_km(model.unit_pos(st, st["units"][g["unit"]]), center) > materialize.SAM_FULL_KM]
     ok_far = all(sum(1 for v in g["vehicles"] if any(c["type"] == v["type"] and c["role"] == "launcher"
                      for c in st["units"][g["unit"]]["composition"])) <= materialize.SAM_TOKEN_LN for g in far)
-    w_ok = all(abs(sum(v["weight"] for v in g["vehicles"]) - sum(model.alive_by_type(st["units"][g["unit"]]).values())) < 1e-6
-               for g in far)
+    w_ok = all(sum(v["weight"] for v in g["vehicles"]) <= sum(model.alive_by_type(st["units"][g["unit"]]).values()) + 1e-6
+               and max(v["weight"] for v in g["vehicles"]) <= materialize.MAX_WEIGHT for g in far)
     check(far and ok_far and w_ok, f"ЗРК дальше {materialize.SAM_FULL_KM} км - знаком: РЛС и не больше "
-          f"{materialize.SAM_TOKEN_LN} ПУ, веса = исправным ({len(far)} позиций)")
+          f"{materialize.SAM_TOKEN_LN} ПУ, вес машины не больше {materialize.MAX_WEIGHT} ({len(far)} позиций)")
     att = [g for g in gs if g["unit"] in st["units"] and st["units"][g["unit"]].get("attached_to") and not g.get("core")]
     radar = max([sum(1 for v in g["vehicles"] if v["type"] in materialize.AD_RADAR_TYPES) for g in att] or [0])
     far_ad = [g for g in att if model.dist_km(model.unit_pos(st, st["units"][st["units"][g["unit"]]["attached_to"]]), center)
