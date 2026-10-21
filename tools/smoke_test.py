@@ -1345,6 +1345,22 @@ def gui_section(tmp: Path) -> None:
     r = app.do("endday", {"file": "g1.json"})
     check(r["state"]["day"] == 2, "конец дня из окна")
     check(app.path("../x").parent == root, "имя файла кампании не выходит из папки проекта")
+    # ливреи полков по умолчанию: из кампании - в новые кампании театра
+    st1 = model.load(root / "g1.json")
+    ac = next(u for u in st1["units"].values() if model.category(u) == "air")
+    app.do("setlivery", {"file": "g1.json", "id": ac["id"], "livery": "test_livery"})
+    r = app.do("liverydefaults", {"file": "g1.json"})
+    r2 = app.do("new", {"file": "g3", "side": "red", "seed": "7"})
+    check(model.load(root / "g3.json")["units"][ac["id"]].get("livery") == "test_livery" and any("Ливреи" in ln for ln in r2["lines"]),
+          f"ливреи по умолчанию: сохранены из кампании, новая кампания театра получает их ({r['lines'][0]})")
+    # ливреи из поставки (data/liveries.json): по id полка и типу
+    _lj = model.load_json
+    model.load_json = lambda n: {"r33iap": {"_name": "x", "MiG_29_Fulcrum": "lv29", "MiG_23MLD": "lv23"}} if n == "liveries.json" else _lj(n)
+    try:
+        stl = model.new_campaign("lv", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    finally:
+        model.load_json = _lj
+    check(stl["units"]["r33iap"].get("livery") == "lv29", "ливрея из data/liveries.json - по типу полка в пресете (МиГ-29 в 1989)")
     # дата начала и настройки погоды: из окна при создании и потом
     r = app.do("new", {"file": "g2", "side": "red", "seed": "42", "date": "1985-12-10"})
     check(r["state"]["date"] == "1985-12-10", "новая кампания с заданной датой начала")
