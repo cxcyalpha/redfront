@@ -12,6 +12,7 @@
 """
 from __future__ import annotations
 
+import copy
 import json
 import sys
 import tempfile
@@ -3447,11 +3448,44 @@ def mission_ad_section(tmp: Path) -> None:
           f"точке (ближайшие в {gap * 1000:.0f} м)")
 
 
+def weather_kneeboard_section(tmp: Path) -> None:
+    """Погода суток (weather.py), планшет (kneeboard.py), лимит ЛА миссии и одна смена ДРЛО на зону (build.air_activity)."""
+    import re
+    import zipfile
+    from redfront import weather
+    print("\n== погода, планшет, лимит ЛА ==")
+    st = model.new_campaign("wx", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    planner.plan(st)
+    w1 = weather.day(st)
+    st2 = copy.deepcopy(st)
+    st2.pop("weather")
+    days = [weather.day(st2, d)["type"] for d in range(1, 31)]
+    check(w1 == weather.day(st2, 1) and len(set(days)) >= 3 and str(1) in st["weather"],
+          f"погода: по суткам, повторяется для той же кампании, хранится в ней; 10 суток: {', '.join(days[:10])}")
+    man = build.build(st, tmp / "wx.miz", task_no=1)
+    z = zipfile.ZipFile(tmp / "wx.miz")
+    mis = z.read("mission").decode("utf-8")
+    kb = [n for n in z.namelist() if n.startswith("KNEEBOARD/")]
+    check((g := re.search(r'\["atGround"\]=\s*\{\s*\["dir"\]=(\d+),\s*\["speed"\]=([\d.]+)', mis))
+          and int(g[1]) == (w1["wind_dir"] + 180) % 360 and abs(float(g[2]) - w1["wind_mps"]) < 1e-6
+          and ('["preset"]="' in mis) == bool(w1["preset"]),
+          f"погода в миссии: ветер, давление, облачность ({weather.summary(st, st['start_hour']).splitlines()[0]})")
+    check(len(kb) >= 3 and man["kneeboard_pages"] == len(kb), f"планшет: {len(kb)} страниц в .miz ({kb[0] if kb else '-'})")
+    orb = [f["group"] for f in man["flights"] if f["kind"] == "orbit"]
+    zones = {(g.split("_")[0], "_".join(g.split("_")[1:-1])) for g in orb}
+    check(len(orb) == len(zones), f"дежурство: одна смена на зону в миссии ({', '.join(orb)})")
+    st["settings"]["mission_air"] = 20
+    man2 = build.build(st, tmp / "wx2.miz", task_no=1)
+    n_air = sum(len(f["units"]) for f in man2["flights"])
+    check(n_air <= 20 and any(f["kind"] == "orbit" for f in man2["flights"]),
+          f"лимит ЛА миссии 20: в миссии {n_air} (было {sum(len(f['units']) for f in man['flights'])}), дежурства - первыми")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section]
 
 
 def main() -> int:

@@ -18,6 +18,8 @@ if not exist ".venv\Scripts\python.exe" (
     exit /b 1
   )
 )
+rem new requirements (Pillow - kneeboard) for an existing .venv
+".venv\Scripts\python.exe" -c "import PIL" 2>nul || ".venv\Scripts\python.exe" -m pip install -r requirements.txt
 if /i "%~1"=="menu" (
   ".venv\Scripts\python.exe" -m redfront menu %2
 ) else (

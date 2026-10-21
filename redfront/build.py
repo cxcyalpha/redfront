@@ -764,6 +764,7 @@ AI_FLIGHTS = {"own": 3, "enemy": 4}   # ОЦЕНКА: сколько групп 
 AI_RECON = 1                           # ОЦЕНКА: разведчиков каждой стороны в миссии (маршрут не дальше RECON_KM от цели игрока)
 RECON_KM = 150
 BALANCE = 0.6                          # ОЦЕНКА: ЛА стороны в миссии - не меньше этой доли от другой (если есть вылеты в окне)
+MISSION_AIR = 0                        # ЛА в миссии не больше (settings.mission_air, build --air; 0 - без ограничения)
 AI_AIRLIFT = 2                         # ОЦЕНКА: рейсов воздушной перевозки каждой стороны в миссии (ближние к удару игрока)
 
 
@@ -787,7 +788,9 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
     def rank(e):
         t = e["times"]["strike"]
         near_km = model.dist_km(e["task"]["target_pos"], tk["target_pos"])
-        return (not e["ai_only"], abs(t["objective_s"] - tot) / 60 + near_km / 10)
+        ok = e["task"]["package"][0]["objective"]["kind"]   # при лимите ЛА: дежурства в зоне, пакеты, дежурные пары, прочее
+        pri = 0 if ok == "orbit" else 1 if not e["ai_only"] else 2 if ok == "alert" else 3
+        return (pri, abs(t["objective_s"] - tot) / 60 + near_km / 10)
     out = []
     n = {False: 0, True: 0}
     nl = {False: 0, True: 0}
@@ -834,7 +837,8 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
         if e["ai_only"] and not lift and not rec:
             key = f"{'enemy' if enemy else 'ai'}_{e['kind']}_{ato.hhmm(e['tot_s']).replace(':', '')}"
             times[key] = {"start_s": max(0, int(t["objective_s"] - m0)), "late_s": 0,
-                          "objective_s": max(0, int(t["objective_s"] - m0)), "until_s": int(t["station_end_s"] - m0)}
+                          "objective_s": max(0, int(t["objective_s"] - m0)),
+                          "until_s": max(int(t["station_end_s"] - m0), ato.MISSION_LEN_S)}   # смена держит зону до конца окна
         else:
             take, obj = t["takeoff_s"] - m0, t["objective_s"] - m0
             if take < 0 and obj <= 60:
@@ -894,9 +898,28 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
                 total += sg["size"]
         return total
     cands = sorted((e for e in a["entries"] if e["id"] != tk.get("ato_id") and ato.in_window(e, t0, t1)), key=rank)
-    count = {False: sum(g["size"] for g in tk["package"]), True: 0}   # ЛА в миссии: свои (с пакетом игрока), противника
+    # дежурство (ДРЛО, заправщик) - одна смена на зону: та, что дольше всех на станции в окне миссии; она держит зону
+    # до конца миссии (смена смен - за кадром: иначе в миссии две машины в зоне и одна на обратном пути)
+    def on_station(e):
+        t = next(iter(e["times"].values()))
+        return min(t1, t["station_end_s"]) - max(t0, t["objective_s"])
+    best: dict = {}
     for e in cands:
-        k = add(e)
+        if e["task"]["package"][0]["objective"]["kind"] == "orbit":
+            k = (e["side"], e["task"]["target"])
+            if k not in best or on_station(e) > on_station(best[k]):
+                best[k] = e
+    cands = [e for e in cands if e["task"]["package"][0]["objective"]["kind"] != "orbit"
+             or best.get((e["side"], e["task"]["target"])) is e]
+    count = {False: sum(g["size"] for g in tk["package"]), True: 0}   # ЛА в миссии: свои (с пакетом игрока), противника
+    cap = int((state.get("settings") or {}).get("mission_air", MISSION_AIR) or 0)
+    air = [count[False]]                         # всего ЛА в миссии (с пакетом игрока и дежурствами)
+    def fits(e):                                 # лимит ЛА миссии: вылет - весь пакет (оценка сверху), иначе не ставится
+        pk = e["task"]["package"]
+        return not cap or air[0] + sum(g["size"] for g in (pk[:1] if e["ai_only"] else pk)) <= cap
+    for e in cands:
+        k = add(e) if fits(e) else 0
+        air[0] += k
         if k:
             taken.add(e["id"])
             if e["task"]["package"][0]["objective"]["kind"] not in ("alert", "orbit"):
@@ -909,7 +932,8 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
                 break
             if e["id"] in taken or (e["side"] != tk["side"]) != weak:
                 continue
-            k = add(e, capped=False)
+            k = add(e, capped=False) if fits(e) else 0
+            air[0] += k
             if k:
                 taken.add(e["id"])
                 count[weak] += k
@@ -988,6 +1012,44 @@ def radio_setup(m: Mission, state: dict, tk: dict, pkg: list[dict], sortie: int,
     return out + titles
 
 
+def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines: list[str], comm_lines: list[str],
+               wx_text: str, lg: str) -> int:
+    """Наколенный планшет ЛА игрока (kneeboard.py): задание и маршрут со временем, связь, погода и аэродромы."""
+    from . import kneeboard
+    L = lambda ru, en: i18n.L(lg, ru, en)
+    hhmm = lambda s: (m.start_time + datetime.timedelta(seconds=int(s))).strftime("%H:%M")
+    groups, seen = [], set()
+    for c in list(m.coalition["red"].countries.values()) + list(m.coalition["blue"].countries.values()):
+        for fg in list(c.plane_group) + list(c.helicopter_group):
+            if not any(u.skill in (Skill.Client, Skill.Player) for u in fg.units):
+                continue
+            ut = fg.units[0].unit_type
+            route, t, prev = [], float(getattr(fg.points[0], "ETA", 0) or 0), None
+            for i, pt in enumerate(fg.points):     # время точек: заданное (ETA), иначе - по участкам и скорости точки
+                if prev is not None:
+                    eta = float(getattr(pt, "ETA", 0) or 0)
+                    t = eta if getattr(pt, "ETA_locked", False) and eta else t + prev.position.distance_to_point(pt.position) / max(pt.speed or 150.0, 30.0)
+                prev = pt
+                route.append(f"{i:2d}  {hhmm(t)}  {pt.alt:>6.0f} {L('м', 'm')}  {pt.name or ''}")
+            ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
+            names = {a.id: a.name for a in m.terrain.airports.values()}
+            fields = [L("Взлёт: ", "Departure: ") + names.get(ab[0], "-")] + ([L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")] if ab else [])
+            sub = f"{fg.name} - {ut.id} x{len(fg.units)} - {L('день', 'day')} {state['day']}"
+            pages = [
+                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), [L(f"Удаление цели {tk['distance_km']:.0f} км", f"Target distance {tk['distance_km']:.0f} km"),
+                                           L("Угрозы: ", "Threats: ") + (", ".join(state["units"][t]["name"] for t in tk["threats"]) or L("не выявлены", "none detected"))]),
+                                          (L("Тактическая группа", "Package"), lines),
+                                          (L("Порядок действий", "Sequence"), order_lines),
+                                          (L("Маршрут (точка, время, высота)", "Route (point, time, altitude)"), route)]),
+                (L("СВЯЗЬ", "COMMS"), [(L("Каналы и позывные", "Channels and callsigns"), comm_lines or ["-"])]),
+                (L("ПОГОДА", "WEATHER"), [(L("Погода", "Weather"), wx_text.split("\n")), (L("Аэродромы", "Airfields"), fields)]),
+            ]
+            if (ut.id, fg.name) not in seen:
+                seen.add((ut.id, fg.name))
+                groups.append({"type": ut, "sub": sub, "pages": pages})
+    return kneeboard.build(m, lg, groups)
+
+
 def package_order(pkg: list[dict], times: dict, lg: str = "ru") -> list[str]:
     """Брифинг: сбор пакета (место, время каждой группы) и порядок выхода на объекты относительно удара (T)."""
     out = []
@@ -1060,6 +1122,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     y, mo, d = map(int, state["date"].split("-"))
     start = datetime.datetime(y, mo, d, state["start_hour"], 0) + datetime.timedelta(days=state["day"] - 1)
     m.start_time = start
+    from . import weather as wx_mod
+    wx_now = wx_mod.apply(m, state, state["start_hour"])                  # погода суток (weather.py)
 
     # ---- весь театр: район задачи подробно, остальное - реже ----
     groups = materialize.theatre(state, tk, density)
@@ -1676,8 +1740,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             for grp in list(c.plane_group) + list(c.helicopter_group):
                 for pt in grp.points:
                     pt.name = i18n.waypoint(pt.name, lg)
+    wx_text = wx_mod.summary(state, (m.start_time.hour + m.start_time.minute / 60), lg)
     m.set_description_text(
-        f"{i18n.tr(tk['title'], lg)}\n\n{Lx('День', 'Day')} {state['day']}" + (Lx(", НОЧНОЙ ВЫЛЕТ", ", NIGHT SORTIE") if _ato_night(state, m0) else "")
+        f"{i18n.tr(tk['title'], lg)}\n\n{Lx('Погода', 'Weather')}: {wx_text}\n\n{Lx('День', 'Day')} {state['day']}" + (Lx(", НОЧНОЙ ВЫЛЕТ", ", NIGHT SORTIE") if _ato_night(state, m0) else "")
         + Lx(". Тактическая группа:\n", ". Package:\n") + "\n".join(f"- {ln}" for ln in lines)
         + ((Lx("\nПорядок действий группы:\n", "\nSequence of the package:\n") + "\n".join(f"- {ln}" for ln in order_lines)) if order_lines else "")
         + ((Lx("\n\nСвязь:\n", "\n\nCommunications:\n") + "\n".join(f"- {ln}" for ln in comm_lines)) if comm_lines else "")
@@ -1689,6 +1754,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         + ((Lx("\n\nНаведение (КРУ, только МиГ-29):\n", "\n\nGround control intercept (GCI, MiG-29 only):\n") + "\n".join(f"- {ln}" for ln in gci_lines)) if gci_lines else "")
         + ((Lx("\n\nПеревозки и наведение (CTLD):\n", "\n\nTransport and JTAC (CTLD):\n") + "\n".join(f"- {ln}" for ln in ctld_lines)) if ctld_lines else ""))
 
+    kb_pages = _kneeboard(m, state, tk, lines, order_lines, comm_lines, wx_text, lg)
+
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     m.save(str(out_path))
@@ -1696,6 +1763,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     manifest = {
         "sortie": state["sortie"],
         "file": str(out_path),
+        "weather": wx_now,                               # погода суток в миссии (weather.py)
+        "kneeboard_pages": kb_pages,
         "ato_id": tk.get("ato_id"),                      # вылет плана полётов, который летит игрок
         "start_s": int(m0),                              # начало миссии, с от полуночи суток кампании
         "end_s": int(m0) + ATO_LEN_S,                    # окно миссии (после дебрифа - часы кампании)

@@ -667,6 +667,24 @@ the routes and objective, farthest first: columns and formations are thinned fir
 vehicles), then distant groups are removed entirely. Removed forces still live in the model. Without a budget a
 theatre mission reaches ~1200 vehicles by day 8.
 
+Aircraft in the mission are limited by `settings.mission_air` (settings or `build --air N`; 0 — unlimited, default).
+The player package is always placed; then, in order: on-station orbits (AWACS, tanker), AI packages (whole, those near
+the player strike first), alert pairs, recon and airlift — while the sortie fits. The cap does not change the air
+tasking order: sorties left out of the mission are flown in the model. One orbit shift per zone: the one longest on
+station in the mission window holds the zone until the end of the mission.
+
+#### Weather and kneeboard
+
+Weather is per day, with memory (`weather.py`): the regime (high, front, low, post-frontal) follows transition
+probabilities from yesterday, adjusted by season; clouds are DCS presets; wind at ground, 2000 and 8000 m; temperature
+for the sortie hour; QNH, visibility, rain, morning fog under a high in the cold season. Climate after Hannover
+normals (DWD 1961–1990); probabilities and thresholds are estimates. A METAR-style summary goes into the briefing and
+the kneeboard. Weather does not affect the air tasking order yet.
+
+Kneeboard (`kneeboard.py`, needs Pillow): pages for the player aircraft type — mission (target, threats, package,
+sequence, route with times and altitudes), comms, weather and airfields. DCS shows kneeboards per aircraft type, so
+pages are labelled with the group.
+
 #### Speed and countries
 
 Group speed on the route and in timing — the doctrine task's `speed_kmh` (estimates); the landing waypoint gets the

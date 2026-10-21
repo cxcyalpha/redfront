@@ -225,6 +225,8 @@ dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
     <select id="sLang"><option value="ru">Русский</option><option value="en">English</option></select>
     <label data-t="budget"></label>
     <input id="sBudget" type="number" min="0" step="50" data-t-title="budgetTip">
+    <label data-t="airBudget"></label>
+    <input id="sAir" type="number" min="0" step="10" data-t-title="airBudgetTip">
     <label><input type="checkbox" id="sEnemy" style="width:auto"> <span data-t="enemyPlan"></span></label>
     <div class="sect"><b data-t="mapTools"></b>
       <div class="meta" data-t="mapToolsTip"></div>
@@ -254,7 +256,8 @@ const I18N = {
     sideBlueNATO: "Синие (НАТО)", nPreset: "Состав сил (пресет)", copyPreset: "Копия для правки",
     copyPresetTip: "копия выбранного пресета в папку presets/ - для правки в текстовом редакторе", nVar: "Вариант сценария",
     nSeed: "Seed (пусто - случайный)", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
-    cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", budget: "Наземных машин в миссии, не больше",
+    cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
+    airBudgetTip: "с пакетом игрока; вылеты ИИ дальше от удара игрока не ставятся (в модели они летают); 0 - без ограничения",
     budgetTip: "дальнее прореживается и убирается; 0 - без ограничения", enemyPlan: "показывать план полётов противника (отладка)",
     mapTools: "Инструменты карты DCS",
     mapToolsTip: "Уточняют цели и дороги по объектам карты DCS: создать служебную миссию, запустить её в DCS, затем применить результат.",
@@ -317,7 +320,7 @@ const I18N = {
       <li>Можно собрать следующий вылет тех же суток или <b>4. Конец дня</b> - модель доигрывает сутки.</li></ol>
       <p><b>Вкладки:</b> «Войска» - наземные части (противник - по разведке), «Авиация» - полки (добавить полк, перебазировать, лётчики, ливрея), «Тыл» - снабжение в тоннах, «Журнал» - события.</p>
       <p><b>Режим командующего:</b> во «Вылетах» вылет своей стороны можно изменить (время, часть, число бортов, подвеска), снять или добавить («+ вылет»).</p>
-      <p><b>Настройки (⚙):</b> язык, бюджет наземных машин в миссии, план противника (отладка), инструменты карты DCS.</p>
+      <p><b>Настройки (⚙):</b> язык, бюджет наземных машин и ЛА в миссии, план противника (отладка), инструменты карты DCS.</p>
       <p>Подробно - README.md / README.en.md.</p>`,
   },
   en: {
@@ -328,7 +331,8 @@ const I18N = {
     sideBlueNATO: "Blue (NATO)", nPreset: "Order of battle (preset)", copyPreset: "Copy for editing",
     copyPresetTip: "copy the selected preset to presets/ for editing in a text editor", nVar: "Scenario variant",
     nSeed: "Seed (empty - random)", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
-    cancel: "Cancel", create: "Create", close: "Close", language: "Language", budget: "Max ground vehicles in mission",
+    cancel: "Cancel", create: "Create", close: "Close", language: "Language", budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
+    airBudgetTip: "including the player package; AI sorties farther from the player strike are left out (the model still flies them); 0 - unlimited",
     budgetTip: "distant units are thinned out and removed; 0 - unlimited", enemyPlan: "show enemy air tasking order (debug)",
     mapTools: "DCS map tools",
     mapToolsTip: "Refine targets and roads from DCS map objects: create a service mission, run it in DCS, then apply the result.",
@@ -391,7 +395,7 @@ const I18N = {
       <li>Build another sortie of the same day or press <b>4. End of day</b> - the model plays out the rest of the day.</li></ol>
       <p><b>Tabs:</b> “Ground” - ground units (enemy per intelligence), “Air units” - regiments (add, rebase, pilots, livery), “Logistics” - supply in tonnes, “Log” - events.</p>
       <p><b>Commander mode:</b> in “Sorties” your side's sorties can be edited (time, unit, number of aircraft, loadout), removed or added (“+ sortie”).</p>
-      <p><b>Settings (⚙):</b> language, mission ground vehicle budget, enemy plan (debug), DCS map tools.</p>
+      <p><b>Settings (⚙):</b> language, mission ground vehicle and aircraft budgets, enemy plan (debug), DCS map tools.</p>
       <p>Mission briefings follow the language setting. The event log and target explanations are currently in Russian.</p>
       <p>Details: README.en.md.</p>`,
   },
@@ -659,7 +663,7 @@ function renderInspector() {
   box.innerHTML = h + `</div>`;
   const go = box.querySelector(".go");
   if (go) go.onclick = e => act("build", {task: ti + 1, fly: box.querySelector(".fly").value, humans: box.querySelector(".hum").value,
-    budget: pref("rf_budget", "")}, e.target);
+    budget: pref("rf_budget", ""), air: pref("rf_air", "")}, e.target);
   const ed = box.querySelector(".atoEd"); if (ed) ed.onclick = () => atoEditor(box.querySelector(".item"));
   const rm = box.querySelector(".atoRm"); if (rm) rm.onclick = e => { if (confirm(T("removeQ"))) act("atoremove", {id: r.id}, e.target); };
 }
@@ -975,7 +979,7 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b
 $("#bPlan").onclick = async e => { SEL = 0; TAB = "sorties"; SELID = null; await act("plan", {}, e.currentTarget);
   if (ST && ST.tasks.length && ST.tasks[0].ato_id) selectSortie(ST.tasks[0].ato_id); };
 $("#bBuild").onclick = e => { act("build", {task: SEL + 1, fly: ($("#insp .fly") || {}).value || "strike",
-  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", "")}, e.currentTarget); };
+  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", ""), air: pref("rf_air", "")}, e.currentTarget); };
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
 $("#bEnd").onclick = e => { if (confirm(T("endQ"))) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();
@@ -983,6 +987,7 @@ $("#bHelp").onclick = () => $("#dHelp").showModal();
 $("#bSet").onclick = () => {
   $("#sLang").value = LANG;
   $("#sBudget").value = pref("rf_budget", "") || (ST ? ST.budget : "");
+  $("#sAir").value = pref("rf_air", "") || (ST ? ST.air_budget : "");
   $("#sEnemy").checked = pref("rf_ato_enemy", "0") === "1";
   $("#dSet").showModal();
 };
@@ -992,6 +997,7 @@ $("#sLang").onchange = async e => {
   if (INFO) { const keep = FILE; await loadInfo(); FILE = keep; }
 };
 $("#sBudget").onchange = e => setPref("rf_budget", e.target.value);
+$("#sAir").onchange = e => setPref("rf_air", e.target.value);
 $("#sEnemy").onchange = e => { setPref("rf_ato_enemy", e.target.checked ? "1" : "0"); render(); };
 window.addEventListener("resize", () => map.invalidateSize());
 $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
