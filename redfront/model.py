@@ -384,9 +384,28 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     _farp.ensure(st)
     from . import intel as _intel                # туман войны: известные позиции ЗРК противника
     _intel.ensure(st)
+    apply_liveries(st)
     for side in (chosen or {}).get("assembly", []):   # вариант: первый эшелон стороны - в исходных районах у границы
         assembly_areas(st, side)
     return st
+
+
+def apply_liveries(state: dict) -> int:
+    """Ливреи полков по умолчанию из data/liveries.json: id полка -> {тип: ливрея} или строка (для всех типов);
+    пустое - ливрея DCS по умолчанию. Возвращает число полков с ливреей."""
+    try:
+        lv = load_json("liveries.json")
+    except (OSError, ValueError):
+        return 0
+    n = 0
+    for uid, x in lv.items():
+        u = state["units"].get(uid)
+        if not u or uid.startswith("_"):
+            continue
+        name = x.get(u.get("type"), "") if isinstance(x, dict) else x
+        if name and str(name).strip():
+            u["livery"], n = str(name).strip(), n + 1
+    return n
 
 
 ASSEMBLY_PER_PLACE = 2   # ОЦЕНКА: дивизий (бригад) первого эшелона в исходном районе у одного пункта

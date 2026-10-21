@@ -624,7 +624,9 @@ off the list until rescued; killed or captured pilots leave; replacements get ne
 **Regiment livery** — "Air" → "Pilots, livery"; applies to all the regiment's groups in all missions. The list comes
 from the installed DCS (pydcs scans DCS and Saved Games livery folders); if DCS is not found, type the livery folder
 name.
-The "Liveries as default" button on the "Air" tab saves the campaign's regiment liveries (`liveries_<theatre>.json`
+Bundled liveries — `redfront/data/liveries.json`: regiment id → {DCS type: livery folder name} (or a string for all
+types; `_name` is for reference). Empty means the DCS default. Applied when a campaign is created; a livery set in
+the window overrides it. The "Liveries as default" button on the "Air" tab saves the campaign's regiment liveries (`liveries_<theatre>.json`
 in the campaigns folder): new campaigns of this theatre get them at once — same regiment, same type (a re-equipped
 regiment does not inherit it).
 
