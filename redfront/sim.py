@@ -157,7 +157,9 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
             sm = _sim(state, u["side"])
             pos = model.unit_pos(state, u)
             road = u.get("road_march_km", sm.get("road_march_km"))   # у части - своё (0 - всегда темп наступления)
-            rear = road and all(model.dist_km(pos, f) > sm.get("road_clear_km", 15) for f in foes[u["side"]])
+            cl = current_link(state, u)                # маршевый темп - только по своей территории: в тылу противника
+            own = not cl or all(ops.owner(state, x) == u["side"] for x in cl)   # (прорыв, брешь) - темп наступления
+            rear = road and own and all(model.dist_km(pos, f) > sm.get("road_clear_km", 15) for f in foes[u["side"]])
             if rear:                                 # марш по своему тылу - темпом колонны, а не наступления (ОЦЕНКА)
                 budget[u["id"]] = road * u.get("supply", 1.0) * frac_day
             else:
