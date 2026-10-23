@@ -87,6 +87,19 @@ def _ad_cap(cap: int | None) -> int | None:
     return None if cap is None else (CAP_AD_FAR if cap <= CAP_TOKEN else CAP_AD_NEAR)
 
 
+def _ad_share(ad: dict, parent: dict, shown: int, cap: int | None) -> int | None:
+    """Приданная ПВО - той же долей, что показана часть (иначе в бою видна почти одна ПВО: часть - 60 машин из 300,
+    ПВО - вся); не меньше BUDGET_MIN_KEEP, не больше cap."""
+    alive = sum(model.alive_by_type(parent).values())
+    if alive <= 0:
+        return cap
+    ad_alive = sum(model.alive_by_type(ad).values())
+    n = max(BUDGET_MIN_KEEP, math.ceil(ad_alive * shown / alive))
+    if cap is None and n >= round(ad_alive):
+        return None                              # часть показана целиком - и ПВО целиком (окно задачи, как раньше)
+    return n if cap is None else min(cap, n)
+
+
 def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None) -> dict:
     """Колонна на марше. Порядок следования и дистанция - из пакета доктрины стороны, которой принадлежит часть
     (ОЦЕНКИ в data/doctrine/*.json, раздел march); бюджет машин - настройка кампании (settings.column_budget_units)."""
@@ -101,7 +114,9 @@ def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None
     head_km = unit["progress_km"]
     spacing_km = march["spacing_m"] / 1000.0
     # разрыв за танками под приданную войсковую ПВО (она идёт отдельной группой, см. attached_column)
-    gap = sum(sum(_deploy_ad(model.alive_by_type(a), ad_cap)[0].values()) for a in state["units"].values()
+    shown = sum(counts.values())
+    gap = sum(sum(_deploy_ad(model.alive_by_type(a), _ad_share(a, unit, shown, ad_cap))[0].values())
+              for a in state["units"].values()
               if a.get("attached_to") == unit["id"] and a.get("state") != "destroyed")   # так же, как в attached_column
     vehicles, i, slot = [], 0, 0
     gap_done = gap == 0
@@ -223,7 +238,8 @@ def attached_column(state: dict, unit: dict, parent_group: dict, cap: int | None
     n_ahead = sum(1 for v in parent_group["vehicles"] if roles.get(v["type"]) == "MBT")
     start_km = parent["progress_km"] - n_ahead * spacing_km      # в разрыв, оставленный колонной за танками
     alive = model.alive_by_type(unit)
-    counts, weight = _deploy_ad(alive, cap if cap is not None else parent_group.get("ad_cap"))
+    counts, weight = _deploy_ad(alive, _ad_share(unit, parent, len(parent_group["vehicles"]),
+                                                 cap if cap is not None else parent_group.get("ad_cap")))
     vehicles, i = [], 0
     for comp in unit["composition"]:
         for _ in range(counts.get(comp["type"], 0)):
@@ -316,7 +332,7 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
         if a.get("attached_to") != unit["id"] or a["state"] == "destroyed" or not with_ad:
             continue
         av = []
-        a_counts, a_weight = _deploy_ad(model.alive_by_type(a), _ad_cap(cap))
+        a_counts, a_weight = _deploy_ad(model.alive_by_type(a), _ad_share(a, unit, len(vehicles), _ad_cap(cap)))
         for comp in a["composition"]:
             for _ in range(a_counts.get(comp["type"], 0)):
                 k = len(av)
@@ -581,7 +597,7 @@ def apply_budget(state: dict, task: dict, groups: list[dict], budget: int | None
         for g in free:
             if total <= budget:
                 break
-            if g["kind"] not in ("column", "battle"):
+            if g["kind"] not in ("column", "battle") and not g.get("battle"):   # ПВО части в бою - вместе с ней
                 continue
             keep = max(BUDGET_MIN_KEEP, int(len(g["vehicles"]) * frac))
             total -= _thin(g, keep)

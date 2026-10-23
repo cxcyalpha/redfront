@@ -14,7 +14,7 @@
  },
  "b_52tfw": {
   "_name": "52-е тактическое истребительное крыло (F-4E/F-4G; в DCS - F-4E)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "RS68-381_E1_526TFS"
  },
  "b_52tfw_f16": {
   "_name": "52-е крыло, F-16C (пары hunter/killer с F-4G; в DCS - блок 50)",
@@ -26,23 +26,23 @@
  },
  "b_a10": {
   "_name": "Передовая площадка A-10A (81-е крыло)",
-  "A_10A": ""
+  "A_10A": "81st FS Spangdahlem AB, Germany (SP) 1"
  },
  "b_a10_ahlhorn": {
   "_name": "Передовая площадка A-10A Аальхорн (81-е крыло)",
-  "A_10A": ""
+  "A_10A": "81st FS Spangdahlem AB, Germany (SP) 2"
  },
  "b_a10_jever": {
   "_name": "Передовая площадка A-10A Евер (81-е крыло)",
-  "A_10A": ""
+  "A_10A": "23rd TFW England AFB (EL)"
  },
  "b_ag51": {
   "_name": "AG 51 (RF-4E; в DCS - F-4E)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "MY68-328_E1_68FS"
  },
  "b_cf18": {
   "_name": "4-е крыло ВВС Канады (CF-18; в DCS - F/A-18C)",
-  "FA_18C_hornet": ""
+  "FA_18C_hornet": "Canada 409th Squadron"
  },
  "b_hfr35": {
   "_name": "Транспортный вертолётный полк Хересфлигер (CH-53G; в DCS - CH-53E)",
@@ -50,33 +50,33 @@
  },
  "b_jabog31": {
   "_name": "JaboG 31 (Tornado IDS)",
-  "Tornado_IDS": ""
+  "Tornado_IDS": "jagdbombergeschwader 31 `boelcke` norvenich ab luftwaffe"
  },
  "b_jabog32": {
   "_name": "JaboG 32 (Tornado IDS)",
-  "Tornado_IDS": ""
+  "Tornado_IDS": "jagdbombergeschwader 32 lechfeld ab luftwaffe"
  },
  "b_jabog33": {
   "_name": "JaboG 33 (Tornado IDS)",
-  "Tornado_IDS": "",
-  "F_4E_45MC": ""
+  "Tornado_IDS": "jagdbombergeschwader 33 buchel ab no. 43+19 experimental scheme",
+  "F_4E_45MC": "37+36_N72_JG74"
  },
  "b_jabog34": {
   "_name": "JaboG 34 (Tornado IDS)",
-  "Tornado_IDS": "",
-  "F_4E_45MC": ""
+  "Tornado_IDS": "jagdbombergeschwader 32 lechfeld ab luftwaffe",
+  "F_4E_45MC": "37+36_N72_JG74"
  },
  "b_jabog35": {
   "_name": "JaboG 35 (F-4F; в DCS - F-4E)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "37+49_N81A_JG73"
  },
  "b_jabog36": {
   "_name": "JaboG 36 (F-4F; в DCS - F-4E)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "37+49_N81A_JG73"
  },
  "b_jabog38": {
   "_name": "JaboG 38 (Tornado IDS)",
-  "Tornado_IDS": ""
+  "Tornado_IDS": "jagdbombergeschwader 32 lechfeld ab luftwaffe"
  },
  "b_jabog43": {
   "_name": "JaboG 43 (Alpha Jet; в DCS - L-39ZA)",
@@ -92,11 +92,11 @@
  },
  "b_jg71": {
   "_name": "JG 71 (F-4F; в DCS - F-4E)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "38+10_N72_JG71"
  },
  "b_jg74": {
   "_name": "JG 74 (F-4F; в DCS - F-4E)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "37+36_N72_JG74"
  },
  "b_kc135": {
   "_name": "Заправщики ВВС США (KC-135)",
@@ -128,19 +128,19 @@
  },
  "b_raf_18sqn": {
   "_name": "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47D)",
-  "CH_47D": ""
+  "CH_47D": "ch-47_green uk"
  },
  "b_raf_230sqn": {
   "_name": "230-я эскадрилья RAF (Puma HC.1; в DCS - UH-1H)",
-  "UH_1H": ""
+  "UH_1H": "uh-1h"
  },
  "b_raf_2sqn": {
   "_name": "2-я эскадрилья RAF (Jaguar GR.1, к концу 80-х Tornado GR.1A; в DCS - Tornado GR.4)",
-  "Tornado_GR4": ""
+  "Tornado_GR4": "no. 12 squadron raf lossiemouth ab (morayshire)"
  },
  "b_raf_bruggen": {
   "_name": "Крыло RAF Брюгген (Tornado GR.1; в DCS - GR.4)",
-  "Tornado_GR4": ""
+  "Tornado_GR4": "no. 14 squadron raf lossiemouth ab (morayshire)"
  },
  "b_raf_harrier": {
   "_name": "3-я и 4-я эскадрильи RAF (Harrier GR.3; в DCS - AV-8B)",
@@ -148,11 +148,11 @@
  },
  "b_raf_laarbruch": {
   "_name": "Крыло RAF Лаарбрух (Tornado GR.1; в DCS - GR.4)",
-  "Tornado_GR4": ""
+  "Tornado_GR4": "no. 14 squadron raf lossiemouth ab (morayshire)"
  },
  "b_raf_wildenrath": {
   "_name": "19-я и 92-я эскадрильи RAF (Phantom FGR.2; в DCS - F-4E)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "RAF-43-Sqn-FG.1"
  },
  "b_us_avn": {
   "_name": "Батальон боевых вертолётов армии США (AH-64A)",
@@ -160,19 +160,19 @@
  },
  "b_us_lift": {
   "_name": "Вертолётный батальон армии США (UH-60A)",
-  "UH_60A": ""
+  "UH_60A": "standard"
  },
  "blue_jbg_1": {
   "_name": "Истребительно-бомбардировочная эскадрилья (Tornado)",
-  "Tornado_IDS": ""
+  "Tornado_IDS": "jagdbombergeschwader 31 `boelcke` norvenich ab luftwaffe"
  },
  "blue_jg_1": {
   "_name": "Истребительная эскадрилья (F-4)",
-  "F_4E_45MC": ""
+  "F_4E_45MC": "37+83_N81A_JG74"
  },
  "nva_jbg37": {
   "_name": "JBG-37 ВВС ННА (МиГ-23БН; в DCS - МиГ-27К)",
-  "MiG_27K": ""
+  "MiG_27K": "af standard"
  },
  "nva_jbg77": {
   "_name": "JBG-77 ВВС ННА (Су-22М4; в DCS - Су-17М4)",
@@ -180,48 +180,48 @@
  },
  "nva_jg1": {
   "_name": "JG-1 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)",
-  "MiG_21Bis": ""
+  "MiG_21Bis": "Germany East - Bare Metal"
  },
  "nva_jg2": {
   "_name": "JG-2 ВВС ННА (МиГ-21М; в DCS - МиГ-21бис)",
-  "MiG_21Bis": ""
+  "MiG_21Bis": "Germany East - JG-2 Tan"
  },
  "nva_jg3": {
   "_name": "JG-3 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)",
-  "MiG_29_Fulcrum": "",
-  "MiG_21Bis": ""
+  "MiG_29_Fulcrum": "GDR",
+  "MiG_21Bis": "Germany East - JG-3 Green"
  },
  "nva_jg3_21": {
   "_name": "JG-3 ВВС ННА, эскадрилья МиГ-21МФ (в DCS - МиГ-21бис)",
-  "MiG_21Bis": ""
+  "MiG_21Bis": "Germany East - JG-3 Green"
  },
  "nva_jg7": {
   "_name": "JG-7 ВВС ННА (МиГ-21МФ; в DCS - МиГ-21бис)",
-  "MiG_21Bis": ""
+  "MiG_21Bis": "Germany East - Bare Metal"
  },
  "nva_jg8": {
   "_name": "JG-8 ВВС ННА (МиГ-21бис)",
-  "MiG_21Bis": ""
+  "MiG_21Bis": "Germany East - JG-8"
  },
  "nva_jg9": {
   "_name": "JG-9 ВВС ННА (МиГ-23МЛ/МФ; в DCS - МиГ-23МЛД)",
-  "MiG_23MLD": ""
+  "MiG_23MLD": "af standard"
  },
  "nva_khg3": {
   "_name": "KHG-3 ННА (Ми-24Д; в DCS - Ми-24П)",
-  "Mi_24P": ""
+  "Mi_24P": "GDR Mi-24P"
  },
  "nva_khg3_8": {
   "_name": "KHG-3 ННА, Ми-8ТБ (в DCS - Ми-8МТ)",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "nva_khg5": {
   "_name": "KHG-5 ННА (Ми-24Д; в DCS - Ми-24П)",
-  "Mi_24P": ""
+  "Mi_24P": "GDR Mi-24P"
  },
  "nva_khg5_8": {
   "_name": "KHG-5 ННА, Ми-8ТБ (в DCS - Ми-8МТ)",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "nva_mfg28": {
   "_name": "MFG-28 ННА (Су-22М4; в DCS - Су-17М4)",
@@ -233,35 +233,35 @@
  },
  "nva_thg34": {
   "_name": "THG-34 ННА (Ми-8Т; в DCS - Ми-8МТ)",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r116bap": {
   "_name": "116-й гв. бап (Су-24М)",
-  "Su_24M": ""
+  "Su_24M": "af standard"
  },
  "r11orap": {
   "_name": "11-й орап (Су-24МР)",
-  "Su_24MR": ""
+  "Su_24MR": "af standard"
  },
  "r172obvp": {
   "_name": "172-й обвп (Ми-24Д/В/П; в DCS - Ми-24П)",
-  "Mi_24P": ""
+  "Mi_24P": "AF USSR"
  },
  "r172obvp_8": {
   "_name": "172-й обвп, эскадрилья Ми-8",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r178obvp": {
   "_name": "178-й обвп (Ми-24; в DCS - Ми-24П)",
-  "Mi_24P": ""
+  "Mi_24P": "AF USSR"
  },
  "r178obvp_8": {
   "_name": "178-й обвп, эскадрилья Ми-8",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r19apib": {
   "_name": "19-й гв. апиб (МиГ-27; в DCS - МиГ-27К)",
-  "MiG_27K": ""
+  "MiG_27K": "af standard"
  },
  "r20apib": {
   "_name": "20-й гв. апиб (Су-17М3/М4; в DCS - Су-17М4)",
@@ -269,11 +269,11 @@
  },
  "r225obvp": {
   "_name": "225-й обвп (Ми-24; в DCS - Ми-24П)",
-  "Mi_24P": ""
+  "Mi_24P": "AF USSR"
  },
  "r225obvp_8": {
   "_name": "225-й обвп, эскадрилья Ми-8",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r226osap": {
   "_name": "226-й осап (Ан-12/Ан-26; в DCS - Ан-26Б)",
@@ -281,7 +281,7 @@
  },
  "r226osap_8": {
   "_name": "226-й осап, вертолёты (Ми-8)",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r239ovp_6": {
   "_name": "239-й овп (Ми-6А; в DCS - Ми-26)",
@@ -289,7 +289,7 @@
  },
  "r239ovp_8": {
   "_name": "239-й овп (Ми-8МТ)",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r294orap": {
   "_name": "294-й орап (Су-17М3Р; в DCS - Су-17М4)",
@@ -297,54 +297,54 @@
  },
  "r296apib": {
   "_name": "296-й апиб (МиГ-21СМТ/МиГ-27; в DCS - МиГ-27К)",
-  "MiG_27K": ""
+  "MiG_27K": "af standard"
  },
  "r31iap": {
   "_name": "31-й гв. иап (МиГ-23М; в DCS - МиГ-23МЛД)",
-  "MiG_29_Fulcrum": "",
-  "MiG_23MLD": ""
+  "MiG_29_Fulcrum": "Air Force Standard",
+  "MiG_23MLD": "af standard-1"
  },
  "r336obvp": {
   "_name": "336-й обвп (Ми-24; в DCS - Ми-24П)",
-  "Mi_24P": ""
+  "Mi_24P": "AF USSR"
  },
  "r336obvp_8": {
   "_name": "336-й обвп, эскадрилья Ми-8",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r337obvp": {
   "_name": "337-й обвп (Ми-24; в DCS - Ми-24П)",
-  "Mi_24P": ""
+  "Mi_24P": "AF USSR"
  },
  "r337obvp_8": {
   "_name": "337-й обвп, эскадрилья Ми-8",
-  "Mi_8MT": ""
+  "Mi_8MT": "Russia_Army_Weather"
  },
  "r33iap": {
   "_name": "33-й иап (МиГ-29)",
-  "MiG_29_Fulcrum": "",
-  "MiG_23MLD": ""
+  "MiG_29_Fulcrum": "Air Force Standard",
+  "MiG_23MLD": "af standard-2"
  },
  "r357oshap": {
   "_name": "357-й оштап (Су-25; почти весь полк в Афганистане)",
-  "Su_25": ""
+  "Su_25": "forest camo scheme #1 (native)"
  },
  "r35iap": {
   "_name": "35-й иап (МиГ-29)",
-  "MiG_29_Fulcrum": "",
-  "MiG_23MLD": ""
+  "MiG_29_Fulcrum": "Air Force Standard",
+  "MiG_23MLD": "af standard"
  },
  "r368oshap": {
   "_name": "368-й оштап (Су-25)",
-  "Su_25": ""
+  "Su_25": "forest camo scheme #1 (native)"
  },
  "r497bap": {
   "_name": "497-й бап (Су-24)",
-  "Su_24M": ""
+  "Su_24M": "af standard"
  },
  "r559apib": {
   "_name": "559-й апиб (МиГ-27К)",
-  "MiG_27K": ""
+  "MiG_27K": "af standard"
  },
  "r730apib": {
   "_name": "730-й апиб (Су-17М3/М4; в DCS - Су-17М4)",
@@ -352,54 +352,54 @@
  },
  "r73iap": {
   "_name": "73-й гв. иап (МиГ-29)",
-  "MiG_29_Fulcrum": "",
-  "MiG_23MLD": ""
+  "MiG_29_Fulcrum": "Soviet AF 968th FAR",
+  "MiG_23MLD": "af standard-1"
  },
  "r773iap": {
   "_name": "773-й иап (МиГ-23МЛ/МЛД)",
-  "MiG_29_Fulcrum": "",
-  "MiG_23MLD": ""
+  "MiG_29_Fulcrum": "Soviet AF 773th FAR",
+  "MiG_23MLD": "af standard-2"
  },
  "r787iap": {
   "_name": "787-й иап, эскадрильи МиГ-23 (МиГ-23М/МЛ; в DCS - МиГ-23МЛД)",
-  "MiG_29_Fulcrum": "",
-  "MiG_23MLD": ""
+  "MiG_29_Fulcrum": "Soviet AF 773th FAR",
+  "MiG_23MLD": "af standard-3 (worn-out)"
  },
  "r787iap_25": {
   "_name": "787-й иап, эскадрилья МиГ-25ПД/ПУ",
-  "MiG_25PD": ""
+  "MiG_25PD": "af standard"
  },
  "r833iap": {
   "_name": "833-й иап (МиГ-23МЛА/МЛД; в DCS - МиГ-23МЛД)",
-  "MiG_23MLD": ""
+  "MiG_23MLD": "af standard"
  },
  "r85iap": {
   "_name": "85-й гв. иап (МиГ-29)",
-  "MiG_29_Fulcrum": "",
-  "MiG_23MLD": ""
+  "MiG_29_Fulcrum": "Air Force Standard",
+  "MiG_23MLD": "af standard-1"
  },
  "r911apib": {
   "_name": "911-й апиб (МиГ-27К)",
-  "MiG_27K": ""
+  "MiG_27K": "af standard"
  },
  "r931orap": {
   "_name": "931-й гв. орап (МиГ-25РБ; в DCS - МиГ-25РБТ)",
-  "MiG_25RBT": ""
+  "MiG_25RBT": "af standard"
  },
  "r_a50": {
   "_name": "Отряд ДРЛО (А-50)",
-  "A_50": ""
+  "A_50": "RF Air Force"
  },
  "red_bap_1": {
   "_name": "Бомбардировочная эскадрилья (Су-24М)",
-  "Su_24M": ""
+  "Su_24M": "af standard"
  },
  "red_iap_1": {
   "_name": "Истребительная эскадрилья (МиГ-29)",
-  "MiG_29_Fulcrum": ""
+  "MiG_29_Fulcrum": "Air Force Standard"
  },
  "red_shap_1": {
   "_name": "Штурмовая эскадрилья (Су-25)",
-  "Su_25": ""
+  "Su_25": "forest camo scheme #1 (native)"
  }
 }
