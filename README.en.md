@@ -347,9 +347,19 @@ IFVs in each company).
   stagger), vehicles in an arc; attack — the lead team in a wedge, the others staggered behind in overwatch.
 
 **Artillery.** Each unit in battle gets a supporting battery (6 guns: 2S1 Gvozdika for the Warsaw Pact, M109 for
-NATO; estimate) 6 km behind its line. In the mission it fires 4 fire missions on the enemy line (24 rounds each,
-250 m dispersion). Lost guns are remembered by the unit (the battery is smaller in later missions) and are restored
-at one per day. The ground model does not track artillery separately — its fire is part of combat attrition.
+NATO; estimate) 6 km behind its line. Fires follow the doctrine (`fires` section, estimates):
+
+* **Warsaw Pact** — massed fire: preparation (6 fire missions of 36 rounds on the forward edge) and a BM-21 Grad
+  rocket battery (6 launchers, full salvo 240 rockets) 9 km behind the line, firing into the depth of the defence
+  (second echelon, reserves, 3 km behind the forward edge). In the combat model — stronger artillery
+  (`artillery_factor` 0.35) plus a rocket bonus (`sim_k`).
+* **NATO** — fire on call (4 missions of 24 rounds from M109s) and counter-battery fire: US Army brigades from 1983
+  get an MLRS platoon (3 launchers) 12 km behind the line firing at Warsaw Pact gun positions in that battle. In the
+  combat model the artillery of a WP unit fighting such a brigade is weaker (`counter_k` 0.35). West Germany (LARS)
+  and the UK have no rocket launchers: not in DCS, British MLRS only from 1990.
+
+Lost guns and launchers are remembered by the unit (`art_lost`, `mrl_lost`; smaller in later missions) and are
+restored at one vehicle per day.
 
 ### Air defence network
 

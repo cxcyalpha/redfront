@@ -1145,9 +1145,17 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             vg = _ground_group(m, state, g, shift_of(g))
             sx, sy = shift_of(g)
             c = _pt(m, g["fire_at"])
-            for k in range(ART_MISSIONS):        # налёты подряд: по линии противника, со сдвигом по фронту (ОЦЕНКА)
-                off = (k - (ART_MISSIONS - 1) / 2) * 300
-                vg.points[0].tasks.append(task.FireAtPoint(Vector2(c.x + sx + off, c.y + sy), rounds=ART_ROUNDS, radius=ART_RADIUS_M))
+            if g.get("target") == "counterbattery":  # РСЗО НАТО: по огневым позициям артиллерии противника в этом бою
+                foe = next((a for a in arts if not a.get("mrl") and a["unit"] in g.get("engaged", [])), None)
+                if foe:
+                    fx, fy = shift_of(foe)
+                    q = _pt(m, foe["vehicles"][len(foe["vehicles"]) // 2])
+                    c, sx, sy = q, fx, fy
+            n_m = int(g.get("missions", ART_MISSIONS))
+            for k in range(n_m):                 # налёты подряд: по линии противника, со сдвигом по фронту (ОЦЕНКА)
+                off = (k - (n_m - 1) / 2) * 300
+                vg.points[0].tasks.append(task.FireAtPoint(Vector2(c.x + sx + off, c.y + sy), rounds=int(g.get("rounds", ART_ROUNDS)),
+                                                           radius=ART_RADIUS_M * (2 if g.get("mrl") else 1)))
             continue
         if g["kind"] == "battle":
             platoons[g["unit"]] = _battle_platoons(m, state, g, shift_of(g))
@@ -1780,7 +1788,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "objects": [o["id"] for o in objs],              # объекты тыла, по которым миссия считает разрушения
         "ground_s": state.get("ground_s"),               # наземная модель - на это время суток (sim.advance)
         "pre_lines": pre_lines,                          # что изменилось к началу миссии (бой, марш, вылеты ИИ)
-        "artillery": [{"unit": g["unit"], "vehicles": [v["name"] for v in g["vehicles"]]} for g in arts],
+        "artillery": [{"unit": g["unit"], "vehicles": [v["name"] for v in g["vehicles"]], "mrl": bool(g.get("mrl"))} for g in arts],
         "ground": [{"unit": g["unit"], "kind": g["kind"], "cluster": g.get("cluster"), "vehicles": [{"name": v["name"], "type": v["type"], "weight": v["weight"]} for v in g["vehicles"]]}
                    for g in groups if g["kind"] not in ("downed", "convoy", "artillery")],   # экипажи, колонны снабжения, батареи - не части модели
         "convoys": [{"unit": g["unit"], "side": g["side"], "link": g["link"],      # колонны снабжения: потери - недовоз (convoys.py)

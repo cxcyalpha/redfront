@@ -39,11 +39,23 @@ def power(state: dict, unit: dict) -> float:
 def artillery_k(state: dict, unit: dict) -> float:
     """Огонь артиллерии части (батарея поддержки, materialize.ART_GUNS; потерянные орудия - art_lost): сила x (1 +
     artillery_factor x доля исправных орудий) - ОЦЕНКА, sim.artillery_factor доктрины."""
-    from .materialize import ART_GUNS
+    from .materialize import ART_GUNS, fires, mrl_ok
     k = _sim(state, unit["side"]).get("artillery_factor", 0.0)
     if not k or unit.get("role") == "air_assault":
         return 1.0
-    return 1.0 + k * max(0, ART_GUNS - int(unit.get("art_lost", 0))) / ART_GUNS
+    guns = max(0, ART_GUNS - int(unit.get("art_lost", 0))) / ART_GUNS
+    units = state["units"]
+    foes = [units[f] for f in unit.get("engaged", []) if f in units]
+    mrl = fires(state, unit["side"]).get("mrl")
+    bonus = 0.0
+    if mrl_ok(state, unit, mrl):                 # РСЗО части: огонь по глубине (ОВД) - к силе части (fires.mrl.sim_k)
+        bonus = mrl.get("sim_k", 0.0) * max(0, mrl.get("n", 6) - int(unit.get("mrl_lost", 0))) / max(1, mrl.get("n", 6))
+    for f in foes:                               # контрбатарейный огонь РСЗО противника (НАТО) - глушит артиллерию части
+        fm = fires(state, f["side"]).get("mrl")
+        if fm and fm.get("target") == "counterbattery" and mrl_ok(state, f, fm):
+            guns *= 1.0 - fm.get("counter_k", 0.0)
+            break
+    return 1.0 + k * guns + bonus
 
 
 def _take_losses(unit: dict, frac: float) -> float:
@@ -339,6 +351,8 @@ def end_day(state: dict) -> list[str]:
     for u in state["units"].values():            # артиллерия частей: орудие в сутки из ремонта и пополнения (ОЦЕНКА)
         if u.get("art_lost"):
             u["art_lost"] -= 1
+        if u.get("mrl_lost"):
+            u["mrl_lost"] -= 1
     lines += logistics.air_defence(state)
     lines += samroam.daily(state)               # смена позиций ЗРК по подвижности и близости к фронту
     intel.ensure(state)                         # новые ЗРК противника (из глубины) - в разведку
