@@ -3396,8 +3396,8 @@ def ground_ops_section(tmp: Path) -> None:
           "6 суток: передовой отряд, ввод вторых эшелонов в полосе успеха, ОМГ после прорыва (ОВД); сдерживание - отход на следующий рубеж (НАТО); темп в журнале")
     u = next(x for x in sim._maneuver(st) if x["side"] == "red" and x.get("role") != "air_assault")
     a0 = sim.artillery_k(st, u)
-    u["art_lost"] = materialize.ART_GUNS
-    check(a0 > 1.0 and sim.artillery_k(st, u) == 1.0, f"артиллерия в бою: сила части x{a0:.2f}, без орудий - x1.0")
+    u["art_lost"], u["mrl_lost"] = materialize.ART_GUNS, 99
+    check(a0 > 1.0 and sim.artillery_k(st, u) == 1.0, f"артиллерия в бою: сила части x{a0:.2f}, без орудий и РСЗО - x1.0")
     u.pop("art_lost")
     br = next(b for b in st["units"].values() if model.category(b) == "bridge" and not b.get("minor") and not b.get("found") and b.get("links"))
     a_, b_ = br["links"][0]
@@ -3555,11 +3555,43 @@ def weather_kneeboard_section(tmp: Path) -> None:
           f"лимит ЛА миссии 20: в миссии {n_air} (было {sum(len(f['units']) for f in man['flights'])}), дежурства - первыми")
 
 
+def fires_section(tmp: Path) -> None:
+    """Огонь по доктрине (fires): ОВД - артподготовка и РСЗО 'Град' по глубине; НАТО - MLRS (армия США с 1983) по
+    артиллерии противника (контрбатарейная борьба)."""
+    from redfront import pilots
+    print("\n== огонь по доктрине: артподготовка, РСЗО ==")
+    st = model.new_campaign("fires", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    red = next(u for u in st["units"].values() if u["side"] == "red" and u.get("role") == "maneuver")
+    us = next(u for u in st["units"].values() if u["side"] == "blue" and u.get("role") == "maneuver" and pilots.nation(u) == "us")
+    frg = next(u for u in st["units"].values() if u["side"] == "blue" and u.get("role") == "maneuver" and pilots.nation(u) == "frg")
+    c = model.unit_pos(st, red)
+    ar = materialize.artillery(st, red, c, 270.0, model.offset(c, 270.0, 3000))
+    ab = materialize.artillery(st, us, c, 90.0, c)
+    af = materialize.artillery(st, frg, c, 90.0, c)
+    rm = next((g for g in ar if g.get("mrl")), None)
+    bm = next((g for g in ab if g.get("mrl")), None)
+    check(rm and rm["vehicles"][0]["type"] == "Grad-URAL" and rm["target"] == "depth"
+          and next(g for g in ar if not g.get("mrl"))["missions"] > next(g for g in ab if not g.get("mrl"))["missions"]
+          and bm and bm["vehicles"][0]["type"] == "MLRS" and bm["target"] == "counterbattery" and not any(g.get("mrl") for g in af),
+          f"ОВД: артподготовка ({ar[0]['missions']} налётов) и 'Град' ({len(rm['vehicles']) if rm else 0}) по глубине; НАТО: налёты по вызову, "
+          f"MLRS ({len(bm['vehicles']) if bm else 0}) у армии США - по артиллерии противника, у ФРГ РСЗО нет")
+    k0 = sim.artillery_k(st, red)
+    red["engaged"] = [us["id"]]
+    k1 = sim.artillery_k(st, red)
+    red["engaged"] = [frg["id"]]
+    k2 = sim.artillery_k(st, red)
+    red["engaged"] = []
+    check(k1 < k0 == k2, f"контрбатарейная борьба: огонь части ОВД против бригады США слабее ({k1:.2f} против {k0:.2f}), против ФРГ - нет")
+    st85 = model.new_campaign("fires85", sector="sector_germany.json", oob="oob_germany_1985.json", seed=7)
+    us85 = next(u for u in st85["units"].values() if u["side"] == "blue" and u.get("role") == "maneuver" and pilots.nation(u) == "us")
+    check(any(g.get("mrl") for g in materialize.artillery(st85, us85, c, 90.0, c)), "MLRS у армии США в 1985 (с 1983)")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section]
 
 
 def main() -> int:

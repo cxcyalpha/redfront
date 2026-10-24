@@ -266,22 +266,60 @@ ART_BEHIND_M = 6000     # ОЦЕНКА: огневые позиции за бо�
 ART_TYPES = {"red": "SAU_Gvozdika", "blue": "M_109"}   # 2С1 "Гвоздика", M109
 
 
+FIRES = {"missions": 4, "rounds": 24, "mrl": None}   # огонь по умолчанию (доктрина без раздела fires)
+
+
+def fires(state: dict, side: str) -> dict:
+    """Огневая поддержка стороны в бою - раздел fires доктрины (ОЦЕНКИ): налёты батареи (missions x rounds) и РСЗО."""
+    return {**FIRES, **(model.doctrine(state, side).get("fires") or {})}
+
+
+def mrl_ok(state: dict, unit: dict, mrl: dict | None) -> bool:
+    """РСЗО у части: есть в доктрине, нация и год (nations: {нация: с какого года}; MLRS у армии США - с 1983)."""
+    if not mrl:
+        return False
+    nat = mrl.get("nations")
+    if not nat:
+        return True
+    from . import pilots
+    n = pilots.nation(unit)
+    return n in nat and (planner.campaign_year(state) or 9999) >= nat[n]
+
+
 def artillery(state: dict, unit: dict, center: dict, axis: float, target: dict) -> list[dict]:
-    """Артиллерия части в бою (батарея поддержки): за боевым порядком, развёрнута к противнику; цель огня - линия
-    противника (FireAtPoint в build). Потери орудий - у части (art_lost), восстанавливаются по одному в сутки."""
+    """Артиллерия части в бою: батарея поддержки за боевым порядком, развёрнута к противнику, огонь - по линии
+    противника; РСЗО (fires.mrl доктрины) - дальше в глубине, огонь по глубине (target depth: второй эшелон, резервы)
+    или по артиллерии противника (counterbattery, build). FireAtPoint ставит build. Потери - у части (art_lost,
+    mrl_lost), восстанавливаются по одной машине в сутки."""
     if model.category(unit) != "ground" or unit.get("role") == "air_assault":
         return []
+    out = []
     n = max(0, ART_GUNS - int(unit.get("art_lost", 0)))
     t = ART_TYPES.get(unit["side"])
-    if not n or not t:
-        return []
-    vs = []
-    for k in range(n):
-        p = model.offset(center, axis, -ART_BEHIND_M, (k - (n - 1) / 2) * 120)
-        vs.append({"name": f"{unit['id']}@art#{k + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"], "weight": 0.0,
-                   "heading": axis})
-    return [{"unit": unit["id"], "side": unit["side"], "kind": "artillery", "name": f"{unit['id']} art", "vehicles": vs,
-             "waypoints": [], "speed_kmh": 0, "fire_at": dict(target)}]
+    fr = fires(state, unit["side"])
+    if n and t:
+        vs = []
+        for k in range(n):
+            p = model.offset(center, axis, -ART_BEHIND_M, (k - (n - 1) / 2) * 120)
+            vs.append({"name": f"{unit['id']}@art#{k + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"], "weight": 0.0,
+                       "heading": axis})
+        out.append({"unit": unit["id"], "side": unit["side"], "kind": "artillery", "name": f"{unit['id']} art", "vehicles": vs,
+                    "waypoints": [], "speed_kmh": 0, "fire_at": dict(target), "missions": fr["missions"], "rounds": fr["rounds"]})
+    mrl = fr.get("mrl")
+    if mrl_ok(state, unit, mrl):
+        m = max(0, int(mrl.get("n", 6)) - int(unit.get("mrl_lost", 0)))
+        if m:
+            vs = []
+            for k in range(m):
+                p = model.offset(center, axis, -mrl.get("behind_m", 9000), (k - (m - 1) / 2) * 150)
+                vs.append({"name": f"{unit['id']}@mrl#{k + 1:02d}", "type": mrl["type"], "lat": p["lat"], "lon": p["lon"],
+                           "weight": 0.0, "heading": axis})
+            aim = model.offset(target, axis, mrl.get("depth_km", 3) * 1000) if mrl.get("target") == "depth" else dict(target)
+            out.append({"unit": unit["id"], "side": unit["side"], "kind": "artillery", "mrl": True, "name": f"{unit['id']} mrl",
+                        "vehicles": vs, "waypoints": [], "speed_kmh": 0, "fire_at": aim, "missions": int(mrl.get("missions", 1)),
+                        "rounds": int(mrl.get("rounds", 120)), "target": mrl.get("target", "depth"),
+                        "engaged": list(unit.get("engaged", []))})
+    return out
 
 
 def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None = None, with_ad: bool = True) -> list[dict]:

@@ -2406,6 +2406,24 @@
     "spacing_m": 50,
     "estimate": true
   },
+  "fires": {
+    "missions": 4,
+    "rounds": 24,
+    "mrl": {
+      "type": "MLRS",
+      "n": 3,
+      "rounds": 36,
+      "missions": 1,
+      "target": "counterbattery",
+      "behind_m": 12000,
+      "nations": {
+        "us": 1983
+      },
+      "counter_k": 0.35,
+      "sim_k": 0.0
+    },
+    "note": "Огневая поддержка НАТО (ОЦЕНКИ по смыслу: FM 6-20 Fire Support in the AirLand Battle, 1988; FM 100-5, 1986): налёты по вызову (4 по 24 снаряда батареи M109), контрбатарейная борьба - РСЗО MLRS (М270, в армии США с 1983; взвод 3 ПУ, по 12 ракет) по огневым позициям артиллерии ОВД, обнаруженным РЛС AN/TPQ-36/37. counter_k - на столько слабее огонь артиллерии противника в бою с частью, у которой есть MLRS. У ФРГ (LARS) и Великобритании (MLRS - с 1990) РСЗО в DCS нет или ещё нет."
+  },
   "sim": {
     "combat_ineffective_below": 0.5,
     "estimate": true,
