@@ -449,15 +449,15 @@ def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
             if parent and parent["id"] in placed:
                 continue
             if parent and parent["state"] == "march":
-                col = column(state, parent, density * OTHER_DENSITY)
-                groups += [col, attached_column(state, units[sid], col)]
+                col = column(state, parent, density * OTHER_DENSITY, CAP_MID)
+                groups += [dict(col, free=True), attached_column(state, units[sid], col)]
                 placed |= {parent["id"], sid}
             elif parent:                         # часть на месте (оборона, бой) - позицией, её ПВО - с ней (цель подавления ПВО)
                 cl = battle_cluster(state, parent["id"]) if parent["state"] == "battle" else [parent["id"]]
-                for uid in cl:
+                for uid in cl:                   # в ядре миссии - только ПВО (угроза); сама часть - как часть фронта (бюджет)
                     if uid not in placed:
-                        part = _tag(battle_line(state, units[uid], density * OTHER_DENSITY), cl)
-                        groups += part
+                        part = _tag(battle_line(state, units[uid], density * OTHER_DENSITY, CAP_MID), cl)
+                        groups += [dict(g_, free=True) if g_["kind"] == "battle" else g_ for g_ in part]
                         placed |= {g_["unit"] for g_ in part}
             else:
                 groups.append(sam_site(state, units[sid]))
@@ -475,8 +475,8 @@ def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
                 continue
             parent = units.get(units[sid].get("attached_to") or "")
             if parent and parent["state"] == "march" and parent["id"] not in placed:   # ПВО части на марше - вместе с колонной
-                col = column(state, parent, density * OTHER_DENSITY)
-                groups += [col, attached_column(state, units[sid], col)]
+                col = column(state, parent, density * OTHER_DENSITY, CAP_MID)
+                groups += [dict(col, free=True), attached_column(state, units[sid], col)]
                 placed |= {parent["id"], sid}
             else:
                 groups.append(sam_site(state, units[sid]))
@@ -527,7 +527,7 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     units = state["units"]
     groups = window(state, task, density)
     for g in groups:
-        g["core"] = True                         # окно задачи игрока - бюджет миссии его не трогает
+        g["core"] = not g.pop("free", False)     # окно задачи игрока - бюджет миссии его не трогает (кроме частей угроз)
     placed = {g["unit"] for g in groups}
     far = density * FAR_DENSITY
     center = task.get("target_pos") or model.unit_pos(state, units[task["target"]])
