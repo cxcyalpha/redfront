@@ -841,6 +841,16 @@ more medium/long-range SAMs (on the low-level route from the nearest strike airf
 belt" in the reasons), and that belt's SAMs come first in SAM-site strikes: enemy air defence is rolled back belt by
 belt.
 
+**AI time on station** (`build._lock_eta`, as in Liberation/Retribution): an AI group has its ETA locked at its
+entry point — the IP (strike time minus the IP–target leg), the launch line, the cover zone; speed is not locked, so
+DCS picks it to arrive on time. Takeoff accounts for the roll, single-ship takeoffs and join-up (`ato.AI_TAKEOFF_S`,
+2.5 min); jet strike route speed is 800 km/h (estimate). **Escort and sweep fighters** hold their zone outside known
+SAM rings (+5 km, `planner.clear_point`) — on the approach, not over the target; troop cover sits over friendly
+troops but outside enemy SAMs. They counter enemy aircraft rather than flying into air defences.
+
+**Map timeline** (window, list next to the date): the situation at the start of each past day (what the player knew,
+with fog of war): units, places, front line; the map gets a yellow frame. Up to 60 snapshots.
+
 **Troop cover in back-to-back shifts** (`ato.py`): after all of the side's tasks — up to 2 reliefs (`RELIEFS`), each
 arriving 5 min before the previous one leaves. AI CAP pairs return on bingo fuel and when out of missiles (DCS
 options) and after losing a wingman (`lua/cap.lua`).
