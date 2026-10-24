@@ -269,7 +269,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             targets = [u for u in state["units"].values() if u["side"] == tside and model.category(u) == "sam"
                        and not u.get("attached_to") and u["state"] not in ("destroyed", "pending")
                        and model.strength(u) >= tdef["target"].get("min_strength", 0.5)
-                       and (u.get("fixed") or not tdef["target"].get("fixed"))]
+                       and (u.get("fixed") or not tdef["target"].get("fixed"))
+                       and not u.get("point")]          # ПВО склада/моста (ЗУ, ПЗРК) - не цель отдельного удара
         else:
             targets = [u for u in state["units"].values()
                        if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]

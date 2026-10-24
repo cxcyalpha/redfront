@@ -1418,7 +1418,7 @@ def germany_section(tmp: Path) -> None:
           f"миссия всего фронта: без бюджета {n_full} машин, с бюджетом {veh} (не больше {materialize.MISSION_BUDGET}), "
           f"{len(man['ground'])} групп, машина не дороже ~{materialize.MAX_WEIGHT} машин модели (макс. {heavy:.2f})")
     core = {g["unit"]: len(g["vehicles"]) for g in materialize.window(st, tk)
-            if g["kind"] != "downed"}            # сбитый экипаж - не часть модели, в манифест наземных частей не входит
+            if g["kind"] != "downed" and not g.get("free")}   # сбитый экипаж - не часть модели; free - части угроз (бюджет)
     got = {g["unit"]: len(g["vehicles"]) for g in man["ground"]}
     check(all(got.get(u) == n for u, n in core.items() if n),
           f"бюджет не трогает окно задачи игрока ({len(core)} групп: цель, угрозы коридора, ЗРК у маршрута)")
@@ -1632,7 +1632,10 @@ def air_defence_section(tmp: Path) -> None:
     print("\n== объектовая ПВО ==")
     st = model.new_campaign("ad", sector="sector_germany.json", oob="oob_germany.json", seed=3)
     sec = model.load_json("sector_germany.json")
-    ad = [u for u in st["units"].values() if u.get("fixed")]
+    ad = [u for u in st["units"].values() if u.get("fixed") and not u.get("point")]   # point - ПВО складов и мостов
+    pt = [u for u in st["units"].values() if u.get("point")]
+    check(pt and all(st["units"][u["covers"]]["role"] in ("depot", "bridge") for u in pt) and len(pt) < 40,
+          f"ПВО объектов тыла - только склады и большие мосты: {len(pt)} позиций (заводы и малые мосты - без неё)")
     tiers = {r: sum(1 for u in ad if u["role"] == r) for r in ("sam_long", "sam_medium", "sam_short")}
     check(len(ad) == len(sec["ad_sites"]) and all(tiers.values()),
           f"позиции ПВО сектора заняты шаблонами сторон: {len(ad)} частей ({tiers})")
