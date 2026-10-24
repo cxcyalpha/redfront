@@ -24,6 +24,7 @@ from dcs.triggers import TriggerStart
 from dcs.unit import Skill
 
 from . import csar, dcstypes, i18n, intel, materialize, model, planner
+from . import ato
 from .ato import MISSION_LEN_S as ATO_LEN_S
 from .ato import is_night as _ato_night
 
@@ -1078,12 +1079,31 @@ def package_order(pkg: list[dict], times: dict, lg: str = "ru") -> list[str]:
     return out
 
 
+ETA_POINTS = ("ИПМ", "Рубеж пуска", "Рубеж атаки", "Зона прикрытия", "Зона расчистки", "Демонстрация", "Район поиска",
+              "Площадка", "Экипаж", "Зона дежурства")   # точки, к которым группа ИИ выходит ко времени
+
+
+def _lock_eta(fg, objective_s: float, spd_kmh: float) -> None:
+    """Время выхода группы ИИ на рубеж (ИПМ - время удара минус полёт ИПМ-цель; зона, рубеж пуска - время выхода на
+    объект): ETA залочен, скорость - нет: DCS сама ускоряется или замедляется, чтобы успеть (как в планировщиках
+    Liberation/Retribution - время на цели фиксировано, скорость свободна). Раньше залоченный сбор не трогаем."""
+    pts = fg.points
+    for i, w in enumerate(pts[1:], 1):
+        if (w.name or "") in ETA_POINTS:
+            eta = objective_s
+            if w.name == "ИПМ" and i + 1 < len(pts) and (pts[i + 1].name or "") == "Цель":
+                eta -= w.position.distance_to_point(pts[i + 1].position) / (spd_kmh / 3.6)
+            if eta > 0:
+                w.ETA, w.ETA_locked, w.speed_locked = int(eta), True, False
+            return
+
+
 def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str, dict]:
     """Задержки взлёта групп пакета. Опорная - группа игрока: холодный старт (timing.player_cold_start_min, ОЦЕНКА)
     плюс полёт до объекта. Группа обеспечения выходит на свой объект за lead_min до выхода ударной группы на цель
     (ОЦЕНКИ из доктрины). Группы ИИ взлетают с полосы с задержкой start_s; если не успевают - late_s > 0."""
     fly_s = {g["group"]: _path_km(state["airbases"][g["base"]], planner.route_points(g)) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
-             for g in groups}                    # скорость задачи доктрины
+             + (0 if g["group"] == fly else ato.AI_TAKEOFF_S) for g in groups}   # скорость задачи доктрины; ИИ - разбег и сбор
     lead = {g["group"]: g.get("lead_min", 0) * 60 for g in groups}
     t_player = tdef["timing"]["player_cold_start_min"] * 60 + fly_s[fly]
     eta_strike = t_player + lead[fly]
@@ -1645,6 +1665,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(ip, transit, "ИПМ")
             wp(tgt, transit, "Цель")
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
+        if not is_player and not g.get("_air_start"):   # ИИ: ко времени на рубеже - ETA там, скорость DCS подберёт сама
+            _lock_eta(fg, times[g["group"]]["objective_s"], spd)
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)

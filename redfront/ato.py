@@ -113,10 +113,11 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
             dwell = -obj + (g.get("hold_after_min") or 5) * 60
         else:
             dwell = DWELL_S
-        out[g["group"]] = {"takeoff_s": obj - fly, "objective_s": obj, "land_s": obj + dwell + back}
+        out[g["group"]] = {"takeoff_s": obj - fly - AI_TAKEOFF_S, "objective_s": obj, "land_s": obj + dwell + back}
     return out
 
 
+AI_TAKEOFF_S = 150       # ОЦЕНКА: группа ИИ с полосы - разбег, взлёт по одному и сбор группы до выхода на маршрут
 RELIEFS = 2              # ОЦЕНКА: смен прикрытия войск после первой (пока хватает самолётов и лётного дня)
 RELIEF_OVERLAP_S = 300   # ОЦЕНКА: смена приходит в зону за столько до ухода предыдущей - зона не пустеет
 SAM_FIRST_MIN = 30   # ОЦЕНКА: удар по цели - не раньше стольких минут после удара по прикрывающей её позиции ЗРК

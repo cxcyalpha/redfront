@@ -148,6 +148,7 @@ details.more summary{cursor:pointer;color:var(--dim)}
 .help ol{margin:4px 0 4px 18px;padding:0}
 dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
 
+body.past #map { box-shadow: inset 0 0 0 3px #b8860b; filter: sepia(.25); }
 </style>
 </head>
 <body>
@@ -162,6 +163,7 @@ dialog .sect{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
       <button class="main" id="bEnd" data-t="c4" data-t-title="c4s"></button>
     </span>
     <span class="meta" id="meta"></span>
+    <select id="hist" data-t-title="histTip" style="max-width:150px"></select>
     <span class="sp"></span>
     <button class="icon-btn" id="tLeft" data-t-title="togLeft">◧</button>
     <button class="icon-btn" id="tBottom" data-t-title="togBottom">⬓</button>
@@ -272,7 +274,8 @@ const I18N = {
     wxFixed: "заданная", wxType: "Тип погоды", wxHigh: "антициклон: ясно, слабый ветер", wxPost: "тыл циклона: кучевые, ветер СЗ",
     wxFront: "фронт: значительная облачность, дождь", wxLow: "циклон: сплошная низкая облачность, дождь, ветер",
     wxFog: "утренний туман", wxEff: "погода влияет на план полётов (минимумы)", wxTip: "пересчёт: сегодня, если ещё не летали, иначе с завтра", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
-    cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
+    cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", histNow: "обстановка: сейчас", histDay: "День", histTip: "хронология: обстановка на карте в прошлые дни (движение фронта)",
+    budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
     airBudgetTip: "с пакетом игрока; вылеты ИИ дальше от удара игрока не ставятся (в модели они летают); 0 - без ограничения",
     budgetTip: "дальнее прореживается и убирается; 0 - без ограничения", enemyPlan: "показывать план полётов противника (отладка)",
     mapTools: "Инструменты карты DCS",
@@ -351,7 +354,8 @@ const I18N = {
     wxFixed: "fixed", wxType: "Weather type", wxHigh: "high pressure: clear, light wind", wxPost: "post-frontal: cumulus, NW wind",
     wxFront: "frontal: broken cloud, rain", wxLow: "low pressure: low overcast, rain, wind",
     wxFog: "morning fog", wxEff: "weather affects the air tasking order (minima)", wxTip: "recomputed today if nothing flown yet, otherwise from tomorrow", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
-    cancel: "Cancel", create: "Create", close: "Close", language: "Language", budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
+    cancel: "Cancel", create: "Create", close: "Close", language: "Language", histNow: "situation: now", histDay: "Day", histTip: "timeline: the map situation on past days (front movement)",
+    budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
     airBudgetTip: "including the player package; AI sorties farther from the player strike are left out (the model still flies them); 0 - unlimited",
     budgetTip: "distant units are thinned out and removed; 0 - unlimited", enemyPlan: "show enemy air tasking order (debug)",
     mapTools: "DCS map tools",
@@ -525,17 +529,34 @@ let fitted = false, frontKey = "", frontCache = null;
 const col = s => TAC.sideCol(s);
 const icon = (html, w, h, cls) => L.divIcon({className: cls || "tac", html, iconSize: [w, h], iconAnchor: [w / 2, h / 2]});
 
+let HIST = null;                                         // снимок хронологии на карте (null - текущая обстановка)
+function fillHist() {
+  const h = (ST && ST.history) || [];
+  $("#hist").innerHTML = `<option value="">${T("histNow")}</option>` +
+    h.slice().reverse().map(x => `<option value="${x.i}">${T("histDay")} ${x.day}, ${esc(x.time)}</option>`).join("");
+  $("#hist").style.display = h.length ? "" : "none";
+  if (!HIST) $("#hist").value = "";
+}
+$("#hist").onchange = async e => {
+  const v = e.target.value;
+  if (v === "") { HIST = null; } else {
+    try { HIST = (await api("history", {file: FILE, i: Number(v)})).snap; } catch (er) { out(er.message, true); HIST = null; }
+  }
+  document.body.classList.toggle("past", !!HIST);
+  drawMap();
+};
 function drawMap() {
   Object.values(layers).forEach(l => l.clearLayers());
   if (!ST) return;
+  const V = HIST ? Object.assign({}, ST, HIST) : ST;  // хронология: снимок обстановки вместо текущей
   const nato = ST.side === "blue";                     // стиль знаков - по стороне игрока
   $("#legend").innerHTML = `<b>${pref("rf_legend", "0") === "1" ? "▾" : "▸"} ${nato ? T("legendNATO") : T("legendSU")}</b>` + TAC.legend(nato, LANG === "en");
   $("#legend").classList.toggle("min", pref("rf_legend", "0") !== "1");
   $("#legend b").onclick = () => { setPref("rf_legend", pref("rf_legend", "0") === "1" ? "0" : "1"); drawMap(); };
-  const P = Object.fromEntries(ST.places.map(p => [p.name, p]));
-  const field = ST.ground.filter(g => g.cat === "ground" && !g.attached && !["pending", "destroyed"].includes(g.state)
+  const P = Object.fromEntries(V.places.map(p => [p.name, p]));
+  const field = V.ground.filter(g => g.cat === "ground" && !g.attached && !["pending", "destroyed"].includes(g.state)
     && g.intel !== "presence");
-  const sites = ST.places.filter(p => p.side).map(p => ({lat: p.pos[0], lon: p.pos[1], side: p.side}))
+  const sites = V.places.filter(p => p.side).map(p => ({lat: p.pos[0], lon: p.pos[1], side: p.side}))
     .concat(field.map(g => ({lat: g.pos[0], lon: g.pos[1], side: g.side})));
   const key = JSON.stringify(sites);
   if (key !== frontKey) { frontKey = key; frontCache = TAC.front(sites); }
@@ -544,18 +565,18 @@ function drawMap() {
     for (const ln of frontCache.red) L.polyline(ln, {color: TAC.RED, weight: 3, opacity: .95, interactive: false}).addTo(layers.front);
     for (const ln of frontCache.blue) L.polyline(ln, {color: TAC.BLUE, weight: 3, opacity: .95, interactive: false}).addTo(layers.front);
   }
-  for (const l of ST.links) {
+  for (const l of V.links) {
     const a = P[l.a], b = P[l.b]; if (!a || !b) continue;
     const line = L.polyline([a.pos, b.pos], {color: l.open ? "#555" : "#c8102e", weight: l.open ? 1 : 2, opacity: l.open ? .35 : .8,
       dashArray: l.open ? null : "4 6"}).bindTooltip(`${l.a} – ${l.b}${l.front ? T("viaFront") : ""}${l.open ? "" : T("closedBridge")}`);
     line.addTo(l.open ? layers.links : layers.objects);
   }
-  for (const p of ST.places) {
+  for (const p of V.places) {
     L.circleMarker(p.pos, {radius: 2.5, color: "#222", weight: 1, fillColor: "#222", fillOpacity: 1, interactive: false}).addTo(layers.places);
     L.marker(p.pos, {icon: L.divIcon({className: "plbl", html: esc(p.name), iconAnchor: [-5, 7]}), interactive: false}).addTo(layers.places);
   }
   const enemyOf = s => sites.filter(x => x.side && x.side !== s);
-  for (const g of ST.ground) {
+  for (const g of V.ground) {
     if (g.state === "destroyed" || g.attached) continue;
     const tip = `<b>${esc(g.name)}</b><br>${esc(stateTxt(g))} · ${strengthTxt(g)}` +
       (g.engaged.length ? `<br>${T("fighting")}: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? `<br><b>${T("supplyOf")} ${Math.round(g.supply_frac * 100)}${T("ofNorm")}</b>` : "") +
@@ -583,20 +604,20 @@ function drawMap() {
     L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit" + (g.intel && g.intel !== "exact" ? " fog-" + g.intel : "")), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip)
       .on("click", () => selectHtml(tip)).addTo(layers.ground);
   }
-  for (const o of ST.objects) {
+  for (const o of V.objects) {
     if (o.role === "airfield") continue;
     L.marker(o.pos, {icon: icon(TAC.target(o), 24, 24)})
       .bindTooltip(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`, {className: "wide"})
       .on("click", () => selectHtml(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`)).addTo(layers.objects);
   }
-  for (const r of (ST.supply_routes || []))
+  for (const r of (HIST ? [] : ST.supply_routes || []))
     L.polyline(r.pts, {color: "#7a5230", weight: 2 + Math.min(6, r.t / 150), opacity: .6, dashArray: "2 6"})
       .bindTooltip(`<b>${T("supplyRoute")} ${esc(r.link)}</b>${infoTxt(r.info)}`, {className: "wide"}).addTo(layers.supply);
-  for (const d of (ST.downed || [])) {
+  for (const d of (HIST ? [] : ST.downed || [])) {
     L.marker(d.pos, {icon: L.divIcon({className: "obj", html: "🪂", iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(d.title)}</b><br>${T("sinceDay")} ${d.day} · ${T("beacon")} ${d.freq} kHz`).addTo(layers.objects);
   }
-  const AF = Object.fromEntries(ST.objects.filter(o => o.role === "airfield").map(o => [o.name, o]));
+  const AF = Object.fromEntries(V.objects.filter(o => o.role === "airfield").map(o => [o.name, o]));
   for (const b of ST.airbases) {
     const o = AF["Аэродром " + b.name];
     const st = T("bst")[b.state] || b.state;
@@ -610,7 +631,7 @@ function drawMap() {
       .bindTooltip(`<b>${esc(b.name)}</b> · ${st}${o && o.damage > 0 ? ` · ${T("damage")} ${Math.round(o.damage * 100)}%` : ""}${used}`).addTo(layers.bases);
   }
   drawTask();
-  if (!fitted && ST.places.length) { map.fitBounds(ST.places.map(p => p.pos), {padding: [30, 30]}); fitted = true; }
+  if (!fitted && V.places.length) { map.fitBounds(V.places.map(p => p.pos), {padding: [30, 30]}); fitted = true; }
 }
 
 
@@ -824,6 +845,7 @@ const sideName = (s, cap) => T(cap ? (s === "red" ? "Red" : "Blue") : s);
 function render() {
   if (!ST) { $("#pane").innerHTML = `<p class='meta'>${T("noCamp")}</p>`; $("#meta").innerHTML = ""; drawMap(); renderInspector(); renderMatrix(); return; }
   $("#meta").innerHTML = T("meta")(ST, sideName(ST.side));
+  fillHist();
   $("#meta").title = `${ST.scenario || ""} · ${T("seed")} ${ST.seed ?? "-"}${ST.randomness ? "" : " · " + T("noRandom")}` +
     (ST.built ? ` · ${T("built")} ${ST.built.sortie}: ${ST.built.file}` : "");
   document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === TAB));
@@ -988,7 +1010,7 @@ function fillVariants() {
   $("#nVar").innerHTML = `<option value="">${T("randomVar")}</option>` + vs.map(v => `<option value="${esc(v.name)}">${esc(v.title)}</option>`).join("");
 }
 async function loadState() {
-  ST = null;
+  ST = null; HIST = null; document.body.classList.remove("past");
   if (FILE) { try { ST = (await api("state?file=" + encodeURIComponent(FILE))).state; } catch (e) { out(e.message, true); } }
   if (ST && ST.lang !== LANG) {                        // язык окна - и для брифинга кампании
     try { ST = (await api("setlang", {file: FILE, lang: LANG})).state; } catch (e) { out(e.message, true); }

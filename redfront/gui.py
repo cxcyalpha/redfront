@@ -60,7 +60,26 @@ def _ll(p: dict) -> list[float]:
     return [round(p["lat"], 5), round(p["lon"], 5)]
 
 
-def view(st: dict) -> dict:
+HISTORY_MAX = 60       # снимков обстановки в кампании (начало каждых суток, ~140 КБ на снимок)
+
+
+def snapshot(st: dict) -> None:
+    """Снимок обстановки для хронологии карты (окно: перемотка назад): то, что видел игрок (туман войны) - части,
+    пункты (чьи), объекты, связи. Дубль того же времени заменяется."""
+    v = view(st, history=False)
+    ground = [dict(g, route=g["route"][:3]) if g.get("route") else g for g in v["ground"] if g.get("state") != "destroyed"]
+    snap = {"day": st["day"], "time": v["ground_time"], "ground": ground, "places": v["places"],
+            "objects": [{k: o[k] for k in ("id", "name", "role", "side", "pos", "damage", "state", "checked") if k in o}
+                        for o in v["objects"]], "links": v["links"]}
+    h = st.setdefault("history", [])
+    if h and h[-1]["day"] == snap["day"] and h[-1]["time"] == snap["time"]:
+        h[-1] = snap
+    else:
+        h.append(snap)
+    del h[:-HISTORY_MAX]
+
+
+def view(st: dict, history: bool = True) -> dict:
     """Состояние кампании для страницы: только то, что рисуется и показывается. Названия задач и групп - на языке
     кампании (i18n.py)."""
     units = st["units"]
@@ -192,6 +211,7 @@ def view(st: dict) -> dict:
         "window": list(ato.flying_window(st)),
         "clock": ato.hhmm(st.get("clock_s") or 0) if st.get("clock_s") else None,
         "ground_time": ato.hhmm(st.get("ground_s") or 0),          # наземная обстановка - на это время (sim.advance)
+        "history": [{"i": i, "day": h["day"], "time": h["time"]} for i, h in enumerate(st.get("history") or [])] if history else [],
         "built": {"file": man.get("file"), "sortie": man.get("sortie")} if man else None,
         "log": st["log"][-80:],
     }
@@ -401,6 +421,7 @@ class App:
                     lines.append(f"Ливреи по умолчанию: {n} полков ({lf.name}).")
             sc = st.get("scenario") or {}
             lines.append(f"Создана кампания {p.name}: {sc.get('title') or sc.get('variant')}, seed {sc.get('seed')}.")
+            snapshot(st)                             # хронология карты: начало 1-го дня
             model.save(st, p)
             return {"lines": lines, "file": p.name, "state": view(st)}
         if action == "presetcopy":                   # копия пресета для правки: presets/<имя>.json в папке проекта
@@ -460,6 +481,10 @@ class App:
             model.note(st, f"Погода: режим {mode}; {ln}.")
             model.save(st, p)
             return {"state": view(st), "lines": [ln]}
+        if action == "history":                      # хронология карты: снимок обстановки (только чтение)
+            h = st.get("history") or []
+            i = int(req.get("i", -1))
+            return {"snap": h[i] if 0 <= i < len(h) else None}
         if action == "setlang":                      # язык кампании: окно, брифинг миссии (i18n.py)
             st["settings"]["lang"] = "en" if req.get("lang") == "en" else "ru"
             model.save(st, p)
@@ -548,7 +573,10 @@ class App:
             lines.append(i18n.L(i18n.lang(st), "Файл дебрифа: ", "Debrief file: ") + str(f))
             lines += debrief.apply(st, debrief.read(f))
         elif action == "endday":
+            if not st.get("history"):                # кампания старше хронологии - снимок текущих суток до конца дня
+                snapshot(st)
             lines += sim.end_day(st)
+            snapshot(st)                             # и начало новых суток
             if not lines:
                 lines.append(i18n.L(i18n.lang(st), "День прошёл без событий.", "The day passed without events."))
         elif action == "roadsapply":

@@ -1346,6 +1346,10 @@ def gui_section(tmp: Path) -> None:
     check((home / "Saved Games" / "DCS" / "Missions" / "redfront_g1_day1.miz").exists(), "миссия собрана в Saved Games\\DCS\\Missions")
     r = app.do("endday", {"file": "g1.json"})
     check(r["state"]["day"] == 2, "конец дня из окна")
+    h = r["state"]["history"]
+    sn = app.do("history", {"file": "g1.json", "i": 0})["snap"]
+    check([x["day"] for x in h] == [1, 2] and sn and sn["ground"] and sn["places"],
+          f"хронология карты: снимки на начало суток ({len(h)}), снимок - части и пункты для перемотки назад")
     check(app.path("../x").parent == root, "имя файла кампании не выходит из папки проекта")
     # ливреи полков по умолчанию: из кампании - в новые кампании театра
     st1 = model.load(root / "g1.json")
@@ -3089,7 +3093,7 @@ def payload_section(tmp: Path) -> None:
     planner.plan(st)
     man = build.build(st, tmp / "pl.miz", task_no=1)
     lines = [ln for ln in man["package_lines"] if "подвеска" in ln]
-    check(any("Retribution" in ln or "STRIKE" in ln or "CAS" in ln for ln in lines),
+    check(any(k in ln for ln in lines for k in ("Retribution", "STRIKE", "CAS", "SEAD")),
           f"подвеска по виду задачи из payloads.json: {lines[0].split('подвеска')[-1][:80]}")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "pl.miz"))
@@ -3638,11 +3642,20 @@ def realism_section(tmp: Path) -> None:
             dw = (e["task"]["package"][0].get("cap_min") or 20) * 60
             ok = ok or 0 < e["tot_s"] - base["tot_s"] < dw
     check(ch and ok, f"прикрытие войск - сменами встык: смена приходит в зону до ухода предыдущей ({len(ch)} смен)")
+    sams = planner._known_sams(st, "red")
+    zones = [g for t in st["tasks"] for g in t["package"] if g["objective"]["kind"] in ("cover_zone", "sweep_zone", "cap_zone")]
+    inside = [g for g in zones if any(model.dist_km(g["route"][0], c) <= r for c, r in sams)
+              and planner.clear_point(st, "red", g["route"][0], st["airbases"][g["base"]]) != {k: g["route"][0][k] for k in ("lat", "lon")}]
+    check(zones and not inside, f"зоны прикрытия и расчистки истребителей - вне зон известных ЗРК ({len(zones)} групп), не над целью")
     man = build.build(st, tmp / "real.miz", task_no=1)
     import zipfile
     mis = zipfile.ZipFile(tmp / "real.miz").read("mission").decode("utf-8")
     check("redfront cap" in mis or not any(f["kind"] in ("cap_zone", "cover_zone", "sweep_zone") for f in man["flights"] if not f["player"]),
           "пары прикрытия ИИ: домой без ведомого (cap.lua), по остатку топлива и расходу ракет")
+    import re as _re
+    locked = len(_re.findall(r'\["ETA_locked"\]=true', mis))
+    check(locked >= sum(1 for f in man["flights"] if not f["player"]) // 2,
+          f"группы ИИ выходят на рубеж ко времени: ETA залочен на рубеже, скорость - нет ({locked} точек)")
 
 
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,

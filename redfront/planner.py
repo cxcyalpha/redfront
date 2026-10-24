@@ -893,7 +893,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     size = min(s["size"], avail[perf["id"]])
     avail[perf["id"]] -= size
     if s.get("mode") == "cap_zone":              # прикрытие района (истребители): зона над своими войсками
-        route, objective = [tpos], {"kind": "cap_zone", "unit": tgt["id"], "pos": tpos}
+        cz = clear_point(state, perf["side"], tpos, state["airbases"][perf["base"]])   # над своими войсками, но вне ЗРК противника
+        route, objective = [cz], {"kind": "cap_zone", "unit": tgt["id"], "pos": cz}
     elif model.category(tgt) == "sam":           # позиция ЗРК: атака группы на позиции
         route, objective = [ip, tpos], {"kind": "site", "unit": tgt["id"], "pos": tpos}
     elif model.category(tgt) in STRATEGIC:       # объект тыла: удар по точке (бомбы; по мосту - по объекту карты)
@@ -933,9 +934,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             fp = feint_point(state, perf, ip, g, perf["side"])
             objective = {"kind": "feint", "unit": tgt["id"], "pos": fp}
             route_of = lambda base, fp=fp: [fp]
-        elif g.get("mode") == "cover_zone":       # прикрытие группы: зона над целью на время удара
+        elif g.get("mode") == "cover_zone":       # прикрытие группы: зона на подходе к цели вне зон ЗРК (не над ней)
             objective = {"kind": "cover_zone", "unit": tgt["id"], "pos": tpos}
-            route_of = lambda base: [tpos]
+            route_of = lambda base: [clear_point(state, perf["side"], tpos, base)]
         else:
             kind = "search_zone" if g.get("mode") == "search_zone" else "flyover"
             objective = {"kind": kind, "unit": tgt["id"], "pos": tpos}
@@ -988,6 +989,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             cb = state["airbases"][chosen["base"]]
             obj_k = {"kind": "sam", "units": [per[k]["id"]]} if per else objective
             route_k = [hold_point(state, per[k], cb, g)] if per else route_of(cb)
+            if obj_k.get("kind") == "cover_zone":    # центр зоны прикрытия - точка маршрута (вне ЗРК)
+                obj_k = dict(obj_k, pos=route_k[0])
             groups.append({"group": g["id"] if k == 0 else f"{g['id']}{k + 1}", "support_id": g["id"],
                            "title": g["title"] if flights == 1 else
                            (f"{g['title']}: {per[k]['name']}" if per else f"{g['title']}, пара {k + 1}"),
@@ -1014,17 +1017,22 @@ def _known_sams(state: dict, side: str) -> list[tuple[dict, float]]:
     return out
 
 
-def clear_point(state: dict, side: str, p: dict, home: dict, step_km: float = 5, max_km: float = 80) -> dict:
-    """Ближайшая к p точка на линии p - home вне зон поражения известных ЗРК (зона расчистки воздуха)."""
+CLEAR_MARGIN_KM = 5     # ОЦЕНКА: зона истребителей - на столько дальше края зоны поражения ЗРК
+
+
+def clear_point(state: dict, side: str, p: dict, home: dict, step_km: float = 5, max_km: float = 80,
+                margin_km: float = CLEAR_MARGIN_KM) -> dict:
+    """Ближайшая к p точка на линии p - home вне зон поражения известных ЗРК (+margin_km): зоны расчистки воздуха и
+    прикрытия - истребители прикрывают от авиации, а не висят над ЗРК. Нет такой в max_km - самая дальняя проверенная."""
     sams = _known_sams(state, side)
     d = model.dist_km(p, home)
-    k = 0.0
+    k, q = 0.0, dict(p)
     while k <= min(max_km, d):
         q = model.lerp(p, home, k / d) if d else dict(p)
-        if not any(model.dist_km(q, c) <= r for c, r in sams):
+        if not any(model.dist_km(q, c) <= r + margin_km for c, r in sams):
             return {"lat": q["lat"], "lon": q["lon"]}
         k += step_km
-    return {"lat": p["lat"], "lon": p["lon"]}
+    return {"lat": q["lat"], "lon": q["lon"]}
 
 
 def _interleave(tasks: list[dict]) -> list[dict]:
