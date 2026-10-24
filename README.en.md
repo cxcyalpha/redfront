@@ -732,7 +732,9 @@ and the briefing.
 
 ### Daily air tasking order (ATO)
 
-`redfront/ato.py`: ATO for both sides for the flying day (06:00–20:00, `settings.flying_hours`, estimate).
+`redfront/ato.py`: ATO for both sides for the flying day — daylight on the campaign date (NOAA sunrise and sunset
+for the theatre centre, plus 30 min civil twilight; mission time UTC+1, estimate): 21 June ~03:30–21:10,
+21 December ~07:50–16:40. Manual override — `settings.flying_hours`.
 
 * The side's tasks in doctrine priority order are spread over the flying day; a sortie is scheduled only if the unit
   has enough aircraft for the whole sortie plus turnaround (`turnaround_min`, default 90 min), otherwise later, in
@@ -825,9 +827,23 @@ with a 10 m antenna, ignoring terrain); otherwise S-200 or Patriot would "reach"
 **AI sorties in the mission fly as full packages:** the strike group and its support groups (SEAD, kill, escort,
 sweep, feint) with their own ATO times; the SEAD group only if its SAMs are placed in the mission.
 
-**Strike on SEAD readiness** (`lua/push.lua`). The AI strike group (of the player's package and of every AI sortie, each with its own flag) orbits at the IP until the SEAD group starts
-launching; no launches by planned time + 3 min (SAM radars silent) — strike on schedule; SEAD groups shot down
-without firing — strike cancelled.
+**Strike on SEAD readiness** (`lua/push.lua`). The AI strike group (of the player's package and of every AI sortie,
+each with its own flag) orbits at the IP until the radars of all SAMs covering the target are destroyed or silenced
+by ARMs (`iads.lua`); if SEAD is firing but not everything is suppressed — strike 2 min after the first launch
+(suppression window); nothing by planned time + 3 min — strike on schedule; SEAD groups shot down without firing —
+strike cancelled.
+
+**Realistic SEAD** (`planner.py`, estimates): SEAD flights only against radar SAMs (medium and long range, SA-8,
+Roland, SA-6, Tunguska, S-60 fire control radar); guns, MANPADS and IR/optical SAMs (Gepard, Shilka, Vulcan, Strela,
+Chaparral, Rapier) — no: those are avoided by altitude and manoeuvre. One SEAD flight per covering battery (up to 3,
+nearest to the target first); one for all if aircraft are short. **SAM belts (roll-back):** a deep target behind 2 or
+more medium/long-range SAMs (on the low-level route from the nearest strike airfield) is not planned ("behind a SAM
+belt" in the reasons), and that belt's SAMs come first in SAM-site strikes: enemy air defence is rolled back belt by
+belt.
+
+**Troop cover in back-to-back shifts** (`ato.py`): after all of the side's tasks — up to 2 reliefs (`RELIEFS`), each
+arriving 5 min before the previous one leaves. AI CAP pairs return on bingo fuel and when out of missiles (DCS
+options) and after losing a wingman (`lua/cap.lua`).
 
 ### NATO SEAD
 

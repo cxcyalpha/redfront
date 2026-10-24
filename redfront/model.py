@@ -385,6 +385,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     from . import intel as _intel                # туман войны: известные позиции ЗРК противника
     _intel.ensure(st)
     apply_liveries(st)
+    ensure_point_ad(st)
     for side in (chosen or {}).get("assembly", []):   # вариант: первый эшелон стороны - в исходных районах у границы
         assembly_areas(st, side)
     return st
@@ -475,6 +476,7 @@ def load(path: Path) -> dict:
             u["type"] = "MiG_29_Fulcrum"
     init_crews(st)
     drop_dummy_depots(st)
+    ensure_point_ad(st)
     from . import farp as _farp                  # вертолётные площадки карты - и в старых кампаниях
     _farp.ensure(st)
     from . import intel as _intel                # разведка позиций ЗРК противника - и в старых кампаниях
@@ -488,6 +490,37 @@ def load(path: Path) -> dict:
         for u in marching:
             u["progress_km"] = project_km(route_points(st, u), before[u["id"]])
     return st
+
+
+POINT_AD = {   # ПВО объекта тыла (склад снабжения, большой мост через крупную реку) - ОЦЕНКИ: ОВД - ЗУ-23 и ПЗРК (войска ПВО/тыла),
+    # НАТО - зенитные установки территориальных войск ФРГ (Fla 20 мм; в DCS - Vulcan) и ПЗРК Stinger
+    "red": [("ZU-23 Emplacement", "launcher", 4), ("SA-18 Igla manpad", "launcher", 2)],
+    "blue": [("Vulcan", "launcher", 2), ("Soldier stinger", "launcher", 2)],
+}
+POINT_AD_M = 600       # ОЦЕНКА: позиция ПВО - в стольких метрах от объекта
+
+
+def ensure_point_ad(st: dict) -> int:
+    """ПВО объектов тыла: склады (с подвозом) и большие мосты обеих сторон (малые мосты и заводы - без неё) - с прикрытием ближнего яруса
+    (POINT_AD), если его ещё нет. Кампании, созданные раньше, получают его при загрузке. Возвращает число новых."""
+    units = st.get("units", {})
+    n = 0
+    for o in list(units.values()):
+        if o.get("role") not in ("depot", "bridge") or o.get("supply") is False:   # заводы ПВО не прикрывали (ОЦЕНКА)
+            continue
+        if o.get("role") == "bridge" and o.get("minor", o.get("found")):
+            continue                             # малый мост - объезд рядом, прикрывать нечем и незачем
+        uid = f"{o['id']}_pvo"
+        tpl = POINT_AD.get(o.get("side"))
+        if uid in units or not tpl or "pos" not in o:
+            continue
+        units[uid] = {"id": uid, "name": f"ПВО объекта: {o['name']}", "side": o["side"], "role": "sam_short",
+                      "state": "deployed", "fixed": True, "point": True, "covers": o["id"], "lost": {},
+                      "pos": {"lat": o["pos"]["lat"] + POINT_AD_M / 111_320.0, "lon": o["pos"]["lon"]},
+                      "composition": [{"type": t, "role": r, "count": c} for t, r, c in tpl],
+                      "source": "ПВО объекта тыла - ОЦЕНКА (model.POINT_AD)", "estimate": True}
+        n += 1
+    return n
 
 
 def drop_dummy_depots(st: dict) -> None:

@@ -68,6 +68,59 @@ def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str, l
     return out
 
 
+RADAR_SAM_TYPES = {"Osa_9A33_ln", "Roland_ADS", "X_2S6_Tunguska", "Tor 9A331", "Kub_2P25_ln", "rapier_fsa_blindfire_radar"}
+SEAD_MAX_FLIGHTS = 3    # ОЦЕНКА: групп подавления в пакете - не больше (по одной на прикрывающую батарею)
+GATE_BELT = 2           # ОЦЕНКА: столько ЗРК средней/большой дальности на пути к цели в глубине - пояс ПВО: цель ждёт
+
+
+def sead_target(unit: dict) -> bool:
+    """ЗРК, против которого действует подавление (ПРР наводятся на РЛС): средней и большой дальности, ближнего - с
+    РЛС наведения ракет (Оса, Роланд, Куб, Тунгуска). Зенитные пушки, ПЗРК и ЗРК с ИК/оптикой (Гепард, Шилка,
+    Вулкан, Стрела, Чапарэл, Стингер, Игла) - нет: их обходят высотой и манёвром, а не ПРР."""
+    if unit.get("role") in ("sam_medium", "sam_long"):
+        return True
+    return any((c.get("role") == "radar" and "optical" not in c["type"]) or c["type"] in RADAR_SAM_TYPES   # Рапира -
+               for c in unit.get("composition", []))                                                       # оптическая
+
+
+def belt(state: dict, side: str, base: dict, tpos: dict, low_alt_m: float | None) -> list[str]:
+    """Пояс ПВО на пути к цели: ЗРК средней и большой дальности противника (не объектовая ПВО склада), которые
+    достают маршрут база - цель. Несколько таких - цель в глубине не берётся, пока их не подавят (снятие ПВО поясами,
+    'roll-back': ПВО противника - первый этап воздушной операции, FM 100-5 / 'Тактика ВВС')."""
+    foe = model.enemy(side)
+    ids = corridor_threats(state, [(base, tpos)], foe, low_alt_m)
+    return [i for i in ids if state["units"][i].get("role") in ("sam_medium", "sam_long") and not state["units"][i].get("point")]
+
+
+def _gates(state: dict, side: str) -> tuple[dict[str, int], dict[str, list[str]]]:
+    """Пояса ПВО: для каждого объекта тыла противника - ЗРК средней/большой дальности на пути от ближнего своего
+    аэродрома с ударной авиацией (на малой высоте). GATE_BELT и больше - цель закрыта (gated: цель -> ЗРК пояса);
+    gate: ЗРК -> сколько целей он закрывает (удары по ЗРК - сначала по ним)."""
+    foe = model.enemy(side)
+    bases = {u["base"] for u in state["units"].values() if u["side"] == side and u.get("base")
+             and u.get("role") in ("bomber", "fighter_bomber", "attack") and u["base"] in state["airbases"]}
+    if not bases:
+        return {}, {}
+    gate: dict[str, int] = {}
+    gated: dict[str, list[str]] = {}
+    for t in state["units"].values():
+        if model.category(t) not in STRATEGIC or t["state"] != "active" or t.get("damage", 0) >= 0.95:
+            continue
+        if (logistics.bridge_side(state, t) if model.category(t) == "bridge" else t["side"]) != foe:
+            continue
+        tpos = _aim(state, side, t)
+        base = min((state["airbases"][b] for b in bases), key=lambda b: model.dist_km(b, tpos))
+        b = belt(state, side, base, tpos, GATE_LOW_M)
+        if len(b) >= GATE_BELT:
+            gated[t["id"]] = b
+            for x in b:
+                gate[x] = gate.get(x, 0) + 1
+    return gate, gated
+
+
+GATE_LOW_M = 100        # ОЦЕНКА: высота прорыва ПВО ударной группой (радиогоризонт РЛС ЗРК по ней)
+
+
 def detection_radius_km(unit: dict) -> float | None:
     """Дальность обнаружения РЛС ЗРК: явная у части (detection_radius_km), иначе наименьшая detection_range
     среди РЛС группы из pydcs. None - РЛС нет."""
@@ -221,6 +274,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     reasons, tasks = [], []
     tasked: dict[str, int] = {}                  # задач у части в этом плане
     year = campaign_year(state)
+    gate, gated = _gates(state, side)            # пояса ПВО перед целями в глубине: сначала они (roll-back)
     for kind, tdef in doc["tasks"].items():
         if tdef.get("from_year") and year and year < tdef["from_year"]:
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
@@ -265,11 +319,16 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             targets = [u for u in state["units"].values() if model.category(u) == cat and u["state"] == "active"
                        and u.get("damage", 0) < 0.95 and (cat != "depot" or logistics.supplies(u))
                        and (logistics.bridge_side(state, u) if cat == "bridge" else u["side"]) == tside]
+            for t in [t for t in targets if t["id"] in gated]:   # за поясом ПВО - не сейчас
+                reasons.append(f"{tdef['title']}: {t['name']} - за поясом ПВО ({', '.join(state['units'][x]['name'] for x in gated[t['id']])}), "
+                               "сначала его подавление")
+            targets = [t for t in targets if t["id"] not in gated]
         elif cat == "sam":                       # позиции ЗРК противника (fixed - только объектовая ПВО): исправные
             targets = [u for u in state["units"].values() if u["side"] == tside and model.category(u) == "sam"
                        and not u.get("attached_to") and u["state"] not in ("destroyed", "pending")
                        and model.strength(u) >= tdef["target"].get("min_strength", 0.5)
-                       and (u.get("fixed") or not tdef["target"].get("fixed"))]
+                       and (u.get("fixed") or not tdef["target"].get("fixed"))
+                       and not u.get("point")]          # ПВО склада/моста (ЗУ, ПЗРК) - не цель отдельного удара
         else:
             targets = [u for u in state["units"].values()
                        if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]
@@ -284,8 +343,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         found = False
         if cat in STRATEGIC or cat == "sam":     # объекты тыла, позиции ЗРК: не больше MAX_PER_KIND ближних к базам исполнителей
             bases = [state["airbases"][r["base"]] for r in performers]
-            if bases:
-                targets.sort(key=lambda t: min(model.dist_km(b, _aim(state, side, t)) for b in bases))
+            if bases:                            # ЗРК пояса, закрывающего цели в глубине, - первыми; затем ближние
+                targets.sort(key=lambda t: (-gate.get(t["id"], 0), min(model.dist_km(b, _aim(state, side, t)) for b in bases)))
             targets = targets[:per_kind]
         n_kind = 0
         for tgt in targets:
@@ -856,12 +915,16 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             continue
         if g.get("types") and perf["type"] in g["types"]:   # разведчик-наводчик не нужен, если ударная - сама такого типа
             continue
-        if g["when"] == "threats" and g.get("mode") in (None, "kill"):   # подавление и добивание - по ЗРК коридора
-            objs = sorted((units[t] for t in threats),
-                          key=lambda u: model.dist_km(state["airbases"][perf["base"]], model.unit_pos(state, u)))
+        per = None                               # подавление: по группе на прикрывающую батарею (objs[k])
+        if g["when"] == "threats" and g.get("mode") in (None, "kill"):   # подавление и добивание - по ЗРК с РЛС коридора
+            objs = sorted((units[t] for t in threats if sead_target(units[t])),     # ближние к цели - первыми
+                          key=lambda u: model.dist_km(tpos, model.unit_pos(state, u)))
+            if not objs:
+                continue                         # в коридоре только пушки и ПЗРК - подавлять ПРР нечего
             objective = {"kind": "sam", "units": [u["id"] for u in objs]}
-            # одно ожидание - на рубеже по ближнему ЗРК; атака - по всем (в бою ЗРК стоят рядом)
             route_of = lambda base, g=g, objs=objs: [hold_point(state, objs[0], base, g)]
+            if g.get("mode") is None and int(g.get("flights", 1)) == 1:
+                per = objs[:SEAD_MAX_FLIGHTS]
         elif g.get("mode") == "sweep_zone":       # расчистка воздуха: зона на подходе до выхода удара на цель, вне зон ЗРК
             sp = clear_point(state, perf["side"], ip, state["airbases"][perf["base"]])
             objective = {"kind": "sweep_zone", "unit": tgt["id"], "pos": sp}
@@ -877,7 +940,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             kind = "search_zone" if g.get("mode") == "search_zone" else "flyover"
             objective = {"kind": kind, "unit": tgt["id"], "pos": tpos}
             route_of = lambda base: [ip_point(base, tpos, tdef["ip_offset_km"]), tpos]
-        flights = int(g.get("flights", 1))       # несколько пар - отдельные группы, у каждой своя задача атаки
+        flights = len(per) if per else int(g.get("flights", 1))   # несколько пар - отдельные группы, у каждой своя задача
         need = g["size"] * flights
         from . import pilots
         cands = [u for u in units.values()
@@ -904,6 +967,14 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             if radius is not None and all(model.dist_km(base, p) <= radius for p in route_of(base)):
                 chosen = u
                 break
+        if chosen is None and per and len(per) > 1:   # на все батареи самолётов нет - одна группа на все (как раньше)
+            per, flights, need = None, 1, g["size"]
+            for u in cands:
+                base = state["airbases"][u["base"]]
+                radius = strike_radius_km(u)
+                if avail.get(u["id"], 0) >= need and radius is not None and all(model.dist_km(base, p) <= radius for p in route_of(base)):
+                    chosen = u
+                    break
         if chosen is None:
             msg = f"нет исполнителя для группы '{g['title']}' ({need} ЛА с ролью {', '.join(g['performers'])} в радиусе)"
             if g.get("required"):
@@ -914,11 +985,15 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         _SUP_LOAD[chosen["id"]] = _SUP_LOAD.get(chosen["id"], 0) + need
         chosen_by[g["id"]] = chosen
         for k in range(flights):
+            cb = state["airbases"][chosen["base"]]
+            obj_k = {"kind": "sam", "units": [per[k]["id"]]} if per else objective
+            route_k = [hold_point(state, per[k], cb, g)] if per else route_of(cb)
             groups.append({"group": g["id"] if k == 0 else f"{g['id']}{k + 1}", "support_id": g["id"],
-                           "title": g["title"] if flights == 1 else f"{g['title']}, пара {k + 1}",
+                           "title": g["title"] if flights == 1 else
+                           (f"{g['title']}: {per[k]['name']}" if per else f"{g['title']}, пара {k + 1}"),
                            "performer": chosen["id"], "size": g["size"],
-                           "base": chosen["base"], "route": route_of(state["airbases"][chosen["base"]]),
-                           "objective": objective, "maintask": g["maintask"], "loadout": g["loadout"],
+                           "base": chosen["base"], "route": route_k,
+                           "objective": obj_k, "maintask": g["maintask"], "loadout": g["loadout"],
                            "lead_min": g.get("lead_min", 0), "roe": g.get("roe"), "ai": g.get("ai") or {},
                            "search_min": g.get("search_min"), "zone_margin_km": g.get("zone_margin_km"),
                            "search_alt_m": g.get("search_alt_m"), "launch_alt_m": g.get("launch_alt_m"),

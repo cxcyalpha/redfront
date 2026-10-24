@@ -123,6 +123,8 @@ function H:onEvent(e)
         local st = state[s.group] or { mode = "init", last = -1e9, dark_until = 0 }
         state[s.group] = st
         st.dark_until = timer.getTime() + d / 600 + DARK_S     -- полёт ПРР (~600 м/с) и молчание после
+        REDFRONT_IADS.dark = REDFRONT_IADS.dark or {}           -- для push.lua: ЗРК подавлен до этого времени
+        REDFRONT_IADS.dark[s.group] = st.dark_until
         note(s, "harm")
       end
     end
