@@ -42,9 +42,42 @@ def is_night(state: dict, t_s: float) -> bool:
     return not (w0 <= t_s % DAY_S < w1)
 
 
+SUN_LAT, SUN_LON = 51.5, 10.5   # центр театра (Германия) для восхода и заката
+MAP_UTC_H = 1                    # ОЦЕНКА: время миссии DCS на карте Cold War Germany - UTC+1 (зимнее, без перехода на летнее)
+TWILIGHT_H = 0.5                 # ОЦЕНКА: гражданские сумерки - лётный день от восхода -30 мин до заката +30 мин
+
+
+def sun_hours(date) -> tuple[float, float]:
+    """Восход и закат (ч, время миссии) на дату - упрощённые формулы NOAA (точность ~5 мин)."""
+    import math
+    n = date.timetuple().tm_yday
+    g = 2 * math.pi / 365 * (n - 1)
+    decl = (0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g)
+            + 0.000907 * math.sin(2 * g) - 0.002697 * math.cos(3 * g) + 0.00148 * math.sin(3 * g))
+    eqt = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g) - 0.014615 * math.cos(2 * g)
+                    - 0.040849 * math.sin(2 * g))
+    lat = math.radians(SUN_LAT)
+    ha = math.degrees(math.acos(math.cos(math.radians(90.833)) / (math.cos(lat) * math.cos(decl)) - math.tan(lat) * math.tan(decl)))
+    noon = 720 - 4 * SUN_LON - eqt + MAP_UTC_H * 60
+    return (noon - 4 * ha) / 60, (noon + 4 * ha) / 60
+
+
+def campaign_date(state: dict):
+    import datetime
+    return datetime.date.fromisoformat(state["date"]) + datetime.timedelta(days=state["day"] - 1)
+
+
 def flying_window(state: dict) -> tuple[int, int]:
-    h0, h1 = (state.get("settings") or {}).get("flying_hours") or FLYING_HOURS
-    return int(h0 * 3600), int(h1 * 3600)
+    """Лётный день: settings.flying_hours, если задан вручную, иначе - светлое время суток на дату кампании (восход
+    и закат с сумерками): летом ~4:30-21:30, зимой ~7:30-16:30. Вне его летают только типы с night."""
+    fh = (state.get("settings") or {}).get("flying_hours")
+    if fh:
+        return int(fh[0] * 3600), int(fh[1] * 3600)
+    try:
+        rise, sset = sun_hours(campaign_date(state))
+    except (KeyError, ValueError):
+        rise, sset = FLYING_HOURS
+    return int((rise - TWILIGHT_H) * 3600), int((sset + TWILIGHT_H) * 3600)
 
 
 def hhmm(t_s: float) -> str:
@@ -84,6 +117,8 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
     return out
 
 
+RELIEFS = 2              # ОЦЕНКА: смен прикрытия войск после первой (пока хватает самолётов и лётного дня)
+RELIEF_OVERLAP_S = 300   # ОЦЕНКА: смена приходит в зону за столько до ухода предыдущей - зона не пустеет
 SAM_FIRST_MIN = 30   # ОЦЕНКА: удар по цели - не раньше стольких минут после удара по прикрывающей её позиции ЗРК
 
 
@@ -237,7 +272,10 @@ def build(state: dict) -> dict:
         reg = [t for t in tasks if not t.get("ai_only")]
         # ночь: до ATO_NIGHT_TASKS задач, где все группы летают ночью, - из младших по приоритету (глубокие удары -
         # ночью, поддержка войск - днём), вечером после лётного дня (утро суток - только дежурства)
-        night = [t for t in reversed(reg) if t["kind"] in NIGHT_KINDS and night_capable(state, t)][:ATO_NIGHT_TASKS]
+        covering = {x for t in reg if t["kind"] != "strike_sam_site" for x in _covering_sams(state, t)}
+        night = [t for t in reversed(reg) if t["kind"] in NIGHT_KINDS and night_capable(state, t)
+                 and not (t["kind"] == "strike_sam_site" and t.get("target") in covering)][:ATO_NIGHT_TASKS]
+        # (удар по ЗРК, прикрывающему дневные цели, - не на вечер: он открывает им путь и идёт раньше них)
         for i, t in enumerate(night):
             tdef = doc["tasks"][t["kind"]]
             rel = rel_times(state, tdef, t)
@@ -265,6 +303,7 @@ def build(state: dict) -> dict:
         reg = [t for t in reg if t not in night]
         # удары по позициям ЗРК - раньше ударов, которые эти ЗРК прикрывают: сначала ПВО цели, потом цель
         reg = [t for t in reg if t["kind"] == "strike_sam_site"] + [t for t in reg if t["kind"] != "strike_sam_site"]
+        relief_q: list[tuple] = []                # прикрытие войск: смены - после всех задач стороны (самолёты остались)
         sam_tot: dict[str, float] = {}               # ЗРК -> время удара по его позиции (сутки, с)
         span = w1 - w0
         for i, t in enumerate(reg):
@@ -293,8 +332,21 @@ def build(state: dict) -> dict:
                                     "title": t["title"], "task": t, "tot_s": tot, "times": times, "ai_only": False})
                     if t["kind"] == "strike_sam_site" and t.get("target"):
                         sam_tot[t["target"]] = min(sam_tot.get(t["target"], 1e18), tot)
+                    if tdef.get("method") == "zone_patrol":   # прикрытие войск - сменами встык: после всех задач (ниже)
+                        relief_q.append((t, tdef, rel, tot, last))
                     break
                 tot += SLOT_MIN * 60
+        for t, tdef, rel, tot, last in relief_q:  # смена приходит в зону до ухода предыдущей - зона не пустеет
+            dwell = (t["package"][0].get("cap_min") or tdef["strike"].get("cap_min") or 20) * 60
+            for k in range(1, int(tdef.get("reliefs", RELIEFS)) + 1):
+                tk_ = tot + k * (dwell - RELIEF_OVERLAP_S)
+                need_k = _need(t, rel, tk_, turn_s)
+                if tk_ + last > w1 + 3600 or not pool.fits(need_k):
+                    break
+                pool.book(need_k)
+                entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],
+                                "title": f"{t['title']} (смена {k + 1})", "task": t, "tot_s": tk_, "ai_only": False,
+                                "times": {kk: {k2: tk_ + v2 for k2, v2 in v.items()} for kk, v in rel.items()}})
     entries.sort(key=lambda e: e["tot_s"])
     state["ato"] = {"day": state["day"], "entries": entries, "done": [],
                     "weather_cancelled": [{"title": k, "why": v} for k, v in wx_why.items()]}

@@ -362,25 +362,27 @@ def patriot_close_section(tmp: Path) -> None:
     p.write_text(json.dumps(oob, ensure_ascii=False), encoding="utf-8")
     st = model.new_campaign("pclose", oob=p, sector=BASE_SECTOR)
     tk = planner.plan(st)
-    sead = next(g for g in tk["package"] if g["group"] == "sead")
-    check(sorted(tk["threats"]) == ["blue_flak_1", "blue_patriot_1"] and set(sead["objective"]["units"]) == {"blue_flak_1", "blue_patriot_1"},
-          "Patriot рядом с маршрутом: в коридоре, группа подавления - по обоим ЗРК")
+    seads = [g for g in tk["package"] if g.get("support_id") == "sead"]
+    check(sorted(tk["threats"]) == ["blue_flak_1", "blue_patriot_1"] and len(seads) == 2
+          and sorted(u for g in seads for u in g["objective"]["units"]) == ["blue_flak_1", "blue_patriot_1"],
+          "Patriot рядом с маршрутом: в коридоре, подавление - по паре на каждый ЗРК (Роланд колонны и Patriot)")
     from redfront import intel as _intel
     for sid in tk["threats"]:                    # свежие данные разведки (перед вылетом) - пуск по группам ЗРК
         _intel.seen(st, st["units"][sid].get("attached_to") or sid, "разведка", (st["day"] - 1) * 86400 + (tk.get("tot_s") or 0))
     build.build(st, tmp / "pclose.miz")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "pclose.miz"))
-    g = next(g for g in plane_groups(m) if " sead " in g.name)
     vgs = {v.id: v.name for c in m.coalition["blue"].countries.values() for v in c.vehicle_group}
     holds = []
-    for pt in g.points:
-        eng = [vgs[t.params["groupId"]] for t in pt.tasks if getattr(t, "id", None) == "EngageGroup"]
-        hold = [t for t in pt.tasks if getattr(t, "id", None) == "ControlledTask"]
-        if eng:
-            holds.append((sorted(eng), hold[0].params["task"]["params"]["altitude"]))
-    check(holds == [(["blue_flak_1", "blue_patriot_1"], build.AI_LOW_MIN_M)],
-          f"одно ожидание на рубеже по ближнему ЗРК, атака по обоим; круг на {build.AI_LOW_MIN_M} м - рубеж внутри зоны Patriot (60 км)")
+    for g in [g for g in plane_groups(m) if " sead" in g.name]:
+        for pt in g.points:
+            eng = [vgs[t.params["groupId"]] for t in pt.tasks if getattr(t, "id", None) == "EngageGroup"]
+            hold = [t for t in pt.tasks if getattr(t, "id", None) == "ControlledTask"]
+            if eng:
+                holds.append((sorted(eng), hold[0].params["task"]["params"]["altitude"]))
+    pat = [h for h in holds if h[0] == ["blue_patriot_1"]]
+    check(sorted(e for h in holds for e in h[0]) == ["blue_flak_1", "blue_patriot_1"] and pat and pat[0][1] == build.AI_LOW_MIN_M,
+          f"у каждой пары подавления своё ожидание и свой ЗРК; по Patriot - круг на {build.AI_LOW_MIN_M} м (рубеж внутри его зоны, 60 км)")
 
 
 def front_section(tmp: Path) -> None:
@@ -1709,6 +1711,7 @@ def air_defence_section(tmp: Path) -> None:
 def core_section(tmp: Path) -> None:
     """Сквозной цикл двух дней на составе сил слоёв 0.1-0.3 (BASELINE) и проверки слоёв."""
     st = model.new_campaign("smoke", oob=BASE_OOB, sector=BASE_SECTOR)
+    st["settings"]["flying_hours"] = (6, 20)   # базовые числа 0.1 - при прежнем лётном дне (не по восходу)
     bn = st["units"]["blue_pzgren_bn_1"]
 
     # ---- день 1 ----
@@ -3056,8 +3059,9 @@ def nato_section(tmp: Path) -> None:
     hk = [t for t in reg if any(g["group"] == "kill" for g in t["package"])]
     hk52 = [t for t in hk if {g["group"]: g["performer"] for g in t["package"]}.get("sead") == "b_52tfw"]
     pk_ = {g["group"]: g for g in hk52[0]["package"]} if hk52 else {}
+    hunt = sorted(u for g in (hk52[0]["package"] if hk52 else []) if g.get("support_id") == "sead" for u in g["objective"]["units"])
     check(hk52 and pk_["sead"]["performer"] == "b_52tfw" and pk_["kill"]["performer"] == "b_52tfw_f16"
-          and pk_["sead"]["objective"]["units"] == pk_["kill"]["objective"]["units"],
+          and hunt == sorted(pk_["kill"]["objective"]["units"]),
           "hunter-killer: пара поиска с ПРР - 52-е крыло (F-4E вместо F-4G), пара добивания - F-16C того же крыла, по тем же ЗРК")
     st90 = model.new_campaign("nato90", sector="sector_germany.json", oob="oob_germany.json", seed=7)
     st90["date"] = "1990-06-01"
@@ -3146,7 +3150,8 @@ def mixed_section(tmp: Path) -> None:
         fp = pk2["feint"]["route"][0]
         hot = [u["name"] for u in sg["units"].values() if u["side"] == "blue" and model.category(u) == "sam"
                and u["state"] != "destroyed" and model.dist_km(fp, model.unit_pos(sg, u)) <= planner.threat_radius_km(u)]
-        check("sweep" in pk2 and t2["sweep"]["objective_s"] < t2["sead"]["objective_s"] < t2["strike"]["objective_s"]
+        check("sweep" in pk2 and t2["sweep"]["objective_s"] < t2.get("sead", t2["sweep"])["objective_s"] + ("sead" not in t2)
+              and t2.get("sead", t2["sweep"])["objective_s"] < t2["strike"]["objective_s"]
               and t2["feint"]["objective_s"] < t2["strike"]["objective_s"] and pk2["feint"]["alt_m"] >= 3000,
               f"удар по аэродрому: расчистка воздуха и демонстративная группа (средняя высота, другим направлением) - до подавления ПВО и удара; точка демонстрации в зонах ЗРК: {hot or 'нет'}")
     else:
@@ -3259,18 +3264,24 @@ def push_qra_section(tmp: Path) -> None:
         L = lupa.LuaRuntime(unpack_returned_tuples=True)
         L.execute(PUSH_MOCK)
         L.execute(f'ALIVE["{sead_name}"] = true')
+        L.execute('RADAR_UP = true; Unit = { getByName = function(n) if not RADAR_UP then return nil end '
+                  'return { isExist = function() return true end, getLife = function() return 1 end } end }')
         L.execute(script)
         Gl = L.globals()
         for ev in events:
             L.execute(ev)
         return Gl
     G1 = run(['T = 30000; SCHED()'])                                   # срок прошёл, подавление живо - удар по сроку
-    G2 = run([f'for _, h in ipairs(H) do h:onEvent({{ id = 1, initiator = {{ getGroup = function() return {{ getName = function() return "{sead_name}" end }} end }} }}) end'])
+    G2 = run([f'for _, h in ipairs(H) do h:onEvent({{ id = 1, initiator = {{ getGroup = function() return {{ getName = function() return "{sead_name}" end }} end }} }}) end',
+              'T = T + 130; SCHED()'])                                 # пуски ПРР, РЛС живы - удар в окне подавления
+    G4 = run(['RADAR_UP = false; SCHED()'])                            # РЛС прикрывающих ЗРК уничтожены - удар
     G3 = run([f'ALIVE["{sead_name}"] = false; T = 20000; SCHED()'])   # подавление сбито, не выстрелив - отмена
     check(G1.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "deadline" and G2.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "sead"
           and G3.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "abort" and G3.CMDS[1] and G3.FLAGS[build.PUSH_FLAG]
-          and "удар отменён" in G3.TEXTS[1] and "удар разрешён" in G2.TEXTS[1],
-          "push.lua: пуск группы подавления - удар; подавление сбито, не выстрелив, - удар отменён (домой); нет пусков к сроку - удар; сообщения своей стороне")
+          and "удар отменён" in G3.TEXTS[1] and "окне подавления" in G2.TEXTS[1]
+          and G4.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "clear" and "удар разрешён" in G4.TEXTS[1],
+          "push.lua: РЛС прикрывающих ЗРК уничтожены или молчат - удар; пуски ПРР - удар в окне подавления (2 мин); "
+          "подавление сбито, не выстрелив, - удар отменён (домой); ничего к сроку - удар; сообщения своей стороне")
     d_ = m.description_text()
     pl = next(g for c in m.coalition["red"].countries.values() for g in c.plane_group
               if g.units[0].skill in (dcs.unit.Skill.Client, dcs.unit.Skill.Player))
@@ -3590,11 +3601,55 @@ def fires_section(tmp: Path) -> None:
     check(any(g.get("mrl") for g in materialize.artillery(st85, us85, c, 90.0, c)), "MLRS у армии США в 1985 (с 1983)")
 
 
+def realism_section(tmp: Path) -> None:
+    """Световой день по дате, пояса ПВО (roll-back), подавление по каждой прикрывающей батарее, смена прикрытия встык."""
+    import datetime
+    from redfront import ato
+    print("\n== световой день, пояса ПВО, смена прикрытия ==")
+    r6, s6 = ato.sun_hours(datetime.date(1989, 6, 21))
+    r12, s12 = ato.sun_hours(datetime.date(1989, 12, 21))
+    st = model.new_campaign("real", sector="sector_germany.json", oob="oob_germany.json", seed=7)
+    w0, w1 = ato.flying_window(st)
+    check(3.5 < r6 < 4.5 and 20 < s6 < 21 and 8 < r12 < 8.7 and 15.8 < s12 < 16.5 and w0 < 6 * 3600,
+          f"световой день по дате: 21 июня {r6:.1f}-{s6:.1f} ч, 21 декабря {r12:.1f}-{s12:.1f} ч; лётный день 1 сентября "
+          f"{ato.hhmm(w0)}-{ato.hhmm(w1)} (с сумерками)")
+    gate, gated = planner._gates(st, "red")
+    planner.plan(st)
+    deep = [t for t in st["tasks"] if t["kind"] in ("strike_depot", "strike_bridge", "strike_airfield", "strike_factory")]
+    check(gated and not any(t["target"] in gated for t in deep),
+          f"пояса ПВО: {len(gated)} целей в глубине за поясом из 2+ ЗРК не в плане, пока пояс не подавлен "
+          f"(ЗРК пояса: {len(gate)})")
+    gepard = [t for t in st["tasks"] for g in t["package"] if g["objective"]["kind"] == "sam"
+              for u in g["objective"]["units"] if not planner.sead_target(st["units"][u])]
+    multi = [t for t in st["tasks"] if sum(1 for g in t["package"] if g.get("support_id") == "sead") > 1]
+    check(not gepard and multi and all(len({tuple(g["objective"]["units"]) for g in t["package"] if g.get("support_id") == "sead"})
+                                       == sum(1 for g in t["package"] if g.get("support_id") == "sead") for t in multi),
+          f"подавление - только против ЗРК с РЛС (не Гепард, Шилка, ПЗРК); по группе на каждую прикрывающую батарею "
+          f"({len(multi)} пакетов с несколькими)")
+    sim.end_day(st)                              # день 2: бои - есть прикрытие войск
+    planner.plan(st)
+    a = ato.ensure(st)
+    cap = [e for e in a["entries"] if e["kind"] == "cap_own_troops" and e["side"] == "red"]
+    ch = [e for e in cap if "(смена" in e["title"]]
+    ok = False
+    for e in ch:
+        base = next((x for x in cap if x["task"] is e["task"] and "(смена" not in x["title"]), None)
+        if base:
+            dw = (e["task"]["package"][0].get("cap_min") or 20) * 60
+            ok = ok or 0 < e["tot_s"] - base["tot_s"] < dw
+    check(ch and ok, f"прикрытие войск - сменами встык: смена приходит в зону до ухода предыдущей ({len(ch)} смен)")
+    man = build.build(st, tmp / "real.miz", task_no=1)
+    import zipfile
+    mis = zipfile.ZipFile(tmp / "real.miz").read("mission").decode("utf-8")
+    check("redfront cap" in mis or not any(f["kind"] in ("cap_zone", "cover_zone", "sweep_zone") for f in man["flights"] if not f["player"]),
+          "пары прикрытия ИИ: домой без ведомого (cap.lua), по остатку топлива и расходу ракет")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section]
 
 
 def main() -> int:

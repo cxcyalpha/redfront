@@ -1,12 +1,15 @@
 -- redfront push | campaign @CAMPAIGN@ | sortie @SORTIE@
--- Удар по готовности подавления ПВО. Ударные группы ИИ пакета ждут на ИПМ (круг до флага), пока группа подавления
--- ПВО не начнёт пуски. Все группы подавления сбиты, не выстрелив, - удар отменяется: ударные уходят домой (переход
--- на точку посадки). Пусков нет к сроку (РЛС ЗРК молчат) - удар по сроку. Итог - REDFRONT_PUSH (хук пишет в дебриф).
+-- Удар по готовности подавления ПВО. Ударные группы ИИ пакета ждут на ИПМ (круг до флага), пока РЛС всех ЗРК,
+-- которые прикрывают цель (sams: группа и её РЛС), не уничтожены или не молчат под ПРР (iads.lua: REDFRONT_IADS.dark).
+-- Подавление стреляет, но подавлены не все - удар через SUPPRESS_WAIT_S после первого пуска (окно подавления).
+-- Все группы подавления сбиты, не выстрелив, - удар отменяется: ударные уходят домой (переход на точку посадки).
+-- К сроку ничего из этого - удар по сроку (РЛС молчат сами). Итог - REDFRONT_PUSH (хук пишет в дебриф).
 REDFRONT_PUSH = REDFRONT_PUSH or {}
-local CHECK_S = 5
+local CHECK_S, SUPPRESS_WAIT_S = 5, 120   -- ОЦЕНКА: окно подавления после первого пуска ПРР
 local SPECS = { @SPECS@ }   -- { id, side, title, flag, strikes = {}, ip = {}, home = {}, sead = {}, sead_start = {}, deadline }
 local SAY = {
-  sead = "подавление ПВО начало пуски - удар разрешён",
+  clear = "РЛС ЗРК у цели уничтожены или подавлены - удар разрешён",
+  sead = "подавление ПВО ведёт пуски - удар в окне подавления",
   deadline = "пусков подавления нет, РЛС ПВО молчат - удар по времени",
   abort = "группы подавления ПВО сбиты - удар отменён, ударным группам - домой",
 }
@@ -48,11 +51,30 @@ function H:onEvent(e)
   if not ok or not gname then return end
   for _, s in ipairs(SPECS) do
     for _, n in ipairs(s.sead) do
-      if n == gname then push(s, "sead") end
+      if n == gname and not s.first_shot then s.first_shot = timer.getTime() end
     end
   end
 end
 world.addEventHandler(H)
+
+local function unit_alive(name)
+  local u = Unit.getByName(name)
+  return u and u:isExist() and u:getLife() > 0
+end
+
+local function suppressed(s)               -- все прикрывающие ЗРК без РЛС (уничтожены) или молчат под ПРР
+  if not s.sams or #s.sams == 0 then return false end
+  local now = timer.getTime()
+  local dark = (REDFRONT_IADS and REDFRONT_IADS.dark) or {}
+  for _, z in ipairs(s.sams) do
+    local up = false
+    for _, r in ipairs(z.radars) do
+      if unit_alive(r) then up = true end
+    end
+    if up and not ((dark[z.group] or 0) > now) then return false end
+  end
+  return true
+end
 
 local function check()
   local left = false
@@ -64,7 +86,11 @@ local function check()
       for i, n in ipairs(s.sead) do
         if now < s.sead_start[i] + 60 or alive(n) then any = true end   -- до взлёта группы в миссии её нет
       end
-      if not any then
+      if suppressed(s) then
+        push(s, "clear")
+      elseif s.first_shot and now >= s.first_shot + SUPPRESS_WAIT_S then
+        push(s, "sead")
+      elseif not any then
         push(s, "abort")
       elseif now >= s.deadline then
         push(s, "deadline")
