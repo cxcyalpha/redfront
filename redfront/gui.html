@@ -274,7 +274,9 @@ const I18N = {
     wxFixed: "заданная", wxType: "Тип погоды", wxHigh: "антициклон: ясно, слабый ветер", wxPost: "тыл циклона: кучевые, ветер СЗ",
     wxFront: "фронт: значительная облачность, дождь", wxLow: "циклон: сплошная низкая облачность, дождь, ветер",
     wxFog: "утренний туман", wxEff: "погода влияет на план полётов (минимумы)", wxTip: "пересчёт: сегодня, если ещё не летали, иначе с завтра", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
-    cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", histNow: "обстановка: сейчас", histDay: "День", histTip: "хронология: обстановка на карте в прошлые дни (движение фронта)",
+    cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", loEdTip: "своя подвеска: оружие по пилонам (новее года кампании - заменится по эпохе)", loEmpty: "— пусто —",
+    loName: "имя подвески", loSave: "Сохранить",
+    histNow: "обстановка: сейчас", histDay: "День", histTip: "хронология: обстановка на карте в прошлые дни (движение фронта)",
     budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
     airBudgetTip: "с пакетом игрока; вылеты ИИ дальше от удара игрока не ставятся (в модели они летают); 0 - без ограничения",
     budgetTip: "дальнее прореживается и убирается; 0 - без ограничения", enemyPlan: "показывать план полётов противника (отладка)",
@@ -354,7 +356,9 @@ const I18N = {
     wxFixed: "fixed", wxType: "Weather type", wxHigh: "high pressure: clear, light wind", wxPost: "post-frontal: cumulus, NW wind",
     wxFront: "frontal: broken cloud, rain", wxLow: "low pressure: low overcast, rain, wind",
     wxFog: "morning fog", wxEff: "weather affects the air tasking order (minima)", wxTip: "recomputed today if nothing flown yet, otherwise from tomorrow", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
-    cancel: "Cancel", create: "Create", close: "Close", language: "Language", histNow: "situation: now", histDay: "Day", histTip: "timeline: the map situation on past days (front movement)",
+    cancel: "Cancel", create: "Create", close: "Close", language: "Language", loEdTip: "custom loadout: weapon per pylon (newer than the campaign year is replaced by era)", loEmpty: "— empty —",
+    loName: "loadout name", loSave: "Save",
+    histNow: "situation: now", histDay: "Day", histTip: "timeline: the map situation on past days (front movement)",
     budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
     airBudgetTip: "including the player package; AI sorties farther from the player strike are left out (the model still flies them); 0 - unlimited",
     budgetTip: "distant units are thinned out and removed; 0 - unlimited", enemyPlan: "show enemy air tasking order (debug)",
@@ -956,22 +960,54 @@ async function atoEditor(it) {
   try { o = (await api("atooptions", {file: FILE, id: it.dataset.id})).options; } catch (e) { return out(e.message, true); }
   const perfOpt = (g, sel) => g.performers.map(x => `<option value="${esc(x.id)}" ${x.id === sel ? "selected" : ""}>${esc(x.name)} · ${esc(x.type)} · ${esc(x.base)} · ${T("avail")} ${x.available}</option>`).join("");
   const loOpt = (g, pid, sel) => { const x = g.performers.find(q => q.id === pid) || {loadouts: []};
-    return `<option value="">${T("auto")}</option>` + x.loadouts.map(c => `<option value="${esc(c)}" ${c === sel ? "selected" : ""}>${esc(c.startsWith("rt:") ? c.slice(3) + " (Retribution)" : c)}</option>`).join(""); };
+    return `<option value="">${T("auto")}</option>` + x.loadouts.map(c => `<option value="${esc(c)}" ${c === sel ? "selected" : ""}>${esc(loLabel(c))}</option>`).join(""); };
   f.innerHTML = `<div style="border:1px solid var(--line);border-radius:6px;padding:6px;margin-top:6px">
     <div class="row"><span class="meta" style="margin:0">${T("tot")}</span><input class="tot" value="${esc(o.tot)}" style="width:70px"></div>` +
     o.groups.map(g => `<div class="grp" data-g="${esc(g.group)}" style="margin-top:6px"><div class="d">${esc(g.title)}</div>
       <div class="row"><select class="perf" style="flex:1;min-width:0">${perfOpt(g, g.performer)}</select>
       <input class="size" type="number" min="1" max="4" value="${g.size}" style="width:52px" title="${esc(T("seats"))}">
-      <select class="lo">${loOpt(g, g.performer, g.loadout)}</select></div></div>`).join("") +
+      <select class="lo">${loOpt(g, g.performer, g.loadout)}</select><button class="loEd" title="${esc(T("loEdTip"))}">✎</button></div>
+      <div class="loForm"></div></div>`).join("") +
     `<div class="row" style="margin-top:6px"><button class="main save">${T("apply")}</button><button class="cancel">${T("cancel")}</button></div></div>`;
   f.querySelectorAll(".grp").forEach(el => { const g = o.groups.find(q => q.group === el.dataset.g);
-    el.querySelector(".perf").onchange = e => { el.querySelector(".lo").innerHTML = loOpt(g, e.target.value, ""); }; });
+    el.querySelector(".perf").onchange = e => { el.querySelector(".lo").innerHTML = loOpt(g, e.target.value, ""); };
+    el.querySelector(".loEd").onclick = () => loEditor(el, g, loOpt); });
   f.querySelector(".cancel").onclick = () => { f.innerHTML = ""; };
   f.querySelector(".save").onclick = e => {
     const groups = {};
     f.querySelectorAll(".grp").forEach(el => { groups[el.dataset.g] = {performer: el.querySelector(".perf").value,
       size: +el.querySelector(".size").value, loadout: el.querySelector(".lo").value}; });
     act("atoedit", {id: it.dataset.id, tot: f.querySelector(".tot").value.trim(), groups}, e.target);
+  };
+}
+function loLabel(c) {                                    // подвеска: только задача (без источника) или своё имя
+  return c.startsWith("rt:") ? c.slice(3).replace(/^Retribution /, "") : c.startsWith("my:") ? "★ " + c.slice(3) : c;
+}
+async function loEditor(el, g, loOpt) {                  // своя подвеска: оружие по пилонам, имя; сохраняется в кампании
+  const f = el.querySelector(".loForm");
+  if (f.innerHTML) { f.innerHTML = ""; return; }
+  const pid = el.querySelector(".perf").value, x = g.performers.find(q => q.id === pid);
+  if (!x) return;
+  const cur = el.querySelector(".lo").value;
+  let r;
+  try { r = await api("pylons", {file: FILE, type: x.type, name: cur.startsWith("my:") ? cur.slice(3) : ""}); } catch (e) { return out(e.message, true); }
+  f.innerHTML = `<div style="border:1px dashed var(--line);border-radius:6px;padding:6px;margin-top:4px">
+    <div class="d">${esc(x.type)} · ${T("loEdTip")}</div>` +
+    r.pylons.map(pl => `<div class="row"><span class="meta" style="margin:0;width:22px">${pl.num}</span>
+      <select class="py" data-n="${pl.num}" style="flex:1;min-width:0"><option value="">${T("loEmpty")}</option>` +
+      pl.options.map(o => `<option value="${esc(o.clsid)}" ${r.current[pl.num] === o.clsid ? "selected" : ""}>${esc(o.name)}</option>`).join("") +
+      `</select></div>`).join("") +
+    `<div class="row" style="margin-top:4px"><input class="lnm" placeholder="${esc(T("loName"))}" value="${esc(cur.startsWith("my:") ? cur.slice(3) : "")}" style="flex:1">
+      <button class="main lsave">${T("loSave")}</button></div></div>`;
+  f.querySelector(".lsave").onclick = async e => {
+    const pylons = {};
+    f.querySelectorAll(".py").forEach(s => { if (s.value) pylons[s.dataset.n] = s.value; });
+    let j;
+    try { j = await api("saveloadout", {file: FILE, type: x.type, name: f.querySelector(".lnm").value, pylons}); } catch (er) { return out(er.message, true); }
+    out(j.lines);
+    if (!x.loadouts.includes(j.name)) x.loadouts.unshift(j.name);
+    el.querySelector(".lo").innerHTML = loOpt(g, pid, j.name);
+    f.innerHTML = "";
   };
 }
 async function atoCands() {

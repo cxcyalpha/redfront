@@ -3093,7 +3093,26 @@ def payload_section(tmp: Path) -> None:
     planner.plan(st)
     man = build.build(st, tmp / "pl.miz", task_no=1)
     lines = [ln for ln in man["package_lines"] if "подвеска" in ln]
-    check(any(k in ln for ln in lines for k in ("Retribution", "STRIKE", "CAS", "SEAD")),
+    check(not any("Retribution" in ln for ln in man["package_lines"]),
+          "в брифинге подвеска - по задаче, без источника (без 'Retribution')")
+    from redfront import command
+    st = model.new_campaign("pl2", sector="sector_germany.json", oob="oob_germany_1985.json", seed=7, player_side="blue")
+    planner.plan(st)                             # правка - до начала вылета (часы кампании не сдвинуты сборкой)
+    tk = st["tasks"][0]
+    g0 = tk["package"][0]
+    typ = st["units"][g0["performer"]]["type"]
+    py = command.pylons(typ)
+    pick = {str(pl["num"]): pl["options"][0]["clsid"] for pl in py[:2] if pl["options"]}
+    command.save_loadout(st, typ, "Моя", pick)
+    command.edit(st, tk["ato_id"], groups={g0["group"]: {"loadout": "my:Моя"}})
+    planner.plan(st)
+    i = next(i for i, t in enumerate(st["tasks"]) if t.get("ato_id") == tk["ato_id"])
+    build.build(st, tmp / "pl2.miz", task_no=i + 1, fly=g0["group"])
+    import zipfile
+    mis = zipfile.ZipFile(tmp / "pl2.miz").read("mission").decode("utf-8")
+    check(pick and all(c in mis for c in pick.values()),
+          f"своя подвеска ({typ}, пилоны {', '.join(pick)}): сохранена в кампании, выбрана для вылета - в .miz на пилонах")
+    check(any(k in ln for ln in lines for k in ("STRIKE", "CAS", "SEAD", "Strike")),
           f"подвеска по виду задачи из payloads.json: {lines[0].split('подвеска')[-1][:80]}")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "pl.miz"))

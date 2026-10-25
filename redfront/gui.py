@@ -489,6 +489,13 @@ class App:
             st["settings"]["lang"] = "en" if req.get("lang") == "en" else "ru"
             model.save(st, p)
             return {"state": view(st)}
+        if action == "pylons":                       # своя подвеска: пилоны типа и варианты на них (pydcs)
+            cur = (((st.get("custom_loadouts") or {}).get(dcstypes.flying(req["type"]).id) or {}).get(req.get("name") or "") or {})
+            return {"pylons": command.pylons(req["type"]), "current": {k: v["CLSID"] for k, v in cur.get("pylons", {}).items()}}
+        if action == "saveloadout":                  # своя подвеска кампании - сохранить (выбор - в правке вылета)
+            ln = command.save_loadout(st, req["type"], req.get("name"), req.get("pylons") or {})
+            model.save(st, p)
+            return {"lines": [ln], "name": "my:" + str(req.get("name")).strip()}
         if action == "atooptions":                   # режим командующего: что можно выбрать для вылета (без сохранения)
             return {"options": command.options(st, req["id"])}
         if action == "addoptions":                   # добавить полк: исторические допущения, типы, роли, аэродромы

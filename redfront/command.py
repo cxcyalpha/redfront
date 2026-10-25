@@ -154,21 +154,57 @@ def _reaches(state: dict, unit: dict, route: list[dict]) -> bool:
     return r is None or all(model.dist_km(base, p) <= r for p in route)
 
 
-def loadouts(type_name: str) -> list[str]:
-    """Подвески типа на выбор: подвески по задачам DCS Retribution ('rt:имя')."""
-    own: list[str] = []
+def loadouts(type_name: str, state: dict | None = None) -> list[str]:
+    """Подвески типа на выбор: свои подвески кампании ('my:имя', custom_loadouts) и подвески по задачам ('rt:имя')."""
     from . import dcstypes
     try:
         dcs_id = dcstypes.flying(type_name).id
     except KeyError:
-        return own
+        return []
+    own = [f"my:{k}" for k in ((state or {}).get("custom_loadouts") or {}).get(dcs_id, {})]
     rt = [f"rt:{k}" for k, v in (model.load_json("payloads.json").get("types", {}).get(dcs_id) or {}).items() if v["pylons"]]
     return own + rt
 
 
+def loadout_label(cat: str) -> str:
+    """Имя подвески для показа: задача без источника ('Retribution Strike' -> 'Strike'), своя - её имя."""
+    name = cat.split(":", 1)[1] if cat[:3] in ("rt:", "my:") else cat
+    return name.replace("Retribution ", "")
+
+
+def pylons(type_name: str) -> list[dict]:
+    """Пилоны типа и варианты подвески на каждом (pydcs): [{num, options: [{clsid, name}]}]."""
+    from . import dcstypes
+    ac = dcstypes.flying(type_name)
+    out = []
+    for n in sorted(ac.pylons):
+        p = getattr(ac, f"Pylon{n}", None)
+        opts = sorted({v[1]["clsid"]: v[1]["name"] for k, v in vars(p).items() if not k.startswith("_") and isinstance(v, tuple)}.items(),
+                      key=lambda x: x[1]) if p else []
+        out.append({"num": n, "options": [{"clsid": c, "name": nm} for c, nm in opts]})
+    return out
+
+
+def save_loadout(state: dict, type_name: str, name: str, pyl: dict) -> str:
+    """Своя подвеска кампании: тип -> имя -> пилоны (номер -> CLSID). Пустое имя - ошибка; пустые пилоны - пустые."""
+    from . import dcstypes
+    name = str(name or "").strip()
+    if not name:
+        raise ValueError("у подвески должно быть имя")
+    ac = dcstypes.flying(type_name)
+    valid = {n: {v[1]["clsid"] for k, v in vars(getattr(ac, f"Pylon{n}")).items() if not k.startswith("_") and isinstance(v, tuple)}
+             for n in ac.pylons if getattr(ac, f"Pylon{n}", None)}
+    pl = {}
+    for k, c in (pyl or {}).items():
+        if c and int(k) in valid and c in valid[int(k)]:
+            pl[str(int(k))] = {"CLSID": c}
+    state.setdefault("custom_loadouts", {}).setdefault(ac.id, {})[name] = {"pylons": pl}
+    return f"Своя подвеска {type_name} «{name}»: пилонов {len(pl)}."
+
+
 def effective_loadout(g: dict, type_name: str) -> str:
     """Подвеска, выбранная для группы командующим (loadout_user), иначе первая своя категория списка; '' - по задаче."""
-    have = loadouts(type_name)
+    have = loadouts(type_name)   # своих (my:) тут нет - они только по выбору (loadout_user)
     if g.get("loadout_user"):
         return g["loadout"][0] if g.get("loadout") else ""
     return next((c for c in g.get("loadout") or [] if c in have and not c.startswith("rt:")), "")
@@ -189,7 +225,7 @@ def options(state: dict, eid: str) -> dict:
                 continue
             perfs.append({"id": u["id"], "name": u["name"], "type": u["type"], "available": logistics.available(state, u),
                           "base": state["airbases"].get(u["base"], {}).get("name", u["base"]),
-                          "loadouts": loadouts(u["type"])})
+                          "loadouts": loadouts(u["type"], state)})
         perfs.sort(key=lambda p: (p["id"] != g["performer"], p["type"], p["name"]))
         groups.append({"group": g["group"], "title": g["title"], "performer": g["performer"], "size": g["size"],
                        "loadout": effective_loadout(g, state["units"][g["performer"]]["type"]), "performers": perfs})
@@ -231,13 +267,13 @@ def edit(state: dict, eid: str, tot: str | None = None, groups: dict | None = No
         if "loadout" in ch:
             cat = ch["loadout"] or ""
             typ = state["units"][g["performer"]]["type"]
-            if cat and cat not in loadouts(typ):
+            if cat and cat not in loadouts(typ, state):
                 raise ValueError(f"{g['title']}: у {typ} нет подвески '{cat}' (payloads.json)")
             was = effective_loadout(g, typ)
             if cat != was:
                 g["loadout"] = [cat] + [c for c in g.get("loadout") or [] if c != cat] if cat else []
                 g["loadout_user"] = bool(cat)    # выбор командующего - первым, раньше подвески по виду задачи
-                lines.append(f"{g['title']}: подвеска {cat or 'DCS по умолчанию'}.")
+                lines.append(f"{g['title']}: подвеска {loadout_label(cat) if cat else 'по задаче'}.")
         if g["group"] == "strike":
             new["task"]["group_size"] = g["size"]
     tot_s = parse_hhmm(tot) if tot else new["tot_s"]

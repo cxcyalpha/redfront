@@ -631,6 +631,11 @@ the unit's nationality (USSR, East Germany, West Germany, USA, UK, Canada, Belgi
 `nation` field). In the mission the aircraft name = rank and surname, the leader is the most senior. A downed pilot is
 off the list until rescued; killed or captured pilots leave; replacements get new names.
 
+**Custom loadout** — in the sortie editor (✎ next to the loadout choice): a weapon per pylon from the DCS options
+(pydcs) and a name; stored in the campaign (`custom_loadouts`), listed as "★ name" for any group of that type.
+Weapons newer than the campaign year are replaced by era (weapons.py). Task loadouts are shown by task only
+(Strike, CAS, SEAD…), without the source.
+
 **Regiment livery** — "Air" → "Pilots, livery"; applies to all the regiment's groups in all missions. The list comes
 from the installed DCS (pydcs scans DCS and Saved Games livery folders); if DCS is not found, type the livery folder
 name.

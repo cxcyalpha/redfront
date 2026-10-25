@@ -562,9 +562,10 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
     from . import weapons
     year = weapons.campaign_year(state) if state else None
     for cat in cats:
-        if cat.startswith("rt:"):                # подвеска DCS Retribution по имени (выбор командующего)
-            pls = (model.load_json("payloads.json").get("types", {}).get(ac.id) or {}).get(cat[3:])
-            if pls and pls["pylons"]:
+        if cat.startswith(("rt:", "my:")):       # выбранная подвеска: по задаче (payloads.json) или своя (custom_loadouts)
+            src = ((state or {}).get("custom_loadouts") or {}) if cat.startswith("my:") else model.load_json("payloads.json").get("types", {})
+            pls = (src.get(ac.id) or {}).get(cat[3:])
+            if pls is not None and (pls["pylons"] or cat.startswith("my:")):   # своя может быть и пустой (без подвески)
                 for u in fg.units:
                     u.reset_loadout()
                     for num, d in pls["pylons"].items():
@@ -572,7 +573,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                             u.pylons[int(num)] = dict(d)
                 weapons.degrade(fg, year)
                 weapons.fixups(fg, year)
-                return cat[3:]
+                return cat[3:].replace("Retribution ", "")
     for cat in cats:
         pl = _payload(ac, cat, year)
         if pl:
@@ -584,7 +585,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                         u.pylons[int(num)] = dict(d)
             weapons.degrade(fg, year)
             weapons.fixups(fg, year)
-            return f"{cat} ({name})"
+            return f"{cat} ({name.replace('Retribution ', '')})"
     weapons.degrade(fg, year)
     return None
 
