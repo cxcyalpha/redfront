@@ -585,7 +585,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                         u.pylons[int(num)] = dict(d)
             weapons.degrade(fg, year)
             weapons.fixups(fg, year)
-            return f"{cat} ({name.replace('Retribution ', '')})"
+            return name.replace("Retribution ", "")   # подвеска - по функции (Strike, CAS, SEAD...)
     weapons.degrade(fg, year)
     return None
 
@@ -865,12 +865,8 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
             else:
                 n[enemy] += 1
                 key = f"{'enemy' if enemy else 'ai'}{n[enemy]}"
-            if take < 0:                         # в воздухе на пути к объекту: точка на участке база - первая точка маршрута
-                base = state["airbases"][g["base"]]
-                first = g["route"][0]
-                leg = model.dist_km(base, first)
-                done_km = -take * model.group_speed_kmh(state, g, tdg) / 3600
-                g["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
+            if take < 0:                         # в воздухе на пути к объекту - там, где по плану полётов
+                _airborne(state, g, model.group_speed_kmh(state, g, tdg), -take)
             times[key] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
         used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
         lg = i18n.lang(state)
@@ -897,11 +893,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
                 g2 = dict(sg)
                 k2 = f"{key}_{sg['group']}"
                 if take < 0:
-                    base = state["airbases"][g2["base"]]
-                    first = g2["route"][0]
-                    leg = model.dist_km(base, first)
-                    done_km = -take * model.group_speed_kmh(state, g2, tdg) / 3600
-                    g2["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
+                    _airborne(state, g2, model.group_speed_kmh(state, g2, tdg), -take)
                 times[k2] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
                 used[sp["id"]] = used.get(sp["id"], 0) + sg["size"]
                 g2.update({"group": k2, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
@@ -1099,6 +1091,30 @@ def _lock_eta(fg, objective_s: float, spd_kmh: float) -> None:
             return
 
 
+def _airborne(state: dict, g: dict, spd_kmh: float, secs: float) -> bool:
+    """Группа ИИ, взлетевшая по плану за secs до начала миссии, - в воздухе там, где она к этому времени (как в Falcon
+    BMS: миссия начинается со взлёта игрока, остальные вылеты пакета и плана - уже в пути). Точка - по маршруту база -
+    сбор - первая точка маршрута (за вычетом разбега и сбора; не дальше неё - задачу группы не срезаем). g меняется на
+    месте (_air_start, rv). False - ещё на земле (взлетит с началом миссии)."""
+    km = (secs - ato.AI_TAKEOFF_S) * spd_kmh / 3600
+    if km <= 3:
+        return False
+    rv_ok = g.get("rv") and g["objective"]["kind"] in planner.RV_KINDS
+    pts = [state["airbases"][g["base"]]] + ([g["rv"]] if rv_ok else []) + list(g["route"][:1])
+    total = sum(model.dist_km(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+    km = min(km, max(0.0, total - 3))            # не дальше первой точки маршрута (ИПМ, зона, рубеж - задача группы)
+    run = 0.0
+    for i in range(len(pts) - 1):
+        leg = model.dist_km(pts[i], pts[i + 1])
+        if run + leg >= km or i == len(pts) - 2:
+            g["_air_start"] = model.lerp(pts[i], pts[i + 1], min(1.0, (km - run) / leg) if leg else 1.0)
+            if rv_ok and i >= 1:                 # сбор пройден - его в маршруте нет
+                g.pop("rv", None)
+            return True
+        run += leg
+    return False
+
+
 def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str, dict]:
     """Задержки взлёта групп пакета. Опорная - группа игрока: холодный старт (timing.player_cold_start_min, ОЦЕНКА)
     плюс полёт до объекта. Группа обеспечения выходит на свой объект за lead_min до выхода ударной группы на цель
@@ -1108,19 +1124,15 @@ def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str,
     lead = {g["group"]: g.get("lead_min", 0) * 60 for g in groups}
     t_player = tdef["timing"]["player_cold_start_min"] * 60 + fly_s[fly]
     eta_strike = t_player + lead[fly]
-    # время удара - по самой медленной группе: кто не успел бы к выходу игрока (вертолёты с дальней площадки), тот
-    # взлетает с началом миссии, а удар сдвигается; остальные взлетают позже, игрок - тоже позже (по брифингу) или
-    # ждёт в точке сбора: она гасит разницу во времени групп
-    wait = max([0.0] + [-(eta_strike - lead[g["group"]] - fly_s[g["group"]]) for g in groups if g["group"] != fly])
-    eta_strike += wait
+    # миссия начинается с холодного старта игрока (как в Falcon BMS и Liberation: время на цели - по плану, группа
+    # игрока - с земли); группы ИИ, которым по плану взлетать раньше начала миссии, к её началу уже в воздухе на своём
+    # маршруте (air_s - сколько они уже летят, build._airborne), а не стартуют все с земли и опаздывают
     out = {}
     for g in groups:
         k = g["group"]
         start = eta_strike - lead[k] - fly_s[k]
-        out[k] = {"start_s": 0 if k == fly else max(0, int(start)), "late_s": 0 if k == fly else max(0, int(-start)),
-                  "objective_s": int(eta_strike - lead[k])}
-        if k == fly and wait:                    # игрок: взлёт не раньше (слот в DCS доступен с начала миссии)
-            out[k]["takeoff_s"] = int(tdef["timing"]["player_cold_start_min"] * 60 + wait)
+        out[k] = {"start_s": 0 if k == fly else max(0, int(start)), "late_s": 0,
+                  "air_s": 0 if k == fly else max(0, int(-start)), "objective_s": int(eta_strike - lead[k])}
         if g.get("rv"):                          # время в точке сбора: выход на объект минус полёт сбор - объект
             rest = _path_km(g["rv"], g["route"]) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
             out[k]["rv_s"] = int(eta_strike - lead[k] - rest)
@@ -1348,6 +1360,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             flights.append({"group": g["group"], "performer": perf["id"], "kind": g["objective"]["kind"], "units": [u.name for u in fl.units], "player": False,
                             **({"side": side_g} if g.get("_enemy") else {})})
             continue
+        if not is_player and not g.get("_ai") and times[g["group"]].get("air_s"):   # группа пакета игрока, взлетевшая раньше
+            g = copy.deepcopy(g)                 # (маршрут в плане не трогаем)
+            _airborne(state, g, spd, times[g["group"]]["air_s"])
         if g.get("_air_start"):                  # по плану полётов к началу миссии уже в воздухе, на пути к объекту
             fg = m.flight_group_inflight(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                          _pt(m, g["_air_start"]), max(int(transit), AIR_START_MIN_M), speed=int(spd),
@@ -1666,7 +1681,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(ip, transit, "ИПМ")
             wp(tgt, transit, "Цель")
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
-        if not is_player and not g.get("_air_start"):   # ИИ: ко времени на рубеже - ETA там, скорость DCS подберёт сама
+        if not is_player:                        # ИИ: ко времени на рубеже - ETA там, скорость DCS подберёт сама
             _lock_eta(fg, times[g["group"]]["objective_s"], spd)
         _land(fg, land, spd)
         if is_player:
@@ -1693,7 +1708,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                          + (Lx(f", ВЗЛЁТ через ~{t['takeoff_s'] // 60} мин (время удара - по самой медленной группе; раньше - ждать в точке сбора)",
                                f", TAKE OFF at ~{t['takeoff_s'] // 60} min (time on target is set by the slowest group; if early - hold at the rendezvous)")
                             if t.get("takeoff_s") else ""))
-                        if is_player else Lx(f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин", f"AI, runway takeoff at {t['start_s'] // 60} min"))
+                        if is_player else Lx("ИИ, к началу миссии уже в воздухе на маршруте", "AI, already airborne en route at mission start")
+                        if g.get("_air_start") else Lx(f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин", f"AI, runway takeoff at {t['start_s'] // 60} min"))
                      + (f", {when}" if g.get("_dest") else Lx(f", на объекте через ~{t['objective_s'] // 60} мин", f", on objective at ~{t['objective_s'] // 60} min"))
                      + (Lx(f", переход на {transit} м (угроз ЗРК в коридоре нет)", f", transit at {transit} m (no SAM threats in the corridor)")
                         if g.get("transit_alt_m_agl") else "")

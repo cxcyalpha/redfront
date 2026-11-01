@@ -846,6 +846,13 @@ more medium/long-range SAMs (on the low-level route from the nearest strike airf
 belt" in the reasons), and that belt's SAMs come first in SAM-site strikes: enemy air defence is rolled back belt by
 belt.
 
+**Mission start and package groups** (as in Falcon BMS and Liberation): the mission starts with the player's cold
+start; time on target follows the ATO. Only the player's group and AI groups due to take off after the mission start
+begin on the ground; groups that took off earlier are already airborne on their route at mission start, where they
+would be by then (`build._airborne`: base — rendezvous — first route point, minus takeoff and join-up), heading for
+their entry point on time. The strike is no longer shifted to the slowest group, and groups are not late from all
+starting on the runway.
+
 **AI time on station** (`build._lock_eta`, as in Liberation/Retribution): an AI group has its ETA locked at its
 entry point — the IP (strike time minus the IP–target leg), the launch line, the cover zone; speed is not locked, so
 DCS picks it to arrive on time. Takeoff accounts for the roll, single-ship takeoffs and join-up (`ato.AI_TAKEOFF_S`,
