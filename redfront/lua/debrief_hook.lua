@@ -92,6 +92,14 @@ local function qraOut()
   for id, t in pairs(REDFRONT_QRA) do o[#o + 1] = string.format('"%s":%d', esc(id), t) end
   return "{" .. table.concat(o, ",") .. "}"
 end
+-- вертолётом к части (unitlift.lua): рейс игрока засчитан (0/1)
+local function uliftOut()
+  if type(REDFRONT_ULIFT) ~= "table" then return "{}" end
+  local o = {}
+  for id, v in pairs(REDFRONT_ULIFT) do o[#o + 1] = string.format('"%s":%d', esc(id), v.done or 0) end
+  return "{" .. table.concat(o, ",") .. "}"
+end
+
 -- эвакуация десанта (evac.lua): вывезено фигур, было на площадке, убито на площадке
 local function evacOut()
   if type(REDFRONT_EVAC) ~= "table" then return "{}" end
@@ -130,8 +138,8 @@ local function dump()
   local f = io.open(OUT, "w")
   if not f then return end
   f:write(string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"evac":%s,"hit":%s,"timing":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), evacOut(), keys(hit), timingOut()))
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"ulift":%s,"evac":%s,"hit":%s,"timing":%s}',
+    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), uliftOut(), evacOut(), keys(hit), timingOut()))
   f:close()
 end
 local function nameOf(obj)

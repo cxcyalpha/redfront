@@ -380,6 +380,8 @@ def base_options(state: dict, uid: str) -> dict:
             continue
         if b.get("kind") == "farp" and cat != "heli":
             continue
+        if b.get("kind") == "carrier" and not model.aircraft_info(u.get("type")).get("carrier"):
+            continue                             # на авианосец - только палубные типы
         cap = _capacity(state, bid, cat)
         here = _at(state, bid, cat, skip=uid)
         if here >= cap:
