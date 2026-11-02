@@ -29,19 +29,29 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Infantry AK",
+     "count": 320,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 60,
+     "role": "infantry"
+    },
+    {
      "type": "T_55",
-     "count": 15,
+     "count": 8,
      "role": "MBT"
     },
     {
      "type": "PT_76",
-     "count": 10,
+     "count": 4,
      "role": "MBT"
     },
     {
-     "type": "BTR-60",
-     "count": 15,
-     "role": "APC"
+     "type": "GAZ-66",
+     "count": 20,
+     "role": "truck"
     },
     {
      "type": "Grad-URAL",
@@ -62,11 +72,16 @@
    "composition": [
     {
      "type": "ZSU_57_2",
-     "count": 6,
+     "count": 4,
      "role": "launcher"
     },
     {
      "type": "ZU_23_Emplacement",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "HL_DSHK",
      "count": 8,
      "role": "launcher"
     },
@@ -93,19 +108,29 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Infantry AK",
+     "count": 320,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 60,
+     "role": "infantry"
+    },
+    {
      "type": "T_55",
-     "count": 15,
+     "count": 8,
      "role": "MBT"
     },
     {
      "type": "PT_76",
-     "count": 10,
+     "count": 4,
      "role": "MBT"
     },
     {
-     "type": "BTR-60",
-     "count": 15,
-     "role": "APC"
+     "type": "GAZ-66",
+     "count": 20,
+     "role": "truck"
     },
     {
      "type": "Grad-URAL",
@@ -126,11 +151,16 @@
    "composition": [
     {
      "type": "ZSU_57_2",
-     "count": 6,
+     "count": 4,
      "role": "launcher"
     },
     {
      "type": "ZU_23_Emplacement",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "HL_DSHK",
      "count": 8,
      "role": "launcher"
     },
@@ -157,19 +187,29 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Infantry AK",
+     "count": 320,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 60,
+     "role": "infantry"
+    },
+    {
      "type": "T_55",
-     "count": 15,
+     "count": 8,
      "role": "MBT"
     },
     {
      "type": "PT_76",
-     "count": 10,
+     "count": 4,
      "role": "MBT"
     },
     {
-     "type": "BTR-60",
-     "count": 15,
-     "role": "APC"
+     "type": "GAZ-66",
+     "count": 20,
+     "role": "truck"
     },
     {
      "type": "Grad-URAL",
@@ -190,11 +230,16 @@
    "composition": [
     {
      "type": "ZSU_57_2",
-     "count": 6,
+     "count": 4,
      "role": "launcher"
     },
     {
      "type": "ZU_23_Emplacement",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "HL_DSHK",
      "count": 8,
      "role": "launcher"
     },
@@ -229,6 +274,11 @@
      "type": "PT_76",
      "count": 30,
      "role": "MBT"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 40,
+     "role": "infantry"
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
@@ -244,11 +294,16 @@
    "composition": [
     {
      "type": "ZSU_57_2",
-     "count": 6,
+     "count": 4,
      "role": "launcher"
     },
     {
      "type": "ZU_23_Emplacement",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "HL_DSHK",
      "count": 8,
      "role": "launcher"
     },
@@ -275,19 +330,29 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Infantry AK",
+     "count": 320,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 60,
+     "role": "infantry"
+    },
+    {
      "type": "T_55",
-     "count": 15,
+     "count": 8,
      "role": "MBT"
     },
     {
      "type": "PT_76",
-     "count": 10,
+     "count": 4,
      "role": "MBT"
     },
     {
-     "type": "BTR-60",
-     "count": 15,
-     "role": "APC"
+     "type": "GAZ-66",
+     "count": 20,
+     "role": "truck"
     },
     {
      "type": "Grad-URAL",
@@ -308,11 +373,16 @@
    "composition": [
     {
      "type": "ZSU_57_2",
-     "count": 6,
+     "count": 4,
      "role": "launcher"
     },
     {
      "type": "ZU_23_Emplacement",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "HL_DSHK",
      "count": 8,
      "role": "launcher"
     },
@@ -339,19 +409,29 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Infantry AK",
+     "count": 320,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 60,
+     "role": "infantry"
+    },
+    {
      "type": "T_55",
-     "count": 15,
+     "count": 8,
      "role": "MBT"
     },
     {
      "type": "PT_76",
-     "count": 10,
+     "count": 4,
      "role": "MBT"
     },
     {
-     "type": "BTR-60",
-     "count": 15,
-     "role": "APC"
+     "type": "GAZ-66",
+     "count": 20,
+     "role": "truck"
     },
     {
      "type": "Grad-URAL",
@@ -372,11 +452,16 @@
    "composition": [
     {
      "type": "ZSU_57_2",
-     "count": 6,
+     "count": 4,
      "role": "launcher"
     },
     {
      "type": "ZU_23_Emplacement",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "HL_DSHK",
      "count": 8,
      "role": "launcher"
     },
@@ -403,14 +488,24 @@
    "daily_advance_km": 8,
    "composition": [
     {
-     "type": "M-60",
-     "count": 20,
-     "role": "MBT"
+     "type": "Soldier M4",
+     "count": 320,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 40,
+     "role": "infantry"
     },
     {
      "type": "M-113",
-     "count": 80,
+     "count": 40,
      "role": "APC"
+    },
+    {
+     "type": "M-60",
+     "count": 10,
+     "role": "MBT"
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
@@ -430,8 +525,18 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Soldier M4",
+     "count": 140,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
      "type": "M-113",
-     "count": 40,
+     "count": 12,
      "role": "APC"
     }
    ],
@@ -479,8 +584,18 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Soldier M4",
+     "count": 140,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
      "type": "M-113",
-     "count": 40,
+     "count": 12,
      "role": "APC"
     }
    ],
@@ -501,14 +616,24 @@
    "daily_advance_km": 8,
    "composition": [
     {
-     "type": "M-60",
-     "count": 20,
-     "role": "MBT"
+     "type": "Soldier M4",
+     "count": 320,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 40,
+     "role": "infantry"
     },
     {
      "type": "M-113",
-     "count": 80,
+     "count": 40,
      "role": "APC"
+    },
+    {
+     "type": "M-60",
+     "count": 10,
+     "role": "MBT"
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
@@ -528,8 +653,18 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Soldier M4",
+     "count": 140,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
      "type": "M-113",
-     "count": 40,
+     "count": 12,
      "role": "APC"
     }
    ],
@@ -577,8 +712,18 @@
    "daily_advance_km": 8,
    "composition": [
     {
+     "type": "Soldier M4",
+     "count": 140,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
      "type": "M-113",
-     "count": 40,
+     "count": 12,
      "role": "APC"
     }
    ],

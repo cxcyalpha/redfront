@@ -3728,6 +3728,22 @@ def theatres_section(tmp: Path) -> None:
     check(aa and modes <= {"reinforce", "flank"} and rng_ok and moved,
           f"аэромобильная высадка у фронта (Вьетнам 1972): {len(aa)} в плане ({', '.join(sorted(modes))}), "
           f"рот переброшено {len(moved)}")
+    for _ in range(4):
+        planner.plan(st)
+        kinds = {e["kind"] for e in st["ato"]["entries"] if e["side"] == "blue"}
+        log = sim.end_day(st)
+    st2 = model.new_campaign("vnh", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
+    seen, lines = set(), []
+    for _ in range(6):
+        planner.plan(st2)
+        seen |= {e["kind"] for e in st2["ato"]["entries"] if e["side"] == "blue"}
+        lines += sim.end_day(st2)
+    nva = st2["units"]["red_308"]["composition"]
+    inf = sum(c["count"] for c in nva if c["role"] == "infantry") / sum(c["count"] for c in nva)
+    check({"heli_resupply", "medevac", "air_assault"} <= seen and any("вывоз раненых" in l for l in lines)
+          and any("в резерве у" in l for l in lines) and inf > 0.7,
+          f"вертолёты во Вьетнаме: снабжение, вывоз раненых, высадки; роты возвращаются в резерв; дивизия ВНА - "
+          f"пехота {inf:.0%} состава")
     st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
     planner.plan(st)
     b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]

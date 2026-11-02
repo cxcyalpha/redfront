@@ -2742,6 +2742,73 @@
    "same_service": true,
    "_about_same_service": "пакет одной службы: 'Альфа' авианосца - палубные части, пакет ВВС - с суши (Michel)",
    "source": "Michel, 'The Eleven Days of Christmas' (2002): ночные удары B-52 ячейками по три по ж/д узлам, складам и аэродромам; прикрытие - F-105G/F-4 'Дикая ласка' и F-4 MiGCAP"
+  },
+  "heli_resupply": {
+   "performers": [
+    "transport_helo"
+   ],
+   "method": "airlift_unit",
+   "speed_kmh": 180,
+   "transit_alt_m_agl": 50,
+   "low_alt_m_agl": 50,
+   "ip_offset_km": 0,
+   "lz_offset_km": 1.5,
+   "land_s": 180,
+   "per_day": 3,
+   "sorties_per_day": 2,
+   "max_threats": 3,
+   "target": {
+    "category": "unit"
+   },
+   "estimate": true,
+   "title": "Снабжение вертолётами",
+   "mode": "resupply",
+   "resupply_below": 0.6,
+   "strike": {
+    "title": "транспортная группа",
+    "group_name": "борт",
+    "size": 4,
+    "maintask": [
+     "Transport"
+    ],
+    "loadout": []
+   },
+   "method_source": "армия США во Вьетнаме (J. Tolson, 'Airmobility 1961-1971', 1973): огневые базы и части в окружении снабжались вертолётами (UH-1, CH-47); числа - ОЦЕНКИ",
+   "note": "только ИИ: часть, получившая меньше resupply_below нормы, - рейсы к площадке у неё, груз бортов (cargo_t) - прямо в часть"
+  },
+  "medevac": {
+   "performers": [
+    "transport_helo"
+   ],
+   "method": "airlift_unit",
+   "speed_kmh": 180,
+   "transit_alt_m_agl": 50,
+   "low_alt_m_agl": 50,
+   "ip_offset_km": 0,
+   "lz_offset_km": 1.5,
+   "land_s": 180,
+   "per_day": 4,
+   "sorties_per_day": 2,
+   "max_threats": 6,
+   "target": {
+    "category": "unit"
+   },
+   "estimate": true,
+   "title": "Вывоз раненых (Dustoff)",
+   "mode": "medevac",
+   "medevac_below": 0.9,
+   "strike": {
+    "title": "санитарная пара",
+    "group_name": "борт",
+    "size": 2,
+    "maintask": [
+     "Transport"
+    ],
+    "loadout": []
+   },
+   "method_source": "армия США во Вьетнаме (P. Dorland, J. Nanney, 'Dust Off: Army Aeromedical Evacuation in Vietnam', 1982): вывоз раненых вертолётом с поля боя за час-два; эффект в модели - ОЦЕНКА (assault.MEDEVAC_K)",
+   "note": "только ИИ: часть в бою с боеспособностью ниже medevac_below - пара к площадке у неё; часть возвращает долю потерь",
+   "threat_note": "Dustoff шёл и в зону огня (ОЦЕНКА: до 6 угроз ПВО в коридоре)"
   }
  },
  "march": {

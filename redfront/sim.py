@@ -347,6 +347,8 @@ def end_day(state: dict) -> list[str]:
     lines += csar.daily(state)                   # сбитые экипажи: выход к своим, плен
     lines += logistics.supply(state)
     lines += assault.linkup(state)
+    lines += assault.medevac(state)              # вывоз раненых вертолётами (рейсы суток)
+    lines += assault.recall(state)               # аэромобильные роты - обратно в резерв
     lines += logistics.repairs(state)
     for u in state["units"].values():            # артиллерия частей: орудие в сутки из ремонта и пополнения (ОЦЕНКА)
         if u.get("art_lost"):

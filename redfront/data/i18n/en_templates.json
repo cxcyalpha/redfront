@@ -200,6 +200,11 @@ false
 false
 ],
 [
+"вывоз\\ раненых\\ вертолётами\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ бортов\\)\\ \\-\\ боеспособность\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.",
+"wounded evacuated by helicopter ({n} sorties) - strength {a} -> {b}.",
+false
+],
+[
 "оперативная\\ маневренная\\ группа\\ \\-\\ прорыв\\ в\\ глубину\\ на\\ (?P<t>.+?)\\ \\((?P<r>.+?)\\)\\.",
 "operational manoeuvre group - deep breakthrough towards {t} ({r}).",
 false
@@ -362,6 +367,11 @@ false
 [
 "позиция\\ раскрыта,\\ ЗРК\\ сменил\\ позицию\\ \\((?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
 "position revealed, the SAM relocated ({k} km).",
+false
+],
+[
+"снята\\ с\\ участка\\ вертолётами\\ \\-\\ в\\ резерве\\ у\\ (?P<p>.+?)\\.",
+"lifted out by helicopter - in reserve at {p}.",
 false
 ],
 [
@@ -815,6 +825,11 @@ false
 false
 ],
 [
+"Вывоз\\ раненых\\ \\(Dustoff\\)",
+"Medical evacuation (Dustoff)",
+false
+],
+[
 "выдвигается\\ на\\ рубеж\\ (?P<p>.+?)\\.",
 "moving up to the {p} line.",
 false
@@ -867,6 +882,11 @@ false
 [
 "по\\ памяти\\ \\-\\ проверить",
 "from memory - to be verified",
+false
+],
+[
+"Снабжение\\ вертолётами",
+"Helicopter resupply",
 false
 ],
 [
@@ -1162,6 +1182,11 @@ false
 [
 "сменил\\ (?P<u>.+?)\\ в\\ июле\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
 "replaced {u} in July {y}",
+false
+],
+[
+"санитарная\\ пара",
+"medevac pair",
 false
 ],
 [

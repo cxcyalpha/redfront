@@ -632,7 +632,9 @@ MSGS += [
     ("{a} в {y}", "{a} in {y}"), ("{a} с {y} (?)", "{a} from {y} (?)"), ("Вьетнам", "Vietnam"), ("Ливан", "Lebanon"), ("часть", "unit"),
 ]
 MSGS += [
-    ("пара {n}", "pair {n}"), ("сбито при высадке {n} {t}.", "{n} {t} shot down at the landing zone."),
+    ("пара {n}", "pair {n}"), ("Снабжение вертолётами", "Helicopter resupply"), ("Вывоз раненых (Dustoff)", "Medical evacuation (Dustoff)"),
+    ("санитарная пара", "medevac pair"), ("снята с участка вертолётами - в резерве у {p}.", "lifted out by helicopter - in reserve at {p}."),
+    ("вывоз раненых вертолётами ({n} бортов) - боеспособность {a} -> {b}.", "wounded evacuated by helicopter ({n} sorties) - strength {a} -> {b}."), ("сбито при высадке {n} {t}.", "{n} {t} shot down at the landing zone."),
     ("переброшена к {p} ({h}: село {a} из {b} бортов), обороняет пункт.", "flown in to {p} ({h}: {a} of {b} helicopters landed), defending the place."),
     ("Аэромобильная высадка", "Airmobile assault"), ("подкрепление", "reinforcement"), ("захват с фланга", "flank seizure"),
     ("площадка под огнём: частей противника рядом {n}", "hot landing zone: {n} enemy units nearby"), ("снято", "removed"), ("передовая группа", "forward detachment"),

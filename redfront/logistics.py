@@ -193,6 +193,25 @@ def airlift_cargo_t(state: dict, unit: dict) -> float:
     return float(c) if c else (5.0 if unit["role"] == "transport" else 2.0)
 
 
+def unit_lift_t(state: dict, side: str, mode: str) -> dict[str, float]:
+    """Вертолётные рейсы к частям плана полётов суток (objective unit_lift, mode): часть -> тонн (снабжение) или
+    бортов (вывоз раненых), за вычетом сбитых в миссиях."""
+    a = state.get("ato") or {}
+    out: dict[str, float] = {}
+    for e in a.get("entries", []):
+        if e["side"] != side:
+            continue
+        g = e["task"]["package"][0]
+        obj = g["objective"]
+        if obj.get("kind") != "unit_lift" or obj.get("mode") != mode:
+            continue
+        perf = state["units"].get(g["performer"])
+        n = max(0, g["size"] - (a.get("lost") or {}).get(e["id"], 0))
+        if perf and n:
+            out[obj["unit"]] = out.get(obj["unit"], 0.0) + (n * airlift_cargo_t(state, perf) if mode == "resupply" else n)
+    return out
+
+
 def supply(state: dict) -> list[str]:
     """Снабжение за сутки (ОЦЕНКИ, logistics_note доктрины). Склад - запас в тоннах (stock_t) из ёмкости cap_t;
     повреждение склада уничтожает запас сверх cap_t x (1 - повреждение).
@@ -267,9 +286,15 @@ def supply(state: dict) -> list[str]:
         maps = _depot_maps(state, side, g)
         used = 0.0
         units = sorted(ops._maneuver(state, side), key=lambda u: PRIORITY.index(u["state"]) if u["state"] in PRIORITY else 9)
+        heli_t = unit_lift_t(state, side, "resupply")   # вертолётом прямо в часть (снабжение отрезанных)
         for u in units:
             need = demand_t(state, u)
             got, reach = _draw(state, need, ops.node_of(state, u), maps, sim["supply_km"]) if need > 0 else (0.0, True)
+            if heli_t.get(u["id"]) and need > got:
+                h = min(need - got, heli_t[u["id"]])
+                got += h
+                air += h
+                reach = True
             used += got
             frac = 1.0 if need <= 1e-9 else got / need
             was = u.get("supply", 1.0)

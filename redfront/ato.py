@@ -233,7 +233,7 @@ def build(state: dict) -> dict:
                 s = e
         # воздушные перевозки: sorties_per_day рейсов на направление, равномерно по лётному дню; рейс - до посадки
         # на аэродроме назначения, самолёты заняты ещё на обратный перелёт и подготовку
-        for t in (t for t in tasks if t.get("ai_only") and doc["tasks"][t["kind"]].get("method") == "airlift"):
+        for t in (t for t in tasks if t.get("ai_only") and doc["tasks"][t["kind"]].get("method") in ("airlift", "airlift_unit")):
             tdef = doc["tasks"][t["kind"]]
             g = t["package"][0]
             if g["size"] <= 0:
