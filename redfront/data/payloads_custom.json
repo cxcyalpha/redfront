@@ -40,6 +40,598 @@
     },
     "note": "Alex: реальная подвеска по войскам - 2 Х-25МЛ (3/8), 2 ОФАБ-250-270 (4/7), остальное Б-8М1 С-8КОМ (2/5/6/9), 2 Р-60М (1/10). Размещение по пилонам - по допустимому в pydcs."
    }
+  },
+  "A6E": {
+   "AERO-1D Fuel Tank 300 GAL*5": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     }
+    }
+   },
+   "Mk20*28": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     }
+    }
+   },
+   "Mk82*28": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK82_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK82_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     }
+    }
+   },
+   "Mk81*28": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK81_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK81_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK81_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK81_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK81_MER_6x}"
+     }
+    }
+   },
+   "Mk83*15": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK83_MER_3x_FWD}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK83_MER_3x_AFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK83_MER_3x_FWD}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK83_MER_3x_AFT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK83_MER_3x_FWD}"
+     }
+    }
+   },
+   "Mk84*5": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "2": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "3": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "4": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "5": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     }
+    }
+   },
+   "GBU-12*8, AERO-1D Fuel Tank 300 GAL": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_GBU12_MER_2x_LEFT}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_GBU12_MER_2x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_GBU12_MER_2x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_GBU12_MER_2x_RIGHT}"
+     }
+    }
+   },
+   "GBU-16*5": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     },
+     "2": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     },
+     "3": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     },
+     "4": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     },
+     "5": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     }
+    }
+   },
+   "GBU-10*4": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}"
+     },
+     "2": {
+      "CLSID": "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}"
+     },
+     "4": {
+      "CLSID": "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}"
+     },
+     "5": {
+      "CLSID": "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}"
+     }
+    }
+   },
+   "LAU-61*10": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_LAU61MK151_TER_3x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_LAU61MK151_TER_2x_LEFT}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_LAU61MK151_TER_2x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_LAU61MK151_TER_3x}"
+     }
+    }
+   },
+   "Zuni*10": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_LAU10_TER_3x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_LAU10_TER_2x_LEFT}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_LAU10_TER_2x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_LAU10_TER_3x}"
+     }
+    }
+   },
+   "HARM*2, TALD*4, Mk20*6": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_TALD_MER_4x}"
+     },
+     "2": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "4": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     }
+    }
+   },
+   "HARPOON*2, AIM-9M, ALQ-167, AERO-1D Fuel Tank 300 GAL": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{F14-ALQ167-POD}"
+     },
+     "2": {
+      "CLSID": "{AGM_84D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{AGM_84D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_LAU7_AIM9M}"
+     }
+    }
+   },
+   "Mk82SE*27": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82SE_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK82SE_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK82SE_MER_5x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK82SE_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82SE_MER_6x}"
+     }
+    }
+   },
+   "HARM*2, Mk20*10, AERO-1D Fuel Tank 300 GAL": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     }
+    }
+   },
+   "Mk82*12, AERO-1D Fuel Tank 300 GAL*3": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     }
+    }
+   },
+   "AERO-1D Fuel Tank 300 GAL*4": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     }
+    }
+   },
+   "Mk82*6, GBU-16*2, AIM-9L*2": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_LAU7_AIM9L}"
+     },
+     "2": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_LAU7_AIM9L}"
+     }
+    }
+   },
+   "D-704 Refueling Pod, AERO-1D Fuel Tank 300 GAL*4": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_D704}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     }
+    }
+   },
+   "D-704 Refueling Pod, AERO-1D Fuel Tank 300 GAL*2 (Inboard)": {
+    "tasks": {},
+    "pylons": {
+     "2": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_D704}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     }
+    }
+   },
+   "D-704 Refueling Pod, AERO-1D Fuel Tank 300 GAL*2 (Outboard)": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_D704}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     }
+    }
+   },
+   "D-704 Refueling Pod, AERO-1D Fuel Tank 300 GAL*2, 1x AGM-65F": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "2": {
+      "CLSID": "LAU_117_AGM_65F"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_D704}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     }
+    }
+   },
+   "AERO-1D Fuel Tank 300 GAL*2, HARPOON, MK20*3, GBU-16": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "2": {
+      "CLSID": "{AGM_84D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK20_MER_3x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"
+     }
+    }
+   },
+   "HARM, MK83*2, AERO-1D Fuel Tank 300 GAL, AGM-65F, AIM-9M": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK83_MER_2x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "LAU_117_AGM_65F"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_LAU7_AIM9M}"
+     }
+    }
+   },
+   "STRIKE": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK82_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK82_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     }
+    }
+   },
+   "CAS": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     }
+    }
+   },
+   "BAI": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     }
+    }
+   },
+   "DEAD": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     }
+    }
+   },
+   "OCA/Runway": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "2": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "3": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "4": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "5": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     }
+    }
+   },
+   "SEAD": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "2": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+     },
+     "5": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     }
+    }
+   },
+   "Anti-ship": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{F14-ALQ167-POD}"
+     },
+     "2": {
+      "CLSID": "{AGM_84D}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{AGM_84D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_LAU7_AIM9M}"
+     }
+    }
+   }
   }
  }
 }

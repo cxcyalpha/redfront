@@ -180,6 +180,7 @@ NAMES = {
     "Мост Хардали через Литани": "Khardali bridge over the Litani",
     # --- Вьетнам
     "324B дивизия ВНА": "NVA 324B Division",
+    "VA-176 (A-6E, Independence)": "VA-176 (A-6E, Independence)", "VA-15, VA-87 (A-7E, Independence)": "VA-15, VA-87 (A-7E, Independence)",
     "Рота 21-го батальона рейнджеров АРВН": "Company, ARVN 21st Ranger Battalion",
     "Рота 39-го батальона рейнджеров АРВН": "Company, ARVN 39th Ranger Battalion",
     "Рота 2-го воздушно-десантного батальона АРВН": "Company, ARVN 2nd Airborne Battalion",
@@ -642,7 +643,7 @@ MSGS += [
     ("площадка в {k} км от части, зелёный дым; посадка {d} с", "landing zone {k} km from the unit, green smoke; on the ground {d} s"),
     ("раненых - на свой аэродром", "wounded - to your own airfield"),
     ("площадка в {k} км от части, зелёный дым", "landing zone {k} km from the unit, green smoke"), ("посадка {d} с", "on the ground {d} s"),
-    ("пропал без вести.", "missing."), ("два кавалерийских эскадрона армии США в I корпусе", "two US Army cavalry squadrons in I Corps"),
+    ("пропал без вести.", "missing."), ("{t} в DCS нет - F/A-18C (допущение)", "no {t} in DCS - F/A-18C (assumption)"), ("два кавалерийских эскадрона армии США в I корпусе", "two US Army cavalry squadrons in I Corps"),
     ("1-я авиационная бригада: подъём рот АРВН", "1st Aviation Brigade: lift for ARVN companies"), ("вернулся в часть.", "returned to the unit."), ("погиб.", "killed."), ("{h}, вернулся в часть", "{h}, returned to the unit"), ("Снабжение вертолётами", "Helicopter resupply"), ("Вывоз раненых (Dustoff)", "Medical evacuation (Dustoff)"),
     ("санитарная пара", "medevac pair"), ("снята с участка вертолётами - в резерве у {p}.", "lifted out by helicopter - in reserve at {p}."),
     ("вывоз раненых вертолётами ({n} бортов) - боеспособность {a} -> {b}.", "wounded evacuated by helicopter ({n} sorties) - strength {a} -> {b}."), ("сбито при высадке {n} {t}.", "{n} {t} shot down at the landing zone."),

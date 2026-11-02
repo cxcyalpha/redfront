@@ -19,7 +19,7 @@ _LOADED: set[str] = set()
 
 
 def _bundle() -> None:   # pragma: no cover - не вызывается: явный импорт, чтобы сборщик (PyInstaller) включил описания модов
-    from . import a4ec  # noqa: F401
+    from . import a4ec, a6e  # noqa: F401
 
 
 def planemod(plane):
