@@ -69,8 +69,8 @@ the range against a high-altitude target; it is overstated against a low-flying 
 **DCS mods** (`redfront/mods`): a mod type is a module describing the type and weapons for pydcs (like
 `pydcs_extensions` in DCS Retribution, LGPL-3.0), enabled per campaign (⚙ → "Campaign" → "DCS mods"; every player of
 the mission needs the mod). Units on a mod type (`mod` on the unit) take no part without the mod. Currently A-4E-C
-(Israeli A-4 squadrons in Lebanon 1982); the type description (`redfront/mods/a4ec.py`) is brought over from
-Retribution separately.
+(Israeli A-4 squadrons in Lebanon 1982); the type description is `redfront/mods/a4ec.py` from Retribution (LGPL-3.0,
+`redfront/mods/NOTICE.md`).
 
 ### Mission window and conservation rule
 

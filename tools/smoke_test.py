@@ -3698,6 +3698,21 @@ def theatres_section(tmp: Path) -> None:
         sim.end_day(st)
     taken = [n for n in ("Tyre", "Nabatieh", "Hasbaya") if ops.owner(st, n) == "blue"]
     banned = [n for n in st["off_limits"]["blue"] if ops.owner(st, n) == "blue"]
+    from redfront import mods
+    sm = model.new_campaign("a4", sector="sector_syria.json", oob="oob_syria.json", seed=7, player_side="blue")
+    off = sm["units"]["i_a4"]["count"]
+    sm["settings"]["mods"] = ["a4ec"]
+    mods.apply(sm)
+    planner.plan(sm)
+    t4 = next(((i, t) for i, t in enumerate(sm["tasks"]) if any(sm["units"][g["performer"]]["type"] == "A_4E_C"
+                                                              for g in t["package"])), None)
+    ok4 = False
+    if t4:
+        g4 = next(g for g in t4[1]["package"] if sm["units"][g["performer"]]["type"] == "A_4E_C")
+        build.build(sm, tmp / "a4.miz", task_no=t4[0] + 1, fly=g4["group"])
+        ok4 = '["type"]="A-4E-C"' in zipfile.ZipFile(tmp / "a4.miz").read("mission").decode("utf-8")
+    check(off == 0 and sm["units"]["i_a4"]["count"] > 0 and ok4,
+          "мод A-4E-C: без мода эскадрилий A-4 в кампании нет, с модом - в строю, в плане и в .miz (тип A-4E-C)")
     check(st["posture"]["blue"] == "offense" and len(taken) >= 2 and not banned,
           f"1982: наступает Израиль (поза сценария), к 3-м суткам взяты {', '.join(taken)}; на территорию Сирии не наступает")
 

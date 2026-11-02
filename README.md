@@ -69,7 +69,7 @@ English version: [README.en.md](README.en.md)
 **Моды DCS** (`redfront/mods`): тип мода — модуль с описанием типа и оружия для pydcs (как `pydcs_extensions` в DCS
 Retribution, LGPL-3.0), включается в кампании (окно ⚙ → «Кампания» → «Моды DCS»; мод должен быть у всех игроков
 миссии). Часть состава сил на типе мода (`mod` у части) без мода в кампании не участвует. Сейчас — A-4E-C (эскадрильи
-A-4 Израиля в Ливане 1982); описание типа (`redfront/mods/a4ec.py`) переносится из Retribution отдельно.
+A-4 Израиля в Ливане 1982); описание типа — `redfront/mods/a4ec.py` из Retribution (LGPL-3.0, `redfront/mods/NOTICE.md`).
 
 ### Окно миссии и правило сохранения
 
