@@ -61,7 +61,10 @@ def candidates(state: dict, side: str, tdef: dict) -> list[str]:
     base_conn = logistics.road_connected(state, foe, g)
     obj = ops.objective(state, side)
     out = []
+    banned = set((state.get("off_limits") or {}).get(side, []))   # куда сторона по сценарию не идёт - и десантом
     for name, p in pl.items():
+        if name in banned:
+            continue
         if p.get("side") != foe or any(pl[q].get("side") == side for q in g[name]):
             continue                             # соседний со своими пункт - не десант, а наступление
         depth = min(model.dist_km(p, q) for q in own)
@@ -92,7 +95,10 @@ def front_candidates(state: dict, side: str, tdef: dict) -> list[tuple[str, str]
     near_km = tdef.get("threat_km", 15)
     power = lambda s_, place: sum(model.strength(u) for u in ops._units_near(state, place, s_, near_km))
     out = []
+    banned = set((state.get("off_limits") or {}).get(side, []))
     for name, p in pl.items():
+        if name in banned:
+            continue
         nb = [q for q in g[name]]
         if p.get("side") == side and any(pl[q].get("side") == foe for q in nb):
             enemy, own = power(foe, name), power(side, name)

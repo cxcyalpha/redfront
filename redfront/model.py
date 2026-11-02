@@ -421,6 +421,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "point_ad": forces.get("point_ad") or {},   # ПВО объектов тыла по сценарию (нет - model.POINT_AD)
         "air_limits": sec.get("air_limits", sec.get("off_limits", {})),   # пункты, по которым авиация не бьёт (нет - как off_limits)
         "task_rules": (chosen or {}).get("task_rules", {}),   # задачи сценария: с какого дня, запрет (1982: Бекаа - с 4-го)
+        "posture_days": (chosen or {}).get("posture_days", []),   # смена позы по дням (1973: Израиль переходит в наступление)
         "posture": (chosen or {}).get("posture", {}),   # поза сторон по сценарию (наступает синяя - 1982), иначе доктрины
         "replacements": forces.get("replacements", {}),
         "objectives": objectives,                 # цели операции сторон (по порядку), с учётом варианта

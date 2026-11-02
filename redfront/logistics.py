@@ -416,7 +416,7 @@ def replacements(state: dict) -> list[str]:
     rate = (state.get("replacements") or {}).get("air_per_day", 0)
     lines = []
     for u in state["units"].values():            # экипажи: crews_per_day доктрины до штата (из училищ и резерва)
-        if "crews" in u and u["crews"] < u.get("crews0", 0):
+        if "crews" in u and u["crews"] < u.get("crews0", 0) and not u.get("mod_off"):
             u["crews_acc"] = u.get("crews_acc", 0.0) + _sim(state, u["side"]).get("crews_per_day", 0) * industry(state, u["side"])
             add = min(int(u["crews_acc"]), u["crews0"] - u["crews"])
             if add > 0:
@@ -424,8 +424,8 @@ def replacements(state: dict) -> list[str]:
                 u["crews_acc"] -= add
                 lines.append(f"{u['name']}: пополнение +{add} экипаж(а), экипажей {u['crews']}.")
     for u in state["units"].values():
-        if model.category(u) not in ("air", "heli") or u.get("count", 0) >= u.get("count0", 0):
-            continue
+        if model.category(u) not in ("air", "heli") or u.get("count", 0) >= u.get("count0", 0) or u.get("mod_off"):
+            continue                             # часть на типе выключенного мода - вне кампании, пополнений нет
         u["repl_acc"] = u.get("repl_acc", 0.0) + rate * industry(state, u["side"])
         add = min(int(u["repl_acc"]), u["count0"] - u["count"])
         if add > 0:

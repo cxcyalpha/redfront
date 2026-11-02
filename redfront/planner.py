@@ -339,7 +339,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
         performers = [u for u in state["units"].values()
                       if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0
-                      and kind in u.get("tasks_only", [kind])]   # специализированная часть (спасатели HH-53) - только свои задачи
+                      and kind in u.get("tasks_only", [kind]) and not u.get("mod_off")]   # специализированная часть (спасатели HH-53) - только свои задачи
         if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
             from . import assault
             performers = [u for u in performers if assault.troops(u.get("type", "")) > 0]

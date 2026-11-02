@@ -1,0 +1,1955 @@
+{
+ "_about": "Октябрьская война 1973 г., Голанский фронт (Израиль - Сирия, Ирак, Иордания). tools/gen_golan73.py.",
+ "theatre": "syria",
+ "preset": {
+  "title": "Октябрь 1973: Голаны",
+  "year": 1973,
+  "date": "1973-10-06"
+ },
+ "date": "1973-10-06",
+ "countries": {
+  "red": "Syria",
+  "blue": "Israel"
+ },
+ "units": [
+  {
+   "id": "red_7div",
+   "name": "7-я пехотная дивизия Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "KhanArnabah"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 70,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 200,
+     "role": "infantry"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "north"
+  },
+  {
+   "id": "red_7div_pvo",
+   "name": "Войсковая ПВО: 7-я пехотная дивизия Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_9div",
+   "name": "9-я пехотная дивизия Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kudne"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 70,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 200,
+     "role": "infantry"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south"
+  },
+  {
+   "id": "red_9div_pvo",
+   "name": "Войсковая ПВО: 9-я пехотная дивизия Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_9div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5div",
+   "name": "5-я пехотная дивизия Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Nawa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 70,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 200,
+     "role": "infantry"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south"
+  },
+  {
+   "id": "red_5div_pvo",
+   "name": "Войсковая ПВО: 5-я пехотная дивизия Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_5div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_1ad",
+   "name": "1-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Jassem"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 230,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 60,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "south"
+  },
+  {
+   "id": "red_1ad_pvo",
+   "name": "Войсковая ПВО: 1-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_1ad",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_3ad",
+   "name": "3-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "TelShams"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 230,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 60,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "north"
+  },
+  {
+   "id": "red_3ad_pvo",
+   "name": "Войсковая ПВО: 3-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_3ad",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_47bde",
+   "name": "47-я отдельная бронетанковая бригада Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sasa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "north"
+  },
+  {
+   "id": "red_47bde_pvo",
+   "name": "Войсковая ПВО: 47-я отдельная бронетанковая бригада Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_47bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_51bde",
+   "name": "51-я отдельная бронетанковая бригада Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "SheikhMaskin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south"
+  },
+  {
+   "id": "red_51bde_pvo",
+   "name": "Войсковая ПВО: 51-я отдельная бронетанковая бригада Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_51bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_iq3ad",
+   "name": "3-я бронетанковая дивизия Ирака",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "SheikhMaskin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 200,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 60,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 8,
+   "arrives_jitter": 0
+  },
+  {
+   "id": "red_iq3ad_pvo",
+   "name": "Войсковая ПВО: 3-я бронетанковая дивизия Ирака",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_iq3ad",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_jo40",
+   "name": "40-я бронетанковая бригада Иордании",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Deraa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 100,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 11,
+   "arrives_jitter": 0
+  },
+  {
+   "id": "blue_7bde",
+   "name": "7-я бронетанковая бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Booster"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_7bde_pvo",
+   "name": "Войсковая ПВО: 7-я бронетанковая бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_7bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_188",
+   "name": "188-я бронетанковая бригада 'Барак'",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hushniya"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 60,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_188_pvo",
+   "name": "Войсковая ПВО: 188-я бронетанковая бригада 'Барак'",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_188",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_golani",
+   "name": "Бригада 'Голани' (опорные пункты)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kuneitra"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "Soldier M4",
+     "count": 60,
+     "role": "infantry"
+    },
+    {
+     "type": "M-113",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_679",
+   "name": "679-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Nafah"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_679_pvo",
+   "name": "Войсковая ПВО: 679-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_679",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_17",
+   "name": "17-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "ElAl"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_17_pvo",
+   "name": "Войсковая ПВО: 17-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_17",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_19",
+   "name": "19-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "ArikBridge"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_19_pvo",
+   "name": "Войсковая ПВО: 19-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_19",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_205",
+   "name": "205-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Gamla"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_205_pvo",
+   "name": "Войсковая ПВО: 205-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_205",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_9",
+   "name": "9-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "BnotYaakov"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_9_pvo",
+   "name": "Войсковая ПВО: 9-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_9",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_4",
+   "name": "4-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "ArikBridge"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 0,
+   "quality": 2.5
+  },
+  {
+   "id": "blue_4_pvo",
+   "name": "Войсковая ПВО: 4-я бронетанковая бригада (резерв)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_4",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_31",
+   "name": "31-я парашютно-десантная бригада (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "RoshPina"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 15,
+   "composition": [
+    {
+     "type": "Soldier M4",
+     "count": 60,
+     "role": "infantry"
+    },
+    {
+     "type": "M-113",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 0,
+   "quality": 2.5
+  },
+  {
+   "id": "red_82pb_1",
+   "name": "Рота 82-го парашютного батальона Сирии",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "TelShams",
+   "men": 100,
+   "route": [
+    "TelShams"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 5,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_82pb_2",
+   "name": "Рота 82-го парашютного батальона Сирии (вторая)",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Sasa",
+   "men": 100,
+   "route": [
+    "Sasa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 5,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_1",
+   "name": "Батарея Куб №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.2,
+    "lon": 35.95
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_2",
+   "name": "Батарея Куб №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.1,
+    "lon": 35.93
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_3",
+   "name": "Батарея Куб №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.0,
+    "lon": 35.95
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_4",
+   "name": "Батарея Куб №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.9,
+    "lon": 36.05
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_5",
+   "name": "Батарея Куб №5",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.25,
+    "lon": 36.02
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_6",
+   "name": "Батарея Куб №6",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.15,
+    "lon": 36.05
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_7",
+   "name": "Батарея Куб №7",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.05,
+    "lon": 36.08
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_8",
+   "name": "Батарея Куб №8",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.95,
+    "lon": 36.12
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_9",
+   "name": "Батарея Куб №9",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.3,
+    "lon": 36.1
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_10",
+   "name": "Батарея Куб №10",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.85,
+    "lon": 36.2
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_1",
+   "name": "Дивизион С-75 №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.35,
+    "lon": 36.18
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_2",
+   "name": "Дивизион С-75 №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.45,
+    "lon": 36.2
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_3",
+   "name": "Дивизион С-75 №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.55,
+    "lon": 36.35
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_4",
+   "name": "Дивизион С-75 №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.25,
+    "lon": 36.25
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_5",
+   "name": "Дивизион С-75 №5",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.1,
+    "lon": 36.25
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_6",
+   "name": "Дивизион С-75 №6",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.6,
+    "lon": 36.2
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_1",
+   "name": "Дивизион С-125 №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.32,
+    "lon": 36.08
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_2",
+   "name": "Дивизион С-125 №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.18,
+    "lon": 36.15
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_3",
+   "name": "Дивизион С-125 №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.42,
+    "lon": 36.12
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_4",
+   "name": "Дивизион С-125 №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.5,
+    "lon": 36.28
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_roshpina",
+   "name": "Батарея HAWK (Рош-Пина)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.97,
+    "lon": 35.56
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_tiberias",
+   "name": "Батарея HAWK (Тверия)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.8,
+    "lon": 35.5
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_ramat",
+   "name": "Батарея HAWK (Рамат-Давид)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.68,
+    "lon": 35.2
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f4_rd",
+   "name": "69-я и 107-я эскадрильи (F-4E 'Курнас')",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "ramat_david",
+   "type": "F_4E",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f4_hz",
+   "name": "119-я и 201-я эскадрильи (F-4E 'Курнас')",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzor",
+   "type": "F_4E",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f4_tn",
+   "name": "Эскадрильи F-4E (Тель-Ноф)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "tel_nof",
+   "type": "F_4E",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_a4_hz",
+   "name": "Эскадрильи A-4E/H 'Скайхок' (102, 109, 110)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzerim",
+   "type": "A_4E_C",
+   "count": 50,
+   "strike_radius_km": 400,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА; мод A-4E-C: без мода части в кампании нет",
+   "estimate": true,
+   "mod": "a4ec"
+  },
+  {
+   "id": "i_a4_rd",
+   "name": "Эскадрильи A-4 'Скайхок' (115, 116, 140)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "ramat_david",
+   "type": "A_4E_C",
+   "count": 40,
+   "strike_radius_km": 400,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА; мод A-4E-C: без мода части в кампании нет",
+   "estimate": true,
+   "mod": "a4ec"
+  },
+  {
+   "id": "i_nesher",
+   "name": "101-я, 113-я, 117-я эскадрильи ('Нешер', 'Мираж' IIICJ)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "hatzor",
+   "type": "Mirage_F1CE",
+   "count": 60,
+   "strike_radius_km": 450,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА; Нешер/Мираж III - Mirage F1CE",
+   "estimate": true
+  },
+  {
+   "id": "i_ch53",
+   "name": "114-я эскадрилья (CH-53)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "eyn_shemer",
+   "type": "CH_53E",
+   "count": 8,
+   "strike_radius_km": 200,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА; CH-53D - CH-53E",
+   "estimate": true
+  },
+  {
+   "id": "i_uh1",
+   "name": "Вертолётные эскадрильи (Белл 205)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "rosh_pina",
+   "type": "UH_1H",
+   "count": 12,
+   "strike_radius_km": 150,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig21_dum",
+   "name": "Истребительные эскадрильи (МиГ-21ПФМ/МФ)",
+   "side": "red",
+   "role": "fighter",
+   "base": "al_dumayr",
+   "type": "MiG_21Bis",
+   "count": 40,
+   "strike_radius_km": 250,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-21ПФМ/МФ - МиГ-21бис",
+   "estimate": true
+  },
+  {
+   "id": "s_mig21_kh",
+   "name": "Истребительные эскадрильи (МиГ-21МФ)",
+   "side": "red",
+   "role": "fighter",
+   "base": "khalkhalah",
+   "type": "MiG_21Bis",
+   "count": 30,
+   "strike_radius_km": 250,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig21_nas",
+   "name": "Истребительная эскадрилья (МиГ-21)",
+   "side": "red",
+   "role": "fighter",
+   "base": "an_nasiriyah",
+   "type": "MiG_21Bis",
+   "count": 20,
+   "strike_radius_km": 250,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig17",
+   "name": "Истребительно-бомбардировочные эскадрильи (МиГ-17Ф)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "marj_ruhayyil",
+   "type": "MiG_15bis",
+   "count": 40,
+   "strike_radius_km": 200,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-17 - МиГ-15бис",
+   "estimate": true
+  },
+  {
+   "id": "s_su7",
+   "name": "Истребительно-бомбардировочные эскадрильи (Су-7БМК)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "sayqal",
+   "type": "Su_17M4",
+   "count": 30,
+   "strike_radius_km": 250,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА; Су-7БМК - Су-17М4",
+   "estimate": true
+  },
+  {
+   "id": "s_mi8",
+   "name": "Вертолётная эскадрилья (Ми-8)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "mezzeh",
+   "type": "Mi_8MT",
+   "count": 16,
+   "strike_radius_km": 150,
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "variants": [
+  {
+   "name": "base",
+   "title": "Октябрь 1973: Голаны",
+   "posture": {
+    "red": "offense",
+    "blue": "defense"
+   },
+   "posture_days": [
+    {
+     "from_day": 6,
+     "red": "defense",
+     "blue": "offense"
+    }
+   ],
+   "_about_posture": "Сирия наступает 6-9.10; с 11.10 (6-й день) - контрнаступление Израиля на Сасу",
+   "task_rules": {
+    "blue": {
+     "strike_factory": {
+      "off": true,
+      "why": "по промышленности Сирии в первые дни не били"
+     },
+     "strike_airfield": {
+      "from_day": 3,
+      "why": "удары по аэродромам Сирии - с 8.10"
+     }
+    }
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 2,
+  "note": "ОЦЕНКА; с 14.10 - американский воздушный мост (Nickel Grass)"
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "Стрела-1, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Strela_1_9P31",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Вулкан",
+     "composition": [
+      {
+       "type": "Vulcan",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "Синайский фронт (другая карта), 'Супер-Мистэры', Су-20, Хантеры Ирака, марокканская бригада, наземный удар 'Голани' по Хермону 21-22.10, ракеты 'Луна' (FROG) по Израилю."
+}

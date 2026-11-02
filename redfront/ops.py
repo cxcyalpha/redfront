@@ -240,6 +240,9 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     # десант в резерве и высаженный (держит пункт до подхода своих) - не в распоряжении командования фронта (assault.py)
     free = [u for u in free if u.get("order") not in ("reserve", "airhead")]
     posture = (state.get("posture") or {}).get(side) or sim.get("posture") or "defense"   # сценарий может переопределить
+    for row in sorted(state.get("posture_days") or [], key=lambda r: r.get("from_day", 0)):   # смена позы по дням сценария
+        if state["day"] >= row.get("from_day", 0) and row.get(side):
+            posture = row[side]
     if posture == "offense" and not any(objective(state, side, u) for u in free):
         posture = "defense"                                       # цели операции достигнуты - удерживать
     g = graph(state)

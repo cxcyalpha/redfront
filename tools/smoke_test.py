@@ -3759,6 +3759,15 @@ def theatres_section(tmp: Path) -> None:
         mis = zipfile.ZipFile(tmp / "vn_lift.miz").read("mission").decode("utf-8")
     check(playable and "REDFRONT_ULIFT" in mis,
           f"вертолётом к части - вылет игрока: {playable[0]['title'] if playable else '-'} (посадка у части - unitlift.lua)")
+    st4 = model.new_campaign("g73", sector="sector_golan73.json", oob="oob_golan73.json", seed=7, player_side="blue")
+    own = []
+    for _ in range(14):
+        planner.plan(st4)
+        sim.end_day(st4)
+        own.append(ops.owner(st4, "BnotYaakov") == "blue" and ops.owner(st4, "Hermon") == "red")
+    pos6 = st4.get("posture_days")
+    check(all(own[:5]) and pos6 and ops.owner(st4, "KiryatShmona") == "blue",
+          f"Голаны 1973: Хермон взят десантом, мост Бнот-Яаков удержан, смена позы на {pos6[0]['from_day'] if pos6 else '-'}-й день")
     st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
     planner.plan(st)
     b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]
