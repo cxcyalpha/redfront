@@ -243,3 +243,46 @@ def evac_resolve(state: dict, until_s: float | None = None) -> list[str]:
         u.pop("airhead_day", None)
         lines.append(f"{u['name']}: эвакуирована ({how}): вывезено {frac:.0%} живых, в резерве у {home}.")
     return lines
+
+
+MEDEVAC_K = 0.04      # ОЦЕНКА: рейс вывоза раненых (борт) - столько потерь части возвращается (раненые выжили и вернутся,
+MEDEVAC_MAX = 0.15    # а не умерли без помощи: в армии США во Вьетнаме вывоз за час-два резко снизил смертность); за сутки не больше
+
+
+def medevac(state: dict) -> list[str]:
+    """Итог рейсов вывоза раненых суток (logistics.unit_lift_t, mode medevac): часть возвращает долю потерь."""
+    lines = []
+    for side in model.SIDES:
+        for uid, n in logistics.unit_lift_t(state, side, "medevac").items():
+            u = state["units"].get(uid)
+            if not u or u["state"] == "destroyed" or not u.get("lost"):
+                continue
+            k = min(MEDEVAC_MAX, MEDEVAC_K * n)
+            before = model.strength(u)
+            for t in list(u["lost"]):
+                u["lost"][t] *= (1.0 - k)
+            lines.append(f"{u['name']}: вывоз раненых вертолётами ({n:.0f} бортов) - боеспособность {before:.0%} -> {model.strength(u):.0%}.")
+    return lines
+
+
+RECALL_DAYS = 2       # ОЦЕНКА: аэромобильная рота после высадки - в резерв через столько суток без боя
+
+
+def recall(state: dict) -> list[str]:
+    """Аэромобильные роты (air_mobile), переброшенные к фронту или соединившиеся со своими, - обратно в резерв у своего
+    пункта (home), если RECALL_DAYS суток не в бою и боеспособность не ниже готовности: следующие высадки - снова ими."""
+    lines = []
+    for u in state["units"].values():
+        if not u.get("air_mobile") or u.get("order") in ("reserve", "airhead") or u["state"] in ("destroyed", "pending"):
+            continue
+        if u["state"] == "battle" or u.get("engaged"):
+            u["quiet_days"] = 0
+            continue
+        u["quiet_days"] = u.get("quiet_days", 0) + 1
+        home = u.get("home")
+        if u["quiet_days"] < RECALL_DAYS or not home or state["places"].get(home, {}).get("side") != u["side"]:
+            continue
+        u["route"], u["progress_km"] = [home], 0.0
+        u["state"], u["order"], u["defending"], u["engaged"], u["quiet_days"] = "defend", "reserve", True, [], 0
+        lines.append(f"{u['name']}: снята с участка вертолётами - в резерве у {home}.")
+    return lines

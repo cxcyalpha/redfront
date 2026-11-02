@@ -1628,6 +1628,18 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             if not is_player:                    # ИИ: посадку у пилота пересчитает csar.lua (пилот - на открытом месте)
                 rescuers.append({"group": fg.name, "downed": obj["downed"], "home": airport.id,
                                  "land": tdg.get("land_s", 90)})
+        elif obj["kind"] == "unit_lift":         # вертолётом к части (снабжение, раненые): малая высота, посадка, домой
+            lz = obj["pos"]
+            low = int(tdg.get("low_alt_m_agl", 50))
+            start_p = g.get("_air_start") or base
+            d = model.dist_km(start_p, lz)
+            if d > 8:
+                wp(model.lerp(lz, start_p, 5 / d), low, "Подход")
+            w = wp(lz, low, "Площадка")
+            c = _pt(m, lz)
+            w.tasks.append(task.Land(Vector2(c.x, c.y), duration=int(tdg.get("land_s", 180))))
+            if d > 8:
+                wp(model.lerp(lz, base, 5 / model.dist_km(base, lz)), low, "Отход")
         elif obj["kind"] == "air_evac":          # эвакуация: на малой высоте к площадке у роты, посадка на land_s, домой
             lz = obj["pos"]
             low = int(tdg.get("low_alt_m_agl", 50))

@@ -354,6 +354,9 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("method") == "airlift":      # воздушные перевозки снабжения (только ИИ)
             tasks += airlift_tasks(state, side, kind, tdef, performers)
             continue
+        if tdef.get("method") == "airlift_unit":  # вертолётом к части: снабжение отрезанной, вывоз раненых (только ИИ)
+            tasks += unit_lift_tasks(state, side, kind, tdef, performers)
+            continue
         if tdef.get("method") == "recon":        # разведывательные вылеты (recon.py; только ИИ)
             from . import recon
             tasks += recon.plan_tasks(state, side, kind, tdef, performers)
@@ -603,6 +606,62 @@ def airlift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                     "performer": perf["id"], "target": d["id"], "group_size": g["size"], "base": perf["base"],
                     "target_pos": g["objective"]["pos"], "ip": g["objective"]["pos"], "distance_km": round(km, 1),
                     "threats": [], "package": [g], "package_notes": "", "ai_only": True})
+    return out
+
+
+def unit_lift_needs(state: dict, side: str, tdef: dict) -> list[dict]:
+    """Части для вертолётного рейса (method airlift_unit): mode resupply - получила меньше resupply_below нормы
+    снабжения (отрезана или склады пусты), mode medevac - в бою (battle) с боеспособностью ниже medevac_below.
+    Худшие первыми. Аэромобильные роты в резерве и десант в тылу противника - не здесь (у них свои задачи)."""
+    from . import ops
+    mode = tdef.get("mode", "resupply")
+    out = []
+    for u in ops._maneuver(state, side):
+        if u["state"] in ("destroyed", "pending", "march") or u.get("order") in ("reserve",):
+            continue
+        if mode == "resupply":
+            if u.get("supply_frac", 1.0) < tdef.get("resupply_below", 0.6):
+                out.append((u.get("supply_frac", 1.0), u))
+        elif u["state"] == "battle" and model.strength(u) < tdef.get("medevac_below", 0.9):
+            out.append((model.strength(u), u))
+    out.sort(key=lambda x: x[0])
+    return [u for _k, u in out]
+
+
+def unit_lift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: list[dict]) -> list[dict]:
+    """Вертолётный рейс к части (снабжение, вывоз раненых): площадка у части в сторону своих (assault.lz_point);
+    группа - ближняя вертолётная часть, достающая до площадки; через насыщенную ПВО (max_threats) не идут."""
+    from . import assault, ops
+    foe = model.enemy(side)
+    out, tasked = [], {}
+    s = tdef["strike"]
+    for u in unit_lift_needs(state, side, tdef)[:tdef.get("per_day", 2)]:
+        lz = assault.lz_point(state, side, ops.node_of(state, u), tdef)
+        best = None
+        for r in performers:
+            if model.category(r) != "heli" or logistics.available(state, r) < s["size"]:
+                continue
+            km = model.dist_km(state["airbases"][r["base"]], lz)
+            radius = strike_radius_km(r)
+            if radius is not None and km > radius:
+                continue
+            key = (tasked.get(r["id"], 0), km)
+            if best is None or key < best[0]:
+                best = (key, r)
+        if best is None:
+            continue
+        (_n, km), perf = best
+        base = state["airbases"][perf["base"]]
+        threats = corridor_threats(state, [(base, lz)], foe, tdef.get("low_alt_m_agl"))
+        if len(threats) > tdef.get("max_threats", 2):
+            continue
+        tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
+        g = {"group": "strike", "title": s["title"], "performer": perf["id"], "size": s["size"], "base": perf["base"],
+             "route": [lz], "objective": {"kind": "unit_lift", "mode": tdef.get("mode", "resupply"), "unit": u["id"], "pos": lz},
+             "maintask": s["maintask"], "loadout": [], "lead_min": 0, "ai": {}, "alt_m": tdef.get("transit_alt_m_agl", 50)}
+        out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']}", "performer": perf["id"],
+                    "target": u["id"], "group_size": g["size"], "base": perf["base"], "target_pos": lz, "ip": lz,
+                    "distance_km": round(km, 1), "threats": threats, "package": [g], "package_notes": "", "ai_only": True})
     return out
 
 

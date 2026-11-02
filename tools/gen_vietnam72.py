@@ -17,7 +17,7 @@ data/oob_vietnam72.json.
 "Airpower and the 1972 Spring Invasion" (USAF Southeast Asia Monograph, 1976). Составы и числа - ОЦЕНКИ по порядку
 величины. Типы DCS: F-4J/B ВМС - F-14A (палубного F-4 в DCS нет; анахронизм); A-6A, A-7E - F/A-18C (в pydcs нет без модов); KA-6D - S-3B Tanker;
 F-105G "Дикая ласка" - F-4E; HH-53 - CH-53E; AH-1G - AH-1W; МиГ-21ПФ/МФ - МиГ-21бис; МиГ-17 - МиГ-15бис; J-6 - МиГ-19П;
-Т-54 - Т-55; ПТ-76 есть; М-48 - М-60; Стрела-2 - Игла.
+Т-54 - Т-55; ПТ-76 есть; М-48 - М-60; Стрела-2 - Игла; АК, М16 - пехота DCS (Infantry AK, Soldier M4).
 """
 from __future__ import annotations
 
@@ -87,11 +87,15 @@ AXES = {"dmz": {"title": "ДМЗ: Жолинь - Донгха - Куангчи -
 def comp(*rows):
     return [{"type": t, "count": c, "role": r} for t, c, r in rows if c > 0]
 
-NVA_DIV = comp(("T_55", 15, "MBT"), ("PT_76", 10, "MBT"), ("BTR-60", 15, "APC"), ("Grad-URAL", 6, "MRL"))   # пехотная дивизия
-NVA_ARM = comp(("T_55", 50, "MBT"), ("PT_76", 30, "MBT"))                                                 # 202-й/203-й тп
-NVA_ADD = {"ZSU_57_2": 6, "ZU_23_Emplacement": 8, "SA-18 Igla manpad": 6}                                 # Стрела-2 - Игла
-ARVN_DIV = comp(("M-60", 20, "MBT"), ("M-113", 80, "APC"))
-ARVN_MAR = comp(("M-113", 40, "APC"))
+# ВНА 1972: пехотные дивизии (~8-10 тыс. человек) с приданными танками и 122-мм реактивной артиллерией; ПВО - много
+# стволов (ДШК, ЗУ, ЗСУ-57) и Стрела-2. Фигура пехоты в DCS - ~4 человека (ОЦЕНКА масштаба, как assault.men).
+NVA_DIV = comp(("Infantry AK", 320, "infantry"), ("Soldier RPG", 60, "infantry"), ("T_55", 8, "MBT"), ("PT_76", 4, "MBT"),
+               ("GAZ-66", 20, "truck"), ("Grad-URAL", 6, "MRL"))
+NVA_ARM = comp(("T_55", 50, "MBT"), ("PT_76", 30, "MBT"), ("Infantry AK", 40, "infantry"))           # 202-й/203-й тп
+NVA_ADD = {"ZSU_57_2": 4, "ZU_23_Emplacement": 6, "HL_DSHK": 8, "SA-18 Igla manpad": 6}            # Стрела-2 - Игла
+# АРВН: пехотные дивизии и бригады морской пехоты на M113, танки M48 - в бронечастях
+ARVN_DIV = comp(("Soldier M4", 320, "infantry"), ("Soldier M249", 40, "infantry"), ("M-113", 40, "APC"), ("M-60", 10, "MBT"))
+ARVN_MAR = comp(("Soldier M4", 140, "infantry"), ("Soldier M249", 20, "infantry"), ("M-113", 12, "APC"))
 ARVN_ARM = comp(("M-60", 40, "MBT"), ("M-113", 20, "APC"))                                                # 20-й тб (М-48)
 GROUND = [   # (id, имя, сторона, пункт, состав, ПВО, день ввода, ось)
     ("red_308", "308-я дивизия ВНА", "red", "CampCarroll", NVA_DIV, NVA_ADD, 1, "dmz"),
