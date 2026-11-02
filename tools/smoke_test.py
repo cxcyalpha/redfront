@@ -3710,6 +3710,18 @@ def theatres_section(tmp: Path) -> None:
     check(sams and not in_zone and '"KS-19"' in mis and '"helipadId"' in mis,
           f"Вьетнам 1972: удары по С-75 юга ДРВ ({len(sams)}), Ханой и Хайфон закрыты до 'Лайнбэкера', зенитная "
           f"артиллерия у объектов, палубные вылеты")
+    alpha = [t for t in st["tasks"] if "Альфа" in t["title"]]
+    roles = {g.get("support_id", "strike") for t in alpha for g in t["package"]}
+    mixed = [t["title"] for t in alpha if len({st["airbases"][g["base"]].get("kind") == "carrier" for g in t["package"]}) > 1]
+    check(alpha and {"strike", "sead", "flak", "migcap", "cover"} <= roles and not mixed,
+          f"налёт 'Альфа': {len(alpha)} в плане, ударная группа, 'Айрон Хэнд', подавление зенитки, MiGCAP, эскорт; "
+          "пакет одной службы (флот или ВВС)")
+    st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
+    planner.plan(st)
+    b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]
+    hanoi = [t for t in st["tasks"] if t["target"] in ("red_depot_hanoi", "br_doumer", "red_depot_haiphong")]
+    check(st["doctrine"]["blue"] == "us72" and b52 and all(t["package"][0]["size"] == 3 for t in b52) and hanoi,
+          f"'Лайнбэкер-2': B-52 ячейками по три ({len(b52)} ударов), Ханой и Хайфон открыты ({len(hanoi)} ударов)")
     st = model.new_campaign("syr", sector="sector_syria.json", oob="oob_syria.json", seed=7)
     for _ in range(3):
         sim.end_day(st)

@@ -315,6 +315,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     tasked: dict[str, int] = {}                  # задач у части в этом плане
     year = campaign_year(state)
     gate, gated = _gates(state, side)            # пояса ПВО перед целями в глубине: сначала они (roll-back)
+    if doc.get("roll_back") is False:            # доктрина без roll-back (США 1972: пакет идёт сквозь пояс С-75 с
+        gated = {}                               # подавлением в своём составе); пояс - лишь первым в очереди целей ЗРК
     rules = (state.get("task_rules") or {}).get(side) or {}   # правила задач сценария (с какого дня, запрет)
     banned = set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))   # куда авиация не бьёт
     for z in rules.get("_zones") or []:          # запретные для ударов районы сценария до дня until_day (правила применения:
@@ -1017,7 +1019,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         # сначала те, чей тип умеет основную задачу группы (для подавления ПВО - SEAD), затем та же часть, что ударная, затем ближние
         # (killer - сначала с аэродрома своего hunter: смешанные пары одного крыла)
         gcls = fitness.group_class(g["maintask"], None)   # подавление ПВО - sead, прикрытие - air
+        sea = lambda x: state["airbases"][x["base"]].get("kind") == "carrier"
         cands.sort(key=lambda u: (pref.index(u["id"]) if u["id"] in pref else len(pref),
+                                  bool(tdef.get("same_service")) and sea(u) != sea(perf),   # пакет одной службы (флот / ВВС)
                                   bool(mate) and bool(g.get("prefer_other_type")) and u["type"] == mate["type"],
                                   bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
                                   round(_SUP_LOAD.get(u["id"], 0) / max(1, u.get("count", 1)), 1),   # загрузка части за сутки

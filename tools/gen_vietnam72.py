@@ -244,7 +244,7 @@ def main() -> None:
         "_about": "Вьетнам, апрель 1972: Пасхальное наступление и воздушная кампания США (условная география, карта Syria).",
         "theatre": "syria",
         "preset": {"title": "Апрель 1972: Вьетнам, Пасхальное наступление", "year": 1972, "date": "1972-04-06"},
-        "date": "1972-04-06", "countries": {"red": "Vietnam", "blue": "USA"}, "units": units,
+        "date": "1972-04-06", "countries": {"red": "Vietnam", "blue": "USA"}, "doctrine": {"blue": "us72"}, "units": units,
         "variants": [{"name": "base", "title": "Апрель 1972: 'Freedom Train' и Пасхальное наступление",
                       "posture": {"red": "offense", "blue": "defense"},
                       "task_rules": {"blue": {
@@ -261,7 +261,57 @@ def main() -> None:
                          "Лаос и Камбоджа, минирование Хайфона, флот у побережья (обстрел крейсерами).",
     }
     (DATA / "oob_vietnam72.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
+    linebacker2(sector, oob)
     print(f"пунктов {len(places)}, авианосцев {len(carriers)}, частей {len(GROUND)}, С-75 {len(SAMS)}, авиачастей {len(AIR)}")
+
+
+def linebacker2(sector: dict, oob: dict) -> None:
+    """'Лайнбэкер-2' (18-29.12.1972): та же условная география, обстановка декабря. Куангчи отбит АРВ (16.09), фронт
+    стоит по реке Тхатьхан (стороны в обороне); Ханой, Хайфон и аэродромы МиГов открыты; B-52 - ночью ячейками по три
+    (729 вылетов за 11 суток, 15 сбито С-75 - Michel, 'The Eleven Days of Christmas'); палубные 'Альфы' - днём и ночью
+    (A-6). Авианосцы декабря: Enterprise, Saratoga, America (и др.) - тип Forrestal. Числа - ОЦЕНКИ."""
+    import copy
+    sec, ob = copy.deepcopy(sector), copy.deepcopy(oob)
+    sec["_about"] = sec["_about"].replace("апрель", "декабрь") + " Обстановка 18.12.1972 ('Лайнбэкер-2')."
+    sec["places"]["QuangTri"]["side"] = "blue"     # Куангчи отбит 16.09.1972
+    sec["places"]["DongHa"]["side"] = "red"        # Донгха - у ВНА (фронт по реке Тхатьхан)
+    sec["objectives"] = {"red": [], "blue": []}
+    sec["carriers"] = {
+        "cv65": {**sec["carriers"]["cv63"], "name": "USS Enterprise (CVN-65)", "tacan": 65, "tacan_id": "ENT"},
+        "cv60": {**sec["carriers"]["cv64"], "name": "USS Saratoga (CV-60)", "tacan": 60, "tacan_id": "SAR"},
+        "cv66": {**sec["carriers"]["cv43"], "name": "USS America (CV-66)", "tacan": 66, "tacan_id": "AME",
+                 "escorts": ["TICONDEROG", "PERRY"]},
+    }
+    cmap = {"cv63": "cv65", "cv64": "cv60", "cv43": "cv66"}
+    units = []
+    for u in ob["units"]:
+        u = dict(u)
+        if u.get("base") in cmap:
+            u["base"] = cmap[u["base"]]
+            u["name"] = (u["name"].replace("Kitty Hawk", "Enterprise").replace("Constellation", "Saratoga")
+                         .replace("Coral Sea", "America"))
+        if u["id"] == "us_b52":
+            u["count"] = 60                          # ОЦЕНКА: доля сил (в операции - ~200 B-52 с Гуама и У-Тапао)
+            u["name"] = "B-52D/G (Гуам, У-Тапао): 'Лайнбэкер-2'"
+        if u.get("role") == "maneuver":              # фронт стоит: части - в обороне на местах
+            u["state"], u["axis"] = "defend", None
+            u.pop("arrives_day", None); u.pop("arrives_jitter", None)
+            if u["side"] == "blue" and u["route"][0] == "DongHa":
+                u["route"] = ["QuangTri"]
+        if u["id"].startswith("r_9") and u.get("count"):
+            u["count"] = max(6, int(u["count"] * 0.7))   # ОЦЕНКА: к декабрю потери ВВС ДРВ
+        units.append({k: v for k, v in u.items() if v is not None})
+    ob["units"] = units
+    ob["preset"] = {"title": "Декабрь 1972: 'Лайнбэкер-2'", "year": 1972, "date": "1972-12-18"}
+    ob["date"] = "1972-12-18"
+    ob["_about"] = "Вьетнам, 'Лайнбэкер-2' (18-29.12.1972): условная география на карте Syria. tools/gen_vietnam72.py."
+    ob["variants"] = [{"name": "base", "title": "Декабрь 1972: 'Лайнбэкер-2'",
+                       "posture": {"red": "defense", "blue": "defense"},
+                       "task_rules": {"blue": {"cas_contact": {"off": True, "why": "фронт стоит; усилия - на Север"},
+                                               "strike_supply_route": {"off": True, "why": "усилия - на объекты Ханоя и Хайфона"}}},
+                       "_about": "Север открыт для ударов с первого дня; фронт стоит (стороны в обороне)"}]
+    (DATA / "sector_vietnam72_lb2.json").write_text(json.dumps(sec, ensure_ascii=False, indent=1), encoding="utf-8")
+    (DATA / "oob_vietnam72_lb2.json").write_text(json.dumps(ob, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 if __name__ == "__main__":

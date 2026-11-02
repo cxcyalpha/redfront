@@ -11,6 +11,9 @@
   "red": "Vietnam",
   "blue": "USA"
  },
+ "doctrine": {
+  "blue": "us72"
+ },
  "units": [
   {
    "id": "red_308",

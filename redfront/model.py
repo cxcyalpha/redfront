@@ -307,12 +307,13 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     # координаты аэродромов берём из терраина pydcs карты сектора, а не вписываем руками
     if player_side not in SIDES:
         raise ValueError(f"сторона должна быть одной из {SIDES}")
-    packages = {**{"red": "wp", "blue": "nato"}, **(packages or {})}   # синие - доктрина НАТО (data/doctrine/nato.json)
+    sec = load_json(sector)
+    forces = load_json(oob)
+    # синие - доктрина НАТО (data/doctrine/nato.json); сценарий может задать свою (doctrine состава сил), явный выбор - сильнее
+    packages = {**{"red": "wp", "blue": "nato"}, **(forces.get("doctrine") or {}), **(packages or {})}
     for side, pkg in packages.items():
         if not (DATA / "doctrine" / f"{pkg}.json").is_file():
             raise FileNotFoundError(f"нет пакета доктрины '{pkg}' для стороны {side} (data/doctrine/{pkg}.json)")
-    sec = load_json(sector)
-    forces = load_json(oob)
     date = date or forces.get("date") or "2026-05-15"   # дата среза пресета состава сил (1985, 1987, 1989)
     import datetime
     date = datetime.date.fromisoformat(str(date)).isoformat()   # своя дата - ГГГГ-ММ-ДД, иначе ошибка сразу

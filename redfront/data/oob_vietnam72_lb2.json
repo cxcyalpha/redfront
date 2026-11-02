@@ -1,0 +1,1373 @@
+{
+ "_about": "Вьетнам, 'Лайнбэкер-2' (18-29.12.1972): условная география на карте Syria. tools/gen_vietnam72.py.",
+ "theatre": "syria",
+ "preset": {
+  "title": "Декабрь 1972: 'Лайнбэкер-2'",
+  "year": 1972,
+  "date": "1972-12-18"
+ },
+ "date": "1972-12-18",
+ "countries": {
+  "red": "Vietnam",
+  "blue": "USA"
+ },
+ "doctrine": {
+  "blue": "us72"
+ },
+ "units": [
+  {
+   "id": "red_308",
+   "name": "308-я дивизия ВНА",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "CampCarroll"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "PT_76",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_308_pvo",
+   "name": "Войсковая ПВО: 308-я дивизия ВНА",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_308",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_57_2",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_304",
+   "name": "304-я дивизия ВНА",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "KheSanh"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "PT_76",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_304_pvo",
+   "name": "Войсковая ПВО: 304-я дивизия ВНА",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_304",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_57_2",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_324b",
+   "name": "324B дивизия ВНА",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "ALuoi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "PT_76",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_324b_pvo",
+   "name": "Войсковая ПВО: 324B дивизия ВНА",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_324b",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_57_2",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_202",
+   "name": "202-й и 203-й танковые полки ВНА",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "GioLinh"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 50,
+     "role": "MBT"
+    },
+    {
+     "type": "PT_76",
+     "count": 30,
+     "role": "MBT"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_202_pvo",
+   "name": "Войсковая ПВО: 202-й и 203-й танковые полки ВНА",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_202",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_57_2",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_320b",
+   "name": "320B дивизия ВНА",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "DongHoi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "PT_76",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_320b_pvo",
+   "name": "Войсковая ПВО: 320B дивизия ВНА",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_320b",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_57_2",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_325",
+   "name": "325-я дивизия ВНА",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "MuGia"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "PT_76",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "Grad-URAL",
+     "count": 6,
+     "role": "MRL"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_325_pvo",
+   "name": "Войсковая ПВО: 325-я дивизия ВНА",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_325",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_57_2",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_3div",
+   "name": "3-я дивизия АРВ",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "QuangTri"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 80,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_258",
+   "name": "258-я бригада морской пехоты Южного Вьетнама",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "QuangTri"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_20tk",
+   "name": "20-й танковый батальон АРВ (М-48)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "QuangTri"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_147",
+   "name": "147-я бригада морской пехоты Южного Вьетнама",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "QuangTri"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_1div",
+   "name": "1-я дивизия АРВ",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Bastogne"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 80,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_369",
+   "name": "369-я бригада морской пехоты Южного Вьетнама",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hue"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_1abde",
+   "name": "1-я бронетанковая бригада АРВ",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hue"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_abn",
+   "name": "Воздушно-десантная дивизия Южного Вьетнама",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "DaNang"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 20,
+   "daily_advance_km": 8,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_0_1",
+   "name": "Дивизион С-75 (Ханой) №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.2,
+    "lon": 36.7
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_0_2",
+   "name": "Дивизион С-75 (Ханой) №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.08,
+    "lon": 36.82
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_0_3",
+   "name": "Дивизион С-75 (Ханой) №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.18,
+    "lon": 36.85
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_0_4",
+   "name": "Дивизион С-75 (Ханой) №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.06,
+    "lon": 36.66
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_0_5",
+   "name": "Дивизион С-75 (Ханой) №5",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.22,
+    "lon": 36.78
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_0_6",
+   "name": "Дивизион С-75 (Ханой) №6",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.12,
+    "lon": 36.6
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_1_1",
+   "name": "Дивизион С-75 (Хайфон) №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.55,
+    "lon": 35.85
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_1_2",
+   "name": "Дивизион С-75 (Хайфон) №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.47,
+    "lon": 35.82
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_1_3",
+   "name": "Дивизион С-75 (Хайфон) №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.58,
+    "lon": 35.95
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_2_1",
+   "name": "Дивизион С-75 (Тханьхоа) №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.15,
+    "lon": 36.0
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_2_2",
+   "name": "Дивизион С-75 (Тханьхоа) №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.22,
+    "lon": 35.98
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_3_1",
+   "name": "Дивизион С-75 (Винь) №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.92,
+    "lon": 35.95
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_3_2",
+   "name": "Дивизион С-75 (Винь) №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.86,
+    "lon": 35.97
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_4_1",
+   "name": "Дивизион С-75 (Донгхой) №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.7,
+    "lon": 36.02
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_vf114",
+   "name": "VF-114, VF-213 (F-4J, Enterprise)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "cv65",
+   "type": "F_14A_135_GR_Early",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)",
+   "estimate": true
+  },
+  {
+   "id": "us_va_kh",
+   "name": "VA-192, VA-195 (A-7E), VA-52 (A-6A), Enterprise",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv65",
+   "type": "FA_18C_hornet",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E/A-6A - F/A-18C",
+   "estimate": true
+  },
+  {
+   "id": "us_e2_kh",
+   "name": "VAW-114 (E-2B)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "cv65",
+   "type": "E_2C",
+   "count": 4,
+   "strike_radius_km": 1000,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; E-2B - E-2C",
+   "estimate": true
+  },
+  {
+   "id": "us_ka6_kh",
+   "name": "KA-6D (Enterprise)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "cv65",
+   "type": "S_3B_Tanker",
+   "count": 4,
+   "strike_radius_km": 800,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; KA-6D - S-3B Tanker",
+   "estimate": true
+  },
+  {
+   "id": "us_vf96",
+   "name": "VF-92, VF-96 (F-4J, Saratoga)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "cv60",
+   "type": "F_14A_135_GR_Early",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)",
+   "estimate": true
+  },
+  {
+   "id": "us_va_con",
+   "name": "VA-146, VA-147 (A-7E), VA-165 (A-6A), Saratoga",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv60",
+   "type": "FA_18C_hornet",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E/A-6A - F/A-18C",
+   "estimate": true
+  },
+  {
+   "id": "us_e2_con",
+   "name": "VAW-116 (E-2B)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "cv60",
+   "type": "E_2C",
+   "count": 4,
+   "strike_radius_km": 1000,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; E-2B - E-2C",
+   "estimate": true
+  },
+  {
+   "id": "us_vf51",
+   "name": "VF-51, VF-111 (F-4B, America)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "cv66",
+   "type": "F_14A_135_GR_Early",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)",
+   "estimate": true
+  },
+  {
+   "id": "us_va_cs",
+   "name": "VA-22, VA-94 (A-7E), VMA(AW)-224 (A-6A), America",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv66",
+   "type": "FA_18C_hornet",
+   "count": 30,
+   "strike_radius_km": 500,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E/A-6A - F/A-18C",
+   "estimate": true
+  },
+  {
+   "id": "us_366",
+   "name": "366-е тактическое крыло (F-4E, Дананг)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "beirut_rafic_hariri",
+   "type": "F_4E",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_432",
+   "name": "432-е разведывательное крыло (F-4D/E, Удорн): MiGCAP",
+   "side": "blue",
+   "role": "fighter",
+   "base": "hatay",
+   "type": "F_4E",
+   "count": 36,
+   "strike_radius_km": 600,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4D - F-4E",
+   "estimate": true
+  },
+  {
+   "id": "us_8tfw",
+   "name": "8-е тактическое крыло 'Волчья стая' (F-4D, Убон): управляемые бомбы",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "incirlik",
+   "type": "F_4E",
+   "count": 36,
+   "strike_radius_km": 600,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4D - F-4E",
+   "estimate": true
+  },
+  {
+   "id": "us_ww",
+   "name": "17-я эскадрилья 'Дикая ласка' (F-105G, Корат)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "incirlik",
+   "type": "F_4E",
+   "count": 12,
+   "strike_radius_km": 600,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-105G - F-4E",
+   "estimate": true
+  },
+  {
+   "id": "us_kc135",
+   "name": "KC-135 (Таиланд)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "incirlik",
+   "type": "KC_135",
+   "count": 4,
+   "strike_radius_km": 2000,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_b52",
+   "name": "B-52D/G (Гуам, У-Тапао): 'Лайнбэкер-2'",
+   "side": "blue",
+   "role": "bomber",
+   "base": "akrotiri",
+   "type": "B_52H",
+   "count": 60,
+   "strike_radius_km": 2000,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; B-52D/G - B-52H",
+   "estimate": true
+  },
+  {
+   "id": "us_37arrs",
+   "name": "37-я спасательная эскадрилья (HH-53, Дананг)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "beirut_rafic_hariri",
+   "type": "CH_53E",
+   "count": 6,
+   "strike_radius_km": 200,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; HH-53 - CH-53E",
+   "estimate": true
+  },
+  {
+   "id": "us_ah1",
+   "name": "Армейские AH-1G (Фубай)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "rene_mouawad",
+   "type": "AH_1W",
+   "count": 12,
+   "strike_radius_km": 120,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; AH-1G - AH-1W",
+   "estimate": true
+  },
+  {
+   "id": "vn_uh1",
+   "name": "ВВС Южного Вьетнама (UH-1H, Фубай)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "rene_mouawad",
+   "type": "UH_1H",
+   "count": 16,
+   "strike_radius_km": 150,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_921",
+   "name": "921-й истребительный полк 'Красная звезда' (МиГ-21ПФ/МФ, Ной-Бай)",
+   "side": "red",
+   "role": "fighter",
+   "base": "hama",
+   "type": "MiG_21Bis",
+   "count": 21,
+   "strike_radius_km": 250,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-21ПФ/МФ - МиГ-21бис",
+   "estimate": true
+  },
+  {
+   "id": "r_927",
+   "name": "927-й истребительный полк 'Ламшон' (МиГ-21, Кеп)",
+   "side": "red",
+   "role": "fighter",
+   "base": "bassel_al_assad",
+   "type": "MiG_21Bis",
+   "count": 16,
+   "strike_radius_km": 250,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_923",
+   "name": "923-й истребительный полк 'Йенбай' (МиГ-17, Кеп)",
+   "side": "red",
+   "role": "fighter",
+   "base": "bassel_al_assad",
+   "type": "MiG_15bis",
+   "count": 16,
+   "strike_radius_km": 200,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-17 - МиГ-15бис",
+   "estimate": true
+  },
+  {
+   "id": "r_925",
+   "name": "925-й истребительный полк (J-6/МиГ-19, Йенбай)",
+   "side": "red",
+   "role": "fighter",
+   "base": "abu_al_duhur",
+   "type": "MiG_19P",
+   "count": 14,
+   "strike_radius_km": 250,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; J-6 - МиГ-19П",
+   "estimate": true
+  },
+  {
+   "id": "r_fwd",
+   "name": "Передовая группа МиГ-21 (Куанглан)",
+   "side": "red",
+   "role": "fighter",
+   "base": "al_qusayr",
+   "type": "MiG_21Bis",
+   "count": 8,
+   "strike_radius_km": 200,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "variants": [
+  {
+   "name": "base",
+   "title": "Декабрь 1972: 'Лайнбэкер-2'",
+   "posture": {
+    "red": "defense",
+    "blue": "defense"
+   },
+   "task_rules": {
+    "blue": {
+     "cas_contact": {
+      "off": true,
+      "why": "фронт стоит; усилия - на Север"
+     },
+     "strike_supply_route": {
+      "off": true,
+      "why": "усилия - на объекты Ханоя и Хайфона"
+     }
+    }
+   },
+   "_about": "Север открыт для ударов с первого дня; фронт стоит (стороны в обороне)"
+  }
+ ],
+ "replacements": {
+  "air_per_day": 2,
+  "note": "ОЦЕНКА"
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "КС-19, С-60, ЗУ-23",
+     "composition": [
+      {
+       "type": "KS_19",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "S_60_Type59_Artillery",
+       "role": "launcher",
+       "count": 4
+      },
+      {
+       "type": "ZU_23_Emplacement",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "point_ad": {
+  "red": [
+   {
+    "type": "KS_19",
+    "role": "launcher",
+    "count": 2
+   },
+   {
+    "type": "S_60_Type59_Artillery",
+    "role": "launcher",
+    "count": 4
+   },
+   {
+    "type": "ZU_23_Emplacement",
+    "role": "launcher",
+    "count": 2
+   }
+  ]
+ },
+ "_about_point_ad": "ДРВ: у мостов и складов - зенитная артиллерия 57-100 мм и 23 мм (ОЦЕНКА состава), не ЗРК малой дальности.",
+ "_not_included": "A-6A, A-7E, F-105, F-8, A-1, A-37, AC-130, OV-10 (нет в DCS без модов - замены в source), МиГ-17 (МиГ-15бис), Лаос и Камбоджа, минирование Хайфона, флот у побережья (обстрел крейсерами)."
+}
