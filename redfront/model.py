@@ -327,6 +327,11 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         bases[bid] = {**b, "lat": ll.lat, "lon": ll.lng, "state": "open"}
     for cid, c in (sec.get("carriers") or {}).items():   # авианосцы - палубные базы на море (позиция - из сектора)
         bases[cid] = {**c, "kind": "carrier", "airport": None, "state": "open"}
+    for u in forces["units"]:                    # с палубы - только палубные типы (aircraft.json carrier) и вертолёты
+        if u.get("base") in (sec.get("carriers") or {}) and u.get("type"):
+            import dcs.helicopters as _h
+            if not (aircraft_info(u["type"]).get("carrier") or hasattr(_h, u["type"])):
+                raise ValueError(f"{u['name']}: тип {u['type']} в DCS не летает с авианосца (aircraft.json carrier)")
     # ---- вариант сценария и разброс ----
     if seed is None:
         seed = random.randrange(1, 10**6) if randomness else 0

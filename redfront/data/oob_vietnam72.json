@@ -1034,10 +1034,10 @@
    "side": "blue",
    "role": "fighter",
    "base": "cv63",
-   "type": "F_4E",
+   "type": "F_14A_135_GR_Early",
    "count": 24,
    "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J - F-4E",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)",
    "estimate": true
   },
   {
@@ -1082,10 +1082,10 @@
    "side": "blue",
    "role": "fighter",
    "base": "cv64",
-   "type": "F_4E",
+   "type": "F_14A_135_GR_Early",
    "count": 24,
    "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J - F-4E",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)",
    "estimate": true
   },
   {
@@ -1118,10 +1118,10 @@
    "side": "blue",
    "role": "fighter",
    "base": "cv43",
-   "type": "F_4E",
+   "type": "F_14A_135_GR_Early",
    "count": 24,
    "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4B - F-4E",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)",
    "estimate": true
   },
   {

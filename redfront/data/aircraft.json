@@ -127,7 +127,7 @@
       "crew": 2,
       "night": true
     },
-    "FA_18C_hornet": {
+    "FA_18C_hornet": {"carrier": true, 
       "fit": {"cas": 0.75, "interdiction": 0.75, "strike": 0.8, "sead": 0.8, "air": 0.8},
       "crew": 1,
       "night": true
@@ -212,7 +212,7 @@
       "crew": 1,
       "night": false
     },
-    "F_14A": {
+    "F_14A": {"carrier": true, 
       "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "F-14A с контейнером TARPS"},
       "crew": 2,
       "night": true
@@ -233,14 +233,16 @@
     "MiG_29S": {"fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.85}, "crew": 1, "night": false},
     "L_39C": {"fit": {"cas": 0.15, "air": 0.05}, "crew": 2, "night": false},
     "Mi_24V": {"fit": {"cas": 0.7}, "cargo_t": 1.5, "troops": 8, "crew": 2, "night": false},
-    "E_2C": {"crew": 5, "night": true},
+    "E_2C": {"carrier": true, "crew": 5, "night": true},
     "A_4E_C": {"fit": {"cas": 0.6, "interdiction": 0.55, "strike": 0.55, "sead": 0.3, "air": 0.2}, "crew": 1, "night": false},
     "B_52H": {"fit": {"interdiction": 0.5, "strike": 0.7}, "crew": 6, "night": true},
     "MiG_19P": {"fit": {"cas": 0.15, "air": 0.4}, "crew": 1, "night": false},
     "MiG_15bis": {"fit": {"cas": 0.15, "air": 0.25}, "crew": 1, "night": false},
-    "F_14A_135_GR": {"fit": {"air": 0.9}, "crew": 2, "night": true},
-    "S_3B_Tanker": {"crew": 4, "night": true}
+    "F_14A_135_GR": {"carrier": true, "fit": {"air": 0.9}, "crew": 2, "night": true},
+    "S_3B_Tanker": {"carrier": true, "crew": 4, "night": true},
+    "F_14A_135_GR_Early": {"carrier": true, "fit": {"air": 0.85}, "crew": 2, "night": true}
   },
+  "_about_carrier": "carrier - тип взлетает с палубы и садится на неё в DCS (авианосные части - только такие типы; вертолёты - все).",
   "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность); нет поля - груз не возит (ящики CTLD - тоже по нему).",
   "_about_fit": "fit - пригодность типа по видам задач на одной шкале для всех эпох (0..1; cas - удар по войскам, interdiction - по колоннам и путям подвоза, strike - по объектам тыла, sead - по ПВО, air - воздушный бой и перехват). Сравнивается с лучшим типом этой кампании (fitness.py): эпоху задаёт состав сил. ОЦЕНКИ по назначению, вооружению и прицельному оборудованию типа.",
   "_about_troops": "troops - солдат на борт (десант, эвакуация, CTLD): от типа ЛА, не от роли части - Ми-24 берёт 8, Апач и Газель никого; нет поля - солдат не возит (ОЦЕНКА по справочной вместимости).",

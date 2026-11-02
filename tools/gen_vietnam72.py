@@ -15,7 +15,7 @@ data/oob_vietnam72.json.
 Источники (общие, проверять): M. Michel, "Clashes: Air Combat over North Vietnam 1965-1972" (1997); D. Andrade,
 "Trial by Fire: The 1972 Easter Offensive" (1995); W. Momyer, "Airpower in Three Wars" (1978); A. Lavalle (ред.),
 "Airpower and the 1972 Spring Invasion" (USAF Southeast Asia Monograph, 1976). Составы и числа - ОЦЕНКИ по порядку
-величины. Типы DCS: F-4J/B ВМС - F-4E; A-6A, A-7E - F/A-18C (в pydcs нет без модов); KA-6D - S-3B Tanker;
+величины. Типы DCS: F-4J/B ВМС - F-14A (палубного F-4 в DCS нет; анахронизм); A-6A, A-7E - F/A-18C (в pydcs нет без модов); KA-6D - S-3B Tanker;
 F-105G "Дикая ласка" - F-4E; HH-53 - CH-53E; AH-1G - AH-1W; МиГ-21ПФ/МФ - МиГ-21бис; МиГ-17 - МиГ-15бис; J-6 - МиГ-19П;
 Т-54 - Т-55; ПТ-76 есть; М-48 - М-60; Стрела-2 - Игла.
 """
@@ -132,17 +132,18 @@ BRIDGES = [   # мосты - места ОЦЕНКА (середина учас�
     {"id": "br_dongha", "name": "Мост Донгха", "lat": 34.59, "lon": 35.99, "links": [["GioLinh", "DongHa"]],
      "source": "условно: середина участка Жолинь - Донгха"},
 ]
+F4_NOTE = "F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)"
 AIR = [   # (id, имя, сторона, роль, тип, база, число, радиус км, примечание)
-    ("us_vf114", "VF-114, VF-213 (F-4J, Kitty Hawk)", "blue", "fighter", "F_4E", "cv63", 24, 500, "F-4J - F-4E"),
+    ("us_vf114", "VF-114, VF-213 (F-4J, Kitty Hawk)", "blue", "fighter", "F_14A_135_GR_Early", "cv63", 24, 500, F4_NOTE),
     ("us_va_kh", "VA-192, VA-195 (A-7E), VA-52 (A-6A), Kitty Hawk", "blue", "fighter_bomber", "FA_18C_hornet", "cv63", 36, 500,
      "A-7E/A-6A - F/A-18C"),
     ("us_e2_kh", "VAW-114 (E-2B)", "blue", "awacs", "E_2C", "cv63", 4, 1000, "E-2B - E-2C"),
     ("us_ka6_kh", "KA-6D (Kitty Hawk)", "blue", "tanker", "S_3B_Tanker", "cv63", 4, 800, "KA-6D - S-3B Tanker"),
-    ("us_vf96", "VF-92, VF-96 (F-4J, Constellation)", "blue", "fighter", "F_4E", "cv64", 24, 500, "F-4J - F-4E"),
+    ("us_vf96", "VF-92, VF-96 (F-4J, Constellation)", "blue", "fighter", "F_14A_135_GR_Early", "cv64", 24, 500, F4_NOTE),
     ("us_va_con", "VA-146, VA-147 (A-7E), VA-165 (A-6A), Constellation", "blue", "fighter_bomber", "FA_18C_hornet", "cv64", 36, 500,
      "A-7E/A-6A - F/A-18C"),
     ("us_e2_con", "VAW-116 (E-2B)", "blue", "awacs", "E_2C", "cv64", 4, 1000, "E-2B - E-2C"),
-    ("us_vf51", "VF-51, VF-111 (F-4B, Coral Sea)", "blue", "fighter", "F_4E", "cv43", 24, 500, "F-4B - F-4E"),
+    ("us_vf51", "VF-51, VF-111 (F-4B, Coral Sea)", "blue", "fighter", "F_14A_135_GR_Early", "cv43", 24, 500, F4_NOTE),
     ("us_va_cs", "VA-22, VA-94 (A-7E), VMA(AW)-224 (A-6A), Coral Sea", "blue", "fighter_bomber", "FA_18C_hornet", "cv43", 30, 500,
      "A-7E/A-6A - F/A-18C"),
     ("us_366", "366-е тактическое крыло (F-4E, Дананг)", "blue", "fighter_bomber", "F_4E", "Beirut-Rafic Hariri", 36, 500, ""),
