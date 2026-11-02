@@ -17,7 +17,6 @@ from dcs.action import DoScript, DoScriptFile
 from dcs.mapping import LatLng, Point, Vector2
 from dcs.mission import StartType
 from dcs.point import PointAction
-from dcs.terrain.germany import Germany
 from dcs.terrain.terrain import NoParkingSlotError
 from dcs.translation import String
 from dcs.triggers import TriggerStart
@@ -1161,7 +1160,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for ln in pre_lines:
             model.note(state, ln)
 
-    m = Mission(Germany())
+    m = Mission(model.terrain_class(state)())
     set_airbase_coalitions(m, state)
     y, mo, d = map(int, state["date"].split("-"))
     start = datetime.datetime(y, mo, d, state["start_hour"], 0) + datetime.timedelta(days=state["day"] - 1)

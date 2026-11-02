@@ -351,11 +351,10 @@ SLOTS_PER_UNIT = {"air": 16, "heli": 12}     # ОЦЕНКА: мест стоян
 
 def _capacity(state: dict, bid: str, cat: str) -> int:
     """Сколько частей класса cat (air, heli) примет аэродром: стоянки / SLOTS_PER_UNIT; площадка - одну вертолётную."""
-    from dcs.terrain.germany import Germany
     b = state["airbases"][bid]
     if b.get("kind") == "farp":
         return 1 if cat == "heli" else 0
-    ap = Germany().airports.get(b.get("airport") or "")
+    ap = model.terrain(state).airports.get(b.get("airport") or "")
     if ap is None:
         return 1
     n = sum(1 for s in ap.parking_slots if (s.helicopter if cat == "heli" else s.airplanes))

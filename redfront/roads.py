@@ -16,7 +16,6 @@ from pathlib import Path
 from dcs import Mission
 from dcs.action import DoScript
 from dcs.mapping import LatLng, Point
-from dcs.terrain.germany import Germany
 from dcs.translation import String
 from dcs.triggers import TriggerStart
 
@@ -42,7 +41,7 @@ def pairs_from_units(units: list[dict]) -> list[tuple[str, str]]:
 
 
 def probe_script(sector: str, places: dict, pairs: list[tuple[str, str]]) -> str:
-    terrain = Germany()
+    terrain = model.terrain(model.sector_theatre(sector))
     def p(name):
         q = Point.from_latlng(LatLng(places[name]["lat"], places[name]["lon"]), terrain)
         return q.x, q.y
@@ -62,7 +61,7 @@ def probe(out_path: Path, sector: str | Path = "sector_hamburg.json", oob: str |
         pairs = [tuple(l) for l in sec["links"]]
     if not pairs:
         raise ValueError("в составе сил нет маршрутов - спрашивать у DCS нечего")
-    m = Mission(Germany())
+    m = Mission(model.terrain_class(sec.get("theatre"))())
     trig = TriggerStart(comment="redfront roads probe")
     trig.add_action(DoScript(String(probe_script(sid, sec["places"], pairs))))   # String(...), не m.string(...)
     m.triggerrules.triggers.append(trig)
@@ -88,7 +87,7 @@ def load(path: Path) -> dict:
 def from_raw(raw: dict) -> dict:
     """{"paths": {"A>B": [[x, y], ...]}} в координатах карты DCS -> ломаные в широте/долготе.
     Тот же вид пишет и зонд дорог, и хук дебрифа (поле roads - пути, найденные скриптом колонны)."""
-    terrain = Germany()
+    terrain = model.terrain(model.sector_theatre(raw.get("sector") or "germany"))
     paths = {}
     for pid, pts in raw.get("paths", {}).items():
         line = []

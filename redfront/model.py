@@ -22,6 +22,45 @@ STATE_VERSION = 2
 SIDES = ("red", "blue")
 
 
+_TERRAINS: dict = {}
+THEATRE_INFO = {   # карта DCS: класс pydcs, центр (восход/закат), время миссии DCS (UTC+), климат (weather.CLIMATES)
+    "germany": {"cls": "Germany", "lat": 51.5, "lon": 10.5, "utc": 1, "climate": "hannover"},
+    "caucasus": {"cls": "Caucasus", "lat": 42.5, "lon": 43.5, "utc": 4, "climate": "tbilisi"},
+    "syria": {"cls": "Syria", "lat": 33.5, "lon": 35.8, "utc": 3, "climate": "beirut"},
+}
+
+
+def theatre_id(state_or_name) -> str:
+    """Карта кампании: поле theatre сектора (germany, caucasus, syria); Гамбург - тоже germany."""
+    t = state_or_name.get("theatre") if isinstance(state_or_name, dict) else state_or_name
+    return t if t in THEATRE_INFO else "germany"
+
+
+def terrain(state_or_name=None):
+    """Терраин pydcs карты кампании (кэш: создание терраина - секунды)."""
+    tid = theatre_id(state_or_name or "germany")
+    if tid not in _TERRAINS:
+        import dcs.terrain as _t
+        _TERRAINS[tid] = getattr(_t, THEATRE_INFO[tid]["cls"])()
+    return _TERRAINS[tid]
+
+
+def sector_theatre(sector) -> str:
+    """Карта сектора: по файлу сектора или его id (sector_<id>.json; файл зонда хранит id)."""
+    try:
+        name = str(sector)
+        if not name.endswith(".json"):
+            name = f"sector_{name}.json"
+        return theatre_id(load_json(Path(name).name if not Path(name).is_file() else name).get("theatre"))
+    except (OSError, ValueError):
+        return "germany"
+
+
+def terrain_class(state_or_name=None):
+    import dcs.terrain as _t
+    return getattr(_t, THEATRE_INFO[theatre_id(state_or_name or "germany")]["cls"])
+
+
 def load_json(name: str | Path) -> dict:
     """Файл игрока (если путь существует) или файл из data/ пакета."""
     p = Path(name)
@@ -265,7 +304,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
                  randomness: bool = True) -> dict:
     """Новая кампания. Вариант сценария (variants в составе сил) - заданный, иначе случайный по seed;
     randomness=False - без случайности: базовый вариант, без разброса в бою и в решениях командования."""
-    from dcs.terrain.germany import Germany  # координаты аэродромов берём из терраина pydcs, а не вписываем руками
+    # координаты аэродромов берём из терраина pydcs карты сектора, а не вписываем руками
     if player_side not in SIDES:
         raise ValueError(f"сторона должна быть одной из {SIDES}")
     packages = {**{"red": "wp", "blue": "nato"}, **(packages or {})}   # синие - доктрина НАТО (data/doctrine/nato.json)
@@ -279,7 +318,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     date = datetime.date.fromisoformat(str(date)).isoformat()   # своя дата - ГГГГ-ММ-ДД, иначе ошибка сразу
     if forces["countries"]["red"] == forces["countries"]["blue"]:
         raise ValueError("у сторон в составе сил одна и та же страна (countries)")
-    terrain = Germany()
+    terrain = terrain_class(sec.get("theatre"))()
     bases = {}
     for bid, b in sec["airbases"].items():
         if not b.get("military", True):          # только военные аэродромы

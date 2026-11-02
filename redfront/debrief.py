@@ -9,7 +9,6 @@ import json
 from pathlib import Path
 
 from dcs.mapping import Point
-from dcs.terrain.germany import Germany
 
 from . import explain, model, roads
 
@@ -83,7 +82,7 @@ def apply(state: dict, data: dict) -> list[str]:
     for name, msg in (data.get("column_log") or {}).items():
         lines.append(f"Колонна {name}: {msg}.")
     if data.get("roads"):
-        lines += roads.apply(state, roads.from_raw({"paths": data["roads"]}), note=False)
+        lines += roads.apply(state, roads.from_raw({"paths": data["roads"], "sector": roads.sector_id(state.get("sector") or "germany")}), note=False)
     # место боя, выбранное миссией по местности (battle_site.lua): следующие вылеты ставят бой туда же
     for key, (dx, dy) in (data.get("sites") or {}).items():
         state.setdefault("battle_sites", {})[key] = {"x": dx, "y": dy}
@@ -114,7 +113,7 @@ def apply(state: dict, data: dict) -> list[str]:
             u[key] = u.get(key, 0) + n
             lines.append(f"{u['name']}: " + (f"РСЗО - потеряно боевых машин {n}." if a.get("mrl") else f"артиллерия - потеряно орудий {n}."))
     # ---- наземные части ----
-    terrain = Germany()
+    terrain = model.terrain(state)
     for g in man["ground"]:
         u = state["units"][g["unit"]]
         before = model.strength(u)

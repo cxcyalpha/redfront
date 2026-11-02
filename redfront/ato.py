@@ -42,23 +42,24 @@ def is_night(state: dict, t_s: float) -> bool:
     return not (w0 <= t_s % DAY_S < w1)
 
 
-SUN_LAT, SUN_LON = 51.5, 10.5   # центр театра (Германия) для восхода и заката
-MAP_UTC_H = 1                    # ОЦЕНКА: время миссии DCS на карте Cold War Germany - UTC+1 (зимнее, без перехода на летнее)
+# центр театра и время миссии DCS (UTC+) - model.THEATRE_INFO (ОЦЕНКИ: Germany +1, Caucasus +4, Syria +3)
 TWILIGHT_H = 0.5                 # ОЦЕНКА: гражданские сумерки - лётный день от восхода -30 мин до заката +30 мин
 
 
-def sun_hours(date) -> tuple[float, float]:
-    """Восход и закат (ч, время миссии) на дату - упрощённые формулы NOAA (точность ~5 мин)."""
+def sun_hours(date, theatre: str = "germany") -> tuple[float, float]:
+    """Восход и закат (ч, время миссии) на дату для центра театра - упрощённые формулы NOAA (точность ~5 мин)."""
     import math
+    ti = model.THEATRE_INFO[model.theatre_id(theatre)]
+    sun_lat, sun_lon, utc = ti["lat"], ti["lon"], ti["utc"]
     n = date.timetuple().tm_yday
     g = 2 * math.pi / 365 * (n - 1)
     decl = (0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g)
             + 0.000907 * math.sin(2 * g) - 0.002697 * math.cos(3 * g) + 0.00148 * math.sin(3 * g))
     eqt = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g) - 0.014615 * math.cos(2 * g)
                     - 0.040849 * math.sin(2 * g))
-    lat = math.radians(SUN_LAT)
+    lat = math.radians(sun_lat)
     ha = math.degrees(math.acos(math.cos(math.radians(90.833)) / (math.cos(lat) * math.cos(decl)) - math.tan(lat) * math.tan(decl)))
-    noon = 720 - 4 * SUN_LON - eqt + MAP_UTC_H * 60
+    noon = 720 - 4 * sun_lon - eqt + utc * 60
     return (noon - 4 * ha) / 60, (noon + 4 * ha) / 60
 
 
@@ -74,7 +75,7 @@ def flying_window(state: dict) -> tuple[int, int]:
     if fh:
         return int(fh[0] * 3600), int(fh[1] * 3600)
     try:
-        rise, sset = sun_hours(campaign_date(state))
+        rise, sset = sun_hours(campaign_date(state), model.theatre_id(state))
     except (KeyError, ValueError):
         rise, sset = FLYING_HOURS
     return int((rise - TWILIGHT_H) * 3600), int((sset + TWILIGHT_H) * 3600)

@@ -27,7 +27,6 @@ from pathlib import Path
 from dcs import Mission
 from dcs.action import DoScript
 from dcs.mapping import LatLng, Point
-from dcs.terrain.germany import Germany
 from dcs.translation import String
 from dcs.triggers import TriggerStart
 
@@ -100,7 +99,7 @@ def tiles(sec: dict, terrain) -> list[tuple[float, float]]:
 def probe(out_path: Path, sector: str | Path = "sector_hamburg.json") -> dict:
     sec = model.load_json(sector)
     sid = roads.sector_id(sector)
-    terrain = Germany()
+    terrain = model.terrain(sec.get("theatre"))
     tl = tiles(sec, terrain)
     dp = []
     for d in sec.get("depots", []):
@@ -112,7 +111,7 @@ def probe(out_path: Path, sector: str | Path = "sector_hamburg.json") -> dict:
               .replace("@DEPOTS@", ", ".join(dp))
               .replace("@DEPOT_KEYS@", ", ".join(f'"{k}"' for k in DEPOT_KEYS))
               .replace("@FACTORY_KEYS@", ", ".join(f'"{k}"' for k in FACTORY_KEYS)))
-    m = Mission(Germany())
+    m = Mission(model.terrain_class(sec.get("theatre"))())
     trig = TriggerStart(comment="redfront map probe")
     trig.add_action(DoScript(String(script)))
     m.triggerrules.triggers.append(trig)
@@ -130,7 +129,7 @@ def load(path: Path) -> dict:
     """Файл зонда -> объекты в широте/долготе: bridges_all [{name, type, lat, lon, water}], depot_objects_all,
     depots {id склада: {тип: {n, lat, lon}}}; старый формат - bridges/depot_objects по id цели."""
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
-    terrain = Germany()
+    terrain = model.terrain(model.sector_theatre(raw.get("sector") or "germany"))
     out = {"sector": raw.get("sector"), "bridges": {}, "depots": {}, "depot_objects": {}, "errors": raw.get("errors", {})}
     def objs_ll(objs):
         lst = []
@@ -420,7 +419,7 @@ def _props(z) -> dict:
 
 def import_miz(target: dict, miz: Path) -> list[str]:
     """Зоны "Assign as..." из миссии: ROLE = depot|bridge, VALUE = id объекта. Заменяют найденное зондом."""
-    m = Mission(Germany())
+    m = Mission(model.terrain_class(model.sector_theatre(target.get("sector") or "germany"))())
     m.load_file(str(miz))
     groups: dict[str, list[dict]] = {}
     lines = []
