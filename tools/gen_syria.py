@@ -259,6 +259,10 @@ def main() -> None:
         "units": units,
         "variants": [{"name": "base", "title": "Июнь 1982: Ливан, долина Бекаа",
                       "posture": {"blue": "offense", "red": "defense"},
+                      "task_rules": {"blue": {
+                          "strike_sam_site": {"from_day": 4, "why": "удар по ЗРК в Бекаа ('Медведка 19') - 9 июня"},
+                          "strike_airfield": {"off": True, "why": "по аэродромам Сирии Израиль не бил"},
+                          "strike_factory": {"off": True, "why": "по промышленности не били"}}},
                       "_about_posture": "наступает Израиль; Сирия и ООП - в обороне (ops: поза по сценарию)"}],
         "replacements": {"air_per_day": 1, "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}

@@ -685,6 +685,20 @@
    "Telavi"
   ]
  },
+ "off_limits": {
+  "blue": [
+   "Mozdok",
+   "Prokhladny",
+   "Nalchik",
+   "Beslan",
+   "Nazran",
+   "Vladikavkaz",
+   "Alagir",
+   "Zaramag",
+   "UpperLars",
+   "Sochi"
+  ]
+ },
  "axes": {
   "south": "Южная Осетия: Цхинвали - Гори",
   "west": "Абхазия: Зугдиди - Сенаки - Поти",

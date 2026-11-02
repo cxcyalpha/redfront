@@ -1881,6 +1881,22 @@
     "blue": "offense",
     "red": "defense"
    },
+   "task_rules": {
+    "blue": {
+     "strike_sam_site": {
+      "from_day": 4,
+      "why": "удар по ЗРК в Бекаа ('Медведка 19') - 9 июня"
+     },
+     "strike_airfield": {
+      "off": true,
+      "why": "по аэродромам Сирии Израиль не бил"
+     },
+     "strike_factory": {
+      "off": true,
+      "why": "по промышленности не били"
+     }
+    }
+   },
    "_about_posture": "наступает Израиль; Сирия и ООП - в обороне (ops: поза по сценарию)"
   }
  ],

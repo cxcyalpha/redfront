@@ -567,7 +567,7 @@ class App:
             if str(req.get("air") or "").strip():
                 st["settings"]["mission_air"] = max(0, int(req["air"]))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),
-                                  humans=int(req.get("humans") or 1))
+                                  humans=int(req.get("humans") or 1), player=not req.get("ai"))
             n = sum(len(g["vehicles"]) for g in man["ground"])
             lines.append(i18n.L(i18n.lang(st), f"Миссия: {man['file']} (наземных машин {n}, бюджет ",
                                 f"Mission: {man['file']} (ground vehicles {n}, budget ")

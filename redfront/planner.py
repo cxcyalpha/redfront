@@ -69,6 +69,7 @@ def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str, l
 
 
 RADAR_SAM_TYPES = {"Osa_9A33_ln", "Roland_ADS", "X_2S6_Tunguska", "Tor 9A331", "Kub_2P25_ln", "rapier_fsa_blindfire_radar"}
+DENSE_SAMS, DENSE_KM, WAVE_GAP_MIN = 3, 25, 3   # ОЦЕНКИ: плотная ПВО у цели - второй эшелон удара через 3 мин
 SEAD_MAX_FLIGHTS = 3    # ОЦЕНКА: групп подавления в пакете - не больше (по одной на прикрывающую батарею)
 GATE_BELT = 2           # ОЦЕНКА: столько ЗРК средней/большой дальности на пути к цели в глубине - пояс ПВО: цель ждёт
 
@@ -236,6 +237,41 @@ def nation_bonus(state: dict, unit: dict, cls: str | None) -> float:
     return float((nb.get(pilots.nation(unit)) or {}).get(cls, 0.0))
 
 
+PHASE_K = {   # ОЦЕНКИ: множители долей категорий по фазе воздушной операции (FM 100-5 / AJP-3.3: сначала - ПВО и
+    # авиация противника, затем - поддержка войск; 1982: "Медведка 19", затем бои за господство в воздухе)
+    "suppression": {"SEAD": 2.0, "OCA": 1.2, "APCLO": 0.7},
+    "air_superiority": {"SEAD": 1.0, "OCA": 1.6, "DCA": 1.2, "APCLO": 0.8},
+    "support": {"SEAD": 0.6, "OCA": 0.6, "APCLO": 1.5},
+}
+PHASE_SAM, PHASE_AIR = 0.5, 0.6   # ОЦЕНКИ: подавление - пока живо больше половины ЗРК с РЛС противника; господство -
+                                  # пока у противника больше 60% истребителей; дальше - поддержка войск
+
+
+def _strength_now(state: dict, side: str) -> tuple[int, int]:
+    """ЗРК средней/большой дальности и истребители стороны в строю."""
+    sams = sum(1 for u in state["units"].values() if u["side"] == side and u.get("role") in ("sam_medium", "sam_long")
+               and u["state"] not in ("destroyed", "pending") and model.strength(u) >= 0.5)
+    air = sum(u.get("count", 0) for u in state["units"].values() if u["side"] == side
+              and u.get("role") in ("fighter", "interceptor"))
+    return sams, air
+
+
+def phase(state: dict, side: str) -> str:
+    """Фаза воздушной операции стороны по обстановке: suppression - ПВО противника в основном цела; air_superiority -
+    его истребители в основном целы; support - поддержка войск. Начальные силы - на 1-й день (state['air_war_base'])."""
+    foe = model.enemy(side)
+    base = state.setdefault("air_war_base", {})
+    if foe not in base:
+        base[foe] = list(_strength_now(state, foe))
+    s0, a0 = base[foe]
+    s, a = _strength_now(state, foe)
+    if s0 and s / s0 > PHASE_SAM:
+        return "suppression"
+    if a0 and a / a0 > PHASE_AIR:
+        return "air_superiority"
+    return "support"
+
+
 def apportion(state: dict, doc: dict, tasks: list[dict], max_tasks: int) -> list[dict]:
     """Распределение сил по категориям (доктрина apportionment: DCA, OCA, SEAD, APCLO): категории - не больше своей
     доли плана (не меньше одной задачи, если доля есть); задачи вне категорий - без ограничения. Порядок - прежний."""
@@ -246,6 +282,10 @@ def apportion(state: dict, doc: dict, tasks: list[dict], max_tasks: int) -> list
     for row in sorted(ap["shares"], key=lambda r: r["from_day"]):
         if state["day"] >= row["from_day"]:
             shares = row
+    side = tasks[0]["side"] if tasks else None
+    ph = phase(state, side) if side else None
+    if ph:                                       # фаза воздушной операции смещает доли (ОЦЕНКИ: PHASE_K)
+        shares = {c: (v * PHASE_K[ph].get(c, 1.0) if isinstance(v, (int, float)) else v) for c, v in shares.items()}
     cls_of = {k: c for c, ks in ap["classes"].items() for k in ks}
     cap = {c: (max(1, round(shares.get(c, 0) * max_tasks)) if shares.get(c, 0) > 0 else 0) for c in ap["classes"]}
     used: dict[str, int] = {}
@@ -275,7 +315,20 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     tasked: dict[str, int] = {}                  # задач у части в этом плане
     year = campaign_year(state)
     gate, gated = _gates(state, side)            # пояса ПВО перед целями в глубине: сначала они (roll-back)
+    rules = (state.get("task_rules") or {}).get(side) or {}   # правила задач сценария (с какого дня, запрет)
+    banned = set((state.get("off_limits") or {}).get(side, []))
+    def _allowed_area(u):                        # цель не в районе, куда сторона по сценарию не действует
+        if not banned:
+            return True
+        pos = _aim(state, side, u)
+        near = min(state["places"], key=lambda n: model.dist_km(state["places"][n], pos))
+        return near not in banned
     for kind, tdef in doc["tasks"].items():
+        rule = rules.get(kind) or {}
+        if rule.get("off") or state["day"] < rule.get("from_day", 0):
+            reasons.append(f"{tdef['title']}: " + (rule.get("why") or "не в замысле сценария") +
+                           (f" (с {rule['from_day']}-го дня)" if rule.get("from_day") and not rule.get("off") else ""))
+            continue
         if tdef.get("from_year") and year and year < tdef["from_year"]:
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
         performers = [u for u in state["units"].values()
@@ -338,6 +391,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             if depth and tside == foe:           # полоса глубины от своих войск (НАТО: BAI 15-50 км, FOFA - глубже)
                 from . import farp
                 targets = [u for u in targets if depth[0] <= farp.front_km(state, foe, _aim(state, side, u)) <= depth[1]]
+        targets = [t for t in targets if _allowed_area(t)]
         if not targets:
             continue
         found = False
@@ -394,7 +448,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if not found and not targets:
             reasons.append(f"{tdef['title']}: целей нет")
     orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
-    regular = apportion(state, doc, [t for t in tasks if not t.get("ai_only")], max_tasks)
+    regular = apportion(state, doc, _interleave([t for t in tasks if not t.get("ai_only")]), max_tasks)   # доли - по кругу видов
     return joint_heli(state, side, _interleave(regular)[:max_tasks]) + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
 
 
@@ -1001,6 +1055,15 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                            "search_min": g.get("search_min"), "zone_margin_km": g.get("zone_margin_km"),
                            "search_alt_m": g.get("search_alt_m"), "launch_alt_m": g.get("launch_alt_m"),
                            **{k: g[k] for k in ZONE_KEYS if k in g}})
+    # плотная ПВО у цели (DENSE_SAMS и больше ЗРК с РЛС ближе DENSE_KM): второй эшелон удара той же части через
+    # WAVE_GAP_MIN - добивает то, что первый не поразил, пока ПВО ещё подавлена (удар волнами, как в планах BMS/НАТО)
+    dense = [t for t in threats if sead_target(units[t]) and model.dist_km(model.unit_pos(state, units[t]), tpos) <= DENSE_KM]
+    if (len(dense) >= DENSE_SAMS and objective.get("kind") not in ("cap_zone",) and s.get("mode") != "cap_zone"
+            and avail.get(perf["id"], 0) >= size):
+        avail[perf["id"]] -= size
+        g2 = dict(groups[0], group="strike2", title=f"{s['title']} (второй эшелон)", lead_min=-WAVE_GAP_MIN, route=list(groups[0]["route"]))
+        groups.append(g2)
+        notes.append(f"плотная ПВО у цели ({len(dense)} ЗРК) - второй эшелон удара через {WAVE_GAP_MIN} мин")
     rendezvous(state, tdef, groups)
     return groups, "; ".join(notes)
 

@@ -64,6 +64,8 @@ LINKS = [
     ("Gudauta", "Gagra"), ("Gagra", "Sochi"), ("Sukhumi", "Azhara"),
 ]
 SUPPLY_ENTRY = {"red": ["Mozdok", "Nalchik", "Sochi"], "blue": ["Tbilisi", "Batumi", "Telavi"]}
+OFF_LIMITS = {"blue": ["Mozdok", "Prokhladny", "Nalchik", "Beslan", "Nazran", "Vladikavkaz", "Alagir", "Zaramag",
+                       "UpperLars", "Sochi"]}   # Грузия не действует на территории России (политика и возможности)
 
 AIRBASES = {   # имена - как в терраине pydcs Caucasus
     "red": ["Mozdok", "Beslan", "Nalchik", "Mineralnye Vody", "Krymsk", "Maykop-Khanskaya", "Krasnodar-Center",
@@ -229,6 +231,7 @@ def main() -> None:
         "airbases": airbases,
         "links": [list(l) for l in LINKS],
         "supply_entry": SUPPLY_ENTRY,
+        "off_limits": OFF_LIMITS,
         "axes": {k: v["title"] for k, v in AXES.items()},
         "objectives": {"red": {k: v["objectives"] for k, v in AXES.items()}, "blue": []},
         "_about_objectives": "Оси красных - ОЦЕНКА по ходу войны (Цхинвали - Гори; Абхазия - Зугдиди, Сенаки, Поти; "
@@ -276,7 +279,8 @@ def main() -> None:
         "date": "2008-08-08",
         "countries": {"red": "Russia", "blue": "Georgia"},
         "units": units,
-        "variants": [{"name": "base", "title": "Август 2008: Южная Осетия и Абхазия"}],
+        "variants": [{"name": "base", "title": "Август 2008: Южная Осетия и Абхазия",
+                      "task_rules": {"blue": {"strike_airfield": {"off": True, "why": "у ВВС Грузии нет средств для ударов по аэродромам России"}}}}],
         "replacements": {"air_per_day": 1, "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]}

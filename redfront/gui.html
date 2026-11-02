@@ -276,6 +276,7 @@ const I18N = {
     wxFog: "утренний туман", wxEff: "погода влияет на план полётов (минимумы)", wxTip: "пересчёт: сегодня, если ещё не летали, иначе с завтра", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
     cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", loEdTip: "своя подвеска: оружие по пилонам (новее года кампании - заменится по эпохе)", loEmpty: "— пусто —",
     loName: "имя подвески", loSave: "Сохранить",
+    aiTest: "всё на ИИ", aiTestTip: "проверочная миссия: группа игрока тоже ИИ; в дебрифе - когда группы ИИ вышли на рубеж против плана",
     histNow: "обстановка: сейчас", histDay: "День", histTip: "хронология: обстановка на карте в прошлые дни (движение фронта)",
     budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
     airBudgetTip: "с пакетом игрока; вылеты ИИ дальше от удара игрока не ставятся (в модели они летают); 0 - без ограничения",
@@ -358,6 +359,7 @@ const I18N = {
     wxFog: "morning fog", wxEff: "weather affects the air tasking order (minima)", wxTip: "recomputed today if nothing flown yet, otherwise from tomorrow", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
     cancel: "Cancel", create: "Create", close: "Close", language: "Language", loEdTip: "custom loadout: weapon per pylon (newer than the campaign year is replaced by era)", loEmpty: "— empty —",
     loName: "loadout name", loSave: "Save",
+    aiTest: "all AI", aiTestTip: "test mission: the player's group is AI too; the debrief shows when AI groups reached their entry points against the plan",
     histNow: "situation: now", histDay: "Day", histTip: "timeline: the map situation on past days (front movement)",
     budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
     airBudgetTip: "including the player package; AI sorties farther from the player strike are left out (the model still flies them); 0 - unlimited",
@@ -698,7 +700,8 @@ function renderInspector() {
       <select class="fly">${t.package.map(g => `<option value="${g.group}">${esc(g.title)}</option>`).join("")}</select>
       <span class="meta" style="margin:0" title="${esc(T("humansTip"))}">${T("humans")}</span>
       <select class="hum">${Array.from({length: Math.max(1, t.seats || 1)}, (_, k) => `<option>${k + 1}</option>`).join("")}</select></div>
-      <div class="row" style="margin-top:6px"><button class="main go">${T("buildBtn")}</button></div></div>`;
+      <div class="row" style="margin-top:6px"><button class="main go">${T("buildBtn")}</button>
+      <label class="meta" style="margin:0" title="${esc(T("aiTestTip"))}"><input type="checkbox" class="aitest" style="width:auto"> ${T("aiTest")}</label></div></div>`;
   if (own && !r.locked) h += `<div class="row" style="margin-top:6px">${r.duty_only ? "" : `<button class="atoEd">${T("edit")}</button>`}<button class="atoRm">${T("remove")}</button></div>`;
   h += `<div class="atoForm"></div>`;
   if (s) h += s.groups.map((g, k) => `<div class="grpbox"><div><span class="sw" style="background:${grpCol(k)}"></span><b>${esc(g.title)}</b>: ${g.size} × ${esc(g.type)}</div>
@@ -708,6 +711,7 @@ function renderInspector() {
   box.innerHTML = h + `</div>`;
   const go = box.querySelector(".go");
   if (go) go.onclick = e => act("build", {task: ti + 1, fly: box.querySelector(".fly").value, humans: box.querySelector(".hum").value,
+    ai: box.querySelector(".aitest").checked,
     budget: pref("rf_budget", ""), air: pref("rf_air", "")}, e.target);
   const ed = box.querySelector(".atoEd"); if (ed) ed.onclick = () => atoEditor(box.querySelector(".item"));
   const rm = box.querySelector(".atoRm"); if (rm) rm.onclick = e => { if (confirm(T("removeQ"))) act("atoremove", {id: r.id}, e.target); };

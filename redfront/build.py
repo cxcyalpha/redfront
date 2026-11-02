@@ -523,7 +523,7 @@ def loadout_cats(kind: str, g: dict) -> list[str]:
     """Категории подвески группы по порядку: вид задачи (для ударной группы) или роль группы обеспечения, затем
     категории доктрины (loadout группы)."""
     first = [] if g.get("loadout_user") else \
-        GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], []) if g.get("group") != "strike" \
+        GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], []) if g.get("group") not in ("strike", "strike2") \
         else KIND_CATS.get(kind, [])
     out = []
     for c in first + list(g.get("loadout") or []):
@@ -1075,7 +1075,7 @@ ETA_POINTS = ("ИПМ", "Рубеж пуска", "Рубеж атаки", "Зо�
               "Площадка", "Экипаж", "Зона дежурства")   # точки, к которым группа ИИ выходит ко времени
 
 
-def _lock_eta(fg, objective_s: float, spd_kmh: float) -> None:
+def _lock_eta(fg, objective_s: float, spd_kmh: float) -> dict | None:
     """Время выхода группы ИИ на рубеж (ИПМ - время удара минус полёт ИПМ-цель; зона, рубеж пуска - время выхода на
     объект): ETA залочен, скорость - нет: DCS сама ускоряется или замедляется, чтобы успеть (как в планировщиках
     Liberation/Retribution - время на цели фиксировано, скорость свободна). Раньше залоченный сбор не трогаем."""
@@ -1087,7 +1087,9 @@ def _lock_eta(fg, objective_s: float, spd_kmh: float) -> None:
                 eta -= w.position.distance_to_point(pts[i + 1].position) / (spd_kmh / 3.6)
             if eta > 0:
                 w.ETA, w.ETA_locked, w.speed_locked = int(eta), True, False
-            return
+                return {"group": fg.name, "x": w.position.x, "y": w.position.y, "eta": int(eta)}   # проверка (timing.lua)
+            return None
+    return None
 
 
 def _airborne(state: dict, g: dict, spd_kmh: float, secs: float) -> bool:
@@ -1261,6 +1263,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     evac_specs: list[dict] = []                  # эвакуация десанта (evac.lua)
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     cap_specs: list[dict] = []                   # пары прикрытия ИИ (cap.lua)
+    timing_specs: list[dict] = []                # выход групп ИИ на рубеж: факт против плана (timing.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
     ctld = {"pilots": [], "actions": {}, "limits": {}, "cargo": {}, "logistic": [], "pickup": [], "groups": [],
             "crates": [], "lifts": [], "jtacs": [], "extract": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
@@ -1413,7 +1416,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             if g.get("_ai"):                     # вылет ИИ: ударная группа - без группы обеспечения (_support)
                 sp = push_specs.get(g.get("_ato")) if not g.get("_support") else None
             else:
-                sp = push_specs["player"] if g["group"] == "strike" else None
+                sp = push_specs["player"] if g["group"] in ("strike", "strike2") else None
             if not sp or not sp["sead"]:
                 return
             hold = task.ControlledTask(task.OrbitAction(altitude=int(w.alt), speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
@@ -1681,7 +1684,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(tgt, transit, "Цель")
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         if not is_player:                        # ИИ: ко времени на рубеже - ETA там, скорость DCS подберёт сама
-            _lock_eta(fg, times[g["group"]]["objective_s"], spd)
+            ts = _lock_eta(fg, times[g["group"]]["objective_s"], spd)
+            if ts:
+                timing_specs.append(ts)
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)
@@ -1804,6 +1809,12 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p))))
+    if timing_specs:                             # проверка плана по времени: факт выхода групп ИИ на рубеж
+        q = lambda x: '"' + str(x).replace('"', "'") + '"'
+        items = ", ".join(f'{{ group = {q(t["group"])}, x = {t["x"]:.0f}, y = {t["y"]:.0f}, eta = {t["eta"]} }}' for t in timing_specs)
+        trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "timing.lua").read_text(encoding="utf-8")
+                                        .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(state["sortie"]))
+                                        .replace("@SPECS@", items))))
     if cap_specs:                                # пары прикрытия ИИ: без ведомого - домой
         trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны

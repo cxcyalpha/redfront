@@ -2209,6 +2209,14 @@
     "spacing_m": 50,
     "estimate": true
   },
+  "apportionment": {
+    "source": "ОЦЕНКА по смыслу советской теории воздушной операции фронта (первые массированные удары - по авиации и ПВО противника, затем - поддержка войск): доли задач плана по категориям; фазы по обстановке - planner.phase",
+    "classes": {"DCA": ["cap_own_troops"], "OCA": ["strike_airfield"], "SEAD": ["strike_sam_site"],
+                "APCLO": ["cas_contact", "cas_helo", "strike_column_march", "strike_supply_route", "strike_bridge", "strike_depot", "strike_factory"]},
+    "shares": [{"from_day": 1, "DCA": 0.15, "OCA": 0.3, "SEAD": 0.2, "APCLO": 0.35},
+               {"from_day": 3, "DCA": 0.15, "OCA": 0.15, "SEAD": 0.15, "APCLO": 0.55}],
+    "estimate": true
+  },
   "fires": {
     "missions": 6,
     "rounds": 36,

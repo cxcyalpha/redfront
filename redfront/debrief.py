@@ -168,6 +168,14 @@ def apply(state: dict, data: dict) -> list[str]:
             n = sum(1 for v in cv["vehicles"] if v["name"] in lost)
             lines.append(f"Колонна снабжения {cv['link'].replace('>', ' - ')}: уничтожено {n} из {len(cv['vehicles'])} машин "
                          f"(~{dead_w:.1f} грузовиков потока), недовоз ~{t:.0f} т.")
+    tm = data.get("timing") or {}                # выход групп ИИ на рубеж: факт против плана (timing.lua)
+    if tm:
+        dev = sorted(((t - eta) // 60, g) for g, (t, eta) in tm.items())
+        late = [f"{g} {d:+d} мин" for d, g in dev if abs(d) >= 3]
+        lines.append(f"Время выхода групп ИИ на рубеж: {len(tm)} групп, отклонение от плана "
+                     f"{dev[0][0]:+d}..{dev[-1][0]:+d} мин" + (f"; больше 3 мин: {', '.join(late[:6])}" if late else " - в пределах 3 мин."))
+        state.setdefault("timing_log", []).append({"day": state["day"], "sortie": data.get("sortie"),
+                                                   "dev_min": [d for d, _g in dev]})
     for qid in sorted(data.get("qra") or {}):    # дежурные пары, поднятые в миссии (qra.lua)
         e = next((x for x in (state.get("ato") or {}).get("entries", []) if x["id"] == qid), None)
         if e:

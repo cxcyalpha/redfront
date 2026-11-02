@@ -863,6 +863,23 @@ more medium/long-range SAMs (on the low-level route from the nearest strike airf
 belt" in the reasons), and that belt's SAMs come first in SAM-site strikes: enemy air defence is rolled back belt by
 belt.
 
+**Plan check in DCS** (`lua/timing.lua`): for every AI group with a locked time the mission records when it actually
+reached its entry point (3 km), against the plan; the debrief shows the spread and groups more than 3 min off
+(campaign `timing_log`). The "all AI" box by the build button makes a test mission with the player's group under AI.
+
+**Second strike wave:** 3 or more radar SAMs within 25 km of the target — the same unit sends a second wave 3 min
+after the first while the defences are still suppressed (estimates).
+
+**Air operation phases** (`planner.phase`): suppression (more than half of the enemy's medium/long-range SAMs alive)
+— SAM strikes ×2; air superiority (more than 60% of enemy fighters) — airfield strikes ×1.6; then troop support ×1.5
+(`PHASE_K`, estimates). Category shares are the doctrine `apportionment` (WP: first massed strikes on air forces and
+air defence).
+
+**Scenario task rules** (variant `task_rules`): a task kind from a given day or forbidden, with the reason in the
+day plan; the sector `off_limits` is an area a side does not act in, from the air as well. Lebanon 1982: Bekaa SAM
+strikes from day 4 (9 June), no strikes on Syrian airfields, industry or Syria proper; Caucasus 2008: Georgia does
+not strike Russia.
+
 **Mission start and package groups** (as in Falcon BMS and Liberation): the mission starts with the player's cold
 start; time on target follows the ATO. Only the player's group and AI groups due to take off after the mission start
 begin on the ground; groups that took off earlier are already airborne on their route at mission start, where they
