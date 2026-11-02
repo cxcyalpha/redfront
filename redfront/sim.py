@@ -33,7 +33,9 @@ def power(state: dict, unit: dict) -> float:
     p = sum(n * w.get(roles[t], 0.0) for t, n in model.alive_by_type(unit).items())
     frac = unit.get("supply_frac", 1.0 if unit.get("supply", 1.0) >= 1.0 else 0.0)
     spf = sim.get("supply_power_factor", 1.0)
-    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit)
+    # quality - выучка экипажей и командиров части по сценарию (1973: соотношение потерь танков на Голанах ~4:1
+    # в пользу Израиля - ОЦЕНКА), по умолчанию 1
+    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * unit.get("quality", 1.0)
 
 
 def artillery_k(state: dict, unit: dict) -> float:
