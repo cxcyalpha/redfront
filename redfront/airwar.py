@@ -17,7 +17,7 @@ from . import model
 
 STRIKE_P = 0.7
 PER_THREAT = 0.1
-LOSS = {"column": 0.04, "site": 0.25}            # доля исправной техники цели на пару ударной группы
+LOSS = {"column": 0.04, "site": 0.25, "ship": 0.15}   # доля исправной техники (кораблей) цели на пару ударной группы
 DAMAGE = {"depot": 0.35, "factory": 0.25, "airfield": 0.3, "bridge": 0.5}
 LOSS_PER_THREAT = 0.03                             # вероятность потерять борт на ЗРК коридора
 EJECT_P = 0.7
@@ -152,6 +152,6 @@ def resolve(state: dict, t0: float, t1: float) -> list[str]:
         if e["id"] in skip:
             continue
         obj = e["task"]["package"][0]["objective"]
-        if obj["kind"] in ("column", "site", "point"):
+        if obj["kind"] in ("column", "site", "point", "ship"):
             lines += _strike(state, e)
     return lines

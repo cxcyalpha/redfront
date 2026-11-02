@@ -1258,11 +1258,187 @@
    "estimate": true
   },
   {
+   "id": "blue_csg_forrestal",
+   "name": "Авианосная ударная группа USS Forrestal",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.05,
+    "lon": 35.45
+   },
+   "composition": [
+    {
+     "type": "Forrestal",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Forrestal (CV-59)"
+     ]
+    },
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Ticonderoga (CG-47)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 1,
+     "role": "frigate",
+     "names": [
+      "USS Clark (FFG-11)"
+     ]
+    }
+   ],
+   "abbr": "CSG 59",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_csg_vinson",
+   "name": "Авианосная ударная группа USS Carl Vinson",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.8,
+    "lon": 35.4
+   },
+   "composition": [
+    {
+     "type": "VINSON",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Carl Vinson (CVN-70)"
+     ]
+    },
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Yorktown (CG-48)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 1,
+     "role": "frigate",
+     "names": [
+      "USS Duncan (FFG-10)"
+     ]
+    }
+   ],
+   "abbr": "CSG 70",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_fac_haiphong",
+   "name": "Торпедные катера ВМС ДРВ (Хайфон)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.55,
+    "lon": 35.7
+   },
+   "composition": [
+    {
+     "type": "Type_021_1",
+     "count": 3,
+     "role": "boat",
+     "names": [
+      "Катер №1",
+      "Катер №2",
+      "Катер №3"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав и место - ОЦЕНКА; пр. 183 (P-6) и пр. 123 - в DCS Type 021-1; 19.04.1972 у Донгхоя атаковали эсминцы США (с МиГ-17)",
+   "estimate": true
+  },
+  {
+   "id": "red_convoy_haiphong",
+   "name": "Советские транспорты у Хайфона",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.62,
+    "lon": 35.6
+   },
+   "composition": [
+    {
+     "type": "Dry_cargo_ship_1",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №1"
+     ]
+    },
+    {
+     "type": "Dry_cargo_ship_2",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №2"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав и место - ОЦЕНКА; морской подвоз ДРВ: удары по судам СССР были запрещены (с 9.05 - минирование Хайфона)",
+   "estimate": true,
+   "protected": true
+  },
+  {
+   "id": "blue_convoy_danang",
+   "name": "Транспорты снабжения (Дананг)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.95,
+    "lon": 35.3
+   },
+   "composition": [
+    {
+     "type": "HandyWind",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "SS Transcolumbia"
+     ]
+    },
+    {
+     "type": "Dry_cargo_ship_1",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "SS Green Wave"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
    "id": "us_vf114",
-   "name": "VF-114, VF-213 (F-4J, Enterprise)",
+   "name": "VF-114, VF-213 (F-4J, Forrestal)",
    "side": "blue",
    "role": "fighter",
-   "base": "cv65",
+   "base": "cv63",
    "type": "F_14A_135_GR_Early",
    "count": 24,
    "strike_radius_km": 500,
@@ -1271,10 +1447,10 @@
   },
   {
    "id": "us_va_kh",
-   "name": "VA-192, VA-195 (A-7E), Enterprise",
+   "name": "VA-192, VA-195 (A-7E), Forrestal",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "cv65",
+   "base": "cv63",
    "type": "FA_18C_hornet",
    "count": 24,
    "strike_radius_km": 500,
@@ -1283,10 +1459,10 @@
   },
   {
    "id": "us_va52",
-   "name": "VA-52 (A-6A, Enterprise)",
+   "name": "VA-52 (A-6A, Forrestal)",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "cv65",
+   "base": "cv63",
    "type": "A6E",
    "count": 12,
    "strike_radius_km": 600,
@@ -1298,7 +1474,7 @@
    "name": "VAW-114 (E-2B)",
    "side": "blue",
    "role": "awacs",
-   "base": "cv65",
+   "base": "cv63",
    "type": "E_2C",
    "count": 4,
    "strike_radius_km": 1000,
@@ -1307,10 +1483,10 @@
   },
   {
    "id": "us_ka6_kh",
-   "name": "KA-6D (Enterprise)",
+   "name": "KA-6D (Forrestal)",
    "side": "blue",
    "role": "tanker",
-   "base": "cv65",
+   "base": "cv63",
    "type": "S_3B_Tanker",
    "count": 4,
    "strike_radius_km": 800,
@@ -1319,10 +1495,10 @@
   },
   {
    "id": "us_vf96",
-   "name": "VF-92, VF-96 (F-4J, Saratoga)",
+   "name": "VF-92, VF-96 (F-4J, Carl Vinson)",
    "side": "blue",
    "role": "fighter",
-   "base": "cv60",
+   "base": "cv64",
    "type": "F_14A_135_GR_Early",
    "count": 24,
    "strike_radius_km": 500,
@@ -1331,10 +1507,10 @@
   },
   {
    "id": "us_va_con",
-   "name": "VA-146, VA-147 (A-7E), Saratoga",
+   "name": "VA-146, VA-147 (A-7E), Carl Vinson",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "cv60",
+   "base": "cv64",
    "type": "FA_18C_hornet",
    "count": 24,
    "strike_radius_km": 500,
@@ -1343,10 +1519,10 @@
   },
   {
    "id": "us_va165",
-   "name": "VA-165 (A-6A, Saratoga)",
+   "name": "VA-165 (A-6A, Carl Vinson)",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "cv60",
+   "base": "cv64",
    "type": "A6E",
    "count": 12,
    "strike_radius_km": 600,
@@ -1358,47 +1534,11 @@
    "name": "VAW-116 (E-2B)",
    "side": "blue",
    "role": "awacs",
-   "base": "cv60",
+   "base": "cv64",
    "type": "E_2C",
    "count": 4,
    "strike_radius_km": 1000,
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; E-2B - E-2C",
-   "estimate": true
-  },
-  {
-   "id": "us_vf51",
-   "name": "VF-51, VF-111 (F-4B, America)",
-   "side": "blue",
-   "role": "fighter",
-   "base": "cv66",
-   "type": "F_14A_135_GR_Early",
-   "count": 24,
-   "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)",
-   "estimate": true
-  },
-  {
-   "id": "us_va_cs",
-   "name": "VA-22, VA-94 (A-7E), America",
-   "side": "blue",
-   "role": "fighter_bomber",
-   "base": "cv66",
-   "type": "FA_18C_hornet",
-   "count": 20,
-   "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E - F/A-18C",
-   "estimate": true
-  },
-  {
-   "id": "us_vma224",
-   "name": "VMA(AW)-224 (A-6A, America)",
-   "side": "blue",
-   "role": "fighter_bomber",
-   "base": "cv66",
-   "type": "A6E",
-   "count": 10,
-   "strike_radius_km": 600,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-6A - A-6E",
    "estimate": true
   },
   {

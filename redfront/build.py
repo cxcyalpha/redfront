@@ -539,34 +539,60 @@ class CarrierPad:
         self.atc_radio = type("R", (), {"vhf_high_hz": f, "uhf_hz": f})()
 
 
+NAVAL_GROUPS: dict = {}   # группы кораблей этой миссии: id части флота -> группа pydcs (цели ударов, дебриф)
+NAVAL_SHIPS: dict = {}    # id части флота -> [(класс pydcs, имя корабля)]
+
+
 def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "CarrierPad"]:
-    """Авианосные группы кампании в миссии: авианосец и эскорт (state airbases kind carrier), на галсах против ветра
-    (курс - откуда дует ветер; 25 узлов на прямой ~40 км туда и обратно, ОЦЕНКА), TACAN и ICLS авианосца включены
-    с начала миссии. -> id базы: CarrierPad."""
+    """Флот кампании в миссии (naval.py): каждая корабельная группа модели - группа кораблей DCS из живых кораблей
+    (реальные имена). Группа с авианосцем - на галсах против ветра (курс - откуда дует ветер; 25 узлов, галс ~40 км -
+    ОЦЕНКА), TACAN и ICLS авианосца включены с начала миссии; остальные - курсом галсами у своей позиции (10 узлов,
+    катера - 25). Авианосец - база (state airbases kind carrier, поле naval). -> id базы: CarrierPad."""
     import dcs.ships as _ships
+    from . import naval
+    NAVAL_GROUPS.clear()
+    NAVAL_SHIPS.clear()
     out = {}
-    for bid, b in state["airbases"].items():
-        if b.get("kind") != "carrier" or b.get("state") == "lost":
+    by_unit = {b.get("naval"): (bid, b) for bid, b in state["airbases"].items() if b.get("kind") == "carrier" and b.get("naval")}
+    from . import i18n, i18n_en
+    tr = i18n_en.en if i18n.lang(state) == "en" else (lambda x: x)   # английская миссия - имена кораблей и групп
+    for u in naval.ships(state):
+        lst = [(t, tr(n)) for t, n in naval.ship_names(u)]
+        if not lst:
             continue
-        pos = _pt(m, b)
-        sg = m.ship_group(_country(m, state, b["side"]), b["name"], getattr(_ships, b["ship"]), pos, heading=wind_from)
-        for k, esc in enumerate(b.get("escorts", [])):
-            off = model.offset(b, wind_from + 120 * (k + 1), 3000)
-            u = m.ship(f"{b['name']} escort {k + 1}", getattr(_ships, esc))
+        pos = _pt(m, u["pos"])
+        base = by_unit.get(u["id"])
+        hdg = wind_from if base else (u.get("heading") or 0)
+        sg = m.ship_group(_country(m, state, u["side"]), tr(u["name"]), getattr(_ships, lst[0][0]), pos, heading=hdg)
+        sg.units[0].name = lst[0][1]
+        for k, (typ, nm) in enumerate(lst[1:]):   # охранение - кольцом в 3-5 км (ОЦЕНКА)
+            off = model.offset(u["pos"], hdg + 360 / max(1, len(lst) - 1) * k, 3000 + 1000 * (k % 2))
+            sh = m.ship(nm, getattr(_ships, typ))
             q = _pt(m, off)
-            u.position = Point(q.x, q.y, m.terrain)
-            sg.add_unit(u)
-        leg = model.offset(b, wind_from, CARRIER_LEG_M)
-        w1 = sg.add_waypoint(_pt(m, leg), CARRIER_KMH)
-        sg.add_waypoint(pos, CARRIER_KMH)
-        sg.add_waypoint(_pt(m, leg), CARRIER_KMH)
-        sg.points[0].tasks.append(task.ActivateBeaconCommand(channel=int(b.get("tacan", 70)), modechannel="X",
-                                                             callsign=str(b.get("tacan_id", "CVN"))[:3], unit_id=sg.units[0].id,
-                                                             aa=False))
-        if b.get("icls"):
-            sg.points[0].tasks.append(task.ActivateICLSCommand(channel=int(b["icls"]), unit_id=sg.units[0].id))
-        out[bid] = CarrierPad(sg, b)
+            sh.position = Point(q.x, q.y, m.terrain)
+            sh.heading = hdg
+            sg.add_unit(sh)
+        kmh = CARRIER_KMH if base else (46 if naval.kind(u) == "FAC" else 19)
+        leg = model.offset(u["pos"], hdg, CARRIER_LEG_M if base else 15_000)
+        sg.add_waypoint(_pt(m, leg), kmh)
+        sg.add_waypoint(pos, kmh)
+        sg.add_waypoint(_pt(m, leg), kmh)
+        NAVAL_GROUPS[u["id"]] = sg
+        NAVAL_SHIPS[u["id"]] = lst
+        if base:
+            bid, b = base
+            sg.points[0].tasks.append(task.ActivateBeaconCommand(channel=int(b.get("tacan", 70)), modechannel="X",
+                                                                 callsign=str(b.get("tacan_id", "CVN"))[:3], unit_id=sg.units[0].id,
+                                                                 aa=False))
+            if b.get("icls"):
+                sg.points[0].tasks.append(task.ActivateICLSCommand(channel=int(b["icls"]), unit_id=sg.units[0].id))
+            out[bid] = CarrierPad(sg, b)
     return out
+
+
+def naval_manifest() -> list[dict]:
+    """Корабли миссии для дебрифа: часть флота -> имена и типы кораблей."""
+    return [{"unit": uid, "ships": [{"name": nm, "type": typ} for typ, nm in lst]} for uid, lst in NAVAL_SHIPS.items()]
 
 
 def carrier_lines(state: dict, side_pos=None) -> list[str]:
@@ -653,7 +679,7 @@ KIND_CATS = {   # категория подвески по виду задачи
     "strike_airfield": ["runway"], "strike_sam_site": ["dead"], "cas_contact": ["cas"], "cas_helo": ["cas"],
     "strike_column_march": ["bai"], "strike_bai": ["bai"], "strike_fofa": ["bai"], "strike_supply_route": ["bai"],
     "strike_bridge": ["strike"], "strike_depot": ["strike"], "strike_factory": ["strike"],
-    "cap_own_troops": ["cap"], "qra": ["cap"],
+    "cap_own_troops": ["cap"], "qra": ["cap"], "fleet_cap": ["cap"], "strike_ship": ["antiship", "strike"],
 }
 GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "escort": ["cas"], "helo": ["cas"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"]}
 PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retribution (data/payloads.json), по порядку предпочтения
@@ -667,6 +693,7 @@ PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retr
     "dead": ["Retribution DEAD", "Retribution SEAD", "SEAD", "Retribution Strike", "STRIKE"],
     "cap": ["Retribution BARCAP", "Retribution TARCAP", "CAP", "Retribution Fighter Sweep"],
     "escort": ["Retribution Escort", "Retribution TARCAP", "CAP", "Retribution BARCAP"],
+    "antiship": ["Retribution Anti-ship", "Retribution Antiship", "ANTISHIP", "Anti-ship", "Retribution Strike", "STRIKE"],
 }
 
 
@@ -1738,6 +1765,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                       f"Load Assault...; высадка на площадке (ближе {spec['r']} м) - Unload / Extract Troops "
                                       f"(на земле или висением по тросу). Высадили не там - заберите (тот же пункт) и высадите снова.")
             g["_lz"] = obj["place"]
+        elif obj["kind"] == "ship":              # удар по кораблям: от ИПМ на малой высоте, атака группы кораблей
+            ip, tgt = g["route"]
+            push_hold(wp(ip, transit, "ИПМ"), ip, tgt)
+            w = wp(tgt, tdg["attack_alt_m_agl"], "Цель")
+            sg = NAVAL_GROUPS.get(obj["unit"])
+            if sg is not None:
+                w.tasks.append(_attack(sg.id, ai))
+            wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
         elif obj["kind"] in ("column", "site"):    # ударная группа: колонна, часть в бою, позиция ЗРК
             ip, tgt = g["route"]
             push_hold(wp(ip, transit, "ИПМ"), ip, tgt)
@@ -2049,6 +2084,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "start_s": int(m0),                              # начало миссии, с от полуночи суток кампании
         "end_s": int(m0) + ATO_LEN_S,                    # окно миссии (после дебрифа - часы кампании)
         "flights": flights,
+        "ships": naval_manifest(),                       # корабли флота в миссии (дебриф: потопленные - потери групп)
         "package_lines": lines,
         "enemy_lines": enemy_lines,                      # авиация противника в миссии (в брифинг не выводится)
         "ai_lines": ai_lines,                            # свои группы ИИ по плану дня (в брифинге)

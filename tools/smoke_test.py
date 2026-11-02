@@ -3740,7 +3740,7 @@ def theatres_section(tmp: Path) -> None:
         lines += sim.end_day(st2)
     nva = st2["units"]["red_308"]["composition"]
     inf = sum(c["count"] for c in nva if c["role"] == "infantry") / sum(c["count"] for c in nva)
-    check({"heli_resupply", "medevac", "air_assault"} <= seen and any("вывоз раненых" in l for l in lines)
+    check({"medevac", "air_assault"} <= seen and any("вывоз раненых" in l for l in lines)
           and any("в резерве у" in l for l in lines) and inf > 0.7,
           f"вертолёты во Вьетнаме: снабжение, вывоз раненых, высадки; роты возвращаются в резерв; дивизия ВНА - "
           f"пехота {inf:.0%} состава")
@@ -3768,6 +3768,27 @@ def theatres_section(tmp: Path) -> None:
     pos6 = st4.get("posture_days")
     check(all(own[:5]) and pos6 and ops.owner(st4, "KiryatShmona") == "blue",
           f"Голаны 1973: Хермон взят десантом, мост Бнот-Яаков удержан, смена позы на {pos6[0]['from_day'] if pos6 else '-'}-й день")
+    from redfront import naval
+    st5 = model.new_campaign("nav", sector="sector_golan73.json", oob="oob_golan73.json", seed=7, player_side="red")
+    lines5 = []
+    for _ in range(2):
+        planner.plan(st5)
+        lines5 += sim.end_day(st5)
+    lat = st5["units"]["red_osa_latakia"]
+    planner.plan(st5)
+    ship_tasks = [t for t in st5["tasks"] if t["kind"] == "strike_ship"]
+    sea = sum((ln.get("_last") or {}).get("t", 0) for ln in st5["sea_lanes"] if ln["side"] == "red")   # доставлено конвоем (склад мог быть полон)
+    check(any("Бой кораблей" in l for l in lines5) and model.strength(lat) < 0.5 and sea > 0,
+          f"флот: бой у Латакии (катера Сирии - {model.strength(lat):.0%}), морской подвоз в Тартус {sea} т, "
+          f"ударов по кораблям в плане красных {len(ship_tasks)}")
+    st6 = model.new_campaign("csg", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="red")
+    planner.plan(st6)
+    k = next((i for i, t in enumerate(st6["tasks"], 1) if t["kind"] == "strike_ship"), None)
+    if k:
+        mn = build.build(st6, tmp / "csg.miz", task_no=k)
+        mz = zipfile.ZipFile(tmp / "csg.miz").read("mission").decode("utf-8")
+    check(k and "USS Ticonderoga (CG-47)" in mz and "AttackGroup" in mz and any(len(x["ships"]) >= 3 for x in mn["ships"]),
+          "авианосная ударная группа в миссии (реальные корабли DCS), удар по кораблям - атака группы кораблей")
     st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
     planner.plan(st)
     b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]

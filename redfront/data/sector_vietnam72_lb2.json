@@ -208,52 +208,30 @@
   }
  },
  "carriers": {
-  "cv65": {
-   "name": "USS Enterprise (CVN-65)",
+  "cv63": {
+   "name": "USS Forrestal (CV-59)",
    "side": "blue",
    "ship": "Forrestal",
    "lat": 35.05,
    "lon": 35.45,
-   "tacan": 65,
-   "tacan_id": "ENT",
+   "tacan": 59,
+   "tacan_id": "FOR",
    "icls": 3,
    "freq": 127.5,
-   "escorts": [
-    "TICONDEROG",
-    "PERRY"
-   ],
+   "naval": "blue_csg_forrestal",
    "estimate": true
   },
-  "cv60": {
-   "name": "USS Saratoga (CV-60)",
+  "cv64": {
+   "name": "USS Carl Vinson (CVN-70)",
    "side": "blue",
-   "ship": "Forrestal",
+   "ship": "VINSON",
    "lat": 34.8,
    "lon": 35.4,
-   "tacan": 60,
-   "tacan_id": "SAR",
+   "tacan": 70,
+   "tacan_id": "VIN",
    "icls": 4,
    "freq": 128.5,
-   "escorts": [
-    "TICONDEROG",
-    "PERRY"
-   ],
-   "estimate": true
-  },
-  "cv66": {
-   "name": "USS America (CV-66)",
-   "side": "blue",
-   "ship": "Forrestal",
-   "lat": 35.3,
-   "lon": 35.5,
-   "tacan": 66,
-   "tacan_id": "AME",
-   "icls": 5,
-   "freq": 129.5,
-   "escorts": [
-    "TICONDEROG",
-    "PERRY"
-   ],
+   "naval": "blue_csg_vinson",
    "estimate": true
   }
  },
@@ -400,6 +378,22 @@
   ],
   "red": []
  },
+ "sea_lanes": [
+  {
+   "id": "lane_haiphong",
+   "side": "red",
+   "port": "Haiphong",
+   "convoy": "red_convoy_haiphong",
+   "t_per_day": 400
+  },
+  {
+   "id": "lane_danang",
+   "side": "blue",
+   "port": "DaNang",
+   "convoy": "blue_convoy_danang",
+   "t_per_day": 500
+  }
+ ],
  "air_limits": {
   "blue": [],
   "red": []

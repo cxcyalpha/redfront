@@ -21,6 +21,9 @@ def strike_radius_km(unit: dict) -> float | None:
 def threat_radius_km(unit: dict) -> float:
     """Радиус угрозы ЗРК: явный у части, иначе по роли, иначе наибольший threat_range пусковых из pydcs."""
     r = unit.get("threat_radius_km")
+    if r is None and model.category(unit) == "naval":   # корабли - по ЗРК кораблей (naval.SHIP_INFO)
+        from . import naval
+        return naval.threat_km(unit)
     if r is None:
         r = model.role_info(unit["role"]).get("threat_radius_km")
     if r is None:
@@ -55,13 +58,17 @@ def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str, l
     """ЗРК стороны against, которые достают хотя бы один участок маршрута. low_alt_m - высота маршрута в зонах ЗРК
     (low_alt_m_agl задачи): радиус угрозы не больше радиогоризонта РЛС по цели на этой высоте - иначе С-200 с
     дальностью 255 км по высотной цели "достаёт" любой маловысотный маршрут, и подавление назначается на всё подряд."""
+    from . import naval
     out = []
     for u in state["units"].values():
-        if u["side"] != against or model.category(u) != "sam" or u["state"] == "destroyed" or model.strength(u) <= 0:
+        cat = model.category(u)
+        if u["side"] != against or cat not in ("sam", "naval") or u["state"] in ("destroyed", "sunk") or model.strength(u) <= 0:
             continue
-        r = threat_radius_km(u)
+        r = naval.threat_km(u) if cat == "naval" else threat_radius_km(u)   # ПВО кораблей - как ЗРК
+        if r <= 0:
+            continue
         if low_alt_m is not None:
-            r = min(r, radar_horizon_km(RADAR_MAST_M, low_alt_m))
+            r = min(r, radar_horizon_km(naval.RADAR_MAST_M if cat == "naval" else RADAR_MAST_M, low_alt_m))
         pos = intel.known_pos(state, u) if against != state.get("player_side") else model.unit_pos(state, u)   # игрок - по разведке
         if any(_seg_dist_km(pos, a, b) <= r for a, b in legs):
             out.append(u["id"])
@@ -386,6 +393,11 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 reasons.append(f"{tdef['title']}: {t['name']} - за поясом ПВО ({', '.join(state['units'][x]['name'] for x in gated[t['id']])}), "
                                "сначала его подавление")
             targets = [t for t in targets if t["id"] not in gated]
+        elif cat == "naval":                     # корабельные группы противника на море (вид - target.kinds: CSG, SAG, FAC...)
+            from . import naval
+            kinds = tdef["target"].get("kinds")
+            targets = [u for u in naval.ships(state, tside) if (not kinds or naval.kind(u) in kinds)
+                       and not (tside == foe and u.get("protected"))]   # суда, удары по которым запрещены (СССР у Хайфона)
         elif cat == "sam":                       # позиции ЗРК противника (fixed - только объектовая ПВО): исправные
             targets = [u for u in state["units"].values() if u["side"] == tside and model.category(u) == "sam"
                        and not u.get("attached_to") and u["state"] not in ("destroyed", "pending")
@@ -405,7 +417,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if not targets:
             continue
         found = False
-        if cat in STRATEGIC or cat == "sam":     # объекты тыла, позиции ЗРК: не больше MAX_PER_KIND ближних к базам исполнителей
+        if cat in STRATEGIC or cat in ("sam", "naval"):   # объекты тыла, ЗРК, корабли: не больше MAX_PER_KIND ближних к базам
             bases = [state["airbases"][r["base"]] for r in performers]
             if bases:                            # ЗРК пояса, закрывающего цели в глубине, - первыми; затем ближние
                 targets.sort(key=lambda t: (-gate.get(t["id"], 0), min(model.dist_km(b, _aim(state, side, t)) for b in bases)))
@@ -1028,6 +1040,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         route, objective = [cz], {"kind": "cap_zone", "unit": tgt["id"], "pos": cz}
     elif model.category(tgt) == "sam":           # позиция ЗРК: атака группы на позиции
         route, objective = [ip, tpos], {"kind": "site", "unit": tgt["id"], "pos": tpos}
+    elif model.category(tgt) == "naval":         # корабельная группа: атака группы кораблей (ПКР, бомбы)
+        route, objective = [ip, tpos], {"kind": "ship", "unit": tgt["id"], "pos": tpos}
     elif model.category(tgt) in STRATEGIC:       # объект тыла: удар по точке (бомбы; по мосту - по объекту карты)
         route, objective = [ip, tpos], {"kind": "point", "unit": tgt["id"], "pos": tpos, "object": model.category(tgt)}
     else:
@@ -1227,7 +1241,7 @@ def nation_ok(state: dict, u: dict, g: dict) -> bool:
 
 
 RV_KM = 40          # ОЦЕНКА: точка сбора тактической группы - за столько км до ИПМ ударной группы, над своей территорией
-RV_KINDS = ("column", "site", "point", "flyover", "search_zone", "cover_zone", "sweep_zone")   # идут через сбор; подавление ПВО - нет
+RV_KINDS = ("column", "site", "ship", "point", "flyover", "search_zone", "cover_zone", "sweep_zone")   # идут через сбор; подавление ПВО - нет
 
 
 def rendezvous(state: dict, tdef: dict, groups: list[dict]) -> None:

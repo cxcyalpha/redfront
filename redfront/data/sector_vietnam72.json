@@ -209,50 +209,29 @@
  },
  "carriers": {
   "cv63": {
-   "name": "USS Kitty Hawk (CV-63)",
+   "name": "USS Forrestal (CV-59)",
    "side": "blue",
    "ship": "Forrestal",
    "lat": 35.05,
    "lon": 35.45,
-   "tacan": 63,
-   "tacan_id": "KTH",
+   "tacan": 59,
+   "tacan_id": "FOR",
    "icls": 3,
    "freq": 127.5,
-   "escorts": [
-    "TICONDEROG",
-    "PERRY"
-   ],
+   "naval": "blue_csg_forrestal",
    "estimate": true
   },
   "cv64": {
-   "name": "USS Constellation (CV-64)",
+   "name": "USS Carl Vinson (CVN-70)",
    "side": "blue",
-   "ship": "Forrestal",
+   "ship": "VINSON",
    "lat": 34.8,
    "lon": 35.4,
-   "tacan": 64,
-   "tacan_id": "CON",
+   "tacan": 70,
+   "tacan_id": "VIN",
    "icls": 4,
    "freq": 128.5,
-   "escorts": [
-    "TICONDEROG",
-    "PERRY"
-   ],
-   "estimate": true
-  },
-  "cv43": {
-   "name": "USS Coral Sea (CV-43)",
-   "side": "blue",
-   "ship": "Forrestal",
-   "lat": 35.3,
-   "lon": 35.5,
-   "tacan": 43,
-   "tacan_id": "COR",
-   "icls": 5,
-   "freq": 129.5,
-   "escorts": [
-    "PERRY"
-   ],
+   "naval": "blue_csg_vinson",
    "estimate": true
   }
  },
@@ -399,6 +378,22 @@
   ],
   "red": []
  },
+ "sea_lanes": [
+  {
+   "id": "lane_haiphong",
+   "side": "red",
+   "port": "Haiphong",
+   "convoy": "red_convoy_haiphong",
+   "t_per_day": 400
+  },
+  {
+   "id": "lane_danang",
+   "side": "blue",
+   "port": "DaNang",
+   "convoy": "blue_convoy_danang",
+   "t_per_day": 500
+  }
+ ],
  "air_limits": {
   "blue": [],
   "red": []

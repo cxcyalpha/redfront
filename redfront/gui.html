@@ -312,7 +312,7 @@ const I18N = {
     liveryFolder: "имя папки ливреи (DCS не найден)", set: "Задать", pilots: "Лётчики", pilotsTip: "имя в DCS - звание и фамилия, ведущий - старший",
     sorties: "выл.", onGround: "На земле (сбиты):", lost: "Выбыли:", dayN: "сутки", now: "сейчас", toEnemy: "до противника", kmFromHere: "км отсюда",
     helosUpTo: "вертолётов до", slots: "мест", order: "Приказ",
-    whatTonnes: "Что значат тонны", rearDay: "Снабжение (прошлые сутки)", stock: "запас складов", of: "из", roadIn: "за сутки подвоз", airIn: "воздухом",
+    whatTonnes: "Что значат тонны", rearDay: "Снабжение (прошлые сутки)", stock: "запас складов", of: "из", roadIn: "за сутки подвоз", airIn: "воздухом", seaIn: "морем",
     used: "расход", cut: "отрезано складов", estObjs: n => `По оценке: ${n} объект(ов) - уточните инструментами карты DCS в настройках.`,
     allChecked: "Все цели тыла на объектах карты.", lostSt: "потерян", closedSt: "закрыт", damage: "повреждение", intact: "цел",
     estCoords: "координаты по оценке", stockEst: "запас ~", estimate: "оценка", cutOff: "отрезан от подвоза",
@@ -325,7 +325,9 @@ const I18N = {
     ipm: "ИПМ", target: "Цель: ", supplyRoute: "путь подвоза", heliPad: "вертолётная площадка",
     bst: {open: "открыт", active: "открыт", closed: "закрыт", lost: "потерян"},
     legendSU: "Условные знаки", legendNATO: "Условные знаки (APP-6)",
-    lay: {front: "Линия фронта", links: "Связи пунктов", places: "Пункты", sam: "Зоны ПВО", ground: "Войска", objects: "Тыл",
+    navKind: {CSG: "авианосная ударная группа", SAG: "отряд кораблей", FAC: "ракетные катера", ARG: "десантный отряд", CONVOY: "конвой"},
+    navAd: "ПВО кораблей", 
+    lay: {naval: "Флот", front: "Линия фронта", links: "Связи пунктов", places: "Пункты", sam: "Зоны ПВО", ground: "Войска", objects: "Тыл",
           supply: "Пути подвоза", bases: "Аэродромы", task: "Задача"},
     bases: {paper: "Карта (бумага)", topo: "Топографическая", none: "Без подложки"},
     viaFront: " · через линию фронта", closedBridge: " · закрыта (мост)",
@@ -409,7 +411,7 @@ const I18N = {
     sorties: "sorties", onGround: "On the ground (downed):", lost: "Lost:", dayN: "day", now: "now", toEnemy: "to enemy", kmFromHere: "km from here",
     helosUpTo: "helicopters up to", slots: "slots", order: "Order",
     whatTonnes: "What the tonnes mean", rearDay: "Supply (previous day)", stock: "depot stock", of: "of", roadIn: "delivered by road",
-    airIn: "by air", used: "consumed", cut: "depots cut off", estObjs: n => `Estimated: ${n} object(s) - refine with the DCS map tools in Settings.`,
+    airIn: "by air", seaIn: "by sea", used: "consumed", cut: "depots cut off", estObjs: n => `Estimated: ${n} object(s) - refine with the DCS map tools in Settings.`,
     allChecked: "All rear targets are on map objects.", lostSt: "lost", closedSt: "closed", damage: "damage", intact: "intact",
     estCoords: "estimated coordinates", stockEst: "stock ~", estimate: "estimate", cutOff: "cut off from supply",
     st: {march: "march", battle: "battle", defend: "defence", halted: "combat ineffective", destroyed: "destroyed", deployed: "deployed",
@@ -421,7 +423,9 @@ const I18N = {
     ipm: "IP", target: "Target: ", supplyRoute: "supply route", heliPad: "helicopter pad",
     bst: {open: "open", active: "open", closed: "closed", lost: "lost"},
     legendSU: "Map symbols", legendNATO: "Map symbols (APP-6)",
-    lay: {front: "Front line", links: "Place links", places: "Places", sam: "Air defence zones", ground: "Ground forces", objects: "Rear targets",
+    navKind: {CSG: "carrier strike group", SAG: "surface action group", FAC: "fast attack craft", ARG: "amphibious group", CONVOY: "convoy"},
+    navAd: "ship air defence",
+    lay: {naval: "Navy", front: "Front line", links: "Place links", places: "Places", sam: "Air defence zones", ground: "Ground forces", objects: "Rear targets",
           supply: "Supply routes", bases: "Airfields", task: "Task"},
     bases: {paper: "Map (paper)", topo: "Topographic", none: "No basemap"},
     viaFront: " · across the front line", closedBridge: " · closed (bridge)",
@@ -540,7 +544,7 @@ const BASES = {
 const baseKey = pref("rf_base2", "paper");
 (BASES[baseKey] || BASES.paper).addTo(map);
 map.createPane("terrain").style.zIndex = 350;          // заливка территорий - под линиями и знаками
-const layers = {front: L.layerGroup().addTo(map), links: L.layerGroup(), places: L.layerGroup().addTo(map), sam: L.layerGroup().addTo(map),
+const layers = {naval: L.layerGroup().addTo(map), front: L.layerGroup().addTo(map), links: L.layerGroup(), places: L.layerGroup().addTo(map), sam: L.layerGroup().addTo(map),
                 ground: L.layerGroup().addTo(map), objects: L.layerGroup().addTo(map), bases: L.layerGroup().addTo(map),
                 task: L.layerGroup().addTo(map), supply: L.layerGroup().addTo(map)};
 let layerCtl = null;
@@ -650,8 +654,15 @@ function drawMap() {
     L.marker(d.pos, {icon: L.divIcon({className: "obj", html: "🪂", iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(d.title)}</b><br>${T("sinceDay")} ${d.day} · ${T("beacon")} ${d.freq} kHz`).addTo(layers.objects);
   }
+  for (const g of V.naval || []) {                     // флот: корабельные группы (знак APP-6 надводных сил)
+    const friend = g.side === ST.side;
+    const tip = `<b>${esc(g.name)}</b> · ${esc(T("navKind")[g.kind] || g.kind)} · ${T("strength")} ${Math.round(g.strength * 100)}%` +
+      (g.ad_km ? ` · ${T("navAd")} ${g.ad_km} km` : "") + `<br>${g.ships.map(esc).join("<br>")}`;
+    L.marker(g.pos, {icon: icon(TAC.ship(g, ST.side === "blue", friend), 34, 34, "tac")}).bindTooltip(tip, {className: "wide"}).addTo(layers.naval);
+  }
   const AF = Object.fromEntries(V.objects.filter(o => o.role === "airfield").map(o => [o.id, o]));   // af_<id аэродрома>
   for (const b of ST.airbases) {
+    if (b.kind === "carrier") continue;               // авианосец - знаком своей корабельной группы (флот)
     const o = AF["af_" + b.id];
     const st = T("bst")[b.state] || b.state;
     const used = b.units && b.units.length ? `<br>${b.units.map(esc).join("<br>")}` : "";
@@ -897,7 +908,7 @@ function render() {
     const unk = ST.objects.filter(o => !o.checked).length;
     const SL = ST.supply_log || {};
     const tyl = ["red", "blue"].filter(s => SL[s]).map(s => { const x = SL[s];
-      return `<div class="d"><b class="${s}">${sideName(s, true)}</b>: ${T("stock")} ${x.stock_t} t ${T("of")} ${x.cap_t} (${Math.round(x.stock_t / x.cap_t * 100)}%) · ${T("roadIn")} ${x.road_t} t, ${T("airIn")} ${x.air_t} t, ${T("used")} ${x.used_t} t${x.cut.length ? ` · ${T("cut")}: ` + x.cut.length : ""}</div>`; }).join("");
+      return `<div class="d"><b class="${s}">${sideName(s, true)}</b>: ${T("stock")} ${x.stock_t} t ${T("of")} ${x.cap_t} (${Math.round(x.stock_t / x.cap_t * 100)}%) · ${T("roadIn")} ${x.road_t} t${x.sea_t ? `, ${T("seaIn")} ${x.sea_t} t` : ""}, ${T("airIn")} ${x.air_t} t, ${T("used")} ${x.used_t} t${x.cut.length ? ` · ${T("cut")}: ` + x.cut.length : ""}</div>`; }).join("");
     p.innerHTML = `${(ST.rear || []).length ? `<h4>${T("whatTonnes")}</h4>${infoTxt(ST.rear)}` : ""}
       ${tyl ? `<h4>${T("rearDay")}</h4>${tyl}` : ""}
       <p class="meta">${unk ? T("estObjs")(unk) : T("allChecked")}</p>` +

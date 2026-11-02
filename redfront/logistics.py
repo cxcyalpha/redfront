@@ -260,6 +260,14 @@ def supply(state: dict) -> list[str]:
             t = min(_room(d), t)
             d["stock_t"] += t
             air += t
+        # 1б. морской подвоз - на склады портов (naval.sea_supply: конвои, удары по ним, блокада)
+        from . import naval
+        sea = 0.0
+        for port, t in naval.sea_supply(state, side).items():
+            for d in [x for x in ds if x.get("place") == port and x.get("state") != "lost"][:1]:
+                t = min(_room(d), t)
+                d["stock_t"] += t
+                sea += t
         # 2. подвоз из тыла (остаток места после воздушного груза)
         conn = road_connected(state, side, g)
         inflow = _rate(state, side, "supply_inflow", SUPPLY_INFLOW) * _side_base_t(state, side)
@@ -333,13 +341,13 @@ def supply(state: dict) -> list[str]:
         state.setdefault("supply_routes", {})[side] = convoys.forecast(state, side, {i: n * k for i, n in need.items()}, g)
         stock = sum(d.get("stock_t", 0.0) for d in ds)
         cap = sum(d["cap_t"] for d in ds) or 1.0
-        state.setdefault("supply_log", {})[side] = {"day": state["day"], "road_t": round(road), "air_t": round(air),
+        state.setdefault("supply_log", {})[side] = {"day": state["day"], "road_t": round(road), "air_t": round(air), "sea_t": round(sea),
                                                    "convoy_lost_t": round(convoy_lost),
                                                    "used_t": round(used), "stock_t": round(stock), "cap_t": round(cap),
                                                    "cut": [d["id"] for d in cut]}
         lines.append(f"Тыл ({'красные' if side == 'red' else 'синие'}): подвоз {road:.0f} т"
                      + (f" (колонны разбиты - недовезено {convoy_lost:.0f} т)" if convoy_lost >= 0.5 else "")
-                     + f", воздухом {air:.0f} т, "
+                     + (f", морем {sea:.0f} т" if sea >= 0.5 else "") + f", воздухом {air:.0f} т, "
                      f"расход {used:.0f} т; запас складов {stock:.0f} т ({stock / cap:.0%}).")
     return lines
 

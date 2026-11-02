@@ -147,6 +147,19 @@ def apply(state: dict, data: dict) -> list[str]:
                     lines.append(f"{u['name']}: за время вылета продвинулся на {adv:.1f} км.")
                     u["progress_km"] = head
 
+    # ---- флот: потопленные корабли - потери корабельных групп ----
+    for sh in man.get("ships") or []:
+        u = state["units"].get(sh["unit"])
+        sunk = [x for x in sh["ships"] if x["name"] in lost]
+        if not u or not sunk:
+            continue
+        for x in sunk:
+            typ = next((c["type"] for c in u["composition"] if c["type"] == x["type"]), None)
+            if typ:
+                cap = next(c["count"] for c in u["composition"] if c["type"] == typ)
+                u["lost"][typ] = min(cap, u["lost"].get(typ, 0.0) + 1.0)
+        lines.append(f"{u['name']}: потоплено {len(sunk)}: {', '.join(x['name'] for x in sunk)}.")
+
     # ---- своё звено ----
     from . import pilots
     for fl in flights:                           # все звенья тактической группы, не только звено игрока
