@@ -204,6 +204,10 @@ def apply(state: dict, data: dict) -> list[str]:
         if state.get("ato"):
             state["ato"].setdefault("evac", {})[eid] = [int(saved), alive]
         lines.append(f"Эвакуация: вывезено {saved} из {alive} фигур роты на площадке" + (f" (убито на площадке {dead})" if dead else "") + ".")
+    for uid, done in (data.get("ulift") or {}).items():   # игрок вёз груз или раненых к части (unitlift.lua)
+        if state.get("ato"):
+            state["ato"].setdefault("ulift", {})[uid] = int(done)
+        lines.append("Рейс к части: " + ("выполнен." if int(done) else "не выполнен (посадки у части не было)."))
     for lid, kg in (data.get("lift") or {}).items():   # перевозка снабжения игроком: ящики CTLD в зоне выгрузки (ctld_cfg.lua)
         if state.get("ato"):
             state["ato"].setdefault("lift", {})[lid] = round(int(kg) / 1000, 2)

@@ -3744,6 +3744,21 @@ def theatres_section(tmp: Path) -> None:
           and any("в резерве у" in l for l in lines) and inf > 0.7,
           f"вертолёты во Вьетнаме: снабжение, вывоз раненых, высадки; роты возвращаются в резерв; дивизия ВНА - "
           f"пехота {inf:.0%} состава")
+    st3 = model.new_campaign("vnl", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
+    playable, mis = [], ""
+    for _ in range(8):                           # первый день, когда есть вертолётный рейс к части для игрока
+        planner.plan(st3)
+        playable = [t for t in st3["tasks"] if t["kind"] in ("medevac", "heli_resupply")]
+        if playable:
+            break
+        sim.end_day(st3)
+    st2 = st3
+    if playable:
+        k = st2["tasks"].index(playable[0]) + 1
+        build.build(st2, tmp / "vn_lift.miz", task_no=k)
+        mis = zipfile.ZipFile(tmp / "vn_lift.miz").read("mission").decode("utf-8")
+    check(playable and "REDFRONT_ULIFT" in mis,
+          f"вертолётом к части - вылет игрока: {playable[0]['title'] if playable else '-'} (посадка у части - unitlift.lua)")
     st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
     planner.plan(st)
     b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]

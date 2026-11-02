@@ -661,7 +661,10 @@ def unit_lift_tasks(state: dict, side: str, kind: str, tdef: dict, performers: l
              "maintask": s["maintask"], "loadout": [], "lead_min": 0, "ai": {}, "alt_m": tdef.get("transit_alt_m_agl", 50)}
         out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']}", "performer": perf["id"],
                     "target": u["id"], "group_size": g["size"], "base": perf["base"], "target_pos": lz, "ip": lz,
-                    "distance_km": round(km, 1), "threats": threats, "package": [g], "package_notes": "", "ai_only": True})
+                    "distance_km": round(km, 1), "threats": threats, "package": [g],
+                    "package_notes": f"площадка в {tdef.get('lz_offset_km', 1.5)} км от части, зелёный дым; посадка {tdef.get('land_s', 180)} с"
+                                     + ("; раненых - на свой аэродром" if tdef.get("mode") == "medevac" else ""),
+                    "ai_only": side != state.get("player_side")})   # своей стороны - вылет игрока (unitlift.lua)
     return out
 
 

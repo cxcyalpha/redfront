@@ -33,6 +33,7 @@ FRONT_LUA = Path(__file__).parent / "lua" / "front.lua"
 SITE_LUA = Path(__file__).parent / "lua" / "battle_site.lua"
 ASSAULT_LUA = Path(__file__).parent / "lua" / "assault.lua"
 EVAC_LUA = Path(__file__).parent / "lua" / "evac.lua"
+ULIFT_LUA = Path(__file__).parent / "lua" / "unitlift.lua"
 CSAR_LUA = Path(__file__).parent / "lua" / "csar.lua"
 LZ_LUA = Path(__file__).parent / "lua" / "lz.lua"
 QRA_LUA = Path(__file__).parent / "lua" / "qra.lua"
@@ -393,6 +394,15 @@ def assault_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
             .replace("@SPECS@", ", ".join(items)))
 
 
+def ulift_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
+    """lua/unitlift.lua: вертолётом к части - вид (resupply, medevac), площадка (x, y DCS), радиус, посадка (с), борта."""
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    items = [f'{{ id = {q(a["id"])}, mode = {q(a["mode"])}, title = {q(a["title"])}, x = {a["x"]:.1f}, y = {a["y"]:.1f}, '
+             f'r = {a["r"]:.0f}, land = {int(a["land"])}, helos = {{ {", ".join(q(n) for n in a["helos"])} }} }}' for a in specs]
+    return (ULIFT_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
+            .replace("@SPECS@", ", ".join(items)))
+
+
 def evac_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
     """lua/evac.lua: эвакуация - борта и группы ИИ, площадка (x, y DCS), радиус, посадка (с), аэродром возврата, рота
     группами DCS (имена и типы фигур - пересоздаются у перенесённой площадки)."""
@@ -469,6 +479,11 @@ LUA_EN = {   # сообщения скриптов миссии по-англи�
     "Сбитых экипажей нет.": "No downed crews.", ": дым!": ": smoke!", ": ракета!": ": flare!", "Сбитые экипажи": "Downed crews",
     "Ракета у ближнего": "Flare at the nearest", "Дым у ближнего": "Smoke at the nearest", "экипаж ": "crew ",
     " катапультировался, маяк ": " ejected, beacon ", " кГц.": " kHz.", "Экипажи доставлены. Отличная работа!": "Crews delivered. Well done!",
+    ": площадка - зелёный дым. Сядьте и ждите ": ": landing zone - green smoke. Land and wait ",
+    "Раненые доставлены. Рейс засчитан.": "Wounded delivered. Flight completed.",
+    "Раненые на борту - на свой аэродром.": "Wounded on board - fly to your own airfield.",
+    "Груз сдан части. Рейс засчитан.": "Cargo delivered to the unit. Flight completed.",
+    "Погрузка раненых: ещё ": "Loading wounded: ", "Разгрузка: ещё ": "Unloading: ",
     "место боя сдвинуто на %.0f м (оценка %.2f), машин переставлено %d, без хорошего места %d":
         "battle site moved %.0f m (score %.2f), %d vehicles repositioned, %d without a good spot",
     "ошибка: ": "error: ", "ПВО на открытом месте: %d машин, у строений осталось %d%s": "air defence in the open: %d vehicles, %d left by buildings%s",
@@ -1403,6 +1418,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     multi = sum(hum_of.values()) > 1             # несколько людей - мультиплеер: места Client
     assault_specs = []
     evac_specs: list[dict] = []                  # эвакуация десанта (evac.lua)
+    ulift_specs: list[dict] = []                 # вертолётом к части: снабжение, раненые (unitlift.lua, игрок)
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     cap_specs: list[dict] = []                   # пары прикрытия ИИ (cap.lua)
     timing_specs: list[dict] = []                # выход групп ИИ на рубеж: факт против плана (timing.lua)
@@ -1640,6 +1656,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             w.tasks.append(task.Land(Vector2(c.x, c.y), duration=int(tdg.get("land_s", 180))))
             if d > 8:
                 wp(model.lerp(lz, base, 5 / model.dist_km(base, lz)), low, "Отход")
+            if is_player:                        # игрок: посадка у части засчитывается скриптом (unitlift.lua)
+                ulift_specs.append({"id": tk.get("ato_id") or f"task-{sortie}", "mode": obj.get("mode", "resupply"),
+                                    "title": state["units"][obj["unit"]]["name"], "x": c.x, "y": c.y,
+                                    "r": tdg.get("lz_radius_m", 500), "land": tdg.get("land_s", 180),
+                                    "helos": [u.name for u in fg.units]})
         elif obj["kind"] == "air_evac":          # эвакуация: на малой высоте к площадке у роты, посадка на land_s, домой
             lz = obj["pos"]
             low = int(tdg.get("low_alt_m_agl", 50))
@@ -1973,6 +1994,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
         trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
+    if ulift_specs:                              # игрок везёт груз или раненых: посадка у части (unitlift.lua)
+        trig.add_action(DoScript(String(ulift_script(state["campaign_id"], state["sortie"], ulift_specs))))
     if evac_specs:                               # эвакуация: рота садится в борта на площадке (evac.lua; игрок - CTLD)
         trig.add_action(DoScript(String(evac_script(state["campaign_id"], state["sortie"], evac_specs))))
     if assault_specs:                            # десант: рота выходит при посадке бортов на площадку (assault.lua)

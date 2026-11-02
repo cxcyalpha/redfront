@@ -26,7 +26,7 @@ jobs:
       - name: Build redfront.exe
         run: >
           python -m PyInstaller --noconfirm --clean --name redfront --icon NONE
-          --collect-data redfront --collect-all dcs --hidden-import redfront.gui
+          --collect-data redfront --collect-all dcs --hidden-import redfront.gui --collect-submodules redfront.mods
           packaging/redfront_app.py
       - name: Smoke test (new campaign, plan, mission)
         shell: bash

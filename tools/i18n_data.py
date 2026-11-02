@@ -556,6 +556,11 @@ WORDS = {   # отдельные слова и сокращения (подпи�
 }
 
 
+# фраза: скобки (до двух уровней) целиком, вне скобок - без границ фраз ("; ", перевод строки, " · ")
+PHRASE = r"(?:\([^()]*(?:\([^()]*\)[^()]*)*\)|(?!; |\n| · )[^()])+?"
+PREFIXES = ("День ", "ИИ, ", "Разведка, ", "Разведка: ", "Экипаж ", "экипаж ", "Везёт на: ", "По нему подвоз: ")
+
+
 def msg_rx(ru: str) -> str:
     """'Запас {a} т' -> регулярное выражение с именованными группами."""
     import re as _re
@@ -565,8 +570,8 @@ def msg_rx(ru: str) -> str:
         name = m.group(1)
         grp = (r"[\d/.,:?~%\- ]+?" if name in ("y", "z", "n", "m", "k", "d")   # {y} {z} {n} {m} {k} {d} - числа
                else r"[^()]+?" if name == "w"                                 # {w} - без скобок
-               else r"(?:(?!; |\n| · ).)+?" if m.start() == 0                 # ведущая подстановка - в пределах фразы
-               else ".+?")
+               else ".+?" if (m.end() == len(ru) and ru.startswith(PREFIXES))   # "День 3: ..." - вся строка
+               else PHRASE)                                                   # иначе - в пределах фразы
         out.append(f"(?P={name})" if name in seen else f"(?P<{name}>{grp})")
         seen.add(name)
         pos = m.end()
@@ -632,7 +637,12 @@ MSGS += [
     ("{a} в {y}", "{a} in {y}"), ("{a} с {y} (?)", "{a} from {y} (?)"), ("Вьетнам", "Vietnam"), ("Ливан", "Lebanon"), ("часть", "unit"),
 ]
 MSGS += [
-    ("пара {n}", "pair {n}"), ("Снабжение вертолётами", "Helicopter resupply"), ("Вывоз раненых (Dustoff)", "Medical evacuation (Dustoff)"),
+    ("пара {n}", "pair {n}"), ("Рейс к части: выполнен.", "Flight to the unit: completed."),
+    ("Рейс к части: не выполнен (посадки у части не было).", "Flight to the unit: not completed (no landing at the unit)."),
+    ("площадка в {k} км от части, зелёный дым; посадка {d} с", "landing zone {k} km from the unit, green smoke; on the ground {d} s"),
+    ("раненых - на свой аэродром", "wounded - to your own airfield"),
+    ("площадка в {k} км от части, зелёный дым", "landing zone {k} km from the unit, green smoke"), ("посадка {d} с", "on the ground {d} s"),
+    ("пропал без вести.", "missing."), ("вернулся в часть.", "returned to the unit."), ("погиб.", "killed."), ("{h}, вернулся в часть", "{h}, returned to the unit"), ("Снабжение вертолётами", "Helicopter resupply"), ("Вывоз раненых (Dustoff)", "Medical evacuation (Dustoff)"),
     ("санитарная пара", "medevac pair"), ("снята с участка вертолётами - в резерве у {p}.", "lifted out by helicopter - in reserve at {p}."),
     ("вывоз раненых вертолётами ({n} бортов) - боеспособность {a} -> {b}.", "wounded evacuated by helicopter ({n} sorties) - strength {a} -> {b}."), ("сбито при высадке {n} {t}.", "{n} {t} shot down at the landing zone."),
     ("переброшена к {p} ({h}: село {a} из {b} бортов), обороняет пункт.", "flown in to {p} ({h}: {a} of {b} helicopters landed), defending the place."),

@@ -207,6 +207,8 @@ def unit_lift_t(state: dict, side: str, mode: str) -> dict[str, float]:
             continue
         perf = state["units"].get(g["performer"])
         n = max(0, g["size"] - (a.get("lost") or {}).get(e["id"], 0))
+        if e["id"] in a.get("done", []) and n:   # слетал игрок: его борт - если засчитан (посадка у части), ведомые - как ИИ
+            n = n - 1 + int((a.get("ulift") or {}).get(e["id"], 0))
         if perf and n:
             out[obj["unit"]] = out.get(obj["unit"], 0.0) + (n * airlift_cargo_t(state, perf) if mode == "resupply" else n)
     return out
@@ -373,7 +375,8 @@ def airfields(state: dict) -> list[str]:
         if base and base.get("state", "open") in ("open", "active"):
             continue
         cands = [(k, b) for k, b in state["airbases"].items() if b.get("side") == u["side"] and b.get("state", "open") in ("open", "active")
-                 and (b.get("kind") != "farp" or model.category(u) == "heli")]   # на вертолётную площадку - только вертолёты
+                 and (b.get("kind") != "farp" or model.category(u) == "heli")   # на вертолётную площадку - только вертолёты
+                 and (b.get("kind") != "carrier" or model.aircraft_info(u.get("type")).get("carrier"))]   # на авианосец - палубные
         if not cands:
             continue
         k, b = min(cands, key=lambda kb: model.dist_km(kb[1], base or kb[1]))

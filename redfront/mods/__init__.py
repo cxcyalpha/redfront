@@ -18,6 +18,10 @@ MODS = {   # id -> название, модуль, типы (имя класса
 _LOADED: set[str] = set()
 
 
+def _bundle() -> None:   # pragma: no cover - не вызывается: явный импорт, чтобы сборщик (PyInstaller) включил описания модов
+    from . import a4ec  # noqa: F401
+
+
 def planemod(plane):
     """Тип мода - в справочник pydcs (как game.modsupport.planemod в Retribution)."""
     from dcs.planes import plane_map
