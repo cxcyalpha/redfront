@@ -247,7 +247,12 @@ Tactical map of the sector (`redfront/web/tactical.js`, unit classification — 
 
 ### Settings (⚙)
 
-* language: Русский / English;
+* language: Русский / English. In English the whole window (log, planner reasons, target explanations, unit and
+  object names) and the mission (briefing, kneeboard, script messages, pilot names in Latin script) are English. The
+  model writes its text in Russian; translation happens on output (`redfront/i18n_en.py`): a name catalogue and phrase
+  templates in `data/i18n/`, generated from `tools/i18n_data.py`. `tools/i18n_check.py` checks completeness by running
+  every theatre in English and reporting anything left in Cyrillic. The command line (`python -m redfront ...`) is
+  Russian;
 * mission ground vehicle budget (see [Mission budget](#mission-budget));
 * show the enemy air plan (debug);
 * DCS map tools: "Map probe", "Apply probe", "Roads probe", "Apply roads", import `.miz` with zones (see

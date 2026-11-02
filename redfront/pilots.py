@@ -127,9 +127,11 @@ def crew_for(state: dict, u: dict, n: int, taken: set[str]) -> list[dict]:
 
 def find(u: dict, name: str) -> dict | None:
     """Лётчик по имени ЛА в миссии ("звание фамилия" или фамилия)."""
+    from .i18n_en import en
     for p in u.get("pilots", []):
-        if name == p["name"] or name.endswith(" " + p["name"]) or name.split(" (")[0].endswith(p["name"]):
-            return p
+        for pn in {p["name"], en(p["name"])}:    # английская миссия - имя латиницей
+            if name == pn or name.endswith(" " + pn) or name.split(" (")[0].endswith(pn):
+                return p
     return None
 
 

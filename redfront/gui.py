@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import build as build_mod, materialize
+from . import i18n_en, build as build_mod, materialize
 from . import ato, command, convoys, csar, dcstypes, debrief, explain, i18n, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
@@ -699,14 +699,16 @@ def handler(app: App):
             self.run(lambda: app.do(u.path[len("/api/"):], req))
 
         def run(self, fn):
+            en = self.headers.get("X-Lang") == "en"        # язык окна: ответ - по-английски (i18n_en: перевод на выходе)
+            tr = (lambda o: i18n_en.deep(o)) if en else (lambda o: o)
             try:
                 with LOCK:
-                    self.js(fn())
+                    self.js(tr(fn()))
             except (KeyError, ValueError, FileNotFoundError, RuntimeError, OSError) as e:
-                self.js({"error": str(e.args[0] if e.args else e)}, 400)
+                self.js(tr({"error": str(e.args[0] if e.args else e)}), 400)
             except Exception as e:                                  # noqa: BLE001 - показать в окне, не уронить сервер
                 traceback.print_exc()
-                self.js({"error": f"{type(e).__name__}: {e}"}, 500)
+                self.js(tr({"error": f"{type(e).__name__}: {e}"}), 500)
     return H
 
 

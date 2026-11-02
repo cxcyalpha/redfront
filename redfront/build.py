@@ -450,6 +450,66 @@ def airbase_script(m: Mission, state: dict) -> str:
             "end\n")
 
 
+LUA_EN = {   # сообщения скриптов миссии по-английски (литералы Lua целиком)
+    "Десант высаживается: ": "Air assault landing: ", "Загрузка - только на земле.": "Loading only on the ground.",
+    "Ваша доля десанта уже высажена.": "Your share of the troops has already been landed.",
+    "Загрузка - у своего аэродрома.": "Load at your own airfield.", "Десант на борту (": "Troops on board (",
+    " фигур): ": " troops): ", ". Площадка - в меню.": ". Landing zone - in the menu.",
+    "Десанта на борту нет - сначала загрузите у своего аэродрома.": "No troops on board - load them at your own airfield first.",
+    "Высадка - только на земле.": "Unloading only on the ground.", "Вы не на площадке: до неё %.1f км.": "You are not at the landing zone: it is %.1f km away.",
+    "Десант высажен. Возвращайтесь.": "Troops landed. Return to base.", "Площадка: пеленг %03d, %.1f км (дым)%s.": "Landing zone: bearing %03d, %.1f km (smoke)%s.",
+    "; перенесена на открытое место (%.0f м)": "; moved to open ground (%.0f m)",
+    "Десант высажен на площадке. Возвращайтесь.": "Troops landed at the landing zone. Return to base.", "Десант": "Air assault",
+    "Загрузить десант": "Load troops", "Высадить десант": "Unload troops", "Площадка": "Landing zone",
+    " на борту. Доставьте на свой аэродром.": " on board. Deliver to your own airfield.",
+    ": слышу вас! Ракета и дым - в меню F10, CSAR. Садитесь рядом или зависните надо мной.":
+        ": I hear you! Flare and smoke - F10 menu, CSAR. Land nearby or hover over me.",
+    ": бегу к вам, ": ": running to you, ", " с.": " s.", "Лебёдка: держите зависание ещё ": "Hoist: keep hovering for another ",
+    "%s: пеленг %03d, %.1f км, маяк %d кГц": "%s: bearing %03d, %.1f km, beacon %d kHz", "Сбитые экипажи:\n": "Downed crews:\n",
+    "Сбитых экипажей нет.": "No downed crews.", ": дым!": ": smoke!", ": ракета!": ": flare!", "Сбитые экипажи": "Downed crews",
+    "Ракета у ближнего": "Flare at the nearest", "Дым у ближнего": "Smoke at the nearest", "экипаж ": "crew ",
+    " катапультировался, маяк ": " ejected, beacon ", " кГц.": " kHz.", "Экипажи доставлены. Отличная работа!": "Crews delivered. Well done!",
+    "место боя сдвинуто на %.0f м (оценка %.2f), машин переставлено %d, без хорошего места %d":
+        "battle site moved %.0f m (score %.2f), %d vehicles repositioned, %d without a good spot",
+    "ошибка: ": "error: ", "ПВО на открытом месте: %d машин, у строений осталось %d%s": "air defence in the open: %d vehicles, %d left by buildings%s",
+    ", позиция сдвинута на %.0f м (аэродром, вода, город)": ", position moved %.0f m (airfield, water, town)",
+    " ВНИМАНИЕ: пролёты моста по именам не найдены": " WARNING: bridge spans not found by name",
+    " ВНИМАНИЕ: мостов рядом нет, взят ближайший объект - проверьте координаты (set-pos)":
+        " WARNING: no bridges nearby, the nearest object was taken - check the coordinates (set-pos)",
+    "%s %.0fм": "%s %.0fm", "redfront targets %s: объектов карты %d (в радиусе %d): %s%s": "redfront targets %s: map objects %d (within radius %d): %s%s",
+    "РЛС ЗРК у цели уничтожены или подавлены - удар разрешён": "SAM radars at the target destroyed or suppressed - strike cleared",
+    "подавление ПВО ведёт пуски - удар в окне подавления": "SEAD is firing - strike inside the suppression window",
+    "пусков подавления нет, РЛС ПВО молчат - удар по времени": "no SEAD launches, air defence radars silent - strike on time",
+    "группы подавления ПВО сбиты - удар отменён, ударным группам - домой": "SEAD groups shot down - strike cancelled, strike groups return to base",
+    "дорога для участка с головой колонны не найдена": "no road found for the segment with the column head",
+    "на дороге: %d машин": "on the road: %d vehicles", "отход на исходную на %d с: в строю %d из %d": "withdrawal to the start line at %d s: %d of %d in action",
+    "redfront front: %d взводов": "redfront front: %d platoons", "Эвакуация: группа на борту (": "Extraction: group on board (",
+    "Снабжение сдано на склад: ": "Supplies delivered to the depot: ", "redfront ctld: авианаводчик ": "redfront ctld: JTAC ",
+    " - взлёт по ": " - scramble against ", "redfront: результаты не сохранятся - MissionScripting.lua не разблокирован":
+        "redfront: results will not be saved - MissionScripting.lua is not unlocked",
+    ": потерян ведомый - уходим домой": ": wingman lost - returning to base",
+}
+
+
+def lua_en(src: str) -> str:
+    """Скрипт миссии по-английски: русские строковые литералы Lua - по словарю LUA_EN, иначе переводом i18n_en
+    (подписи из модели: названия частей, задач). Комментарии не трогаются - их не видно."""
+    from . import i18n_en
+
+    def lit(mm):
+        body = mm.group(1)
+        if not i18n_en.CYR.search(body):
+            return mm.group(0)
+        txt = body.replace('\\"', '"')
+        out = LUA_EN.get(txt) or LUA_EN.get(body) or i18n_en.en(txt)
+        return '"' + out.replace('"', '\\"') + '"'
+    lines = []
+    for ln in src.split("\n"):
+        code, sep, comment = ln.partition("--")
+        lines.append(re.sub(r'"((?:[^"\\\n]|\\.)*)"', lit, code) + sep + comment)
+    return "\n".join(lines)
+
+
 class CarrierPad:
     """Авианосец как база группы (вместо аэродрома pydcs): группа кораблей, позиция, частота (TACAN/ICLS - в задачах
     корабля), id корабля-авианосца для посадки. Те же поля, что сборка берёт у аэродрома: position, id, name, atc_radio."""
@@ -477,7 +537,7 @@ def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "Carr
         sg = m.ship_group(_country(m, state, b["side"]), b["name"], getattr(_ships, b["ship"]), pos, heading=wind_from)
         for k, esc in enumerate(b.get("escorts", [])):
             off = model.offset(b, wind_from + 120 * (k + 1), 3000)
-            u = m.ship(f"{b['name']} эскорт {k + 1}", getattr(_ships, esc))
+            u = m.ship(f"{b['name']} escort {k + 1}", getattr(_ships, esc))
             q = _pt(m, off)
             u.position = Point(q.x, q.y, m.terrain)
             sg.add_unit(u)
@@ -727,6 +787,9 @@ def _crew(state: dict, fg, perf: dict) -> None:
     for unit, p in zip(fg.units, pilots.crew_for(state, perf, len(fg.units), taken)):
         taken.add(p["name"])
         name = pilots.title(perf, p)
+        if i18n.lang(state) == "en":             # английская миссия: звание и фамилия латиницей (дебриф узнаёт и так)
+            from . import i18n_en
+            name = i18n_en.en(name)
         if name in _CREW["names"]:               # однофамильцы в разных полках
             name = f"{name} ({perf['id']})"
         _CREW["names"].add(name)
@@ -1928,6 +1991,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         + ((Lx("\n\nНаведение (КРУ, только МиГ-29):\n", "\n\nGround control intercept (GCI, MiG-29 only):\n") + "\n".join(f"- {ln}" for ln in gci_lines)) if gci_lines else "")
         + ((Lx("\n\nПеревозки и наведение (CTLD):\n", "\n\nTransport and JTAC (CTLD):\n") + "\n".join(f"- {ln}" for ln in ctld_lines)) if ctld_lines else ""))
 
+    if lg == "en":                               # английская миссия: брифинг, сообщения скриптов - из русского текста модели
+        from . import i18n_en
+        m.set_description_text(i18n_en.en(m.description_text()))
+        lines, order_lines, comm_lines = ([i18n_en.en(x) for x in ls] for ls in (lines, order_lines, comm_lines))
+        for tr_ in m.triggerrules.triggers:
+            for act in tr_.actions:
+                if isinstance(act, DoScript):
+                    act.text = String(lua_en(str(act.text)))
     kb_pages = _kneeboard(m, state, tk, lines, order_lines, comm_lines, wx_text, lg)
 
     out_path = Path(out_path)

@@ -1,0 +1,688 @@
+"""Английские названия для data/i18n/*.json (источник правды - этот файл; запуск пишет JSON).
+
+PLACES - русские написания пунктов и городов -> английские (как на картах: немецкие, грузинские, арабские,
+вьетнамские названия - в принятой латинской форме). NAMES - точные имена частей, объектов, сценариев, задач.
+TEMPLATES - шаблоны фраз: регулярное выражение по-русски -> английский текст ({имя} - подстановка, переводится тоже).
+
+    python tools/i18n_data.py
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import re
+
+OUT = Path(__file__).resolve().parent.parent / "redfront" / "data" / "i18n"
+
+PLACES = {
+    # Германия
+    "Людвигслюст": "Ludwigslust", "Бойценбург": "Boizenburg", "Шверин": "Schwerin", "Стендаль": "Stendal",
+    "Магдебург": "Magdeburg", "Галле": "Halle", "Эрфурт": "Erfurt", "Гера": "Gera", "Зольтау": "Soltau",
+    "Ильцен": "Uelzen", "Ноймюнстер": "Neumünster", "Ганновер": "Hannover", "Кассель": "Kassel", "Фульда": "Fulda",
+    "Вюрцбург": "Würzburg", "Нюрнберг": "Nuremberg", "Лауэнбурга": "Lauenburg", "Дёмица": "Dömitz",
+    "Эккернфёрде": "Eckernförde", "Хайде": "Heide", "Куксхафен": "Cuxhaven", "Бремерфёрде": "Bremervörde",
+    "Вестертимке": "Westertimke", "Дельменхорст": "Delmenhorst", "Эйдельштедт": "Eidelstedt", "Мёнезее": "Möhnesee",
+    "Бурбах": "Burbach", "Гиссен": "Giessen", "Вильдфлеккен": "Wildflecken", "Ханау": "Hanau", "Гибельштадт": "Giebelstadt",
+    "Графенвёр": "Grafenwöhr", "Ансбах": "Ansbach", "Брюгген": "Brüggen", "Лаарбрух": "Laarbruch", "Аальхорн": "Ahlhorn",
+    "Евер": "Jever", "Люнебурга": "Lüneburg", "Люнебург": "Lüneburg", "Венланда": "Wendland", "Венланд": "Wendland",
+    "Винзен": "Winsen", "Мюнстер": "Munster", "Данненберга": "Dannenberg", "Пархим": "Parchim", "Лаге": "Laage",
+    "Дамгартен": "Damgarten", "Мальвинкель": "Mahlwinkel", "Вунсторф": "Wunstorf", "Фасберг": "Fassberg",
+    "Целле": "Celle", "Ютерзен": "Uetersen", "Нордхольц": "Nordholz", "Гюстрова": "Güstrow", "Рослау": "Rosslau",
+    "Гарльштедт": "Garlstedt", "Зедорф": "Seedorf", "Ротенбург": "Rotenburg", "Гёттинген": "Göttingen",
+    "Хельмштедт": "Helmstedt", "Альтмарк": "Altmark", "Хоф": "Hof", "Майн": "Main", "Шлезвиг-Гольштейн": "Schleswig-Holstein",
+    "Нижняя Эльба": "Lower Elbe", "Эльбу": "Elbe", "Эльбе": "Elbe", "Эльба": "Elbe",
+    # Кавказ
+    "Сенаки": "Senaki", "Гори": "Gori", "Тбилиси": "Tbilisi", "Каспи": "Kaspi", "Кутаиси": "Kutaisi", "Вазиани": "Vaziani",
+    "Хони": "Khoni", "Владикавказ": "Vladikavkaz", "Алагир": "Alagir", "Джава": "Java", "Гудаута": "Gudauta",
+    "Сухуми": "Sukhumi", "Зугдиди": "Zugdidi", "Ингури": "Inguri", "Рухи": "Rukhi", "Лиахви": "Liakhvi",
+    "Цхинвали": "Tskhinvali", "Поти": "Poti", "Кодори": "Kodori", "Беслан": "Beslan", "Сочи": "Sochi",
+    # Ливан, Сирия, Израиль
+    "Сук-эль-Гарб": "Souk el Gharb", "Баабда": "Baabda", "Хальде": "Khalde", "Алей": "Aley", "Бейт-эд-Дин": "Beiteddine",
+    "Западный Бейрут": "West Beirut", "Бейрут": "Beirut", "Бхамдун": "Bhamdoun", "Софар": "Sofar", "Штора": "Chtaura",
+    "Метн": "Metn", "Бекаа": "Bekaa", "Думайр": "Dumayr", "Шиншар": "Shinshar", "Тарава": "Tarawa", "Набатия": "Nabatieh",
+    "Джеззин": "Jezzine", "Тир": "Tyre", "Хасбайя": "Hasbaya", "Сидон": "Sidon", "Айн-аль-Хильва": "Ain al-Hilweh",
+    "Дамаск": "Damascus", "Голаны": "Golan", "Катана": "Qatana", "Хайфа": "Haifa", "Верхняя Галилея": "Upper Galilee",
+    "Рамат-Давид": "Ramat David", "Джуния": "Jounieh", "Кирьят-Шмона": "Kiryat Shmona", "Нахария": "Nahariya",
+    "Кацрин": "Katzrin", "Литани": "Litani", "Дамур": "Damour", "Айн-Жальта": "Ain Zhalta", "Рашайя": "Rashaya",
+    "Джуб-Джаннин": "Joub Jannine",
+    # Вьетнам (условная география)
+    "Ханой": "Hanoi", "Хайфон": "Haiphong", "Хайфона": "Haiphong", "Ханоя": "Hanoi", "Тханьхоа": "Thanh Hoa",
+    "Винь": "Vinh", "Донгхой": "Dong Hoi", "Дананг": "Da Nang", "Дананга": "Da Nang", "Хюэ": "Hue", "Донгха": "Dong Ha",
+    "Удорн": "Udorn", "Убон": "Ubon", "Корат": "Korat", "Таиланд": "Thailand", "У-Тапао": "U-Tapao", "Гуам": "Guam",
+    "Фубай": "Phu Bai", "Ной-Бай": "Noi Bai", "Кеп": "Kep", "Йенбай": "Yen Bai", "Куанглан": "Quang Lang",
+    "Байтхыонг": "Bai Thuong", "Хама": "Hama", "Басиль-Асад": "Bassel al-Assad", "Абу-аль-Духур": "Abu al-Duhur",
+    "Эль-Кусайр": "Al Qusayr", "Шайрат": "Shayrat", "Кляят": "Qlayaat", "Хатай": "Hatay", "Инджирлик": "Incirlik",
+    "Акротири": "Akrotiri", "Йенвьен": "Yen Vien", "Хамронг": "Ham Rong", "Жолинь": "Gio Linh", "Куангчи": "Quang Tri",
+    "Ашау": "A Shau", "Бастонь": "Bastogne",
+    # аэродромы в примечаниях
+    "Рамштайн": "Ramstein", "Нёрфених": "Nörvenich", "Баден-Зёллинген": "Baden-Söllingen", "Лар": "Lahr",
+    "Тролленхаген": "Trollenhagen", "Штендаль": "Stendal", "Борштель": "Borstel", "Гроссенхайн": "Großenhain",
+    "Альтенбург": "Altenburg", "Альтенбурге": "Altenburg", "Милденхолл": "Mildenhall", "Гайленкирхен": "Geilenkirchen",
+    "Нойбург": "Neuburg", "Альтштедт": "Allstedt", "Прешен": "Preschen", "Древиц": "Drewitz", "Базеполь": "Basepohl",
+    "Хопстен": "Hopsten", "Нора": "Nohra", "Хон": "Hahn", "Пенцинг": "Penzing", "Вельцов": "Welzow", "Лехфельд": "Lechfeld",
+    "Вильденрат": "Wildenrath", "Финстервальде": "Finsterwalde", "Бремгартен": "Bremgarten", "Котбус": "Cottbus",
+    "Лайпхайм": "Leipheim", "Фюрстенфельдбрук": "Fürstenfeldbruck", "Меммингем": "Memmingen", "Ольденбург": "Oldenburg",
+    "Виттмундхафен": "Wittmundhafen", "Холм": "Holm", "Белоруссию": "Belarus", "Баден-Зёллинген и Лар": "Baden-Söllingen and Lahr",
+}
+
+NAMES = {
+    # --- Кавказ 2008
+    "135-й мсп 19-й мсд (58-я армия)": "135th Motor Rifle Regiment, 19th MRD (58th Army)",
+    "693-й мсп 19-й мсд (58-я армия)": "693rd Motor Rifle Regiment, 19th MRD (58th Army)",
+    "503-й мсп 19-й мсд": "503rd Motor Rifle Regiment, 19th MRD",
+    "Вооружённые формирования Южной Осетии": "South Ossetian armed formations",
+    "104-й пдп 76-й вдд": "104th Airborne Regiment, 76th Airborne Division",
+    "234-й пдп 76-й вдд": "234th Airborne Regiment, 76th Airborne Division",
+    "70-й мсп 42-й мсд": "70th Motor Rifle Regiment, 42nd MRD", "71-й мсп 42-й мсд": "71st Motor Rifle Regiment, 42nd MRD",
+    "Вооружённые силы Абхазии": "Abkhaz armed forces", "Абхазские подразделения (Кодори)": "Abkhaz units (Kodori)",
+    "247-й дшп 7-й вдд": "247th Air Assault Regiment, 7th Airborne Division",
+    "108-й дшп 7-й вдд": "108th Air Assault Regiment, 7th Airborne Division",
+    "4-я пехотная бригада (Вазиани)": "4th Infantry Brigade (Vaziani)", "3-я пехотная бригада (Кутаиси)": "3rd Infantry Brigade (Kutaisi)",
+    "Отдельный танковый батальон (Гори)": "Independent Tank Battalion (Gori)", "Спецназ МВД Грузии": "Georgian Interior Ministry special forces",
+    "2-я пехотная бригада (Сенаки)": "2nd Infantry Brigade (Senaki)", "5-я пехотная бригада (Хони)": "5th Infantry Brigade (Khoni)",
+    "1-я пехотная бригада (возвращается из Ирака)": "1st Infantry Brigade (returning from Iraq)",
+    "Силы МВД в Верхней Абхазии": "Interior Ministry forces in Upper Abkhazia",
+    "Зенитная ракетная бригада 58-й армии (Бук)": "58th Army SAM Brigade (Buk)", "Батарея Тор (Владикавказ)": "Tor battery (Vladikavkaz)",
+    "368-й ошап (Су-25)": "368th Ground Attack Regiment (Su-25)", "461-й ошап (Су-25)": "461st Ground Attack Regiment (Su-25)",
+    "559-й бап (Су-24М)": "559th Bomber Regiment (Su-24M)", "11-й орап (Су-24МР)": "11th Reconnaissance Regiment (Su-24MR)",
+    "52-й гв. тбап (Ту-22М3)": "52nd Guards Heavy Bomber Regiment (Tu-22M3)", "3-й иап (Су-27)": "3rd Fighter Regiment (Su-27)",
+    "31-й иап (МиГ-29)": "31st Fighter Regiment (MiG-29)", "487-й овп (Ми-24П)": "487th Helicopter Regiment (Mi-24P)",
+    "487-й овп, эскадрилья Ми-8": "487th Helicopter Regiment, Mi-8 squadron", "Отряд ДРЛО (А-50)": "AEW detachment (A-50)",
+    "ВВС Абхазии (Л-39)": "Abkhaz Air Force (L-39)", "ВВС Абхазии (Ми-8)": "Abkhaz Air Force (Mi-8)",
+    "Штурмовая эскадрилья ВВС Грузии (Су-25КМ)": "Georgian Air Force attack squadron (Su-25KM)",
+    "Учебно-боевая эскадрилья (Л-39)": "Training squadron (L-39)", "Вертолётная эскадрилья (Ми-24)": "Helicopter squadron (Mi-24)",
+    "Вертолётная эскадрилья (Ми-8)": "Helicopter squadron (Mi-8)", "Вертолётная эскадрилья (UH-1H)": "Helicopter squadron (UH-1H)",
+    "Склад снабжения 58-й армии (Владикавказ)": "58th Army supply depot (Vladikavkaz)",
+    "Мост через Ингури (Рухи)": "Inguri bridge (Rukhi)", "Мост через Лиахви (Гори)": "Liakhvi bridge (Gori)",
+    # --- Германия
+    "Зенитная ракетная бригада 8-й гв. А (Круг; в DCS - Куб)": "8th Guards Army SAM Brigade (Krug; Kub in DCS)",
+    "Зенитная ракетная бригада 1-й гв. ТА (Круг; в DCS - Куб)": "1st Guards Tank Army SAM Brigade (Krug; Kub in DCS)",
+    "Панцергренадерский батальон (усиленный)": "Panzergrenadier battalion (reinforced)",
+    "Войсковая ПВО батальона (Gepard, Roland)": "Battalion air defence (Gepard, Roland)", "Батарея Patriot": "Patriot battery",
+    "Мотострелковый полк (передовой отряд)": "Motor rifle regiment (forward detachment)",
+    "ПВО мотострелкового полка (Оса, Стрела-10)": "Motor rifle regiment air defence (Osa, Strela-10)",
+    "Танковый полк (передовой отряд)": "Tank regiment (forward detachment)",
+    "ПВО танкового полка (Шилка, Стрела-10)": "Tank regiment air defence (Shilka, Strela-10)",
+    "Танковый батальон (оборона Люнебурга)": "Tank battalion (defence of Lüneburg)",
+    "Войсковая ПВО танкового батальона (Gepard)": "Tank battalion air defence (Gepard)",
+    "Истребительная эскадрилья (МиГ-29)": "Fighter squadron (MiG-29)", "Истребительная эскадрилья (F-4)": "Fighter squadron (F-4)",
+    "Истребительно-бомбардировочная эскадрилья (Tornado)": "Fighter-bomber squadron (Tornado)",
+    "Танковая бригада (резерв корпуса)": "Tank brigade (corps reserve)", "Войсковая ПВО бригады (Gepard, Roland)": "Brigade air defence (Gepard, Roland)",
+    "Танковый полк (второй эшелон)": "Tank regiment (second echelon)",
+    "ПВО танкового полка второго эшелона (Тунгуска нет в pydcs - Шилка, Оса)": "Second-echelon tank regiment air defence (no Tunguska in pydcs: Shilka, Osa)",
+    "Панцергренадерский батальон (оборона Венланда)": "Panzergrenadier battalion (defence of the Wendland)",
+    "Войсковая ПВО батальона (Gepard)": "Battalion air defence (Gepard)", "Танковая бригада (второй резерв)": "Tank brigade (second reserve)",
+    "Мотострелковый полк (Венланд)": "Motor rifle regiment (Wendland)", "ПВО мотострелкового полка (Стрела-10)": "Motor rifle regiment air defence (Strela-10)",
+    "Штурмовая эскадрилья (Су-25)": "Attack squadron (Su-25)", "Бомбардировочная эскадрилья (Су-24М)": "Bomber squadron (Su-24M)",
+    "Силы ДРЛО НАТО (E-3A)": "NATO AEW Force (E-3A)", "Заправщики ВВС США (KC-135)": "USAF tankers (KC-135)",
+    "Батальон боевых вертолётов армии США (AH-64A)": "US Army attack helicopter battalion (AH-64A)",
+    "Вертолётный батальон армии США (UH-60A)": "US Army helicopter battalion (UH-60A)",
+    "Транспортный вертолётный полк Хересфлигер (CH-53G; в DCS - CH-53E)": "Army aviation transport helicopter regiment (CH-53G; CH-53E in DCS)",
+    "Передовая площадка A-10A (81-е крыло)": "A-10A forward operating location (81st Wing)",
+    "Передовая площадка A-10A Аальхорн (81-е крыло)": "A-10A forward operating location Ahlhorn (81st Wing)",
+    "Передовая площадка A-10A Евер (81-е крыло)": "A-10A forward operating location Jever (81st Wing)",
+    "36-е тактическое истребительное крыло (F-15C/D)": "36th Tactical Fighter Wing (F-15C/D)",
+    "50-е тактическое истребительное крыло (F-16C/D блок 25; в DCS - блок 50)": "50th Tactical Fighter Wing (F-16C/D Block 25; Block 50 in DCS)",
+    "50-е тактическое истребительное крыло (F-16A/B блок 15; в DCS - F-16C блок 50)": "50th Tactical Fighter Wing (F-16A/B Block 15; F-16C Block 50 in DCS)",
+    "86-е тактическое истребительное крыло (F-16C блок 25/30; в DCS - блок 50)": "86th Tactical Fighter Wing (F-16C Block 25/30; Block 50 in DCS)",
+    "52-е тактическое истребительное крыло (F-4E/F-4G; в DCS - F-4E)": "52nd Tactical Fighter Wing (F-4E/F-4G; F-4E in DCS)",
+    "52-е крыло, F-16C (пары hunter/killer с F-4G; в DCS - блок 50)": "52nd Wing, F-16C (hunter/killer pairs with F-4G; Block 50 in DCS)",
+    "26-е тактическое разведывательное крыло (RF-4C; в DCS - F-4E)": "26th Tactical Reconnaissance Wing (RF-4C; F-4E in DCS)",
+    "3-я и 4-я эскадрильи RAF (Harrier GR.3; в DCS - AV-8B)": "Nos. 3 and 4 Squadrons RAF (Harrier GR.3; AV-8B in DCS)",
+    "19-я и 92-я эскадрильи RAF (Phantom FGR.2; в DCS - F-4E)": "Nos. 19 and 92 Squadrons RAF (Phantom FGR.2; F-4E in DCS)",
+    "Крыло RAF Брюгген (Tornado GR.1; в DCS - GR.4)": "RAF Brüggen Wing (Tornado GR.1; GR.4 in DCS)",
+    "Крыло RAF Лаарбрух (Tornado GR.1; в DCS - GR.4)": "RAF Laarbruch Wing (Tornado GR.1; GR.4 in DCS)",
+    "2-я эскадрилья RAF (Jaguar GR.1, к концу 80-х Tornado GR.1A; в DCS - Tornado GR.4)": "No. 2 Squadron RAF (Jaguar GR.1, Tornado GR.1A by the late 1980s; Tornado GR.4 in DCS)",
+    "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47D)": "No. 18 Squadron RAF (Chinook HC.1; CH-47D in DCS)",
+    "230-я эскадрилья RAF (Puma HC.1; в DCS - UH-1H)": "No. 230 Squadron RAF (Puma HC.1; UH-1H in DCS)",
+    "4-е крыло ВВС Канады (CF-18; в DCS - F/A-18C)": "4 Wing, Canadian Forces (CF-18; F/A-18C in DCS)",
+    "1-я ютландская бригада (Дания) (LANDJUT)": "1st Jutland Brigade (Denmark) (LANDJUT)",
+    "2-я ютландская бригада (Дания) (LANDJUT)": "2nd Jutland Brigade (Denmark) (LANDJUT)",
+    "1-я кавалерийская дивизия США (бригада) (III амер. АК)": "US 1st Cavalry Division (brigade) (US III Corps)",
+    "Передовая бригада 2-й бронетанковой дивизии США (III амер. АК)": "Forward brigade, US 2nd Armored Division (US III Corps)",
+    "1-я десантно-штурмовая рота 35-й одшбр": "1st Air Assault Company, 35th Air Assault Brigade",
+    "2-я десантно-штурмовая рота 35-й одшбр": "2nd Air Assault Company, 35th Air Assault Brigade",
+    "3-я десантно-штурмовая рота 35-й одшбр": "3rd Air Assault Company, 35th Air Assault Brigade",
+    "357-й оштап (Су-25; почти весь полк в Афганистане)": "357th Independent Attack Regiment (Su-25; most of the regiment in Afghanistan)",
+    "35-й иап (МиГ-23МЛ в роли ИБА; в DCS - МиГ-23МЛД)": "35th Fighter Regiment (MiG-23ML as fighter-bomber; MiG-23MLD in DCS)",
+    "787-й иап, эскадрилья МиГ-25ПД/ПУ": "787th Fighter Regiment, MiG-25PD/PU squadron",
+    "Склады ПСП (Алей)": "PSP depots (Aley)",
+    # --- Ливан 1983, 1982
+    "24-й экспедиционный отряд МП США (аэропорт)": "24th Marine Amphibious Unit (airport)",
+    "8-я бригада ливанской армии (Сук-эль-Гарб)": "Lebanese Army 8th Brigade (Souk el Gharb)",
+    "4-я бригада ливанской армии (Баабда)": "Lebanese Army 4th Brigade (Baabda)",
+    "5-я бригада ливанской армии (Хальде)": "Lebanese Army 5th Brigade (Khalde)",
+    "Ополчение ПСП (друзы, Алей)": "PSP militia (Druze, Aley)", "Ополчение ПСП (друзы, Бейт-эд-Дин)": "PSP militia (Druze, Beiteddine)",
+    "Ополчение 'Амаль' (Западный Бейрут)": "Amal militia (West Beirut)",
+    "Сирийская бронетанковая бригада (резерв)": "Syrian armoured brigade (reserve)",
+    "VS-28 (S-3A, заправщик)": "VS-28 (S-3A, tanker)", "HMM-162 (CH-46/AH-1T, Тарава)": "HMM-162 (CH-46/AH-1T, Tarawa)",
+    "Истребительные эскадрильи (МиГ-21)": "Fighter squadrons (MiG-21)", "Истребительные эскадрильи (МиГ-23МЛ)": "Fighter squadrons (MiG-23ML)",
+    "Истребительно-бомбардировочные эскадрильи (Су-22)": "Fighter-bomber squadrons (Su-22)", "Вертолёты 'Газель'": "Gazelle helicopters",
+    "Стрела-1, ЗСУ-23-4": "Strela-1, ZSU-23-4",
+    "91-я дивизия (побережье)": "91st Division (coast)", "880-я дивизия (резерв)": "880th Division (reserve)",
+    "Бригада ООП 'Кастель' (Тир)": "PLO Kastel Brigade (Tyre)", "Бригада ООП 'Карама' (Хасбайя)": "PLO Karameh Brigade (Hasbaya)",
+    "Бригада ООП 'Ярмук' (Набатия)": "PLO Yarmouk Brigade (Nabatieh)",
+    "Формирования ООП (Сидон, Айн-аль-Хильва)": "PLO forces (Sidon, Ain al-Hilweh)",
+    "85-я бригада Сирии (Бейрут)": "Syrian 85th Brigade (Beirut)", "62-я отдельная бригада Сирии (Бекаа)": "Syrian 62nd Independent Brigade (Bekaa)",
+    "1-я бронетанковая дивизия Сирии": "Syrian 1st Armoured Division", "91-я танковая бригада Сирии": "Syrian 91st Tank Brigade",
+    "Сирийские коммандос (шоссе Бейрут - Дамаск)": "Syrian commandos (Beirut - Damascus highway)",
+    "3-я бронетанковая дивизия Сирии": "Syrian 3rd Armoured Division",
+    "106-я и 133-я эскадрильи (F-15A)": "Nos. 106 and 133 Squadrons (F-15A)", "110-я и 117-я эскадрильи (F-16A)": "Nos. 110 and 117 Squadrons (F-16A)",
+    "69-я, 119-я, 201-я эскадрильи (F-4E 'Курнас')": "Nos. 69, 119 and 201 Squadrons (F-4E Kurnass)",
+    "Эскадрильи A-4N/H 'Скайхок' (102, 109, 115, 116, 140)": "A-4N/H Skyhawk squadrons (102, 109, 115, 116, 140)",
+    "192-я эскадрилья (E-2C)": "No. 192 Squadron (E-2C)", "120-я эскадрилья (Боинг 707 - заправщик)": "No. 120 Squadron (Boeing 707 tanker)",
+    "160-я и 161-я эскадрильи (AH-1S)": "Nos. 160 and 161 Squadrons (AH-1S)", "Вертолётная эскадрилья (UH-1/Белл 212)": "Helicopter squadron (UH-1/Bell 212)",
+    "Истребительные эскадрильи (МиГ-23МФ/МС)": "Fighter squadrons (MiG-23MF/MS)",
+    "Истребительно-бомбардировочные эскадрильи (Су-22/Су-20)": "Fighter-bomber squadrons (Su-22/Su-20)", "Эскадрилья МиГ-25": "MiG-25 squadron",
+    "Вертолёты 'Газель' (ПТУР HOT)": "Gazelle helicopters (HOT ATGM)", "Вертолёты Ми-8": "Mi-8 helicopters", "Чапарэл, Вулкан": "Chaparral, Vulcan",
+    "Склад снабжения сирийских войск (Штора)": "Syrian forces supply depot (Chtaura)", "Склады ООП (Бейрут)": "PLO depots (Beirut)",
+    "Склады ООП (Сидон)": "PLO depots (Sidon)", "Мост Касмия через Литани": "Qasmiyeh bridge over the Litani",
+    "Мост Хардали через Литани": "Khardali bridge over the Litani",
+    # --- Вьетнам
+    "324B дивизия ВНА": "NVA 324B Division", "320B дивизия ВНА": "NVA 320B Division",
+    "202-й и 203-й танковые полки ВНА": "NVA 202nd and 203rd Armored Regiments",
+    "20-й танковый батальон АРВ (М-48)": "ARVN 20th Tank Battalion (M48)", "1-я бронетанковая бригада АРВ": "ARVN 1st Armored Brigade",
+    "Воздушно-десантная дивизия Южного Вьетнама": "South Vietnamese Airborne Division",
+    "366-е тактическое крыло (F-4E, Дананг)": "366th Tactical Fighter Wing (F-4E, Da Nang)",
+    "432-е разведывательное крыло (F-4D/E, Удорн): MiGCAP": "432nd Tactical Reconnaissance Wing (F-4D/E, Udorn): MiGCAP",
+    "8-е тактическое крыло 'Волчья стая' (F-4D, Убон): управляемые бомбы": "8th Tactical Fighter Wing 'Wolfpack' (F-4D, Ubon): guided bombs",
+    "17-я эскадрилья 'Дикая ласка' (F-105G, Корат)": "17th Wild Weasel Squadron (F-105G, Korat)", "KC-135 (Таиланд)": "KC-135 (Thailand)",
+    "B-52D/G (У-Тапао, Гуам): 'Арк Лайт', 'Freedom Porch'": "B-52D/G (U-Tapao, Guam): Arc Light, Freedom Porch",
+    "B-52D/G (Гуам, У-Тапао): 'Лайнбэкер-2'": "B-52D/G (Guam, U-Tapao): Linebacker II",
+    "37-я спасательная эскадрилья (HH-53, Дананг)": "37th Aerospace Rescue and Recovery Squadron (HH-53, Da Nang)",
+    "Армейские AH-1G (Фубай)": "US Army AH-1G (Phu Bai)", "ВВС Южного Вьетнама (UH-1H, Фубай)": "South Vietnamese Air Force (UH-1H, Phu Bai)",
+    "921-й истребительный полк 'Красная звезда' (МиГ-21ПФ/МФ, Ной-Бай)": "921st Fighter Regiment 'Sao Do' (MiG-21PF/MF, Noi Bai)",
+    "927-й истребительный полк 'Ламшон' (МиГ-21, Кеп)": "927th Fighter Regiment 'Lam Son' (MiG-21, Kep)",
+    "923-й истребительный полк 'Йенбай' (МиГ-17, Кеп)": "923rd Fighter Regiment 'Yen The' (MiG-17, Kep)",
+    "925-й истребительный полк (J-6/МиГ-19, Йенбай)": "925th Fighter Regiment (J-6/MiG-19, Yen Bai)",
+    "Передовая группа МиГ-21 (Куанглан)": "MiG-21 forward detachment (Quang Lang)", "КС-19, С-60, ЗУ-23": "KS-19, S-60, ZU-23",
+    "Нефтебаза и порт Хайфона": "Haiphong oil storage and port", "Железнодорожный узел Ханоя (Йенвьен)": "Hanoi rail yard (Yen Vien)",
+    "Склады и перевалка Винь": "Vinh depots and transshipment point", "Перевалка Донгхой": "Dong Hoi transshipment point",
+    "Склады Дананга": "Da Nang depots", "Склады Хюэ": "Hue depots", "Мост Тханьхоа (Хамронг)": "Thanh Hoa Bridge (Ham Rong)",
+    "Мост Думера (Ханой)": "Paul Doumer Bridge (Hanoi)", "Мост Донгха": "Dong Ha bridge",
+    "Мост через Эльбу у Лауэнбурга": "Elbe bridge at Lauenburg", "Переправа через Эльбу у Дёмица": "Elbe crossing at Dömitz",
+    # сокращения
+    "мпб": "marine infantry battalion", "мсб": "motor rifle battalion", "693 мбр": "693 mech. brigade", "3 мпбр": "3 marine infantry brigade",
+    "135 мбр": "135 mech. brigade", "4 мпбр": "4 marine infantry brigade", "2 мпбр": "2 marine infantry brigade",
+    "С-200": "S-200", "С-75": "S-75", "С-125": "S-125", "С-60": "S-60", "КРУ": "GCI radar", "Оса, ЗСУ-23-4": "Osa, ZSU-23-4",
+    "Тор, ЗСУ-23-4": "Tor, ZSU-23-4", "Оса-АКМ, ЗУ-23": "Osa-AKM, ZU-23",
+    # --- сценарии, оси
+    "Август 2008: Южная Осетия и Абхазия": "August 2008: South Ossetia and Abkhazia",
+    "Удар ОВД по всему фронту (1989)": "Warsaw Pact offensive on the whole front (1989)",
+    "Удар ОВД по всему фронту (1985)": "Warsaw Pact offensive on the whole front (1985)",
+    "Удар ОВД по всему фронту (1987)": "Warsaw Pact offensive on the whole front (1987)",
+    "Удар на Люнебург и Винзен": "Thrust on Lüneburg and Winsen", "Главный удар на юг: Ильцен - Мюнстер": "Main thrust south: Uelzen - Munster",
+    "Синие успели: резерв на 2-й день, оборона по Эльбе": "Blue in time: reserve on day 2, defence along the Elbe",
+    "Декабрь 1983: Ливан, авианосцы США": "December 1983: Lebanon, US carriers", "Июнь 1982: Ливан, долина Бекаа": "June 1982: Lebanon, Bekaa Valley",
+    "Апрель 1972: Вьетнам, Пасхальное наступление": "April 1972: Vietnam, Easter Offensive",
+    "Апрель 1972: 'Freedom Train' и Пасхальное наступление": "April 1972: Freedom Train and the Easter Offensive",
+    "Декабрь 1972: 'Лайнбэкер-2'": "December 1972: Linebacker II",
+    "Южная Осетия: Цхинвали - Гори": "South Ossetia: Tskhinvali - Gori", "Абхазия: Зугдиди - Сенаки - Поти": "Abkhazia: Zugdidi - Senaki - Poti",
+    "Кодорское ущелье": "Kodori Gorge", "Фульдский коридор": "Fulda Gap", "Гёттинген - Кассель": "Göttingen - Kassel",
+    "Альтмарк - Целле": "Altmark - Celle", "Хельмштедт - Ганновер": "Helmstedt - Hannover", "Хоф - Нюрнберг": "Hof - Nuremberg",
+    "Шуф: Алей - Сук-эль-Гарб - аэропорт": "Shouf: Aley - Souk el Gharb - airport", "Побережье: Дамур - Хальде": "Coast: Damour - Khalde",
+    "Побережье: Тир - Сидон - Дамур - Бейрут": "Coast: Tyre - Sidon - Damour - Beirut",
+    "Центр: Набатия - Джеззин - Айн-Жальта": "Centre: Nabatieh - Jezzine - Ain Zhalta",
+    "Бекаа: Хасбайя - Рашайя - Джуб-Джаннин - Штора": "Bekaa: Hasbaya - Rashaya - Joub Jannine - Chtaura",
+    "ДМЗ: Жолинь - Донгха - Куангчи - Хюэ": "DMZ: Gio Linh - Dong Ha - Quang Tri - Hue", "Запад: Ашау - Бастонь - Хюэ": "West: A Shau - Bastogne - Hue",
+    "Ной-Бай (Хама)": "Noi Bai (Hama)", "Кеп (Басиль-Асад)": "Kep (Bassel al-Assad)", "Йенбай (Абу-аль-Духур)": "Yen Bai (Abu al-Duhur)",
+    "Куанглан (Эль-Кусайр)": "Quang Lang (Al Qusayr)", "Байтхыонг (Шайрат)": "Bai Thuong (Shayrat)", "Дананг (Бейрут)": "Da Nang (Beirut)",
+    "Фубай (Кляят)": "Phu Bai (Qlayaat)", "Удорн (Хатай)": "Udorn (Hatay)", "Корат (Инджирлик)": "Korat (Incirlik)",
+    "У-Тапао (Акротири)": "U-Tapao (Akrotiri)",
+    # --- доктрины: названия
+    "Общий профиль (без доктрины)": "Generic profile (no doctrine)", "НАТО (Центральный фронт)": "NATO (Central Front)",
+    "Варшавский договор": "Warsaw Pact", "США, Вьетнам 1972: налёт 'Альфа' (ВМС) и ударный пакет ВВС": "USA, Vietnam 1972: Navy Alpha strike and USAF strike package",
+    "Удар по аэродрому (налёт 'Альфа')": "Airfield strike (Alpha strike)", "Удар по мосту (налёт 'Альфа')": "Bridge strike (Alpha strike)",
+    "Удар по складу (налёт 'Альфа')": "Depot strike (Alpha strike)", "Удар по заводу (налёт 'Альфа')": "Factory strike (Alpha strike)",
+    "Удар B-52 (ячейки по три)": "B-52 strike (three-ship cells)", "ячейка B-52": "B-52 cell", "ячейка": "cell", "два звена": "two flights",
+    "'Айрон Хэнд' (подавление С-75)": "Iron Hand (SA-2 suppression)", "'Айрон Хэнд' / 'Дикая ласка' (подавление С-75)": "Iron Hand / Wild Weasel (SA-2 suppression)",
+    "эскорт (F-4/F-14)": "escort (F-4/F-14)", "подавление зенитной артиллерии над целью": "flak suppression over the target",
+    "MiGCAP (расчистка воздуха)": "MiGCAP (fighter sweep)", "борт": "aircraft", "самолёт": "aircraft",
+    "общевойсковая часть (батальон, полк)": "combined-arms unit (battalion, regiment)",
+    "десантно-штурмовое подразделение (вертолётный десант)": "air assault unit (helicopter landing)",
+    "ЗРК большой дальности": "long-range SAM", "ЗРК средней дальности": "medium-range SAM",
+    "ЗРК малой дальности, войсковая ПВО": "short-range SAM, organic air defence",
+    "командный пункт наведения (КРУ, GCI)": "ground-controlled intercept post (GCI)", "склад снабжения": "supply depot", "мост": "bridge",
+    "путь подвоза (колонны снабжения)": "supply route (supply convoys)", "военный аэродром": "military airfield",
+    "завод (промышленный объект)": "factory (industrial target)",
+    "у ВВС Грузии нет средств для ударов по аэродромам России": "the Georgian Air Force has no means to strike Russian airfields",
+    "удары - только по войскам и ПВО в Ливане": "strikes only against troops and air defences in Lebanon",
+    "удар по ЗРК в Бекаа ('Медведка 19') - 9 июня": "the Bekaa SAM strike (Mole Cricket 19) was on 9 June",
+    "по аэродромам Сирии Израиль не бил": "Israel did not strike Syrian airfields", "по промышленности не били": "industry was not struck",
+    "Ханой и Хайфон закрыты для ударов до 'Лайнбэкера' (10.05.1972); 'Freedom Train' - только юг ДРВ":
+        "Hanoi and Haiphong are off limits until Linebacker (10 May 1972); Freedom Train covers only the southern North",
+    "аэродромы МиГов - с 'Лайнбэкера' (10.05.1972)": "MiG airfields only from Linebacker (10 May 1972)",
+    "фронт стоит; усилия - на Север": "the front is static; the effort goes North", "усилия - на объекты Ханоя и Хайфона": "the effort goes to Hanoi and Haiphong targets",
+    "A-4E-C Skyhawk (мод сообщества)": "A-4E-C Skyhawk (community mod)",
+    "Пархим": "Parchim", "Лаге": "Laage", "Стендаль": "Stendal", "Дамгартен": "Damgarten", "Мальвинкель": "Mahlwinkel",
+    "Вунсторф": "Wunstorf", "Фасберг": "Fassberg", "Целле": "Celle", "Ютерзен": "Uetersen", "Нордхольц": "Nordholz",
+}
+
+# шаблоны: (регулярное выражение, английский текст). Порядок - от частного к общему.
+P = r"(?P<{}>.+?)"
+TEMPLATES = [
+    [r"Войсковая ПВО: (?P<x>.+)", "Organic air defence: {x}"],
+    [r"ПВО объекта: (?P<x>.+)", "Point air defence: {x}"],
+    [r"ПВО аэродрома (?P<x>[^:]+): (?P<y>.+)", "{x} airfield air defence: {y}"],
+    [r"ПВО аэродрома (?P<x>.+)", "{x} airfield air defence"],
+    [r"Зенитная артиллерия аэродрома (?P<x>.+)", "{x} airfield anti-aircraft artillery"],
+    [r"КРУ аэродрома (?P<x>.+)", "{x} airfield GCI radar"],
+    [r"ЗРК большой дальности \((?P<x>.+)\)", "Long-range SAM ({x})"],
+    [r"ЗРК средней дальности \((?P<x>.+)\)", "Medium-range SAM ({x})"],
+    [r"Аэродром (?P<x>.+)", "{x} airfield"],
+    [r"Склад снабжения \((?P<x>.+)\)", "Supply depot ({x})"],
+    [r"Передовой склад \((?P<x>.+)\)", "Forward depot ({x})"],
+    [r"Мост на связи (?P<a>.+?) - (?P<b>.+)\.", "Bridge on the {a} - {b} link."],
+    [r"Дивизион (?P<t>[^ ]+(?: ?[^ (]+)?) ПВО Грузии \((?P<x>.+)\)", "Georgian air defence {t} battalion ({x})"],
+    [r"Батарея (?P<t>[^ ]+) ПВО Грузии \((?P<x>.+)\)", "Georgian air defence {t} battery ({x})"],
+    [r"Дивизион (?P<t>С-\d+М?) \((?P<x>[^)]+)\) №(?P<n>\d+)", "{t} battalion ({x}) No. {n}"],
+    [r"Дивизион (?P<t>С-\d+М?) \((?P<x>[^)]+)\)", "{t} battalion ({x})"],
+    [r"Батарея (?P<t>\S+) \((?P<x>[^)]+)\) №(?P<n>\d+)", "{t} battery ({x}) No. {n}"],
+    [r"Батарея (?P<t>\S+) \((?P<x>[^)]+)\)", "{t} battery ({x})"],
+    [r"(?P<n>\d+)-й зенитный ракетный батальон (?P<t>\S+) \((?P<x>.+)\)", "{t} SAM battalion {n} ({x})"],
+    [r"(?P<b>\d+)-я батарея (?P<r>\d+)-го полка (?P<t>\S+) \((?P<x>.+)\)", "{b|ord} Battery, {r|ord} {t} Regiment ({x})"],
+    [r"(?P<r>\d+)-й полк (?P<t>\S+) \((?P<x>.+)\)", "{r|ord} {t} Regiment ({x})"],
+    [r"(?P<n>\d+)-я гв\. мотострелковая дивизия \((?P<a>.+)\)", "{n|ord} Guards Motor Rifle Division ({a})"],
+    [r"(?P<n>\d+)-я гв\. танковая дивизия \((?P<a>.+)\)", "{n|ord} Guards Tank Division ({a})"],
+    [r"(?P<n>\d+)-я мотострелковая дивизия ННА(?P<r> \(резерв\))? \((?P<a>.+)\)", "GDR {n|ord} Motor Rifle Division{r} ({a})"],
+    [r"(?P<n>\d+)-я танковая дивизия ННА \((?P<a>.+)\)", "GDR {n|ord} Tank Division ({a})"],
+    [r"(?P<n>\d+)-я мотострелковая дивизия \((?P<a>.+)\)", "{n|ord} Motor Rifle Division ({a})"],
+    [r"(?P<n>\d+)-я танковая дивизия \((?P<a>.+)\)", "{n|ord} Tank Division ({a})"],
+    [r"Панцергренадерская бригада (?P<n>\d+) \((?P<a>.+)\)", "Panzergrenadierbrigade {n} ({a})"],
+    [r"Учебная панцербригада (?P<n>\d+) \((?P<a>.+)\)", "Panzerlehrbrigade {n} ({a})"],
+    [r"Панцербригада (?P<n>\d+) \((?P<a>.+)\)", "Panzerbrigade {n} ({a})"],
+    [r"Бригада территориальной обороны (?P<n>\d+) \((?P<a>.+)\)", "Heimatschutzbrigade {n} ({a})"],
+    [r"(?P<n>\d+)-я бронетанковая бригада \((?P<c>Нидерланды|Бельгия)\) \((?P<a>.+)\)", "{n|ord} Armoured Brigade ({c}) ({a})"],
+    [r"(?P<n>\d+)-я механизированная бригада \((?P<c>Нидерланды|Бельгия)\) \((?P<a>.+)\)", "{n|ord} Mechanised Brigade ({c}) ({a})"],
+    [r"(?P<n>\d+)-я бронетанковая бригада \((?P<a>.+)\)", "{n|ord} Armoured Brigade ({a})"],
+    [r"(?P<n>\d+)-я пехотная бригада \(Великобритания\) \((?P<a>.+)\)", "{n|ord} Infantry Brigade (UK) ({a})"],
+    [r"(?P<b>\d+)-я бригада (?P<d>\d+)-й бронетанковой дивизии США \((?P<a>.+)\)", "{b|ord} Brigade, US {d|ord} Armored Division ({a})"],
+    [r"(?P<b>\d+)-я бригада (?P<d>\d+)-й пехотной дивизии США \((?P<a>.+)\)", "{b|ord} Brigade, US {d|ord} Infantry Division ({a})"],
+    [r"(?P<n>\d+)-й бронекавалерийский полк США \((?P<a>.+)\)", "US {n|ord} Armored Cavalry Regiment ({a})"],
+    [r"(?P<n>\d+)-я дивизия ВНА", "NVA {n|ord} Division"], [r"(?P<n>\d+)-я дивизия АРВ", "ARVN {n|ord} Division"],
+    [r"(?P<n>\d+)-я бригада морской пехоты Южного Вьетнама", "South Vietnamese {n|ord} Marine Brigade"],
+    [r"(?P<n>\d+)-я дивизия \((?P<x>.+)\)", "{n|ord} Division ({x})"],
+    [r"(?P<n>\d+)-я механизированная дивизия Сирии \((?P<x>.+)\)", "Syrian {n|ord} Mechanised Division ({x})"],
+    [r"(?P<n>\d+)-я бронетанковая бригада \((?P<a>[IV]+ брит\. АК)\)", "{n|ord} Armoured Brigade ({a})"],
+    [r"Сирийская бригада \((?P<x>.+)\)", "Syrian brigade ({x})"],
+    [r"(?P<n>\d+)-й (?P<g>гв\. )?(?P<k>иап|бап|апиб|орап|оштап|ошап|обвп|овп|осап|тбап)(?P<rest>[ ,].+)", "{n|ord} {g}{k}{rest}"],
+    [r"(?P<n>\d+)-й (?P<g>гв\. )?(?P<k>иап|бап|апиб|орап|оштап|ошап|обвп|овп|осап|тбап)", "{n|ord} {g}{k}"],
+    [r", эскадрилья (?P<t>[^ (]+)(?P<r>.*)", ", {t} squadron{r}"], [r", эскадрильи (?P<t>[^ (]+)(?P<r>.*)", ", {t} squadrons{r}"],
+    [r", вертолёты (?P<t>.+)", ", helicopters {t}"],
+    [r"(?P<u>JG|JBG|KHG|MFG|THG|TFG)-(?P<n>\d+) (?P<rest>.+)", "{u}-{n} {rest}"],
+    [r"(?P<u>JaboG|JG|AG|LTG) (?P<n>\d+) (?P<rest>.+)", "{u} {n} {rest}"],
+    [r"Противотанковый вертолётный полк (?P<n>\d+) (?P<rest>.+)", "Anti-tank Helicopter Regiment {n} {rest}"],
+    [r"ВВС ННА(?P<rest>.*)", "GDR Air Force{rest}"], [r"ННА(?P<rest>.*)", "GDR{rest}"],
+    [r"\((?P<x>[^()]+)\)", "({x})"],
+    [r"(?P<a>[^()]+) \((?P<x>[^()]+)\)", "{a} ({x})"],
+    [r"(?P<n>\d+) x (?P<t>\S+) \((?P<u>[^()]*(?:\([^()]*(?:\([^()]*\)[^()]*)*\)[^()]*)*)\)", "{n} x {t} ({u})"],
+    [r"(?P<a>[^()]+) \((?P<x>[^()]*(?:\([^()]*(?:\([^()]*\)[^()]*)*\)[^()]*)*)\)", "{a} ({x})"],
+    [r"(?P<a>.+), эскадрилья (?P<t>.+)", "{a}, {t} squadron"],
+    [r"(?P<a>.+), вертолёты (?P<t>.+)", "{a}, helicopters {t}"],
+    [r"(?P<t>[^();]+); в DCS - (?P<d>[^();]+)", "{t}; {d} in DCS"], [r"в DCS - (?P<d>[^();]+)", "{d} in DCS"],
+    [r"(?P<a>.+) №(?P<n>\d+)", "{a} No. {n}"],
+]
+SHORT = {   # сокращения внутри шаблонов
+    "иап": "Fighter Regiment", "бап": "Bomber Regiment", "апиб": "Fighter-Bomber Regiment", "орап": "Reconnaissance Regiment",
+    "оштап": "Independent Attack Regiment", "ошап": "Ground Attack Regiment", "обвп": "Independent Helicopter Regiment",
+    "овп": "Helicopter Regiment", "осап": "Composite Aviation Regiment", "тбап": "Heavy Bomber Regiment", "гв. ": "Guards ",
+    "I нем. АК": "I GE Corps", "II нем. АК": "II GE Corps", "III нем. АК": "III GE Corps", "I брит. АК": "I BR Corps",
+    "V амер. АК": "US V Corps", "VII амер. АК": "US VII Corps", "III амер. АК": "US III Corps", "I нидерл. АК": "I NL Corps",
+    "I бельг. АК": "I BE Corps", "2 гв. ТА": "2nd Gds Tank Army", "3 УА": "3rd Shock Army", "8 гв. А": "8th Gds Army",
+    "1 гв. ТА": "1st Gds Tank Army", "20 гв. А": "20th Gds Army", "5 А ННА": "GDR 5th Army", "3 А ННА": "GDR 3rd Army",
+    "Нидерланды": "Netherlands", "Бельгия": "Belgium", "резерв": "reserve", "побережье": "coast", "Голаны": "Golan",
+}
+
+
+# ---- сообщения модели: "русский шаблон с {подстановками}" -> английский. {x} - любая подстрока (переводится тоже).
+MSGS = [
+    # префиксы журнала
+    ("День {d}: {x}", "Day {d}: {x}"), ("ИИ, {x}", "AI, {x}"), ("Экипаж {x}", "Crew {x}"), ("экипаж {x}", "crew {x}"),
+    # бой и марш
+    ("{u}: бои к {t} - боеспособность {a} -> {b}.", "{u}: fighting until {t} - strength {a} -> {b}."),
+    ("бои к {t} - боеспособность {a} -> {b}.", "fighting until {t} - strength {a} -> {b}."),
+    ("продвинулся на {k} км.", "advanced {k} km."), ("прибыл в район {p}.", "arrived in the {p} area."),
+    ("выдвигается на рубеж {p}.", "moving up to the {p} line."), ("наступление на {p}.", "attacking towards {p}."),
+    ("вышел в район {p}.", "reached the {p} area."), ("в плену.", "captured."), ("перешёл к обороне.", "went over to the defence."),
+    ("{u}, перешёл к обороне.", "{u}, went over to the defence."),
+    ("противник выбыл - продолжает марш.", "the enemy is out of action - continuing the march."),
+    ("смена позиции ({k} км).", "relocating ({k} km)."), ("на марше, боеспособность {a}.", "on the march, strength {a}."),
+    ("в бою с нашими войсками, боеспособность {a}.", "fighting our troops, strength {a}."),
+    ("в обороне, боеспособность {a}.", "defending, strength {a}."),
+    ("не хватает снабжения ({a} нормы) - склады пусты.", "short of supply ({a} of the norm) - depots are empty."),
+    ("без снабжения - нет своего склада с запасом в {k} км по своей территории.",
+     "no supply - no own stocked depot within {k} km over own territory."),
+    ("вводится в полосе успеха - район {p}.", "committed in the breakthrough sector - {p} area."),
+    ("передовой отряд - выйти на рубеж {p}.", "forward detachment - reach the {p} line."),
+    ("не выдержала удара (перевес противника {r}) - отходит в {p}.", "could not hold (enemy superiority {r}) - falling back to {p}."),
+    ("не выдержала удара (перевес противника {r}) - отходит в {p}", "could not hold (enemy superiority {r}) - falling back to {p}"),
+    ("Соприкосновение: {a} и {b}.", "Contact: {a} and {b}."), ("Соприкосновение: {a} и {b}", "Contact: {a} and {b}"),
+    ("Пункт {p} занят: {s}.", "{p} taken by {s}."), ("занят: {s}.", "taken by {s}."),
+    ("Темп наступления ({s}): за сутки занято пунктов {n}, ведущие части продвинулись до {k} км (норма доктрины ~{m} км/сутки).",
+     "Rate of advance ({s}): {n} places taken in a day, leading units advanced up to {k} km (doctrine norm ~{m} km/day)."),
+    ("Обстановка на {t}:", "Situation at {t}:"),
+    # авиация, пополнения
+    ("пополнение +{n} ЛА, в строю {m}.", "replacements +{n} aircraft, {m} in service."),
+    ("пополнение +{n} экипаж(а), экипажей {m}.", "replacements +{n} crew(s), {m} crews."),
+    ("цель не поражена.", "target not hit."), ("потеряно {n} {t}", "lost {n} {t}"), ("потеряно {n}", "lost {n}"),
+    ("боеспособность цели {a} -> {b}.", "target strength {a} -> {b}."),
+    ("повреждение {a} -> {b}.", "damage {a} -> {b}."),
+    ("повреждение {a} -> {b}. С аэродрома к вылету ~{c} -> ~{d} ЛА.", "damage {a} -> {b}. Aircraft available at the airfield ~{c} -> ~{d}."),
+    ("повреждение {a} -> {b}. Сгорело {c} т запаса, осталось {d} т.", "damage {a} -> {b}. {c} t of stock burned, {d} t left."),
+    ("повреждение {a} -> {b}. По оценке сгорело ~{c} т запаса.", "damage {a} -> {b}. Estimated {c} t of stock burned."),
+    ("повреждение {a} -> {b}. Запас, по оценке, не пострадал (склад был неполон).",
+     "damage {a} -> {b}. The stock is estimated undamaged (the depot was not full)."),
+    ("{a} (второй эшелон)", "{a} (second wave)"), ("{a}, пара {n}", "{a}, pair {n}"), ("{a} (смена {n})", "{a} (relief {n})"),
+    ("{n} x {t} ({u}, {b})", "{n} x {t} ({u}, {b})"),
+    ("плотная ПВО у цели ({n} ЗРК) - второй эшелон удара через {m} мин",
+     "dense air defence at the target ({n} SAMs) - second strike wave {m} min later"),
+    ("нет исполнителя для группы '{g}' ({n} ЛА с ролью {r} в радиусе) - группа не назначена",
+     "no unit for the '{g}' group ({n} aircraft with role {r} in range) - group not assigned"),
+    ("нет исполнителя для группы '{g}' ({n} ЛА с ролью {r} в радиусе)", "no unit for the '{g}' group ({n} aircraft with role {r} in range)"),
+    ("{t} - нет исполнителей ({r}) в радиусе", "{t} - no units ({r}) in range"),
+    ("{t} - за поясом ПВО ({s}), сначала его подавление", "{t} - behind an air defence belt ({s}), suppress it first"),
+    ("поток ~{n} грузовиков в сутки", "flow ~{n} trucks a day"),
+    ("вылет уже начался (взлёт {a}, часы кампании {b})", "the sortie has already started (takeoff {a}, campaign clock {b})"),
+    ("перебазирование {x}", "rebasing {x}"),
+    ("{u}, передовая группа", "{u}, forward detachment"),
+    ("передовая группа: выдвижение на передовую площадку {p}", "forward detachment: moving to forward site {p}"),
+    ("площадка {p}", "site {p}"), ("{a} (вместо {b})", "{a} (instead of {b})"),
+    # тыл
+    ("Тыл ({s}): подвоз {a} т, воздухом {b} т, расход {c} т; запас складов {d} т ({e}).",
+     "Logistics ({s}): {a} t delivered by road, {b} t by air, {c} t consumed; depot stock {d} t ({e})."),
+    ("Тыл ({s}): подвоз {a} т (колонны разбиты - недовезено {x} т), воздухом {b} т, расход {c} т; запас складов {d} т ({e}).",
+     "Logistics ({s}): {a} t delivered by road (convoys hit - {x} t not delivered), {b} t by air, {c} t consumed; depot stock {d} t ({e})."),
+    ("{t} (~{n} т/сутки): колонны снабжения на участке {l} разбиты, недовоз ~{x} т.",
+     "{t} (~{n} t/day): supply convoys on the {l} segment hit, ~{x} t not delivered."),
+    ("{a} (~{n} т/сутки)", "{a} (~{n} t/day)"),
+    # пояснения целей (explain.py)
+    ("Ёмкость ~{a} т (разведка); запас по оценке - {b}.", "Capacity ~{a} t (intelligence); estimated stock: {b}."),
+    ("почти пуст", "almost empty"), ("около четверти", "about a quarter"), ("около половины", "about half"),
+    ("около трёх четвертей", "about three quarters"), ("полный", "full"),
+    ("Снабжает {u} в {k} км по своей территории: расход ~{t} т/сутки.", "Supplies {u} within {k} km over own territory: consumption ~{t} t/day."),
+    ("Снабжает {u} в {k} км по своей территории: расход ~{t} т/сутки, запаса - {w} без подвоза.",
+     "Supplies {u} within {k} km over own territory: consumption ~{t} t/day, stock lasts {w} without resupply."),
+    ("меньше чем на сутки", "less than a day"), ("на ~{n} сут.", "~{n} days"),
+    ("{n} часть", "{n} unit"), ("{n} части", "{n} units"), ("{n} частей", "{n} units"),
+    ("Запас {a} т из {b} т ({c}).", "Stock {a} t of {b} t ({c})."),
+    ("Запас {a} т из {b} т ({c}); повреждение {d} - вмещает не больше {e} т.", "Stock {a} t of {b} t ({c}); damage {d} - holds at most {e} t."),
+    ("Запас {a}.", "Stock {a}."),
+    ("{w}: повреждение X% сжигает запас сверх ёмкость x (1 - X) - при 50% останется не больше {a} т; ремонт ~{r} в сутки. Без снабжения части слабее в бою и медленнее на марше.",
+     "{w}: damage X% burns the stock above capacity x (1 - X) - at 50% no more than {a} t remains; repair ~{r} a day. Without supply units are weaker in battle and slower on the march."),
+    ("Удар противника", "Enemy strike"), ("Удар", "Strike"),
+    ("Частей в {k} км нет - склад сейчас в резерве (снабжает при подходе войск и авиацию).",
+     "No units within {k} km - the depot is in reserve for now (supplies approaching troops and aviation)."),
+    ("Отрезан от подвоза из тыла: пополняется только воздухом.", "Cut off from rear resupply: replenished by air only."),
+    ("Склад, найденный на карте: на снабжение войск в модели не влияет (цель без последствий).",
+     "A depot found on the map: it does not affect troop supply in the model (a target without consequences)."),
+    ("Потерян: пункт занят противником.", "Lost: the place is held by the enemy."),
+    ("Часть, получившая меньше нормы, слабее в бою и медленнее на марше (⚠ на карте).",
+     "A unit that receives less than the norm is weaker in battle and slower on the march (⚠ on the map)."),
+    ("Завод {s} ({n} в секторе): промышленность стороны сейчас x{k} - так быстро ремонтируются склады, мосты, аэродромы и приходят пополнения авиации и экипажей.",
+     "Factory of the {s} side ({n} in the sector): the side's industry is now x{k} - this sets how fast depots, bridges and airfields are repaired and how fast aircraft and crew replacements arrive."),
+    ("Удар: этот завод разрушен полностью - x{a} -> x{b} (вклад завода 1/{n}, влияние {c}); сам ремонтируется ~{r} в сутки. Эффект - медленный, на дни вперёд.",
+     "Strike: destroying this factory completely - x{a} -> x{b} (factory share 1/{n}, influence {c}); it repairs itself ~{r} a day. The effect is slow, over the following days."),
+    ("Промышленность {s}: x{a} -> x{b} (ремонт тыла и пополнения).", "{s} industry: x{a} -> x{b} (rear repairs and replacements)."),
+    ("Промышленность: x{a} (ремонт складов, мостов, аэродромов, пополнения авиации; заводы противника - x{b}).",
+     "Industry: x{a} (repair of depots, bridges, airfields, aircraft replacements; enemy factories - x{b})."),
+    ("Мост на связи {a}.", "Bridge on the {a} link."), ("связь не найдена", "link not found"),
+    ("Малый мост: разрушенный связь не закрывает - объезд, марш и подвоз медленнее; ремонт ~{d} сут.",
+     "Minor bridge: when destroyed it does not close the link - there is a detour, marches and supply are slower; repair ~{d} days."),
+    ("Удар: разрушенный мост закрывает связь - войска и подвоз идут в обход (или не идут); ремонт ~{d} сут.",
+     "Strike: a destroyed bridge closes the link - troops and supply take a detour (or stop); repair ~{d} days."),
+    ("Удар: повреждение X% - доля самолётов, не готовых к вылету; ремонт ~{r} в сутки.",
+     "Strike: damage X% is the share of aircraft that cannot fly; repair ~{r} a day."),
+    ("Повреждение {a}: к вылету меньше на столько же (~{n} ЛА не взлетят).", "Damage {a}: that many fewer aircraft can fly (~{n} aircraft grounded)."),
+    ("Базируется: {c}, ~{m} ЛА ({u}).", "Based here: {c}, ~{m} aircraft ({u})."), ("Базируется: {c}, ~{m} ЛА", "Based here: {c}, ~{m} aircraft"),
+    ("~{t} т/сутки - около {n} грузовиков ({w} т) в сутки, {p} подвоза {s} из тыла (~{a} т/сутки).",
+     "~{t} t/day - about {n} trucks ({w} t) a day, {p} of {s} rear resupply (~{a} t/day)."),
+    ("~{t} т/сутки.", "~{t} t/day."),
+    ("Для сравнения: войска {s} расходуют ~{a} т/сутки (в обороне - ~{b}).", "For comparison: {s} troops consume ~{a} t/day (~{b} on the defence)."),
+    ("Удар: удачный удар ИИ - недовоз ~{p} потока (~{t} т); в миссии на участке ~{q} суточного потока, сожжённые машины - недовезённые тонны.",
+     "Strike: a successful AI strike stops ~{p} of the flow (~{t} t); in the mission the segment carries ~{q} of the daily flow, burned trucks are undelivered tonnes."),
+    ("Позиция ЗРК: радиус поражения ~{k} км. Удар - потери пусковых и РЛС; подавленный ЗРК открывает коридор для следующих вылетов.",
+     "SAM site: engagement radius ~{k} km. A strike destroys launchers and radars; a suppressed SAM opens a corridor for the following sorties."),
+    ("Удар: потери в технике - слабее в бою; при боеспособности ниже {p} часть выходит из боя и больше не держит фронт (на восстановление).",
+     "Strike: equipment losses make it weaker in battle; below {p} strength the unit leaves the fight and no longer holds the front (refitting)."),
+    ("Расход войск сейчас ~{a} т/сутки (в обороне ~{b}; бой - 1 т на машину в сутки, марш - 0.5, оборона - 0.2) плюс авиация: ~4 т на самолёто-вылет, 1.5 - на вертолёто-вылет.",
+     "Troop consumption now ~{a} t/day (~{b} on the defence; battle - 1 t per vehicle a day, march - 0.5, defence - 0.2) plus aviation: ~4 t per aircraft sortie, 1.5 per helicopter sortie."),
+    ("Подвоз из тыла - до ~{a} т/сутки ({x} x расход в обороне): в обороне склады наполняются, в наступлении и бою - тают.",
+     "Rear resupply - up to ~{a} t/day ({x} x defensive consumption): on the defence depots fill up, in the attack and in battle they run down."),
+    ("Подвоз из тыла - до ~{a} т/сутки.", "Rear resupply - up to ~{a} t/day."),
+    ("Склады: {a} т из {b} ({c}) - это ~{d} сут. нынешнего расхода без подвоза.", "Depots: {a} t of {b} ({c}) - ~{d} days of current consumption without resupply."),
+    ("Склады: {a} т из {b} ({c}).", "Depots: {a} t of {b} ({c})."),
+    ("По нему подвоз: {x}", "Supply over it: {x}"), ("Везёт на: {x}", "Delivers to: {x}"),
+    ("{s} ~{t} т/сутки", "{s} ~{t} t/day"), ("красных", "red"), ("синих", "blue"), ("красные", "red"), ("синие", "blue"),
+    ("{a} (разведка {h} ч назад)", "{a} (intelligence {h} h ago)"), ("{a}, боеспособность {s}", "{a}, strength {s}"),
+    ("Груз: {n} x {t} по ~{c} т = ~{a} т на склад за рейс - ~{p} суточного расхода частей у склада (воздухом - только самое срочное).",
+     "Cargo: {n} x {t} at ~{c} t = ~{a} t to the depot per trip - ~{p} of the daily consumption of units at the depot (by air - only the most urgent)."),
+    ("Груз: {n} x {t} по ~{c} т = ~{a} т на склад за рейс", "Cargo: {n} x {t} at ~{c} t = ~{a} t to the depot per trip"),
+    ("в бою с нашими войсками", "fighting our troops"), ("на марше", "on the march"), ("в обороне", "on the defence"),
+    # разведка
+    ("{a}: уточнено {n}, ЗРК и РЛС {m} (день, полоса {k} км, РТР {r} км).",
+     "{a}: {n} refined, {m} SAMs and radars (day, swath {k} km, ELINT {r} km)."),
+    ("Разведка, {x}", "Reconnaissance, {x}"),
+    ("Создана кампания {f}: {t}, seed {s}.", "Campaign {f} created: {t}, seed {s}."),
+    ("маяк {f} кГц (АРК / ADF); на земле с суток {d}", "beacon {f} kHz (ADF); on the ground since day {d}"),
+    ("{a} · канал {c}, радиус {r} км", "{a} · channel {c}, radius {r} km"),
+    ("-> снято", "-> removed"),
+    # аэродромы, склады, мосты
+    ("закрыт - противник ближе {k} км.", "closed - the enemy is closer than {k} km."),
+    ("потерян (противник на аэродроме).", "lost (the enemy is on the airfield)."), ("снова открыт.", "open again."),
+    ("отрезан от подвоза из тыла (только воздухом).", "cut off from rear resupply (air only)."),
+    ("подвоз из тыла восстановлен.", "rear resupply restored."), ("потерян (пункт занят противником).", "lost (the place is held by the enemy)."),
+    ("потерян - пункт {p} занят противником.", "lost - {p} is held by the enemy."),
+    ("восстановлен, движение открыто.", "repaired, the road is open."),
+    # части
+    ("экипаж сбитого {t} катапультировался, на земле {x}", "the crew of the downed {t} ejected, on the ground {x}"),
+    ("экипаж сбитого {t} погиб{x}", "the crew of the downed {t} was killed{x}"), ("экипаж сбитого {t} погиб", "the crew of the downed {t} was killed"),
+    ("экипаж сбитого {t} спасён в миссии.", "the crew of the downed {t} was rescued in the mission."),
+    ("({s}) выходит из боя, отходит в {p}.", "({s}) is leaving the fight, falling back to {p}."),
+    ("бой с {f} - потеряно ~{n} машин, {x}", "battle with {f} - ~{n} vehicles lost, {x}"),
+    ("в тылу ({p}), восстановление.", "in the rear ({p}), refitting."), ("восстановлен до {s}.", "restored to {s}."),
+    ("восстановлена до {s}, в строю.", "restored to {s}, back in service."),
+    ("высадка у {p} сорвана ({h}: село {a} из {b} бортов).", "landing at {p} failed ({h}: {a} of {b} helicopters landed)."),
+    ("высажена у {p} ({h}: село {a} из {b} бортов), держит пункт до подхода своих.",
+     "landed at {p} ({h}: {a} of {b} helicopters landed), holding the place until friendly troops arrive."),
+    ("контратака - вернуть {t}.", "counterattack - retake {t}."), ("контрудар по вклинившейся {e} ({p}).", "counterstroke against the penetrating {e} ({p})."),
+    ("наступление на {t} ({r}).", "attacking towards {t} ({r})."),
+    ("оперативная маневренная группа - прорыв в глубину на {t} ({r}).", "operational manoeuvre group - deep breakthrough towards {t} ({r})."),
+    ("перебазирование {a} -> {b}.", "rebasing {a} -> {b}."),
+    ("передовой отряд - выйти на рубеж {p} раньше противника ({r}).", "forward detachment - reach the {p} line before the enemy ({r})."),
+    ("позиция раскрыта, ЗРК сменил позицию ({k} км).", "position revealed, the SAM relocated ({k} km)."),
+    ("потерял боеспособность ({s}), остановился.", "combat ineffective ({s}), halted."), ("потерял боеспособность, вышел из боя.", "combat ineffective, left the fight."),
+    ("продвинулся на {k} км {x}", "advanced {k} km {x}"), ("противник выбыл - {x}", "the enemy is out of action - {x}"),
+    ("продолжает марш.", "continuing the march."), ("удержал район.", "held the area."),
+    ("сдерживание - отходит на следующий рубеж {t}.", "delaying action - falling back to the next line {t}."),
+    ("снабжение восстановлено ({p} нормы).", "supply restored ({p} of the norm)."), ("соединилась со своими у {p}.", "linked up with friendly troops at {p}."),
+    ("уничтожен.", "destroyed."), ("уход с передовой площадки {a} на {b}.", "leaving forward site {a} for {b}."),
+    ("уход с площадки {a} - в свой полк ({b}).", "leaving site {a} - back to its regiment ({b})."),
+    ("участков по дорогам {a} из {b}, {x}", "road segments {a} of {b}, {x}"),
+    ("эвакуация сорвана ({h}), рота держится у {p}.", "extraction failed ({h}), the company is holding at {p}."),
+    ("эвакуирована ({h}): вывезено {p} живых, в резерве у {b}.", "extracted ({h}): {p} of the survivors lifted out, in reserve at {b}."),
+    ("выдвижение на передовую {b} ({n} вертолётов, площадка - до {m}; {k} км от противника; основной аэродром {x}",
+     "moving to forward site {b} ({n} helicopters, site holds up to {m}; {k} km from the enemy; main airfield {x}"),
+    ("{u} (район {p})", "{u} ({p} area)"), ("{u} (район на марше)", "{u} (on the march)"),
+    ("{a} (совместно с вертолётами {h})", "{a} (together with helicopters of {h})"),
+    ("цель сместилась на {k} км к времени вылета - маршрут пересчитан.", "the target moved {k} km by the sortie time - route recalculated."),
+    ("цель не найдена ({w}).", "target not found ({w})."), ("ушла на {k} км от места по данным разведки", "moved {k} km from the reported position"),
+    ("экипаж не вернулся - данных нет.", "the crew did not return - no data."),
+    ("{u} - новая позиция ({k} км от известной).", "{u} - new position ({k} km from the known one)."),
+    ("в вылете замечены части противника: {n}.", "enemy units spotted on the sortie: {n}."),
+    ("в соприкосновении уточнены части противника: {n}.", "enemy units refined at the line of contact: {n}."),
+    ("Разведка: {x}", "Reconnaissance: {x}"),
+    ("уточнено {n}", "{n} refined"), ("новых частей {n}", "{n} new units"),
+    ("ЗРК и РЛС {n}", "{n} SAMs and radars"), ("РТР {k} км", "ELINT {k} km"), ("ночь", "night"), ("день", "day"),
+    ("{h}, вернулся в часть.", "{h}, returned to the unit."), ("вышел к своим", "reached friendly lines"), ("в плену", "captured"),
+    ("погиб в сбитом вертолёте-спасателе", "killed in the downed rescue helicopter"), ("погиб", "killed"), ("пропал без вести", "missing"),
+    ("спасён ({t})", "rescued ({t})"), ("спасён в миссии", "rescued in the mission"), ("по итогам вылета", "per the sortie result"),
+    ("историческое допущение: из пресета {y}; {x}", "historical assumption: from the {y} preset; {x}"),
+    ("добавлен (историческое допущение, из пресета {y}) на {b}, {n} ЛА; в плане - со следующих суток.",
+     "added (historical assumption, from the {y} preset) at {b}, {n} aircraft; in the plan from the next day."),
+    ("свой полк добавлен на {b} ({n} x {t}, роль {r}); в плане - со следующих суток.",
+     "custom regiment added at {b} ({n} x {t}, role {r}); in the plan from the next day."),
+    ("свой полк (добавлен командующим)", "custom regiment (added by the commander)"),
+    ("противника в полосе не обнаружено", "no enemy found in the swath"), ("разведка мирного времени", "peacetime intelligence"),
+    ("разведка ({t})", "reconnaissance ({t})"), ("соприкосновение", "contact"), ("своя", "own"), ("чужая", "enemy"),
+    ("аэродром не свой или закрыт", "the airfield is not ours or is closed"),
+    ("аэродром не свой, закрыт или площадка для самолёта", "the airfield is not ours, is closed, or is a helicopter site for an aircraft"),
+    ("вертолёт - только с вертолётной ролью, самолёт - с самолётной", "a helicopter needs a helicopter role, an aircraft an aircraft role"),
+    ("нужно название полка", "a regiment name is required"), ("роль - одна из авиационных", "the role must be an aviation role"),
+    ("сторона - red или blue", "the side must be red or blue"), ("число ЛА - от 1 до {n}", "the number of aircraft must be 1 to {n}"),
+    ("такой части в списке нет (уже в кампании или не этого театра)", "no such unit in the list (already in the campaign or not of this theatre)"),
+    ("у стороны нет открытого аэродрома", "the side has no open airfield"),
+    ("площадка {p} ({a})", "site {p} ({a})"), ("вылет", "sortie"),
+    ("DCS не нашёл дорогу {p}: {e} - этот участок остаётся прямой.", "DCS found no road for {p}: {e} - this segment stays a straight line."),
+    ("в составе сил нет маршрутов - спрашивать у DCS нечего", "the order of battle has no routes - nothing to ask DCS"),
+    # источники частей
+    ("по памяти - проверить", "from memory - to be verified"), ("число и радиус - ОЦЕНКА", "number and radius are ESTIMATES"),
+    ("число и радиус действия - ОЦЕНКА", "number and combat radius are ESTIMATES"), ("состав - ОЦЕНКА", "composition is an ESTIMATE"),
+    ("место - ОЦЕНКА", "position is an ESTIMATE"), ("ОЦЕНКА", "ESTIMATE"),
+]
+
+
+WORDS = {   # отдельные слова и сокращения (подписи знаков на карте, звания)
+    "тд": "TD", "мсд": "MRD", "пд": "ID", "вдд": "AbnD", "тбр": "Tk Bde", "мбр": "Mech Bde", "пбр": "Inf Bde",
+    "одшбр": "AAslt Bde", "тп": "TR", "мсп": "MRR", "пп": "IR", "дшп": "AAslt R", "пдп": "AbnR", "тб": "Tk Bn", "мсб": "MR Bn",
+    "пб": "Inf Bn", "пдб": "Abn Bn", "тр": "Tk Coy", "мср": "MR Coy", "пр": "Inf Coy", "дшр": "AAslt Coy",
+    "мпд": "Mech D", "мпбр": "Mech Bde", "мпп": "Mech R", "мпб": "Mech Bn", "мпр": "Mech Coy", "бкп": "ACR", "кд": "Cav D",
+    "гв.": "Gds", "США": "US", "ННА": "GDR", "ВНА": "NVA", "АРВ": "ARVN",
+    "л-т": "Lt", "ст. л-т": "Sr Lt", "к-н": "Capt", "м-р": "Maj", "п/п-к": "Lt Col", "п-к": "Col",
+    "по умолчанию": "default", "разведка": "intelligence", "Пункт": "Place",
+}
+
+
+def msg_rx(ru: str) -> str:
+    """'Запас {a} т' -> регулярное выражение с именованными группами."""
+    import re as _re
+    out, pos, seen = [], 0, set()
+    for m in _re.finditer(r"\{(\w+)\}", ru):
+        out.append(_re.escape(ru[pos:m.start()]))
+        name = m.group(1)
+        grp = (r"[\d/.,:?~%\- ]+?" if name in ("y", "z", "n", "m", "k", "d")   # {y} {z} {n} {m} {k} {d} - числа
+               else r"[^()]+?" if name == "w"                                 # {w} - без скобок
+               else r"(?:(?!; |\n| · ).)+?" if m.start() == 0                 # ведущая подстановка - в пределах фразы
+               else ".+?")
+        out.append(f"(?P={name})" if name in seen else f"(?P<{name}>{grp})")
+        seen.add(name)
+        pos = m.end()
+    out.append(_re.escape(ru[pos:]))
+    return "".join(out)
+
+
+MSGS += [
+    ("вышел в район {p}, перешёл к обороне.", "reached the {p} area, went over to the defence."),
+    ("({w}, полоса {k} км, РТР {r} км).", "({w}, swath {k} km, ELINT {r} km)."), ("({w}, полоса {k} км).", "({w}, swath {k} km)."),
+    ("{a} ({w}, полоса {k} км, РТР {r} км).", "{a} ({w}, swath {k} km, ELINT {r} km)."), ("{a} ({w}, полоса {k} км).", "{a} ({w}, swath {k} km)."),
+    ("С аэродрома к вылету ~{a} -> ~{b} ЛА.", "Aircraft available at the airfield ~{a} -> ~{b}."),
+    ("Сгорело {a} т запаса, осталось {b} т.", "{a} t of stock burned, {b} t left."), ("По оценке сгорело ~{a} т запаса.", "Estimated {a} t of stock burned."),
+    ("Запас, по оценке, не пострадал (склад был неполон).", "The stock is estimated undamaged (the depot was not full)."),
+    ("({n} десантников на борт)", "({n} troops per helicopter)"), ("{a} ({n} десантников на борт)", "{a} ({n} troops per helicopter)"),
+]
+MSGS += [
+    # погода
+    ("антициклон", "high pressure"), ("тыл циклона", "post-frontal"), ("прохождение фронта", "frontal passage"), ("ясно", "clear"),
+    ("ветер {d}° {v} м/с (на {h} м - {x})", "wind {d}° {v} m/s ({x} at {h} m)"), ("видимость {k} км", "visibility {k} km"),
+    ("QNH {p} гПа", "QNH {p} hPa"), ("нижняя граница {h} м", "cloud base {h} m"), ("облачность {c}", "cloud {c}"),
+    # подвеска, план
+    ("{a} -> снято", "{a} -> removed"), ("в плане дня задач {n}", "{n} tasks in the daily plan"), ("номер {n} вне списка (сначала plan)", "number {n} is out of range (plan first)"),
+    ("перебазировать можно только свою авиачасть", "only own air units can be rebased"), ("план противника не правится", "the enemy plan cannot be edited"),
+    ("Зонда карты нет: склады и мосты по оценочным координатам (кнопка 'Зонд карты').",
+     "No map probe: depots and bridges use estimated coordinates (button 'Map probe')."),
+    ("нет готовой десантной роты, площадки или вертолётов", "no ready air assault company, landing site or helicopters"),
+    ("нет исполнителей ({r}) в радиусе", "no units ({r}) in range"),
+    ("выдвижение на передовую площадку {b} ({n} вертолётов, площадка - до {m}; {k} км от противника; основной аэродром {x} - {d} км).",
+     "moving to forward site {b} ({n} helicopters, site holds up to {m}; {k} km from the enemy; main airfield {x} - {d} km)."),
+    ("выдвижение на передовую площадка {b} ({n} вертолётов, площадка - до {m}; {k} км от противника; основной аэродром {x} - {d} км).",
+     "moving to forward site {b} ({n} helicopters, site holds up to {m}; {k} km from the enemy; main airfield {x} - {d} km)."),
+    ("{a}, передовая группа, площадка {b}", "{a}, forward detachment, site {b}"), ("{a}, передовая группа", "{a}, forward detachment"),
+    ("площадка в {k} км от {p}", "landing site {k} km from {p}"), ("высажена у {p} (ИИ: село {a} из {b} бортов)", "landed at {p} (AI: {a} of {b} helicopters landed)"),
+    ("держит пункт до подхода своих.", "holding the place until friendly troops arrive."),
+    ("вышел в район {p}", "reached the {p} area"), ("Базируется: {c}, ~{m} ЛА.", "Based here: {c}, ~{m} aircraft."),
+    # названия театров (окно)
+    ("Вся карта: фронт от Балтики до Хофа ({y})", "Whole map: front from the Baltic to Hof ({y})"),
+    ("Сектор Гамбург - Люнебург (полигон)", "Hamburg - Lüneburg sector (test range)"),
+    ("Кавказ: август {y} (Южная Осетия и Абхазия)", "Caucasus: August {y} (South Ossetia and Abkhazia)"),
+    ("Сирия - Ливан: июнь {y} (долина Бекаа)", "Syria - Lebanon: June {y} (Bekaa Valley)"),
+    ("Ливан: декабрь {y} (авианосцы США, гипотетическая)", "Lebanon: December {y} (US carriers, hypothetical)"),
+    ("Вьетнам: апрель {y} (условная география, авианосцы)", "Vietnam: April {y} (stand-in geography, carriers)"),
+    ("Вьетнам: декабрь {y}, Лайнбэкер-2 (условная география)", "Vietnam: December {y}, Linebacker II (stand-in geography)"),
+    # источники и примечания частей
+    ("сводка игрока по ВВС в Германии", "player's summary of the air forces in Germany"),
+    ("число и радиус действия", "number and combat radius"), ("число и радиус", "number and radius"), ("по памяти", "from memory"),
+    ("проверить", "to be verified"), ("замена", "substitute"), ("перебазирован", "rebased"),
+    ("здесь", "here"), ("{p} вне карты", "{p|tr} is off the map"),
+    ("{t} в DCS нет", "no {t} in DCS"), ("{t} в pydcs нет", "no {t} in pydcs"), ("{a} (допущение)", "{a} (assumption)"),
+    ("мод A-4E-C", "A-4E-C mod"), ("без мода части в кампании нет", "without the mod the unit is not in the campaign"),
+    ("в июле {y} ушёл в Белоруссию", "left for Belarus in July {y}"), ("в июле {y} ушёл", "left in July {y}"),
+    ("{t} до {y}", "{t} until {y}"), ("{t} с {y}", "{t} from {y}"), ("{t} с апреля {y}", "{t} from April {y}"),
+    ("палубного F-4 в DCS нет (F-4E с авианосца не летает)", "no carrier F-4 in DCS (the F-4E cannot fly from a carrier)"),
+    ("анахронизм (в строю с {y})", "anachronism (in service from {y})"), ("месяц перевооружения в {y}", "month of conversion in {y}"),
+    ("годы перевооружения", "conversion years"), ("перевооружение {y}", "conversion {y}"), ("с марта {y} (? другой источник - {z})", "from March {y} (? another source says {z})"),
+    ("в ГСВГ на постоянной основе не было", "not permanently based in the GSFG"), ("ОЦЕНКА сценария", "scenario ESTIMATE"),
+    ("в {y} перебазирован в {p}", "rebased to {p|tr} in {y}"), ("часть и аэродром", "unit and airfield"), ("ранние годы не проверены", "early years not verified"),
+    ("расформирован в {y} (? месяц)", "disbanded in {y} (? month)"), ("+{n} sqn с {y}", "+{n} sqn from {y}"), ("по плану {y}", "planned {y}"),
+    ("сменил {u} в июле {y}", "replaced {u} in July {y}"), ("с июля {y}", "from July {y}"), ("в модели база та же", "the model uses the same base"),
+    ("что в {p}", "as at {p|tr}"), ("{a} (ОЦЕНКА)", "{a} (ESTIMATE)"), ("? по памяти", "? from memory"), ("? {p} даёт {q}", "? {p|tr} gives {q|tr}"),
+    ("{t} (подавление ПВО) в DCS нет", "no {t} (air defence suppression) in DCS"), ("{a} и {b} вне карты", "{a|tr} and {b|tr} are off the map"),
+    ("{a} в {y}", "{a} in {y}"), ("{a} с {y} (?)", "{a} from {y} (?)"), ("Вьетнам", "Vietnam"), ("Ливан", "Lebanon"), ("часть", "unit"),
+]
+MSGS += [
+    ("пара {n}", "pair {n}"), ("снято", "removed"), ("передовая группа", "forward detachment"),
+    ("высажена у {p} (ИИ: село {n} из {m} бортов), держит пункт до подхода своих.",
+     "landed at {p} (AI: {n} of {m} helicopters landed), holding the place until friendly troops arrive."),
+    ("Разведка, {a}: {x} ({w}, полоса {k} км, РТР {r} км).", "Reconnaissance, {a}: {x} ({w}, swath {k} km, ELINT {r} km)."),
+    ("Разведка, {a}: {x} ({w}, полоса {k} км).", "Reconnaissance, {a}: {x} ({w}, swath {k} km)."),
+    ("{t} - нет исполнителей ({r}) в радиусе", "{t} - no units ({r}) in range"),
+    ("{a} (ОЦЕНКА)", "{a|tr} (ESTIMATE)"),
+]
+# от длинных к коротким: частный шаблон раньше общего
+MSGS.sort(key=lambda m: -len(re.sub(r"\{\w+\}", "", m[0])))
+def _late(ru: str) -> bool:
+    """Общий шаблон: мало текста вокруг подстановок и начинается с подстановки - после разбора по разделителям."""
+    lit = re.sub(r"\{\w+\}", "", ru)
+    return ru.startswith("{") and len(lit.strip(" .,:;()-")) < 12
+
+
+GENERIC = {r"\((?P<x>[^()]+)\)", r"(?P<a>[^()]+) \((?P<x>[^()]+)\)"}
+TEMPLATES = ([[msg_rx(ru), en, _late(ru)] for ru, en in MSGS]
+             + [[rx, en, rx in GENERIC or rx.startswith("(?P<a>[^()]+) \\(") or rx.startswith("(?P<n>\\d+) x ")]
+                for rx, en in TEMPLATES])
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    names = {**PLACES, **SHORT, **NAMES}
+    (OUT / "en_names.json").write_text(json.dumps({"_about": "tools/i18n_data.py", **names}, ensure_ascii=False, indent=0),
+                                       encoding="utf-8")
+    (OUT / "en_words.json").write_text(json.dumps(WORDS, ensure_ascii=False, indent=0), encoding="utf-8")
+    (OUT / "en_templates.json").write_text(json.dumps(TEMPLATES, ensure_ascii=False, indent=0), encoding="utf-8")
+    # имена из данных (части, объекты, сценарии) - готовым переводом в каталог: внутри фраз они узнаются целиком
+    import glob, re, sys
+    sys.path.insert(0, str(OUT.parent.parent.parent))
+    from redfront import i18n_en
+    i18n_en.reload()
+    data = OUT.parent
+    cyr = re.compile("[А-Яа-яЁё]")
+    extra = {}
+    def walk(x, k=None):
+        if isinstance(x, dict):
+            for kk, v in x.items():
+                walk(v, kk)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v, k)
+        elif isinstance(x, str) and k in ("name", "title", "alias") and cyr.search(x) and x not in names:
+            e = i18n_en.en(x)
+            if not cyr.search(e):
+                extra[x] = e
+    for f in sorted(glob.glob(str(data / "*.json")) + glob.glob(str(data / "doctrine" / "*.json"))):
+        walk(json.loads(Path(f).read_text(encoding="utf-8")))
+    names.update(extra)
+    (OUT / "en_names.json").write_text(json.dumps({"_about": "tools/i18n_data.py", **names}, ensure_ascii=False, indent=0),
+                                       encoding="utf-8")
+    print(f"names {len(names)} (из данных {len(extra)}), templates {len(TEMPLATES)}")
+
+
+if __name__ == "__main__":
+    main()

@@ -265,43 +265,43 @@ body.past #map { box-shadow: inset 0 0 0 3px #b8860b; filter: sepia(.25); }
 <script>
 const I18N = {
   ru: {
-    settings: "Настройки", help: "Справка", new: "Новая", c1: "1. План", c1s: "вылеты на сутки", c2: "2. Миссия", c2s: "собрать .miz",
-    c3: "3. Дебриф", c3s: "после полёта", c4: "4. Конец дня", c4s: "ход модели",
-    tabSorties: "Вылеты", tabGround: "Войска", tabAir: "Авиация", tabRear: "Тыл", tabLog: "Журнал",
-    newTitle: "Новая кампания", nFile: "Файл", nTh: "Театр", nSide: "Сторона игрока", sideRedWP: "Красные (Варшавский договор)",
-    sideBlueNATO: "Синие (НАТО)", nPreset: "Состав сил (пресет)", copyPreset: "Копия для правки",
-    copyPresetTip: "копия выбранного пресета в папку presets/ - для правки в текстовом редакторе", nVar: "Вариант сценария",
-    nSeed: "Seed (пусто - случайный)", nDate: "Дата начала кампании", nDateTip: "сезон: погода, температура; состав сил - по пресету",
+    settings: "Настройки", help: "Справка", new: "Новая", c1: "1. План дня", c1s: "Составить план вылетов на сутки (обе стороны). Ваши вылеты появятся во вкладке «Вылеты».", c2: "2. Миссия", c2s: "Собрать файл миссии .miz для DCS по выбранному вылету.",
+    c3: "3. Итоги полёта", c3s: "После полёта в DCS: перенести в кампанию потери, итог удара, сбитых и спасённых.", c4: "4. Конец дня", c4s: "Модель доигрывает остаток суток за обе стороны: бои на земле, вылеты ИИ, снабжение.",
+    tabSorties: "Вылеты", tabGround: "Войска", tabAir: "Авиация", tabRear: "Снабжение", tabLog: "Журнал",
+    newTitle: "Новая кампания", nFile: "Имя файла кампании", nTh: "Карта и война", nSide: "Ваша сторона", sideRedWP: "Красные (Варшавский договор)",
+    sideBlueNATO: "Синие (НАТО)", nPreset: "Состав сил (на какой год)", copyPreset: "Копия для правки",
+    copyPresetTip: "Сохранить копию выбранного состава сил в папку presets/: её можно править в текстовом редакторе.", nVar: "Вариант сценария",
+    nSeed: "Номер случайности (seed)", nDate: "Дата начала", nDateTip: "От даты зависят погода, температура и длина светового дня; состав сил - от выбранного года.",
     campSet: "Кампания", apply: "Применить", wxMode: "Погода", wxClimate: "по климату и сезону", wxFair: "только хорошая (без тумана и низких облаков)",
     wxFixed: "заданная", wxType: "Тип погоды", wxHigh: "антициклон: ясно, слабый ветер", wxPost: "тыл циклона: кучевые, ветер СЗ",
     wxFront: "фронт: значительная облачность, дождь", wxLow: "циклон: сплошная низкая облачность, дождь, ветер",
-    wxFog: "утренний туман", wxEff: "погода влияет на план полётов (минимумы)", wxTip: "пересчёт: сегодня, если ещё не летали, иначе с завтра", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
+    wxFog: "утренний туман", wxEff: "погода влияет на план полётов (минимумы)", wxTip: "пересчёт: сегодня, если ещё не летали, иначе с завтра", nSeedPh: "пусто - случайный, например 12345", noRand: "без случайностей (одинаковый ход при каждом запуске)", overwrite: "перезаписать файл с таким именем",
     cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", loEdTip: "своя подвеска: оружие по пилонам (новее года кампании - заменится по эпохе)", loEmpty: "— пусто —",
     loName: "имя подвески", loSave: "Сохранить",
     modsT: "Моды DCS (установлены у всех игроков миссии)", modsTip: "части на типах мода - в строю, только если мод включён",
     modNoDesc: "нет описания типа в программе", aiTest: "всё на ИИ", aiTestTip: "проверочная миссия: группа игрока тоже ИИ; в дебрифе - когда группы ИИ вышли на рубеж против плана",
     histNow: "обстановка: сейчас", histDay: "День", histTip: "хронология: обстановка на карте в прошлые дни (движение фронта)",
     budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
-    airBudgetTip: "с пакетом игрока; вылеты ИИ дальше от удара игрока не ставятся (в модели они летают); 0 - без ограничения",
-    budgetTip: "дальнее прореживается и убирается; 0 - без ограничения", enemyPlan: "показывать план полётов противника (отладка)",
-    mapTools: "Инструменты карты DCS",
-    mapToolsTip: "Уточняют цели и дороги по объектам карты DCS: создать служебную миссию, запустить её в DCS, затем применить результат.",
+    airBudgetTip: "Нагрузка на DCS: ваш пакет ставится всегда, вылеты ИИ подальше от него - нет (в модели они всё равно летают); 0 - без ограничения.",
+    budgetTip: "Нагрузка на DCS: дальние от вашего вылета войска прореживаются; 0 - без ограничения.", enemyPlan: "показывать план вылетов противника (для проверки)",
+    mapTools: "Привязка целей к карте DCS (необязательно)",
+    mapToolsTip: "Склады и мосты сначала стоят по примерным координатам. Чтобы привязать их к настоящим объектам карты: «Зонд карты» создаёт служебную миссию - запустите её в DCS (можно наблюдателем), дождитесь сообщения и нажмите «Применить зонд». Дороги - так же.",
     probe: "Зонд карты", probeApply: "Применить зонд", roadsProbe: "Зонд дорог", roadsApply: "Применить дороги",
-    mizPh: "путь к .miz с зонами Assign as... (ROLE/VALUE)", import: "Импорт",
-    needCamp: "Сначала создайте или выберите кампанию.", noCamp: "Создайте кампанию кнопкой «Новая».", noCamps: "нет кампаний",
+    mizPh: "путь к своей .miz с зонами целей (Assign as... ROLE/VALUE)", import: "Импорт",
+    needCamp: "Сначала создайте или откройте кампанию.", noCamp: "Создайте кампанию кнопкой «Новая».", noCamps: "нет кампаний",
     day: "день", oldVer: " (старая версия)", randomVar: "случайный (по seed)",
     meta: (s, side) => `День <b>${s.day}</b>, обстановка на ${esc(s.ground_time || "00:00")} · ${s.date || ""} · вылетов ${s.sortie} · игрок: <span class="${s.side}">${side}</span>` + (s.weather ? ` · <span title="${esc(s.weather_text)}">☁ ${esc(s.weather)}</span>` : ""),
     red: "красные", blue: "синие", Red: "Красные", Blue: "Синие", seed: "seed", noRandom: "без случайности", built: "собран вылет",
-    noPlan: "Плана ещё нет - кнопка «1. План».", noTasks: "Задач нет: ", fromBase: "км от", sam: "ПВО", none: "нет",
-    fly: "лечу в", humans: "людей", humansTip: "людей в вылете: сначала группа игрока, затем остальные группы по порядку; больше одного - места Client (мультиплеер)",
+    noPlan: "Плана на сегодня ещё нет - нажмите «1. План дня».", noTasks: "Вылетов нет: ", fromBase: "км от", sam: "ПВО", none: "нет",
+    fly: "моя группа", humans: "игроков", humansTip: "Сколько людей летит: первое место - в вашей группе, остальные - по группам пакета (места Client для мультиплеера).",
     buildBtn: "Собрать миссию", edit: "Изменить", remove: "Снять", addSortie: "+ вылет",
-    addSortieTip: "задачи, которые планировщик нашёл, но в план не взял", otherSorties: "Остальные вылеты своей стороны (ИИ, дежурства, прошедшие)",
-    enemySorties: "План противника (отладка)", onTarget: "на объекте", inZone: "в зоне", removeQ: "Снять вылет из плана полётов?",
+    addSortieTip: "Задачи, которые планировщик нашёл, но в план не поставил: можно поставить вручную.", otherSorties: "Остальные вылеты вашей стороны (ИИ, дежурства, завершённые)",
+    enemySorties: "План противника (для проверки)", onTarget: "на объекте", inZone: "в зоне", removeQ: "Снять вылет из плана полётов?",
     clock: "часы кампании", situation: "обстановка на", tot: "на объекте", apply: "Применить", auto: "по задаче (автоматически)",
-    avail: "к вылету", seats: "бортов", outOfPlan: "Задачи вне плана", nothingMore: "Планировщик больше ничего не находит.",
+    avail: "готовы к вылету", seats: "самолётов", outOfPlan: "Задачи вне плана", nothingMore: "Планировщик больше ничего не находит.",
     searching: "Ищу задачи...", put: "Поставить", hhmm: "ЧЧ:ММ", totTip: "время на объекте; пусто - первое, когда хватает самолётов",
     byIntel: " (по данным разведки)", vs: "против", supplyPct: "снабжение", ofNorm: "% нормы",
-    addRegiment: "Добавить полк", custom: "свой", assumption: "допущение", inService: "в строю", crews: "экипажей", ready: "к вылету",
+    addRegiment: "Добавить полк", custom: "свой", assumption: "историческое допущение", inService: "в строю", crews: "экипажей", ready: "к вылету",
     rebaseTo: "перебазирование на", endOfDay: "в конце суток", livery: "ливрея", rebase: "Перебазировать", pilotsLivery: "Лётчики, ливрея",
     downed: "Сбитые экипажи на земле", beacon: "маяк", sinceDay: "на земле с суток",
     fromList: "Из списка", fromListTip: "части других дат этого театра (историческое допущение)", add: "Добавить",
@@ -312,7 +312,7 @@ const I18N = {
     liveryFolder: "имя папки ливреи (DCS не найден)", set: "Задать", pilots: "Лётчики", pilotsTip: "имя в DCS - звание и фамилия, ведущий - старший",
     sorties: "выл.", onGround: "На земле (сбиты):", lost: "Выбыли:", dayN: "сутки", now: "сейчас", toEnemy: "до противника", kmFromHere: "км отсюда",
     helosUpTo: "вертолётов до", slots: "мест", order: "Приказ",
-    whatTonnes: "Что значат тонны", rearDay: "Тыл (прошлые сутки)", stock: "запас складов", of: "из", roadIn: "за сутки подвоз", airIn: "воздухом",
+    whatTonnes: "Что значат тонны", rearDay: "Снабжение (прошлые сутки)", stock: "запас складов", of: "из", roadIn: "за сутки подвоз", airIn: "воздухом",
     used: "расход", cut: "отрезано складов", estObjs: n => `По оценке: ${n} объект(ов) - уточните инструментами карты DCS в настройках.`,
     allChecked: "Все цели тыла на объектах карты.", lostSt: "потерян", closedSt: "закрыт", damage: "повреждение", intact: "цел",
     estCoords: "координаты по оценке", stockEst: "запас ~", estimate: "оценка", cutOff: "отрезан от подвоза",
@@ -329,63 +329,75 @@ const I18N = {
           supply: "Пути подвоза", bases: "Аэродромы", task: "Задача"},
     bases: {paper: "Карта (бумага)", topo: "Топографическая", none: "Без подложки"},
     viaFront: " · через линию фронта", closedBridge: " · закрыта (мост)",
-    endQ: "Закончить день? Модель сделает ход, план дня сбросится.", copyName: "Имя копии пресета (файл presets/<имя>.json):", mine: " мой",
-    ready0: "Готово. Цикл дня: План → Миссия → (полёт в DCS) → Дебриф → Конец дня.", working: "Выполняю", sec: "с",
+    endQ: "Закончить день? Модель доиграет сутки за обе стороны, план дня будет сброшен.", copyName: "Имя копии пресета (файл presets/<имя>.json):", mine: " мой",
+    ready0: "Готово. Порядок дня: 1. План дня → 2. Миссия → полёт в DCS → 3. Итоги полёта → 4. Конец дня.", working: "Выполняю", sec: "с",
     busy: {new: "Создаю кампанию (зонды карты и дорог применяются сами - до нескольких минут)", plan: "Строю план полётов на сутки",
            build: "Собираю миссию", debrief: "Применяю дебриф", endday: "Конец дня: ход модели", mapimport: "Применяю зонд карты",
            mapapply: "Применяю зонд карты", roadsapply: "Применяю дороги", presetcopy: "Копирую пресет", atoedit: "Меняю вылет",
            atoremove: "Снимаю вылет", atoadd: "Ставлю вылет", rebase: "Отдаю приказ", setlang: "Меняю язык"},
-    helpHtml: `<b>REDFRONT - генератор динамической кампании DCS (Cold War Germany)</b>
-      <p>Кампания идёт по суткам. Модель ведёт наземный фронт, тыл и воздушную войну обеих сторон; вы летаете вылеты своей стороны в DCS, итог возвращается в модель.</p>
-      <ol><li><b>Новая</b> - создать кампанию: театр, сторона, состав сил (пресет по году).</li>
-      <li><b>1. План</b> - план полётов на сутки (ATO). Вкладка «Вылеты»: свои вылеты по времени на объекте; у каждого - тактическая группа, угрозы, цель.</li>
-      <li>Выберите вылет, группу («лечу в») и число людей, <b>Собрать миссию</b> (или «2. Миссия»). Файл .miz - в Saved Games\\DCS\\Missions.</li>
-      <li>Слетайте в DCS. Хук дебрифа (MissionScripting, см. README) пишет итог вылета.</li>
-      <li><b>3. Дебриф</b> - потери, итог удара, пленные и сбитые - в модель.</li>
-      <li>Можно собрать следующий вылет тех же суток или <b>4. Конец дня</b> - модель доигрывает сутки.</li></ol>
-      <p><b>Вкладки:</b> «Войска» - наземные части (противник - по разведке), «Авиация» - полки (добавить полк, перебазировать, лётчики, ливрея), «Тыл» - снабжение в тоннах, «Журнал» - события.</p>
-      <p><b>Режим командующего:</b> во «Вылетах» вылет своей стороны можно изменить (время, часть, число бортов, подвеска), снять или добавить («+ вылет»).</p>
-      <p><b>Настройки (⚙):</b> язык, бюджет наземных машин и ЛА в миссии, план противника (отладка), инструменты карты DCS.</p>
-      <p>Подробно - README.md / README.en.md.</p>`,
+    helpHtml: `<b>REDFRONT - динамическая кампания для DCS World</b>
+      <p>Кампания идёт по суткам. Программа сама ведёт войну за обе стороны: бои на земле, снабжение, вылеты авиации ИИ.
+      Вы выбираете вылет своей стороны, летаете его в DCS, и результат влияет на дальнейший ход войны.</p>
+      <p><b>Перед первым запуском</b>: чтобы итоги полёта сохранялись, в DCS нужно разрешить скриптам миссии запись файлов
+      (MissionScripting.lua - инструкция в README). Без этого миссии летаются, но результаты не попадут в кампанию.</p>
+      <p><b>Как играть один день</b></p>
+      <ol><li><b>Новая</b> - создать кампанию: карта и война, ваша сторона, год состава сил, дата.</li>
+      <li><b>1. План дня</b> - программа планирует вылеты на сутки. Ваши вылеты - во вкладке «Вылеты», по времени выхода на цель.
+      Нажмите вылет: справа - состав группы, маршрут, угрозы и пояснение цели.</li>
+      <li>Выберите, в какой группе летите («моя группа») и сколько игроков, нажмите <b>Собрать миссию</b>
+      (или «2. Миссия»). Файл .miz появится в Saved Games\\DCS\\Missions.</li>
+      <li>Слетайте миссию в DCS.</li>
+      <li><b>3. Итоги полёта</b> - перенести в кампанию потери, итог удара, сбитых и спасённых.</li>
+      <li>Можно собрать ещё один вылет этих же суток или нажать <b>4. Конец дня</b> - модель доиграет сутки.</li></ol>
+      <p><b>Вкладки слева</b>: «Вылеты» - план дня; «Войска» - наземные части (противник - только то, что известно разведке);
+      «Авиация» - полки и эскадрильи: лётчики, ливрея, перебазирование, добавить часть; «Снабжение» - запасы и подвоз в тоннах;
+      «Журнал» - события кампании.</p>
+      <p><b>Карта</b>: линия фронта, войска, ПВО, склады, мосты и аэродромы. Над картой можно выбрать прошлый день и посмотреть,
+      как двигался фронт. <b>Внизу</b> - матрица: время вылетов всех групп; вылет можно перенести, потянув метку времени.</p>
+      <p><b>Свои решения</b>: вылеты вашей стороны можно менять (время, часть, число самолётов, подвеска), снимать и добавлять («+ вылет»).</p>
+      <p><b>Настройки (⚙)</b>: язык; ограничение числа машин и самолётов в миссии (для производительности DCS);
+      дата, погода и моды кампании; привязка целей к карте DCS.</p>
+      <p>Слова: <i>пакет</i> - все группы одного удара (ударная, подавление ПВО, прикрытие); <i>ОЦЕНКА</i> - число не из
+      источника, а прикидка автора. Подробно - README.md.</p>`,
   },
   en: {
-    settings: "Settings", help: "Help", new: "New", c1: "1. Plan", c1s: "daily sorties", c2: "2. Mission", c2s: "build .miz",
-    c3: "3. Debrief", c3s: "after the flight", c4: "4. End of day", c4s: "model turn",
-    tabSorties: "Sorties", tabGround: "Ground", tabAir: "Air units", tabRear: "Logistics", tabLog: "Log",
-    newTitle: "New campaign", nFile: "File", nTh: "Theatre", nSide: "Player side", sideRedWP: "Red (Warsaw Pact)",
-    sideBlueNATO: "Blue (NATO)", nPreset: "Order of battle (preset)", copyPreset: "Copy for editing",
-    copyPresetTip: "copy the selected preset to presets/ for editing in a text editor", nVar: "Scenario variant",
-    nSeed: "Seed (empty - random)", nDate: "Campaign start date", nDateTip: "season: weather, temperature; forces follow the preset",
+    settings: "Settings", help: "Help", new: "New", c1: "1. Plan the day", c1s: "Build the sortie plan for the day (both sides). Your sorties appear in the “Sorties” tab.", c2: "2. Build mission", c2s: "Build the DCS mission file (.miz) for the selected sortie.",
+    c3: "3. Load results", c3s: "After flying in DCS: bring losses, strike results, downed and rescued crews into the campaign.", c4: "4. End the day", c4s: "The model plays out the rest of the day for both sides: ground battles, AI sorties, supply.",
+    tabSorties: "Sorties", tabGround: "Ground", tabAir: "Air units", tabRear: "Supply", tabLog: "Log",
+    newTitle: "New campaign", nFile: "Campaign file name", nTh: "Map and war", nSide: "Your side", sideRedWP: "Red (Warsaw Pact)",
+    sideBlueNATO: "Blue (NATO)", nPreset: "Order of battle (which year)", copyPreset: "Copy for editing",
+    copyPresetTip: "Save a copy of the selected order of battle to the presets/ folder so you can edit it in a text editor.", nVar: "Scenario variant",
+    nSeed: "Random seed", nDate: "Start date", nDateTip: "The date sets the weather, temperature and daylight; the forces follow the chosen year.",
     campSet: "Campaign", apply: "Apply", wxMode: "Weather", wxClimate: "climate and season", wxFair: "fair only (no fog or low cloud)",
     wxFixed: "fixed", wxType: "Weather type", wxHigh: "high pressure: clear, light wind", wxPost: "post-frontal: cumulus, NW wind",
     wxFront: "frontal: broken cloud, rain", wxLow: "low pressure: low overcast, rain, wind",
-    wxFog: "morning fog", wxEff: "weather affects the air tasking order (minima)", wxTip: "recomputed today if nothing flown yet, otherwise from tomorrow", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
+    wxFog: "morning fog", wxEff: "weather affects the air tasking order (minima)", wxTip: "recomputed today if nothing flown yet, otherwise from tomorrow", nSeedPh: "empty - random, e.g. 12345", noRand: "no randomness (the same result on every run)", overwrite: "overwrite a file with this name",
     cancel: "Cancel", create: "Create", close: "Close", language: "Language", loEdTip: "custom loadout: weapon per pylon (newer than the campaign year is replaced by era)", loEmpty: "— empty —",
     loName: "loadout name", loSave: "Save",
     modsT: "DCS mods (installed for every player of the mission)", modsTip: "units on mod types are active only with the mod enabled",
     modNoDesc: "no type description in the program", aiTest: "all AI", aiTestTip: "test mission: the player's group is AI too; the debrief shows when AI groups reached their entry points against the plan",
     histNow: "situation: now", histDay: "Day", histTip: "timeline: the map situation on past days (front movement)",
-    budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
-    airBudgetTip: "including the player package; AI sorties farther from the player strike are left out (the model still flies them); 0 - unlimited",
-    budgetTip: "distant units are thinned out and removed; 0 - unlimited", enemyPlan: "show enemy air tasking order (debug)",
-    mapTools: "DCS map tools",
-    mapToolsTip: "Refine targets and roads from DCS map objects: create a service mission, run it in DCS, then apply the result.",
+    budget: "Max ground vehicles in the mission", airBudget: "Max aircraft and helicopters in the mission",
+    airBudgetTip: "DCS performance: your package is always included, AI sorties farther away are left out (the model still flies them); 0 - unlimited.",
+    budgetTip: "DCS performance: troops far from your sortie are thinned out; 0 - unlimited.", enemyPlan: "show the enemy sortie plan (for checking)",
+    mapTools: "Snap targets to the DCS map (optional)",
+    mapToolsTip: "Depots and bridges start at estimated coordinates. To snap them to real map objects: “Map probe” creates a service mission - run it in DCS (spectating is fine), wait for the message, then press “Apply probe”. Roads work the same way.",
     probe: "Map probe", probeApply: "Apply probe", roadsProbe: "Roads probe", roadsApply: "Apply roads",
-    mizPh: "path to a .miz with Assign as... zones (ROLE/VALUE)", import: "Import",
-    needCamp: "Create or select a campaign first.", noCamp: "Create a campaign with the “New” button.", noCamps: "no campaigns",
+    mizPh: "path to your own .miz with target zones (Assign as... ROLE/VALUE)", import: "Import",
+    needCamp: "Create or open a campaign first.", noCamp: "Create a campaign with the “New” button.", noCamps: "no campaigns",
     day: "day", oldVer: " (old version)", randomVar: "random (by seed)",
     meta: (s, side) => `Day <b>${s.day}</b>, situation at ${esc(s.ground_time || "00:00")} · ${s.date || ""} · sorties flown ${s.sortie} · player: <span class="${s.side}">${side}</span>` + (s.weather ? ` · <span title="${esc(s.weather_text)}">☁ ${esc(s.weather)}</span>` : ""),
     red: "red", blue: "blue", Red: "Red", Blue: "Blue", seed: "seed", noRandom: "no randomness", built: "built sortie",
-    noPlan: "No plan yet - press “1. Plan”.", noTasks: "No tasks: ", fromBase: "km from", sam: "Air defence", none: "none",
-    fly: "I fly", humans: "humans", humansTip: "humans in the sortie: the player's group first, then other groups in order; more than one - Client slots (multiplayer)",
+    noPlan: "No plan for today yet - press “1. Plan the day”.", noTasks: "No sorties: ", fromBase: "km from", sam: "Air defence", none: "none",
+    fly: "my group", humans: "players", humansTip: "How many people fly: the first seat is in your group, the rest go to the other groups of the package (Client slots for multiplayer).",
     buildBtn: "Build mission", edit: "Edit", remove: "Remove", addSortie: "+ sortie",
-    addSortieTip: "tasks the planner found but did not schedule", otherSorties: "Other own sorties (AI, duty stations, completed)",
-    enemySorties: "Enemy plan (debug)", onTarget: "on target", inZone: "on station", removeQ: "Remove this sortie from the air tasking order?",
+    addSortieTip: "Tasks the planner found but did not schedule: you can schedule them yourself.", otherSorties: "Other sorties of your side (AI, duty stations, completed)",
+    enemySorties: "Enemy plan (for checking)", onTarget: "on target", inZone: "on station", removeQ: "Remove this sortie from the air tasking order?",
     clock: "campaign clock", situation: "situation at", tot: "time on target", apply: "Apply", auto: "by task (automatic)",
-    avail: "available", seats: "aircraft", outOfPlan: "Unscheduled tasks", nothingMore: "The planner finds nothing more.",
+    avail: "ready", seats: "aircraft", outOfPlan: "Unscheduled tasks", nothingMore: "The planner finds nothing more.",
     searching: "Searching for tasks...", put: "Schedule", hhmm: "HH:MM", totTip: "time on target; empty - first time aircraft are available",
     byIntel: " (per intelligence)", vs: "vs", supplyPct: "supply", ofNorm: "% of norm",
-    addRegiment: "Add regiment", custom: "custom", assumption: "assumption", inService: "in service", crews: "crews", ready: "available",
+    addRegiment: "Add unit", custom: "custom", assumption: "historical assumption", inService: "in service", crews: "crews", ready: "available",
     rebaseTo: "rebasing to", endOfDay: "at end of day", livery: "livery", rebase: "Rebase", pilotsLivery: "Pilots, livery",
     downed: "Downed crews on the ground", beacon: "beacon", sinceDay: "on the ground since day",
     fromList: "From list", fromListTip: "units of other dates of this theatre (historical assumption)", add: "Add",
@@ -396,7 +408,7 @@ const I18N = {
     liveryFolder: "livery folder name (DCS not found)", set: "Set", pilots: "Pilots", pilotsTip: "name in DCS is rank and surname; the leader is the senior",
     sorties: "sorties", onGround: "On the ground (downed):", lost: "Lost:", dayN: "day", now: "now", toEnemy: "to enemy", kmFromHere: "km from here",
     helosUpTo: "helicopters up to", slots: "slots", order: "Order",
-    whatTonnes: "What the tonnes mean", rearDay: "Logistics (previous day)", stock: "depot stock", of: "of", roadIn: "delivered by road",
+    whatTonnes: "What the tonnes mean", rearDay: "Supply (previous day)", stock: "depot stock", of: "of", roadIn: "delivered by road",
     airIn: "by air", used: "consumed", cut: "depots cut off", estObjs: n => `Estimated: ${n} object(s) - refine with the DCS map tools in Settings.`,
     allChecked: "All rear targets are on map objects.", lostSt: "lost", closedSt: "closed", damage: "damage", intact: "intact",
     estCoords: "estimated coordinates", stockEst: "stock ~", estimate: "estimate", cutOff: "cut off from supply",
@@ -413,34 +425,45 @@ const I18N = {
           supply: "Supply routes", bases: "Airfields", task: "Task"},
     bases: {paper: "Map (paper)", topo: "Topographic", none: "No basemap"},
     viaFront: " · across the front line", closedBridge: " · closed (bridge)",
-    endQ: "End the day? The model will make its turn and the day's plan will be reset.", copyName: "Preset copy name (file presets/<name>.json):", mine: " mine",
-    ready0: "Ready. Day cycle: Plan → Mission → (fly in DCS) → Debrief → End of day.", working: "Working", sec: "s",
+    endQ: "End the day? The model will play out the day for both sides and the day's plan will be reset.", copyName: "Preset copy name (file presets/<name>.json):", mine: " mine",
+    ready0: "Ready. Daily cycle: 1. Plan the day → 2. Build mission → fly in DCS → 3. Load results → 4. End the day.", working: "Working", sec: "s",
     busy: {new: "Creating campaign (map and road probes are applied automatically - up to a few minutes)", plan: "Building the daily air tasking order",
            build: "Building mission", debrief: "Applying debrief", endday: "End of day: model turn", mapimport: "Applying map probe",
            mapapply: "Applying map probe", roadsapply: "Applying roads", presetcopy: "Copying preset", atoedit: "Changing sortie",
            atoremove: "Removing sortie", atoadd: "Scheduling sortie", rebase: "Issuing order", setlang: "Changing language"},
-    helpHtml: `<b>REDFRONT - DCS dynamic campaign generator (Cold War Germany)</b>
-      <p>The campaign runs day by day. The model runs the ground front, logistics and the air war of both sides; you fly your side's sorties in DCS and the result goes back into the model.</p>
-      <ol><li><b>New</b> - create a campaign: theatre, side, order of battle (preset by year).</li>
-      <li><b>1. Plan</b> - the daily air tasking order (ATO). The “Sorties” tab lists your side's sorties by time on target, each with its package, threats and target.</li>
-      <li>Pick a sortie, the group you fly (“I fly”) and the number of humans, then <b>Build mission</b> (or “2. Mission”). The .miz goes to Saved Games\\DCS\\Missions.</li>
-      <li>Fly it in DCS. The debrief hook (MissionScripting, see README) records the result.</li>
-      <li><b>3. Debrief</b> - losses, strike results, downed crews go into the model.</li>
-      <li>Build another sortie of the same day or press <b>4. End of day</b> - the model plays out the rest of the day.</li></ol>
-      <p><b>Tabs:</b> “Ground” - ground units (enemy per intelligence), “Air units” - regiments (add, rebase, pilots, livery), “Logistics” - supply in tonnes, “Log” - events.</p>
-      <p><b>Commander mode:</b> in “Sorties” your side's sorties can be edited (time, unit, number of aircraft, loadout), removed or added (“+ sortie”).</p>
-      <p><b>Settings (⚙):</b> language, mission ground vehicle and aircraft budgets, enemy plan (debug), DCS map tools.</p>
-      <p>Mission briefings follow the language setting. The event log and target explanations are currently in Russian.</p>
-      <p>Details: README.en.md.</p>`,
+    helpHtml: `<b>REDFRONT - a dynamic campaign for DCS World</b>
+      <p>The campaign runs day by day. The program fights the war for both sides: ground battles, supply, AI air operations.
+      You pick a sortie of your side, fly it in DCS, and the result shapes the rest of the war.</p>
+      <p><b>Before the first run</b>: for flight results to be saved, DCS must allow mission scripts to write files
+      (MissionScripting.lua - see the README). Without it the missions fly, but the results do not reach the campaign.</p>
+      <p><b>How to play one day</b></p>
+      <ol><li><b>New</b> - create a campaign: map and war, your side, the year of the forces, the date.</li>
+      <li><b>1. Plan the day</b> - the program plans the day's sorties. Yours are in the “Sorties” tab, ordered by time on target.
+      Click a sortie: the right panel shows the package, route, threats and what the target is worth.</li>
+      <li>Choose the group you fly (“my group”) and the number of players, then press <b>Build mission</b>
+      (or “2. Build mission”). The .miz file goes to Saved Games\\DCS\\Missions.</li>
+      <li>Fly the mission in DCS.</li>
+      <li><b>3. Load results</b> - bring losses, strike results, downed and rescued crews into the campaign.</li>
+      <li>Build another sortie of the same day, or press <b>4. End the day</b> - the model plays out the rest of the day.</li></ol>
+      <p><b>Tabs on the left</b>: “Sorties” - the day's plan; “Ground” - ground units (the enemy only as far as intelligence knows);
+      “Air units” - regiments and squadrons: pilots, livery, rebasing, adding a unit; “Supply” - stocks and deliveries in tonnes;
+      “Log” - campaign events.</p>
+      <p><b>Map</b>: front line, troops, air defences, depots, bridges and airfields. Above the map you can pick a past day to see
+      how the front moved. <b>At the bottom</b> - the matrix: the timing of every group; drag a time mark to move a sortie.</p>
+      <p><b>Your decisions</b>: your side's sorties can be changed (time, unit, number of aircraft, loadout), removed or added (“+ sortie”).</p>
+      <p><b>Settings (⚙)</b>: language; the vehicle and aircraft limits per mission (DCS performance);
+      campaign date, weather and mods; snapping targets to the DCS map.</p>
+      <p>Terms: <i>package</i> - all groups of one strike (strike, air defence suppression, escort); <i>ESTIMATE</i> - a number
+      that is the author's judgement rather than from a source. Details: README.en.md.</p>`,
   },
 };
 Object.assign(I18N.ru, {matrix: "Матрица синхронизации", mDuty: "дежурства", mPast: "прошедшие", playable: "Можно слетать",
   mHint: "◆ выход на объект, ○ сбор, пунктир - время удара; ⇔ тянуть - перенести вылет", dragTip: "перенести вылет (шаг 5 мин)",
-  rv: "сбор", inspEmpty: "Выберите вылет в списке, на матрице или объект на карте.", togLeft: "левая панель", togRight: "инспектор",
+  rv: "сбор", inspEmpty: "Выберите вылет в списке слева, на матрице внизу или объект на карте - здесь появятся подробности.", togLeft: "левая панель", togRight: "инспектор",
   togBottom: "матрица"});
 Object.assign(I18N.en, {matrix: "Synchronization matrix", mDuty: "duty stations", mPast: "completed", playable: "Available to fly",
   mHint: "◆ on objective, ○ rendezvous, dashed - time on target; drag ⇔ to move the sortie", dragTip: "move the sortie (5 min steps)",
-  rv: "rendezvous", inspEmpty: "Select a sortie in the list or the matrix, or an object on the map.", togLeft: "left panel",
+  rv: "rendezvous", inspEmpty: "Select a sortie in the list on the left, in the matrix below or an object on the map - details appear here.", togLeft: "left panel",
   togRight: "inspector", togBottom: "matrix"});
 I18N.ru.meta = (s, side) => `День <b>${s.day}</b> · ${esc(s.ground_time || "00:00")} · ${s.date || ""} · <span class="${s.side}">${side}</span>`;
 I18N.en.meta = (s, side) => `Day <b>${s.day}</b> · ${esc(s.ground_time || "00:00")} · ${s.date || ""} · <span class="${s.side}">${side}</span>`;
@@ -470,8 +493,8 @@ function out(lines, err) {
   o.innerHTML = `<div class="${err ? "err" : ""}">[${t}] ${(Array.isArray(lines) ? lines : [lines]).map(esc).join("\n")}</div>` + o.innerHTML;
 }
 async function api(action, body) {
-  const r = await fetch("/api/" + action, body === undefined ? {} :
-    {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const r = await fetch("/api/" + action, body === undefined ? {headers: {"X-Lang": LANG}} :
+    {method: "POST", headers: {"Content-Type": "application/json", "X-Lang": LANG}, body: JSON.stringify(body)});
   const j = await r.json();
   if (j.error) throw new Error(j.error);
   return j;
@@ -627,9 +650,9 @@ function drawMap() {
     L.marker(d.pos, {icon: L.divIcon({className: "obj", html: "🪂", iconSize: [18, 18]})})
       .bindTooltip(`<b>${esc(d.title)}</b><br>${T("sinceDay")} ${d.day} · ${T("beacon")} ${d.freq} kHz`).addTo(layers.objects);
   }
-  const AF = Object.fromEntries(V.objects.filter(o => o.role === "airfield").map(o => [o.name, o]));
+  const AF = Object.fromEntries(V.objects.filter(o => o.role === "airfield").map(o => [o.id, o]));   // af_<id аэродрома>
   for (const b of ST.airbases) {
-    const o = AF["Аэродром " + b.name];
+    const o = AF["af_" + b.id];
     const st = T("bst")[b.state] || b.state;
     const used = b.units && b.units.length ? `<br>${b.units.map(esc).join("<br>")}` : "";
     if (b.kind === "farp") {

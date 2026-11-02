@@ -1,0 +1,1947 @@
+[
+[
+"Расход\\ войск\\ сейчас\\ \\~(?P<a>.+?)\\ т/сутки\\ \\(в\\ обороне\\ \\~(?P<b>.+?);\\ бой\\ \\-\\ 1\\ т\\ на\\ машину\\ в\\ сутки,\\ марш\\ \\-\\ 0\\.5,\\ оборона\\ \\-\\ 0\\.2\\)\\ плюс\\ авиация:\\ \\~4\\ т\\ на\\ самолёто\\-вылет,\\ 1\\.5\\ \\-\\ на\\ вертолёто\\-вылет\\.",
+"Troop consumption now ~{a} t/day (~{b} on the defence; battle - 1 t per vehicle a day, march - 0.5, defence - 0.2) plus aviation: ~4 t per aircraft sortie, 1.5 per helicopter sortie.",
+false
+],
+[
+"(?P<w>[^()]+?):\\ повреждение\\ X%\\ сжигает\\ запас\\ сверх\\ ёмкость\\ x\\ \\(1\\ \\-\\ X\\)\\ \\-\\ при\\ 50%\\ останется\\ не\\ больше\\ (?P<a>.+?)\\ т;\\ ремонт\\ \\~(?P<r>.+?)\\ в\\ сутки\\.\\ Без\\ снабжения\\ части\\ слабее\\ в\\ бою\\ и\\ медленнее\\ на\\ марше\\.",
+"{w}: damage X% burns the stock above capacity x (1 - X) - at 50% no more than {a} t remains; repair ~{r} a day. Without supply units are weaker in battle and slower on the march.",
+false
+],
+[
+"Завод\\ (?P<s>.+?)\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ в\\ секторе\\):\\ промышленность\\ стороны\\ сейчас\\ x(?P<k>[\\d/.,:?~%\\- ]+?)\\ \\-\\ так\\ быстро\\ ремонтируются\\ склады,\\ мосты,\\ аэродромы\\ и\\ приходят\\ пополнения\\ авиации\\ и\\ экипажей\\.",
+"Factory of the {s} side ({n} in the sector): the side's industry is now x{k} - this sets how fast depots, bridges and airfields are repaired and how fast aircraft and crew replacements arrive.",
+false
+],
+[
+"Удар:\\ этот\\ завод\\ разрушен\\ полностью\\ \\-\\ x(?P<a>.+?)\\ \\->\\ x(?P<b>.+?)\\ \\(вклад\\ завода\\ 1/(?P<n>[\\d/.,:?~%\\- ]+?),\\ влияние\\ (?P<c>.+?)\\);\\ сам\\ ремонтируется\\ \\~(?P<r>.+?)\\ в\\ сутки\\.\\ Эффект\\ \\-\\ медленный,\\ на\\ дни\\ вперёд\\.",
+"Strike: destroying this factory completely - x{a} -> x{b} (factory share 1/{n}, influence {c}); it repairs itself ~{r} a day. The effect is slow, over the following days.",
+false
+],
+[
+"Удар:\\ потери\\ в\\ технике\\ \\-\\ слабее\\ в\\ бою;\\ при\\ боеспособности\\ ниже\\ (?P<p>.+?)\\ часть\\ выходит\\ из\\ боя\\ и\\ больше\\ не\\ держит\\ фронт\\ \\(на\\ восстановление\\)\\.",
+"Strike: equipment losses make it weaker in battle; below {p} strength the unit leaves the fight and no longer holds the front (refitting).",
+false
+],
+[
+"Удар:\\ удачный\\ удар\\ ИИ\\ \\-\\ недовоз\\ \\~(?P<p>.+?)\\ потока\\ \\(\\~(?P<t>.+?)\\ т\\);\\ в\\ миссии\\ на\\ участке\\ \\~(?P<q>.+?)\\ суточного\\ потока,\\ сожжённые\\ машины\\ \\-\\ недовезённые\\ тонны\\.",
+"Strike: a successful AI strike stops ~{p} of the flow (~{t} t); in the mission the segment carries ~{q} of the daily flow, burned trucks are undelivered tonnes.",
+false
+],
+[
+"Позиция\\ ЗРК:\\ радиус\\ поражения\\ \\~(?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\.\\ Удар\\ \\-\\ потери\\ пусковых\\ и\\ РЛС;\\ подавленный\\ ЗРК\\ открывает\\ коридор\\ для\\ следующих\\ вылетов\\.",
+"SAM site: engagement radius ~{k} km. A strike destroys launchers and radars; a suppressed SAM opens a corridor for the following sorties.",
+false
+],
+[
+"Груз:\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ x\\ (?P<t>.+?)\\ по\\ \\~(?P<c>.+?)\\ т\\ =\\ \\~(?P<a>.+?)\\ т\\ на\\ склад\\ за\\ рейс\\ \\-\\ \\~(?P<p>.+?)\\ суточного\\ расхода\\ частей\\ у\\ склада\\ \\(воздухом\\ \\-\\ только\\ самое\\ срочное\\)\\.",
+"Cargo: {n} x {t} at ~{c} t = ~{a} t to the depot per trip - ~{p} of the daily consumption of units at the depot (by air - only the most urgent).",
+false
+],
+[
+"Подвоз\\ из\\ тыла\\ \\-\\ до\\ \\~(?P<a>.+?)\\ т/сутки\\ \\((?P<x>.+?)\\ x\\ расход\\ в\\ обороне\\):\\ в\\ обороне\\ склады\\ наполняются,\\ в\\ наступлении\\ и\\ бою\\ \\-\\ тают\\.",
+"Rear resupply - up to ~{a} t/day ({x} x defensive consumption): on the defence depots fill up, in the attack and in battle they run down.",
+false
+],
+[
+"Темп\\ наступления\\ \\((?P<s>.+?)\\):\\ за\\ сутки\\ занято\\ пунктов\\ (?P<n>[\\d/.,:?~%\\- ]+?),\\ ведущие\\ части\\ продвинулись\\ до\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ \\(норма\\ доктрины\\ \\~(?P<m>[\\d/.,:?~%\\- ]+?)\\ км/сутки\\)\\.",
+"Rate of advance ({s}): {n} places taken in a day, leading units advanced up to {k} km (doctrine norm ~{m} km/day).",
+false
+],
+[
+"выдвижение\\ на\\ передовую\\ площадку\\ (?P<b>.+?)\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ вертолётов,\\ площадка\\ \\-\\ до\\ (?P<m>[\\d/.,:?~%\\- ]+?);\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ от\\ противника;\\ основной\\ аэродром\\ (?P<x>.+?)\\ \\-\\ (?P<d>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
+"moving to forward site {b} ({n} helicopters, site holds up to {m}; {k} km from the enemy; main airfield {x} - {d} km).",
+false
+],
+[
+"выдвижение\\ на\\ передовую\\ площадка\\ (?P<b>.+?)\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ вертолётов,\\ площадка\\ \\-\\ до\\ (?P<m>[\\d/.,:?~%\\- ]+?);\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ от\\ противника;\\ основной\\ аэродром\\ (?P<x>.+?)\\ \\-\\ (?P<d>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
+"moving to forward site {b} ({n} helicopters, site holds up to {m}; {k} km from the enemy; main airfield {x} - {d} km).",
+false
+],
+[
+"Промышленность:\\ x(?P<a>.+?)\\ \\(ремонт\\ складов,\\ мостов,\\ аэродромов,\\ пополнения\\ авиации;\\ заводы\\ противника\\ \\-\\ x(?P<b>.+?)\\)\\.",
+"Industry: x{a} (repair of depots, bridges, airfields, aircraft replacements; enemy factories - x{b}).",
+false
+],
+[
+"Удар:\\ разрушенный\\ мост\\ закрывает\\ связь\\ \\-\\ войска\\ и\\ подвоз\\ идут\\ в\\ обход\\ \\(или\\ не\\ идут\\);\\ ремонт\\ \\~(?P<d>[\\d/.,:?~%\\- ]+?)\\ сут\\.",
+"Strike: a destroyed bridge closes the link - troops and supply take a detour (or stop); repair ~{d} days.",
+false
+],
+[
+"Тыл\\ \\((?P<s>.+?)\\):\\ подвоз\\ (?P<a>.+?)\\ т\\ \\(колонны\\ разбиты\\ \\-\\ недовезено\\ (?P<x>.+?)\\ т\\),\\ воздухом\\ (?P<b>.+?)\\ т,\\ расход\\ (?P<c>.+?)\\ т;\\ запас\\ складов\\ (?P<d>[\\d/.,:?~%\\- ]+?)\\ т\\ \\((?P<e>.+?)\\)\\.",
+"Logistics ({s}): {a} t delivered by road (convoys hit - {x} t not delivered), {b} t by air, {c} t consumed; depot stock {d} t ({e}).",
+false
+],
+[
+"выдвижение\\ на\\ передовую\\ (?P<b>.+?)\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ вертолётов,\\ площадка\\ \\-\\ до\\ (?P<m>[\\d/.,:?~%\\- ]+?);\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ от\\ противника;\\ основной\\ аэродром\\ (?P<x>.+?)",
+"moving to forward site {b} ({n} helicopters, site holds up to {m}; {k} km from the enemy; main airfield {x}",
+false
+],
+[
+"Малый\\ мост:\\ разрушенный\\ связь\\ не\\ закрывает\\ \\-\\ объезд,\\ марш\\ и\\ подвоз\\ медленнее;\\ ремонт\\ \\~(?P<d>[\\d/.,:?~%\\- ]+?)\\ сут\\.",
+"Minor bridge: when destroyed it does not close the link - there is a detour, marches and supply are slower; repair ~{d} days.",
+false
+],
+[
+"Склад,\\ найденный\\ на\\ карте:\\ на\\ снабжение\\ войск\\ в\\ модели\\ не\\ влияет\\ \\(цель\\ без\\ последствий\\)\\.",
+"A depot found on the map: it does not affect troop supply in the model (a target without consequences).",
+false
+],
+[
+"добавлен\\ \\(историческое\\ допущение,\\ из\\ пресета\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\)\\ на\\ (?P<b>.+?),\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ ЛА;\\ в\\ плане\\ \\-\\ со\\ следующих\\ суток\\.",
+"added (historical assumption, from the {y} preset) at {b}, {n} aircraft; in the plan from the next day.",
+false
+],
+[
+"Частей\\ в\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ нет\\ \\-\\ склад\\ сейчас\\ в\\ резерве\\ \\(снабжает\\ при\\ подходе\\ войск\\ и\\ авиацию\\)\\.",
+"No units within {k} km - the depot is in reserve for now (supplies approaching troops and aviation).",
+false
+],
+[
+"Часть,\\ получившая\\ меньше\\ нормы,\\ слабее\\ в\\ бою\\ и\\ медленнее\\ на\\ марше\\ \\(⚠\\ на\\ карте\\)\\.",
+"A unit that receives less than the norm is weaker in battle and slower on the march (⚠ on the map).",
+false
+],
+[
+"Зонда\\ карты\\ нет:\\ склады\\ и\\ мосты\\ по\\ оценочным\\ координатам\\ \\(кнопка\\ 'Зонд\\ карты'\\)\\.",
+"No map probe: depots and bridges use estimated coordinates (button 'Map probe').",
+false
+],
+[
+"Снабжает\\ (?P<u>.+?)\\ в\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ по\\ своей\\ территории:\\ расход\\ \\~(?P<t>.+?)\\ т/сутки,\\ запаса\\ \\-\\ (?P<w>[^()]+?)\\ без\\ подвоза\\.",
+"Supplies {u} within {k} km over own territory: consumption ~{t} t/day, stock lasts {w} without resupply.",
+false
+],
+[
+"Удар:\\ повреждение\\ X%\\ \\-\\ доля\\ самолётов,\\ не\\ готовых\\ к\\ вылету;\\ ремонт\\ \\~(?P<r>.+?)\\ в\\ сутки\\.",
+"Strike: damage X% is the share of aircraft that cannot fly; repair ~{r} a day.",
+false
+],
+[
+"нет\\ исполнителя\\ для\\ группы\\ '(?P<g>.+?)'\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ ЛА\\ с\\ ролью\\ (?P<r>.+?)\\ в\\ радиусе\\)\\ \\-\\ группа\\ не\\ назначена",
+"no unit for the '{g}' group ({n} aircraft with role {r} in range) - group not assigned",
+false
+],
+[
+"\\~(?P<t>.+?)\\ т/сутки\\ \\-\\ около\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ грузовиков\\ \\((?P<w>[^()]+?)\\ т\\)\\ в\\ сутки,\\ (?P<p>.+?)\\ подвоза\\ (?P<s>.+?)\\ из\\ тыла\\ \\(\\~(?P<a>.+?)\\ т/сутки\\)\\.",
+"~{t} t/day - about {n} trucks ({w} t) a day, {p} of {s} rear resupply (~{a} t/day).",
+false
+],
+[
+"без\\ снабжения\\ \\-\\ нет\\ своего\\ склада\\ с\\ запасом\\ в\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ по\\ своей\\ территории\\.",
+"no supply - no own stocked depot within {k} km over own territory.",
+false
+],
+[
+"повреждение\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.\\ Запас,\\ по\\ оценке,\\ не\\ пострадал\\ \\(склад\\ был\\ неполон\\)\\.",
+"damage {a} -> {b}. The stock is estimated undamaged (the depot was not full).",
+false
+],
+[
+"свой\\ полк\\ добавлен\\ на\\ (?P<b>.+?)\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ x\\ (?P<t>.+?),\\ роль\\ (?P<r>.+?)\\);\\ в\\ плане\\ \\-\\ со\\ следующих\\ суток\\.",
+"custom regiment added at {b} ({n} x {t}, role {r}); in the plan from the next day.",
+false
+],
+[
+"высажена\\ у\\ (?P<p>.+?)\\ \\(ИИ:\\ село\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ из\\ (?P<m>[\\d/.,:?~%\\- ]+?)\\ бортов\\),\\ держит\\ пункт\\ до\\ подхода\\ своих\\.",
+"landed at {p} (AI: {n} of {m} helicopters landed), holding the place until friendly troops arrive.",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ \\(\\~(?P<n>[\\d/.,:?~%\\- ]+?)\\ т/сутки\\):\\ колонны\\ снабжения\\ на\\ участке\\ (?P<l>.+?)\\ разбиты,\\ недовоз\\ \\~(?P<x>.+?)\\ т\\.",
+"{t} (~{n} t/day): supply convoys on the {l} segment hit, ~{x} t not delivered.",
+false
+],
+[
+"высажена\\ у\\ (?P<p>.+?)\\ \\((?P<h>.+?):\\ село\\ (?P<a>.+?)\\ из\\ (?P<b>.+?)\\ бортов\\),\\ держит\\ пункт\\ до\\ подхода\\ своих\\.",
+"landed at {p} ({h}: {a} of {b} helicopters landed), holding the place until friendly troops arrive.",
+false
+],
+[
+"Тыл\\ \\((?P<s>.+?)\\):\\ подвоз\\ (?P<a>.+?)\\ т,\\ воздухом\\ (?P<b>.+?)\\ т,\\ расход\\ (?P<c>.+?)\\ т;\\ запас\\ складов\\ (?P<d>[\\d/.,:?~%\\- ]+?)\\ т\\ \\((?P<e>.+?)\\)\\.",
+"Logistics ({s}): {a} t delivered by road, {b} t by air, {c} t consumed; depot stock {d} t ({e}).",
+false
+],
+[
+"Повреждение\\ (?P<a>.+?):\\ к\\ вылету\\ меньше\\ на\\ столько\\ же\\ \\(\\~(?P<n>[\\d/.,:?~%\\- ]+?)\\ ЛА\\ не\\ взлетят\\)\\.",
+"Damage {a}: that many fewer aircraft can fly (~{n} aircraft grounded).",
+false
+],
+[
+"Склады:\\ (?P<a>.+?)\\ т\\ из\\ (?P<b>.+?)\\ \\((?P<c>.+?)\\)\\ \\-\\ это\\ \\~(?P<d>[\\d/.,:?~%\\- ]+?)\\ сут\\.\\ нынешнего\\ расхода\\ без\\ подвоза\\.",
+"Depots: {a} t of {b} ({c}) - ~{d} days of current consumption without resupply.",
+false
+],
+[
+"цель\\ сместилась\\ на\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ к\\ времени\\ вылета\\ \\-\\ маршрут\\ пересчитан\\.",
+"the target moved {k} km by the sortie time - route recalculated.",
+false
+],
+[
+"вертолёт\\ \\-\\ только\\ с\\ вертолётной\\ ролью,\\ самолёт\\ \\-\\ с\\ самолётной",
+"a helicopter needs a helicopter role, an aircraft an aircraft role",
+false
+],
+[
+"такой\\ части\\ в\\ списке\\ нет\\ \\(уже\\ в\\ кампании\\ или\\ не\\ этого\\ театра\\)",
+"no such unit in the list (already in the campaign or not of this theatre)",
+false
+],
+[
+"Для\\ сравнения:\\ войска\\ (?P<s>.+?)\\ расходуют\\ \\~(?P<a>.+?)\\ т/сутки\\ \\(в\\ обороне\\ \\-\\ \\~(?P<b>.+?)\\)\\.",
+"For comparison: {s} troops consume ~{a} t/day (~{b} on the defence).",
+false
+],
+[
+"плотная\\ ПВО\\ у\\ цели\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ ЗРК\\)\\ \\-\\ второй\\ эшелон\\ удара\\ через\\ (?P<m>[\\d/.,:?~%\\- ]+?)\\ мин",
+"dense air defence at the target ({n} SAMs) - second strike wave {m} min later",
+false
+],
+[
+"оперативная\\ маневренная\\ группа\\ \\-\\ прорыв\\ в\\ глубину\\ на\\ (?P<t>.+?)\\ \\((?P<r>.+?)\\)\\.",
+"operational manoeuvre group - deep breakthrough towards {t} ({r}).",
+false
+],
+[
+"Отрезан\\ от\\ подвоза\\ из\\ тыла:\\ пополняется\\ только\\ воздухом\\.",
+"Cut off from rear resupply: replenished by air only.",
+false
+],
+[
+"Запас\\ (?P<a>.+?)\\ т\\ из\\ (?P<b>.+?)\\ т\\ \\((?P<c>.+?)\\);\\ повреждение\\ (?P<d>[\\d/.,:?~%\\- ]+?)\\ \\-\\ вмещает\\ не\\ больше\\ (?P<e>.+?)\\ т\\.",
+"Stock {a} t of {b} t ({c}); damage {d} - holds at most {e} t.",
+false
+],
+[
+"передовой\\ отряд\\ \\-\\ выйти\\ на\\ рубеж\\ (?P<p>.+?)\\ раньше\\ противника\\ \\((?P<r>.+?)\\)\\.",
+"forward detachment - reach the {p} line before the enemy ({r}).",
+false
+],
+[
+"не\\ выдержала\\ удара\\ \\(перевес\\ противника\\ (?P<r>.+?)\\)\\ \\-\\ отходит\\ в\\ (?P<p>.+?)\\.",
+"could not hold (enemy superiority {r}) - falling back to {p}.",
+false
+],
+[
+"нет\\ исполнителя\\ для\\ группы\\ '(?P<g>.+?)'\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ ЛА\\ с\\ ролью\\ (?P<r>.+?)\\ в\\ радиусе\\)",
+"no unit for the '{g}' group ({n} aircraft with role {r} in range)",
+false
+],
+[
+"Снабжает\\ (?P<u>.+?)\\ в\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ по\\ своей\\ территории:\\ расход\\ \\~(?P<t>.+?)\\ т/сутки\\.",
+"Supplies {u} within {k} km over own territory: consumption ~{t} t/day.",
+false
+],
+[
+"DCS\\ не\\ нашёл\\ дорогу\\ (?P<p>.+?):\\ (?P<e>.+?)\\ \\-\\ этот\\ участок\\ остаётся\\ прямой\\.",
+"DCS found no road for {p}: {e} - this segment stays a straight line.",
+false
+],
+[
+"не\\ выдержала\\ удара\\ \\(перевес\\ противника\\ (?P<r>.+?)\\)\\ \\-\\ отходит\\ в\\ (?P<p>.+?)",
+"could not hold (enemy superiority {r}) - falling back to {p}",
+false
+],
+[
+"в\\ составе\\ сил\\ нет\\ маршрутов\\ \\-\\ спрашивать\\ у\\ DCS\\ нечего",
+"the order of battle has no routes - nothing to ask DCS",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?):\\ уточнено\\ (?P<n>[\\d/.,:?~%\\- ]+?),\\ ЗРК\\ и\\ РЛС\\ (?P<m>[\\d/.,:?~%\\- ]+?)\\ \\(день,\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км,\\ РТР\\ (?P<r>.+?)\\ км\\)\\.",
+"{a}: {n} refined, {m} SAMs and radars (day, swath {k} km, ELINT {r} km).",
+false
+],
+[
+"палубного\\ F\\-4\\ в\\ DCS\\ нет\\ \\(F\\-4E\\ с\\ авианосца\\ не\\ летает\\)",
+"no carrier F-4 in DCS (the F-4E cannot fly from a carrier)",
+false
+],
+[
+"передовая\\ группа:\\ выдвижение\\ на\\ передовую\\ площадку\\ (?P<p>.+?)",
+"forward detachment: moving to forward site {p}",
+false
+],
+[
+"Промышленность\\ (?P<s>.+?):\\ x(?P<a>.+?)\\ \\->\\ x(?P<b>.+?)\\ \\(ремонт\\ тыла\\ и\\ пополнения\\)\\.",
+"{s} industry: x{a} -> x{b} (rear repairs and replacements).",
+false
+],
+[
+"Запас,\\ по\\ оценке,\\ не\\ пострадал\\ \\(склад\\ был\\ неполон\\)\\.",
+"The stock is estimated undamaged (the depot was not full).",
+false
+],
+[
+"нет\\ готовой\\ десантной\\ роты,\\ площадки\\ или\\ вертолётов",
+"no ready air assault company, landing site or helicopters",
+false
+],
+[
+"Вьетнам:\\ декабрь\\ (?P<y>[\\d/.,:?~%\\- ]+?),\\ Лайнбэкер\\-2\\ \\(условная\\ география\\)",
+"Vietnam: December {y}, Linebacker II (stand-in geography)",
+false
+],
+[
+"аэродром\\ не\\ свой,\\ закрыт\\ или\\ площадка\\ для\\ самолёта",
+"the airfield is not ours, is closed, or is a helicopter site for an aircraft",
+false
+],
+[
+"повреждение\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.\\ С\\ аэродрома\\ к\\ вылету\\ \\~(?P<c>.+?)\\ \\->\\ \\~(?P<d>[\\d/.,:?~%\\- ]+?)\\ ЛА\\.",
+"damage {a} -> {b}. Aircraft available at the airfield ~{c} -> ~{d}.",
+false
+],
+[
+"повреждение\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.\\ Сгорело\\ (?P<c>.+?)\\ т\\ запаса,\\ осталось\\ (?P<d>[\\d/.,:?~%\\- ]+?)\\ т\\.",
+"damage {a} -> {b}. {c} t of stock burned, {d} t left.",
+false
+],
+[
+"Вьетнам:\\ апрель\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(условная\\ география,\\ авианосцы\\)",
+"Vietnam: April {y} (stand-in geography, carriers)",
+false
+],
+[
+"повреждение\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.\\ По\\ оценке\\ сгорело\\ \\~(?P<c>.+?)\\ т\\ запаса\\.",
+"damage {a} -> {b}. Estimated {c} t of stock burned.",
+false
+],
+[
+"эвакуирована\\ \\((?P<h>.+?)\\):\\ вывезено\\ (?P<p>.+?)\\ живых,\\ в\\ резерве\\ у\\ (?P<b>.+?)\\.",
+"extracted ({h}): {p} of the survivors lifted out, in reserve at {b}.",
+false
+],
+[
+"Ливан:\\ декабрь\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(авианосцы\\ США,\\ гипотетическая\\)",
+"Lebanon: December {y} (US carriers, hypothetical)",
+false
+],
+[
+"в\\ соприкосновении\\ уточнены\\ части\\ противника:\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\.",
+"enemy units refined at the line of contact: {n}.",
+false
+],
+[
+"не\\ хватает\\ снабжения\\ \\((?P<a>.+?)\\ нормы\\)\\ \\-\\ склады\\ пусты\\.",
+"short of supply ({a} of the norm) - depots are empty.",
+false
+],
+[
+"отрезан\\ от\\ подвоза\\ из\\ тыла\\ \\(только\\ воздухом\\)\\.",
+"cut off from rear resupply (air only).",
+false
+],
+[
+"экипаж\\ сбитого\\ (?P<t>.+?)\\ катапультировался,\\ на\\ земле\\ (?P<x>.+?)",
+"the crew of the downed {t} ejected, on the ground {x}",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ \\-\\ за\\ поясом\\ ПВО\\ \\((?P<s>.+?)\\),\\ сначала\\ его\\ подавление",
+"{t} - behind an air defence belt ({s}), suppress it first",
+false
+],
+[
+"Ёмкость\\ \\~(?P<a>.+?)\\ т\\ \\(разведка\\);\\ запас\\ по\\ оценке\\ \\-\\ (?P<b>.+?)\\.",
+"Capacity ~{a} t (intelligence); estimated stock: {b}.",
+false
+],
+[
+"позиция\\ раскрыта,\\ ЗРК\\ сменил\\ позицию\\ \\((?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
+"position revealed, the SAM relocated ({k} km).",
+false
+],
+[
+"вылет\\ уже\\ начался\\ \\(взлёт\\ (?P<a>.+?),\\ часы\\ кампании\\ (?P<b>.+?)\\)",
+"the sortie has already started (takeoff {a}, campaign clock {b})",
+false
+],
+[
+"сдерживание\\ \\-\\ отходит\\ на\\ следующий\\ рубеж\\ (?P<t>.+?)\\.",
+"delaying action - falling back to the next line {t}.",
+false
+],
+[
+"перебазировать\\ можно\\ только\\ свою\\ авиачасть",
+"only own air units can be rebased",
+false
+],
+[
+"в\\ бою\\ с\\ нашими\\ войсками,\\ боеспособность\\ (?P<a>.+?)\\.",
+"fighting our troops, strength {a}.",
+false
+],
+[
+"маяк\\ (?P<f>.+?)\\ кГц\\ \\(АРК\\ /\\ ADF\\);\\ на\\ земле\\ с\\ суток\\ (?P<d>[\\d/.,:?~%\\- ]+?)",
+"beacon {f} kHz (ADF); on the ground since day {d}",
+false
+],
+[
+"высадка\\ у\\ (?P<p>.+?)\\ сорвана\\ \\((?P<h>.+?):\\ село\\ (?P<a>.+?)\\ из\\ (?P<b>.+?)\\ бортов\\)\\.",
+"landing at {p} failed ({h}: {a} of {b} helicopters landed).",
+false
+],
+[
+"Кавказ:\\ август\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(Южная\\ Осетия\\ и\\ Абхазия\\)",
+"Caucasus: August {y} (South Ossetia and Abkhazia)",
+false
+],
+[
+"Груз:\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ x\\ (?P<t>.+?)\\ по\\ \\~(?P<c>.+?)\\ т\\ =\\ \\~(?P<a>.+?)\\ т\\ на\\ склад\\ за\\ рейс",
+"Cargo: {n} x {t} at ~{c} t = ~{a} t to the depot per trip",
+false
+],
+[
+"потерял\\ боеспособность\\ \\((?P<s>.+?)\\),\\ остановился\\.",
+"combat ineffective ({s}), halted.",
+false
+],
+[
+"эвакуация\\ сорвана\\ \\((?P<h>.+?)\\),\\ рота\\ держится\\ у\\ (?P<p>.+?)\\.",
+"extraction failed ({h}), the company is holding at {p}.",
+false
+],
+[
+"ушла\\ на\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ от\\ места\\ по\\ данным\\ разведки",
+"moved {k} km from the reported position",
+false
+],
+[
+"Вся\\ карта:\\ фронт\\ от\\ Балтики\\ до\\ Хофа\\ \\((?P<y>[\\d/.,:?~%\\- ]+?)\\)",
+"Whole map: front from the Baltic to Hof ({y})",
+false
+],
+[
+"потерял\\ боеспособность,\\ вышел\\ из\\ боя\\.",
+"combat ineffective, left the fight.",
+false
+],
+[
+"в\\ вылете\\ замечены\\ части\\ противника:\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\.",
+"enemy units spotted on the sortie: {n}.",
+false
+],
+[
+"историческое\\ допущение:\\ из\\ пресета\\ (?P<y>[\\d/.,:?~%\\- ]+?);\\ (?P<x>.+?)",
+"historical assumption: from the {y} preset; {x}",
+false
+],
+[
+"Разведка,\\ (?P<a>.+?):\\ (?P<x>.+?)\\ \\((?P<w>[^()]+?),\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км,\\ РТР\\ (?P<r>.+?)\\ км\\)\\.",
+"Reconnaissance, {a}: {x} ({w}, swath {k} km, ELINT {r} km).",
+false
+],
+[
+"(?P<u>(?:(?!; |\\n| · ).)+?)\\ \\-\\ новая\\ позиция\\ \\((?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ от\\ известной\\)\\.",
+"{u} - new position ({k} km from the known one).",
+false
+],
+[
+"потерян\\ \\-\\ пункт\\ (?P<p>.+?)\\ занят\\ противником\\.",
+"lost - {p} is held by the enemy.",
+false
+],
+[
+"Сектор\\ Гамбург\\ \\-\\ Люнебург\\ \\(полигон\\)",
+"Hamburg - Lüneburg sector (test range)",
+false
+],
+[
+"Сирия\\ \\-\\ Ливан:\\ июнь\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(долина\\ Бекаа\\)",
+"Syria - Lebanon: June {y} (Bekaa Valley)",
+false
+],
+[
+"в\\ ГСВГ\\ на\\ постоянной\\ основе\\ не\\ было",
+"not permanently based in the GSFG",
+false
+],
+[
+"противник\\ выбыл\\ \\-\\ продолжает\\ марш\\.",
+"the enemy is out of action - continuing the march.",
+false
+],
+[
+"вводится\\ в\\ полосе\\ успеха\\ \\-\\ район\\ (?P<p>.+?)\\.",
+"committed in the breakthrough sector - {p} area.",
+false
+],
+[
+"передовой\\ отряд\\ \\-\\ выйти\\ на\\ рубеж\\ (?P<p>.+?)\\.",
+"forward detachment - reach the {p} line.",
+false
+],
+[
+"пополнение\\ \\+(?P<n>[\\d/.,:?~%\\- ]+?)\\ экипаж\\(а\\),\\ экипажей\\ (?P<m>[\\d/.,:?~%\\- ]+?)\\.",
+"replacements +{n} crew(s), {m} crews.",
+false
+],
+[
+"потерян\\ \\(пункт\\ занят\\ противником\\)\\.",
+"lost (the place is held by the enemy).",
+false
+],
+[
+"уход\\ с\\ площадки\\ (?P<a>.+?)\\ \\-\\ в\\ свой\\ полк\\ \\((?P<b>.+?)\\)\\.",
+"leaving site {a} - back to its regiment ({b}).",
+false
+],
+[
+"погиб\\ в\\ сбитом\\ вертолёте\\-спасателе",
+"killed in the downed rescue helicopter",
+false
+],
+[
+"вышел\\ в\\ район\\ (?P<p>.+?),\\ перешёл\\ к\\ обороне\\.",
+"reached the {p} area, went over to the defence.",
+false
+],
+[
+"высажена\\ у\\ (?P<p>.+?)\\ \\(ИИ:\\ село\\ (?P<a>.+?)\\ из\\ (?P<b>.+?)\\ бортов\\)",
+"landed at {p} (AI: {a} of {b} helicopters landed)",
+false
+],
+[
+"Потерян:\\ пункт\\ занят\\ противником\\.",
+"Lost: the place is held by the enemy.",
+false
+],
+[
+"потерян\\ \\(противник\\ на\\ аэродроме\\)\\.",
+"lost (the enemy is on the airfield).",
+false
+],
+[
+"снабжение\\ восстановлено\\ \\((?P<p>.+?)\\ нормы\\)\\.",
+"supply restored ({p} of the norm).",
+false
+],
+[
+"противника\\ в\\ полосе\\ не\\ обнаружено",
+"no enemy found in the swath",
+false
+],
+[
+"у\\ стороны\\ нет\\ открытого\\ аэродрома",
+"the side has no open airfield",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ \\-\\ нет\\ исполнителей\\ \\((?P<r>.+?)\\)\\ в\\ радиусе",
+"{t} - no units ({r}) in range",
+false
+],
+[
+"экипаж\\ сбитого\\ (?P<t>.+?)\\ спасён\\ в\\ миссии\\.",
+"the crew of the downed {t} was rescued in the mission.",
+false
+],
+[
+"экипаж\\ не\\ вернулся\\ \\-\\ данных\\ нет\\.",
+"the crew did not return - no data.",
+false
+],
+[
+"свой\\ полк\\ \\(добавлен\\ командующим\\)",
+"custom regiment (added by the commander)",
+false
+],
+[
+"число\\ и\\ радиус\\ действия\\ \\-\\ ОЦЕНКА",
+"number and combat radius are ESTIMATES",
+false
+],
+[
+"номер\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ вне\\ списка\\ \\(сначала\\ plan\\)",
+"number {n} is out of range (plan first)",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ \\-\\ нет\\ исполнителей\\ \\((?P<r>.+?)\\)\\ в\\ радиусе",
+"{t} - no units ({r}) in range",
+false
+],
+[
+"(?P<u>(?:(?!; |\\n| · ).)+?):\\ бои\\ к\\ (?P<t>.+?)\\ \\-\\ боеспособность\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.",
+"{u}: fighting until {t} - strength {a} -> {b}.",
+false
+],
+[
+"восстановлен,\\ движение\\ открыто\\.",
+"repaired, the road is open.",
+false
+],
+[
+"уход\\ с\\ передовой\\ площадки\\ (?P<a>.+?)\\ на\\ (?P<b>.+?)\\.",
+"leaving forward site {a} for {b}.",
+false
+],
+[
+"С\\ аэродрома\\ к\\ вылету\\ \\~(?P<a>.+?)\\ \\->\\ \\~(?P<b>.+?)\\ ЛА\\.",
+"Aircraft available at the airfield ~{a} -> ~{b}.",
+false
+],
+[
+"Сгорело\\ (?P<a>.+?)\\ т\\ запаса,\\ осталось\\ (?P<b>.+?)\\ т\\.",
+"{a} t of stock burned, {b} t left.",
+false
+],
+[
+"сводка\\ игрока\\ по\\ ВВС\\ в\\ Германии",
+"player's summary of the air forces in Germany",
+false
+],
+[
+"с\\ марта\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(\\?\\ другой\\ источник\\ \\-\\ (?P<z>[\\d/.,:?~%\\- ]+?)\\)",
+"from March {y} (? another source says {z})",
+false
+],
+[
+"Подвоз\\ из\\ тыла\\ \\-\\ до\\ \\~(?P<a>.+?)\\ т/сутки\\.",
+"Rear resupply - up to ~{a} t/day.",
+false
+],
+[
+"\\((?P<s>.+?)\\)\\ выходит\\ из\\ боя,\\ отходит\\ в\\ (?P<p>.+?)\\.",
+"({s}) is leaving the fight, falling back to {p}.",
+false
+],
+[
+"контрудар\\ по\\ вклинившейся\\ (?P<e>.+?)\\ \\((?P<p>.+?)\\)\\.",
+"counterstroke against the penetrating {e} ({p}).",
+false
+],
+[
+"держит\\ пункт\\ до\\ подхода\\ своих\\.",
+"holding the place until friendly troops arrive.",
+false
+],
+[
+"бои\\ к\\ (?P<t>.+?)\\ \\-\\ боеспособность\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.",
+"fighting until {t} - strength {a} -> {b}.",
+false
+],
+[
+"закрыт\\ \\-\\ противник\\ ближе\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\.",
+"closed - the enemy is closer than {k} km.",
+false
+],
+[
+"По\\ оценке\\ сгорело\\ \\~(?P<a>.+?)\\ т\\ запаса\\.",
+"Estimated {a} t of stock burned.",
+false
+],
+[
+"нет\\ исполнителей\\ \\((?P<r>.+?)\\)\\ в\\ радиусе",
+"no units ({r}) in range",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?),\\ передовая\\ группа,\\ площадка\\ (?P<b>.+?)",
+"{a}, forward detachment, site {b}",
+false
+],
+[
+"без\\ мода\\ части\\ в\\ кампании\\ нет",
+"without the mod the unit is not in the campaign",
+false
+],
+[
+"подвоз\\ из\\ тыла\\ восстановлен\\.",
+"rear resupply restored.",
+false
+],
+[
+"Разведка,\\ (?P<a>.+?):\\ (?P<x>.+?)\\ \\((?P<w>[^()]+?),\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
+"Reconnaissance, {a}: {x} ({w}, swath {k} km).",
+false
+],
+[
+"в\\ обороне,\\ боеспособность\\ (?P<a>.+?)\\.",
+"defending, strength {a}.",
+false
+],
+[
+"Создана\\ кампания\\ (?P<f>.+?):\\ (?P<t>.+?),\\ seed\\ (?P<s>.+?)\\.",
+"Campaign {f} created: {t}, seed {s}.",
+false
+],
+[
+"бой\\ с\\ (?P<f>.+?)\\ \\-\\ потеряно\\ \\~(?P<n>[\\d/.,:?~%\\- ]+?)\\ машин,\\ (?P<x>.+?)",
+"battle with {f} - ~{n} vehicles lost, {x}",
+false
+],
+[
+"восстановлена\\ до\\ (?P<s>.+?),\\ в\\ строю\\.",
+"restored to {s}, back in service.",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(совместно\\ с\\ вертолётами\\ (?P<h>.+?)\\)",
+"{a} (together with helicopters of {h})",
+false
+],
+[
+"аэродром\\ не\\ свой\\ или\\ закрыт",
+"the airfield is not ours or is closed",
+false
+],
+[
+"план\\ противника\\ не\\ правится",
+"the enemy plan cannot be edited",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ \\(подавление\\ ПВО\\)\\ в\\ DCS\\ нет",
+"no {t} (air defence suppression) in DCS",
+false
+],
+[
+"на\\ марше,\\ боеспособность\\ (?P<a>.+?)\\.",
+"on the march, strength {a}.",
+false
+],
+[
+"пополнение\\ \\+(?P<n>[\\d/.,:?~%\\- ]+?)\\ ЛА,\\ в\\ строю\\ (?P<m>[\\d/.,:?~%\\- ]+?)\\.",
+"replacements +{n} aircraft, {m} in service.",
+false
+],
+[
+"поток\\ \\~(?P<n>[\\d/.,:?~%\\- ]+?)\\ грузовиков\\ в\\ сутки",
+"flow ~{n} trucks a day",
+false
+],
+[
+"в\\ тылу\\ \\((?P<p>.+?)\\),\\ восстановление\\.",
+"in the rear ({p}), refitting.",
+false
+],
+[
+"участков\\ по\\ дорогам\\ (?P<a>.+?)\\ из\\ (?P<b>.+?),\\ (?P<x>.+?)",
+"road segments {a} of {b}, {x}",
+false
+],
+[
+"роль\\ \\-\\ одна\\ из\\ авиационных",
+"the role must be an aviation role",
+false
+],
+[
+"расформирован\\ в\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(\\?\\ месяц\\)",
+"disbanded in {y} (? month)",
+false
+],
+[
+"боеспособность\\ цели\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.",
+"target strength {a} -> {b}.",
+false
+],
+[
+"соединилась\\ со\\ своими\\ у\\ (?P<p>.+?)\\.",
+"linked up with friendly troops at {p}.",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\((?P<w>[^()]+?),\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км,\\ РТР\\ (?P<r>.+?)\\ км\\)\\.",
+"{a} ({w}, swath {k} km, ELINT {r} km).",
+false
+],
+[
+"в\\ июле\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ ушёл\\ в\\ Белоруссию",
+"left for Belarus in July {y}",
+false
+],
+[
+"разведка\\ мирного\\ времени",
+"peacetime intelligence",
+false
+],
+[
+"\\((?P<w>[^()]+?),\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км,\\ РТР\\ (?P<r>.+?)\\ км\\)\\.",
+"({w}, swath {k} km, ELINT {r} km).",
+false
+],
+[
+"ранние\\ годы\\ не\\ проверены",
+"early years not verified",
+false
+],
+[
+"в\\ бою\\ с\\ нашими\\ войсками",
+"fighting our troops",
+false
+],
+[
+"число\\ и\\ радиус\\ \\-\\ ОЦЕНКА",
+"number and radius are ESTIMATES",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\((?P<n>[\\d/.,:?~%\\- ]+?)\\ десантников\\ на\\ борт\\)",
+"{a} ({n} troops per helicopter)",
+false
+],
+[
+"ветер\\ (?P<d>[\\d/.,:?~%\\- ]+?)°\\ (?P<v>.+?)\\ м/с\\ \\(на\\ (?P<h>.+?)\\ м\\ \\-\\ (?P<x>.+?)\\)",
+"wind {d}° {v} m/s ({x} at {h} m)",
+false
+],
+[
+"число\\ и\\ радиус\\ действия",
+"number and combat radius",
+false
+],
+[
+"анахронизм\\ \\(в\\ строю\\ с\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\)",
+"anachronism (in service from {y})",
+false
+],
+[
+"месяц\\ перевооружения\\ в\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"month of conversion in {y}",
+false
+],
+[
+"выдвигается\\ на\\ рубеж\\ (?P<p>.+?)\\.",
+"moving up to the {p} line.",
+false
+],
+[
+"Базируется:\\ (?P<c>.+?),\\ \\~(?P<m>[\\d/.,:?~%\\- ]+?)\\ ЛА\\ \\((?P<u>.+?)\\)\\.",
+"Based here: {c}, ~{m} aircraft ({u}).",
+false
+],
+[
+"контратака\\ \\-\\ вернуть\\ (?P<t>.+?)\\.",
+"counterattack - retake {t}.",
+false
+],
+[
+"сторона\\ \\-\\ red\\ или\\ blue",
+"the side must be red or blue",
+false
+],
+[
+"\\((?P<n>[\\d/.,:?~%\\- ]+?)\\ десантников\\ на\\ борт\\)",
+"({n} troops per helicopter)",
+false
+],
+[
+"Соприкосновение:\\ (?P<a>.+?)\\ и\\ (?P<b>.+?)\\.",
+"Contact: {a} and {b}.",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ ·\\ канал\\ (?P<c>.+?),\\ радиус\\ (?P<r>.+?)\\ км",
+"{a} · channel {c}, radius {r} km",
+false
+],
+[
+"экипаж\\ сбитого\\ (?P<t>.+?)\\ погиб(?P<x>.+?)",
+"the crew of the downed {t} was killed{x}",
+false
+],
+[
+"экипаж\\ сбитого\\ (?P<t>.+?)\\ погиб",
+"the crew of the downed {t} was killed",
+false
+],
+[
+"перебазирование\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.",
+"rebasing {a} -> {b}.",
+false
+],
+[
+"по\\ памяти\\ \\-\\ проверить",
+"from memory - to be verified",
+false
+],
+[
+"(?P<u>(?:(?!; |\\n| · ).)+?),\\ перешёл\\ к\\ обороне\\.",
+"{u}, went over to the defence.",
+false
+],
+[
+"смена\\ позиции\\ \\((?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
+"relocating ({k} km).",
+false
+],
+[
+"Соприкосновение:\\ (?P<a>.+?)\\ и\\ (?P<b>.+?)",
+"Contact: {a} and {b}",
+false
+],
+[
+"около\\ трёх\\ четвертей",
+"about three quarters",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(разведка\\ (?P<h>.+?)\\ ч\\ назад\\)",
+"{a} (intelligence {h} h ago)",
+false
+],
+[
+"нужно\\ название\\ полка",
+"a regiment name is required",
+false
+],
+[
+"продвинулся\\ на\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\.",
+"advanced {k} km.",
+false
+],
+[
+"меньше\\ чем\\ на\\ сутки",
+"less than a day",
+false
+],
+[
+"наступление\\ на\\ (?P<t>.+?)\\ \\((?P<r>.+?)\\)\\.",
+"attacking towards {t} ({r}).",
+false
+],
+[
+"продвинулся\\ на\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ (?P<x>.+?)",
+"advanced {k} km {x}",
+false
+],
+[
+"цель\\ не\\ найдена\\ \\((?P<w>[^()]+?)\\)\\.",
+"target not found ({w}).",
+false
+],
+[
+"(?P<h>(?:(?!; |\\n| · ).)+?),\\ вернулся\\ в\\ часть\\.",
+"{h}, returned to the unit.",
+false
+],
+[
+"число\\ ЛА\\ \\-\\ от\\ 1\\ до\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"the number of aircraft must be 1 to {n}",
+false
+],
+[
+"Базируется:\\ (?P<c>.+?),\\ \\~(?P<m>[\\d/.,:?~%\\- ]+?)\\ ЛА\\.",
+"Based here: {c}, ~{m} aircraft.",
+false
+],
+[
+"годы\\ перевооружения",
+"conversion years",
+false
+],
+[
+"в\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ перебазирован\\ в\\ (?P<p>.+?)",
+"rebased to {p|tr} in {y}",
+false
+],
+[
+"в\\ модели\\ база\\ та\\ же",
+"the model uses the same base",
+false
+],
+[
+"перешёл\\ к\\ обороне\\.",
+"went over to the defence.",
+false
+],
+[
+"(?P<u>(?:(?!; |\\n| · ).)+?),\\ передовая\\ группа",
+"{u}, forward detachment",
+false
+],
+[
+"Запас\\ (?P<a>.+?)\\ т\\ из\\ (?P<b>.+?)\\ т\\ \\((?P<c>.+?)\\)\\.",
+"Stock {a} t of {b} t ({c}).",
+false
+],
+[
+"Базируется:\\ (?P<c>.+?),\\ \\~(?P<m>[\\d/.,:?~%\\- ]+?)\\ ЛА",
+"Based here: {c}, ~{m} aircraft",
+false
+],
+[
+"Склады:\\ (?P<a>.+?)\\ т\\ из\\ (?P<b>.+?)\\ \\((?P<c>.+?)\\)\\.",
+"Depots: {a} t of {b} ({c}).",
+false
+],
+[
+"противник\\ выбыл\\ \\-\\ (?P<x>.+?)",
+"the enemy is out of action - {x}",
+false
+],
+[
+"прохождение\\ фронта",
+"frontal passage",
+false
+],
+[
+"в\\ плане\\ дня\\ задач\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"{n} tasks in the daily plan",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?),\\ передовая\\ группа",
+"{a}, forward detachment",
+false
+],
+[
+"площадка\\ в\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\ от\\ (?P<p>.+?)",
+"landing site {k} km from {p}",
+false
+],
+[
+"цель\\ не\\ поражена\\.",
+"target not hit.",
+false
+],
+[
+"повреждение\\ (?P<a>.+?)\\ \\->\\ (?P<b>.+?)\\.",
+"damage {a} -> {b}.",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?),\\ боеспособность\\ (?P<s>.+?)",
+"{a}, strength {s}",
+false
+],
+[
+"восстановлен\\ до\\ (?P<s>.+?)\\.",
+"restored to {s}.",
+false
+],
+[
+"(?P<u>(?:(?!; |\\n| · ).)+?)\\ \\(район\\ на\\ марше\\)",
+"{u} (on the march)",
+false
+],
+[
+"нижняя\\ граница\\ (?P<h>.+?)\\ м",
+"cloud base {h} m",
+false
+],
+[
+"прибыл\\ в\\ район\\ (?P<p>.+?)\\.",
+"arrived in the {p} area.",
+false
+],
+[
+"наступление\\ на\\ (?P<p>.+?)\\.",
+"attacking towards {p}.",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(второй\\ эшелон\\)",
+"{a} (second wave)",
+false
+],
+[
+"перебазирование\\ (?P<x>.+?)",
+"rebasing {x}",
+false
+],
+[
+"связь\\ не\\ найдена",
+"link not found",
+false
+],
+[
+"По\\ нему\\ подвоз:\\ (?P<x>.+?)",
+"Supply over it: {x}",
+false
+],
+[
+"продолжает\\ марш\\.",
+"continuing the march.",
+false
+],
+[
+"пропал\\ без\\ вести",
+"missing",
+false
+],
+[
+"по\\ итогам\\ вылета",
+"per the sortie result",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\((?P<w>[^()]+?),\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
+"{a} ({w}, swath {k} km).",
+true
+],
+[
+"часть\\ и\\ аэродром",
+"unit and airfield",
+false
+],
+[
+"передовая\\ группа",
+"forward detachment",
+false
+],
+[
+"вышел\\ в\\ район\\ (?P<p>.+?)\\.",
+"reached the {p} area.",
+false
+],
+[
+"Пункт\\ (?P<p>.+?)\\ занят:\\ (?P<s>.+?)\\.",
+"{p} taken by {s}.",
+false
+],
+[
+"Обстановка\\ на\\ (?P<t>.+?):",
+"Situation at {t}:",
+false
+],
+[
+"Удар\\ противника",
+"Enemy strike",
+false
+],
+[
+"Мост\\ на\\ связи\\ (?P<a>.+?)\\.",
+"Bridge on the {a} link.",
+false
+],
+[
+"спасён\\ в\\ миссии",
+"rescued in the mission",
+false
+],
+[
+"соприкосновение",
+"contact",
+false
+],
+[
+"состав\\ \\-\\ ОЦЕНКА",
+"composition is an ESTIMATE",
+false
+],
+[
+"\\((?P<w>[^()]+?),\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км\\)\\.",
+"({w}, swath {k} km).",
+false
+],
+[
+"перевооружение\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"conversion {y}",
+false
+],
+[
+"ОЦЕНКА\\ сценария",
+"scenario ESTIMATE",
+false
+],
+[
+"сменил\\ (?P<u>.+?)\\ в\\ июле\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"replaced {u} in July {y}",
+false
+],
+[
+"около\\ четверти",
+"about a quarter",
+false
+],
+[
+"около\\ половины",
+"about half",
+false
+],
+[
+"удержал\\ район\\.",
+"held the area.",
+false
+],
+[
+"место\\ \\-\\ ОЦЕНКА",
+"position is an ESTIMATE",
+false
+],
+[
+"вышел\\ в\\ район\\ (?P<p>.+?)",
+"reached the {p} area",
+false
+],
+[
+"число\\ и\\ радиус",
+"number and radius",
+false
+],
+[
+"снова\\ открыт\\.",
+"open again.",
+false
+],
+[
+"новых\\ частей\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"{n} new units",
+false
+],
+[
+"вышел\\ к\\ своим",
+"reached friendly lines",
+false
+],
+[
+"видимость\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км",
+"visibility {k} km",
+false
+],
+[
+"перебазирован",
+"rebased",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ и\\ (?P<b>.+?)\\ вне\\ карты",
+"{a|tr} and {b|tr} are off the map",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(\\~(?P<n>[\\d/.,:?~%\\- ]+?)\\ т/сутки\\)",
+"{a} (~{n} t/day)",
+true
+],
+[
+"площадка\\ (?P<p>.+?)\\ \\((?P<a>.+?)\\)",
+"site {p} ({a})",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ в\\ pydcs\\ нет",
+"no {t} in pydcs",
+true
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(допущение\\)",
+"{a} (assumption)",
+true
+],
+[
+"в\\ июле\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ ушёл",
+"left in July {y}",
+false
+],
+[
+"разведка\\ \\((?P<t>.+?)\\)",
+"reconnaissance ({t})",
+false
+],
+[
+"тыл\\ циклона",
+"post-frontal",
+false
+],
+[
+"облачность\\ (?P<c>.+?)",
+"cloud {c}",
+false
+],
+[
+"\\?\\ по\\ памяти",
+"? from memory",
+false
+],
+[
+"потеряно\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ (?P<t>.+?)",
+"lost {n} {t}",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(вместо\\ (?P<b>.+?)\\)",
+"{a} (instead of {b})",
+true
+],
+[
+"почти\\ пуст",
+"almost empty",
+false
+],
+[
+"\\~(?P<t>.+?)\\ т/сутки\\.",
+"~{t} t/day.",
+false
+],
+[
+"Везёт\\ на:\\ (?P<x>.+?)",
+"Delivers to: {x}",
+false
+],
+[
+"(?P<s>(?:(?!; |\\n| · ).)+?)\\ \\~(?P<t>.+?)\\ т/сутки",
+"{s} ~{t} t/day",
+true
+],
+[
+"Разведка,\\ (?P<x>.+?)",
+"Reconnaissance, {x}",
+false
+],
+[
+"уничтожен\\.",
+"destroyed.",
+false
+],
+[
+"Разведка:\\ (?P<x>.+?)",
+"Reconnaissance: {x}",
+false
+],
+[
+"ЗРК\\ и\\ РЛС\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"{n} SAMs and radars",
+false
+],
+[
+"антициклон",
+"high pressure",
+false
+],
+[
+"(?P<p>(?:(?!; |\\n| · ).)+?)\\ вне\\ карты",
+"{p|tr} is off the map",
+true
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ в\\ DCS\\ нет",
+"no {t} in DCS",
+true
+],
+[
+"мод\\ A\\-4E\\-C",
+"A-4E-C mod",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ с\\ апреля\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"{t} from April {y}",
+true
+],
+[
+"потеряно\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"lost {n}",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(смена\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\)",
+"{a} (relief {n})",
+true
+],
+[
+"площадка\\ (?P<p>.+?)",
+"site {p}",
+false
+],
+[
+"на\\ \\~(?P<n>[\\d/.,:?~%\\- ]+?)\\ сут\\.",
+"~{n} days",
+false
+],
+[
+"в\\ обороне",
+"on the defence",
+false
+],
+[
+"(?P<u>(?:(?!; |\\n| · ).)+?)\\ \\(район\\ (?P<p>.+?)\\)",
+"{u} ({p} area)",
+true
+],
+[
+"уточнено\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"{n} refined",
+false
+],
+[
+"спасён\\ \\((?P<t>.+?)\\)",
+"rescued ({t})",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\->\\ снято",
+"{a} -> removed",
+true
+],
+[
+"по\\ памяти",
+"from memory",
+false
+],
+[
+"проверить",
+"to be verified",
+false
+],
+[
+"по\\ плану\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"planned {y}",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(ОЦЕНКА\\)",
+"{a} (ESTIMATE)",
+true
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ \\(ОЦЕНКА\\)",
+"{a|tr} (ESTIMATE)",
+true
+],
+[
+"в\\ плену\\.",
+"captured.",
+false
+],
+[
+"занят:\\ (?P<s>.+?)\\.",
+"taken by {s}.",
+false
+],
+[
+"(?P<n>[\\d/.,:?~%\\- ]+?)\\ x\\ (?P<t>.+?)\\ \\((?P<u>.+?),\\ (?P<b>.+?)\\)",
+"{n} x {t} ({u}, {b})",
+true
+],
+[
+"на\\ марше",
+"on the march",
+false
+],
+[
+"\\->\\ снято",
+"-> removed",
+false
+],
+[
+"QNH\\ (?P<p>.+?)\\ гПа",
+"QNH {p} hPa",
+false
+],
+[
+"\\+(?P<n>[\\d/.,:?~%\\- ]+?)\\ sqn\\ с\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"+{n} sqn from {y}",
+false
+],
+[
+"\\?\\ (?P<p>.+?)\\ даёт\\ (?P<q>.+?)",
+"? {p|tr} gives {q|tr}",
+false
+],
+[
+"День\\ (?P<d>[\\d/.,:?~%\\- ]+?):\\ (?P<x>.+?)",
+"Day {d}: {x}",
+false
+],
+[
+"Экипаж\\ (?P<x>.+?)",
+"Crew {x}",
+false
+],
+[
+"экипаж\\ (?P<x>.+?)",
+"crew {x}",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?),\\ пара\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"{a}, pair {n}",
+true
+],
+[
+"(?P<n>[\\d/.,:?~%\\- ]+?)\\ частей",
+"{n} units",
+true
+],
+[
+"Запас\\ (?P<a>.+?)\\.",
+"Stock {a}.",
+false
+],
+[
+"красных",
+"red",
+false
+],
+[
+"красные",
+"red",
+false
+],
+[
+"РТР\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км",
+"ELINT {k} km",
+false
+],
+[
+"в\\ плену",
+"captured",
+false
+],
+[
+"с\\ июля\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"from July {y}",
+false
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ с\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(\\?\\)",
+"{a} from {y} (?)",
+true
+],
+[
+"Вьетнам",
+"Vietnam",
+false
+],
+[
+"полный",
+"full",
+false
+],
+[
+"(?P<n>[\\d/.,:?~%\\- ]+?)\\ часть",
+"{n} unit",
+true
+],
+[
+"(?P<n>[\\d/.,:?~%\\- ]+?)\\ части",
+"{n} units",
+true
+],
+[
+"ОЦЕНКА",
+"ESTIMATE",
+false
+],
+[
+"замена",
+"substitute",
+false
+],
+[
+"что\\ в\\ (?P<p>.+?)",
+"as at {p|tr}",
+false
+],
+[
+"синих",
+"blue",
+false
+],
+[
+"синие",
+"blue",
+false
+],
+[
+"погиб",
+"killed",
+false
+],
+[
+"чужая",
+"enemy",
+false
+],
+[
+"вылет",
+"sortie",
+false
+],
+[
+"здесь",
+"here",
+false
+],
+[
+"Ливан",
+"Lebanon",
+false
+],
+[
+"часть",
+"unit",
+false
+],
+[
+"пара\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"pair {n}",
+false
+],
+[
+"снято",
+"removed",
+false
+],
+[
+"ИИ,\\ (?P<x>.+?)",
+"AI, {x}",
+false
+],
+[
+"Удар",
+"Strike",
+false
+],
+[
+"ночь",
+"night",
+false
+],
+[
+"день",
+"day",
+false
+],
+[
+"своя",
+"own",
+false
+],
+[
+"ясно",
+"clear",
+false
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ до\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"{t} until {y}",
+true
+],
+[
+"(?P<t>(?:(?!; |\\n| · ).)+?)\\ с\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"{t} from {y}",
+true
+],
+[
+"(?P<a>(?:(?!; |\\n| · ).)+?)\\ в\\ (?P<y>[\\d/.,:?~%\\- ]+?)",
+"{a} in {y}",
+true
+],
+[
+"Войсковая ПВО: (?P<x>.+)",
+"Organic air defence: {x}",
+false
+],
+[
+"ПВО объекта: (?P<x>.+)",
+"Point air defence: {x}",
+false
+],
+[
+"ПВО аэродрома (?P<x>[^:]+): (?P<y>.+)",
+"{x} airfield air defence: {y}",
+false
+],
+[
+"ПВО аэродрома (?P<x>.+)",
+"{x} airfield air defence",
+false
+],
+[
+"Зенитная артиллерия аэродрома (?P<x>.+)",
+"{x} airfield anti-aircraft artillery",
+false
+],
+[
+"КРУ аэродрома (?P<x>.+)",
+"{x} airfield GCI radar",
+false
+],
+[
+"ЗРК большой дальности \\((?P<x>.+)\\)",
+"Long-range SAM ({x})",
+false
+],
+[
+"ЗРК средней дальности \\((?P<x>.+)\\)",
+"Medium-range SAM ({x})",
+false
+],
+[
+"Аэродром (?P<x>.+)",
+"{x} airfield",
+false
+],
+[
+"Склад снабжения \\((?P<x>.+)\\)",
+"Supply depot ({x})",
+false
+],
+[
+"Передовой склад \\((?P<x>.+)\\)",
+"Forward depot ({x})",
+false
+],
+[
+"Мост на связи (?P<a>.+?) - (?P<b>.+)\\.",
+"Bridge on the {a} - {b} link.",
+false
+],
+[
+"Дивизион (?P<t>[^ ]+(?: ?[^ (]+)?) ПВО Грузии \\((?P<x>.+)\\)",
+"Georgian air defence {t} battalion ({x})",
+false
+],
+[
+"Батарея (?P<t>[^ ]+) ПВО Грузии \\((?P<x>.+)\\)",
+"Georgian air defence {t} battery ({x})",
+false
+],
+[
+"Дивизион (?P<t>С-\\d+М?) \\((?P<x>[^)]+)\\) №(?P<n>\\d+)",
+"{t} battalion ({x}) No. {n}",
+false
+],
+[
+"Дивизион (?P<t>С-\\d+М?) \\((?P<x>[^)]+)\\)",
+"{t} battalion ({x})",
+false
+],
+[
+"Батарея (?P<t>\\S+) \\((?P<x>[^)]+)\\) №(?P<n>\\d+)",
+"{t} battery ({x}) No. {n}",
+false
+],
+[
+"Батарея (?P<t>\\S+) \\((?P<x>[^)]+)\\)",
+"{t} battery ({x})",
+false
+],
+[
+"(?P<n>\\d+)-й зенитный ракетный батальон (?P<t>\\S+) \\((?P<x>.+)\\)",
+"{t} SAM battalion {n} ({x})",
+false
+],
+[
+"(?P<b>\\d+)-я батарея (?P<r>\\d+)-го полка (?P<t>\\S+) \\((?P<x>.+)\\)",
+"{b|ord} Battery, {r|ord} {t} Regiment ({x})",
+false
+],
+[
+"(?P<r>\\d+)-й полк (?P<t>\\S+) \\((?P<x>.+)\\)",
+"{r|ord} {t} Regiment ({x})",
+false
+],
+[
+"(?P<n>\\d+)-я гв\\. мотострелковая дивизия \\((?P<a>.+)\\)",
+"{n|ord} Guards Motor Rifle Division ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я гв\\. танковая дивизия \\((?P<a>.+)\\)",
+"{n|ord} Guards Tank Division ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я мотострелковая дивизия ННА(?P<r> \\(резерв\\))? \\((?P<a>.+)\\)",
+"GDR {n|ord} Motor Rifle Division{r} ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я танковая дивизия ННА \\((?P<a>.+)\\)",
+"GDR {n|ord} Tank Division ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я мотострелковая дивизия \\((?P<a>.+)\\)",
+"{n|ord} Motor Rifle Division ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я танковая дивизия \\((?P<a>.+)\\)",
+"{n|ord} Tank Division ({a})",
+false
+],
+[
+"Панцергренадерская бригада (?P<n>\\d+) \\((?P<a>.+)\\)",
+"Panzergrenadierbrigade {n} ({a})",
+false
+],
+[
+"Учебная панцербригада (?P<n>\\d+) \\((?P<a>.+)\\)",
+"Panzerlehrbrigade {n} ({a})",
+false
+],
+[
+"Панцербригада (?P<n>\\d+) \\((?P<a>.+)\\)",
+"Panzerbrigade {n} ({a})",
+false
+],
+[
+"Бригада территориальной обороны (?P<n>\\d+) \\((?P<a>.+)\\)",
+"Heimatschutzbrigade {n} ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я бронетанковая бригада \\((?P<c>Нидерланды|Бельгия)\\) \\((?P<a>.+)\\)",
+"{n|ord} Armoured Brigade ({c}) ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я механизированная бригада \\((?P<c>Нидерланды|Бельгия)\\) \\((?P<a>.+)\\)",
+"{n|ord} Mechanised Brigade ({c}) ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я бронетанковая бригада \\((?P<a>.+)\\)",
+"{n|ord} Armoured Brigade ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я пехотная бригада \\(Великобритания\\) \\((?P<a>.+)\\)",
+"{n|ord} Infantry Brigade (UK) ({a})",
+false
+],
+[
+"(?P<b>\\d+)-я бригада (?P<d>\\d+)-й бронетанковой дивизии США \\((?P<a>.+)\\)",
+"{b|ord} Brigade, US {d|ord} Armored Division ({a})",
+false
+],
+[
+"(?P<b>\\d+)-я бригада (?P<d>\\d+)-й пехотной дивизии США \\((?P<a>.+)\\)",
+"{b|ord} Brigade, US {d|ord} Infantry Division ({a})",
+false
+],
+[
+"(?P<n>\\d+)-й бронекавалерийский полк США \\((?P<a>.+)\\)",
+"US {n|ord} Armored Cavalry Regiment ({a})",
+false
+],
+[
+"(?P<n>\\d+)-я дивизия ВНА",
+"NVA {n|ord} Division",
+false
+],
+[
+"(?P<n>\\d+)-я дивизия АРВ",
+"ARVN {n|ord} Division",
+false
+],
+[
+"(?P<n>\\d+)-я бригада морской пехоты Южного Вьетнама",
+"South Vietnamese {n|ord} Marine Brigade",
+false
+],
+[
+"(?P<n>\\d+)-я дивизия \\((?P<x>.+)\\)",
+"{n|ord} Division ({x})",
+false
+],
+[
+"(?P<n>\\d+)-я механизированная дивизия Сирии \\((?P<x>.+)\\)",
+"Syrian {n|ord} Mechanised Division ({x})",
+false
+],
+[
+"(?P<n>\\d+)-я бронетанковая бригада \\((?P<a>[IV]+ брит\\. АК)\\)",
+"{n|ord} Armoured Brigade ({a})",
+false
+],
+[
+"Сирийская бригада \\((?P<x>.+)\\)",
+"Syrian brigade ({x})",
+false
+],
+[
+"(?P<n>\\d+)-й (?P<g>гв\\. )?(?P<k>иап|бап|апиб|орап|оштап|ошап|обвп|овп|осап|тбап)(?P<rest>[ ,].+)",
+"{n|ord} {g}{k}{rest}",
+false
+],
+[
+"(?P<n>\\d+)-й (?P<g>гв\\. )?(?P<k>иап|бап|апиб|орап|оштап|ошап|обвп|овп|осап|тбап)",
+"{n|ord} {g}{k}",
+false
+],
+[
+", эскадрилья (?P<t>[^ (]+)(?P<r>.*)",
+", {t} squadron{r}",
+false
+],
+[
+", эскадрильи (?P<t>[^ (]+)(?P<r>.*)",
+", {t} squadrons{r}",
+false
+],
+[
+", вертолёты (?P<t>.+)",
+", helicopters {t}",
+false
+],
+[
+"(?P<u>JG|JBG|KHG|MFG|THG|TFG)-(?P<n>\\d+) (?P<rest>.+)",
+"{u}-{n} {rest}",
+false
+],
+[
+"(?P<u>JaboG|JG|AG|LTG) (?P<n>\\d+) (?P<rest>.+)",
+"{u} {n} {rest}",
+false
+],
+[
+"Противотанковый вертолётный полк (?P<n>\\d+) (?P<rest>.+)",
+"Anti-tank Helicopter Regiment {n} {rest}",
+false
+],
+[
+"ВВС ННА(?P<rest>.*)",
+"GDR Air Force{rest}",
+false
+],
+[
+"ННА(?P<rest>.*)",
+"GDR{rest}",
+false
+],
+[
+"\\((?P<x>[^()]+)\\)",
+"({x})",
+true
+],
+[
+"(?P<a>[^()]+) \\((?P<x>[^()]+)\\)",
+"{a} ({x})",
+true
+],
+[
+"(?P<n>\\d+) x (?P<t>\\S+) \\((?P<u>[^()]*(?:\\([^()]*(?:\\([^()]*\\)[^()]*)*\\)[^()]*)*)\\)",
+"{n} x {t} ({u})",
+true
+],
+[
+"(?P<a>[^()]+) \\((?P<x>[^()]*(?:\\([^()]*(?:\\([^()]*\\)[^()]*)*\\)[^()]*)*)\\)",
+"{a} ({x})",
+true
+],
+[
+"(?P<a>.+), эскадрилья (?P<t>.+)",
+"{a}, {t} squadron",
+false
+],
+[
+"(?P<a>.+), вертолёты (?P<t>.+)",
+"{a}, helicopters {t}",
+false
+],
+[
+"(?P<t>[^();]+); в DCS - (?P<d>[^();]+)",
+"{t}; {d} in DCS",
+false
+],
+[
+"в DCS - (?P<d>[^();]+)",
+"{d} in DCS",
+false
+],
+[
+"(?P<a>.+) №(?P<n>\\d+)",
+"{a} No. {n}",
+false
+]
+]
