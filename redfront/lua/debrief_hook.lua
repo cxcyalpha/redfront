@@ -100,6 +100,13 @@ local function evacOut()
   return "{" .. table.concat(o, ",") .. "}"
 end
 -- перевозка снабжения через CTLD (ctld_cfg.lua): сколько кг доставлено в зону выгрузки
+local function timingOut()
+  if type(REDFRONT_TIMING) ~= "table" then return "{}" end
+  local o = {}
+  for id, v in pairs(REDFRONT_TIMING) do o[#o + 1] = string.format('"%s":[%d,%d]', esc(id), v[1] or 0, v[2] or 0) end
+  return "{" .. table.concat(o, ",") .. "}"
+end
+
 local function liftOut()
   if type(REDFRONT_LIFT) ~= "table" then return "{}" end
   local o = {}
@@ -123,8 +130,8 @@ local function dump()
   local f = io.open(OUT, "w")
   if not f then return end
   f:write(string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"evac":%s,"hit":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), evacOut(), keys(hit)))
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"evac":%s,"hit":%s,"timing":%s}',
+    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), evacOut(), keys(hit), timingOut()))
   f:close()
 end
 local function nameOf(obj)

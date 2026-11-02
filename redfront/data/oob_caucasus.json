@@ -1,0 +1,1487 @@
+{
+ "_about": "Состав сил войны 8-12 августа 2008 г. (Россия, Южная Осетия, Абхазия - Грузия). Генерирован tools/gen_caucasus.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+ "theatre": "caucasus",
+ "preset": {
+  "title": "Август 2008: Южная Осетия и Абхазия",
+  "year": 2008,
+  "date": "2008-08-08"
+ },
+ "date": "2008-08-08",
+ "countries": {
+  "red": "Russia",
+  "blue": "Georgia"
+ },
+ "units": [
+  {
+   "id": "red_135mrr",
+   "name": "135-й мсп 19-й мсд (58-я армия)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Java"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 31,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south",
+   "note": "батальонные тактические группы прошли Рокский тоннель 8.08"
+  },
+  {
+   "id": "red_135mrr_pvo",
+   "name": "Войсковая ПВО: 135-й мсп 19-й мсд (58-я армия)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_135mrr",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_693mrr",
+   "name": "693-й мсп 19-й мсд (58-я армия)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Zaramag"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 31,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south"
+  },
+  {
+   "id": "red_693mrr_pvo",
+   "name": "Войсковая ПВО: 693-й мсп 19-й мсд (58-я армия)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_693mrr",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_osset",
+   "name": "Вооружённые формирования Южной Осетии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Java"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 25,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south"
+  },
+  {
+   "id": "red_osset_pvo",
+   "name": "Войсковая ПВО: Вооружённые формирования Южной Осетии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_osset",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_503mrr",
+   "name": "503-й мсп 19-й мсд",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Alagir"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 31,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "south"
+  },
+  {
+   "id": "red_503mrr_pvo",
+   "name": "Войсковая ПВО: 503-й мсп 19-й мсд",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_503mrr",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_104vdv",
+   "name": "104-й пдп 76-й вдд",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Alagir"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMD_1",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "south",
+   "note": "переброшен по воздуху в Беслан"
+  },
+  {
+   "id": "red_104vdv_pvo",
+   "name": "Войсковая ПВО: 104-й пдп 76-й вдд",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_104vdv",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_234vdv",
+   "name": "234-й пдп 76-й вдд",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Vladikavkaz"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMD_1",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "south"
+  },
+  {
+   "id": "red_234vdv_pvo",
+   "name": "Войсковая ПВО: 234-й пдп 76-й вдд",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_234vdv",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_70mrr",
+   "name": "70-й мсп 42-й мсд",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Vladikavkaz"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 31,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "south"
+  },
+  {
+   "id": "red_70mrr_pvo",
+   "name": "Войсковая ПВО: 70-й мсп 42-й мсд",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_70mrr",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_71mrr",
+   "name": "71-й мсп 42-й мсд",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Alagir"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 31,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "south"
+  },
+  {
+   "id": "red_71mrr_pvo",
+   "name": "Войсковая ПВО: 71-й мсп 42-й мсд",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_71mrr",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_abkhaz",
+   "name": "Вооружённые силы Абхазии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Ochamchire"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "west"
+  },
+  {
+   "id": "red_abkhaz_pvo",
+   "name": "Войсковая ПВО: Вооружённые силы Абхазии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_abkhaz",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_abkhaz_k",
+   "name": "Абхазские подразделения (Кодори)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Sukhumi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 25,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "kodori",
+   "note": "наступление в Кодорское ущелье 9-12.08"
+  },
+  {
+   "id": "red_abkhaz_k_pvo",
+   "name": "Войсковая ПВО: Абхазские подразделения (Кодори)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_abkhaz_k",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7vdv_247",
+   "name": "247-й дшп 7-й вдд",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Gudauta"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMD_1",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "west",
+   "note": "через Сочи и по морю"
+  },
+  {
+   "id": "red_7vdv_247_pvo",
+   "name": "Войсковая ПВО: 247-й дшп 7-й вдд",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7vdv_247",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7vdv_108",
+   "name": "108-й дшп 7-й вдд",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Sukhumi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMD_1",
+     "count": 90,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "west"
+  },
+  {
+   "id": "red_7vdv_108_pvo",
+   "name": "Войсковая ПВО: 108-й дшп 7-й вдд",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7vdv_108",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_4bde",
+   "name": "4-я пехотная бригада (Вазиани)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Tskhinvali"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 20,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "в наступлении на Цхинвали с 7-8.08"
+  },
+  {
+   "id": "blue_4bde_pvo",
+   "name": "Войсковая ПВО: 4-я пехотная бригада (Вазиани)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_4bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_3bde",
+   "name": "3-я пехотная бригада (Кутаиси)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Gori"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 20,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "переброшена к Цхинвали 8.08"
+  },
+  {
+   "id": "blue_3bde_pvo",
+   "name": "Войсковая ПВО: 3-я пехотная бригада (Кутаиси)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_3bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tank",
+   "name": "Отдельный танковый батальон (Гори)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kareli"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 6,
+     "role": "IFV"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_mvd",
+   "name": "Спецназ МВД Грузии",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Tskhinvali"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_2bde",
+   "name": "2-я пехотная бригада (Сенаки)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Senaki"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 20,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_2bde_pvo",
+   "name": "Войсковая ПВО: 2-я пехотная бригада (Сенаки)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_2bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_5bde",
+   "name": "5-я пехотная бригада (Хони)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Kutaisi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 20,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0
+  },
+  {
+   "id": "blue_5bde_pvo",
+   "name": "Войсковая ПВО: 5-я пехотная бригада (Хони)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_5bde",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_1bde",
+   "name": "1-я пехотная бригада (возвращается из Ирака)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Tbilisi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 20,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "note": "переброшена самолётами ВВС США 10-11.08"
+  },
+  {
+   "id": "blue_1bde_pvo",
+   "name": "Войсковая ПВО: 1-я пехотная бригада (возвращается из Ирака)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_1bde",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_kodori",
+   "name": "Силы МВД в Верхней Абхазии",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Azhara"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 6,
+     "role": "APC"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_buk_gori",
+   "name": "Дивизион Бук-М1 ПВО Грузии (Гори)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 41.955,
+    "lon": 44.04
+   },
+   "composition": [
+    {
+     "type": "SA_11_Buk_SR_9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA_11_Buk_CC_9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA_11_Buk_LN_9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_buk_senaki",
+   "name": "Дивизион Бук-М1 ПВО Грузии (Сенаки)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 42.23,
+    "lon": 42.12
+   },
+   "composition": [
+    {
+     "type": "SA_11_Buk_SR_9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA_11_Buk_CC_9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA_11_Buk_LN_9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_s125_tbilisi",
+   "name": "Дивизион С-125М ПВО Грузии (Тбилиси)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 41.65,
+    "lon": 44.92
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_osa_kaspi",
+   "name": "Батарея Оса-АКМ ПВО Грузии (Каспи)",
+   "side": "blue",
+   "role": "sam_short",
+   "state": "deployed",
+   "pos": {
+    "lat": 41.94,
+    "lon": 44.36
+   },
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_osa_kutaisi",
+   "name": "Батарея Оса-АКМ ПВО Грузии (Кутаиси)",
+   "side": "blue",
+   "role": "sam_short",
+   "state": "deployed",
+   "pos": {
+    "lat": 42.23,
+    "lon": 42.64
+   },
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_buk_58",
+   "name": "Зенитная ракетная бригада 58-й армии (Бук)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 42.98,
+    "lon": 44.3
+   },
+   "composition": [
+    {
+     "type": "SA_11_Buk_SR_9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA_11_Buk_CC_9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA_11_Buk_LN_9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_tor_vlad",
+   "name": "Батарея Тор (Владикавказ)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "pos": {
+    "lat": 43.05,
+    "lon": 44.62
+   },
+   "composition": [
+    {
+     "type": "Tor_9A331",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r368shap",
+   "name": "368-й ошап (Су-25)",
+   "side": "red",
+   "role": "attack",
+   "base": "mozdok",
+   "type": "Su_25",
+   "count": 16,
+   "strike_radius_km": 250,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Будённовск - вне карты, на Моздок",
+   "estimate": true
+  },
+  {
+   "id": "r461shap",
+   "name": "461-й ошап (Су-25)",
+   "side": "red",
+   "role": "attack",
+   "base": "krasnodar_center",
+   "type": "Su_25",
+   "count": 12,
+   "strike_radius_km": 250,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r559bap",
+   "name": "559-й бап (Су-24М)",
+   "side": "red",
+   "role": "bomber",
+   "base": "mozdok",
+   "type": "Su_24M",
+   "count": 12,
+   "strike_radius_km": 400,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Морозовск - вне карты",
+   "estimate": true
+  },
+  {
+   "id": "r11orap",
+   "name": "11-й орап (Су-24МР)",
+   "side": "red",
+   "role": "recon",
+   "base": "mozdok",
+   "type": "Su_24MR",
+   "count": 4,
+   "strike_radius_km": 400,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Мариновка - вне карты",
+   "estimate": true
+  },
+  {
+   "id": "r52tbap",
+   "name": "52-й гв. тбап (Ту-22М3)",
+   "side": "red",
+   "role": "bomber",
+   "base": "mineralnye_vody",
+   "type": "Tu_22M3",
+   "count": 6,
+   "strike_radius_km": 800,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Шайковка - вне карты",
+   "estimate": true
+  },
+  {
+   "id": "r3iap",
+   "name": "3-й иап (Су-27)",
+   "side": "red",
+   "role": "fighter",
+   "base": "krymsk",
+   "type": "Su_27",
+   "count": 12,
+   "strike_radius_km": 450,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r31iap",
+   "name": "31-й иап (МиГ-29)",
+   "side": "red",
+   "role": "fighter",
+   "base": "maykop_khanskaya",
+   "type": "MiG_29S",
+   "count": 12,
+   "strike_radius_km": 350,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Миллерово - вне карты",
+   "estimate": true
+  },
+  {
+   "id": "r487ovp",
+   "name": "487-й овп (Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "beslan",
+   "type": "Mi_24P",
+   "count": 10,
+   "strike_radius_km": 150,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Будённовск - вне карты",
+   "estimate": true
+  },
+  {
+   "id": "r487ovp_8",
+   "name": "487-й овп, эскадрилья Ми-8",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "beslan",
+   "type": "Mi_8MT",
+   "count": 10,
+   "strike_radius_km": 200,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_a50",
+   "name": "Отряд ДРЛО (А-50)",
+   "side": "red",
+   "role": "awacs",
+   "base": "mineralnye_vody",
+   "type": "A_50",
+   "count": 1,
+   "strike_radius_km": 1500,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Иваново - вне карты",
+   "estimate": true
+  },
+  {
+   "id": "abkhaz_air",
+   "name": "ВВС Абхазии (Л-39)",
+   "side": "red",
+   "role": "attack",
+   "base": "sukhumi_babushara",
+   "type": "L_39C",
+   "count": 2,
+   "strike_radius_km": 150,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "abkhaz_heli",
+   "name": "ВВС Абхазии (Ми-8)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "sukhumi_babushara",
+   "type": "Mi_8MT",
+   "count": 3,
+   "strike_radius_km": 200,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "g_su25",
+   "name": "Штурмовая эскадрилья ВВС Грузии (Су-25КМ)",
+   "side": "blue",
+   "role": "attack",
+   "base": "vaziani",
+   "type": "Su_25",
+   "count": 10,
+   "strike_radius_km": 250,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; база - Марнеули (в DCS нет) - Вазиани; Су-25КМ - Су-25",
+   "estimate": true
+  },
+  {
+   "id": "g_l39",
+   "name": "Учебно-боевая эскадрилья (Л-39)",
+   "side": "blue",
+   "role": "attack",
+   "base": "kutaisi",
+   "type": "L_39C",
+   "count": 6,
+   "strike_radius_km": 150,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "g_mi24",
+   "name": "Вертолётная эскадрилья (Ми-24)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "soganlug",
+   "type": "Mi_24P",
+   "count": 8,
+   "strike_radius_km": 150,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА; Алексеевка - Соганлуг",
+   "estimate": true
+  },
+  {
+   "id": "g_mi8",
+   "name": "Вертолётная эскадрилья (Ми-8)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "kutaisi",
+   "type": "Mi_8MT",
+   "count": 10,
+   "strike_radius_km": 200,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "g_uh1",
+   "name": "Вертолётная эскадрилья (UH-1H)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "tbilisi_lochini",
+   "type": "UH_1H",
+   "count": 10,
+   "strike_radius_km": 150,
+   "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "variants": [
+  {
+   "name": "base",
+   "title": "Август 2008: Южная Осетия и Абхазия",
+   "task_rules": {
+    "blue": {
+     "strike_airfield": {
+      "off": true,
+      "why": "у ВВС Грузии нет средств для ударов по аэродромам России"
+     }
+    }
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 1,
+  "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "Тор, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Tor_9A331",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Оса-АКМ, ЗУ-23",
+     "composition": [
+      {
+       "type": "Osa_9A33_ln",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZU_23_Emplacement",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "Черноморский флот (бой у Очамчире 10.08), спецназ ГРУ, батальоны 'Восток' и 'Запад', российские миротворцы в Цхинвали, ВМС Грузии."
+}

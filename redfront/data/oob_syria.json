@@ -1,0 +1,1961 @@
+{
+ "_about": "Состав сил Ливанской войны 1982 г. (Израиль - Сирия и ООП). Генерирован tools/gen_syria.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+ "theatre": "syria",
+ "preset": {
+  "title": "Июнь 1982: Ливан, долина Бекаа",
+  "year": 1982,
+  "date": "1982-06-06"
+ },
+ "date": "1982-06-06",
+ "countries": {
+  "red": "Syria",
+  "blue": "Israel"
+ },
+ "units": [
+  {
+   "id": "blue_91div",
+   "name": "91-я дивизия (побережье)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Naqoura"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "coast"
+  },
+  {
+   "id": "blue_91div_pvo",
+   "name": "Войсковая ПВО: 91-я дивизия (побережье)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_91div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_36div",
+   "name": "36-я дивизия (Набатия)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Marjayoun"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "center"
+  },
+  {
+   "id": "blue_36div_pvo",
+   "name": "Войсковая ПВО: 36-я дивизия (Набатия)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_36div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_162div",
+   "name": "162-я дивизия (Джеззин)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Marjayoun"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "center"
+  },
+  {
+   "id": "blue_162div_pvo",
+   "name": "Войсковая ПВО: 162-я дивизия (Джеззин)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_162div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_252div",
+   "name": "252-я дивизия (Бекаа)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Masada"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "bekaa",
+   "note": "группа сил Бекаа (Бен-Галь)"
+  },
+  {
+   "id": "blue_252div_pvo",
+   "name": "Войсковая ПВО: 252-я дивизия (Бекаа)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_252div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_90div",
+   "name": "90-я дивизия (Бекаа)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Katzrin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "bekaa"
+  },
+  {
+   "id": "blue_90div_pvo",
+   "name": "Войсковая ПВО: 90-я дивизия (Бекаа)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_90div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_880div",
+   "name": "880-я дивизия (резерв)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "KiryatShmona"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "bekaa"
+  },
+  {
+   "id": "blue_880div_pvo",
+   "name": "Войсковая ПВО: 880-я дивизия (резерв)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_880div",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_kastel",
+   "name": "Бригада ООП 'Кастель' (Тир)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Tyre"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_kastel_pvo",
+   "name": "Войсковая ПВО: Бригада ООП 'Кастель' (Тир)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_plo_kastel",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_karameh",
+   "name": "Бригада ООП 'Карама' (Хасбайя)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hasbaya"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_karameh_pvo",
+   "name": "Войсковая ПВО: Бригада ООП 'Карама' (Хасбайя)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_plo_karameh",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_yarmouk",
+   "name": "Бригада ООП 'Ярмук' (Набатия)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Nabatieh"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_yarmouk_pvo",
+   "name": "Войсковая ПВО: Бригада ООП 'Ярмук' (Набатия)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_plo_yarmouk",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_sidon",
+   "name": "Формирования ООП (Сидон, Айн-аль-Хильва)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sidon"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_plo_sidon_pvo",
+   "name": "Войсковая ПВО: Формирования ООП (Сидон, Айн-аль-Хильва)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_plo_sidon",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_85bde",
+   "name": "85-я бригада Сирии (Бейрут)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Beirut"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 60,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_85bde_pvo",
+   "name": "Войсковая ПВО: 85-я бригада Сирии (Бейрут)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_85bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_62bde",
+   "name": "62-я отдельная бригада Сирии (Бекаа)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "JoubJannine"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 60,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 30,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_62bde_pvo",
+   "name": "Войсковая ПВО: 62-я отдельная бригада Сирии (Бекаа)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_62bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_1ad",
+   "name": "1-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Chtaura"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "note": "введена в Бекаа 7-9.06"
+  },
+  {
+   "id": "red_1ad_pvo",
+   "name": "Войсковая ПВО: 1-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_1ad",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_91tbde",
+   "name": "91-я танковая бригада Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Masnaa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 40,
+     "role": "IFV"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0
+  },
+  {
+   "id": "red_91tbde_pvo",
+   "name": "Войсковая ПВО: 91-я танковая бригада Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_91tbde",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_cdo",
+   "name": "Сирийские коммандос (шоссе Бейрут - Дамаск)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "AinZhalta"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0
+  },
+  {
+   "id": "red_3ad",
+   "name": "3-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Damascus"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 0,
+   "note": "резерв, Т-72"
+  },
+  {
+   "id": "red_3ad_pvo",
+   "name": "Войсковая ПВО: 3-я бронетанковая дивизия Сирии",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_3ad",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7div",
+   "name": "7-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Quneitra"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7div_pvo",
+   "name": "Войсковая ПВО: 7-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5div",
+   "name": "5-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sanamayn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5div_pvo",
+   "name": "Войсковая ПВО: 5-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_5div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_9div",
+   "name": "9-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kiswah"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_9div_pvo",
+   "name": "Войсковая ПВО: 9-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_9div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_1",
+   "name": "Батарея Куб (Бекаа) №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.8,
+    "lon": 35.86
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_2",
+   "name": "Батарея Куб (Бекаа) №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.76,
+    "lon": 35.8
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_3",
+   "name": "Батарея Куб (Бекаа) №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.7,
+    "lon": 35.82
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_4",
+   "name": "Батарея Куб (Бекаа) №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.66,
+    "lon": 35.88
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_5",
+   "name": "Батарея Куб (Бекаа) №5",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.86,
+    "lon": 35.95
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_6",
+   "name": "Батарея Куб (Бекаа) №6",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.9,
+    "lon": 35.98
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_7",
+   "name": "Батарея Куб (Бекаа) №7",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.74,
+    "lon": 35.92
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_8",
+   "name": "Батарея Куб (Бекаа) №8",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.62,
+    "lon": 35.83
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_9",
+   "name": "Батарея Куб (Бекаа) №9",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.82,
+    "lon": 35.78
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_10",
+   "name": "Батарея Куб (Бекаа) №10",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.95,
+    "lon": 36.05
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_11",
+   "name": "Батарея Куб (Бекаа) №11",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.58,
+    "lon": 35.9
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_12",
+   "name": "Батарея Куб (Бекаа) №12",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.88,
+    "lon": 35.86
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_s75_1",
+   "name": "Дивизион С-75 (Бекаа)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.84,
+    "lon": 35.92
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_s75_2",
+   "name": "Дивизион С-75 (Бекаа)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.72,
+    "lon": 35.86
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_s125_1",
+   "name": "Дивизион С-125 (Бекаа)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.78,
+    "lon": 35.95
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_s125_2",
+   "name": "Дивизион С-125 (Бекаа)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.68,
+    "lon": 35.78
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s75_1",
+   "name": "Дивизион С-75 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.6,
+    "lon": 36.2
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s75_2",
+   "name": "Дивизион С-75 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.42,
+    "lon": 36.35
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s125_1",
+   "name": "Дивизион С-125 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.48,
+    "lon": 36.15
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_kub_1",
+   "name": "Батарея Куб (Катана)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.4,
+    "lon": 36.05
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_haifa",
+   "name": "Батарея HAWK (Хайфа)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.82,
+    "lon": 35.05
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_galil",
+   "name": "Батарея HAWK (Верхняя Галилея)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.0,
+    "lon": 35.55
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_golan",
+   "name": "Батарея HAWK (Голаны)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.05,
+    "lon": 35.72
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_ramat",
+   "name": "Батарея HAWK (Рамат-Давид)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.68,
+    "lon": 35.2
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f15",
+   "name": "106-я и 133-я эскадрильи (F-15A)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "tel_nof",
+   "type": "F_15C",
+   "count": 30,
+   "strike_radius_km": 600,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА; F-15A - F-15C",
+   "estimate": true
+  },
+  {
+   "id": "i_f16",
+   "name": "110-я и 117-я эскадрильи (F-16A)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "ramat_david",
+   "type": "F_16A",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f4",
+   "name": "69-я, 119-я, 201-я эскадрильи (F-4E 'Курнас')",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzor",
+   "type": "F_4E_45MC",
+   "count": 40,
+   "strike_radius_km": 500,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_a4",
+   "name": "Эскадрильи A-4N/H 'Скайхок' (102, 109, 115, 116, 140)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzerim",
+   "type": "A_4E_C",
+   "count": 40,
+   "strike_radius_km": 400,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА; мод A-4E-C: без мода части в кампании нет",
+   "estimate": true,
+   "mod": "a4ec"
+  },
+  {
+   "id": "i_e2c",
+   "name": "192-я эскадрилья (E-2C)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "palmachim",
+   "type": "E_2C",
+   "count": 2,
+   "strike_radius_km": 1000,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_tank",
+   "name": "120-я эскадрилья (Боинг 707 - заправщик)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "ben_gurion",
+   "type": "KC_135",
+   "count": 2,
+   "strike_radius_km": 2000,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА; 707 - KC-135",
+   "estimate": true
+  },
+  {
+   "id": "i_ah1",
+   "name": "160-я и 161-я эскадрильи (AH-1S)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "megiddo",
+   "type": "AH_1W",
+   "count": 16,
+   "strike_radius_km": 150,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА; AH-1S - AH-1W",
+   "estimate": true
+  },
+  {
+   "id": "i_uh1",
+   "name": "Вертолётная эскадрилья (UH-1/Белл 212)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "rosh_pina",
+   "type": "UH_1H",
+   "count": 12,
+   "strike_radius_km": 150,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig21_dum",
+   "name": "Истребительные эскадрильи (МиГ-21)",
+   "side": "red",
+   "role": "fighter",
+   "base": "al_dumayr",
+   "type": "MiG_21Bis",
+   "count": 30,
+   "strike_radius_km": 250,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig21_kh",
+   "name": "Истребительные эскадрильи (МиГ-21)",
+   "side": "red",
+   "role": "fighter",
+   "base": "khalkhalah",
+   "type": "MiG_21Bis",
+   "count": 24,
+   "strike_radius_km": 250,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig23",
+   "name": "Истребительные эскадрильи (МиГ-23МФ/МС)",
+   "side": "red",
+   "role": "fighter",
+   "base": "shayrat",
+   "type": "MiG_23MLD",
+   "count": 24,
+   "strike_radius_km": 300,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-23МФ/МС - МиГ-23МЛД",
+   "estimate": true
+  },
+  {
+   "id": "s_su22",
+   "name": "Истребительно-бомбардировочные эскадрильи (Су-22/Су-20)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "marj_ruhayyil",
+   "type": "Su_17M4",
+   "count": 18,
+   "strike_radius_km": 300,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА; Су-22 - Су-17М4",
+   "estimate": true
+  },
+  {
+   "id": "s_mig25",
+   "name": "Эскадрилья МиГ-25",
+   "side": "red",
+   "role": "interceptor",
+   "base": "al_dumayr",
+   "type": "MiG_25PD",
+   "count": 8,
+   "strike_radius_km": 300,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_gazelle",
+   "name": "Вертолёты 'Газель' (ПТУР HOT)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "qabr_as_sitt",
+   "type": "SA342M",
+   "count": 14,
+   "strike_radius_km": 120,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mi8",
+   "name": "Вертолёты Ми-8",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "mezzeh",
+   "type": "Mi_8MT",
+   "count": 12,
+   "strike_radius_km": 200,
+   "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "variants": [
+  {
+   "name": "base",
+   "title": "Июнь 1982: Ливан, долина Бекаа",
+   "posture": {
+    "blue": "offense",
+    "red": "defense"
+   },
+   "task_rules": {
+    "blue": {
+     "strike_sam_site": {
+      "from_day": 4,
+      "why": "удар по ЗРК в Бекаа ('Медведка 19') - 9 июня"
+     },
+     "strike_airfield": {
+      "off": true,
+      "why": "по аэродромам Сирии Израиль не бил"
+     },
+     "strike_factory": {
+      "off": true,
+      "why": "по промышленности не били"
+     }
+    }
+   },
+   "_about_posture": "наступает Израиль; Сирия и ООП - в обороне (ops: поза по сценарию)"
+  }
+ ],
+ "replacements": {
+  "air_per_day": 1,
+  "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "Стрела-1, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Strela_1_9P31",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Чапарэл, Вулкан",
+     "composition": [
+      {
+       "type": "M48 Chaparral",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "Vulcan",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "'Кфир' (в DCS нет), A-4 без мода A-4E-C, БПЛА 'Скаут' и 'Мастиф', ВМС, морской десант у Сидона (96-я дивизия), Армия Южного Ливана, многонациональные силы."
+}

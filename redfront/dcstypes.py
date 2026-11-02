@@ -67,6 +67,15 @@ def vehicle(name: str):
         raise KeyError(f"pydcs не знает наземный тип '{name}' (имя класса или DCS id)") from None
 
 
+def register_flying(cls_name: str, cls) -> None:
+    """Тип мода (redfront.mods) - в индекс типов: по имени класса и по DCS id."""
+    global _F
+    if _F is None:
+        _F = _index_flying()
+    _F[cls_name] = cls
+    _F[cls.id] = cls
+
+
 def flying(name: str):
     global _F
     if _F is None:
@@ -75,7 +84,7 @@ def flying(name: str):
         return _F[name]
     except KeyError:
         raise KeyError(f"pydcs не знает летательный аппарат '{name}' (имя класса или DCS id). "
-                       f"Типы модов пока не регистрируются.") from None
+                       f"Тип мода - только если мод включён в кампании (redfront.mods).") from None
 
 
 def detection_range_km(type_names: list[str]) -> float | None:

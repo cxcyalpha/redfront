@@ -136,7 +136,6 @@ def apply_debrief(state: dict, man: dict, data: dict, lost_names: set) -> list[s
     Катапультировался и не подобран - на земле (downed), подобран и доставлен - в части, без катапультирования
     или погиб в сбитом вертолёте-спасателе - погиб."""
     from dcs.mapping import Point
-    from dcs.terrain.germany import Germany
     lines = []
     ej = set(data.get("ejected", []))
     pos = data.get("ejectpos") or {}
@@ -154,7 +153,7 @@ def apply_debrief(state: dict, man: dict, data: dict, lost_names: set) -> list[s
             if n in ej and key in rescued:
                 lines.append(f"{perf['name']}: экипаж сбитого {perf['type']} спасён в миссии.")
             elif n in ej and n in pos and key not in killed:
-                terrain = terrain or Germany()
+                terrain = terrain or model.terrain(state)
                 ll = Point(pos[n][0], pos[n][1], terrain).latlng()
                 d = add_downed(state, perf, n, {"lat": ll.lat, "lon": ll.lng})
                 lines.append(f"{perf['name']}: экипаж сбитого {perf['type']} катапультировался, на земле "

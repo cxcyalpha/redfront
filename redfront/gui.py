@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import build as build_mod, materialize
+from . import i18n_en, build as build_mod, materialize
 from . import ato, command, convoys, csar, dcstypes, debrief, explain, i18n, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
@@ -29,6 +29,11 @@ SECTOR = "sector_hamburg.json"     # кампании без поля sector (с
 THEATRES = [   # (id, сектор, состав сил, название)
     ("germany", "sector_germany.json", "oob_germany.json", "Вся карта: фронт от Балтики до Хофа (1989)"),
     ("hamburg", "sector_hamburg.json", "oob_hamburg.json", "Сектор Гамбург - Люнебург (полигон)"),
+    ("caucasus", "sector_caucasus.json", "oob_caucasus.json", "Кавказ: август 2008 (Южная Осетия и Абхазия)"),
+    ("syria", "sector_syria.json", "oob_syria.json", "Сирия - Ливан: июнь 1982 (долина Бекаа)"),
+    ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы США, гипотетическая)"),
+    ("vietnam72", "sector_vietnam72.json", "oob_vietnam72.json", "Вьетнам: апрель 1972 (условная география, авианосцы)"),
+    ("vietnam72_lb2", "sector_vietnam72_lb2.json", "oob_vietnam72_lb2.json", "Вьетнам: декабрь 1972, Лайнбэкер-2 (условная география)"),
 ]
 
 
@@ -58,6 +63,16 @@ def campaigns(root: Path) -> list[dict]:
 
 def _ll(p: dict) -> list[float]:
     return [round(p["lat"], 5), round(p["lon"], 5)]
+
+
+def _mods_list() -> dict:
+    from . import mods
+    return mods.MODS
+
+
+def _mods_available(k: str) -> bool:
+    from . import mods
+    return mods.available(k)
 
 
 HISTORY_MAX = 60       # снимков обстановки в кампании (начало каждых суток, ~140 КБ на снимок)
@@ -186,6 +201,8 @@ def view(st: dict, history: bool = True) -> dict:
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
         "weather": wx_lines[0], "weather_text": "\n".join(wx_lines[1:] + wx_cancel),
+        "mods": [{"id": k, "title": v["title"], "url": v["url"], "on": k in (st["settings"].get("mods") or []),
+                  "available": _mods_available(k)} for k, v in _mods_list().items()],
         "wx": {k: st["settings"].get(k, v) for k, v in (("weather_mode", "climate"), ("weather_type", "high"),
                                                          ("weather_fog", False), ("weather_effects", True))},
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
@@ -471,6 +488,16 @@ class App:
             model.note(st, f"Дата начала кампании: {st['date']}; {ln}.")
             model.save(st, p)
             return {"state": view(st), "lines": [ln]}
+        if action == "setmods":                      # моды DCS кампании (redfront.mods): части на типах модов в строй
+            from . import mods as _mods
+            want = [m for m in (req.get("mods") or []) if m in _mods.MODS]
+            miss = [m for m in want if not _mods.available(m)]
+            if miss:
+                raise ValueError("нет описания типа мода: " + ", ".join(_mods.MODS[m]["title"] for m in miss))
+            st["settings"]["mods"] = want
+            ln = _mods.apply(st) or ["Моды: " + (", ".join(_mods.MODS[m]["title"] for m in want) or "выключены") + "."]
+            model.save(st, p)
+            return {"state": view(st), "lines": ln}
         if action == "setweather":                   # настройки погоды: режим, тип, туман, влияние на план полётов
             from . import weather as _wx
             cfg = st["settings"]
@@ -489,6 +516,13 @@ class App:
             st["settings"]["lang"] = "en" if req.get("lang") == "en" else "ru"
             model.save(st, p)
             return {"state": view(st)}
+        if action == "pylons":                       # своя подвеска: пилоны типа и варианты на них (pydcs)
+            cur = (((st.get("custom_loadouts") or {}).get(dcstypes.flying(req["type"]).id) or {}).get(req.get("name") or "") or {})
+            return {"pylons": command.pylons(req["type"]), "current": {k: v["CLSID"] for k, v in cur.get("pylons", {}).items()}}
+        if action == "saveloadout":                  # своя подвеска кампании - сохранить (выбор - в правке вылета)
+            ln = command.save_loadout(st, req["type"], req.get("name"), req.get("pylons") or {})
+            model.save(st, p)
+            return {"lines": [ln], "name": "my:" + str(req.get("name")).strip()}
         if action == "atooptions":                   # режим командующего: что можно выбрать для вылета (без сохранения)
             return {"options": command.options(st, req["id"])}
         if action == "addoptions":                   # добавить полк: исторические допущения, типы, роли, аэродромы
@@ -558,7 +592,7 @@ class App:
             if str(req.get("air") or "").strip():
                 st["settings"]["mission_air"] = max(0, int(req["air"]))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),
-                                  humans=int(req.get("humans") or 1))
+                                  humans=int(req.get("humans") or 1), player=not req.get("ai"))
             n = sum(len(g["vehicles"]) for g in man["ground"])
             lines.append(i18n.L(i18n.lang(st), f"Миссия: {man['file']} (наземных машин {n}, бюджет ",
                                 f"Mission: {man['file']} (ground vehicles {n}, budget ")
@@ -665,14 +699,16 @@ def handler(app: App):
             self.run(lambda: app.do(u.path[len("/api/"):], req))
 
         def run(self, fn):
+            en = self.headers.get("X-Lang") == "en"        # язык окна: ответ - по-английски (i18n_en: перевод на выходе)
+            tr = (lambda o: i18n_en.deep(o)) if en else (lambda o: o)
             try:
                 with LOCK:
-                    self.js(fn())
+                    self.js(tr(fn()))
             except (KeyError, ValueError, FileNotFoundError, RuntimeError, OSError) as e:
-                self.js({"error": str(e.args[0] if e.args else e)}, 400)
+                self.js(tr({"error": str(e.args[0] if e.args else e)}), 400)
             except Exception as e:                                  # noqa: BLE001 - показать в окне, не уронить сервер
                 traceback.print_exc()
-                self.js({"error": f"{type(e).__name__}: {e}"}, 500)
+                self.js(tr({"error": f"{type(e).__name__}: {e}"}), 500)
     return H
 
 

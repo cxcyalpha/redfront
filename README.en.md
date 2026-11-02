@@ -2,8 +2,25 @@
 
 Русская версия: [README.md](README.md)
 
-A dynamic campaign generator for DCS World on the Cold War Germany map (Python + pydcs, Lua mission scripts, a
-browser-based campaign window). Full cycle: campaign model → day plan → mission → flight in DCS → debrief → next day.
+A dynamic campaign generator for DCS World (Python + pydcs, Lua mission scripts, a browser-based campaign window).
+Full cycle: campaign model → day plan → mission → flight in DCS → debrief → next day.
+
+**Theatres** (window "New" → "Theatre"):
+
+* **Cold War Germany** — Warsaw Pact strike along the whole front (1985, 1987, 1989), Hamburg sector (training).
+* **Caucasus** — the August 2008 war (Russia, South Ossetia, Abkhazia vs Georgia): the 58th Army through the Roki
+  tunnel to Tskhinvali and Gori, a second front in Abkhazia (Zugdidi, Senaki, Poti, Kodori); Georgian air defence —
+  Buk-M1, S-125, Osa-AKM. `tools/gen_caucasus.py`.
+* **Syria** — the June 1982 Lebanon war (Israel vs Syria and the PLO): advances along the coast, in the centre and in
+  the Bekaa valley, the Syrian SAM group in the Bekaa (SA-6, SA-2, SA-3); the blue side attacks (scenario posture),
+  Israel does not advance into Syria (sector `off_limits`). `tools/gen_syria.py`.
+
+The map sets the pydcs terrain, sunrise and sunset (theatre centre, DCS mission time: Germany UTC+1, Caucasus +4,
+Syria +3 — estimate) and the climate (Hannover, Tbilisi, Beirut — `weather.CLIMATES`). Place coordinates, unit
+compositions and aircraft numbers of the new theatres are estimates from open sources (named in the generators and in
+the units' `source`); DCS types are the nearest (T-62 → T-55, Merkava Mk1 → Mk4, F-15A → F-15C; A-4 and Kfir are not
+in DCS and are left out). A unit facing 6:1 or more does not hold its place and withdraws (`ops.ROUT_RATIO`); places a
+side does not attack are `off_limits`. Map and road probes for the new theatres work as for Germany.
 
 ## Contents
 
@@ -49,7 +66,11 @@ Where planner numbers come from: air unit radius — `strike_radius_km` on the u
 `threat_radius_km` on the unit, otherwise on the role, otherwise the largest launcher `threat_range` from pydcs (that is
 the range against a high-altitude target; it is overstated against a low-flying one; see also radar horizon below).
 
-Mod types (Su-24, MiG-31 etc.) unknown to pydcs are not supported; registering them is a separate step.
+**DCS mods** (`redfront/mods`): a mod type is a module describing the type and weapons for pydcs (like
+`pydcs_extensions` in DCS Retribution, LGPL-3.0), enabled per campaign (⚙ → "Campaign" → "DCS mods"; every player of
+the mission needs the mod). Units on a mod type (`mod` on the unit) take no part without the mod. Currently A-4E-C
+(Israeli A-4 squadrons in Lebanon 1982); the type description is `redfront/mods/a4ec.py` from Retribution (LGPL-3.0,
+`redfront/mods/NOTICE.md`).
 
 ### Mission window and conservation rule
 
@@ -226,7 +247,12 @@ Tactical map of the sector (`redfront/web/tactical.js`, unit classification — 
 
 ### Settings (⚙)
 
-* language: Русский / English;
+* language: Русский / English. In English the whole window (log, planner reasons, target explanations, unit and
+  object names) and the mission (briefing, kneeboard, script messages, pilot names in Latin script) are English. The
+  model writes its text in Russian; translation happens on output (`redfront/i18n_en.py`): a name catalogue and phrase
+  templates in `data/i18n/`, generated from `tools/i18n_data.py`. `tools/i18n_check.py` checks completeness by running
+  every theatre in English and reporting anything left in Cyrillic. The command line (`python -m redfront ...`) is
+  Russian;
 * mission ground vehicle budget (see [Mission budget](#mission-budget));
 * show the enemy air plan (debug);
 * DCS map tools: "Map probe", "Apply probe", "Roads probe", "Apply roads", import `.miz` with zones (see
@@ -631,6 +657,11 @@ the unit's nationality (USSR, East Germany, West Germany, USA, UK, Canada, Belgi
 `nation` field). In the mission the aircraft name = rank and surname, the leader is the most senior. A downed pilot is
 off the list until rescued; killed or captured pilots leave; replacements get new names.
 
+**Custom loadout** — in the sortie editor (✎ next to the loadout choice): a weapon per pylon from the DCS options
+(pydcs) and a name; stored in the campaign (`custom_loadouts`), listed as "★ name" for any group of that type.
+Weapons newer than the campaign year are replaced by era (weapons.py). Task loadouts are shown by task only
+(Strike, CAS, SEAD…), without the source.
+
 **Regiment livery** — "Air" → "Pilots, livery"; applies to all the regiment's groups in all missions. The list comes
 from the installed DCS (pydcs scans DCS and Saved Games livery folders); if DCS is not found, type the livery folder
 name.
@@ -840,6 +871,30 @@ nearest to the target first); one for all if aircraft are short. **SAM belts (ro
 more medium/long-range SAMs (on the low-level route from the nearest strike airfield) is not planned ("behind a SAM
 belt" in the reasons), and that belt's SAMs come first in SAM-site strikes: enemy air defence is rolled back belt by
 belt.
+
+**Plan check in DCS** (`lua/timing.lua`): for every AI group with a locked time the mission records when it actually
+reached its entry point (3 km), against the plan; the debrief shows the spread and groups more than 3 min off
+(campaign `timing_log`). The "all AI" box by the build button makes a test mission with the player's group under AI.
+
+**Second strike wave:** 3 or more radar SAMs within 25 km of the target — the same unit sends a second wave 3 min
+after the first while the defences are still suppressed (estimates).
+
+**Air operation phases** (`planner.phase`): suppression (more than half of the enemy's medium/long-range SAMs alive)
+— SAM strikes ×2; air superiority (more than 60% of enemy fighters) — airfield strikes ×1.6; then troop support ×1.5
+(`PHASE_K`, estimates). Category shares are the doctrine `apportionment` (WP: first massed strikes on air forces and
+air defence).
+
+**Scenario task rules** (variant `task_rules`): a task kind from a given day or forbidden, with the reason in the
+day plan; the sector `off_limits` is an area a side does not act in, from the air as well. Lebanon 1982: Bekaa SAM
+strikes from day 4 (9 June), no strikes on Syrian airfields, industry or Syria proper; Caucasus 2008: Georgia does
+not strike Russia.
+
+**Mission start and package groups** (as in Falcon BMS and Liberation): the mission starts with the player's cold
+start; time on target follows the ATO. Only the player's group and AI groups due to take off after the mission start
+begin on the ground; groups that took off earlier are already airborne on their route at mission start, where they
+would be by then (`build._airborne`: base — rendezvous — first route point, minus takeoff and join-up), heading for
+their entry point on time. The strike is no longer shifted to the slowest group, and groups are not late from all
+starting on the runway.
 
 **AI time on station** (`build._lock_eta`, as in Liberation/Retribution): an AI group has its ETA locked at its
 entry point — the IP (strike time minus the IP–target leg), the launch line, the cover zone; speed is not locked, so

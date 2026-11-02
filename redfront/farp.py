@@ -101,13 +101,12 @@ def owner(state: dict, pos: dict) -> str | None:
 
 def ensure(state: dict) -> int:
     """Площадки карты в state['airbases'] (новая кампания и старые - при загрузке). Возвращает, сколько добавлено."""
-    from dcs.terrain.germany import Germany
     have = {b.get("airport") for b in state["airbases"].values()}
     lat = [p["lat"] for p in state["places"].values()]
     lon = [p["lon"] for p in state["places"].values()]
     box = (min(lat) - 0.3, max(lat) + 0.3, min(lon) - 0.3, max(lon) + 0.3)   # театр кампании (сектор)
     n = 0
-    for ap in Germany().airports.values():
+    for ap in model.terrain(state).airports.values():
         if not NAME.match(ap.name) or ap.name in have or not any(s.helicopter for s in ap.parking_slots):
             continue
         ll = ap.position.latlng()

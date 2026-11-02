@@ -992,7 +992,7 @@ def column_road_section(tmp: Path) -> None:
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
           and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
-                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront debrief hook"],
+                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront timing", "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
@@ -2344,7 +2344,8 @@ def advance_section(tmp: Path) -> None:
     man = build.build(st, tmp / "adv.miz", task_no=n)
     tk = st["task"]
     tgt = st["units"].get(tk["package"][0]["objective"].get("unit") or "")
-    check(man["ground_s"] >= before and (not tgt or model.dist_km(model.unit_pos(st, tgt), tk["target_pos"]) < 0.3),
+    aim = planner._aim(st, tk["side"], tgt) if tgt else None   # игрок - по разведке (туман войны), не по истинному месту
+    check(man["ground_s"] >= before and (not tgt or model.dist_km(aim, tk["target_pos"]) < 0.3),
           f"сборка: обстановка на {sim.ato_hhmm(man['ground_s'])} (начало миссии), цель задачи - на своём месте к этому времени")
     # окно слетанной миссии: только события, без марша
     km1 = {u["id"]: u["progress_km"] for u in st["units"].values() if u.get("state") == "march"}
@@ -2444,7 +2445,8 @@ def _miz_scripts(path: Path) -> list[tuple[str, str]]:
     L = lupa.LuaRuntime()
     L.execute(zipfile.ZipFile(path).read("mission").decode("utf-8"))
     tr = L.globals().mission.trigrules
-    return [(a.predicate, a.text or a.file) for k in tr for _j, a in tr[k].actions.items()]
+    return [(a.predicate, a.text or a.file) for k in sorted(tr.keys())                 # по номеру триггера и действия
+            for _j, a in sorted(tr[k].actions.items(), key=lambda x: x[0])]          # (порядок таблицы Lua не задан)
 
 
 CTLD_MOCK = r"""
@@ -3093,7 +3095,26 @@ def payload_section(tmp: Path) -> None:
     planner.plan(st)
     man = build.build(st, tmp / "pl.miz", task_no=1)
     lines = [ln for ln in man["package_lines"] if "подвеска" in ln]
-    check(any(k in ln for ln in lines for k in ("Retribution", "STRIKE", "CAS", "SEAD")),
+    check(not any("Retribution" in ln for ln in man["package_lines"]),
+          "в брифинге подвеска - по задаче, без источника (без 'Retribution')")
+    from redfront import command
+    st = model.new_campaign("pl2", sector="sector_germany.json", oob="oob_germany_1985.json", seed=7, player_side="blue")
+    planner.plan(st)                             # правка - до начала вылета (часы кампании не сдвинуты сборкой)
+    tk = st["tasks"][0]
+    g0 = tk["package"][0]
+    typ = st["units"][g0["performer"]]["type"]
+    py = command.pylons(typ)
+    pick = {str(pl["num"]): pl["options"][0]["clsid"] for pl in py[:2] if pl["options"]}
+    command.save_loadout(st, typ, "Моя", pick)
+    command.edit(st, tk["ato_id"], groups={g0["group"]: {"loadout": "my:Моя"}})
+    planner.plan(st)
+    i = next(i for i, t in enumerate(st["tasks"]) if t.get("ato_id") == tk["ato_id"])
+    build.build(st, tmp / "pl2.miz", task_no=i + 1, fly=g0["group"])
+    import zipfile
+    mis = zipfile.ZipFile(tmp / "pl2.miz").read("mission").decode("utf-8")
+    check(pick and all(c in mis for c in pick.values()),
+          f"своя подвеска ({typ}, пилоны {', '.join(pick)}): сохранена в кампании, выбрана для вылета - в .miz на пилонах")
+    check(any(k in ln for ln in lines for k in ("STRIKE", "CAS", "SEAD", "Strike")),
           f"подвеска по виду задачи из payloads.json: {lines[0].split('подвеска')[-1][:80]}")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "pl.miz"))
@@ -3658,11 +3679,90 @@ def realism_section(tmp: Path) -> None:
           f"группы ИИ выходят на рубеж ко времени: ETA залочен на рубеже, скорость - нет ({locked} точек)")
 
 
+def theatres_section(tmp: Path) -> None:
+    """Другие карты: Кавказ (август 2008), Сирия - Ливан (июнь 1982): кампания, план, миссия на своём терраине."""
+    import zipfile
+    from redfront import ato, ops
+    print("\n== другие карты: Кавказ 2008, Ливан 1982 ==")
+    for sec, oob, side, terr in (("sector_caucasus.json", "oob_caucasus.json", "red", "Caucasus"),
+                                 ("sector_syria.json", "oob_syria.json", "blue", "Syria")):
+        st = model.new_campaign("th", sector=sec, oob=oob, seed=7, player_side=side)
+        planner.plan(st)
+        man = build.build(st, tmp / f"{terr}.miz", task_no=1)
+        mis = zipfile.ZipFile(tmp / f"{terr}.miz").read("mission").decode("utf-8")
+        check(st["tasks"] and man["ground"] and f'["theatre"]="{terr}"' in mis,
+              f"{terr}: кампания {st['date']}, задач в плане {len(st['tasks'])}, миссия на карте {terr} "
+              f"(наземных групп {len(man['ground'])}), лётный день {ato.hhmm(ato.flying_window(st)[0])}-{ato.hhmm(ato.flying_window(st)[1])}")
+    st = model.new_campaign("lb", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="blue")
+    planner.plan(st)
+    build.build(st, tmp / "lebanon83.miz", task_no=1)
+    mis = zipfile.ZipFile(tmp / "lebanon83.miz").read("mission").decode("utf-8")
+    check("Forrestal" in mis and '"helipadId"' in mis and "ActivateBeacon" in mis and "ActivateICLS" in mis,
+          f"Ливан 1983: авианосцы в миссии, старт и посадка на палубу ({mis.count('helipadId')} точек), TACAN и ICLS")
+    st = model.new_campaign("vn", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
+    planner.plan(st)
+    tg = [state_u for state_u in (st["units"].get(t.get("target")) for t in st["tasks"]) if state_u]
+    near = lambda u: min(st["places"], key=lambda n: model.dist_km(st["places"][n], u.get("pos") or model.unit_pos(st, u)))
+    in_zone = [u["name"] for u in tg if near(u) in ("Hanoi", "ThaiNguyen", "HaiDuong", "Haiphong")]
+    sams = [u for u in tg if u.get("role") == "sam_medium"]
+    build.build(st, tmp / "vietnam72.miz", task_no=1)
+    mis = zipfile.ZipFile(tmp / "vietnam72.miz").read("mission").decode("utf-8")
+    check(sams and not in_zone and '"KS-19"' in mis and '"helipadId"' in mis,
+          f"Вьетнам 1972: удары по С-75 юга ДРВ ({len(sams)}), Ханой и Хайфон закрыты до 'Лайнбэкера', зенитная "
+          f"артиллерия у объектов, палубные вылеты")
+    alpha = [t for t in st["tasks"] if "Альфа" in t["title"]]
+    roles = {g.get("support_id", "strike") for t in alpha for g in t["package"]}
+    mixed = [t["title"] for t in alpha if len({st["airbases"][g["base"]].get("kind") == "carrier" for g in t["package"]}) > 1]
+    check(alpha and {"strike", "sead", "flak", "migcap", "cover"} <= roles and not mixed,
+          f"налёт 'Альфа': {len(alpha)} в плане, ударная группа, 'Айрон Хэнд', подавление зенитки, MiGCAP, эскорт; "
+          "пакет одной службы (флот или ВВС)")
+    st = model.new_campaign("vnaa", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
+    sim.end_day(st)
+    planner.plan(st)
+    aa = [e for e in st["ato"]["entries"] if e["kind"] == "air_assault"]
+    modes = {g["objective"].get("mode") for e in aa for g in e["task"]["package"] if g["objective"]["kind"] == "air_assault"}
+    rng_ok = all(g["objective"]["mode"] != "reinforce" or st["places"][g["objective"]["place"]]["side"] == "blue"
+                 for e in aa for g in e["task"]["package"] if g["objective"]["kind"] == "air_assault")
+    sim.end_day(st)
+    moved = [u for u in st["units"].values() if u.get("air_mobile") and u.get("order") != "reserve"]
+    check(aa and modes <= {"reinforce", "flank"} and rng_ok and moved,
+          f"аэромобильная высадка у фронта (Вьетнам 1972): {len(aa)} в плане ({', '.join(sorted(modes))}), "
+          f"рот переброшено {len(moved)}")
+    st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
+    planner.plan(st)
+    b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]
+    hanoi = [t for t in st["tasks"] if t["target"] in ("red_depot_hanoi", "br_doumer", "red_depot_haiphong")]
+    check(st["doctrine"]["blue"] == "us72" and b52 and all(t["package"][0]["size"] == 3 for t in b52) and hanoi,
+          f"'Лайнбэкер-2': B-52 ячейками по три ({len(b52)} ударов), Ханой и Хайфон открыты ({len(hanoi)} ударов)")
+    st = model.new_campaign("syr", sector="sector_syria.json", oob="oob_syria.json", seed=7)
+    for _ in range(3):
+        sim.end_day(st)
+    taken = [n for n in ("Tyre", "Nabatieh", "Hasbaya") if ops.owner(st, n) == "blue"]
+    banned = [n for n in st["off_limits"]["blue"] if ops.owner(st, n) == "blue"]
+    from redfront import mods
+    sm = model.new_campaign("a4", sector="sector_syria.json", oob="oob_syria.json", seed=7, player_side="blue")
+    off = sm["units"]["i_a4"]["count"]
+    sm["settings"]["mods"] = ["a4ec"]
+    mods.apply(sm)
+    planner.plan(sm)
+    t4 = next(((i, t) for i, t in enumerate(sm["tasks"]) if any(sm["units"][g["performer"]]["type"] == "A_4E_C"
+                                                              for g in t["package"])), None)
+    ok4 = False
+    if t4:
+        g4 = next(g for g in t4[1]["package"] if sm["units"][g["performer"]]["type"] == "A_4E_C")
+        build.build(sm, tmp / "a4.miz", task_no=t4[0] + 1, fly=g4["group"])
+        ok4 = '["type"]="A-4E-C"' in zipfile.ZipFile(tmp / "a4.miz").read("mission").decode("utf-8")
+    check(off == 0 and sm["units"]["i_a4"]["count"] > 0 and ok4,
+          "мод A-4E-C: без мода эскадрилий A-4 в кампании нет, с модом - в строю, в плане и в .miz (тип A-4E-C)")
+    check(st["posture"]["blue"] == "offense" and len(taken) >= 2 and not banned,
+          f"1982: наступает Израиль (поза сценария), к 3-м суткам взяты {', '.join(taken)}; на территорию Сирии не наступает")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:

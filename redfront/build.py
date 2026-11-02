@@ -17,7 +17,6 @@ from dcs.action import DoScript, DoScriptFile
 from dcs.mapping import LatLng, Point, Vector2
 from dcs.mission import StartType
 from dcs.point import PointAction
-from dcs.terrain.germany import Germany
 from dcs.terrain.terrain import NoParkingSlotError
 from dcs.translation import String
 from dcs.triggers import TriggerStart
@@ -408,7 +407,7 @@ def csar_script(m: Mission, state: dict, downed: list[dict], rescuers: list[dict
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     items = [f'{{ id = {q(d["id"])}, group = {q(d["id"])}, side = {1 if d["side"] == "red" else 2}, '
              f'title = {q(csar.title(state, d))}, freq = {int(d["freq_khz"])} }}' for d in downed]
-    bases = {side: ", ".join(f'[{q(b["airport"])}] = true' for b in state["airbases"].values() if b.get("side") == side)
+    bases = {side: ", ".join(f'[{q(b["airport"])}] = true' for b in state["airbases"].values() if b.get("side") == side and b.get("airport"))
              for side in ("red", "blue")}
     return (CSAR_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
             .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SOUND@", BEACON_FILE)
@@ -451,11 +450,147 @@ def airbase_script(m: Mission, state: dict) -> str:
             "end\n")
 
 
+LUA_EN = {   # сообщения скриптов миссии по-английски (литералы Lua целиком)
+    "Десант высаживается: ": "Air assault landing: ", "Загрузка - только на земле.": "Loading only on the ground.",
+    "Ваша доля десанта уже высажена.": "Your share of the troops has already been landed.",
+    "Загрузка - у своего аэродрома.": "Load at your own airfield.", "Десант на борту (": "Troops on board (",
+    " фигур): ": " troops): ", ". Площадка - в меню.": ". Landing zone - in the menu.",
+    "Десанта на борту нет - сначала загрузите у своего аэродрома.": "No troops on board - load them at your own airfield first.",
+    "Высадка - только на земле.": "Unloading only on the ground.", "Вы не на площадке: до неё %.1f км.": "You are not at the landing zone: it is %.1f km away.",
+    "Десант высажен. Возвращайтесь.": "Troops landed. Return to base.", "Площадка: пеленг %03d, %.1f км (дым)%s.": "Landing zone: bearing %03d, %.1f km (smoke)%s.",
+    "; перенесена на открытое место (%.0f м)": "; moved to open ground (%.0f m)",
+    "Десант высажен на площадке. Возвращайтесь.": "Troops landed at the landing zone. Return to base.", "Десант": "Air assault",
+    "Загрузить десант": "Load troops", "Высадить десант": "Unload troops", "Площадка": "Landing zone",
+    " на борту. Доставьте на свой аэродром.": " on board. Deliver to your own airfield.",
+    ": слышу вас! Ракета и дым - в меню F10, CSAR. Садитесь рядом или зависните надо мной.":
+        ": I hear you! Flare and smoke - F10 menu, CSAR. Land nearby or hover over me.",
+    ": бегу к вам, ": ": running to you, ", " с.": " s.", "Лебёдка: держите зависание ещё ": "Hoist: keep hovering for another ",
+    "%s: пеленг %03d, %.1f км, маяк %d кГц": "%s: bearing %03d, %.1f km, beacon %d kHz", "Сбитые экипажи:\n": "Downed crews:\n",
+    "Сбитых экипажей нет.": "No downed crews.", ": дым!": ": smoke!", ": ракета!": ": flare!", "Сбитые экипажи": "Downed crews",
+    "Ракета у ближнего": "Flare at the nearest", "Дым у ближнего": "Smoke at the nearest", "экипаж ": "crew ",
+    " катапультировался, маяк ": " ejected, beacon ", " кГц.": " kHz.", "Экипажи доставлены. Отличная работа!": "Crews delivered. Well done!",
+    "место боя сдвинуто на %.0f м (оценка %.2f), машин переставлено %d, без хорошего места %d":
+        "battle site moved %.0f m (score %.2f), %d vehicles repositioned, %d without a good spot",
+    "ошибка: ": "error: ", "ПВО на открытом месте: %d машин, у строений осталось %d%s": "air defence in the open: %d vehicles, %d left by buildings%s",
+    ", позиция сдвинута на %.0f м (аэродром, вода, город)": ", position moved %.0f m (airfield, water, town)",
+    " ВНИМАНИЕ: пролёты моста по именам не найдены": " WARNING: bridge spans not found by name",
+    " ВНИМАНИЕ: мостов рядом нет, взят ближайший объект - проверьте координаты (set-pos)":
+        " WARNING: no bridges nearby, the nearest object was taken - check the coordinates (set-pos)",
+    "%s %.0fм": "%s %.0fm", "redfront targets %s: объектов карты %d (в радиусе %d): %s%s": "redfront targets %s: map objects %d (within radius %d): %s%s",
+    "РЛС ЗРК у цели уничтожены или подавлены - удар разрешён": "SAM radars at the target destroyed or suppressed - strike cleared",
+    "подавление ПВО ведёт пуски - удар в окне подавления": "SEAD is firing - strike inside the suppression window",
+    "пусков подавления нет, РЛС ПВО молчат - удар по времени": "no SEAD launches, air defence radars silent - strike on time",
+    "группы подавления ПВО сбиты - удар отменён, ударным группам - домой": "SEAD groups shot down - strike cancelled, strike groups return to base",
+    "дорога для участка с головой колонны не найдена": "no road found for the segment with the column head",
+    "на дороге: %d машин": "on the road: %d vehicles", "отход на исходную на %d с: в строю %d из %d": "withdrawal to the start line at %d s: %d of %d in action",
+    "redfront front: %d взводов": "redfront front: %d platoons", "Эвакуация: группа на борту (": "Extraction: group on board (",
+    "Снабжение сдано на склад: ": "Supplies delivered to the depot: ", "redfront ctld: авианаводчик ": "redfront ctld: JTAC ",
+    " - взлёт по ": " - scramble against ", "redfront: результаты не сохранятся - MissionScripting.lua не разблокирован":
+        "redfront: results will not be saved - MissionScripting.lua is not unlocked",
+    ": потерян ведомый - уходим домой": ": wingman lost - returning to base",
+}
+
+
+def lua_en(src: str) -> str:
+    """Скрипт миссии по-английски: русские строковые литералы Lua - по словарю LUA_EN, иначе переводом i18n_en
+    (подписи из модели: названия частей, задач). Комментарии не трогаются - их не видно."""
+    from . import i18n_en
+
+    def lit(mm):
+        body = mm.group(1)
+        if not i18n_en.CYR.search(body):
+            return mm.group(0)
+        txt = body.replace('\\"', '"')
+        out = LUA_EN.get(txt) or LUA_EN.get(body) or i18n_en.en(txt)
+        return '"' + out.replace('"', '\\"') + '"'
+    lines = []
+    for ln in src.split("\n"):
+        code, sep, comment = ln.partition("--")
+        lines.append(re.sub(r'"((?:[^"\\\n]|\\.)*)"', lit, code) + sep + comment)
+    return "\n".join(lines)
+
+
+class CarrierPad:
+    """Авианосец как база группы (вместо аэродрома pydcs): группа кораблей, позиция, частота (TACAN/ICLS - в задачах
+    корабля), id корабля-авианосца для посадки. Те же поля, что сборка берёт у аэродрома: position, id, name, atc_radio."""
+    def __init__(self, group, info: dict):
+        self.group = group
+        self.unit = group.units[0]
+        self.position = self.unit.position
+        self.id = self.unit.id
+        self.name = info["name"]
+        self.info = info
+        f = float(info.get("freq", 127.5)) * 1e6
+        self.atc_radio = type("R", (), {"vhf_high_hz": f, "uhf_hz": f})()
+
+
+def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "CarrierPad"]:
+    """Авианосные группы кампании в миссии: авианосец и эскорт (state airbases kind carrier), на галсах против ветра
+    (курс - откуда дует ветер; 25 узлов на прямой ~40 км туда и обратно, ОЦЕНКА), TACAN и ICLS авианосца включены
+    с начала миссии. -> id базы: CarrierPad."""
+    import dcs.ships as _ships
+    out = {}
+    for bid, b in state["airbases"].items():
+        if b.get("kind") != "carrier" or b.get("state") == "lost":
+            continue
+        pos = _pt(m, b)
+        sg = m.ship_group(_country(m, state, b["side"]), b["name"], getattr(_ships, b["ship"]), pos, heading=wind_from)
+        for k, esc in enumerate(b.get("escorts", [])):
+            off = model.offset(b, wind_from + 120 * (k + 1), 3000)
+            u = m.ship(f"{b['name']} escort {k + 1}", getattr(_ships, esc))
+            q = _pt(m, off)
+            u.position = Point(q.x, q.y, m.terrain)
+            sg.add_unit(u)
+        leg = model.offset(b, wind_from, CARRIER_LEG_M)
+        w1 = sg.add_waypoint(_pt(m, leg), CARRIER_KMH)
+        sg.add_waypoint(pos, CARRIER_KMH)
+        sg.add_waypoint(_pt(m, leg), CARRIER_KMH)
+        sg.points[0].tasks.append(task.ActivateBeaconCommand(channel=int(b.get("tacan", 70)), modechannel="X",
+                                                             callsign=str(b.get("tacan_id", "CVN"))[:3], unit_id=sg.units[0].id,
+                                                             aa=False))
+        if b.get("icls"):
+            sg.points[0].tasks.append(task.ActivateICLSCommand(channel=int(b["icls"]), unit_id=sg.units[0].id))
+        out[bid] = CarrierPad(sg, b)
+    return out
+
+
+def carrier_lines(state: dict, side_pos=None) -> list[str]:
+    """Строки брифинга и планшета: авианосцы кампании - TACAN, ICLS, частота (своей стороны)."""
+    out = []
+    for b in state["airbases"].values():
+        if b.get("kind") == "carrier" and b.get("side") == state.get("player_side", "blue") and b.get("state") != "lost":
+            out.append(f"{b['name']}: TACAN {b.get('tacan')}X {b.get('tacan_id', '')}"
+                       + (f", ICLS {b['icls']}" if b.get("icls") else "") + f", {float(b.get('freq', 127.5)):.1f} МГц")
+    return out
+
+
+CARRIER_KMH = 46        # ОЦЕНКА: 25 узлов - ход авианосца при полётах (ветер над палубой)
+CARRIER_LEG_M = 40_000  # ОЦЕНКА: длина галса
+
+
+def _from_base(m: Mission, country, name: str, ac, base_obj, maintask, start_type, group_size: int):
+    """Группа ЛА с аэродрома или с палубы авианосца (CarrierPad: старт с корабля; с полосы - с катапульты)."""
+    if isinstance(base_obj, CarrierPad):
+        st_ = StartType.Warm if start_type == StartType.Runway else start_type
+        return m.flight_group_from_unit(country, name, ac, base_obj.group, maintask=maintask, start_type=st_,
+                                        group_size=group_size)
+    return m.flight_group_from_airport(country, name, ac, base_obj, maintask=maintask, start_type=start_type,
+                                       group_size=group_size)
+
+
 def _land(fg, airport, spd_kmh: float):
-    """Посадка на аэродром. pydcs ставит точке посадки скорость 0 - ИИ на последнем участке гасит скорость до
-    минимума (Су-17 и др. на возврате шли 300-400 км/ч и крутили фигуры, сбрасывая её). Скорость - как на маршруте:
-    заход и посадку ИИ строит сам."""
-    p = fg.land_at(airport)
+    """Посадка на аэродром или на палубу авианосца. pydcs ставит точке посадки скорость 0 - ИИ на последнем участке
+    гасит скорость до минимума (Су-17 и др. на возврате шли 300-400 км/ч и крутили фигуры, сбрасывая её). Скорость -
+    как на маршруте: заход и посадку ИИ строит сам."""
+    if isinstance(airport, CarrierPad):
+        from dcs.point import MovingPoint, PointProperties
+        p = MovingPoint(airport.position)
+        p.type, p.action, p.alt, p.ETA_locked = "Land", PointAction.Landing, 0, False
+        p.helipad_id = p.link_unit = airport.unit.id
+        p.properties = PointProperties()
+        fg.add_point(p)
+    else:
+        p = fg.land_at(airport)
     p.speed = spd_kmh / 3.6
     return p
 
@@ -524,7 +659,7 @@ def loadout_cats(kind: str, g: dict) -> list[str]:
     """Категории подвески группы по порядку: вид задачи (для ударной группы) или роль группы обеспечения, затем
     категории доктрины (loadout группы)."""
     first = [] if g.get("loadout_user") else \
-        GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], []) if g.get("group") != "strike" \
+        GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], []) if g.get("group") not in ("strike", "strike2") \
         else KIND_CATS.get(kind, [])
     out = []
     for c in first + list(g.get("loadout") or []):
@@ -562,9 +697,10 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
     from . import weapons
     year = weapons.campaign_year(state) if state else None
     for cat in cats:
-        if cat.startswith("rt:"):                # подвеска DCS Retribution по имени (выбор командующего)
-            pls = (model.load_json("payloads.json").get("types", {}).get(ac.id) or {}).get(cat[3:])
-            if pls and pls["pylons"]:
+        if cat.startswith(("rt:", "my:")):       # выбранная подвеска: по задаче (payloads.json) или своя (custom_loadouts)
+            src = ((state or {}).get("custom_loadouts") or {}) if cat.startswith("my:") else model.load_json("payloads.json").get("types", {})
+            pls = (src.get(ac.id) or {}).get(cat[3:])
+            if pls is not None and (pls["pylons"] or cat.startswith("my:")):   # своя может быть и пустой (без подвески)
                 for u in fg.units:
                     u.reset_loadout()
                     for num, d in pls["pylons"].items():
@@ -572,7 +708,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                             u.pylons[int(num)] = dict(d)
                 weapons.degrade(fg, year)
                 weapons.fixups(fg, year)
-                return cat[3:]
+                return cat[3:].replace("Retribution ", "")
     for cat in cats:
         pl = _payload(ac, cat, year)
         if pl:
@@ -584,7 +720,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                         u.pylons[int(num)] = dict(d)
             weapons.degrade(fg, year)
             weapons.fixups(fg, year)
-            return f"{cat} ({name})"
+            return name.replace("Retribution ", "")   # подвеска - по функции (Strike, CAS, SEAD...)
     weapons.degrade(fg, year)
     return None
 
@@ -651,6 +787,9 @@ def _crew(state: dict, fg, perf: dict) -> None:
     for unit, p in zip(fg.units, pilots.crew_for(state, perf, len(fg.units), taken)):
         taken.add(p["name"])
         name = pilots.title(perf, p)
+        if i18n.lang(state) == "en":             # английская миссия: звание и фамилия латиницей (дебриф узнаёт и так)
+            from . import i18n_en
+            name = i18n_en.en(name)
         if name in _CREW["names"]:               # однофамильцы в разных полках
             name = f"{name} ({perf['id']})"
         _CREW["names"].add(name)
@@ -864,12 +1003,8 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
             else:
                 n[enemy] += 1
                 key = f"{'enemy' if enemy else 'ai'}{n[enemy]}"
-            if take < 0:                         # в воздухе на пути к объекту: точка на участке база - первая точка маршрута
-                base = state["airbases"][g["base"]]
-                first = g["route"][0]
-                leg = model.dist_km(base, first)
-                done_km = -take * model.group_speed_kmh(state, g, tdg) / 3600
-                g["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
+            if take < 0:                         # в воздухе на пути к объекту - там, где по плану полётов
+                _airborne(state, g, model.group_speed_kmh(state, g, tdg), -take)
             times[key] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
         used[perf["id"]] = used.get(perf["id"], 0) + g["size"]
         lg = i18n.lang(state)
@@ -896,11 +1031,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
                 g2 = dict(sg)
                 k2 = f"{key}_{sg['group']}"
                 if take < 0:
-                    base = state["airbases"][g2["base"]]
-                    first = g2["route"][0]
-                    leg = model.dist_km(base, first)
-                    done_km = -take * model.group_speed_kmh(state, g2, tdg) / 3600
-                    g2["_air_start"] = model.lerp(base, first, min(done_km, max(0.0, leg - 3)) / leg) if leg > 0 else dict(first)
+                    _airborne(state, g2, model.group_speed_kmh(state, g2, tdg), -take)
                 times[k2] = {"start_s": max(0, int(take)), "late_s": 0, "objective_s": int(obj)}
                 used[sp["id"]] = used.get(sp["id"], 0) + sg["size"]
                 g2.update({"group": k2, "_tdef": tdg, "_side": e["side"], "_enemy": enemy, "_ai": True,
@@ -1045,7 +1176,9 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 route.append(f"{i:2d}  {hhmm(t)}  {pt.alt:>6.0f} {L('м', 'm')}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
-            fields = [L("Взлёт: ", "Departure: ") + names.get(ab[0], "-")] + ([L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")] if ab else [])
+            fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-"), L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")]
+                      if ab else [L("Взлёт и посадка: палуба", "Deck launch and recovery")])
+            fields += carrier_lines(state, fg.units[0].position)
             sub = f"{fg.name} - {ut.id} x{len(fg.units)} - {L('день', 'day')} {state['day']}"
             pages = [
                 (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), [L(f"Удаление цели {tk['distance_km']:.0f} км", f"Target distance {tk['distance_km']:.0f} km"),
@@ -1083,7 +1216,7 @@ ETA_POINTS = ("ИПМ", "Рубеж пуска", "Рубеж атаки", "Зо�
               "Площадка", "Экипаж", "Зона дежурства")   # точки, к которым группа ИИ выходит ко времени
 
 
-def _lock_eta(fg, objective_s: float, spd_kmh: float) -> None:
+def _lock_eta(fg, objective_s: float, spd_kmh: float) -> dict | None:
     """Время выхода группы ИИ на рубеж (ИПМ - время удара минус полёт ИПМ-цель; зона, рубеж пуска - время выхода на
     объект): ETA залочен, скорость - нет: DCS сама ускоряется или замедляется, чтобы успеть (как в планировщиках
     Liberation/Retribution - время на цели фиксировано, скорость свободна). Раньше залоченный сбор не трогаем."""
@@ -1095,7 +1228,33 @@ def _lock_eta(fg, objective_s: float, spd_kmh: float) -> None:
                 eta -= w.position.distance_to_point(pts[i + 1].position) / (spd_kmh / 3.6)
             if eta > 0:
                 w.ETA, w.ETA_locked, w.speed_locked = int(eta), True, False
-            return
+                return {"group": fg.name, "x": w.position.x, "y": w.position.y, "eta": int(eta)}   # проверка (timing.lua)
+            return None
+    return None
+
+
+def _airborne(state: dict, g: dict, spd_kmh: float, secs: float) -> bool:
+    """Группа ИИ, взлетевшая по плану за secs до начала миссии, - в воздухе там, где она к этому времени (как в Falcon
+    BMS: миссия начинается со взлёта игрока, остальные вылеты пакета и плана - уже в пути). Точка - по маршруту база -
+    сбор - первая точка маршрута (за вычетом разбега и сбора; не дальше неё - задачу группы не срезаем). g меняется на
+    месте (_air_start, rv). False - ещё на земле (взлетит с началом миссии)."""
+    km = (secs - ato.AI_TAKEOFF_S) * spd_kmh / 3600
+    if km <= 3:
+        return False
+    rv_ok = g.get("rv") and g["objective"]["kind"] in planner.RV_KINDS
+    pts = [state["airbases"][g["base"]]] + ([g["rv"]] if rv_ok else []) + list(g["route"][:1])
+    total = sum(model.dist_km(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+    km = min(km, max(0.0, total - 3))            # не дальше первой точки маршрута (ИПМ, зона, рубеж - задача группы)
+    run = 0.0
+    for i in range(len(pts) - 1):
+        leg = model.dist_km(pts[i], pts[i + 1])
+        if run + leg >= km or i == len(pts) - 2:
+            g["_air_start"] = model.lerp(pts[i], pts[i + 1], min(1.0, (km - run) / leg) if leg else 1.0)
+            if rv_ok and i >= 1:                 # сбор пройден - его в маршруте нет
+                g.pop("rv", None)
+            return True
+        run += leg
+    return False
 
 
 def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str, dict]:
@@ -1107,19 +1266,15 @@ def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str,
     lead = {g["group"]: g.get("lead_min", 0) * 60 for g in groups}
     t_player = tdef["timing"]["player_cold_start_min"] * 60 + fly_s[fly]
     eta_strike = t_player + lead[fly]
-    # время удара - по самой медленной группе: кто не успел бы к выходу игрока (вертолёты с дальней площадки), тот
-    # взлетает с началом миссии, а удар сдвигается; остальные взлетают позже, игрок - тоже позже (по брифингу) или
-    # ждёт в точке сбора: она гасит разницу во времени групп
-    wait = max([0.0] + [-(eta_strike - lead[g["group"]] - fly_s[g["group"]]) for g in groups if g["group"] != fly])
-    eta_strike += wait
+    # миссия начинается с холодного старта игрока (как в Falcon BMS и Liberation: время на цели - по плану, группа
+    # игрока - с земли); группы ИИ, которым по плану взлетать раньше начала миссии, к её началу уже в воздухе на своём
+    # маршруте (air_s - сколько они уже летят, build._airborne), а не стартуют все с земли и опаздывают
     out = {}
     for g in groups:
         k = g["group"]
         start = eta_strike - lead[k] - fly_s[k]
-        out[k] = {"start_s": 0 if k == fly else max(0, int(start)), "late_s": 0 if k == fly else max(0, int(-start)),
-                  "objective_s": int(eta_strike - lead[k])}
-        if k == fly and wait:                    # игрок: взлёт не раньше (слот в DCS доступен с начала миссии)
-            out[k]["takeoff_s"] = int(tdef["timing"]["player_cold_start_min"] * 60 + wait)
+        out[k] = {"start_s": 0 if k == fly else max(0, int(start)), "late_s": 0,
+                  "air_s": 0 if k == fly else max(0, int(-start)), "objective_s": int(eta_strike - lead[k])}
         if g.get("rv"):                          # время в точке сбора: выход на объект минус полёт сбор - объект
             rest = _path_km(g["rv"], g["route"]) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
             out[k]["rv_s"] = int(eta_strike - lead[k] - rest)
@@ -1148,7 +1303,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for ln in pre_lines:
             model.note(state, ln)
 
-    m = Mission(Germany())
+    m = Mission(model.terrain_class(state)())
     set_airbase_coalitions(m, state)
     y, mo, d = map(int, state["date"].split("-"))
     start = datetime.datetime(y, mo, d, state["start_hour"], 0) + datetime.timedelta(days=state["day"] - 1)
@@ -1157,6 +1312,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     wx_now = wx_mod.apply(m, state, state["start_hour"])                  # погода суток (weather.py)
 
     # ---- весь театр: район задачи подробно, остальное - реже ----
+    carriers = carrier_groups(m, state, (wx_now.get("wind_dir") or 0) % 360)   # авианосные группы - базы на море
     groups = materialize.theatre(state, tk, density)
     vg_by_unit, platoons = {}, {}
     keys = sorted({g["cluster"] for g in groups if g.get("cluster")})        # бои (кластеры) - у каждого своё место
@@ -1249,6 +1405,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     evac_specs: list[dict] = []                  # эвакуация десанта (evac.lua)
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     cap_specs: list[dict] = []                   # пары прикрытия ИИ (cap.lua)
+    timing_specs: list[dict] = []                # выход групп ИИ на рубеж: факт против плана (timing.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
     ctld = {"pilots": [], "actions": {}, "limits": {}, "cargo": {}, "logistic": [], "pickup": [], "groups": [],
             "crates": [], "lifts": [], "jtacs": [], "extract": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
@@ -1300,7 +1457,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         transit = g.get("transit_alt_m_agl") or tdg["transit_alt_m_agl"]   # средние высоты, если угроз в коридоре нет (planner)
         perf = state["units"][g["performer"]]
         base = state["airbases"][g["base"]]
-        airport = m.terrain.airports[base["airport"]]
+        airport = carriers.get(g["base"]) or m.terrain.airports[base["airport"]]   # авианосец - CarrierPad
         ac = dcstypes.flying(perf["type"])
         hum = 0 if g.get("_ai") or g.get("_enemy") else hum_of.get(g["group"], 0)
         is_player = player and hum > 0
@@ -1308,10 +1465,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         mt = _maintask(ac, g["maintask"])
         if g["objective"]["kind"] == "alert":    # дежурная пара ПВО: на стоянке, взлёт по обнаружению (qra.lua)
             try:                                 # стоянка занята или для реактивных её нет - старт с полосы по тревоге
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                                  airport, maintask=mt, start_type=StartType.Warm, group_size=g["size"])
             except NoParkingSlotError:
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                                  airport, maintask=mt, start_type=StartType.Runway, group_size=g["size"])
             _crew(state, fg, perf)
             fg.late_activation = True
@@ -1347,26 +1504,29 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             flights.append({"group": g["group"], "performer": perf["id"], "kind": g["objective"]["kind"], "units": [u.name for u in fl.units], "player": False,
                             **({"side": side_g} if g.get("_enemy") else {})})
             continue
+        if not is_player and not g.get("_ai") and times[g["group"]].get("air_s"):   # группа пакета игрока, взлетевшая раньше
+            g = copy.deepcopy(g)                 # (маршрут в плане не трогаем)
+            _airborne(state, g, spd, times[g["group"]]["air_s"])
         if g.get("_air_start"):                  # по плану полётов к началу миссии уже в воздухе, на пути к объекту
             fg = m.flight_group_inflight(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                          _pt(m, g["_air_start"]), max(int(transit), AIR_START_MIN_M), speed=int(spd),
                                          maintask=mt, group_size=g["size"])
         else:
             try:
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                                  maintask=mt, start_type=StartType.Cold if is_player else StartType.Runway,
                                                  group_size=g["size"])
             except NoParkingSlotError:           # вертолётная площадка: стоянок мало - с площадки (взлёт с полосы)
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                                  maintask=mt, start_type=StartType.Runway, group_size=g["size"])
         _crew(state, fg, perf)
         if is_player:
             player_air = (airport, airport)          # аэродром посадки уточняется ниже (перевозка - другой)
         st_s = times[g["group"]]["start_s"]
         if not is_player and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
-            while (base["airport"], st_s) in runway_slots:
+            while (base.get("airport") or g["base"], st_s) in runway_slots:
                 st_s += RUNWAY_GAP_S
-            runway_slots.add((base["airport"], st_s))
+            runway_slots.add((base.get("airport") or g["base"], st_s))
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
@@ -1398,7 +1558,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             if g.get("_ai"):                     # вылет ИИ: ударная группа - без группы обеспечения (_support)
                 sp = push_specs.get(g.get("_ato")) if not g.get("_support") else None
             else:
-                sp = push_specs["player"] if g["group"] == "strike" else None
+                sp = push_specs["player"] if g["group"] in ("strike", "strike2") else None
             if not sp or not sp["sead"]:
                 return
             hold = task.ControlledTask(task.OrbitAction(altitude=int(w.alt), speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
@@ -1420,7 +1580,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             start_p = g.get("_air_start") or base
             alt = int(g.get("alt_m") or transit)
             wp(model.lerp(start_p, obj["pos"], 0.5), alt, "Маршрут", keep_alt=True)
-            land = m.terrain.airports[dest["airport"]]
+            land = carriers.get(obj["airbase"]) or (m.terrain.airports[dest["airport"]] if dest.get("airport") else None)
             g["_dest"] = dest["name"]
             if is_player and helo:               # игрок: груз - ящики CTLD у машины тыла, сдать - на аэродроме назначения
                 sd = 1 if side_g == "red" else 2
@@ -1665,8 +1825,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             wp(ip, transit, "ИПМ")
             wp(tgt, transit, "Цель")
             wp(ip, tdg.get("egress_alt_m_agl") or transit, "Отход")
-        if not is_player and not g.get("_air_start"):   # ИИ: ко времени на рубеже - ETA там, скорость DCS подберёт сама
-            _lock_eta(fg, times[g["group"]]["objective_s"], spd)
+        if not is_player:                        # ИИ: ко времени на рубеже - ETA там, скорость DCS подберёт сама
+            ts = _lock_eta(fg, times[g["group"]]["objective_s"], spd)
+            if ts:
+                timing_specs.append(ts)
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)
@@ -1692,7 +1854,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                          + (Lx(f", ВЗЛЁТ через ~{t['takeoff_s'] // 60} мин (время удара - по самой медленной группе; раньше - ждать в точке сбора)",
                                f", TAKE OFF at ~{t['takeoff_s'] // 60} min (time on target is set by the slowest group; if early - hold at the rendezvous)")
                             if t.get("takeoff_s") else ""))
-                        if is_player else Lx(f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин", f"AI, runway takeoff at {t['start_s'] // 60} min"))
+                        if is_player else Lx("ИИ, к началу миссии уже в воздухе на маршруте", "AI, already airborne en route at mission start")
+                        if g.get("_air_start") else Lx(f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин", f"AI, runway takeoff at {t['start_s'] // 60} min"))
                      + (f", {when}" if g.get("_dest") else Lx(f", на объекте через ~{t['objective_s'] // 60} мин", f", on objective at ~{t['objective_s'] // 60} min"))
                      + (Lx(f", переход на {transit} м (угроз ЗРК в коридоре нет)", f", transit at {transit} m (no SAM threats in the corridor)")
                         if g.get("transit_alt_m_agl") else "")
@@ -1788,6 +1951,12 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p))))
+    if timing_specs:                             # проверка плана по времени: факт выхода групп ИИ на рубеж
+        q = lambda x: '"' + str(x).replace('"', "'") + '"'
+        items = ", ".join(f'{{ group = {q(t["group"])}, x = {t["x"]:.0f}, y = {t["y"]:.0f}, eta = {t["eta"]} }}' for t in timing_specs)
+        trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "timing.lua").read_text(encoding="utf-8")
+                                        .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(state["sortie"]))
+                                        .replace("@SPECS@", items))))
     if cap_specs:                                # пары прикрытия ИИ: без ведомого - домой
         trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
@@ -1822,6 +1991,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         + ((Lx("\n\nНаведение (КРУ, только МиГ-29):\n", "\n\nGround control intercept (GCI, MiG-29 only):\n") + "\n".join(f"- {ln}" for ln in gci_lines)) if gci_lines else "")
         + ((Lx("\n\nПеревозки и наведение (CTLD):\n", "\n\nTransport and JTAC (CTLD):\n") + "\n".join(f"- {ln}" for ln in ctld_lines)) if ctld_lines else ""))
 
+    if lg == "en":                               # английская миссия: брифинг, сообщения скриптов - из русского текста модели
+        from . import i18n_en
+        m.set_description_text(i18n_en.en(m.description_text()))
+        lines, order_lines, comm_lines = ([i18n_en.en(x) for x in ls] for ls in (lines, order_lines, comm_lines))
+        for tr_ in m.triggerrules.triggers:
+            for act in tr_.actions:
+                if isinstance(act, DoScript):
+                    act.text = String(lua_en(str(act.text)))
     kb_pages = _kneeboard(m, state, tk, lines, order_lines, comm_lines, wx_text, lg)
 
     out_path = Path(out_path)

@@ -80,6 +80,39 @@ def candidates(state: dict, side: str, tdef: dict) -> list[str]:
     return [n for _k, n in out]
 
 
+def front_candidates(state: dict, side: str, tdef: dict) -> list[tuple[str, str]]:
+    """Высадка у фронта (mode front доктрины - аэромобильные действия, армия США во Вьетнаме): [(пункт, вид)], лучшие
+    первыми. reinforce - свой пункт на линии соприкосновения, к которому подходят части противника (в threat_km), а
+    своих там мало: подкрепление на угрожаемый участок; flank - пункт противника рядом со своими (сосед по графу),
+    где его частей нет: захват с фланга. Ключ - перевес противника у пункта; захват - ближний к цели своей оси."""
+    foe = model.enemy(side)
+    pl = state["places"]
+    g = ops.graph(state)
+    obj = ops.objective(state, side)
+    near_km = tdef.get("threat_km", 15)
+    power = lambda s_, place: sum(model.strength(u) for u in ops._units_near(state, place, s_, near_km))
+    out = []
+    for name, p in pl.items():
+        nb = [q for q in g[name]]
+        if p.get("side") == side and any(pl[q].get("side") == foe for q in nb):
+            enemy, own = power(foe, name), power(side, name)
+            if enemy > 0 and enemy > own:        # угрожаемый участок: противника больше
+                out.append(((0, -(enemy - own)), name, "reinforce"))
+        elif p.get("side") == foe and any(pl[q].get("side") == side for q in nb):
+            if not ops._units_near(state, name, foe, tdef.get("lz_clear_km", 5)):
+                out.append(((1, ops.path_km(state, name, obj) if obj else 0.0), name, "flank"))
+    out.sort()
+    return [(n, k) for _k, n, k in out]
+
+
+def hot_lz(state: dict, side: str, pos: dict, tdef: dict) -> int:
+    """Частей противника у площадки (в hot_lz_km): огонь стрелкового оружия, ДШК, ЗУ по садящимся вертолётам."""
+    foe = model.enemy(side)
+    km = tdef.get("hot_lz_km", 5)
+    return sum(1 for u in state["units"].values() if u.get("side") == foe and u.get("state") not in ("destroyed", "pending", None)
+               and model.category(u) in ("ground", "sam") and model.dist_km(model.unit_pos(state, u), pos) <= km)
+
+
 def resolve(state: dict, until_s: float | None = None) -> list[str]:
     """Итог высадок плана полётов суток со временем на цели не позже until_s (шаг наземной модели, airwar.py)."""
     a = state.get("ato") or {}
@@ -105,11 +138,16 @@ def resolve(state: dict, until_s: float | None = None) -> list[str]:
             how = "по итогам вылета"
         else:                                    # ИИ: сбитые в миссиях, остальное - по угрозам ЗРК в коридоре
             left = max(0, size - lost_by.get(e["id"], 0))
-            p = min(0.8, tdef.get("ai_loss_per_threat", 0.15) * len(e["task"].get("threats", [])))
+            p = min(0.8, tdef.get("ai_loss_per_threat", 0.15) * len(e["task"].get("threats", []))
+                    + tdef.get("hot_lz_loss", 0.0) * hot_lz(state, e["side"], obj["pos"], tdef))   # огонь у площадки
             r = model.rng(state, f"assault-{e['id']}")
             down = sum(1 for _ in range(left) if r.random() < p) if r else round(left * p)
             landed = left - down
             how = "ИИ"
+            heli = state["units"].get(g["performer"])
+            if heli and down:                    # сбитые транспортные вертолёты - из строя части
+                heli["count"] = max(0, heli.get("count", 0) - down)
+                lines.append(f"{heli['name']}: сбито при высадке {down} {heli.get('type', '')}.")
         # рота - поровну по бортам (загрузка, а не вместимость: 100 человек на 4 CH-53 - по 25, не по 37)
         frac = landed / size if size else 0.0
         lost_frac = (size - landed) / size if size else 0.0
@@ -123,6 +161,10 @@ def resolve(state: dict, until_s: float | None = None) -> list[str]:
             continue
         u["route"] = [place]
         u["progress_km"] = 0.0
+        if obj.get("mode") == "reinforce":       # подкрепление на свой пункт: обычная часть в обороне
+            u["state"], u["order"], u["defending"], u["engaged"] = "defend", None, True, []
+            lines.append(f"{u['name']}: переброшена к {place} ({how}: село {landed} из {size} бортов), обороняет пункт.")
+            continue
         u["state"], u["order"], u["defending"], u["engaged"] = "defend", "airhead", True, []
         u["airhead_day"] = state["day"]
         lines.append(f"{u['name']}: высажена у {place} ({how}: село {landed} из {size} бортов), держит пункт до подхода своих.")
