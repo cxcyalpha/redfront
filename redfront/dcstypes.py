@@ -50,6 +50,8 @@ def _index_flying() -> dict:
             if isinstance(v, type) and getattr(v, "__module__", "") == mod.__name__ and hasattr(v, "id") and hasattr(v, "pylons"):
                 idx.setdefault(k, v)
                 idx.setdefault(v.id, v)
+    from .mods import a6e                        # типы базового DCS, которых нет в pydcs (A-6E - ИИ-юнит Heatblur)
+    idx.setdefault("A6E", a6e.A6E)
     return idx
 
 

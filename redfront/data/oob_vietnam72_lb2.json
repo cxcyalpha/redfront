@@ -1271,14 +1271,26 @@
   },
   {
    "id": "us_va_kh",
-   "name": "VA-192, VA-195 (A-7E), VA-52 (A-6A), Enterprise",
+   "name": "VA-192, VA-195 (A-7E), Enterprise",
    "side": "blue",
    "role": "fighter_bomber",
    "base": "cv65",
    "type": "FA_18C_hornet",
-   "count": 36,
+   "count": 24,
    "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E/A-6A - F/A-18C",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E - F/A-18C",
+   "estimate": true
+  },
+  {
+   "id": "us_va52",
+   "name": "VA-52 (A-6A, Enterprise)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv65",
+   "type": "A6E",
+   "count": 12,
+   "strike_radius_km": 600,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-6A - A-6E",
    "estimate": true
   },
   {
@@ -1319,14 +1331,26 @@
   },
   {
    "id": "us_va_con",
-   "name": "VA-146, VA-147 (A-7E), VA-165 (A-6A), Saratoga",
+   "name": "VA-146, VA-147 (A-7E), Saratoga",
    "side": "blue",
    "role": "fighter_bomber",
    "base": "cv60",
    "type": "FA_18C_hornet",
-   "count": 36,
+   "count": 24,
    "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E/A-6A - F/A-18C",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E - F/A-18C",
+   "estimate": true
+  },
+  {
+   "id": "us_va165",
+   "name": "VA-165 (A-6A, Saratoga)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv60",
+   "type": "A6E",
+   "count": 12,
+   "strike_radius_km": 600,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-6A - A-6E",
    "estimate": true
   },
   {
@@ -1355,14 +1379,26 @@
   },
   {
    "id": "us_va_cs",
-   "name": "VA-22, VA-94 (A-7E), VMA(AW)-224 (A-6A), America",
+   "name": "VA-22, VA-94 (A-7E), America",
    "side": "blue",
    "role": "fighter_bomber",
    "base": "cv66",
    "type": "FA_18C_hornet",
-   "count": 30,
+   "count": 20,
    "strike_radius_km": 500,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E/A-6A - F/A-18C",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-7E - F/A-18C",
+   "estimate": true
+  },
+  {
+   "id": "us_vma224",
+   "name": "VMA(AW)-224 (A-6A, America)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv66",
+   "type": "A6E",
+   "count": 10,
+   "strike_radius_km": 600,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; A-6A - A-6E",
    "estimate": true
   },
   {
@@ -1622,5 +1658,5 @@
   ]
  },
  "_about_point_ad": "ДРВ: у мостов и складов - зенитная артиллерия 57-100 мм и 23 мм (ОЦЕНКА состава), не ЗРК малой дальности.",
- "_not_included": "A-6A, A-7E, F-105, F-8, A-1, A-37, AC-130, OV-10 (нет в DCS без модов - замены в source), МиГ-17 (МиГ-15бис), Лаос и Камбоджа, минирование Хайфона, флот у побережья (обстрел крейсерами)."
+ "_not_included": "A-7E, F-105, F-8, A-1, A-37, AC-130, OV-10 (нет в DCS без модов - замены в source), МиГ-17 (МиГ-15бис), Лаос и Камбоджа, минирование Хайфона, флот у побережья (обстрел крейсерами)."
 }

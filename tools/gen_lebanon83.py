@@ -8,8 +8,8 @@ New Jersey обстреливал высоты. Сценарий развива�
 Израиль (южнее реки Авали) - вне боёв: его пункты закрыты для обеих сторон.
 
 Источники (общие, по памяти - проверять): B. Hammel, "The Root" (1985); J. Lehman, "Command of the Seas" (1988);
-отчёт ВМС о налёте 4.12.1983. Координаты, составы и числа - ОЦЕНКИ. Типы DCS: A-6E и A-7E в pydcs нет (без модов) -
-их место занимает F/A-18C (допущение; в 1983 г. на этих авианосцах его не было). Авианосцы класса Forrestal/Kitty Hawk
+отчёт ВМС о налёте 4.12.1983. Координаты, составы и числа - ОЦЕНКИ. Типы DCS: A-6E - ИИ-юнит DCS (тип описан в redfront.mods.a6e); A-7E в DCS нет -
+его место занимает F/A-18C (допущение; в 1983 г. на этих авианосцах его не было). Авианосцы класса Forrestal/Kitty Hawk
 - Forrestal из DCS. Ливанская армия - в коалиции США (одна страна на сторону).
 """
 from __future__ import annotations
@@ -96,13 +96,15 @@ DEPOTS = [("blue_depot_jounieh", "Склад снабжения (Джуния)",
           ("red_depot_aley", "Склады ПСП (Алей)", "red", "Aley")]
 AIR = [   # (id, имя, сторона, роль, тип, база, число, радиус км, примечание)
     ("us_vf14", "VF-14, VF-32 (F-14A, Independence)", "blue", "fighter", "F_14A_135_GR", "cv62", 24, 500, ""),
-    ("us_va_ind", "VA-15, VA-87, VA-176 (A-6E, A-7E, Independence)", "blue", "fighter_bomber", "FA_18C_hornet", "cv62", 30, 500,
-     "A-6E/A-7E в pydcs нет - F/A-18C (допущение)"),
+    ("us_va_ind", "VA-15, VA-87 (A-7E, Independence)", "blue", "fighter_bomber", "FA_18C_hornet", "cv62", 24, 500,
+     "A-7E в DCS нет - F/A-18C (допущение)"),
+    ("us_va176", "VA-176 (A-6E, Independence)", "blue", "fighter_bomber", "A6E", "cv62", 10, 600, ""),
     ("us_e2_ind", "VAW-122 (E-2C)", "blue", "awacs", "E_2C", "cv62", 4, 1000, ""),
     ("us_s3_ind", "VS-28 (S-3A, заправщик)", "blue", "tanker", "S_3B_Tanker", "cv62", 4, 800, "S-3A - S-3B Tanker"),
     ("us_vf11", "VF-11, VF-31 (F-14A, Kennedy)", "blue", "fighter", "F_14A_135_GR", "cv67", 24, 500, ""),
-    ("us_va_jfk", "VA-75, VA-85 (A-6E), VA-15 (A-7E), Kennedy", "blue", "fighter_bomber", "FA_18C_hornet", "cv67", 30, 500,
-     "A-6E/A-7E в pydcs нет - F/A-18C (допущение)"),
+    ("us_va_jfk", "VA-15 (A-7E, Kennedy)", "blue", "fighter_bomber", "FA_18C_hornet", "cv67", 12, 500,
+     "A-7E в DCS нет - F/A-18C (допущение)"),
+    ("us_va75", "VA-75, VA-85 (A-6E, Kennedy)", "blue", "fighter_bomber", "A6E", "cv67", 20, 600, ""),
     ("us_e2_jfk", "VAW-126 (E-2C)", "blue", "awacs", "E_2C", "cv67", 4, 1000, ""),
     ("us_hmm", "HMM-162 (CH-46/AH-1T, Тарава)", "blue", "attack_helo", "AH_1W", "lha1", 4, 120, "AH-1T - AH-1W"),
     ("s_mig21", "Истребительные эскадрильи (МиГ-21)", "red", "fighter", "MiG_21Bis", "Al-Dumayr", 24, 250, ""),
@@ -178,7 +180,7 @@ def main() -> None:
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]} for v in vs]
                                 for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
-        "_not_included": "A-6E, A-7E (нет в pydcs без модов - F/A-18C), линкор New Jersey, многонациональные силы "
+        "_not_included": "A-7E (нет в DCS - F/A-18C), линкор New Jersey, многонациональные силы "
                          "(Франция, Италия, Великобритания), Израиль.",
     }
     (DATA / "oob_lebanon83.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
