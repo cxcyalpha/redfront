@@ -315,6 +315,11 @@ false
 false
 ],
 [
+"два\\ кавалерийских\\ эскадрона\\ армии\\ США\\ в\\ I\\ корпусе",
+"two US Army cavalry squadrons in I Corps",
+false
+],
+[
 "Вьетнам:\\ апрель\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(условная\\ география,\\ авианосцы\\)",
 "Vietnam: April {y} (stand-in geography, carriers)",
 false
@@ -417,6 +422,11 @@ false
 [
 "Кавказ:\\ август\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ \\(Южная\\ Осетия\\ и\\ Абхазия\\)",
 "Caucasus: August {y} (South Ossetia and Abkhazia)",
+false
+],
+[
+"1\\-я\\ авиационная\\ бригада:\\ подъём\\ рот\\ АРВН",
+"1st Aviation Brigade: lift for ARVN companies",
 false
 ],
 [
