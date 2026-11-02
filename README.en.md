@@ -66,7 +66,11 @@ Where planner numbers come from: air unit radius — `strike_radius_km` on the u
 `threat_radius_km` on the unit, otherwise on the role, otherwise the largest launcher `threat_range` from pydcs (that is
 the range against a high-altitude target; it is overstated against a low-flying one; see also radar horizon below).
 
-Mod types (Su-24, MiG-31 etc.) unknown to pydcs are not supported; registering them is a separate step.
+**DCS mods** (`redfront/mods`): a mod type is a module describing the type and weapons for pydcs (like
+`pydcs_extensions` in DCS Retribution, LGPL-3.0), enabled per campaign (⚙ → "Campaign" → "DCS mods"; every player of
+the mission needs the mod). Units on a mod type (`mod` on the unit) take no part without the mod. Currently A-4E-C
+(Israeli A-4 squadrons in Lebanon 1982); the type description (`redfront/mods/a4ec.py`) is brought over from
+Retribution separately.
 
 ### Mission window and conservation rule
 

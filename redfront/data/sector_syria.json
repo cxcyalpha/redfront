@@ -315,6 +315,12 @@
    "airport": "Ben Gurion",
    "side": "blue",
    "military": true
+  },
+  "hatzerim": {
+   "name": "Hatzerim",
+   "airport": "Hatzerim",
+   "side": "blue",
+   "military": true
   }
  },
  "links": [
@@ -715,6 +721,17 @@
    "covers": "af_haifa",
    "lat": 32.8238,
    "lon": 35.0478,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_hatzerim",
+   "name": "ПВО аэродрома Hatzerim",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_hatzerim",
+   "lat": 31.252,
+   "lon": 34.6611,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },

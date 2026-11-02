@@ -8,7 +8,7 @@
 Источники (общие, по памяти - проверять): Ch. Herzog, "The Arab-Israeli Wars"; Z. Schiff, E. Ya'ari, "Israel's
 Lebanon War" (1984); B. Lambeth, "Moscow's Lessons from the 1982 Lebanon Air War" (RAND, 1984). Координаты - ОЦЕНКА
 (+-2 км), составы и числа - ОЦЕНКИ по порядку величины. Типы DCS - ближайшие: Меркава Mk1 - Merkava Mk4, Магах - M-60,
-Т-62 - Т-55, Т-72М - Т-72Б, F-15A - F-15C, МиГ-23МФ/МС - МиГ-23МЛД, Су-22 - Су-17М4, AH-1S - AH-1W; A-4 и Кфир в DCS нет.
+Т-62 - Т-55, Т-72М - Т-72Б, F-15A - F-15C, МиГ-23МФ/МС - МиГ-23МЛД, Су-22 - Су-17М4, AH-1S - AH-1W; A-4 - мод A-4E-C (если включён), Кфира в DCS нет.
 """
 from __future__ import annotations
 
@@ -58,7 +58,7 @@ AIRBASES = {   # терраин pydcs Syria
     "red": ["Damascus", "Mezzeh", "Al-Dumayr", "Khalkhalah", "Marj Ruhayyil", "Shayrat", "Al Qusayr", "Rayak",
             "Qabr as Sitt", "Beirut-Rafic Hariri"],
     "blue": ["Ramat David", "Megiddo", "Haifa", "Rosh Pina", "Kiryat Shmona", "Eyn Shemer", "Tel Nof", "Hatzor",
-             "Palmachim", "Ben Gurion"],
+             "Palmachim", "Ben Gurion", "Hatzerim"],
 }
 AXES = {   # оси наступления синих (ОЦЕНКА по ходу операции)
     "coast": {"title": "Побережье: Тир - Сидон - Дамур - Бейрут", "objectives": ["Tyre", "Sidon", "Damour", "Beirut"]},
@@ -145,6 +145,8 @@ AIR = [   # (id, имя, сторона, роль, тип, аэродром, ч�
     ("i_f15", "106-я и 133-я эскадрильи (F-15A)", "blue", "fighter", "F_15C", "Tel Nof", 30, 600, "F-15A - F-15C"),
     ("i_f16", "110-я и 117-я эскадрильи (F-16A)", "blue", "fighter_bomber", "F_16A", "Ramat David", 36, 500, ""),
     ("i_f4", "69-я, 119-я, 201-я эскадрильи (F-4E 'Курнас')", "blue", "fighter_bomber", "F_4E_45MC", "Hatzor", 40, 500, ""),
+    ("i_a4", "Эскадрильи A-4N/H 'Скайхок' (102, 109, 115, 116, 140)", "blue", "fighter_bomber", "A_4E_C", "Hatzerim", 40, 400,
+     "мод A-4E-C: без мода части в кампании нет"),
     ("i_e2c", "192-я эскадрилья (E-2C)", "blue", "awacs", "E_2C", "Palmachim", 2, 1000, ""),
     ("i_tank", "120-я эскадрилья (Боинг 707 - заправщик)", "blue", "tanker", "KC_135", "Ben Gurion", 2, 2000, "707 - KC-135"),
     ("i_ah1", "160-я и 161-я эскадрильи (AH-1S)", "blue", "attack_helo", "AH_1W", "Megiddo", 16, 150, "AH-1S - AH-1W"),
@@ -159,6 +161,7 @@ AIR = [   # (id, имя, сторона, роль, тип, аэродром, ч�
     ("s_gazelle", "Вертолёты 'Газель' (ПТУР HOT)", "red", "attack_helo", "SA342M", "Qabr as Sitt", 14, 120, ""),
     ("s_mi8", "Вертолёты Ми-8", "red", "transport_helo", "Mi_8MT", "Mezzeh", 12, 200, ""),
 ]
+MOD_TYPES = {"A_4E_C": "a4ec"}   # типы модов (redfront.mods): часть в строю, только если мод включён в кампании
 AD_TEMPLATES = {
     "red": {"short": [{"name": "Стрела-1, ЗСУ-23-4", "composition": [("Strela_1_9P31", "launcher", 2), ("ZSU_23_4_Shilka", "launcher", 2)]}]},
     "blue": {"short": [{"name": "Чапарэл, Вулкан", "composition": [("M48 Chaparral", "launcher", 2), ("Vulcan", "launcher", 2)]}]},
@@ -248,7 +251,7 @@ def main() -> None:
         assert bid in airbases, (uid, base)
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": bid, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
-                      "estimate": True})
+                      "estimate": True, **({"mod": MOD_TYPES[typ]} if typ in MOD_TYPES else {})})
     oob = {
         "_about": "Состав сил Ливанской войны 1982 г. (Израиль - Сирия и ООП). Генерирован tools/gen_syria.py; источники "
                   "- в поле source. Числа - ОЦЕНКИ по порядку величины.",
@@ -268,7 +271,7 @@ def main() -> None:
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]}
                                        for v in vs] for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
-        "_not_included": "A-4 'Скайхок' и 'Кфир' (в DCS нет), БПЛА 'Скаут' и 'Мастиф', ВМС, морской десант у Сидона "
+        "_not_included": "'Кфир' (в DCS нет), A-4 без мода A-4E-C, БПЛА 'Скаут' и 'Мастиф', ВМС, морской десант у Сидона "
                          "(96-я дивизия), Армия Южного Ливана, многонациональные силы.",
     }
     (DATA / "oob_syria.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")

@@ -241,6 +241,8 @@ body.past #map { box-shadow: inset 0 0 0 3px #b8860b; filter: sepia(.25); }
         <label><input type="checkbox" id="sWxFog" style="width:auto"> <span data-t="wxFog"></span></label></div>
       <label><input type="checkbox" id="sWxEff" style="width:auto"> <span data-t="wxEff"></span></label>
       <div class="row" style="margin-top:6px"><button type="button" id="bWx" data-t="apply"></button><span class="meta" data-t="wxTip"></span></div>
+      <label data-t="modsT"></label><div id="sMods"></div>
+      <div class="row" style="margin-top:6px"><button type="button" id="bMods" data-t="apply"></button><span class="meta" data-t="modsTip"></span></div>
     </div>
     <div class="sect"><b data-t="mapTools"></b>
       <div class="meta" data-t="mapToolsTip"></div>
@@ -276,7 +278,8 @@ const I18N = {
     wxFog: "утренний туман", wxEff: "погода влияет на план полётов (минимумы)", wxTip: "пересчёт: сегодня, если ещё не летали, иначе с завтра", nSeedPh: "например 12345", noRand: "без случайности", overwrite: "перезаписать файл",
     cancel: "Отмена", create: "Создать", close: "Закрыть", language: "Язык", loEdTip: "своя подвеска: оружие по пилонам (новее года кампании - заменится по эпохе)", loEmpty: "— пусто —",
     loName: "имя подвески", loSave: "Сохранить",
-    aiTest: "всё на ИИ", aiTestTip: "проверочная миссия: группа игрока тоже ИИ; в дебрифе - когда группы ИИ вышли на рубеж против плана",
+    modsT: "Моды DCS (установлены у всех игроков миссии)", modsTip: "части на типах мода - в строю, только если мод включён",
+    modNoDesc: "нет описания типа в программе", aiTest: "всё на ИИ", aiTestTip: "проверочная миссия: группа игрока тоже ИИ; в дебрифе - когда группы ИИ вышли на рубеж против плана",
     histNow: "обстановка: сейчас", histDay: "День", histTip: "хронология: обстановка на карте в прошлые дни (движение фронта)",
     budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
     airBudgetTip: "с пакетом игрока; вылеты ИИ дальше от удара игрока не ставятся (в модели они летают); 0 - без ограничения",
@@ -359,7 +362,8 @@ const I18N = {
     wxFog: "morning fog", wxEff: "weather affects the air tasking order (minima)", wxTip: "recomputed today if nothing flown yet, otherwise from tomorrow", nSeedPh: "e.g. 12345", noRand: "no randomness", overwrite: "overwrite file",
     cancel: "Cancel", create: "Create", close: "Close", language: "Language", loEdTip: "custom loadout: weapon per pylon (newer than the campaign year is replaced by era)", loEmpty: "— empty —",
     loName: "loadout name", loSave: "Save",
-    aiTest: "all AI", aiTestTip: "test mission: the player's group is AI too; the debrief shows when AI groups reached their entry points against the plan",
+    modsT: "DCS mods (installed for every player of the mission)", modsTip: "units on mod types are active only with the mod enabled",
+    modNoDesc: "no type description in the program", aiTest: "all AI", aiTestTip: "test mission: the player's group is AI too; the debrief shows when AI groups reached their entry points against the plan",
     histNow: "situation: now", histDay: "Day", histTip: "timeline: the map situation on past days (front movement)",
     budget: "Max ground vehicles in mission", airBudget: "Max aircraft in mission",
     airBudgetTip: "including the player package; AI sorties farther from the player strike are left out (the model still flies them); 0 - unlimited",
@@ -1078,7 +1082,9 @@ $("#bSet").onclick = () => {
   $("#sDate").value = (ST && ST.date) || ""; $("#sWxMode").value = wx.weather_mode || "climate";
   $("#sWxType").value = wx.weather_type || "high"; $("#sWxFog").checked = !!wx.weather_fog;
   $("#sWxEff").checked = wx.weather_effects !== false; wxShow();
-  ["sDate", "bDate", "sWxMode", "sWxType", "sWxFog", "sWxEff", "bWx"].forEach(id => $("#" + id).disabled = !ST);
+  ["sDate", "bDate", "sWxMode", "sWxType", "sWxFog", "sWxEff", "bWx", "bMods"].forEach(id => $("#" + id).disabled = !ST);
+  $("#sMods").innerHTML = ((ST && ST.mods) || []).map(m => `<label class="meta" title="${esc(m.url)}"><input type="checkbox" class="modck" value="${esc(m.id)}"
+    ${m.on ? "checked" : ""} ${m.available ? "" : "disabled"} style="width:auto"> ${esc(m.title)}${m.available ? "" : " — " + esc(T("modNoDesc"))}</label>`).join("<br>");
   $("#dSet").showModal();
 };
 $("#sLang").onchange = async e => {
@@ -1091,6 +1097,7 @@ $("#sAir").onchange = e => setPref("rf_air", e.target.value);
 function wxShow() { $("#wxFixed").style.display = $("#sWxMode").value === "fixed" ? "" : "none"; }
 $("#sWxMode").onchange = wxShow;
 $("#bDate").onclick = e => act("setdate", {date: $("#sDate").value}, e.target);
+$("#bMods").onclick = e => act("setmods", {mods: [...document.querySelectorAll(".modck:checked")].map(x => x.value)}, e.target);
 $("#bWx").onclick = e => act("setweather", {mode: $("#sWxMode").value, type: $("#sWxType").value, fog: $("#sWxFog").checked,
   effects: $("#sWxEff").checked}, e.target);
 $("#sEnemy").onchange = e => { setPref("rf_ato_enemy", e.target.checked ? "1" : "0"); render(); };

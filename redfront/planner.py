@@ -929,7 +929,10 @@ def _can(unit: dict, maintask: str) -> bool:
     """Умеет ли тип части задачу DCS (planes.X.tasks), напр. Су-24М - SEAD, Су-25 - нет."""
     from dcs import task as _task
     t = getattr(_task, maintask, None)
-    return t is not None and t in dcstypes.flying(unit["type"]).tasks
+    try:
+        return t is not None and t in dcstypes.flying(unit["type"]).tasks
+    except KeyError:                             # тип мода, мод не включён - части в кампании нет
+        return False
 
 
 def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict,
@@ -1000,6 +1003,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         from . import pilots
         cands = [u for u in units.values()
                  if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need
+                 and not u.get("mod_off")
                  and nation_ok(state, u, g) and (not g.get("types") or u.get("type") in g["types"])          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
                  and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]
         mate = chosen_by.get(g.get("pair_with") or "")

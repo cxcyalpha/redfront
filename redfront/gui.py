@@ -62,6 +62,16 @@ def _ll(p: dict) -> list[float]:
     return [round(p["lat"], 5), round(p["lon"], 5)]
 
 
+def _mods_list() -> dict:
+    from . import mods
+    return mods.MODS
+
+
+def _mods_available(k: str) -> bool:
+    from . import mods
+    return mods.available(k)
+
+
 HISTORY_MAX = 60       # снимков обстановки в кампании (начало каждых суток, ~140 КБ на снимок)
 
 
@@ -188,6 +198,8 @@ def view(st: dict, history: bool = True) -> dict:
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
         "weather": wx_lines[0], "weather_text": "\n".join(wx_lines[1:] + wx_cancel),
+        "mods": [{"id": k, "title": v["title"], "url": v["url"], "on": k in (st["settings"].get("mods") or []),
+                  "available": _mods_available(k)} for k, v in _mods_list().items()],
         "wx": {k: st["settings"].get(k, v) for k, v in (("weather_mode", "climate"), ("weather_type", "high"),
                                                          ("weather_fog", False), ("weather_effects", True))},
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
@@ -473,6 +485,16 @@ class App:
             model.note(st, f"Дата начала кампании: {st['date']}; {ln}.")
             model.save(st, p)
             return {"state": view(st), "lines": [ln]}
+        if action == "setmods":                      # моды DCS кампании (redfront.mods): части на типах модов в строй
+            from . import mods as _mods
+            want = [m for m in (req.get("mods") or []) if m in _mods.MODS]
+            miss = [m for m in want if not _mods.available(m)]
+            if miss:
+                raise ValueError("нет описания типа мода: " + ", ".join(_mods.MODS[m]["title"] for m in miss))
+            st["settings"]["mods"] = want
+            ln = _mods.apply(st) or ["Моды: " + (", ".join(_mods.MODS[m]["title"] for m in want) or "выключены") + "."]
+            model.save(st, p)
+            return {"state": view(st), "lines": ln}
         if action == "setweather":                   # настройки погоды: режим, тип, туман, влияние на план полётов
             from . import weather as _wx
             cfg = st["settings"]

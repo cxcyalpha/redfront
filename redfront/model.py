@@ -429,6 +429,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
     _intel.ensure(st)
     apply_liveries(st)
     ensure_point_ad(st)
+    from . import mods as _mods                  # моды DCS: части на типах модов - по настройке кампании
+    _mods.apply(st)
     for side in (chosen or {}).get("assembly", []):   # вариант: первый эшелон стороны - в исходных районах у границы
         assembly_areas(st, side)
     return st
@@ -520,6 +522,8 @@ def load(path: Path) -> dict:
     init_crews(st)
     drop_dummy_depots(st)
     ensure_point_ad(st)
+    from . import mods as _mods
+    _mods.apply(st)
     from . import farp as _farp                  # вертолётные площадки карты - и в старых кампаниях
     _farp.ensure(st)
     from . import intel as _intel                # разведка позиций ЗРК противника - и в старых кампаниях
