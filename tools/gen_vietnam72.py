@@ -109,6 +109,11 @@ GROUND = [   # (id, имя, сторона, пункт, состав, ПВО, д
     ("blue_1abde", "1-я бронетанковая бригада АРВ", "blue", "Hue", ARVN_ARM, {}, 1, None),
     ("blue_abn", "Воздушно-десантная дивизия Южного Вьетнама", "blue", "DaNang", ARVN_MAR, {}, 3, None),
 ]
+AIRMOBILE = [   # (id, имя, пункт, человек) - аэромобильные роты АРВН в резерве (рейнджеры, десантники): ОЦЕНКА численности
+    ("blue_rgr21", "Рота 21-го батальона рейнджеров АРВН", "Hue", 80),
+    ("blue_rgr39", "Рота 39-го батальона рейнджеров АРВН", "PhuBai", 80),
+    ("blue_abn2", "Рота 2-го воздушно-десантного батальона АРВН", "DaNang", 80),
+]
 S75 = [("p-19 s-125 sr", "radar", 1), ("SNR_75V", "radar", 1), ("S_75M_Volhov", "launcher", 6)]
 # 361-я, 363-я, 365-я дивизии ПВО: дивизионы С-75 (места - ОЦЕНКА, по районам: Ханой - Хайфон - юг ДРВ - у ДМЗ)
 SAM_POS = {"Ханой": [(35.20, 36.70), (35.08, 36.82), (35.18, 36.85), (35.06, 36.66), (35.22, 36.78), (35.12, 36.60)],
@@ -157,7 +162,10 @@ AIR = [   # (id, имя, сторона, роль, тип, база, число,
      "B-52D/G - B-52H"),
     ("us_37arrs", "37-я спасательная эскадрилья (HH-53, Дананг)", "blue", "transport_helo", "CH_53E", "Beirut-Rafic Hariri", 6,
      200, "HH-53 - CH-53E"),
-    ("us_ah1", "Армейские AH-1G (Фубай)", "blue", "attack_helo", "AH_1W", "Rene Mouawad", 12, 120, "AH-1G - AH-1W"),
+    ("us_ah1", "Армейские AH-1G (Фубай)", "blue", "attack_helo", "AH_1W", "Rene Mouawad", 24, 120,
+     "AH-1G - AH-1W; два кавалерийских эскадрона армии США в I корпусе - ОЦЕНКА"),
+    ("us_uh1", "Вертолётные роты армии США (UH-1H, Дананг)", "blue", "transport_helo", "UH_1H", "Beirut-Rafic Hariri", 24, 150,
+     "1-я авиационная бригада: подъём рот АРВН"),
     ("vn_uh1", "ВВС Южного Вьетнама (UH-1H, Фубай)", "blue", "transport_helo", "UH_1H", "Rene Mouawad", 16, 150, ""),
     ("r_921", "921-й истребительный полк 'Красная звезда' (МиГ-21ПФ/МФ, Ной-Бай)", "red", "fighter", "MiG_21Bis", "Hama", 30, 250,
      "МиГ-21ПФ/МФ - МиГ-21бис"),
@@ -230,6 +238,12 @@ def main() -> None:
                           "attached_to": uid, "state": u["state"],
                           "composition": [{"type": t, "count": c, "role": "launcher"} for t, c in ad.items()],
                           "source": "ОЦЕНКА", "estimate": True})
+    for uid, name, place, men in AIRMOBILE:
+        units.append({"id": uid, "name": name, "side": "blue", "role": "air_assault", "state": "defend", "order": "reserve",
+                      "air_mobile": True, "home": place, "men": men, "route": [place], "progress_km": 0.0, "march_kmh": 5,
+                      "daily_advance_km": 10, "composition": [{"type": "Soldier M4", "count": 16, "role": "infantry"},
+                                                              {"type": "Soldier M249", "count": 4, "role": "infantry"}],
+                      "source": SRC + "; рота - ОЦЕНКА; M16/M60 - в DCS Soldier M4/M249", "estimate": True})
     for sid, name, side, role, cmp_, la, lo in SAMS:
         units.append({"id": sid, "name": name, "side": side, "role": role, "state": "deployed", "fixed": True,
                       "pos": {"lat": la, "lon": lo}, "composition": [{"type": t, "count": c, "role": r} for t, r, c in cmp_],
@@ -239,7 +253,7 @@ def main() -> None:
         assert b in airbases or b in carriers, (uid, base)
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": b, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
-                      "estimate": True})
+                      "estimate": True, **({"tasks_only": ["csar"]} if uid == "us_37arrs" else {})})
     oob = {
         "_about": "Вьетнам, апрель 1972: Пасхальное наступление и воздушная кампания США (условная география, карта Syria).",
         "theatre": "syria",

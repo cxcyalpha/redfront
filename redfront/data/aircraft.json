@@ -239,6 +239,7 @@
     "MiG_19P": {"fit": {"cas": 0.15, "air": 0.4}, "crew": 1, "night": false},
     "MiG_15bis": {"fit": {"cas": 0.15, "air": 0.25}, "crew": 1, "night": false},
     "F_14A_135_GR": {"carrier": true, "fit": {"air": 0.9}, "crew": 2, "night": true},
+    "AH_1W": {"fit": {"cas": 0.65}, "troops": 0, "crew": 2, "night": false},
     "S_3B_Tanker": {"carrier": true, "crew": 4, "night": true},
     "F_14A_135_GR_Early": {"carrier": true, "fit": {"air": 0.85}, "crew": 2, "night": true}
   },

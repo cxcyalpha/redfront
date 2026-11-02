@@ -179,7 +179,11 @@ NAMES = {
     "Склады ООП (Сидон)": "PLO depots (Sidon)", "Мост Касмия через Литани": "Qasmiyeh bridge over the Litani",
     "Мост Хардали через Литани": "Khardali bridge over the Litani",
     # --- Вьетнам
-    "324B дивизия ВНА": "NVA 324B Division", "320B дивизия ВНА": "NVA 320B Division",
+    "324B дивизия ВНА": "NVA 324B Division",
+    "Рота 21-го батальона рейнджеров АРВН": "Company, ARVN 21st Ranger Battalion",
+    "Рота 39-го батальона рейнджеров АРВН": "Company, ARVN 39th Ranger Battalion",
+    "Рота 2-го воздушно-десантного батальона АРВН": "Company, ARVN 2nd Airborne Battalion",
+    "Вертолётные роты армии США (UH-1H, Дананг)": "US Army assault helicopter companies (UH-1H, Da Nang)", "ИИ": "AI", "320B дивизия ВНА": "NVA 320B Division",
     "202-й и 203-й танковые полки ВНА": "NVA 202nd and 203rd Armored Regiments",
     "20-й танковый батальон АРВ (М-48)": "ARVN 20th Tank Battalion (M48)", "1-я бронетанковая бригада АРВ": "ARVN 1st Armored Brigade",
     "Воздушно-десантная дивизия Южного Вьетнама": "South Vietnamese Airborne Division",
@@ -628,7 +632,10 @@ MSGS += [
     ("{a} в {y}", "{a} in {y}"), ("{a} с {y} (?)", "{a} from {y} (?)"), ("Вьетнам", "Vietnam"), ("Ливан", "Lebanon"), ("часть", "unit"),
 ]
 MSGS += [
-    ("пара {n}", "pair {n}"), ("снято", "removed"), ("передовая группа", "forward detachment"),
+    ("пара {n}", "pair {n}"), ("сбито при высадке {n} {t}.", "{n} {t} shot down at the landing zone."),
+    ("переброшена к {p} ({h}: село {a} из {b} бортов), обороняет пункт.", "flown in to {p} ({h}: {a} of {b} helicopters landed), defending the place."),
+    ("Аэромобильная высадка", "Airmobile assault"), ("подкрепление", "reinforcement"), ("захват с фланга", "flank seizure"),
+    ("площадка под огнём: частей противника рядом {n}", "hot landing zone: {n} enemy units nearby"), ("снято", "removed"), ("передовая группа", "forward detachment"),
     ("высажена у {p} (ИИ: село {n} из {m} бортов), держит пункт до подхода своих.",
      "landed at {p} (AI: {n} of {m} helicopters landed), holding the place until friendly troops arrive."),
     ("Разведка, {a}: {x} ({w}, полоса {k} км, РТР {r} км).", "Reconnaissance, {a}: {x} ({w}, swath {k} km, ELINT {r} km)."),

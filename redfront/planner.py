@@ -338,7 +338,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("from_year") and year and year < tdef["from_year"]:
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
         performers = [u for u in state["units"].values()
-                      if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0]
+                      if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0
+                      and kind in u.get("tasks_only", [kind])]   # специализированная часть (спасатели HH-53) - только свои задачи
         if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
             from . import assault
             performers = [u for u in performers if assault.troops(u.get("type", "")) > 0]
@@ -764,14 +765,16 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
         return []
     foe = model.enemy(side)
     out, used = [], set()
-    places = assault.candidates(state, side, tdef)
+    front = tdef.get("mode") == "front"          # аэромобильные действия у фронта (армия США во Вьетнаме)
+    places = assault.front_candidates(state, side, tdef) if front else [(p, "deep") for p in assault.candidates(state, side, tdef)]
     for u in res:
         if len(out) >= tdef.get("per_day", 1):
             break
-        for place in places:
+        for place, how in places:
             if place in used:
                 continue
-            lz = assault.lz_point(state, side, place, tdef)
+            lz = (assault.lz_point(state, model.enemy(side), place, tdef) if how == "reinforce"   # за пунктом, от противника
+                  else assault.lz_point(state, side, place, tdef))
             best = None
             for r in performers:
                 need = assault.lift_need(u, r["type"])
@@ -797,17 +800,20 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                 groups.append({"group": "strike" if not k else f"lift{k // GROUP_MAX + 1}",
                                "title": s["title"] + (f" ({k // GROUP_MAX + 1})" if k else ""), "performer": perf["id"],
                                "size": min(GROUP_MAX, need - k), "base": perf["base"], "route": [lz],
-                               "objective": {"kind": "air_assault", "unit": u["id"], "place": place, "pos": lz},
+                               "objective": {"kind": "air_assault", "unit": u["id"], "place": place, "pos": lz, "mode": how},
                                "maintask": s["maintask"], "loadout": [], "lead_min": -k // GROUP_MAX, "ai": {},
                                "alt_m": tdef["transit_alt_m_agl"]})
             tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
             heli_escort(state, side, tdef, perf, lz, groups, tasked, need)
             used.add(place)
-            out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}",
+            hot = assault.hot_lz(state, side, lz, tdef)
+            what = {"reinforce": "подкрепление", "flank": "захват с фланга"}.get(how)
+            out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}" + (f" ({what})" if what else ""),
                         "performer": perf["id"], "target": u["id"], "group_size": need, "base": perf["base"],
                         "target_pos": lz, "ip": lz, "distance_km": round(km, 1), "threats": threats,
                         "package": groups, "package_notes": f"площадка в {tdef.get('lz_offset_km', 2)} км от {place}; "
-                                                          f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"})
+                                                          f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"
+                                                          + (f"; площадка под огнём: частей противника рядом {hot}" if hot else "")})
             break
     return out
 

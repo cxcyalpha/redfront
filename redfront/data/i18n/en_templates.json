@@ -250,6 +250,11 @@ false
 false
 ],
 [
+"переброшена\\ к\\ (?P<p>.+?)\\ \\((?P<h>.+?):\\ село\\ (?P<a>.+?)\\ из\\ (?P<b>.+?)\\ бортов\\),\\ обороняет\\ пункт\\.",
+"flown in to {p} ({h}: {a} of {b} helicopters landed), defending the place.",
+false
+],
+[
 "(?P<a>(?:(?!; |\\n| · ).)+?):\\ уточнено\\ (?P<n>[\\d/.,:?~%\\- ]+?),\\ ЗРК\\ и\\ РЛС\\ (?P<m>[\\d/.,:?~%\\- ]+?)\\ \\(день,\\ полоса\\ (?P<k>[\\d/.,:?~%\\- ]+?)\\ км,\\ РТР\\ (?P<r>.+?)\\ км\\)\\.",
 "{a}: {n} refined, {m} SAMs and radars (day, swath {k} km, ELINT {r} km).",
 false
@@ -337,6 +342,11 @@ false
 [
 "экипаж\\ сбитого\\ (?P<t>.+?)\\ катапультировался,\\ на\\ земле\\ (?P<x>.+?)",
 "the crew of the downed {t} ejected, on the ground {x}",
+false
+],
+[
+"площадка\\ под\\ огнём:\\ частей\\ противника\\ рядом\\ (?P<n>[\\d/.,:?~%\\- ]+?)",
+"hot landing zone: {n} enemy units nearby",
 false
 ],
 [
@@ -860,6 +870,11 @@ false
 false
 ],
 [
+"Аэромобильная\\ высадка",
+"Airmobile assault",
+false
+],
+[
 "(?P<u>(?:(?!; |\\n| · ).)+?),\\ перешёл\\ к\\ обороне\\.",
 "{u}, went over to the defence.",
 false
@@ -887,6 +902,11 @@ false
 [
 "нужно\\ название\\ полка",
 "a regiment name is required",
+false
+],
+[
+"сбито\\ при\\ высадке\\ (?P<n>[\\d/.,:?~%\\- ]+?)\\ (?P<t>.+?)\\.",
+"{n} {t} shot down at the landing zone.",
 false
 ],
 [
@@ -1145,6 +1165,11 @@ false
 false
 ],
 [
+"захват\\ с\\ фланга",
+"flank seizure",
+false
+],
+[
 "около\\ четверти",
 "about a quarter",
 false
@@ -1227,6 +1252,11 @@ true
 [
 "в\\ июле\\ (?P<y>[\\d/.,:?~%\\- ]+?)\\ ушёл",
 "left in July {y}",
+false
+],
+[
+"подкрепление",
+"reinforcement",
 false
 ],
 [

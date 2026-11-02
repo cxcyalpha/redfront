@@ -586,6 +586,99 @@
    "estimate": true
   },
   {
+   "id": "blue_rgr21",
+   "name": "Рота 21-го батальона рейнджеров АРВН",
+   "side": "blue",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Hue",
+   "men": 80,
+   "route": [
+    "Hue"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Soldier M4",
+     "count": 16,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; рота - ОЦЕНКА; M16/M60 - в DCS Soldier M4/M249",
+   "estimate": true
+  },
+  {
+   "id": "blue_rgr39",
+   "name": "Рота 39-го батальона рейнджеров АРВН",
+   "side": "blue",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "PhuBai",
+   "men": 80,
+   "route": [
+    "PhuBai"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Soldier M4",
+     "count": 16,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; рота - ОЦЕНКА; M16/M60 - в DCS Soldier M4/M249",
+   "estimate": true
+  },
+  {
+   "id": "blue_abn2",
+   "name": "Рота 2-го воздушно-десантного батальона АРВН",
+   "side": "blue",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "DaNang",
+   "men": 80,
+   "route": [
+    "DaNang"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Soldier M4",
+     "count": 16,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier M249",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; рота - ОЦЕНКА; M16/M60 - в DCS Soldier M4/M249",
+   "estimate": true
+  },
+  {
    "id": "red_s75_0_1",
    "name": "Дивизион С-75 (Ханой) №1",
    "side": "red",
@@ -1209,7 +1302,10 @@
    "count": 6,
    "strike_radius_km": 200,
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; HH-53 - CH-53E",
-   "estimate": true
+   "estimate": true,
+   "tasks_only": [
+    "csar"
+   ]
   },
   {
    "id": "us_ah1",
@@ -1218,9 +1314,21 @@
    "role": "attack_helo",
    "base": "rene_mouawad",
    "type": "AH_1W",
-   "count": 12,
+   "count": 24,
    "strike_radius_km": 120,
-   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; AH-1G - AH-1W",
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; AH-1G - AH-1W; два кавалерийских эскадрона армии США в I корпусе - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_uh1",
+   "name": "Вертолётные роты армии США (UH-1H, Дананг)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "beirut_rafic_hariri",
+   "type": "UH_1H",
+   "count": 24,
+   "strike_radius_km": 150,
+   "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; число и радиус - ОЦЕНКА; 1-я авиационная бригада: подъём рот АРВН",
    "estimate": true
   },
   {

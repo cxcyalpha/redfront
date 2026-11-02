@@ -3716,6 +3716,18 @@ def theatres_section(tmp: Path) -> None:
     check(alpha and {"strike", "sead", "flak", "migcap", "cover"} <= roles and not mixed,
           f"налёт 'Альфа': {len(alpha)} в плане, ударная группа, 'Айрон Хэнд', подавление зенитки, MiGCAP, эскорт; "
           "пакет одной службы (флот или ВВС)")
+    st = model.new_campaign("vnaa", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
+    sim.end_day(st)
+    planner.plan(st)
+    aa = [e for e in st["ato"]["entries"] if e["kind"] == "air_assault"]
+    modes = {g["objective"].get("mode") for e in aa for g in e["task"]["package"] if g["objective"]["kind"] == "air_assault"}
+    rng_ok = all(g["objective"]["mode"] != "reinforce" or st["places"][g["objective"]["place"]]["side"] == "blue"
+                 for e in aa for g in e["task"]["package"] if g["objective"]["kind"] == "air_assault")
+    sim.end_day(st)
+    moved = [u for u in st["units"].values() if u.get("air_mobile") and u.get("order") != "reserve"]
+    check(aa and modes <= {"reinforce", "flank"} and rng_ok and moved,
+          f"аэромобильная высадка у фронта (Вьетнам 1972): {len(aa)} в плане ({', '.join(sorted(modes))}), "
+          f"рот переброшено {len(moved)}")
     st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
     planner.plan(st)
     b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]
