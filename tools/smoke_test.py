@@ -3693,6 +3693,12 @@ def theatres_section(tmp: Path) -> None:
         check(st["tasks"] and man["ground"] and f'["theatre"]="{terr}"' in mis,
               f"{terr}: кампания {st['date']}, задач в плане {len(st['tasks'])}, миссия на карте {terr} "
               f"(наземных групп {len(man['ground'])}), лётный день {ato.hhmm(ato.flying_window(st)[0])}-{ato.hhmm(ato.flying_window(st)[1])}")
+    st = model.new_campaign("lb", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="blue")
+    planner.plan(st)
+    build.build(st, tmp / "lebanon83.miz", task_no=1)
+    mis = zipfile.ZipFile(tmp / "lebanon83.miz").read("mission").decode("utf-8")
+    check("Forrestal" in mis and '"helipadId"' in mis and "ActivateBeacon" in mis and "ActivateICLS" in mis,
+          f"Ливан 1983: авианосцы в миссии, старт и посадка на палубу ({mis.count('helipadId')} точек), TACAN и ICLS")
     st = model.new_campaign("syr", sector="sector_syria.json", oob="oob_syria.json", seed=7)
     for _ in range(3):
         sim.end_day(st)

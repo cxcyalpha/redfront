@@ -325,6 +325,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
             continue
         ll = terrain.airports[b["airport"]].position.latlng()
         bases[bid] = {**b, "lat": ll.lat, "lon": ll.lng, "state": "open"}
+    for cid, c in (sec.get("carriers") or {}).items():   # авианосцы - палубные базы на море (позиция - из сектора)
+        bases[cid] = {**c, "kind": "carrier", "airport": None, "state": "open"}
     # ---- вариант сценария и разброс ----
     if seed is None:
         seed = random.randrange(1, 10**6) if randomness else 0

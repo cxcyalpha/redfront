@@ -407,7 +407,7 @@ def csar_script(m: Mission, state: dict, downed: list[dict], rescuers: list[dict
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     items = [f'{{ id = {q(d["id"])}, group = {q(d["id"])}, side = {1 if d["side"] == "red" else 2}, '
              f'title = {q(csar.title(state, d))}, freq = {int(d["freq_khz"])} }}' for d in downed]
-    bases = {side: ", ".join(f'[{q(b["airport"])}] = true' for b in state["airbases"].values() if b.get("side") == side)
+    bases = {side: ", ".join(f'[{q(b["airport"])}] = true' for b in state["airbases"].values() if b.get("side") == side and b.get("airport"))
              for side in ("red", "blue")}
     return (CSAR_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
             .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SOUND@", BEACON_FILE)
@@ -450,11 +450,87 @@ def airbase_script(m: Mission, state: dict) -> str:
             "end\n")
 
 
+class CarrierPad:
+    """Авианосец как база группы (вместо аэродрома pydcs): группа кораблей, позиция, частота (TACAN/ICLS - в задачах
+    корабля), id корабля-авианосца для посадки. Те же поля, что сборка берёт у аэродрома: position, id, name, atc_radio."""
+    def __init__(self, group, info: dict):
+        self.group = group
+        self.unit = group.units[0]
+        self.position = self.unit.position
+        self.id = self.unit.id
+        self.name = info["name"]
+        self.info = info
+        f = float(info.get("freq", 127.5)) * 1e6
+        self.atc_radio = type("R", (), {"vhf_high_hz": f, "uhf_hz": f})()
+
+
+def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "CarrierPad"]:
+    """Авианосные группы кампании в миссии: авианосец и эскорт (state airbases kind carrier), на галсах против ветра
+    (курс - откуда дует ветер; 25 узлов на прямой ~40 км туда и обратно, ОЦЕНКА), TACAN и ICLS авианосца включены
+    с начала миссии. -> id базы: CarrierPad."""
+    import dcs.ships as _ships
+    out = {}
+    for bid, b in state["airbases"].items():
+        if b.get("kind") != "carrier" or b.get("state") == "lost":
+            continue
+        pos = _pt(m, b)
+        sg = m.ship_group(_country(m, state, b["side"]), b["name"], getattr(_ships, b["ship"]), pos, heading=wind_from)
+        for k, esc in enumerate(b.get("escorts", [])):
+            off = model.offset(b, wind_from + 120 * (k + 1), 3000)
+            u = m.ship(f"{b['name']} эскорт {k + 1}", getattr(_ships, esc))
+            q = _pt(m, off)
+            u.position = Point(q.x, q.y, m.terrain)
+            sg.add_unit(u)
+        leg = model.offset(b, wind_from, CARRIER_LEG_M)
+        w1 = sg.add_waypoint(_pt(m, leg), CARRIER_KMH)
+        sg.add_waypoint(pos, CARRIER_KMH)
+        sg.add_waypoint(_pt(m, leg), CARRIER_KMH)
+        sg.points[0].tasks.append(task.ActivateBeaconCommand(channel=int(b.get("tacan", 70)), modechannel="X",
+                                                             callsign=str(b.get("tacan_id", "CVN"))[:3], unit_id=sg.units[0].id,
+                                                             aa=False))
+        if b.get("icls"):
+            sg.points[0].tasks.append(task.ActivateICLSCommand(channel=int(b["icls"]), unit_id=sg.units[0].id))
+        out[bid] = CarrierPad(sg, b)
+    return out
+
+
+def carrier_lines(state: dict, side_pos=None) -> list[str]:
+    """Строки брифинга и планшета: авианосцы кампании - TACAN, ICLS, частота (своей стороны)."""
+    out = []
+    for b in state["airbases"].values():
+        if b.get("kind") == "carrier" and b.get("side") == state.get("player_side", "blue") and b.get("state") != "lost":
+            out.append(f"{b['name']}: TACAN {b.get('tacan')}X {b.get('tacan_id', '')}"
+                       + (f", ICLS {b['icls']}" if b.get("icls") else "") + f", {float(b.get('freq', 127.5)):.1f} МГц")
+    return out
+
+
+CARRIER_KMH = 46        # ОЦЕНКА: 25 узлов - ход авианосца при полётах (ветер над палубой)
+CARRIER_LEG_M = 40_000  # ОЦЕНКА: длина галса
+
+
+def _from_base(m: Mission, country, name: str, ac, base_obj, maintask, start_type, group_size: int):
+    """Группа ЛА с аэродрома или с палубы авианосца (CarrierPad: старт с корабля; с полосы - с катапульты)."""
+    if isinstance(base_obj, CarrierPad):
+        st_ = StartType.Warm if start_type == StartType.Runway else start_type
+        return m.flight_group_from_unit(country, name, ac, base_obj.group, maintask=maintask, start_type=st_,
+                                        group_size=group_size)
+    return m.flight_group_from_airport(country, name, ac, base_obj, maintask=maintask, start_type=start_type,
+                                       group_size=group_size)
+
+
 def _land(fg, airport, spd_kmh: float):
-    """Посадка на аэродром. pydcs ставит точке посадки скорость 0 - ИИ на последнем участке гасит скорость до
-    минимума (Су-17 и др. на возврате шли 300-400 км/ч и крутили фигуры, сбрасывая её). Скорость - как на маршруте:
-    заход и посадку ИИ строит сам."""
-    p = fg.land_at(airport)
+    """Посадка на аэродром или на палубу авианосца. pydcs ставит точке посадки скорость 0 - ИИ на последнем участке
+    гасит скорость до минимума (Су-17 и др. на возврате шли 300-400 км/ч и крутили фигуры, сбрасывая её). Скорость -
+    как на маршруте: заход и посадку ИИ строит сам."""
+    if isinstance(airport, CarrierPad):
+        from dcs.point import MovingPoint, PointProperties
+        p = MovingPoint(airport.position)
+        p.type, p.action, p.alt, p.ETA_locked = "Land", PointAction.Landing, 0, False
+        p.helipad_id = p.link_unit = airport.unit.id
+        p.properties = PointProperties()
+        fg.add_point(p)
+    else:
+        p = fg.land_at(airport)
     p.speed = spd_kmh / 3.6
     return p
 
@@ -1037,7 +1113,9 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 route.append(f"{i:2d}  {hhmm(t)}  {pt.alt:>6.0f} {L('м', 'm')}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
-            fields = [L("Взлёт: ", "Departure: ") + names.get(ab[0], "-")] + ([L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")] if ab else [])
+            fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-"), L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")]
+                      if ab else [L("Взлёт и посадка: палуба", "Deck launch and recovery")])
+            fields += carrier_lines(state, fg.units[0].position)
             sub = f"{fg.name} - {ut.id} x{len(fg.units)} - {L('день', 'day')} {state['day']}"
             pages = [
                 (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), [L(f"Удаление цели {tk['distance_km']:.0f} км", f"Target distance {tk['distance_km']:.0f} km"),
@@ -1171,6 +1249,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     wx_now = wx_mod.apply(m, state, state["start_hour"])                  # погода суток (weather.py)
 
     # ---- весь театр: район задачи подробно, остальное - реже ----
+    carriers = carrier_groups(m, state, (wx_now.get("wind_dir") or 0) % 360)   # авианосные группы - базы на море
     groups = materialize.theatre(state, tk, density)
     vg_by_unit, platoons = {}, {}
     keys = sorted({g["cluster"] for g in groups if g.get("cluster")})        # бои (кластеры) - у каждого своё место
@@ -1315,7 +1394,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         transit = g.get("transit_alt_m_agl") or tdg["transit_alt_m_agl"]   # средние высоты, если угроз в коридоре нет (planner)
         perf = state["units"][g["performer"]]
         base = state["airbases"][g["base"]]
-        airport = m.terrain.airports[base["airport"]]
+        airport = carriers.get(g["base"]) or m.terrain.airports[base["airport"]]   # авианосец - CarrierPad
         ac = dcstypes.flying(perf["type"])
         hum = 0 if g.get("_ai") or g.get("_enemy") else hum_of.get(g["group"], 0)
         is_player = player and hum > 0
@@ -1323,10 +1402,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         mt = _maintask(ac, g["maintask"])
         if g["objective"]["kind"] == "alert":    # дежурная пара ПВО: на стоянке, взлёт по обнаружению (qra.lua)
             try:                                 # стоянка занята или для реактивных её нет - старт с полосы по тревоге
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                                  airport, maintask=mt, start_type=StartType.Warm, group_size=g["size"])
             except NoParkingSlotError:
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                                  airport, maintask=mt, start_type=StartType.Runway, group_size=g["size"])
             _crew(state, fg, perf)
             fg.late_activation = True
@@ -1371,20 +1450,20 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                          maintask=mt, group_size=g["size"])
         else:
             try:
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                                  maintask=mt, start_type=StartType.Cold if is_player else StartType.Runway,
                                                  group_size=g["size"])
             except NoParkingSlotError:           # вертолётная площадка: стоянок мало - с площадки (взлёт с полосы)
-                fg = m.flight_group_from_airport(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                                  maintask=mt, start_type=StartType.Runway, group_size=g["size"])
         _crew(state, fg, perf)
         if is_player:
             player_air = (airport, airport)          # аэродром посадки уточняется ниже (перевозка - другой)
         st_s = times[g["group"]]["start_s"]
         if not is_player and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
-            while (base["airport"], st_s) in runway_slots:
+            while (base.get("airport") or g["base"], st_s) in runway_slots:
                 st_s += RUNWAY_GAP_S
-            runway_slots.add((base["airport"], st_s))
+            runway_slots.add((base.get("airport") or g["base"], st_s))
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
@@ -1438,7 +1517,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             start_p = g.get("_air_start") or base
             alt = int(g.get("alt_m") or transit)
             wp(model.lerp(start_p, obj["pos"], 0.5), alt, "Маршрут", keep_alt=True)
-            land = m.terrain.airports[dest["airport"]]
+            land = carriers.get(obj["airbase"]) or (m.terrain.airports[dest["airport"]] if dest.get("airport") else None)
             g["_dest"] = dest["name"]
             if is_player and helo:               # игрок: груз - ящики CTLD у машины тыла, сдать - на аэродроме назначения
                 sd = 1 if side_g == "red" else 2

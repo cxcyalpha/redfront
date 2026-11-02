@@ -1,0 +1,407 @@
+{
+ "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ.",
+ "theatre": "syria",
+ "places": {
+  "BeirutAirport": {
+   "lat": 33.821,
+   "lon": 35.488,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Khalde": {
+   "lat": 33.784,
+   "lon": 35.476,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Baabda": {
+   "lat": 33.834,
+   "lon": 35.544,
+   "estimate": true,
+   "side": "blue"
+  },
+  "EastBeirut": {
+   "lat": 33.89,
+   "lon": 35.53,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Jounieh": {
+   "lat": 33.98,
+   "lon": 35.618,
+   "estimate": true,
+   "side": "blue"
+  },
+  "SoukElGharb": {
+   "lat": 33.806,
+   "lon": 35.578,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Damour": {
+   "lat": 33.729,
+   "lon": 35.456,
+   "estimate": true,
+   "side": "blue"
+  },
+  "WestBeirut": {
+   "lat": 33.88,
+   "lon": 35.49,
+   "estimate": true,
+   "side": "red"
+  },
+  "Aley": {
+   "lat": 33.808,
+   "lon": 35.6,
+   "estimate": true,
+   "side": "red"
+  },
+  "Bhamdoun": {
+   "lat": 33.808,
+   "lon": 35.65,
+   "estimate": true,
+   "side": "red"
+  },
+  "BeitEdDine": {
+   "lat": 33.695,
+   "lon": 35.58,
+   "estimate": true,
+   "side": "red"
+  },
+  "AinZhalta": {
+   "lat": 33.745,
+   "lon": 35.69,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sofar": {
+   "lat": 33.81,
+   "lon": 35.705,
+   "estimate": true,
+   "side": "red"
+  },
+  "Dhour": {
+   "lat": 33.9,
+   "lon": 35.76,
+   "estimate": true,
+   "side": "red"
+  },
+  "Chtaura": {
+   "lat": 33.818,
+   "lon": 35.854,
+   "estimate": true,
+   "side": "red"
+  },
+  "Zahle": {
+   "lat": 33.847,
+   "lon": 35.902,
+   "estimate": true,
+   "side": "red"
+  },
+  "Baalbek": {
+   "lat": 34.006,
+   "lon": 36.211,
+   "estimate": true,
+   "side": "red"
+  },
+  "Masnaa": {
+   "lat": 33.7,
+   "lon": 36.07,
+   "estimate": true,
+   "side": "red"
+  },
+  "Damascus": {
+   "lat": 33.513,
+   "lon": 36.292,
+   "estimate": true,
+   "side": "red"
+  },
+  "Homs": {
+   "lat": 34.73,
+   "lon": 36.71,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sidon": {
+   "lat": 33.561,
+   "lon": 35.371,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Jezzine": {
+   "lat": 33.544,
+   "lon": 35.584,
+   "estimate": true,
+   "side": "blue"
+  }
+ },
+ "airbases": {
+  "damascus": {
+   "name": "Damascus",
+   "airport": "Damascus",
+   "side": "red",
+   "military": true
+  },
+  "mezzeh": {
+   "name": "Mezzeh",
+   "airport": "Mezzeh",
+   "side": "red",
+   "military": true
+  },
+  "al_dumayr": {
+   "name": "Al-Dumayr",
+   "airport": "Al-Dumayr",
+   "side": "red",
+   "military": true
+  },
+  "khalkhalah": {
+   "name": "Khalkhalah",
+   "airport": "Khalkhalah",
+   "side": "red",
+   "military": true
+  },
+  "marj_ruhayyil": {
+   "name": "Marj Ruhayyil",
+   "airport": "Marj Ruhayyil",
+   "side": "red",
+   "military": true
+  },
+  "shayrat": {
+   "name": "Shayrat",
+   "airport": "Shayrat",
+   "side": "red",
+   "military": true
+  },
+  "rayak": {
+   "name": "Rayak",
+   "airport": "Rayak",
+   "side": "red",
+   "military": true
+  }
+ },
+ "carriers": {
+  "cv62": {
+   "name": "USS Independence (CV-62)",
+   "side": "blue",
+   "ship": "Forrestal",
+   "lat": 33.95,
+   "lon": 35.2,
+   "tacan": 62,
+   "tacan_id": "IND",
+   "icls": 2,
+   "freq": 127.5,
+   "escorts": [
+    "TICONDEROG",
+    "PERRY"
+   ],
+   "estimate": true
+  },
+  "cv67": {
+   "name": "USS John F. Kennedy (CV-67)",
+   "side": "blue",
+   "ship": "Forrestal",
+   "lat": 33.72,
+   "lon": 35.1,
+   "tacan": 67,
+   "tacan_id": "JFK",
+   "icls": 7,
+   "freq": 128.5,
+   "escorts": [
+    "TICONDEROG",
+    "PERRY"
+   ],
+   "estimate": true
+  },
+  "lha1": {
+   "name": "USS Tarawa (LHA-1)",
+   "side": "blue",
+   "ship": "LHA_Tarawa",
+   "lat": 33.83,
+   "lon": 35.36,
+   "tacan": 1,
+   "tacan_id": "TAR",
+   "icls": null,
+   "freq": 129.5,
+   "escorts": [
+    "PERRY"
+   ],
+   "estimate": true
+  }
+ },
+ "links": [
+  [
+   "BeirutAirport",
+   "Khalde"
+  ],
+  [
+   "BeirutAirport",
+   "Baabda"
+  ],
+  [
+   "BeirutAirport",
+   "WestBeirut"
+  ],
+  [
+   "Khalde",
+   "Damour"
+  ],
+  [
+   "Khalde",
+   "SoukElGharb"
+  ],
+  [
+   "Baabda",
+   "EastBeirut"
+  ],
+  [
+   "Baabda",
+   "SoukElGharb"
+  ],
+  [
+   "EastBeirut",
+   "Jounieh"
+  ],
+  [
+   "EastBeirut",
+   "WestBeirut"
+  ],
+  [
+   "Jounieh",
+   "Dhour"
+  ],
+  [
+   "SoukElGharb",
+   "Aley"
+  ],
+  [
+   "Aley",
+   "Bhamdoun"
+  ],
+  [
+   "Bhamdoun",
+   "Sofar"
+  ],
+  [
+   "Sofar",
+   "Chtaura"
+  ],
+  [
+   "Sofar",
+   "Dhour"
+  ],
+  [
+   "Damour",
+   "BeitEdDine"
+  ],
+  [
+   "BeitEdDine",
+   "AinZhalta"
+  ],
+  [
+   "AinZhalta",
+   "Sofar"
+  ],
+  [
+   "Dhour",
+   "Zahle"
+  ],
+  [
+   "Chtaura",
+   "Zahle"
+  ],
+  [
+   "Chtaura",
+   "Masnaa"
+  ],
+  [
+   "Zahle",
+   "Baalbek"
+  ],
+  [
+   "Baalbek",
+   "Homs"
+  ],
+  [
+   "Masnaa",
+   "Damascus"
+  ],
+  [
+   "Damascus",
+   "Homs"
+  ],
+  [
+   "Damour",
+   "Sidon"
+  ],
+  [
+   "Sidon",
+   "Jezzine"
+  ],
+  [
+   "Jezzine",
+   "BeitEdDine"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Damascus",
+   "Homs"
+  ],
+  "blue": [
+   "Jounieh"
+  ]
+ },
+ "off_limits": {
+  "blue": [
+   "Damascus",
+   "Homs",
+   "Masnaa",
+   "Baalbek"
+  ],
+  "red": [
+   "Sidon",
+   "Jezzine"
+  ]
+ },
+ "axes": {
+  "shouf": "Шуф: Алей - Сук-эль-Гарб - аэропорт",
+  "coast": "Побережье: Дамур - Хальде"
+ },
+ "objectives": {
+  "red": {
+   "shouf": [
+    "SoukElGharb",
+    "Baabda",
+    "BeirutAirport"
+   ],
+   "coast": [
+    "Damour",
+    "Khalde",
+    "BeirutAirport"
+   ]
+  },
+  "blue": []
+ },
+ "depots": [
+  {
+   "id": "blue_depot_jounieh",
+   "name": "Склад снабжения (Джуния)",
+   "side": "blue",
+   "place": "Jounieh"
+  },
+  {
+   "id": "red_depot_chtaura",
+   "name": "Склад снабжения сирийских войск (Штора)",
+   "side": "red",
+   "place": "Chtaura"
+  },
+  {
+   "id": "red_depot_aley",
+   "name": "Склады ПСП (Алей)",
+   "side": "red",
+   "place": "Aley"
+  }
+ ],
+ "bridges": [],
+ "ad_sites": []
+}
