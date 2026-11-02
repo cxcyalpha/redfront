@@ -3699,6 +3699,17 @@ def theatres_section(tmp: Path) -> None:
     mis = zipfile.ZipFile(tmp / "lebanon83.miz").read("mission").decode("utf-8")
     check("Forrestal" in mis and '"helipadId"' in mis and "ActivateBeacon" in mis and "ActivateICLS" in mis,
           f"Ливан 1983: авианосцы в миссии, старт и посадка на палубу ({mis.count('helipadId')} точек), TACAN и ICLS")
+    st = model.new_campaign("vn", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
+    planner.plan(st)
+    tg = [state_u for state_u in (st["units"].get(t.get("target")) for t in st["tasks"]) if state_u]
+    near = lambda u: min(st["places"], key=lambda n: model.dist_km(st["places"][n], u.get("pos") or model.unit_pos(st, u)))
+    in_zone = [u["name"] for u in tg if near(u) in ("Hanoi", "ThaiNguyen", "HaiDuong", "Haiphong")]
+    sams = [u for u in tg if u.get("role") == "sam_medium"]
+    build.build(st, tmp / "vietnam72.miz", task_no=1)
+    mis = zipfile.ZipFile(tmp / "vietnam72.miz").read("mission").decode("utf-8")
+    check(sams and not in_zone and '"KS-19"' in mis and '"helipadId"' in mis,
+          f"Вьетнам 1972: удары по С-75 юга ДРВ ({len(sams)}), Ханой и Хайфон закрыты до 'Лайнбэкера', зенитная "
+          f"артиллерия у объектов, палубные вылеты")
     st = model.new_campaign("syr", sector="sector_syria.json", oob="oob_syria.json", seed=7)
     for _ in range(3):
         sim.end_day(st)

@@ -316,7 +316,11 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     year = campaign_year(state)
     gate, gated = _gates(state, side)            # пояса ПВО перед целями в глубине: сначала они (roll-back)
     rules = (state.get("task_rules") or {}).get(side) or {}   # правила задач сценария (с какого дня, запрет)
-    banned = set((state.get("off_limits") or {}).get(side, []))
+    banned = set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))   # куда авиация не бьёт
+    for z in rules.get("_zones") or []:          # запретные для ударов районы сценария до дня until_day (правила применения:
+        if state["day"] < z.get("until_day", 10**6):   # Ханой и Хайфон до "Лайнбэкера") - только авиация, не наземные войска
+            banned |= set(z["places"])
+            reasons.append(z.get("why") or "район закрыт для ударов до дня %d" % z.get("until_day", 0))
     def _allowed_area(u):                        # цель не в районе, куда сторона по сценарию не действует
         if not banned:
             return True

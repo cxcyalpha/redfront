@@ -412,6 +412,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "links": sec.get("links", []),            # связи пунктов - граф оперативного уровня (ops.py)
         "supply_entry": sec.get("supply_entry", {}),   # пункты входа подвоза из тыла (вне карты), если заданы в секторе
         "off_limits": sec.get("off_limits", {}),   # пункты, на которые сторона не наступает (политика сценария)
+        "point_ad": forces.get("point_ad") or {},   # ПВО объектов тыла по сценарию (нет - model.POINT_AD)
+        "air_limits": sec.get("air_limits", sec.get("off_limits", {})),   # пункты, по которым авиация не бьёт (нет - как off_limits)
         "task_rules": (chosen or {}).get("task_rules", {}),   # задачи сценария: с какого дня, запрет (1982: Бекаа - с 4-го)
         "posture": (chosen or {}).get("posture", {}),   # поза сторон по сценарию (наступает синяя - 1982), иначе доктрины
         "replacements": forces.get("replacements", {}),
@@ -561,6 +563,9 @@ def ensure_point_ad(st: dict) -> int:
             continue                             # малый мост - объезд рядом, прикрывать нечем и незачем
         uid = f"{o['id']}_pvo"
         tpl = POINT_AD.get(o.get("side"))
+        own = (st.get("point_ad") or {}).get(o.get("side"))   # состав сценария (ДРВ 1972: зенитная артиллерия)
+        if own:
+            tpl = [(c["type"], c["role"], c["count"]) for c in own]
         if uid in units or not tpl or "pos" not in o:
             continue
         units[uid] = {"id": uid, "name": f"ПВО объекта: {o['name']}", "side": o["side"], "role": "sam_short",
