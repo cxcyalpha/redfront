@@ -2,8 +2,25 @@
 
 Русская версия: [README.md](README.md)
 
-A dynamic campaign generator for DCS World on the Cold War Germany map (Python + pydcs, Lua mission scripts, a
-browser-based campaign window). Full cycle: campaign model → day plan → mission → flight in DCS → debrief → next day.
+A dynamic campaign generator for DCS World (Python + pydcs, Lua mission scripts, a browser-based campaign window).
+Full cycle: campaign model → day plan → mission → flight in DCS → debrief → next day.
+
+**Theatres** (window "New" → "Theatre"):
+
+* **Cold War Germany** — Warsaw Pact strike along the whole front (1985, 1987, 1989), Hamburg sector (training).
+* **Caucasus** — the August 2008 war (Russia, South Ossetia, Abkhazia vs Georgia): the 58th Army through the Roki
+  tunnel to Tskhinvali and Gori, a second front in Abkhazia (Zugdidi, Senaki, Poti, Kodori); Georgian air defence —
+  Buk-M1, S-125, Osa-AKM. `tools/gen_caucasus.py`.
+* **Syria** — the June 1982 Lebanon war (Israel vs Syria and the PLO): advances along the coast, in the centre and in
+  the Bekaa valley, the Syrian SAM group in the Bekaa (SA-6, SA-2, SA-3); the blue side attacks (scenario posture),
+  Israel does not advance into Syria (sector `off_limits`). `tools/gen_syria.py`.
+
+The map sets the pydcs terrain, sunrise and sunset (theatre centre, DCS mission time: Germany UTC+1, Caucasus +4,
+Syria +3 — estimate) and the climate (Hannover, Tbilisi, Beirut — `weather.CLIMATES`). Place coordinates, unit
+compositions and aircraft numbers of the new theatres are estimates from open sources (named in the generators and in
+the units' `source`); DCS types are the nearest (T-62 → T-55, Merkava Mk1 → Mk4, F-15A → F-15C; A-4 and Kfir are not
+in DCS and are left out). A unit facing 6:1 or more does not hold its place and withdraws (`ops.ROUT_RATIO`); places a
+side does not attack are `off_limits`. Map and road probes for the new theatres work as for Germany.
 
 ## Contents
 

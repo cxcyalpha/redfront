@@ -2344,7 +2344,8 @@ def advance_section(tmp: Path) -> None:
     man = build.build(st, tmp / "adv.miz", task_no=n)
     tk = st["task"]
     tgt = st["units"].get(tk["package"][0]["objective"].get("unit") or "")
-    check(man["ground_s"] >= before and (not tgt or model.dist_km(model.unit_pos(st, tgt), tk["target_pos"]) < 0.3),
+    aim = planner._aim(st, tk["side"], tgt) if tgt else None   # игрок - по разведке (туман войны), не по истинному месту
+    check(man["ground_s"] >= before and (not tgt or model.dist_km(aim, tk["target_pos"]) < 0.3),
           f"сборка: обстановка на {sim.ato_hhmm(man['ground_s'])} (начало миссии), цель задачи - на своём месте к этому времени")
     # окно слетанной миссии: только события, без марша
     km1 = {u["id"]: u["progress_km"] for u in st["units"].values() if u.get("state") == "march"}
@@ -3677,11 +3678,34 @@ def realism_section(tmp: Path) -> None:
           f"группы ИИ выходят на рубеж ко времени: ETA залочен на рубеже, скорость - нет ({locked} точек)")
 
 
+def theatres_section(tmp: Path) -> None:
+    """Другие карты: Кавказ (август 2008), Сирия - Ливан (июнь 1982): кампания, план, миссия на своём терраине."""
+    import zipfile
+    from redfront import ato, ops
+    print("\n== другие карты: Кавказ 2008, Ливан 1982 ==")
+    for sec, oob, side, terr in (("sector_caucasus.json", "oob_caucasus.json", "red", "Caucasus"),
+                                 ("sector_syria.json", "oob_syria.json", "blue", "Syria")):
+        st = model.new_campaign("th", sector=sec, oob=oob, seed=7, player_side=side)
+        planner.plan(st)
+        man = build.build(st, tmp / f"{terr}.miz", task_no=1)
+        mis = zipfile.ZipFile(tmp / f"{terr}.miz").read("mission").decode("utf-8")
+        check(st["tasks"] and man["ground"] and f'["theatre"]="{terr}"' in mis,
+              f"{terr}: кампания {st['date']}, задач в плане {len(st['tasks'])}, миссия на карте {terr} "
+              f"(наземных групп {len(man['ground'])}), лётный день {ato.hhmm(ato.flying_window(st)[0])}-{ato.hhmm(ato.flying_window(st)[1])}")
+    st = model.new_campaign("syr", sector="sector_syria.json", oob="oob_syria.json", seed=7)
+    for _ in range(3):
+        sim.end_day(st)
+    taken = [n for n in ("Tyre", "Nabatieh", "Hasbaya") if ops.owner(st, n) == "blue"]
+    banned = [n for n in st["off_limits"]["blue"] if ops.owner(st, n) == "blue"]
+    check(st["posture"]["blue"] == "offense" and len(taken) >= 2 and not banned,
+          f"1982: наступает Израиль (поза сценария), к 3-м суткам взяты {', '.join(taken)}; на территорию Сирии не наступает")
+
+
 SECTIONS = [core_section, patriot_close_section, front_section, random_section, logistics_section, menu_section,
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section]
+            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:

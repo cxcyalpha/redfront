@@ -239,12 +239,13 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
                 u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - sim["refit_rate"] * frac_day * sim["refit_in_line"])
     # десант в резерве и высаженный (держит пункт до подхода своих) - не в распоряжении командования фронта (assault.py)
     free = [u for u in free if u.get("order") not in ("reserve", "airhead")]
-    posture = sim.get("posture") or "defense"
+    posture = (state.get("posture") or {}).get(side) or sim.get("posture") or "defense"   # сценарий может переопределить
     if posture == "offense" and not any(objective(state, side, u) for u in free):
         posture = "defense"                                       # цели операции достигнуты - удерживать
     g = graph(state)
     if posture == "offense":
-        all_targets = {q for p in front for q in g[p] if owner(state, q) != side}
+        banned = set((state.get("off_limits") or {}).get(side, []))   # политические ограничения сценария
+        all_targets = {q for p in front for q in g[p] if owner(state, q) != side and q not in banned}
         attackers = []
         for u in sorted(free, key=lambda u: -model.strength(u)):
             obj = objective(state, side, u)
@@ -292,7 +293,8 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
             if model.strength(u) < sim["attack_min_strength"]:
                 continue
             here = node_of(state, u)
-            empty = [q for q in g[here] if owner(state, q) != side and not _units_near(state, q, model.enemy(side), sim["contact_km"])]
+            empty = [q for q in g[here] if owner(state, q) != side and state["places"][q].get("side") == side   # только свои
+                     and not _units_near(state, q, model.enemy(side), sim["contact_km"])]                       # (исходно)
             if empty:
                 t = empty[0]
                 set_route(state, u, [here, t], "attack")
@@ -330,6 +332,9 @@ def success_entry(state: dict, u: dict, used: dict | None = None) -> str | None:
     return min(rear, key=lambda q: model.dist_km(state["places"][q], state["places"][best])) if rear else best
 
 
+ROUT_RATIO = 6.0        # ОЦЕНКА: перевес, при котором часть в бою не держит пункт и отходит
+
+
 def _operations(state: dict, side: str, frac_day: float) -> list[str]:
     """Оперативные приёмы доктрины (sim стороны, ОЦЕНКИ): подготовка обороны, передовой отряд, ОМГ (ОВД);
     сдерживание и контрудар резервом (НАТО)."""
@@ -343,6 +348,23 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
     for u in own:
         if u["state"] == "defend" and not u.get("engaged"):
             u["dig_h"] = u.get("dig_h", 0) + 24 * frac_day
+    # разгром: часть в бою против противника сильнее в ROUT_RATIO раз (любая доктрина) - не держит пункт, отходит
+    # на следующий рубеж (лёгкие формирования против дивизии: ООП в 1982, ОЦЕНКА порога)
+    for u in own:
+        if u["state"] != "battle" or u.get("order") == "withdraw":
+            continue
+        enemy = sum(_s.power(state, state["units"][f]) for f in u.get("engaged", []) if f in state["units"])
+        if enemy < ROUT_RATIO * max(1e-6, _s.power(state, u)):
+            continue
+        here = node_of(state, u)
+        back = [q for q in g[here] if owner(state, q) == side and q != here]
+        if not back:
+            continue
+        t = max(back, key=lambda q: min((model.dist_km(state["places"][q], model.unit_pos(state, e))
+                                          for e in _maneuver(state, foe) if _active(e)), default=0))
+        _disengage(state, u)
+        set_route(state, u, [here, t], "withdraw")
+        lines.append(f"{u['name']}: не выдержала удара (перевес противника {enemy / max(1e-6, _s.power(state, u)):.0f}:1) - отходит в {t}.")
     # сдерживание (НАТО): против противника сильнее в delay_ratio раз - отход на следующий рубеж, не до разгрома
     if sim.get("delay_ratio"):
         for u in own:

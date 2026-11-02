@@ -1,0 +1,866 @@
+{
+ "_about": "Театр Сирия - Ливан, июнь 1982 г. Генерирован tools/gen_syria.py. Координаты пунктов - ОЦЕНКИ (+-2 км), дороги - вручную по карте. Стороны - утро 6.06.1982.",
+ "theatre": "syria",
+ "places": {
+  "Haifa": {
+   "lat": 32.794,
+   "lon": 34.989,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Nahariya": {
+   "lat": 33.006,
+   "lon": 35.095,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Safed": {
+   "lat": 32.965,
+   "lon": 35.496,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tiberias": {
+   "lat": 32.795,
+   "lon": 35.531,
+   "estimate": true,
+   "side": "blue"
+  },
+  "KiryatShmona": {
+   "lat": 33.207,
+   "lon": 35.57,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Metula": {
+   "lat": 33.278,
+   "lon": 35.578,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Katzrin": {
+   "lat": 32.993,
+   "lon": 35.693,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Masada": {
+   "lat": 33.233,
+   "lon": 35.753,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Naqoura": {
+   "lat": 33.118,
+   "lon": 35.14,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Marjayoun": {
+   "lat": 33.36,
+   "lon": 35.592,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tyre": {
+   "lat": 33.271,
+   "lon": 35.196,
+   "estimate": true,
+   "side": "red"
+  },
+  "Nabatieh": {
+   "lat": 33.378,
+   "lon": 35.484,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sidon": {
+   "lat": 33.561,
+   "lon": 35.371,
+   "estimate": true,
+   "side": "red"
+  },
+  "Damour": {
+   "lat": 33.729,
+   "lon": 35.456,
+   "estimate": true,
+   "side": "red"
+  },
+  "Beirut": {
+   "lat": 33.893,
+   "lon": 35.501,
+   "estimate": true,
+   "side": "red"
+  },
+  "Aley": {
+   "lat": 33.808,
+   "lon": 35.6,
+   "estimate": true,
+   "side": "red"
+  },
+  "BeitEdDine": {
+   "lat": 33.695,
+   "lon": 35.58,
+   "estimate": true,
+   "side": "red"
+  },
+  "Jezzine": {
+   "lat": 33.544,
+   "lon": 35.584,
+   "estimate": true,
+   "side": "red"
+  },
+  "AinZhalta": {
+   "lat": 33.745,
+   "lon": 35.69,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hasbaya": {
+   "lat": 33.398,
+   "lon": 35.685,
+   "estimate": true,
+   "side": "red"
+  },
+  "Rashaya": {
+   "lat": 33.501,
+   "lon": 35.843,
+   "estimate": true,
+   "side": "red"
+  },
+  "JoubJannine": {
+   "lat": 33.63,
+   "lon": 35.785,
+   "estimate": true,
+   "side": "red"
+  },
+  "Chtaura": {
+   "lat": 33.818,
+   "lon": 35.854,
+   "estimate": true,
+   "side": "red"
+  },
+  "Zahle": {
+   "lat": 33.847,
+   "lon": 35.902,
+   "estimate": true,
+   "side": "red"
+  },
+  "Baalbek": {
+   "lat": 34.006,
+   "lon": 36.211,
+   "estimate": true,
+   "side": "red"
+  },
+  "Masnaa": {
+   "lat": 33.7,
+   "lon": 36.07,
+   "estimate": true,
+   "side": "red"
+  },
+  "Quneitra": {
+   "lat": 33.126,
+   "lon": 35.824,
+   "estimate": true,
+   "side": "red"
+  },
+  "Qatana": {
+   "lat": 33.437,
+   "lon": 36.08,
+   "estimate": true,
+   "side": "red"
+  },
+  "Kiswah": {
+   "lat": 33.36,
+   "lon": 36.24,
+   "estimate": true,
+   "side": "red"
+  },
+  "Damascus": {
+   "lat": 33.513,
+   "lon": 36.292,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sanamayn": {
+   "lat": 33.07,
+   "lon": 36.18,
+   "estimate": true,
+   "side": "red"
+  },
+  "Homs": {
+   "lat": 34.73,
+   "lon": 36.71,
+   "estimate": true,
+   "side": "red"
+  }
+ },
+ "airbases": {
+  "damascus": {
+   "name": "Damascus",
+   "airport": "Damascus",
+   "side": "red",
+   "military": true
+  },
+  "mezzeh": {
+   "name": "Mezzeh",
+   "airport": "Mezzeh",
+   "side": "red",
+   "military": true
+  },
+  "al_dumayr": {
+   "name": "Al-Dumayr",
+   "airport": "Al-Dumayr",
+   "side": "red",
+   "military": true
+  },
+  "khalkhalah": {
+   "name": "Khalkhalah",
+   "airport": "Khalkhalah",
+   "side": "red",
+   "military": true
+  },
+  "marj_ruhayyil": {
+   "name": "Marj Ruhayyil",
+   "airport": "Marj Ruhayyil",
+   "side": "red",
+   "military": true
+  },
+  "shayrat": {
+   "name": "Shayrat",
+   "airport": "Shayrat",
+   "side": "red",
+   "military": true
+  },
+  "al_qusayr": {
+   "name": "Al Qusayr",
+   "airport": "Al Qusayr",
+   "side": "red",
+   "military": true
+  },
+  "rayak": {
+   "name": "Rayak",
+   "airport": "Rayak",
+   "side": "red",
+   "military": true
+  },
+  "qabr_as_sitt": {
+   "name": "Qabr as Sitt",
+   "airport": "Qabr as Sitt",
+   "side": "red",
+   "military": true
+  },
+  "beirut_rafic_hariri": {
+   "name": "Beirut-Rafic Hariri",
+   "airport": "Beirut-Rafic Hariri",
+   "side": "red",
+   "military": true
+  },
+  "ramat_david": {
+   "name": "Ramat David",
+   "airport": "Ramat David",
+   "side": "blue",
+   "military": true
+  },
+  "megiddo": {
+   "name": "Megiddo",
+   "airport": "Megiddo",
+   "side": "blue",
+   "military": true
+  },
+  "haifa": {
+   "name": "Haifa",
+   "airport": "Haifa",
+   "side": "blue",
+   "military": true
+  },
+  "rosh_pina": {
+   "name": "Rosh Pina",
+   "airport": "Rosh Pina",
+   "side": "blue",
+   "military": true
+  },
+  "kiryat_shmona": {
+   "name": "Kiryat Shmona",
+   "airport": "Kiryat Shmona",
+   "side": "blue",
+   "military": true
+  },
+  "eyn_shemer": {
+   "name": "Eyn Shemer",
+   "airport": "Eyn Shemer",
+   "side": "blue",
+   "military": true
+  },
+  "tel_nof": {
+   "name": "Tel Nof",
+   "airport": "Tel Nof",
+   "side": "blue",
+   "military": true
+  },
+  "hatzor": {
+   "name": "Hatzor",
+   "airport": "Hatzor",
+   "side": "blue",
+   "military": true
+  },
+  "palmachim": {
+   "name": "Palmachim",
+   "airport": "Palmachim",
+   "side": "blue",
+   "military": true
+  },
+  "ben_gurion": {
+   "name": "Ben Gurion",
+   "airport": "Ben Gurion",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "links": [
+  [
+   "Haifa",
+   "Nahariya"
+  ],
+  [
+   "Haifa",
+   "Tiberias"
+  ],
+  [
+   "Nahariya",
+   "Naqoura"
+  ],
+  [
+   "Nahariya",
+   "Safed"
+  ],
+  [
+   "Safed",
+   "Tiberias"
+  ],
+  [
+   "Safed",
+   "KiryatShmona"
+  ],
+  [
+   "KiryatShmona",
+   "Metula"
+  ],
+  [
+   "Tiberias",
+   "Katzrin"
+  ],
+  [
+   "Katzrin",
+   "Masada"
+  ],
+  [
+   "KiryatShmona",
+   "Masada"
+  ],
+  [
+   "Metula",
+   "Marjayoun"
+  ],
+  [
+   "Naqoura",
+   "Tyre"
+  ],
+  [
+   "Tyre",
+   "Sidon"
+  ],
+  [
+   "Tyre",
+   "Nabatieh"
+  ],
+  [
+   "Marjayoun",
+   "Nabatieh"
+  ],
+  [
+   "Marjayoun",
+   "Hasbaya"
+  ],
+  [
+   "Nabatieh",
+   "Sidon"
+  ],
+  [
+   "Nabatieh",
+   "Jezzine"
+  ],
+  [
+   "Sidon",
+   "Damour"
+  ],
+  [
+   "Sidon",
+   "Jezzine"
+  ],
+  [
+   "Damour",
+   "Beirut"
+  ],
+  [
+   "Damour",
+   "BeitEdDine"
+  ],
+  [
+   "BeitEdDine",
+   "Aley"
+  ],
+  [
+   "BeitEdDine",
+   "AinZhalta"
+  ],
+  [
+   "Jezzine",
+   "BeitEdDine"
+  ],
+  [
+   "Jezzine",
+   "JoubJannine"
+  ],
+  [
+   "Beirut",
+   "Aley"
+  ],
+  [
+   "Aley",
+   "AinZhalta"
+  ],
+  [
+   "AinZhalta",
+   "Chtaura"
+  ],
+  [
+   "Masada",
+   "Hasbaya"
+  ],
+  [
+   "Masada",
+   "Quneitra"
+  ],
+  [
+   "Hasbaya",
+   "Rashaya"
+  ],
+  [
+   "Hasbaya",
+   "JoubJannine"
+  ],
+  [
+   "Rashaya",
+   "JoubJannine"
+  ],
+  [
+   "Rashaya",
+   "Qatana"
+  ],
+  [
+   "JoubJannine",
+   "Chtaura"
+  ],
+  [
+   "Chtaura",
+   "Zahle"
+  ],
+  [
+   "Chtaura",
+   "Masnaa"
+  ],
+  [
+   "Zahle",
+   "Baalbek"
+  ],
+  [
+   "Baalbek",
+   "Homs"
+  ],
+  [
+   "Masnaa",
+   "Damascus"
+  ],
+  [
+   "Quneitra",
+   "Qatana"
+  ],
+  [
+   "Quneitra",
+   "Sanamayn"
+  ],
+  [
+   "Qatana",
+   "Damascus"
+  ],
+  [
+   "Damascus",
+   "Kiswah"
+  ],
+  [
+   "Kiswah",
+   "Sanamayn"
+  ],
+  [
+   "Damascus",
+   "Homs"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Damascus",
+   "Homs"
+  ],
+  "blue": [
+   "Haifa",
+   "Tiberias"
+  ]
+ },
+ "off_limits": {
+  "blue": [
+   "Quneitra",
+   "Qatana",
+   "Kiswah",
+   "Sanamayn",
+   "Damascus",
+   "Homs",
+   "Masnaa",
+   "Baalbek"
+  ],
+  "red": [
+   "Haifa",
+   "Tiberias",
+   "Safed",
+   "Nahariya",
+   "KiryatShmona",
+   "Metula",
+   "Katzrin",
+   "Masada"
+  ]
+ },
+ "axes": {
+  "coast": "Побережье: Тир - Сидон - Дамур - Бейрут",
+  "center": "Центр: Набатия - Джеззин - Айн-Жальта",
+  "bekaa": "Бекаа: Хасбайя - Рашайя - Джуб-Джаннин - Штора"
+ },
+ "objectives": {
+  "blue": {
+   "coast": [
+    "Tyre",
+    "Sidon",
+    "Damour",
+    "Beirut"
+   ],
+   "center": [
+    "Nabatieh",
+    "Jezzine",
+    "BeitEdDine",
+    "AinZhalta"
+   ],
+   "bekaa": [
+    "Hasbaya",
+    "Rashaya",
+    "JoubJannine",
+    "Chtaura"
+   ]
+  },
+  "red": []
+ },
+ "_about_objectives": "Оси наступления Израиля - ОЦЕНКА по ходу операции, не документ.",
+ "depots": [
+  {
+   "id": "blue_depot_kiryat",
+   "name": "Склад снабжения (Кирьят-Шмона)",
+   "side": "blue",
+   "place": "KiryatShmona"
+  },
+  {
+   "id": "blue_depot_nahariya",
+   "name": "Склад снабжения (Нахария)",
+   "side": "blue",
+   "place": "Nahariya"
+  },
+  {
+   "id": "blue_depot_golan",
+   "name": "Склад снабжения (Кацрин)",
+   "side": "blue",
+   "place": "Katzrin"
+  },
+  {
+   "id": "red_depot_beirut",
+   "name": "Склады ООП (Бейрут)",
+   "side": "red",
+   "place": "Beirut"
+  },
+  {
+   "id": "red_depot_sidon",
+   "name": "Склады ООП (Сидон)",
+   "side": "red",
+   "place": "Sidon"
+  },
+  {
+   "id": "red_depot_chtaura",
+   "name": "Склад снабжения сирийских войск (Штора)",
+   "side": "red",
+   "place": "Chtaura"
+  },
+  {
+   "id": "red_depot_damascus",
+   "name": "Склад снабжения (Дамаск)",
+   "side": "red",
+   "place": "Damascus"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_litani_qasmiyeh",
+   "name": "Мост Касмия через Литани",
+   "lat": 33.333,
+   "lon": 35.232,
+   "links": [
+    [
+     "Tyre",
+     "Sidon"
+    ]
+   ],
+   "source": "по памяти - проверить (зонд карты)"
+  },
+  {
+   "id": "br_litani_khardali",
+   "name": "Мост Хардали через Литани",
+   "lat": 33.345,
+   "lon": 35.56,
+   "links": [
+    [
+     "Marjayoun",
+     "Nabatieh"
+    ]
+   ],
+   "source": "по памяти - проверить (зонд карты)"
+  }
+ ],
+ "ad_sites": [
+  {
+   "id": "red_ad_af_al_dumayr",
+   "name": "ПВО аэродрома Al-Dumayr",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_al_dumayr",
+   "lat": 33.6053,
+   "lon": 36.7339,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_al_qusayr",
+   "name": "ПВО аэродрома Al Qusayr",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_al_qusayr",
+   "lat": 34.558,
+   "lon": 36.5626,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_beirut_rafic_hariri",
+   "name": "ПВО аэродрома Beirut-Rafic Hariri",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_beirut_rafic_hariri",
+   "lat": 33.8117,
+   "lon": 35.4847,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_ben_gurion",
+   "name": "ПВО аэродрома Ben Gurion",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_ben_gurion",
+   "lat": 32.0193,
+   "lon": 34.8856,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_damascus",
+   "name": "ПВО аэродрома Damascus",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_damascus",
+   "lat": 33.4205,
+   "lon": 36.5036,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_eyn_shemer",
+   "name": "ПВО аэродрома Eyn Shemer",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_eyn_shemer",
+   "lat": 32.4542,
+   "lon": 35.0098,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_haifa",
+   "name": "ПВО аэродрома Haifa",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_haifa",
+   "lat": 32.8238,
+   "lon": 35.0478,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_hatzor",
+   "name": "ПВО аэродрома Hatzor",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_hatzor",
+   "lat": 31.7734,
+   "lon": 34.7293,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_khalkhalah",
+   "name": "ПВО аэродрома Khalkhalah",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_khalkhalah",
+   "lat": 33.0805,
+   "lon": 36.5252,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_kiryat_shmona",
+   "name": "ПВО аэродрома Kiryat Shmona",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_kiryat_shmona",
+   "lat": 33.2252,
+   "lon": 35.6074,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_marj_ruhayyil",
+   "name": "ПВО аэродрома Marj Ruhayyil",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_marj_ruhayyil",
+   "lat": 33.2862,
+   "lon": 36.4396,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_megiddo",
+   "name": "ПВО аэродрома Megiddo",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_megiddo",
+   "lat": 32.6105,
+   "lon": 35.2287,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_mezzeh",
+   "name": "ПВО аэродрома Mezzeh",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_mezzeh",
+   "lat": 33.473,
+   "lon": 36.2092,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_palmachim",
+   "name": "ПВО аэродрома Palmachim",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_palmachim",
+   "lat": 31.9157,
+   "lon": 34.6982,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_qabr_as_sitt",
+   "name": "ПВО аэродрома Qabr as Sitt",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_qabr_as_sitt",
+   "lat": 33.4519,
+   "lon": 36.3438,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_ramat_david",
+   "name": "ПВО аэродрома Ramat David",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_ramat_david",
+   "lat": 32.6799,
+   "lon": 35.1838,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_rayak",
+   "name": "ПВО аэродрома Rayak",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_rayak",
+   "lat": 33.8396,
+   "lon": 35.9788,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_rosh_pina",
+   "name": "ПВО аэродрома Rosh Pina",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_rosh_pina",
+   "lat": 32.9925,
+   "lon": 35.5817,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_shayrat",
+   "name": "ПВО аэродрома Shayrat",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_shayrat",
+   "lat": 34.4804,
+   "lon": 36.8964,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_tel_nof",
+   "name": "ПВО аэродрома Tel Nof",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_tel_nof",
+   "lat": 31.8515,
+   "lon": 34.8359,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  }
+ ],
+ "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК - части состава сил."
+}

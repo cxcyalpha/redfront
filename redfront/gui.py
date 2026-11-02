@@ -29,6 +29,8 @@ SECTOR = "sector_hamburg.json"     # кампании без поля sector (с
 THEATRES = [   # (id, сектор, состав сил, название)
     ("germany", "sector_germany.json", "oob_germany.json", "Вся карта: фронт от Балтики до Хофа (1989)"),
     ("hamburg", "sector_hamburg.json", "oob_hamburg.json", "Сектор Гамбург - Люнебург (полигон)"),
+    ("caucasus", "sector_caucasus.json", "oob_caucasus.json", "Кавказ: август 2008 (Южная Осетия и Абхазия)"),
+    ("syria", "sector_syria.json", "oob_syria.json", "Сирия - Ливан: июнь 1982 (долина Бекаа)"),
 ]
 
 

@@ -1,0 +1,993 @@
+{
+ "_about": "Театр Кавказ, война августа 2008 г. Генерирован tools/gen_caucasus.py. Координаты пунктов - ОЦЕНКИ (+-2 км); дороги - вручную (через Большой Кавказ - только Рокский тоннель и Военно-Грузинская дорога, в Абхазию - побережье и мост через Ингури). Стороны - утро 8.08.2008.",
+ "theatre": "caucasus",
+ "places": {
+  "Mozdok": {
+   "lat": 43.737,
+   "lon": 44.654,
+   "estimate": true,
+   "side": "red"
+  },
+  "Prokhladny": {
+   "lat": 43.758,
+   "lon": 44.035,
+   "estimate": true,
+   "side": "red"
+  },
+  "Nalchik": {
+   "lat": 43.485,
+   "lon": 43.607,
+   "estimate": true,
+   "side": "red"
+  },
+  "Beslan": {
+   "lat": 43.193,
+   "lon": 44.541,
+   "estimate": true,
+   "side": "red"
+  },
+  "Nazran": {
+   "lat": 43.226,
+   "lon": 44.765,
+   "estimate": true,
+   "side": "red"
+  },
+  "Vladikavkaz": {
+   "lat": 43.025,
+   "lon": 44.682,
+   "estimate": true,
+   "side": "red"
+  },
+  "Alagir": {
+   "lat": 43.042,
+   "lon": 44.217,
+   "estimate": true,
+   "side": "red"
+  },
+  "Zaramag": {
+   "lat": 42.7,
+   "lon": 44.03,
+   "estimate": true,
+   "side": "red"
+  },
+  "UpperLars": {
+   "lat": 42.744,
+   "lon": 44.63,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sochi": {
+   "lat": 43.43,
+   "lon": 39.925,
+   "estimate": true,
+   "side": "red"
+  },
+  "Roki": {
+   "lat": 42.567,
+   "lon": 44.118,
+   "estimate": true,
+   "side": "red"
+  },
+  "Java": {
+   "lat": 42.395,
+   "lon": 43.926,
+   "estimate": true,
+   "side": "red"
+  },
+  "Tskhinvali": {
+   "lat": 42.227,
+   "lon": 43.969,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Gagra": {
+   "lat": 43.33,
+   "lon": 40.25,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gudauta": {
+   "lat": 43.104,
+   "lon": 40.627,
+   "estimate": true,
+   "side": "red"
+  },
+  "NewAthos": {
+   "lat": 43.09,
+   "lon": 40.81,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sukhumi": {
+   "lat": 43.003,
+   "lon": 41.015,
+   "estimate": true,
+   "side": "red"
+  },
+  "Ochamchire": {
+   "lat": 42.713,
+   "lon": 41.468,
+   "estimate": true,
+   "side": "red"
+  },
+  "Tkvarcheli": {
+   "lat": 42.854,
+   "lon": 41.684,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gali": {
+   "lat": 42.627,
+   "lon": 41.737,
+   "estimate": true,
+   "side": "red"
+  },
+  "Azhara": {
+   "lat": 43.1,
+   "lon": 41.76,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Zugdidi": {
+   "lat": 42.509,
+   "lon": 41.871,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Khobi": {
+   "lat": 42.315,
+   "lon": 41.898,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Jvari": {
+   "lat": 42.72,
+   "lon": 42.05,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Mestia": {
+   "lat": 43.045,
+   "lon": 42.727,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Senaki": {
+   "lat": 42.27,
+   "lon": 42.067,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Poti": {
+   "lat": 42.146,
+   "lon": 41.672,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Samtredia": {
+   "lat": 42.163,
+   "lon": 42.34,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Lanchkhuti": {
+   "lat": 42.09,
+   "lon": 42.03,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Ozurgeti": {
+   "lat": 41.924,
+   "lon": 42.007,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kobuleti": {
+   "lat": 41.82,
+   "lon": 41.776,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Batumi": {
+   "lat": 41.643,
+   "lon": 41.64,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kutaisi": {
+   "lat": 42.267,
+   "lon": 42.718,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tkibuli": {
+   "lat": 42.35,
+   "lon": 42.998,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Ambrolauri": {
+   "lat": 42.52,
+   "lon": 43.15,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Oni": {
+   "lat": 42.58,
+   "lon": 43.44,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Zestaponi": {
+   "lat": 42.11,
+   "lon": 43.05,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Sachkhere": {
+   "lat": 42.344,
+   "lon": 43.418,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Khashuri": {
+   "lat": 41.993,
+   "lon": 43.599,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Borjomi": {
+   "lat": 41.84,
+   "lon": 43.381,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Akhaltsikhe": {
+   "lat": 41.639,
+   "lon": 42.983,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kareli": {
+   "lat": 42.022,
+   "lon": 43.896,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Gori": {
+   "lat": 41.985,
+   "lon": 44.112,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kaspi": {
+   "lat": 41.925,
+   "lon": 44.423,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Akhalgori": {
+   "lat": 42.128,
+   "lon": 44.483,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Mtskheta": {
+   "lat": 41.845,
+   "lon": 44.719,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tbilisi": {
+   "lat": 41.716,
+   "lon": 44.783,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Rustavi": {
+   "lat": 41.549,
+   "lon": 44.993,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Marneuli": {
+   "lat": 41.475,
+   "lon": 44.808,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Sagarejo": {
+   "lat": 41.734,
+   "lon": 45.33,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Telavi": {
+   "lat": 41.919,
+   "lon": 45.473,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Dusheti": {
+   "lat": 42.086,
+   "lon": 44.694,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Pasanauri": {
+   "lat": 42.351,
+   "lon": 44.689,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kazbegi": {
+   "lat": 42.657,
+   "lon": 44.643,
+   "estimate": true,
+   "side": "blue"
+  }
+ },
+ "airbases": {
+  "mozdok": {
+   "name": "Mozdok",
+   "airport": "Mozdok",
+   "side": "red",
+   "military": true
+  },
+  "beslan": {
+   "name": "Beslan",
+   "airport": "Beslan",
+   "side": "red",
+   "military": true
+  },
+  "nalchik": {
+   "name": "Nalchik",
+   "airport": "Nalchik",
+   "side": "red",
+   "military": true
+  },
+  "mineralnye_vody": {
+   "name": "Mineralnye Vody",
+   "airport": "Mineralnye Vody",
+   "side": "red",
+   "military": true
+  },
+  "krymsk": {
+   "name": "Krymsk",
+   "airport": "Krymsk",
+   "side": "red",
+   "military": true
+  },
+  "maykop_khanskaya": {
+   "name": "Maykop-Khanskaya",
+   "airport": "Maykop-Khanskaya",
+   "side": "red",
+   "military": true
+  },
+  "krasnodar_center": {
+   "name": "Krasnodar-Center",
+   "airport": "Krasnodar-Center",
+   "side": "red",
+   "military": true
+  },
+  "sochi_adler": {
+   "name": "Sochi-Adler",
+   "airport": "Sochi-Adler",
+   "side": "red",
+   "military": true
+  },
+  "gudauta": {
+   "name": "Gudauta",
+   "airport": "Gudauta",
+   "side": "red",
+   "military": true
+  },
+  "sukhumi_babushara": {
+   "name": "Sukhumi-Babushara",
+   "airport": "Sukhumi-Babushara",
+   "side": "red",
+   "military": true
+  },
+  "vaziani": {
+   "name": "Vaziani",
+   "airport": "Vaziani",
+   "side": "blue",
+   "military": true
+  },
+  "soganlug": {
+   "name": "Soganlug",
+   "airport": "Soganlug",
+   "side": "blue",
+   "military": true
+  },
+  "tbilisi_lochini": {
+   "name": "Tbilisi-Lochini",
+   "airport": "Tbilisi-Lochini",
+   "side": "blue",
+   "military": true
+  },
+  "kutaisi": {
+   "name": "Kutaisi",
+   "airport": "Kutaisi",
+   "side": "blue",
+   "military": true
+  },
+  "senaki_kolkhi": {
+   "name": "Senaki-Kolkhi",
+   "airport": "Senaki-Kolkhi",
+   "side": "blue",
+   "military": true
+  },
+  "kobuleti": {
+   "name": "Kobuleti",
+   "airport": "Kobuleti",
+   "side": "blue",
+   "military": true
+  },
+  "batumi": {
+   "name": "Batumi",
+   "airport": "Batumi",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "links": [
+  [
+   "Mozdok",
+   "Prokhladny"
+  ],
+  [
+   "Mozdok",
+   "Beslan"
+  ],
+  [
+   "Prokhladny",
+   "Nalchik"
+  ],
+  [
+   "Prokhladny",
+   "Beslan"
+  ],
+  [
+   "Nalchik",
+   "Alagir"
+  ],
+  [
+   "Beslan",
+   "Vladikavkaz"
+  ],
+  [
+   "Beslan",
+   "Nazran"
+  ],
+  [
+   "Nazran",
+   "Vladikavkaz"
+  ],
+  [
+   "Vladikavkaz",
+   "Alagir"
+  ],
+  [
+   "Alagir",
+   "Zaramag"
+  ],
+  [
+   "Zaramag",
+   "Roki"
+  ],
+  [
+   "Roki",
+   "Java"
+  ],
+  [
+   "Java",
+   "Tskhinvali"
+  ],
+  [
+   "Vladikavkaz",
+   "UpperLars"
+  ],
+  [
+   "UpperLars",
+   "Kazbegi"
+  ],
+  [
+   "Kazbegi",
+   "Pasanauri"
+  ],
+  [
+   "Pasanauri",
+   "Dusheti"
+  ],
+  [
+   "Dusheti",
+   "Mtskheta"
+  ],
+  [
+   "Tskhinvali",
+   "Gori"
+  ],
+  [
+   "Tskhinvali",
+   "Kareli"
+  ],
+  [
+   "Kareli",
+   "Gori"
+  ],
+  [
+   "Kareli",
+   "Khashuri"
+  ],
+  [
+   "Gori",
+   "Kaspi"
+  ],
+  [
+   "Kaspi",
+   "Mtskheta"
+  ],
+  [
+   "Kaspi",
+   "Akhalgori"
+  ],
+  [
+   "Mtskheta",
+   "Tbilisi"
+  ],
+  [
+   "Tbilisi",
+   "Rustavi"
+  ],
+  [
+   "Tbilisi",
+   "Marneuli"
+  ],
+  [
+   "Tbilisi",
+   "Sagarejo"
+  ],
+  [
+   "Sagarejo",
+   "Telavi"
+  ],
+  [
+   "Khashuri",
+   "Borjomi"
+  ],
+  [
+   "Borjomi",
+   "Akhaltsikhe"
+  ],
+  [
+   "Khashuri",
+   "Zestaponi"
+  ],
+  [
+   "Zestaponi",
+   "Sachkhere"
+  ],
+  [
+   "Zestaponi",
+   "Kutaisi"
+  ],
+  [
+   "Kutaisi",
+   "Tkibuli"
+  ],
+  [
+   "Kutaisi",
+   "Ambrolauri"
+  ],
+  [
+   "Ambrolauri",
+   "Oni"
+  ],
+  [
+   "Kutaisi",
+   "Samtredia"
+  ],
+  [
+   "Samtredia",
+   "Senaki"
+  ],
+  [
+   "Samtredia",
+   "Lanchkhuti"
+  ],
+  [
+   "Lanchkhuti",
+   "Ozurgeti"
+  ],
+  [
+   "Ozurgeti",
+   "Kobuleti"
+  ],
+  [
+   "Kobuleti",
+   "Batumi"
+  ],
+  [
+   "Lanchkhuti",
+   "Poti"
+  ],
+  [
+   "Senaki",
+   "Poti"
+  ],
+  [
+   "Senaki",
+   "Khobi"
+  ],
+  [
+   "Khobi",
+   "Zugdidi"
+  ],
+  [
+   "Senaki",
+   "Zugdidi"
+  ],
+  [
+   "Zugdidi",
+   "Jvari"
+  ],
+  [
+   "Jvari",
+   "Mestia"
+  ],
+  [
+   "Zugdidi",
+   "Gali"
+  ],
+  [
+   "Gali",
+   "Ochamchire"
+  ],
+  [
+   "Ochamchire",
+   "Tkvarcheli"
+  ],
+  [
+   "Ochamchire",
+   "Sukhumi"
+  ],
+  [
+   "Sukhumi",
+   "NewAthos"
+  ],
+  [
+   "NewAthos",
+   "Gudauta"
+  ],
+  [
+   "Gudauta",
+   "Gagra"
+  ],
+  [
+   "Gagra",
+   "Sochi"
+  ],
+  [
+   "Sukhumi",
+   "Azhara"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Mozdok",
+   "Nalchik",
+   "Sochi"
+  ],
+  "blue": [
+   "Tbilisi",
+   "Batumi",
+   "Telavi"
+  ]
+ },
+ "axes": {
+  "south": "Южная Осетия: Цхинвали - Гори",
+  "west": "Абхазия: Зугдиди - Сенаки - Поти",
+  "kodori": "Кодорское ущелье"
+ },
+ "objectives": {
+  "red": {
+   "south": [
+    "Tskhinvali",
+    "Kareli",
+    "Gori"
+   ],
+   "west": [
+    "Gali",
+    "Zugdidi",
+    "Senaki",
+    "Poti"
+   ],
+   "kodori": [
+    "Azhara"
+   ]
+  },
+  "blue": []
+ },
+ "_about_objectives": "Оси красных - ОЦЕНКА по ходу войны (Цхинвали - Гори; Абхазия - Зугдиди, Сенаки, Поти; Кодори), не документ.",
+ "depots": [
+  {
+   "id": "red_depot_vlad",
+   "name": "Склад снабжения 58-й армии (Владикавказ)",
+   "side": "red",
+   "place": "Vladikavkaz"
+  },
+  {
+   "id": "red_depot_alagir",
+   "name": "Передовой склад (Алагир)",
+   "side": "red",
+   "place": "Alagir"
+  },
+  {
+   "id": "red_depot_java",
+   "name": "Передовой склад (Джава)",
+   "side": "red",
+   "place": "Java"
+  },
+  {
+   "id": "red_depot_gudauta",
+   "name": "Склад снабжения (Гудаута)",
+   "side": "red",
+   "place": "Gudauta"
+  },
+  {
+   "id": "red_depot_sukhumi",
+   "name": "Склад снабжения (Сухуми)",
+   "side": "red",
+   "place": "Sukhumi"
+  },
+  {
+   "id": "blue_depot_gori",
+   "name": "Склад снабжения (Гори)",
+   "side": "blue",
+   "place": "Gori"
+  },
+  {
+   "id": "blue_depot_tbilisi",
+   "name": "Склад снабжения (Тбилиси)",
+   "side": "blue",
+   "place": "Tbilisi"
+  },
+  {
+   "id": "blue_depot_kutaisi",
+   "name": "Склад снабжения (Кутаиси)",
+   "side": "blue",
+   "place": "Kutaisi"
+  },
+  {
+   "id": "blue_depot_senaki",
+   "name": "Склад снабжения (Сенаки)",
+   "side": "blue",
+   "place": "Senaki"
+  },
+  {
+   "id": "blue_depot_zugdidi",
+   "name": "Передовой склад (Зугдиди)",
+   "side": "blue",
+   "place": "Zugdidi"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_inguri",
+   "name": "Мост через Ингури (Рухи)",
+   "lat": 42.565,
+   "lon": 41.79,
+   "links": [
+    [
+     "Zugdidi",
+     "Gali"
+    ]
+   ],
+   "source": "по памяти - проверить (зонд карты)"
+  },
+  {
+   "id": "br_gori_liakhvi",
+   "name": "Мост через Лиахви (Гори)",
+   "lat": 41.995,
+   "lon": 44.12,
+   "links": [
+    [
+     "Tskhinvali",
+     "Gori"
+    ]
+   ],
+   "source": "по памяти - проверить (зонд карты)"
+  }
+ ],
+ "ad_sites": [
+  {
+   "id": "blue_ad_af_batumi",
+   "name": "ПВО аэродрома Batumi",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_batumi",
+   "lat": 41.6229,
+   "lon": 41.6031,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_beslan",
+   "name": "ПВО аэродрома Beslan",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_beslan",
+   "lat": 43.1922,
+   "lon": 44.6066,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_gudauta",
+   "name": "ПВО аэродрома Gudauta",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_gudauta",
+   "lat": 43.1129,
+   "lon": 40.5881,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_kobuleti",
+   "name": "ПВО аэродрома Kobuleti",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_kobuleti",
+   "lat": 41.9434,
+   "lon": 41.862,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_krasnodar_center",
+   "name": "ПВО аэродрома Krasnodar-Center",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_krasnodar_center",
+   "lat": 45.0768,
+   "lon": 38.9522,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_krymsk",
+   "name": "ПВО аэродрома Krymsk",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_krymsk",
+   "lat": 44.9596,
+   "lon": 38.0098,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_kutaisi",
+   "name": "ПВО аэродрома Kutaisi",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_kutaisi",
+   "lat": 42.1859,
+   "lon": 42.4669,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_maykop_khanskaya",
+   "name": "ПВО аэродрома Maykop-Khanskaya",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_maykop_khanskaya",
+   "lat": 44.6697,
+   "lon": 40.0448,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_mineralnye_vody",
+   "name": "ПВО аэродрома Mineralnye Vody",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_mineralnye_vody",
+   "lat": 44.2185,
+   "lon": 43.0678,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_mozdok",
+   "name": "ПВО аэродрома Mozdok",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_mozdok",
+   "lat": 43.7782,
+   "lon": 44.6062,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_nalchik",
+   "name": "ПВО аэродрома Nalchik",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_nalchik",
+   "lat": 43.504,
+   "lon": 43.6488,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_senaki_kolkhi",
+   "name": "ПВО аэродрома Senaki-Kolkhi",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_senaki_kolkhi",
+   "lat": 42.2527,
+   "lon": 42.0392,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_sochi_adler",
+   "name": "ПВО аэродрома Sochi-Adler",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_sochi_adler",
+   "lat": 43.4396,
+   "lon": 39.9584,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_soganlug",
+   "name": "ПВО аэродрома Soganlug",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_soganlug",
+   "lat": 41.6585,
+   "lon": 44.9249,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_sukhumi_babushara",
+   "name": "ПВО аэродрома Sukhumi-Babushara",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_sukhumi_babushara",
+   "lat": 42.8706,
+   "lon": 41.1381,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_tbilisi_lochini",
+   "name": "ПВО аэродрома Tbilisi-Lochini",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_tbilisi_lochini",
+   "lat": 41.6758,
+   "lon": 44.9425,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_vaziani",
+   "name": "ПВО аэродрома Vaziani",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_vaziani",
+   "lat": 41.6377,
+   "lon": 45.0134,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  }
+ ],
+ "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил."
+}
