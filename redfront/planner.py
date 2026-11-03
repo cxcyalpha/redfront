@@ -227,6 +227,16 @@ def _book(state: dict, tasked: dict, uid: str) -> None:
     tasked[t] = tasked.get(t, 0) + 1
 
 
+def under_umbrella(state: dict, side: str, pos: dict, km: float) -> bool:
+    """Точка под зонтиком своих ЗРК (не объектовая ПВО): ближе km от кромки зоны поражения исправного ЗРК стороны."""
+    for u in state["units"].values():
+        if (u["side"] == side and model.category(u) == "sam" and not u.get("point")
+                and u["state"] not in ("destroyed", "pending") and model.strength(u) >= 0.5):
+            if model.dist_km(model.unit_pos(state, u), pos) <= km + float(threat_radius_km(u) or 0):
+                return True
+    return False
+
+
 def campaign_year(state: dict) -> int | None:
     try:
         return int(str(state.get("date") or "")[:4])
@@ -414,6 +424,12 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 from . import farp
                 targets = [u for u in targets if depth[0] <= farp.front_km(state, foe, _aim(state, side, u)) <= depth[1]]
         targets = [t for t in targets if _allowed_area(t)]
+        umb = doc.get("umbrella") or {}
+        if kind in umb.get("tasks", []):         # доктрина 'зонтика': задача - только под своими ЗРК (арабские ВВС 1973)
+            before = len(targets)
+            targets = [t for t in targets if under_umbrella(state, side, _aim(state, side, t), umb.get("km", 30))]
+            if before and not targets:
+                reasons.append(f"{tdef['title']}: цели вне зонтика своих ЗРК ({umb.get('km', 30)} км) - по доктрине не летаем")
         if not targets:
             continue
         found = False

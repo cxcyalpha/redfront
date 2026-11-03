@@ -718,6 +718,13 @@ MSGS += [
     ("Разведка, {a}: {x} ({w}, полоса {k} км, РТР {r} км).", "Reconnaissance, {a}: {x} ({w}, swath {k} km, ELINT {r} km)."),
     ("Разведка, {a}: {x} ({w}, полоса {k} км).", "Reconnaissance, {a}: {x} ({w}, swath {k} km)."),
     ("{t} - нет исполнителей ({r}) в радиусе", "{t} - no units ({r}) in range"),
+    ("{a}: ПКР израсходованы ({n}), перезарядка ~{d} сут.", "{a}: anti-ship missiles expended ({n}), reload ~{d} days."),
+    ("{a}: ПКР пополнены ({x}).", "{a}: anti-ship missiles replenished ({x})."), ("удар с воздуха, бомбы", "air strike, bombs"),
+    ("{t}: цели вне зонтика своих ЗРК ({k} км) - по доктрине не летаем", "{t}: targets outside our own SAM umbrella ({k} km) - not flown by doctrine"),
+    ("Сирия в 1983 г. по кораблям 6-го флота не била (огонь ЗРК - только по самолётам)", "Syria did not attack 6th Fleet ships in 1983 (SAM fire only at aircraft)"),
+    ("ВВС ДРВ, 1972: перехват по наведению с земли", "North Vietnamese Air Force, 1972: GCI interception"),
+    ("ВВС и армии арабских стран (советская школа, 1967-1985): зонтик ПВО", "Arab air forces and armies (Soviet school, 1967-1985): SAM umbrella"),
+    ("ВВС и армия Израиля, 1973", "Israeli Air Force and Army, 1973"),
     ("{a} (ОЦЕНКА)", "{a|tr} (ESTIMATE)"),
 ]
 # от длинных к коротким: частный шаблон раньше общего

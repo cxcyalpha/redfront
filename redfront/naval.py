@@ -170,9 +170,50 @@ def _move(state: dict, u: dict) -> str | None:
     return f"{u['name']}: переход {'домой' if goal is home else 'в район'} ({min(d, step):.0f} км)."
 
 
+def asm_left(unit: dict, typ: str, name: str) -> int:
+    """ПКР на борту корабля (боекомплект - SHIP_INFO asm; расходуется залпом, пополняется в порту)."""
+    return int(ship_state(unit)[name].get("asm", info(typ)["asm"]))
+
+
 def _salvo(u: dict) -> float:
     ss = ship_state(u)
-    return sum(info(t)["asm"] * (1.0 - ss[n]["dmg"]) for t, n in ship_names(u)) * u.get("quality", 1.0)
+    return sum(asm_left(u, t, n) * (1.0 - ss[n]["dmg"]) for t, n in ship_names(u)) * u.get("quality", 1.0)
+
+
+def _fire(state: dict, u: dict) -> str | None:
+    """Залп группы: корабли расходуют все ПКР на борту (катер 'Оса' - 4 'Термита' за бой); перезарядка - переход в
+    порт и обратно (ASM_RELOAD: 2 перехода - ОЦЕНКА), до неё корабль в строю как ПВО и охранение."""
+    fired = 0
+    for t, n in ship_names(u):
+        k = asm_left(u, t, n)
+        if k > 0:
+            st = ship_state(u)[n]
+            st["asm"], st["asm_days"] = 0, 2 * _transit_days(state, u)
+            fired += k
+    if not fired:
+        return None
+    return f"{u['name']}: ПКР израсходованы ({fired}), перезарядка ~{2 * _transit_days(state, u)} сут."
+
+
+def reload_asm(state: dict) -> list[str]:
+    """Конец суток: перезарядка ПКР (корабль в строю, срок asm_days); после ремонта в порту - полный боекомплект."""
+    lines = []
+    for u in ships(state):
+        done = []
+        for t, n in ship_list(u):
+            st = ship_state(u)[n]
+            if "asm" not in st or st["status"] == "sunk":
+                continue
+            if st["status"] in ("port", "returning"):
+                st.pop("asm"), st.pop("asm_days", None)
+                continue
+            st["asm_days"] = st.get("asm_days", 0) - 1
+            if st["asm_days"] <= 0:
+                st.pop("asm"), st.pop("asm_days", None)
+                done.append(n)
+        if done:
+            lines.append(f"{u['name']}: ПКР пополнены ({', '.join(done)}).")
+    return lines
 
 
 # ---------- повреждения кораблей (ОЦЕНКИ) ----------
@@ -270,12 +311,39 @@ def apply_hits(state: dict, unit: dict, hits: float, why: str, ai: bool = False)
     return lines
 
 
-def air_strike(state: dict, unit: dict, pairs: float, why: str) -> list[str]:
+def air_strike(state: dict, unit: dict, pairs: float, why: str, asm_frac: float = 1.0) -> list[str]:
     """Удар ИИ с воздуха по группе (итог по модели): попаданий - HITS_PER_PAIR на пару ударной группы, ПВО группы
-    (корабли с ЗРК) отражает часть: x 1 / (1 + сумма ad_km / AD_SCREEN_KM). ОЦЕНКИ."""
+    (корабли с ЗРК) отражает часть: x 1 / (1 + сумма ad_km / AD_SCREEN_KM); asm_frac - доля самолётов с ПКР
+    (остальные - бомбы, x BOMB_K). ОЦЕНКИ."""
     ad = sum(info(t)["ad_km"] for t, _n in ship_names(unit))
-    hits = pairs * HITS_PER_PAIR / (1.0 + ad / AD_SCREEN_KM)
+    hits = pairs * HITS_PER_PAIR * (asm_frac + (1.0 - asm_frac) * BOMB_K) / (1.0 + ad / AD_SCREEN_KM)
     return apply_hits(state, unit, hits, why, ai=True)
+
+
+# ---------- запас авиационных ПКР стороны (sector asm_stock: {side: {count, per_day}}; нет стороны - без учёта) ----------
+BOMB_K = 0.35            # ОЦЕНКА: без ПКР - бомбы с малой высоты: попаданий меньше (надо пройти над ордером)
+BOMB_LOSS_P = 0.12       # ОЦЕНКА: добавка к потерям на самолёт при бомбометании по кораблям с ЗРК
+
+
+def air_asm(state: dict, side: str) -> int | None:
+    st = (state.get("asm_stock") or {}).get(side)
+    return None if st is None else int(st.get("count", 0))
+
+
+def use_air_asm(state: dict, side: str, need: int) -> float:
+    """Списать ПКР на удар: доля самолётов с ПКР (1.0 - все, 0 - только бомбы). Без учёта у стороны - 1.0."""
+    st = (state.get("asm_stock") or {}).get(side)
+    if st is None or need <= 0:
+        return 1.0
+    take = min(int(st.get("count", 0)), need)
+    st["count"] = int(st.get("count", 0)) - take
+    return take / need
+
+
+def air_asm_resupply(state: dict) -> list[str]:
+    for st in (state.get("asm_stock") or {}).values():
+        st["count"] = int(st.get("count", 0)) + int(st.get("per_day", 0))
+    return []
 
 
 HITS_PER_PAIR = 1.0      # ОЦЕНКА: попаданий (ПКР, бомб) на пару ударной группы без ПВО цели
@@ -345,6 +413,7 @@ def engage(state: dict) -> list[str]:
             hit_r = sb * P_HIT * (AD_SAVE if threat_km(r) > 0 else 1.0) * (1.0 - r.get("ecm", 0.0))
             hit_b = sr * P_HIT * (AD_SAVE if threat_km(b) > 0 else 1.0) * (1.0 - b.get("ecm", 0.0))
             lines.append(f"Бой кораблей: {b['name']} и {r['name']}.")
+            lines += [x for x in (_fire(state, b) if sb > 0 else None, _fire(state, r) if sr > 0 else None) if x]
             lines += apply_hits(state, r, hit_r, f"бой с {b['name']}")
             lines += apply_hits(state, b, hit_b, f"бой с {r['name']}")
     return lines
@@ -356,7 +425,8 @@ def daily_moves(state: dict) -> list[str]:
         ln = _move(state, u)
         if ln:
             lines.append(ln)
-    return lines + engage(state) + repairs(state)
+    lines += reload_asm(state)                   # пополнение ПКР - до боя: перезарядка суток уже на борту
+    return lines + engage(state) + repairs(state) + air_asm_resupply(state)
 
 
 # ---------- морской подвоз ----------

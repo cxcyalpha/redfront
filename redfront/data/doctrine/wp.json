@@ -2113,7 +2113,9 @@
     "player_cold_start_min": 5,
     "note": "на дежурстве к началу миссии (в воздухе в зоне)",
     "estimate": true
-   }
+   },
+   "from_year": 1985,
+   "from_year_source": "А-50 - в строю с 1984-1985 гг."
   },
   "airlift": {
    "title": "Воздушная перевозка",

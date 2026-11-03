@@ -92,6 +92,12 @@ def _strike(state: dict, e: dict) -> list[str]:
     qra = alerts_near(state, model.enemy(e["side"]), obj["pos"], _tot(e))
     # потери группы от ЗРК коридора и дежурных пар ПВО противника
     pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) + QRA_LOSS * qra)
+    asm_frac = 1.0
+    if obj["kind"] == "ship":                    # ПКР стороны: нет - бомбы с малой высоты над ордером, потери выше
+        from . import naval
+        asm_frac = naval.use_air_asm(state, e["side"], g["size"])
+        if asm_frac < 1.0 and naval.threat_km(tgt) > 0:
+            pl = min(0.6, pl + naval.BOMB_LOSS_P * (1.0 - asm_frac))
     down = sum(1 for _ in range(g["size"]) if r.random() < pl) if r else 0
     if perf and down:
         perf["count"] = max(0, perf.get("count", 0) - down)
@@ -123,7 +129,7 @@ def _strike(state: dict, e: dict) -> list[str]:
         lines.append(f"ИИ, {e['title']}: повреждение {before:.0%} -> {tgt['damage']:.0%}." + explain.damage_effect(state, tgt, before))
     elif obj["kind"] == "ship":                 # корабли: попадания по кораблям группы (naval.air_strike, авианосец - с пределом)
         from . import naval
-        lines += [f"ИИ, {e['title']}: {x}" for x in naval.air_strike(state, tgt, size_k, "удар с воздуха")]
+        lines += [f"ИИ, {e['title']}: {x}" for x in naval.air_strike(state, tgt, size_k, "удар с воздуха" if asm_frac >= 1.0 else "удар с воздуха, бомбы", asm_frac)]
     elif obj["kind"] in LOSS:
         frac = min(0.5, LOSS[obj["kind"]] * size_k)
         s0 = model.strength(tgt)

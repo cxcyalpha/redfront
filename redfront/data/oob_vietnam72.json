@@ -12,7 +12,8 @@
   "blue": "USA"
  },
  "doctrine": {
-  "blue": "us72"
+  "blue": "us72",
+  "red": "vpaf72"
  },
  "units": [
   {

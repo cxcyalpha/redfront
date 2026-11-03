@@ -7,6 +7,10 @@
   "date": "1973-10-06"
  },
  "date": "1973-10-06",
+ "doctrine": {
+  "red": "arab",
+  "blue": "iaf73"
+ },
  "countries": {
   "red": "Syria",
   "blue": "Israel"

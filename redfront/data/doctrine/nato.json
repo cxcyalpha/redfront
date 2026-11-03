@@ -2188,7 +2188,9 @@
     "player_cold_start_min": 5,
     "note": "на дежурстве к началу миссии (в воздухе в зоне)",
     "estimate": true
-   }
+   },
+   "from_year": 1977,
+   "from_year_source": "E-3A ВВС США - с 1977 г. (НАТО - с 1982)"
   },
   "tanker_orbit": {
    "title": "Дежурство заправщика",

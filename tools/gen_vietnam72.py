@@ -239,7 +239,8 @@ def main() -> None:
         "theatre": "syria", "places": places, "airbases": airbases, "carriers": carriers,
         "links": [list(l) for l in LINKS], "supply_entry": SUPPLY_ENTRY, "off_limits": OFF_LIMITS,
         "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
-        "naval_bases": {"red": [{"name": "Хайфон", "lat": 35.53, "lon": 35.76}]},   # порты ремонта кораблей; нет стороны - порт за картой (Неаполь, Субик-Бей)
+        "naval_bases": {"red": [{"name": "Хайфон", "lat": 35.53, "lon": 35.76}]},
+        "asm_stock": {"blue": {"count": 0, "per_day": 0, "note": "AGM-84 Harpoon - с 1977 г.; 1972 - бомбы (Mk 20 Rockeye)"}, "red": {"count": 0, "per_day": 0, "note": "у ВВС ДРВ ПКР нет: 19.04.1972 - бомбы МиГ-17"}},   # запас авиационных ПКР сторон (naval.use_air_asm; ОЦЕНКА)
         "air_limits": {"blue": [], "red": []},   # авиация бьёт по всему Северу (кроме зон по дням - task_rules _zones)
         "axes": {k: v["title"] for k, v in AXES.items()},
         "objectives": {"red": {k: v["objectives"] for k, v in AXES.items()}, "blue": []},
@@ -294,7 +295,7 @@ def main() -> None:
         "_about": "Вьетнам, апрель 1972: Пасхальное наступление и воздушная кампания США (условная география, карта Syria).",
         "theatre": "syria",
         "preset": {"title": "Апрель 1972: Вьетнам, Пасхальное наступление", "year": 1972, "date": "1972-04-06"},
-        "date": "1972-04-06", "countries": {"red": "Vietnam", "blue": "USA"}, "doctrine": {"blue": "us72"}, "units": units,
+        "date": "1972-04-06", "countries": {"red": "Vietnam", "blue": "USA"}, "doctrine": {"blue": "us72", "red": "vpaf72"}, "units": units,
         "variants": [{"name": "base", "title": "Апрель 1972: 'Freedom Train' и Пасхальное наступление",
                       "posture": {"red": "offense", "blue": "defense"},
                       "task_rules": {"blue": {

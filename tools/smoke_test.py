@@ -3782,6 +3782,7 @@ def theatres_section(tmp: Path) -> None:
           f"флот: бой у Латакии (катера Сирии - {model.strength(lat):.0%}), морской подвоз в Тартус {sea} т, "
           f"ударов по кораблям в плане красных {len(ship_tasks)}")
     st6 = model.new_campaign("csg", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="red")
+    st6["task_rules"]["red"].pop("strike_ship", None)   # в хронике Сирия по 6-му флоту не бьёт; здесь - проверка миссии
     planner.plan(st6)
     k = next((i for i, t in enumerate(st6["tasks"], 1) if t["kind"] == "strike_ship"), None)
     if k:

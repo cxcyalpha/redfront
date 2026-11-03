@@ -236,7 +236,8 @@ def main() -> None:
         "depots": [{"id": i, "name": n, "side": s, "place": p} for i, n, s, p in DEPOTS],
         "bridges": BRIDGES, "ad_sites": sites,
         "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
-        "naval_bases": {"blue": [{"name": "Хайфа", "lat": 32.83, "lon": 35.00}], "red": [{"name": "Тартус", "lat": 34.90, "lon": 35.86}, {"name": "Латакия", "lat": 35.52, "lon": 35.76}]},   # порты ремонта кораблей; нет стороны - порт за картой (Неаполь, Субик-Бей)
+        "naval_bases": {"blue": [{"name": "Хайфа", "lat": 32.83, "lon": 35.00}], "red": [{"name": "Тартус", "lat": 34.90, "lon": 35.86}, {"name": "Латакия", "lat": 35.52, "lon": 35.76}]},
+        "asm_stock": {"blue": {"count": 0, "per_day": 0, "note": "у ВВС Израиля 1973 г. авиационных ПКР нет ('Габриэль' - корабельная)"}, "red": {"count": 0, "per_day": 0, "note": "у ВВС Сирии 1973 г. авиационных ПКР нет"}},   # запас авиационных ПКР сторон (naval.use_air_asm; ОЦЕНКА)
     }
     (DATA / "sector_golan73.json").write_text(json.dumps(sector, ensure_ascii=False, indent=1), encoding="utf-8")
     units = []
@@ -282,7 +283,7 @@ def main() -> None:
         "_about": "Октябрьская война 1973 г., Голанский фронт (Израиль - Сирия, Ирак, Иордания). tools/gen_golan73.py.",
         "theatre": "syria",
         "preset": {"title": "Октябрь 1973: Голаны", "year": 1973, "date": "1973-10-06"},
-        "date": "1973-10-06", "countries": {"red": "Syria", "blue": "Israel"}, "units": units,
+        "date": "1973-10-06", "doctrine": {"red": "arab", "blue": "iaf73"}, "countries": {"red": "Syria", "blue": "Israel"}, "units": units,
         "variants": [{"name": "base", "title": "Октябрь 1973: Голаны",
                       "posture": {"red": "offense", "blue": "defense"},
                       "posture_days": [{"from_day": 6, "red": "defense", "blue": "offense"}],

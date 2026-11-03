@@ -161,7 +161,8 @@ def main() -> None:
         "depots": [{"id": i, "name": n, "side": s, "place": p} for i, n, s, p in DEPOTS],
         "bridges": [], "ad_sites": [],
         "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
-        "naval_bases": {"red": [{"name": "Тартус", "lat": 34.90, "lon": 35.86}]},   # порты ремонта кораблей; нет стороны - порт за картой (Неаполь, Субик-Бей)
+        "naval_bases": {"red": [{"name": "Тартус", "lat": 34.90, "lon": 35.86}]},
+        "asm_stock": {"blue": {"count": 24, "per_day": 2, "type": "AGM-84 Harpoon (A-6E)", "note": "ОЦЕНКА: запас на 2 авианосцах, пополнение с транспорта боеприпасов"}, "red": {"count": 0, "per_day": 0, "note": "у ВВС Сирии 1983 г. авиационных ПКР нет - только бомбы"}},   # запас авиационных ПКР сторон (naval.use_air_asm; ОЦЕНКА)
     }
     (DATA / "sector_lebanon83.json").write_text(json.dumps(sector, ensure_ascii=False, indent=1), encoding="utf-8")
     units = []
@@ -200,10 +201,11 @@ def main() -> None:
         "_about": "Ливан, декабрь 1983: палубная авиация США против Сирии (гипотетическая кампания). tools/gen_lebanon83.py.",
         "theatre": "syria",
         "preset": {"title": "Декабрь 1983: Ливан, авианосцы США", "year": 1983, "date": "1983-12-04"},
-        "date": "1983-12-04", "countries": {"red": "Syria", "blue": "USA"}, "units": units,
+        "date": "1983-12-04", "doctrine": {"red": "arab"}, "countries": {"red": "Syria", "blue": "USA"}, "units": units,
         "variants": [{"name": "base", "title": "Декабрь 1983: Ливан, авианосцы США",
                       "posture": {"red": "offense", "blue": "defense"},
-                      "task_rules": {"blue": {"strike_factory": {"off": True, "why": "удары - только по войскам и ПВО в Ливане"}}}}],
+                      "task_rules": {"blue": {"strike_factory": {"off": True, "why": "удары - только по войскам и ПВО в Ливане"}},
+                                     "red": {"strike_ship": {"off": True, "why": "Сирия в 1983 г. по кораблям 6-го флота не била (огонь ЗРК - только по самолётам)"}}}}],
         "replacements": {"air_per_day": 1, "note": "ОЦЕНКА"},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]} for v in vs]
