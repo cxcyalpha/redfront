@@ -17,66 +17,9 @@ REDFRONT_GCI = REDFRONT_GCI or { events = {} }
 local CHECK_S, GROUP_M = 15, 10000
 local FIGHTERS = { @FIGHTERS@ }   -- { group, side }
 local SIDES = { @SIDES@ }         -- [сторона] = { channels, commit, leash (м), odds, hit_run, heli, bingo, per_target }
-local PROTECT = { @PROTECT@ }     -- [сторона] = { {x, y}, ... } - свои объекты (аэродромы, ЗРК)
-local RADAR_ATTR = { "EWR", "SAM SR" }
+-- картина обстановки, ценность и курс целей, свои объекты - airpic.lua (RF_AIR)
 local assigned = {}               -- группа истребителей -> { target = группа цели, unit = единица цели }
-
-local function d2(a, b) return math.sqrt((a.x - b.x) ^ 2 + (a.z - b.z) ^ 2) end
-
-local function groundRadars(side)
-  local ctrl, pos = {}, {}
-  for _, g in ipairs(coalition.getGroups(side, Group.Category.GROUND) or {}) do
-    for _, u in ipairs(g:getUnits() or {}) do
-      local ok = false
-      if u and u:isExist() then
-        for _, a in ipairs(RADAR_ATTR) do if u:hasAttribute(a) then ok = true end end
-      end
-      if ok then ctrl[#ctrl + 1] = g:getController(); pos[#pos + 1] = u:getPoint(); break end
-    end
-  end
-  return ctrl, pos
-end
-
-local function picture(side)      -- единицы противника в воздухе, которых видят наземные РЛС стороны
-  local seen, list = {}, {}
-  local ctrl, rpos = groundRadars(side)
-  for _, c in ipairs(ctrl) do
-    local ok, dets = pcall(function() return c:getDetectedTargets(Controller.Detection.RADAR) end)
-    for _, d in ipairs(ok and dets or {}) do
-      local o = d.object
-      if o and o.isExist and o:isExist() and o.getCoalition and o:getCoalition() ~= side and o.inAir and o:inAir() then
-        local n = o:getName()
-        if not seen[n] then seen[n] = true; list[#list + 1] = o end
-      end
-    end
-  end
-  return list, seen, rpos
-end
-
-local function has(u, a) local ok, r = pcall(function() return u:hasAttribute(a) end); return ok and r end
-
-local function value(t, prm)      -- ценность цели: 0 - не перехватываем
-  if has(t, "Helicopters") then return prm.heli and 1 or 0 end
-  if has(t, "AWACS") or has(t, "Tankers") then return 3 end
-  if has(t, "Bombers") or has(t, "Strategic bombers") then return 3 end
-  if has(t, "Fighters") or has(t, "Interceptors") then return 1 end
-  if has(t, "Multirole fighters") then return 2 end   -- F-4, F-16 - чаще всего ударная группа
-  return 2
-end
-
-local function inbound(side, t)   -- цель идёт к своему объекту (вектор скорости - на ближний объект ближе 60 град.)
-  local p, v = t:getPoint(), t:getVelocity()
-  local sp = math.sqrt(v.x ^ 2 + v.z ^ 2)
-  if sp < 30 then return false end
-  local best, bd = nil, math.huge
-  for _, o in ipairs(PROTECT[side] or {}) do
-    local d = math.sqrt((o.x - p.x) ^ 2 + (o.y - p.z) ^ 2)
-    if d < bd then best, bd = o, d end
-  end
-  if not best then return false end
-  local cosv = ((best.x - p.x) * v.x + (best.y - p.z) * v.z) / (bd * sp + 1)
-  return cosv > 0.5
-end
+local d2 = RF_AIR.d2
 
 local function nearRadar(rpos, p, leash)
   for _, r in ipairs(rpos) do if d2(r, p) <= leash then return true end end
@@ -106,8 +49,8 @@ end
 local function check()
   local pics = {}
   for side, prm in pairs(SIDES) do
-    local list, seen, rpos = picture(side)
-    pics[side] = { list = list, seen = seen, rpos = rpos, busy = 0, prm = prm, on = {} }
+    local pic = RF_AIR.picture(side, false)       -- только наземные РЛС: наведение с земли
+    pics[side] = { list = pic.list, seen = pic.seen, rpos = pic.rpos, busy = 0, prm = prm, on = {} }
   end
   for _, f in ipairs(FIGHTERS) do                -- снять наведение: цель пропала с РЛС, ушла за границу, пара не готова
     local a = assigned[f.group]
@@ -140,13 +83,13 @@ local function check()
         for _, t in ipairs(p.list) do
           local tp, tg = t:getPoint(), t.getGroup and t:getGroup()
           local d = d2(tp, lp)
-          local v = value(t, prm)
+          local v = RF_AIR.value(t, prm.heli)
           if tg and v > 0 and d <= prm.commit and nearRadar(p.rpos, tp, prm.leash) then
             local foes = enemiesAround(p.list, tp)
             local cap = foes >= 4 and prm.per_target or 1
             local hit = foes > prm.odds * n
             if (p.on[tg:getName()] or 0) < cap and (not hit or prm.hit_run) then
-              local score = v * 100 + (inbound(f.side, t) and 150 or 0) - d / 1000 - (hit and 80 or 0)
+              local score = v * 100 + (RF_AIR.inbound(f.side, t) and 150 or 0) - d / 1000 - (hit and 80 or 0)
               if not bscore or score > bscore then best, bscore, bhit = t, score, hit end
             end
           end

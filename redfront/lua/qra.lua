@@ -1,72 +1,61 @@
 -- redfront qra | campaign @CAMPAIGN@ | sortie @SORTIE@
--- Дежурные пары ПВО. Пара стоит на стоянке своего аэродрома с запущенными двигателями (поздняя активация). Раз в
--- CHECK_S секунд скрипт смотрит самолёты и вертолёты противника ближе r к аэродрому пары и спрашивает радары её
--- стороны - РЛС (EWR), РЛС обнаружения и сопровождения ЗРК, ДРЛО: если кто-то из них видит цель (радаром), пара
--- поднимается (Group.activate) - дальше её ведёт задача из .miz (зона к фронту, атака воздушных целей, посадка).
--- Кто и когда поднят - REDFRONT_QRA (хук пишет в дебриф).
+-- Дежурные звенья ПВО. Звено стоит на стоянке своего аэродрома с запущенными двигателями (поздняя активация: до
+-- тревоги его в мире DCS нет). Раз в CHECK_S секунд - налёты по картине наземных РЛС стороны (airpic.lua): самолёты
+-- противника, идущие к своим объектам; вертолёты и уходящие цели тревоги не поднимают. Подъём соразмерный: на налёт
+-- из n самолётов - ceil(n / per_flight) звеньев (не больше max_per_raid), уже поднятые и живые звенья засчитываются;
+-- reserve звеньев стороны остаются на земле (кроме звена, к чьей базе налёт ближе base_km). Поднимается звено,
+-- ближнее к налёту (база ближе r). Дальше его ведёт задача из .miz и наведение (gci.lua). Кто и когда поднят -
+-- REDFRONT_QRA (хук пишет в дебриф). Все величины - ОЦЕНКИ доктрины (qra: per_flight, max_per_raid, reserve, base_km).
 REDFRONT_QRA = REDFRONT_QRA or {}
 local CHECK_S = 10
 local SPECS = { @SPECS@ }          -- { id, group, side, x, y, r, title }
-local RADAR_ATTR = { "EWR", "SAM SR", "SAM TR", "AWACS" }
+local SIDES = { @SIDES@ }          -- [сторона] = { per_flight, max_per_raid, reserve, base_km }
 
-local function isRadar(u)
-  for _, a in ipairs(RADAR_ATTR) do
-    if u:hasAttribute(a) then return true end
-  end
+local function alive(s)
+  local g = Group.getByName(s.group)
+  if not g or not g:isExist() then return false end
+  for _, u in ipairs(g:getUnits() or {}) do if u and u:isExist() then return true end end
   return false
 end
 
-local function radars(side)        -- контроллеры групп стороны, где есть радар
-  local out = {}
-  for _, cat in ipairs({ Group.Category.GROUND, Group.Category.AIRPLANE }) do
-    for _, g in ipairs(coalition.getGroups(side, cat) or {}) do
-      for _, u in ipairs(g:getUnits() or {}) do
-        if u and u:isExist() and isRadar(u) then out[#out + 1] = g:getController(); break end
-      end
-    end
-  end
-  return out
-end
-
-local function enemies(side, x, y, r)
-  local foe = side == 1 and 2 or 1
-  local out = {}
-  for _, cat in ipairs({ Group.Category.AIRPLANE, Group.Category.HELICOPTER }) do
-    for _, g in ipairs(coalition.getGroups(foe, cat) or {}) do
-      for _, u in ipairs(g:getUnits() or {}) do
-        if u and u:isExist() and u:inAir() then
-          local p = u:getPoint()
-          local dx, dz = p.x - x, p.z - y
-          if dx * dx + dz * dz <= r * r then out[#out + 1] = u end
-        end
-      end
-    end
-  end
-  return out
-end
+local function dist(s, p) return math.sqrt((s.x - p.x) ^ 2 + (s.y - p.z) ^ 2) end
 
 local function check()
   local left = false
-  local cache = {}
-  for _, s in ipairs(SPECS) do
-    if not REDFRONT_QRA[s.id] then
-      left = true
-      local targets = enemies(s.side, s.x, s.y, s.r)
-      if #targets > 0 then
-        cache[s.side] = cache[s.side] or radars(s.side)
-        local seen
-        for _, c in ipairs(cache[s.side]) do
-          for _, t in ipairs(targets) do
-            local ok, det = pcall(function() return c:isTargetDetected(t, Controller.Detection.RADAR) end)
-            if ok and det then seen = t; break end
-          end
-          if seen then break end
+  for side, prm in pairs(SIDES) do
+    local ground, up = {}, 0
+    for _, s in ipairs(SPECS) do
+      if s.side == side then
+        if REDFRONT_QRA[s.id] then
+          if alive(s) then up = up + 1 end
+        else
+          ground[#ground + 1] = s
         end
-        if seen then
-          local g = Group.getByName(s.group)
+      end
+    end
+    if #ground > 0 then
+      left = true
+      local need, raids = 0, RF_AIR.raids(side, false, true)
+      table.sort(raids, function(a, b) return a.n > b.n end)
+      for _, r in ipairs(raids) do need = need + math.min(prm.max_per_raid, math.ceil(r.n / prm.per_flight)) end
+      for _, r in ipairs(raids) do                -- крупные налёты - первыми; на налёт - до своей доли звеньев
+        local want = math.min(prm.max_per_raid, math.ceil(r.n / prm.per_flight))
+        for _ = 1, want do
+          if up >= need then break end
+          local best, bd
+          for _, s in ipairs(ground) do
+            local d = dist(s, r.pos)
+            local spare = #ground > prm.reserve or d <= prm.base_km   -- резерв - на земле, если налёт не на его базу
+            if d <= s.r and spare and (not bd or d < bd) then best, bd = s, d end
+          end
+          if not best then break end
+          local g = Group.getByName(best.group)
           if g then g:activate() end
-          REDFRONT_QRA[s.id] = math.floor(timer.getTime())
-          env.info("redfront qra: " .. s.title .. " - взлёт по " .. seen:getTypeName())
+          REDFRONT_QRA[best.id] = math.floor(timer.getTime())
+          up = up + 1
+          for k, s in ipairs(ground) do if s == best then table.remove(ground, k); break end end
+          env.info("redfront qra: " .. best.title .. " - взлёт по налёту " .. r.n .. " x " .. r.lead:getTypeName()
+                   .. " (" .. math.floor(bd / 1000) .. " км)")
         end
       end
     end
