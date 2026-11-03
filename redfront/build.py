@@ -1219,6 +1219,43 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
     return fg
 
 
+PLAYER_AWACS_STANDOFF_KM = 150   # ОЦЕНКА: зона E-2C игрока - за серединой фронта, как у ДРЛО доктрины НАТО
+
+
+def player_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> str | None:
+    """Игровое допущение: у стороны игрока нет ДРЛО в миссии (Израиль 1973, ВВС ДРВ...) - E-2C над своей территорией
+    до конца миссии, бессмертный и невидимый для противника (его нет в истории: не цель, не потеря). Через него игрок
+    получает картину по радио (AWACS в меню связи); ИИ своей стороны DCS его данные тоже видит. Отключение -
+    settings.player_awacs = False."""
+    if not (state.get("settings") or {}).get("player_awacs", True):
+        return None
+    side = tk["side"]
+    for c in m.coalition[side].countries.values():
+        for grp in c.plane_group:
+            if "awacs" in grp.name or any(getattr(u.unit_type, "id", "") in ("E-2C", "E-3A", "A-50", "KJ-2000") for u in grp.units):
+                return None
+    pos = planner.orbit_point(state, side, PLAYER_AWACS_STANDOFF_KM)
+    if pos is None:
+        return None
+    from dcs import planes as _planes
+    alt, spd = 8000, 500
+    p = _pt(m, pos)
+    ac = _planes.E_2C if side == "blue" else _planes.A_50          # красным - А-50 (Ту-126 в DCS нет)
+    fg = m.flight_group_inflight(_country(m, state, side), f"player awacs {sortie}", ac, p, alt,
+                                 speed=spd, maintask=task.AWACS, group_size=1)
+    w = fg.points[0]
+    if not any(isinstance(t_, task.AWACSTaskAction) for t_ in w.tasks):
+        w.tasks.append(task.AWACSTaskAction())
+    w.tasks += [task.SetImmortalCommand(True), task.SetInvisibleCommand(True)]
+    w.tasks.append(task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.RaceTrack)))
+    fg.add_waypoint(Point(p.x + 40_000, p.y, m.terrain), alt, speed=spd)
+    return i18n.L(i18n.lang(state),
+                  ("ДРЛО E-2C" if side == "blue" else "ДРЛО А-50") + " над своей территорией - игровое допущение (у стороны в этой войне ДРЛО не было): "
+                  "картина по радио, бессмертный, противник его не видит",
+                  ("E-2C" if side == "blue" else "A-50") + " AWACS over friendly territory - a gameplay concession (this side had no AWACS in this war): "
+                  "picture by radio, immortal, invisible to the enemy")
+
+
 def _callsign(u) -> str:
     d = getattr(u, "callsign_dict", None)
     if isinstance(d, dict) and d.get("name"):
@@ -2110,7 +2147,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода
     m.triggerrules.triggers.append(trig)
 
+    pa = player_awacs(m, state, tk, sortie) if player and player_air else None   # игроку - картина ДРЛО
     comm_lines = radio_setup(m, state, tk, pkg, sortie, player_air)
+    if pa:
+        comm_lines.append(pa)
     order_lines = package_order(pkg, times, i18n.lang(state))
     lg = i18n.lang(state)
     Lx = lambda ru, en: i18n.L(lg, ru, en)
