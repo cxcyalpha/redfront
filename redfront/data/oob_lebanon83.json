@@ -723,6 +723,14 @@
      ]
     },
     {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Belknap (CG-26)"
+     ]
+    },
+    {
      "type": "PERRY",
      "count": 2,
      "role": "frigate",
@@ -758,10 +766,11 @@
     },
     {
      "type": "PERRY",
-     "count": 1,
+     "count": 2,
      "role": "frigate",
      "names": [
-      "USS Estocin (FFG-15)"
+      "USS Estocin (FFG-15)",
+      "USS Wadsworth (FFG-9)"
      ]
     }
    ],

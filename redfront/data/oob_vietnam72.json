@@ -1294,15 +1294,16 @@
      "count": 1,
      "role": "cruiser",
      "names": [
-      "USS Ticonderoga (CG-47)"
+      "USS Sterett (DLG-31)"
      ]
     },
     {
      "type": "PERRY",
-     "count": 1,
+     "count": 2,
      "role": "frigate",
      "names": [
-      "USS Clark (FFG-11)"
+      "USS Higbee (DD-806)",
+      "USS Lloyd Thomas (DD-764)"
      ]
     }
    ],
@@ -1335,15 +1336,16 @@
      "count": 1,
      "role": "cruiser",
      "names": [
-      "USS Yorktown (CG-48)"
+      "USS Biddle (DLG-34)"
      ]
     },
     {
      "type": "PERRY",
-     "count": 1,
+     "count": 2,
      "role": "frigate",
      "names": [
-      "USS Duncan (FFG-10)"
+      "USS Berkeley (DDG-15)",
+      "USS Buchanan (DDG-14)"
      ]
     }
    ],

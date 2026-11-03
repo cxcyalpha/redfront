@@ -55,15 +55,16 @@ CARRIERS = {   # авианосцы - реальные корабли DCS (им�
     "cv67": ("USS Carl Vinson (CVN-70)", "VINSON", 33.72, 35.10, 70, "VIN", 7, 128.5, "blue_csg_vinson"),
     "lha1": ("USS Tarawa (LHA-1)", "LHA_Tarawa", 33.83, 35.36, 1, "TAR", 0, 129.5, "blue_arg_tarawa"),
 }
+from naval_common import from_template as T   # noqa: E402
 NAVAL = [   # корабельные группы (tools/naval_common.group): охранение - корабли DCS с реальными именами класса
     ("blue_csg_forrestal", "Авианосная ударная группа USS Forrestal", "blue", 33.95, 35.20,
-     [("Forrestal", "carrier", "USS Forrestal (CV-59)"), ("TICONDEROG", "cruiser", "USS Ticonderoga (CG-47)"),
-      ("PERRY", "frigate", "USS Clark (FFG-11)"), ("PERRY", "frigate", "USS John A. Moore (FFG-19)")], "CSG 59"),
+     T("us_csg_1983", ("Forrestal", "carrier", "USS Forrestal (CV-59)"),
+       ["USS Ticonderoga (CG-47)", "USS Clark (FFG-11)", "USS John A. Moore (FFG-19)"]), "CSG 59"),
     ("blue_csg_vinson", "Авианосная ударная группа USS Carl Vinson", "blue", 33.72, 35.10,
-     [("VINSON", "carrier", "USS Carl Vinson (CVN-70)"), ("PERRY", "frigate", "USS Aubrey Fitch (FFG-34)"),
-      ("PERRY", "frigate", "USS Clifton Sprague (FFG-16)")], "CSG 70"),
+     T("us_csg_1983", ("VINSON", "carrier", "USS Carl Vinson (CVN-70)"),
+       ["USS Belknap (CG-26)", "USS Aubrey Fitch (FFG-34)", "USS Clifton Sprague (FFG-16)"]), "CSG 70"),
     ("blue_arg_tarawa", "Десантная группа USS Tarawa", "blue", 33.83, 35.36,
-     [("LHA_Tarawa", "carrier", "USS Tarawa (LHA-1)"), ("PERRY", "frigate", "USS Estocin (FFG-15)")], "ARG"),
+     T("us_arg_1983", ("LHA_Tarawa", "carrier", "USS Tarawa (LHA-1)"), ["USS Estocin (FFG-15)", "USS Wadsworth (FFG-9)"]), "ARG"),
     ("red_fac_tartus", "Ракетные катера ВМС Сирии (Тартус)", "red", 34.95, 35.80,
      [("Type_021_1", "boat", "Катер пр. 205 №1"), ("Type_021_1", "boat", "Катер пр. 205 №2"), ("Type_021_1", "boat", "Катер пр. 205 №3")],
      "пр. 205 'Оса' - в DCS Type 021-1 (китайская копия 'Осы')"),

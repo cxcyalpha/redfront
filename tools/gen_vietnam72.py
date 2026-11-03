@@ -82,14 +82,15 @@ CARRIERS = {   # 'Янки-стейшн': авианосцы - реальные 
     "cv63": ("USS Forrestal (CV-59)", "Forrestal", 35.05, 35.45, 59, "FOR", 3, 127.5, "blue_csg_forrestal"),
     "cv64": ("USS Carl Vinson (CVN-70)", "VINSON", 34.80, 35.40, 70, "VIN", 4, 128.5, "blue_csg_vinson"),
 }
+from naval_common import from_template as T   # noqa: E402
 NAVAL = [   # корабельные группы: охранение - корабли DCS (Ticonderoga, Perry - в 1972 г. ещё не в строю: вместо крейсеров
     # Belknap/Leahy и эсминцев - ДОПУЩЕНИЕ), имена - реальные корабли класса
     ("blue_csg_forrestal", "Авианосная ударная группа USS Forrestal", "blue", 35.05, 35.45,
-     [("Forrestal", "carrier", "USS Forrestal (CV-59)"), ("TICONDEROG", "cruiser", "USS Ticonderoga (CG-47)"),
-      ("PERRY", "frigate", "USS Clark (FFG-11)")], "CSG 59"),
+     T("us_csg_1972", ("Forrestal", "carrier", "USS Forrestal (CV-59)"),
+       ["USS Sterett (DLG-31)", "USS Higbee (DD-806)", "USS Lloyd Thomas (DD-764)"]), "CSG 59"),
     ("blue_csg_vinson", "Авианосная ударная группа USS Carl Vinson", "blue", 34.80, 35.40,
-     [("VINSON", "carrier", "USS Carl Vinson (CVN-70)"), ("TICONDEROG", "cruiser", "USS Yorktown (CG-48)"),
-      ("PERRY", "frigate", "USS Duncan (FFG-10)")], "CSG 70"),
+     T("us_csg_1972", ("VINSON", "carrier", "USS Carl Vinson (CVN-70)"),
+       ["USS Biddle (DLG-34)", "USS Berkeley (DDG-15)", "USS Buchanan (DDG-14)"]), "CSG 70"),
     ("red_fac_haiphong", "Торпедные катера ВМС ДРВ (Хайфон)", "red", 35.55, 35.70,
      [("Type_021_1", "boat", "Катер №1"), ("Type_021_1", "boat", "Катер №2"), ("Type_021_1", "boat", "Катер №3")],
      "пр. 183 (P-6) и пр. 123 - в DCS Type 021-1; 19.04.1972 у Донгхоя атаковали эсминцы США (с МиГ-17)"),
