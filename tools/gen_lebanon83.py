@@ -160,6 +160,7 @@ def main() -> None:
         "depots": [{"id": i, "name": n, "side": s, "place": p} for i, n, s, p in DEPOTS],
         "bridges": [], "ad_sites": [],
         "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
+        "naval_bases": {"red": [{"name": "Тартус", "lat": 34.90, "lon": 35.86}]},   # порты ремонта кораблей; нет стороны - порт за картой (Неаполь, Субик-Бей)
     }
     (DATA / "sector_lebanon83.json").write_text(json.dumps(sector, ensure_ascii=False, indent=1), encoding="utf-8")
     units = []

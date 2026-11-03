@@ -238,6 +238,7 @@ def main() -> None:
         "theatre": "syria", "places": places, "airbases": airbases, "carriers": carriers,
         "links": [list(l) for l in LINKS], "supply_entry": SUPPLY_ENTRY, "off_limits": OFF_LIMITS,
         "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
+        "naval_bases": {"red": [{"name": "Хайфон", "lat": 35.53, "lon": 35.76}]},   # порты ремонта кораблей; нет стороны - порт за картой (Неаполь, Субик-Бей)
         "air_limits": {"blue": [], "red": []},   # авиация бьёт по всему Северу (кроме зон по дням - task_rules _zones)
         "axes": {k: v["title"] for k, v in AXES.items()},
         "objectives": {"red": {k: v["objectives"] for k, v in AXES.items()}, "blue": []},

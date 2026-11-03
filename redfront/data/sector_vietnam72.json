@@ -394,6 +394,15 @@
    "t_per_day": 500
   }
  ],
+ "naval_bases": {
+  "red": [
+   {
+    "name": "Хайфон",
+    "lat": 35.53,
+    "lon": 35.76
+   }
+  ]
+ },
  "air_limits": {
   "blue": [],
   "red": []

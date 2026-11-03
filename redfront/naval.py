@@ -58,9 +58,9 @@ def ships(state: dict, side: str | None = None) -> list[dict]:
 
 
 def threat_km(unit: dict) -> float:
-    """Радиус ПВО группы: наибольший ЗРК живых кораблей."""
-    alive = model.alive_by_type(unit)
-    return max((info(t)["ad_km"] for t, n in alive.items() if n >= 0.5), default=0.0)
+    """Радиус ПВО группы: наибольший ЗРК кораблей в строю (повреждённый - пропорционально урону)."""
+    ss = ship_state(unit)
+    return max((info(t)["ad_km"] * (1.0 - ss[n]["dmg"]) for t, n in ship_names(unit)), default=0.0)
 
 
 def kind(unit: dict) -> str:
@@ -78,8 +78,12 @@ def kind(unit: dict) -> str:
 
 
 def carrier_alive(unit: dict) -> bool:
-    alive = model.alive_by_type(unit)
-    return any(info(t)["kind"] in CARRIER_KINDS and n >= 0.5 for t, n in alive.items())
+    ss = ship_state(unit)
+    return any(info(t)["kind"] in CARRIER_KINDS and ss[n]["status"] != "sunk" for t, n in ship_list(unit))
+
+
+def carrier_ship(unit: dict) -> tuple[str, str] | None:
+    return next(((t, n) for t, n in ship_list(unit) if info(t)["kind"] in CARRIER_KINDS), None)
 
 
 def daily(state: dict) -> list[str]:
@@ -88,7 +92,7 @@ def daily(state: dict) -> list[str]:
     for u in state["units"].values():
         if model.category(u) != "naval" or u.get("state") in ("destroyed", "sunk"):
             continue
-        if model.strength(u) <= 0.01:
+        if not any(st["status"] != "sunk" for st in ship_state(u).values()):
             u["state"] = "sunk"
             lines.append(f"{u['name']}: группа потоплена.")
     for b in state["airbases"].values():
@@ -101,19 +105,43 @@ def daily(state: dict) -> list[str]:
         if b.get("state") != "lost" and (u.get("state") == "sunk" or not carrier_alive(u)):
             b["state"] = "lost"
             lines.append(f"{b['name']}: авианосец потерян - палуба недоступна, авиакрыло без базы.")
+            continue
+        cs = carrier_ship(u)
+        st = ship_state(u).get(cs[1]) if cs else None
+        if st and b.get("state") != "lost":           # палуба: закрыта при уроне больше DECK_LIMIT или не в строю
+            shut = st["status"] != "ok" or st["dmg"] > DECK_LIMIT
+            if shut and b.get("state") != "closed":
+                b["state"], b["deck_closed"] = "closed", True
+                lines.append(f"{b['name']}: палуба закрыта (повреждение {st['dmg']:.0%}" + (", в порту)." if st["status"] != "ok" else ")."))
+            elif not shut and b.pop("deck_closed", None):
+                b["state"] = "open"
+                lines.append(f"{b['name']}: палуба снова открыта.")
     return lines
 
 
-def ship_names(unit: dict) -> list[tuple[str, str]]:
-    """Живые корабли группы для миссии: [(тип pydcs, имя)], головной (авианосец) - первым."""
+def ship_list(unit: dict) -> list[tuple[str, str]]:
+    """Все корабли группы по составу: [(класс pydcs, имя)], головной (авианосец) - первым."""
     out = []
     comp = sorted(unit.get("composition", []), key=lambda c: info(c["type"])["kind"] not in CARRIER_KINDS)
     for c in comp:
-        alive = int(round(max(0.0, c["count"] - unit["lost"].get(c["type"], 0.0))))
         names = c.get("names") or []
-        for k in range(alive):
+        for k in range(int(c["count"])):
             out.append((c["type"], names[k] if k < len(names) else f"{unit['name']} {c['type']} {k + 1}"))
     return out
+
+
+def ship_state(unit: dict) -> dict:
+    """Состояние кораблей группы: имя -> {dmg 0..1, status ok|transit|port|returning|sunk, days}."""
+    ss = unit.setdefault("ships_state", {})
+    for _t, nm in ship_list(unit):
+        ss.setdefault(nm, {"dmg": 0.0, "status": "ok", "days": 0})
+    return ss
+
+
+def ship_names(unit: dict) -> list[tuple[str, str]]:
+    """Корабли группы в строю (не потоплены, не ушли в порт): [(класс, имя)] - в миссии, в ПВО и залпе группы."""
+    ss = ship_state(unit)
+    return [(t, n) for t, n in ship_list(unit) if ss[n]["status"] == "ok"]
 
 
 # ---------- выход в море и бой кораблей (конец суток) ----------
@@ -143,23 +171,162 @@ def _move(state: dict, u: dict) -> str | None:
 
 
 def _salvo(u: dict) -> float:
-    alive = model.alive_by_type(u)
-    return sum(info(t)["asm"] * n for t, n in alive.items()) * u.get("quality", 1.0)
+    ss = ship_state(u)
+    return sum(info(t)["asm"] * (1.0 - ss[n]["dmg"]) for t, n in ship_names(u)) * u.get("quality", 1.0)
 
 
-def _take_hits(u: dict, hits: float) -> float:
-    """Попадания - по кораблям группы, сначала мелким (охранение прикрывает главный корабль): потеряно кораблей."""
-    lost = 0.0
-    for c in sorted(u["composition"], key=lambda c: HITS_TO_SINK.get(info(c["type"])["kind"], 1.5)):
-        if hits <= 0:
+# ---------- повреждения кораблей (ОЦЕНКИ) ----------
+CREW_LIMIT = 0.2         # до этого урона - ремонт силами экипажа, корабль в строю
+CREW_REPAIR = 0.05       # ремонт экипажем в сутки
+PORT_REPAIR = 0.02       # ремонт в порту в сутки (недели)
+SINK_HEAVY = 0.6         # больше - корабль, скорее всего, не спасти
+SINK_P_TRANSIT = 0.15    # шанс затонуть в сутки перехода в порт при уроне SINK_HEAVY (растёт от CREW_LIMIT линейно)
+SINK_P_HEAVY = (0.5, 0.8)  # шанс затонуть при уроне больше SINK_HEAVY: от 0.5 (у порога) до 0.8 (почти разрушен)
+DECK_LIMIT = 0.2         # авианосец: больше - палуба закрыта (пожар, полётная палуба)
+AI_CARRIER_CAP = 0.15    # удар ИИ вне миссии (итог по модели): урон авианосцу за сутки - не больше, и всего - не выше
+                         # DECK_LIMIT: от расчёта палуба не закрывается; вывести авианосец из строя может только бой в миссии DCS
+PORT_KM_DAY = 400        # повреждённый корабль идёт в порт медленнее (ОЦЕНКА)
+OFF_MAP_DAYS = 2         # порт за картой (Неаполь, Субик-Бей): переход туда - столько суток
+
+
+def _rng(state: dict, key: str):
+    return model.rng(state, key)
+
+
+def port_of(state: dict, unit: dict) -> dict | None:
+    """Ближний свой порт (sector naval_bases), иначе None - порт за картой."""
+    ports = (state.get("naval_bases") or {}).get(unit["side"]) or []
+    return min(ports, key=lambda p: model.dist_km(p, unit["pos"])) if ports else None
+
+
+def _transit_days(state: dict, unit: dict) -> int:
+    p = port_of(state, unit)
+    if not p:
+        return OFF_MAP_DAYS
+    return max(1, -(-int(model.dist_km(p, unit["pos"])) // PORT_KM_DAY))
+
+
+def sink_p(dmg: float) -> float:
+    """Шанс затонуть за сутки при уроне dmg (в порт или на месте без хода)."""
+    if dmg <= CREW_LIMIT:
+        return 0.0
+    if dmg <= SINK_HEAVY:
+        return SINK_P_TRANSIT * (dmg - CREW_LIMIT) / (SINK_HEAVY - CREW_LIMIT)
+    lo, hi = SINK_P_HEAVY
+    return lo + (hi - lo) * min(1.0, (dmg - SINK_HEAVY) / (1.0 - SINK_HEAVY))
+
+
+def damage(state: dict, unit: dict, name: str, add: float, why: str) -> str:
+    """Урон кораблю (доля прочности): 1 и больше - потоплен; больше CREW_LIMIT - уходит в порт."""
+    ss = ship_state(unit)
+    st = ss.get(name)
+    if not st or st["status"] == "sunk" or add <= 0:
+        return ""
+    st["dmg"] = min(1.0, st["dmg"] + add)
+    typ = next((t for t, n in ship_list(unit) if n == name), None)
+    if st["dmg"] >= 0.999:
+        return sink(unit, name, why)
+    if st["dmg"] > CREW_LIMIT and st["status"] == "ok":
+        st["status"], st["days"] = "transit", _transit_days(state, unit)
+        return f"{name} ({why}): повреждение {st['dmg']:.0%} - выходит из боя, идёт в порт."
+    return f"{name} ({why}): повреждение {st['dmg']:.0%}" + (" - ремонт силами экипажа." if typ else ".")
+
+
+def sink(unit: dict, name: str, why: str) -> str:
+    ss = ship_state(unit)
+    st = ss[name]
+    st["status"], st["dmg"] = "sunk", 1.0
+    typ = next((t for t, n in ship_list(unit) if n == name), None)
+    if typ:
+        unit["lost"][typ] = unit["lost"].get(typ, 0.0) + 1.0
+    return f"{name} ({why}): потоплен."
+
+
+def apply_hits(state: dict, unit: dict, hits: float, why: str, ai: bool = False) -> list[str]:
+    """Попадания по группе - сначала по кораблям охранения (прикрывают главный), по одному кораблю за раз:
+    попадание = 1 / HITS_TO_SINK прочности. ai - итог по модели (не бой в DCS): урон авианосцу - не больше AI_CARRIER_CAP."""
+    lines = []
+    order = sorted(ship_names(unit), key=lambda tn: (info(tn[0])["kind"] in CARRIER_KINDS, HITS_TO_SINK.get(info(tn[0])["kind"], 1.5)))
+    ss = ship_state(unit)
+    for typ, nm in order:
+        if hits <= 0.01:
             break
-        alive = max(0.0, c["count"] - u["lost"].get(c["type"], 0.0))
-        need = HITS_TO_SINK.get(info(c["type"])["kind"], 1.5)
-        k = min(alive, hits / need)
-        u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) + k
-        hits -= k * need
-        lost += k
-    return lost
+        need = HITS_TO_SINK.get(info(typ)["kind"], 1.5)
+        room = 1.0 - ss[nm]["dmg"]
+        if ai and info(typ)["kind"] in CARRIER_KINDS:   # итог по модели: за сутки - не больше AI_CARRIER_CAP и не выше
+            day_room = AI_CARRIER_CAP - (ss[nm].get("ai_day_dmg", 0.0) if ss[nm].get("ai_day") == state["day"] else 0.0)
+            room = min(room, max(0.0, day_room), max(0.0, DECK_LIMIT - 0.01 - ss[nm]["dmg"]))   # палуба остаётся открытой
+        take = min(room, hits / need)
+        if take <= 0:
+            continue
+        if ai and info(typ)["kind"] in CARRIER_KINDS:
+            if ss[nm].get("ai_day") != state["day"]:
+                ss[nm]["ai_day"], ss[nm]["ai_day_dmg"] = state["day"], 0.0
+            ss[nm]["ai_day_dmg"] += take
+        ln = damage(state, unit, nm, take, why)
+        if ln:
+            lines.append(ln)
+        hits -= take * need
+    return lines
+
+
+def air_strike(state: dict, unit: dict, pairs: float, why: str) -> list[str]:
+    """Удар ИИ с воздуха по группе (итог по модели): попаданий - HITS_PER_PAIR на пару ударной группы, ПВО группы
+    (корабли с ЗРК) отражает часть: x 1 / (1 + сумма ad_km / AD_SCREEN_KM). ОЦЕНКИ."""
+    ad = sum(info(t)["ad_km"] for t, _n in ship_names(unit))
+    hits = pairs * HITS_PER_PAIR / (1.0 + ad / AD_SCREEN_KM)
+    return apply_hits(state, unit, hits, why, ai=True)
+
+
+HITS_PER_PAIR = 1.0      # ОЦЕНКА: попаданий (ПКР, бомб) на пару ударной группы без ПВО цели
+AD_SCREEN_KM = 100       # ОЦЕНКА: на каждые 100 км суммарной дальности ЗРК кораблей группы - вдвое меньше попаданий
+
+
+def repairs(state: dict) -> list[str]:
+    """Конец суток: ремонт экипажем (урон до CREW_LIMIT), переход в порт (шанс затонуть), ремонт в порту, возврат."""
+    lines = []
+    for u in state["units"].values():
+        if model.category(u) != "naval" or u.get("state") in ("destroyed", "sunk"):
+            continue
+        for typ, nm in ship_list(u):
+            st = ship_state(u)[nm]
+            if st["status"] == "ok" and st["dmg"] > 0:
+                st["dmg"] = max(0.0, st["dmg"] - CREW_REPAIR)
+                if st["dmg"] == 0:
+                    lines.append(f"{nm}: повреждения устранены экипажем.")
+            elif st["status"] == "transit":
+                r = _rng(state, f"sink-{u['id']}-{nm}-{state['day']}")
+                if (r.random() if r else 1.0) < sink_p(st["dmg"]):
+                    lines.append(sink(u, nm, f"затонул на переходе в порт, повреждение {st['dmg']:.0%}"))
+                    continue
+                st["days"] -= 1
+                if st["days"] <= 0:
+                    p = port_of(state, u)
+                    st["status"], st["days"] = "port", -(-int(st["dmg"] * 100) // int(PORT_REPAIR * 100))
+                    lines.append(f"{nm}: дошёл до порта ({p['name'] if p else 'за картой'}), ремонт ~{st['days']} сут.")
+            elif st["status"] == "port":
+                st["dmg"] = max(0.0, st["dmg"] - PORT_REPAIR)
+                st["days"] -= 1
+                if st["dmg"] <= 0 or st["days"] <= 0:
+                    st["dmg"], st["status"], st["days"] = 0.0, "returning", _transit_days(state, u)
+            elif st["status"] == "returning":
+                st["days"] -= 1
+                if st["days"] <= 0:
+                    st["status"] = "ok"
+                    lines.append(f"{nm}: после ремонта вернулся в {u['name']}.")
+    return lines
+
+
+def from_mission(state: dict, unit: dict, life: dict[str, float]) -> list[str]:
+    """Дебриф: остаток прочности кораблей в DCS (life 0..1) - урон за миссию прибавляется к урону модели (корабль
+    в миссии появляется целым: повреждения модели DCS не передаются)."""
+    lines = []
+    for _t, nm in ship_names(unit):
+        if nm in life and life[nm] < 0.999:
+            ln = damage(state, unit, nm, 1.0 - life[nm], "бой в миссии")
+            if ln:
+                lines.append(ln)
+    return lines
 
 
 def engage(state: dict) -> list[str]:
@@ -177,8 +344,9 @@ def engage(state: dict) -> list[str]:
             # ecm - доля ПКР противника, уведённых помехами (1973: все 'Термиты' по 'Сааръ' ушли в ловушки - ОЦЕНКА)
             hit_r = sb * P_HIT * (AD_SAVE if threat_km(r) > 0 else 1.0) * (1.0 - r.get("ecm", 0.0))
             hit_b = sr * P_HIT * (AD_SAVE if threat_km(b) > 0 else 1.0) * (1.0 - b.get("ecm", 0.0))
-            lr, lb = _take_hits(r, hit_r), _take_hits(b, hit_b)
-            lines.append(f"Бой кораблей: {b['name']} и {r['name']} - потоплено {lb:.1f} и {lr:.1f} корабля.")
+            lines.append(f"Бой кораблей: {b['name']} и {r['name']}.")
+            lines += apply_hits(state, r, hit_r, f"бой с {b['name']}")
+            lines += apply_hits(state, b, hit_b, f"бой с {r['name']}")
     return lines
 
 
@@ -188,7 +356,7 @@ def daily_moves(state: dict) -> list[str]:
         ln = _move(state, u)
         if ln:
             lines.append(ln)
-    return lines + engage(state)
+    return lines + engage(state) + repairs(state)
 
 
 # ---------- морской подвоз ----------
@@ -214,5 +382,6 @@ def sea_supply(state: dict, side: str) -> dict[str, float]:
         if cv:
             ln["_last"] = {"day": state["day"], "t": round(ln["t_per_day"] * k), "lost_frac": round(1 - model.strength(cv), 2)}
             cv["lost"] = {}                      # новый конвой следующих суток
+            cv["ships_state"] = {}
             cv["state"] = "deployed"
     return out

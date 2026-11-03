@@ -818,5 +818,26 @@
    "convoy": "blue_convoy_haifa",
    "t_per_day": 300
   }
- ]
+ ],
+ "naval_bases": {
+  "blue": [
+   {
+    "name": "Хайфа",
+    "lat": 32.83,
+    "lon": 35.0
+   }
+  ],
+  "red": [
+   {
+    "name": "Тартус",
+    "lat": 34.9,
+    "lon": 35.86
+   },
+   {
+    "name": "Латакия",
+    "lat": 35.52,
+    "lon": 35.76
+   }
+  ]
+ }
 }

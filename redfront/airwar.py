@@ -121,6 +121,9 @@ def _strike(state: dict, e: dict) -> list[str]:
         tgt["damage"] = min(1.0, before + DAMAGE.get(role, 0.3) * size_k)
         from . import explain
         lines.append(f"ИИ, {e['title']}: повреждение {before:.0%} -> {tgt['damage']:.0%}." + explain.damage_effect(state, tgt, before))
+    elif obj["kind"] == "ship":                 # корабли: попадания по кораблям группы (naval.air_strike, авианосец - с пределом)
+        from . import naval
+        lines += [f"ИИ, {e['title']}: {x}" for x in naval.air_strike(state, tgt, size_k, "удар с воздуха")]
     elif obj["kind"] in LOSS:
         frac = min(0.5, LOSS[obj["kind"]] * size_k)
         s0 = model.strength(tgt)

@@ -404,5 +404,14 @@
    "convoy": "blue_convoy_jounieh",
    "t_per_day": 250
   }
- ]
+ ],
+ "naval_bases": {
+  "red": [
+   {
+    "name": "Тартус",
+    "lat": 34.9,
+    "lon": 35.86
+   }
+  ]
+ }
 }

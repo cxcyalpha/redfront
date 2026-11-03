@@ -397,6 +397,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
             if k in b:
                 units[b["id"]][k] = b[k]
     for bid, b in bases.items():
+        if b.get("kind") == "carrier":           # авианосец - не аэродром-цель: это корабль группы флота (naval.py)
+            continue
         units[f"af_{bid}"] = {"id": f"af_{bid}", "name": f"Аэродром {b['name']}", "side": b["side"], "role": "airfield", "base": bid,
                               "pos": {"lat": b["lat"], "lon": b["lon"]}, "state": "active", "damage": 0.0, "lost": {}, "composition": []}
     st = {
@@ -419,7 +421,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "supply_entry": sec.get("supply_entry", {}),   # пункты входа подвоза из тыла (вне карты), если заданы в секторе
         "off_limits": sec.get("off_limits", {}),   # пункты, на которые сторона не наступает (политика сценария)
         "point_ad": forces.get("point_ad") or {},   # ПВО объектов тыла по сценарию (нет - model.POINT_AD)
-        "sea_lanes": copy.deepcopy(sec.get("sea_lanes") or []),   # морской подвоз (naval.sea_supply)
+        "sea_lanes": copy.deepcopy(sec.get("sea_lanes") or []),
+        "naval_bases": copy.deepcopy(sec.get("naval_bases") or {}),   # порты ремонта кораблей (naval.port_of); нет - за картой   # морской подвоз (naval.sea_supply)
         "air_limits": sec.get("air_limits", sec.get("off_limits", {})),   # пункты, по которым авиация не бьёт (нет - как off_limits)
         "task_rules": (chosen or {}).get("task_rules", {}),   # задачи сценария: с какого дня, запрет (1982: Бекаа - с 4-го)
         "posture_days": (chosen or {}).get("posture_days", []),   # смена позы по дням (1973: Израиль переходит в наступление)

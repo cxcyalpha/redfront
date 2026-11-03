@@ -102,13 +102,14 @@ def _naval(st: dict) -> list[dict]:
     for u in st["units"].values():
         if model.category(u) != "naval":
             continue
-        alive = {nm for _t, nm in naval.ship_names(u)}
+        ss = naval.ship_state(u)
+        st_txt = {"ok": "", "transit": " - идёт в порт", "port": " - в ремонте", "returning": " - возвращается", "sunk": " - потоплен"}
         lead = naval.info(u["composition"][0]["type"])["kind"] if u.get("composition") else ""
         out.append({"id": u["id"], "name": u["name"], "side": u["side"], "pos": _ll(u["pos"]), "kind": naval.kind(u),
                     "lead": lead, "abbr": u.get("abbr", ""), "strength": round(model.strength(u), 2),
                     "ad_km": round(naval.threat_km(u)),
-                    "ships": [n + ("" if n in alive or not c.get("names") else " ✝") for c in u["composition"]
-                              for n in (c.get("names") or [f"{c['type']} x{c['count']}"])]})
+                    "ships": [n + (f" ({ss[n]['dmg']:.0%})" if 0 < ss[n]["dmg"] < 1 else "") + st_txt[ss[n]["status"]]
+                              for _t, n in naval.ship_list(u)]})
     return out
 
 

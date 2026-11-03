@@ -3789,6 +3789,28 @@ def theatres_section(tmp: Path) -> None:
         mz = zipfile.ZipFile(tmp / "csg.miz").read("mission").decode("utf-8")
     check(k and "USS Ticonderoga (CG-47)" in mz and "AttackGroup" in mz and any(len(x["ships"]) >= 3 for x in mn["ships"]),
           "авианосная ударная группа в миссии (реальные корабли DCS), удар по кораблям - атака группы кораблей")
+    st7 = model.new_campaign("dmg", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="blue")
+    deck = []
+    for _ in range(8):                           # удары ИИ вне миссии - палуба авианосцев не закрывается
+        planner.plan(st7)
+        sim.end_day(st7)
+        deck.append(all(b["state"] in ("open", "active") for b in st7["airbases"].values() if b.get("kind") == "carrier"))
+    cvg = st7["units"]["blue_csg_vinson"]
+    naval.from_mission(st7, cvg, {"USS Carl Vinson (CVN-70)": 0.65})   # в миссии DCS авианосец получил 35% урона
+    naval.daily(st7)
+    vin = next(b for b in st7["airbases"].values() if b.get("naval") == "blue_csg_vinson")
+    closed = vin["state"] == "closed"
+    seen_st = set()
+    for _ in range(40):
+        naval.repairs(st7)
+        naval.daily(st7)
+        st7["day"] += 1
+        seen_st.add(naval.ship_state(cvg)["USS Carl Vinson (CVN-70)"]["status"])
+    fin = naval.ship_state(cvg)["USS Carl Vinson (CVN-70)"]
+    check(all(deck) and closed and ({"port", "returning"} <= seen_st or fin["status"] == "sunk") and
+          (fin["status"] == "sunk" or (fin["status"] == "ok" and vin["state"] == "open")),
+          f"повреждения кораблей: удары ИИ палубу не закрывают; урон 35% в миссии - палуба закрыта, переход в порт, "
+          f"ремонт ({', '.join(sorted(seen_st))}) - итог: {fin['status']}, палуба {vin['state']}")
     st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
     planner.plan(st)
     b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]
