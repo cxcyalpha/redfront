@@ -2397,14 +2397,21 @@ def qra_section(tmp: Path) -> None:
             if cat == Group.Category.AIRPLANE then return AIR[side] end
             return {}
           end
+          PLANES = {}
           function radarGroup(side)
-            local u = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end }
-            local c = { isTargetDetected = function(_, t, d) return SEEN end }
+            local u = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end,
+                        getPoint = function() return { x = 0, y = 0, z = 0 } end }
+            local c = { getDetectedTargets = function() if not SEEN then return {} end
+                          local o = {} for _, p in ipairs(PLANES) do o[#o + 1] = { object = p } end return o end }
             RADARS[side][#RADARS[side] + 1] = grp({ u }, c)
           end
-          function plane(side, x, z)
+          function plane(side, x, z, vx)
             local u = { isExist = function() return true end, inAir = function() return true end,
-                        getPoint = function() return { x = x, y = 5000, z = z } end, getTypeName = function() return "Su-25" end }
+                        getPoint = function() return { x = x, y = 5000, z = z } end, getTypeName = function() return "Su-25" end,
+                        getName = function() return "Su-25#1" end, getCoalition = function() return side end,
+                        hasAttribute = function(_, a) return a == "Battle airplanes" end,
+                        getVelocity = function() return { x = vx, y = 0, z = 0 } end }
+            PLANES[#PLANES + 1] = u
             AIR[side][#AIR[side] + 1] = grp({ u }, nil)
           end
         """)
@@ -2412,8 +2419,10 @@ def qra_section(tmp: Path) -> None:
         first = _re.search(r'\{ id = "([^"]+)", group = "([^"]+)", side = (\d), x = ([-\d.]+), y = ([-\d.]+), r = (\d+)', script)
         qid, gname, side, x, y, r = first.groups()
         side = int(side); foe = 2 if side == 1 else 1
-        L.execute(f'radarGroup({side}); plane({foe}, {float(x) + float(r) * 0.5}, {y})')
+        L.execute(f'radarGroup({side}); plane({foe}, {float(x) + 15000}, {y}, -250)')   # к базе пары, в 15 км
         L.execute(f'G["{gname}"] = {{ g = {{ dead = false }}, o = {{ activate = function() ACTIVATED["{gname}"] = true end }} }}')
+        apic = next((a_.text.id for a_ in _do(m) if "redfront airpic" in a_.text.id), "")
+        L.execute(apic)
         L.execute(script)
         Gl = L.globals()
         Gl.T = 10; L.execute("runDue()")
@@ -2421,7 +2430,7 @@ def qra_section(tmp: Path) -> None:
         Gl.SEEN = True
         Gl.T = 20; L.execute("runDue()")
         check(quiet and Gl.ACTIVATED[gname] and Gl.REDFRONT_QRA[qid],
-              "qra.lua: противник в радиусе, но радары стороны его не видят - пара стоит; увидели - пара поднята, время - в дебриф")
+              "qra.lua: налёт к базе, но радары стороны его не видят - пара стоит; увидели - пара поднята, время - в дебриф")
     else:
         print("SKIP lupa не установлена: qra.lua не исполняется")
     e = q[0]
@@ -3320,9 +3329,10 @@ def push_qra_section(tmp: Path) -> None:
     qs, _w = planner.plan_side(st, "blue", max_tasks=ato.ATO_MAX_TASKS, per_kind=ato.ATO_PER_KIND)
     q = [t for t in qs if t["kind"] == "qra"]
     bases = [st["airbases"][t["base"]] for t in q]
-    check(len(q) >= 3 and all(t["group_size"] == 4 for t in q)
+    qsize = model.doctrine(st, "blue")["tasks"]["qra"]["strike"]["size"]   # размер дежурной группы - доктрина (пара)
+    check(len(q) >= 3 and all(t["group_size"] == qsize for t in q)
           and all(model.dist_km(a, b) >= 80 for k, a in enumerate(bases) for b in bases[k + 1:]),
-          f"дежурные звенья синих (4 ЛА) на {len(q)} аэродромах вдоль фронта: {', '.join(b['name'] for b in bases)}")
+          f"дежурные группы синих ({qsize} ЛА, по доктрине) на {len(q)} аэродромах вдоль фронта: {', '.join(b['name'] for b in bases)}")
     types = {side: [g.units[0].unit_type.id for c in m.coalition[side].countries.values() for g in c.plane_group]
              for side in ("red", "blue")}
     acn = {side: sum(len(g.units) for c in m.coalition[side].countries.values() for g in list(c.plane_group) + list(c.helicopter_group)
@@ -3589,9 +3599,11 @@ def weather_kneeboard_section(tmp: Path) -> None:
           f"{al['weather_cancelled'][0]['title'] if al['weather_cancelled'] else '-'} ({al['weather_cancelled'][0]['why'] if al['weather_cancelled'] else ''})")
     st["settings"]["mission_air"] = 20
     man2 = build.build(st, tmp / "wx2.miz", task_no=1)
-    n_air = sum(len(f["units"]) for f in man2["flights"])
+    n_air = sum(len(f["units"]) for f in man2["flights"] if f["kind"] != "alert")   # дежурные звенья - вне лимита
+    n_qra = sum(len(f["units"]) for f in man2["flights"] if f["kind"] == "alert")
     check(n_air <= 20 and any(f["kind"] == "orbit" for f in man2["flights"]),
-          f"лимит ЛА миссии 20: в миссии {n_air} (было {sum(len(f['units']) for f in man['flights'])}), дежурства - первыми")
+          f"лимит ЛА миссии 20: в миссии {n_air} (было {sum(len(f['units']) for f in man['flights'])}), дежурства - первыми; "
+          f"дежурные звенья ({n_qra} ЛА) - вне лимита: до тревоги их в мире нет")
 
 
 def fires_section(tmp: Path) -> None:
@@ -3791,8 +3803,8 @@ def theatres_section(tmp: Path) -> None:
     check(k and "USS Ticonderoga (CG-47)" in mz and "AttackGroup" in mz and any(len(x["ships"]) >= 3 for x in mn["ships"]),
           "авианосная ударная группа в миссии (реальные корабли DCS), удар по кораблям - атака группы кораблей")
     import lupa
-    gsrc = build.gci_script(st6, [{"group": "QRA 1", "side": 1}])
-    gsrc = gsrc.replace("local PROTECT = {", "local PROTECT = { [1] = { { x = 0, y = 0 } } } local _P = {", 1)
+    apic = build.airpic_script(st6).replace("RF_AIR.PROTECT = {", "RF_AIR.PROTECT = { [1] = { { x = 0, y = 0 } } } local _P = {", 1)
+    gsrc = apic + "\n" + build.gci_script(st6, [{"group": "QRA 1", "side": 1}])
     STUB = '''
       env = { info = function() end }
       timer = { getTime = function() return 0 end, scheduleFunction = function(f) CHECK = f end }
@@ -3821,7 +3833,10 @@ def theatres_section(tmp: Path) -> None:
                       getPoint = function() return { x = 0, y = 0, z = 0 } end }
       local rg = { getUnits = function() return { radar } end, getController = function() return {
         getDetectedTargets = function() local o = {} for _, t in ipairs(TARGETS) do o[#o + 1] = { object = t } end return o end } end }
-      coalition = { getGroups = function(side) if side == 1 then return { rg } end return {} end }
+      Group.Category.AIRPLANE, Group.Category.HELICOPTER = 0, 1
+      local tg = { getUnits = function() return TARGETS end }
+      coalition = { getGroups = function(side, cat) if side == 1 and cat == 2 then return { rg } end
+                                                    if side == 2 and cat == 0 then return { tg } end return {} end }
       Unit = { getByName = function(n) for _, t in ipairs(TARGETS) do if t:getName() == n then return t end end end }
       local function mig() return { isExist = function() return true end, inAir = function() return true end,
                     getAmmo = function() return { { count = 2 } } end, getFuel = function() return 0.8 end,
@@ -3840,6 +3855,23 @@ def theatres_section(tmp: Path) -> None:
     p1 = gci_run('mk("F-14A", 11, "Fighters", 12000, 0); mk("A-6E", 22, "Bombers", 18000, -200)')
     # шестёрка у цели против нашей пары (odds 1, без атаки с одного захода) - не наводим; за границей РЛС (60 км) - тоже
     p2 = gci_run('mk("F-4E", 33, "Multirole fighters", 15000, -200, 5); mk("A-7E", 44, "Bombers", 60000, -200)')
+    def qra_run(setup):                          # подъём дежурных звеньев по налёту: сколько звеньев поднято
+        qsrc = apic + "\n" + build.qra_script("c", 1, [
+            {"id": f"q{k}", "group": f"Q{k}", "side": 1, "x": 1000.0 * k, "y": 0.0, "r": 200000, "title": f"Q{k}"} for k in range(3)], st6)
+        L = lupa.LuaRuntime()
+        L.execute(STUB)
+        L.execute("ACT = 0; local gb = Group.getByName; Group.getByName = function(n) local g = gb(n); "
+                  "g.activate = function() ACT = ACT + 1 end; return g end")
+        L.execute(setup)
+        L.execute(qsrc)
+        L.execute("CHECK()")
+        return L.eval("ACT")
+    q1 = qra_run('mk("A-6E", 22, "Bombers", 60000, -200)')                       # одиночный ударный к объекту - 1 звено
+    q8 = qra_run('mk("F-4E", 33, "Multirole fighters", 80000, -200, 7)')         # налёт из 8 - 2 звена, третье в резерве
+    q0 = qra_run('mk("UH-1H", 44, "Helicopters", 30000, -60); mk("F-4E", 55, "Multirole fighters", 50000, 200)')   # вертолёт и уходящий
+    check(q1 == 1 and q8 == 2 and q0 == 0,
+          f"дежурные звенья поднимаются по налёту: одиночный - {q1}, восьмёрка - {q8} (резерв на земле), "
+          f"вертолёт и уходящая цель - {q0}")
     check("redfront gci" in mz and p1 == 22 and p2 == 0,
           f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
           f"и цель за границей наведения - без наведения ({p2})")

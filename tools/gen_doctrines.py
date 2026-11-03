@@ -101,6 +101,36 @@ PACKAGES = [
 
 BASE_GCI = {"wp": {"channels": 8, "commit_km": 120, "leash_km": 40, "odds": 1.5, "hit_run": False, "heli": True,
                    "bingo": 0.35, "per_target": 2, "source": "наведение с земли - основа советской ПВО; каналы - ОЦЕНКА"}}
+# Дежурство ПВО (задача qra): размер дежурной группы и подъём по налёту (qra.lua) - per_flight (самолётов налёта на
+# одно поднятое звено), max_per_raid, reserve (звеньев на земле), base_km (налёт ближе к базе - поднимается и резерв).
+QRA = {
+    "wp": {"size": 2, "per_flight": 4, "max_per_raid": 3, "reserve": 1, "base_km": 60,
+           "note": "дежурная пара (готовность №1) - ОЦЕНКА подъёма по налёту"},
+    "nato": {"size": 2, "per_flight": 4, "max_per_raid": 3, "reserve": 1, "base_km": 60,
+             "note": "QRA - пара в готовности 5-15 мин - ОЦЕНКА подъёма по налёту"},
+}
+QRA_DERIVED = {
+    "vpaf72": {"size": 2, "per_flight": 4, "max_per_raid": 2, "reserve": 1, "base_km": 40,
+               "note": "МиГ-21 - парами (иногда четвёрками), по крупному налёту - 2 пары с разных аэродромов (Michel) - ОЦЕНКА"},
+    "arab": {"size": 2, "per_flight": 4, "max_per_raid": 3, "reserve": 1, "base_km": 50, "note": "ОЦЕНКА"},
+    "iaf73": {"size": 2, "per_flight": 6, "max_per_raid": 2, "reserve": 1, "base_km": 60,
+              "note": "пара перехвата против 6 и больше (выучка) - ОЦЕНКА"},
+}
+
+
+def qra_patch(d: dict, prm: dict) -> None:
+    t = d["tasks"].get("qra")
+    if not t:
+        return
+    t["strike"]["size"] = prm["size"]
+    t["strike"]["title"] = "дежурная пара" if prm["size"] == 2 else "дежурное звено"
+    for k in ("per_flight", "max_per_raid", "reserve", "base_km"):
+        t[k] = prm[k]
+    t["qra_scramble_note"] = ("Подъём по налёту (qra.lua): на налёт из n самолётов, идущих к своим объектам, - "
+                              "ceil(n / per_flight) групп (не больше max_per_raid); reserve групп на земле, кроме налёта на "
+                              "их базу ближе base_km; вертолёты и уходящие цели тревоги не поднимают. " + prm["note"])
+
+
 YEAR_GATES = {   # задачи по году кампании в базовых пакетах (planner: tdef from_year): техники ещё нет в строю
     "wp": {"awacs_orbit": (1985, "А-50 - в строю с 1984-1985 гг.")},
     "nato": {"awacs_orbit": (1977, "E-3A ВВС США - с 1977 г. (НАТО - с 1982)")},
@@ -108,6 +138,9 @@ YEAR_GATES = {   # задачи по году кампании в базовых
 
 
 def main() -> None:
+    us = json.loads((DOC / "us72.json").read_text(encoding="utf-8"))   # us72 - на основе nato (файл не генерируется)
+    qra_patch(us, QRA["nato"])
+    (DOC / "us72.json").write_text(json.dumps(us, ensure_ascii=False, indent=1), encoding="utf-8")
     for base, gates in YEAR_GATES.items():
         p = DOC / f"{base}.json"
         d = json.loads(p.read_text(encoding="utf-8"))
@@ -116,8 +149,12 @@ def main() -> None:
                 d["tasks"][k]["from_year"], d["tasks"][k]["from_year_source"] = y, why
         if base in BASE_GCI:
             d["gci"] = BASE_GCI[base]
+        if base in QRA:
+            qra_patch(d, QRA[base])
         p.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
     for d in PACKAGES:
+        if d["package"] in QRA_DERIVED:
+            qra_patch(d, QRA_DERIVED[d["package"]])
         (DOC / f"{d['package']}.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
         print(d["package"], len(d["tasks"]), "задач")
 

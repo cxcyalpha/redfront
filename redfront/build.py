@@ -308,33 +308,38 @@ def front_script(campaign_id: str, sortie: int, platoons: list[dict]) -> str:
             .replace("@CFG@", cfg).replace("@PLATOONS@", ", ".join(items)))
 
 
-def qra_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
-    """lua/qra.lua: дежурные пары - группа (поздняя активация), коалиция, аэродром (x, y DCS), радиус взлёта."""
+QRA_DEFAULT = {"per_flight": 4, "max_per_raid": 3, "reserve": 1, "base_km": 60}   # ОЦЕНКИ: подъём по налёту (qra.lua)
+
+
+def qra_script(campaign_id: str, sortie: int, specs: list[dict], state: dict | None = None) -> str:
+    """lua/qra.lua: дежурные звенья - группа (поздняя активация), коалиция, аэродром (x, y DCS), радиус взлёта; по
+    сторонам - подъём по налёту (доктрина, задача qra: per_flight, max_per_raid, reserve, base_km). Нужен airpic.lua."""
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     items = [f'{{ id = {q(a["id"])}, group = {q(a["group"])}, side = {a["side"]}, x = {a["x"]:.1f}, y = {a["y"]:.1f}, '
              f'r = {a["r"]:.0f}, title = {q(a["title"])} }}' for a in specs]
+    sides = []
+    for c in sorted({a["side"] for a in specs}):
+        t = {}
+        if state is not None:
+            t = model.doctrine(state, "red" if c == 1 else "blue")["tasks"].get("qra") or {}
+        v = {k: t.get(k, d) for k, d in QRA_DEFAULT.items()}
+        sides.append(f'[{c}] = {{ per_flight = {int(v["per_flight"])}, max_per_raid = {int(v["max_per_raid"])}, '
+                     f'reserve = {int(v["reserve"])}, base_km = {float(v["base_km"]) * 1000:.0f} }}')
     return (QRA_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
-            .replace("@SPECS@", ", ".join(items)))
+            .replace("@SPECS@", ", ".join(items)).replace("@SIDES@", ", ".join(sides)))
 
 
 GCI_LUA = Path(__file__).parent / "lua" / "gci.lua"
 
 
-def gci_script(state: dict, fighters: list[dict], m: Mission | None = None) -> str:
-    """lua/gci.lua: наземное наведение истребителей ИИ сторон, у которых в доктрине есть gci (каналы, радиус, граница
-    от своих РЛС, соотношение сил, атака с одного захода, вертолёты, bingo, пар на цель); свои объекты (аэродромы,
-    ЗРК) - для приоритета целей, идущих к ним (нужна миссия m: координаты DCS)."""
-    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
-    sides, prot = [], []
+AIRPIC_LUA = Path(__file__).parent / "lua" / "airpic.lua"
+
+
+def airpic_script(state: dict, m: Mission | None = None) -> str:
+    """lua/airpic.lua: общая картина обстановки для qra.lua и gci.lua; свои объекты сторон (аэродромы, ЗРК) - для
+    курса цели 'к своему объекту' (нужна миссия m: координаты DCS)."""
+    prot = []
     for side in model.SIDES:
-        g = model.doctrine(state, side).get("gci")
-        if not g:
-            continue
-        c = 1 if side == "red" else 2
-        sides.append(f'[{c}] = {{ channels = {int(g.get("channels", 4))}, commit = {float(g.get("commit_km", 100)) * 1000:.0f}, '
-                     f'leash = {float(g.get("leash_km", 40)) * 1000:.0f}, odds = {float(g.get("odds", 1.5))}, '
-                     f'hit_run = {"true" if g.get("hit_run") else "false"}, heli = {"true" if g.get("heli") else "false"}, '
-                     f'bingo = {float(g.get("bingo", 0.35))}, per_target = {int(g.get("per_target", 2))} }}')
         pts = []
         if m is not None:
             objs = [b for b in state["airbases"].values() if b.get("side") == side and b.get("kind") != "carrier"]
@@ -346,11 +351,28 @@ def gci_script(state: dict, fighters: list[dict], m: Mission | None = None) -> s
                     pts.append(f"{{ x = {pt.x:.0f}, y = {pt.y:.0f} }}")
                 except (KeyError, TypeError):
                     continue
-        prot.append(f'[{c}] = {{ {", ".join(pts)} }}')
+        prot.append(f'[{1 if side == "red" else 2}] = {{ {", ".join(pts)} }}')
+    return (AIRPIC_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@PROTECT@", ", ".join(prot)))
+
+
+def gci_script(state: dict, fighters: list[dict]) -> str:
+    """lua/gci.lua: наземное наведение истребителей ИИ сторон, у которых в доктрине есть gci (каналы, радиус, граница
+    от своих РЛС, соотношение сил, атака с одного захода, вертолёты, bingo, пар на цель). Нужен airpic.lua."""
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    sides = []
+    for side in model.SIDES:
+        g = model.doctrine(state, side).get("gci")
+        if not g:
+            continue
+        sides.append(f'[{1 if side == "red" else 2}] = {{ channels = {int(g.get("channels", 4))}, commit = {float(g.get("commit_km", 100)) * 1000:.0f}, '
+                     f'leash = {float(g.get("leash_km", 40)) * 1000:.0f}, odds = {float(g.get("odds", 1.5))}, '
+                     f'hit_run = {"true" if g.get("hit_run") else "false"}, heli = {"true" if g.get("heli") else "false"}, '
+                     f'bingo = {float(g.get("bingo", 0.35))}, per_target = {int(g.get("per_target", 2))} }}')
     items = [f'{{ group = {q(f["group"])}, side = {f["side"]} }}' for f in fighters]
     return (GCI_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
             .replace("@SORTIE@", str(int(state["sortie"]))).replace("@FIGHTERS@", ", ".join(items))
-            .replace("@SIDES@", ", ".join(sides)).replace("@PROTECT@", ", ".join(prot)))
+            .replace("@SIDES@", ", ".join(sides)))
 
 
 def gci_sides(state: dict) -> set[int]:
@@ -1139,12 +1161,16 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
     count = {False: sum(g["size"] for g in tk["package"]), True: 0}   # ЛА в миссии: свои (с пакетом игрока), противника
     cap = int((state.get("settings") or {}).get("mission_air", MISSION_AIR) or 0)
     air = [count[False]]                         # всего ЛА в миссии (с пакетом игрока и дежурствами)
-    def fits(e):                                 # лимит ЛА миссии: вылет - весь пакет (оценка сверху), иначе не ставится
+    def is_alert(e):
+        return e["task"]["package"][0]["objective"]["kind"] == "alert"
+    def fits(e):                                 # лимит ЛА миссии: вылет - весь пакет (оценка сверху), иначе не ставится;
+        if is_alert(e):                          # дежурные звенья - вне лимита: в мире DCS их нет до тревоги (qra.lua),
+            return True                          # поднимаются по налёту, часть остаётся в резерве
         pk = e["task"]["package"]
         return not cap or air[0] + sum(g["size"] for g in (pk[:1] if e["ai_only"] else pk)) <= cap
     for e in cands:
         k = add(e) if fits(e) else 0
-        air[0] += k
+        air[0] += 0 if is_alert(e) else k
         if k:
             taken.add(e["id"])
             if e["task"]["package"][0]["objective"]["kind"] not in ("alert", "orbit"):
@@ -1158,7 +1184,7 @@ def air_activity(state: dict, tk: dict, times: dict, sortie: int, m0: float, pla
             if e["id"] in taken or (e["side"] != tk["side"]) != weak:
                 continue
             k = add(e, capped=False) if fits(e) else 0
-            air[0] += k
+            air[0] += 0 if is_alert(e) else k
             if k:
                 taken.add(e["id"])
                 count[weak] += k
@@ -2067,12 +2093,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                         .replace("@SPECS@", items))))
     if cap_specs:                                # пары прикрытия ИИ: без ведомого - домой
         trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs))))
-    if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
-        trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
     gs = gci_sides(state)                        # наземное наведение (КРУ) истребителей ИИ: дежурные пары и пары прикрытия
     gci_f = [{"group": x["group"], "side": x["side"]} for x in qra_specs + cap_specs if x["side"] in gs]
+    if qra_specs or gci_f:                       # общая картина обстановки (airpic.lua) - до qra.lua и gci.lua
+        trig.add_action(DoScript(String(airpic_script(state, m))))
+    if qra_specs:                                # дежурные звенья ПВО: подъём по налёту (соразмерно, с резервом)
+        trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs, state))))
     if gci_f:
-        trig.add_action(DoScript(String(gci_script(state, gci_f, m))))
+        trig.add_action(DoScript(String(gci_script(state, gci_f))))
     if ulift_specs:                              # игрок везёт груз или раненых: посадка у части (unitlift.lua)
         trig.add_action(DoScript(String(ulift_script(state["campaign_id"], state["sortie"], ulift_specs))))
     if evac_specs:                               # эвакуация: рота садится в борта на площадке (evac.lua; игрок - CTLD)
