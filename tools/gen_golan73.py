@@ -159,9 +159,9 @@ BRIDGES = [
 ]
 
 AIR = [   # (id, имя, сторона, роль, тип, аэродром, число, радиус км, примечание)
-    ("i_f4_rd", "69-я и 107-я эскадрильи (F-4E 'Курнас')", "blue", "fighter_bomber", "F_4E", "Ramat David", 36, 500, ""),
-    ("i_f4_hz", "119-я и 201-я эскадрильи (F-4E 'Курнас')", "blue", "fighter_bomber", "F_4E", "Hatzor", 36, 500, ""),
-    ("i_f4_tn", "Эскадрильи F-4E (Тель-Ноф)", "blue", "fighter_bomber", "F_4E", "Tel Nof", 24, 500, ""),
+    ("i_f4_rd", "69-я и 107-я эскадрильи (F-4E 'Курнас')", "blue", "fighter_bomber", "F_4E_45MC", "Ramat David", 36, 500, ""),
+    ("i_f4_hz", "119-я и 201-я эскадрильи (F-4E 'Курнас')", "blue", "fighter_bomber", "F_4E_45MC", "Hatzor", 36, 500, ""),
+    ("i_f4_tn", "Эскадрильи F-4E (Тель-Ноф)", "blue", "fighter_bomber", "F_4E_45MC", "Tel Nof", 24, 500, ""),
     ("i_a4_hz", "Эскадрильи A-4E/H 'Скайхок' (102, 109, 110)", "blue", "fighter_bomber", "A_4E_C", "Hatzerim", 50, 400,
      "мод A-4E-C: без мода части в кампании нет"),
     ("i_a4_rd", "Эскадрильи A-4 'Скайхок' (115, 116, 140)", "blue", "fighter_bomber", "A_4E_C", "Ramat David", 40, 400,
