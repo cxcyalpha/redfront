@@ -2678,6 +2678,12 @@
  "gci": {
   "channels": 8,
   "commit_km": 120,
+  "leash_km": 40,
+  "odds": 1.5,
+  "hit_run": false,
+  "heli": true,
+  "bingo": 0.35,
+  "per_target": 2,
   "source": "наведение с земли - основа советской ПВО; каналы - ОЦЕНКА"
  }
 }

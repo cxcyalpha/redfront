@@ -3792,31 +3792,57 @@ def theatres_section(tmp: Path) -> None:
           "авианосная ударная группа в миссии (реальные корабли DCS), удар по кораблям - атака группы кораблей")
     import lupa
     gsrc = build.gci_script(st6, [{"group": "QRA 1", "side": 1}])
-    L = lupa.LuaRuntime()
-    L.execute('''
+    gsrc = gsrc.replace("local PROTECT = {", "local PROTECT = { [1] = { { x = 0, y = 0 } } } local _P = {", 1)
+    STUB = '''
       env = { info = function() end }
       timer = { getTime = function() return 0 end, scheduleFunction = function(f) CHECK = f end }
       Controller = { Detection = { RADAR = 4 } }
       Group = { Category = { GROUND = 2 } }
       PUSHED = {}
-      local tgt = { isExist = function() return true end, getCoalition = function() return 2 end, inAir = function() return true end,
-                    getName = function() return "F-14A#1" end, getTypeName = function() return "F-14A" end,
-                    getPoint = function() return { x = 50000, y = 3000, z = 0 } end,
-                    getGroup = function() return { getID = function() return 77 end, getName = function() return "F14" end } end }
-      local radar = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end }
-      local rg = { getUnits = function() return { radar } end,
-                   getController = function() return { getDetectedTargets = function() return { { object = tgt } } end } end }
+      TARGETS = {}
+      function mk(name, gid, attr, x, vx, around)
+        local u = { isExist = function() return true end, getCoalition = function() return 2 end, inAir = function() return true end,
+                    getName = function() return name end, getTypeName = function() return name end,
+                    hasAttribute = function(_, a) return a == attr end,
+                    getVelocity = function() return { x = vx, y = 0, z = 0 } end,
+                    getPoint = function() return { x = x, y = 3000, z = 0 } end,
+                    getGroup = function() return { getID = function() return gid end, getName = function() return name end } end }
+        TARGETS[#TARGETS + 1] = u
+        for k = 1, (around or 0) do
+          TARGETS[#TARGETS + 1] = { isExist = function() return true end, getCoalition = function() return 2 end,
+            inAir = function() return true end, getName = function() return name .. k end, getTypeName = function() return name end,
+            hasAttribute = function(_, a) return a == attr end, getVelocity = function() return { x = vx, y = 0, z = 0 } end,
+            getPoint = function() return { x = x + 100 * k, y = 3000, z = 0 } end,
+            getGroup = function() return { getID = function() return gid end, getName = function() return name end } end }
+        end
+        return u
+      end
+      local radar = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end,
+                      getPoint = function() return { x = 0, y = 0, z = 0 } end }
+      local rg = { getUnits = function() return { radar } end, getController = function() return {
+        getDetectedTargets = function() local o = {} for _, t in ipairs(TARGETS) do o[#o + 1] = { object = t } end return o end } end }
       coalition = { getGroups = function(side) if side == 1 then return { rg } end return {} end }
-      local mig = { isExist = function() return true end, inAir = function() return true end,
-                    getPoint = function() return { x = 0, y = 5000, z = 0 } end }
-      Group.getByName = function(n) return { isExist = function() return true end, getUnits = function() return { mig } end,
+      Unit = { getByName = function(n) for _, t in ipairs(TARGETS) do if t:getName() == n then return t end end end }
+      local function mig() return { isExist = function() return true end, inAir = function() return true end,
+                    getAmmo = function() return { { count = 2 } } end, getFuel = function() return 0.8 end,
+                    getPoint = function() return { x = 0, y = 5000, z = 0 } end } end
+      Group.getByName = function(n) return { isExist = function() return true end, getUnits = function() return { mig(), mig() } end,
         getController = function() return { pushTask = function(_, t) PUSHED[#PUSHED + 1] = t end, popTask = function() end } end } end
-    ''')
-    L.execute(gsrc)
-    L.execute("CHECK()")
-    pushed = L.eval("PUSHED[1] and PUSHED[1].params.groupId or 0")
-    check("redfront gci" in mz and pushed == 77,
-          f"наземное наведение (КРУ) для ИИ: скрипт в миссии, МиГ наведён на цель, видимую наземной РЛС (groupId {pushed})")
+    '''
+    def gci_run(setup):
+        L = lupa.LuaRuntime()
+        L.execute(STUB)
+        L.execute(setup)
+        L.execute(gsrc)
+        L.execute("CHECK()")
+        return L.eval("PUSHED[1] and PUSHED[1].params.groupId or 0")
+    # истребитель прикрытия ближе (12 км), ударный дальше (18 км) и идёт к своему объекту - наводим на ударного
+    p1 = gci_run('mk("F-14A", 11, "Fighters", 12000, 0); mk("A-6E", 22, "Bombers", 18000, -200)')
+    # шестёрка у цели против нашей пары (odds 1, без атаки с одного захода) - не наводим; за границей РЛС (60 км) - тоже
+    p2 = gci_run('mk("F-4E", 33, "Multirole fighters", 15000, -200, 5); mk("A-7E", 44, "Bombers", 60000, -200)')
+    check("redfront gci" in mz and p1 == 22 and p2 == 0,
+          f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
+          f"и цель за границей наведения - без наведения ({p2})")
     st7 = model.new_campaign("dmg", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="blue")
     deck = []
     for _ in range(8):                           # удары ИИ вне миссии - палуба авианосцев не закрывается

@@ -44,8 +44,10 @@ PACKAGES = [
               "strike_supply_route", "strike_column_march", "cas_contact", "cas_helo", "fleet_cap", "awacs_orbit",
               "air_assault", "air_evac"],
         shares=[{"from_day": 1, "DCA": 0.9, "OCA": 0.0, "SEAD": 0.0, "APCLO": 0.1}],
-        extra={"gci": {"channels": 3, "commit_km": 120, "source": "Michel (1997): перехват целиком по командам КП "
-                                                                "наведения; 3 канала - ОЦЕНКА"}},
+        extra={"gci": {"channels": 3, "commit_km": 120, "leash_km": 30, "odds": 1.0, "hit_run": True, "heli": False,
+                       "bingo": 0.4, "per_target": 2,
+                       "source": "Michel (1997): перехват целиком по командам КП наведения, по превосходящим - атака с "
+                                 "одного захода и уход; вертолёты не перехватывали; числа - ОЦЕНКИ"}},
         tasks={"strike_ship": {"strike": {**json.loads((DOC / "wp.json").read_text(encoding="utf-8"))["tasks"]["strike_ship"]["strike"],
                                           "size": 2},
                                "method_source": "19.04.1972: пара МиГ-17 бомбами с малой высоты по эсминцам у Донгхоя - "
@@ -68,7 +70,9 @@ PACKAGES = [
         sim={"night_power": 0.7, "choice_width": 1, "attack_min_strength": 0.75,
              "night_note": "Арабские армии 1973: ночной бой слабее дневного (night_power 0.7 - ОЦЕНКА по Pollack); "
                            "план держится жёстко - выбор цели без импровизации (choice_width 1)"},
-        extra={"gci": {"channels": 4, "commit_km": 80, "source": "жёсткое наведение с земли (советская школа); каналы - ОЦЕНКА"},
+        extra={"gci": {"channels": 4, "commit_km": 80, "leash_km": 20, "odds": 1.0, "hit_run": False, "heli": True, "bingo": 0.4,
+                       "per_target": 2, "source": "жёсткое наведение с земли (советская школа), за зонтик ЗРК не "
+                                                  "выходят, в бой при равенстве и больше (odds 1) - ОЦЕНКИ"},
                "umbrella": {"km": 25, "tasks": ["cap_own_troops", "cas_contact", "cas_helo", "strike_column_march",
                                       "strike_supply_route", "strike_depot", "strike_bridge", "strike_factory"],
                             "source": "Pollack, Nordeen: 1973 - истребители и штурмовики над войсками только под "
@@ -88,12 +92,15 @@ PACKAGES = [
              "night_note": "Армия обороны Израиля: контратаки и при меньшинстве (counter_ratio 0.9), ночной бой (night_power "
                            "1.1) - ОЦЕНКИ"},
         extra={"nation_bonus": None,
-               "gci": {"channels": 4, "commit_km": 100, "source": "наведение с земли (РЛС на Хермоне и в Галилее) - ОЦЕНКА каналов"}},
+               "gci": {"channels": 4, "commit_km": 100, "leash_km": 60, "odds": 3.0, "hit_run": False, "heli": True, "bingo": 0.3,
+                       "per_target": 2, "source": "наведение с земли (РЛС на Хермоне и в Галилее); израильские пары бой "
+                                                  "и при меньшинстве (odds 3) - ОЦЕНКИ"}},
     ),
 ]
 
 
-BASE_GCI = {"wp": {"channels": 8, "commit_km": 120, "source": "наведение с земли - основа советской ПВО; каналы - ОЦЕНКА"}}
+BASE_GCI = {"wp": {"channels": 8, "commit_km": 120, "leash_km": 40, "odds": 1.5, "hit_run": False, "heli": True,
+                   "bingo": 0.35, "per_target": 2, "source": "наведение с земли - основа советской ПВО; каналы - ОЦЕНКА"}}
 YEAR_GATES = {   # задачи по году кампании в базовых пакетах (planner: tdef from_year): техники ещё нет в строю
     "wp": {"awacs_orbit": (1985, "А-50 - в строю с 1984-1985 гг.")},
     "nato": {"awacs_orbit": (1977, "E-3A ВВС США - с 1977 г. (НАТО - с 1982)")},

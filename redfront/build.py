@@ -320,19 +320,37 @@ def qra_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
 GCI_LUA = Path(__file__).parent / "lua" / "gci.lua"
 
 
-def gci_script(state: dict, fighters: list[dict]) -> str:
-    """lua/gci.lua: наземное наведение истребителей ИИ сторон, у которых в доктрине есть gci (каналы, радиус)."""
+def gci_script(state: dict, fighters: list[dict], m: Mission | None = None) -> str:
+    """lua/gci.lua: наземное наведение истребителей ИИ сторон, у которых в доктрине есть gci (каналы, радиус, граница
+    от своих РЛС, соотношение сил, атака с одного захода, вертолёты, bingo, пар на цель); свои объекты (аэродромы,
+    ЗРК) - для приоритета целей, идущих к ним (нужна миссия m: координаты DCS)."""
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
-    sides = []
+    sides, prot = [], []
     for side in model.SIDES:
         g = model.doctrine(state, side).get("gci")
-        if g:
-            sides.append(f'[{1 if side == "red" else 2}] = {{ channels = {int(g.get("channels", 4))}, '
-                         f'commit = {float(g.get("commit_km", 100)) * 1000:.0f} }}')
+        if not g:
+            continue
+        c = 1 if side == "red" else 2
+        sides.append(f'[{c}] = {{ channels = {int(g.get("channels", 4))}, commit = {float(g.get("commit_km", 100)) * 1000:.0f}, '
+                     f'leash = {float(g.get("leash_km", 40)) * 1000:.0f}, odds = {float(g.get("odds", 1.5))}, '
+                     f'hit_run = {"true" if g.get("hit_run") else "false"}, heli = {"true" if g.get("heli") else "false"}, '
+                     f'bingo = {float(g.get("bingo", 0.35))}, per_target = {int(g.get("per_target", 2))} }}')
+        pts = []
+        if m is not None:
+            objs = [b for b in state["airbases"].values() if b.get("side") == side and b.get("kind") != "carrier"]
+            objs += [model.unit_pos(state, u) for u in state["units"].values()
+                     if u["side"] == side and model.category(u) == "sam" and u.get("state") not in ("destroyed", "pending")]
+            for o in objs:
+                try:
+                    pt = _pt(m, o)
+                    pts.append(f"{{ x = {pt.x:.0f}, y = {pt.y:.0f} }}")
+                except (KeyError, TypeError):
+                    continue
+        prot.append(f'[{c}] = {{ {", ".join(pts)} }}')
     items = [f'{{ group = {q(f["group"])}, side = {f["side"]} }}' for f in fighters]
     return (GCI_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
             .replace("@SORTIE@", str(int(state["sortie"]))).replace("@FIGHTERS@", ", ".join(items))
-            .replace("@SIDES@", ", ".join(sides)))
+            .replace("@SIDES@", ", ".join(sides)).replace("@PROTECT@", ", ".join(prot)))
 
 
 def gci_sides(state: dict) -> set[int]:
@@ -2054,7 +2072,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     gs = gci_sides(state)                        # наземное наведение (КРУ) истребителей ИИ: дежурные пары и пары прикрытия
     gci_f = [{"group": x["group"], "side": x["side"]} for x in qra_specs + cap_specs if x["side"] in gs]
     if gci_f:
-        trig.add_action(DoScript(String(gci_script(state, gci_f))))
+        trig.add_action(DoScript(String(gci_script(state, gci_f, m))))
     if ulift_specs:                              # игрок везёт груз или раненых: посадка у части (unitlift.lua)
         trig.add_action(DoScript(String(ulift_script(state["campaign_id"], state["sortie"], ulift_specs))))
     if evac_specs:                               # эвакуация: рота садится в борта на площадке (evac.lua; игрок - CTLD)
