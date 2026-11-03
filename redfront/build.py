@@ -317,6 +317,28 @@ def qra_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
             .replace("@SPECS@", ", ".join(items)))
 
 
+GCI_LUA = Path(__file__).parent / "lua" / "gci.lua"
+
+
+def gci_script(state: dict, fighters: list[dict]) -> str:
+    """lua/gci.lua: наземное наведение истребителей ИИ сторон, у которых в доктрине есть gci (каналы, радиус)."""
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    sides = []
+    for side in model.SIDES:
+        g = model.doctrine(state, side).get("gci")
+        if g:
+            sides.append(f'[{1 if side == "red" else 2}] = {{ channels = {int(g.get("channels", 4))}, '
+                         f'commit = {float(g.get("commit_km", 100)) * 1000:.0f} }}')
+    items = [f'{{ group = {q(f["group"])}, side = {f["side"]} }}' for f in fighters]
+    return (GCI_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@FIGHTERS@", ", ".join(items))
+            .replace("@SIDES@", ", ".join(sides)))
+
+
+def gci_sides(state: dict) -> set[int]:
+    return {1 if s == "red" else 2 for s in model.SIDES if model.doctrine(state, s).get("gci")}
+
+
 def iads_spec(m: Mission, state: dict, vg_by_unit: dict) -> tuple[list[dict], list[dict]]:
     """Сеть ПВО в миссии (iads.lua): ЗРК (группа, сторона, зона поражения, в сети ли, вероятность распознать ПРР,
     сбивает ли ПРР) и узлы сети (КРУ / РЛС обнаружения - наземные, ДРЛО - самолёты)."""
@@ -2029,6 +2051,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs))))
     if qra_specs:                                # дежурные пары ПВО: взлёт по обнаружению противника радарами стороны
         trig.add_action(DoScript(String(qra_script(state["campaign_id"], state["sortie"], qra_specs))))
+    gs = gci_sides(state)                        # наземное наведение (КРУ) истребителей ИИ: дежурные пары и пары прикрытия
+    gci_f = [{"group": x["group"], "side": x["side"]} for x in qra_specs + cap_specs if x["side"] in gs]
+    if gci_f:
+        trig.add_action(DoScript(String(gci_script(state, gci_f))))
     if ulift_specs:                              # игрок везёт груз или раненых: посадка у части (unitlift.lua)
         trig.add_action(DoScript(String(ulift_script(state["campaign_id"], state["sortie"], ulift_specs))))
     if evac_specs:                               # эвакуация: рота садится в борта на площадке (evac.lua; игрок - CTLD)

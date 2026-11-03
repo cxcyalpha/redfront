@@ -3790,6 +3790,33 @@ def theatres_section(tmp: Path) -> None:
         mz = zipfile.ZipFile(tmp / "csg.miz").read("mission").decode("utf-8")
     check(k and "USS Ticonderoga (CG-47)" in mz and "AttackGroup" in mz and any(len(x["ships"]) >= 3 for x in mn["ships"]),
           "авианосная ударная группа в миссии (реальные корабли DCS), удар по кораблям - атака группы кораблей")
+    import lupa
+    gsrc = build.gci_script(st6, [{"group": "QRA 1", "side": 1}])
+    L = lupa.LuaRuntime()
+    L.execute('''
+      env = { info = function() end }
+      timer = { getTime = function() return 0 end, scheduleFunction = function(f) CHECK = f end }
+      Controller = { Detection = { RADAR = 4 } }
+      Group = { Category = { GROUND = 2 } }
+      PUSHED = {}
+      local tgt = { isExist = function() return true end, getCoalition = function() return 2 end, inAir = function() return true end,
+                    getName = function() return "F-14A#1" end, getTypeName = function() return "F-14A" end,
+                    getPoint = function() return { x = 50000, y = 3000, z = 0 } end,
+                    getGroup = function() return { getID = function() return 77 end, getName = function() return "F14" end } end }
+      local radar = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end }
+      local rg = { getUnits = function() return { radar } end,
+                   getController = function() return { getDetectedTargets = function() return { { object = tgt } } end } end }
+      coalition = { getGroups = function(side) if side == 1 then return { rg } end return {} end }
+      local mig = { isExist = function() return true end, inAir = function() return true end,
+                    getPoint = function() return { x = 0, y = 5000, z = 0 } end }
+      Group.getByName = function(n) return { isExist = function() return true end, getUnits = function() return { mig } end,
+        getController = function() return { pushTask = function(_, t) PUSHED[#PUSHED + 1] = t end, popTask = function() end } end } end
+    ''')
+    L.execute(gsrc)
+    L.execute("CHECK()")
+    pushed = L.eval("PUSHED[1] and PUSHED[1].params.groupId or 0")
+    check("redfront gci" in mz and pushed == 77,
+          f"наземное наведение (КРУ) для ИИ: скрипт в миссии, МиГ наведён на цель, видимую наземной РЛС (groupId {pushed})")
     st7 = model.new_campaign("dmg", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="blue")
     deck = []
     for _ in range(8):                           # удары ИИ вне миссии - палуба авианосцев не закрывается

@@ -316,12 +316,17 @@ def air_strike(state: dict, unit: dict, pairs: float, why: str, asm_frac: float 
     (корабли с ЗРК) отражает часть: x 1 / (1 + сумма ad_km / AD_SCREEN_KM); asm_frac - доля самолётов с ПКР
     (остальные - бомбы, x BOMB_K). ОЦЕНКИ."""
     ad = sum(info(t)["ad_km"] for t, _n in ship_names(unit))
-    hits = pairs * HITS_PER_PAIR * (asm_frac + (1.0 - asm_frac) * BOMB_K) / (1.0 + ad / AD_SCREEN_KM)
+    bomb_k = BOMB_K * (FAC_EVADE if kind(unit) == "FAC" else 1.0)   # катер на 35 уз. с манёвром - бомбой трудно попасть
+    hits = pairs * HITS_PER_PAIR * (asm_frac + (1.0 - asm_frac) * bomb_k) / (1.0 + ad / AD_SCREEN_KM)
+    r = _rng(state, f"air-{unit['id']}-{why}")      # попадания - целые: ожидание 0.3 - чаще промах, иногда одно
+    if r is not None:
+        hits = float(int(hits) + (1 if r.random() < hits - int(hits) else 0))
     return apply_hits(state, unit, hits, why, ai=True)
 
 
 # ---------- запас авиационных ПКР стороны (sector asm_stock: {side: {count, per_day}}; нет стороны - без учёта) ----------
 BOMB_K = 0.35            # ОЦЕНКА: без ПКР - бомбы с малой высоты: попаданий меньше (надо пройти над ордером)
+FAC_EVADE = 0.4         # ОЦЕНКА: бомбы по ракетным катерам на ходу (35 уз., манёвр) - ещё меньше попаданий
 BOMB_LOSS_P = 0.12       # ОЦЕНКА: добавка к потерям на самолёт при бомбометании по кораблям с ЗРК
 
 
@@ -397,6 +402,13 @@ def from_mission(state: dict, unit: dict, life: dict[str, float]) -> list[str]:
     return lines
 
 
+def _hits(rng, salvo: float, p: float) -> float:
+    """Попаданий из залпа salvo ракет с вероятностью p у каждой; без генератора (без случайности) - ожидание."""
+    if rng is None:
+        return salvo * p
+    return float(sum(1 for _ in range(int(round(salvo))) if rng.random() < p))
+
+
 def engage(state: dict) -> list[str]:
     """Бой корабельных групп противников ближе ENGAGE_KM: залпы ПКР с обеих сторон (попадания - P_HIT, ЗРК цели -
     AD_SAVE, выучка - quality группы, РЭБ - ecm цели). Все числа - ОЦЕНКИ."""
@@ -410,8 +422,10 @@ def engage(state: dict) -> list[str]:
             if sb <= 0 and sr <= 0:
                 continue
             # ecm - доля ПКР противника, уведённых помехами (1973: все 'Термиты' по 'Сааръ' ушли в ловушки - ОЦЕНКА)
-            hit_r = sb * P_HIT * (AD_SAVE if threat_km(r) > 0 else 1.0) * (1.0 - r.get("ecm", 0.0))
-            hit_b = sr * P_HIT * (AD_SAVE if threat_km(b) > 0 else 1.0) * (1.0 - b.get("ecm", 0.0))
+            # попадания - по каждой ракете залпа (случайно): при сильных помехах чаще всего - ни одного, иногда - одно
+            rng = _rng(state, f"salvo-{b['id']}-{r['id']}-{state['day']}")
+            hit_r = _hits(rng, sb, P_HIT * (AD_SAVE if threat_km(r) > 0 else 1.0) * (1.0 - r.get("ecm", 0.0)))
+            hit_b = _hits(rng, sr, P_HIT * (AD_SAVE if threat_km(b) > 0 else 1.0) * (1.0 - b.get("ecm", 0.0)))
             lines.append(f"Бой кораблей: {b['name']} и {r['name']}.")
             lines += [x for x in (_fire(state, b) if sb > 0 else None, _fire(state, r) if sr > 0 else None) if x]
             lines += apply_hits(state, r, hit_r, f"бой с {b['name']}")
