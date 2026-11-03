@@ -95,6 +95,24 @@ def snapshot(st: dict) -> None:
     del h[:-HISTORY_MAX]
 
 
+def _naval(st: dict) -> list[dict]:
+    """Флот для карты: корабельные группы (живые и потопленные), состав по кораблям."""
+    from . import naval
+    out = []
+    for u in st["units"].values():
+        if model.category(u) != "naval":
+            continue
+        ss = naval.ship_state(u)
+        st_txt = {"ok": "", "transit": " - идёт в порт", "port": " - в ремонте", "returning": " - возвращается", "sunk": " - потоплен"}
+        lead = naval.info(u["composition"][0]["type"])["kind"] if u.get("composition") else ""
+        out.append({"id": u["id"], "name": u["name"], "side": u["side"], "pos": _ll(u["pos"]), "kind": naval.kind(u),
+                    "lead": lead, "abbr": u.get("abbr", ""), "strength": round(model.strength(u), 2),
+                    "ad_km": round(naval.threat_km(u)),
+                    "ships": [n + (f" ({ss[n]['dmg']:.0%})" if 0 < ss[n]["dmg"] < 1 else "") + st_txt[ss[n]["status"]]
+                              for _t, n in naval.ship_list(u)]})
+    return out
+
+
 def view(st: dict, history: bool = True) -> dict:
     """Состояние кампании для страницы: только то, что рисуется и показывается. Названия задач и групп - на языке
     кампании (i18n.py)."""
@@ -207,6 +225,7 @@ def view(st: dict, history: bool = True) -> dict:
         "wx": {k: st["settings"].get(k, v) for k, v in (("weather_mode", "climate"), ("weather_type", "high"),
                                                          ("weather_fog", False), ("weather_effects", True))},
         "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
+        "naval": _naval(st),
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open"),
                       "kind": b.get("kind", "airfield"),       # farp - вертолётная площадка (farp.py)
                       "units": [u["name"] for u in units.values() if u.get("base") == k and model.category(u) in ("air", "heli")]}

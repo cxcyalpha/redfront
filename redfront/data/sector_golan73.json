@@ -193,6 +193,18 @@
    "lon": 36.71,
    "estimate": true,
    "side": "red"
+  },
+  "Tartus": {
+   "lat": 34.89,
+   "lon": 35.89,
+   "estimate": true,
+   "side": "red"
+  },
+  "Latakia": {
+   "lat": 35.52,
+   "lon": 35.79,
+   "estimate": true,
+   "side": "red"
   }
  },
  "airbases": {
@@ -471,6 +483,14 @@
   [
    "MajdalShams",
    "TelShams"
+  ],
+  [
+   "Homs",
+   "Tartus"
+  ],
+  [
+   "Tartus",
+   "Latakia"
   ]
  ],
  "supply_entry": {
@@ -491,7 +511,9 @@
    "Damascus",
    "Homs",
    "Sanamayn",
-   "Deraa"
+   "Deraa",
+   "Tartus",
+   "Latakia"
   ],
   "red": [
    "Haifa",
@@ -572,6 +594,18 @@
    "name": "Склад снабжения (Санамейн)",
    "side": "red",
    "place": "Sanamayn"
+  },
+  {
+   "id": "red_depot_tartus",
+   "name": "Порт и склады (Тартус)",
+   "side": "red",
+   "place": "Tartus"
+  },
+  {
+   "id": "blue_depot_haifa",
+   "name": "Порт и склады (Хайфа)",
+   "side": "blue",
+   "place": "Haifa"
   }
  ],
  "bridges": [
@@ -768,5 +802,54 @@
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   }
- ]
+ ],
+ "sea_lanes": [
+  {
+   "id": "lane_tartus",
+   "side": "red",
+   "port": "Tartus",
+   "convoy": "red_convoy_tartus",
+   "t_per_day": 300
+  },
+  {
+   "id": "lane_haifa",
+   "side": "blue",
+   "port": "Haifa",
+   "convoy": "blue_convoy_haifa",
+   "t_per_day": 300
+  }
+ ],
+ "naval_bases": {
+  "blue": [
+   {
+    "name": "Хайфа",
+    "lat": 32.83,
+    "lon": 35.0
+   }
+  ],
+  "red": [
+   {
+    "name": "Тартус",
+    "lat": 34.9,
+    "lon": 35.86
+   },
+   {
+    "name": "Латакия",
+    "lat": 35.52,
+    "lon": 35.76
+   }
+  ]
+ },
+ "asm_stock": {
+  "blue": {
+   "count": 0,
+   "per_day": 0,
+   "note": "у ВВС Израиля 1973 г. авиационных ПКР нет ('Габриэль' - корабельная)"
+  },
+  "red": {
+   "count": 0,
+   "per_day": 0,
+   "note": "у ВВС Сирии 1973 г. авиационных ПКР нет"
+  }
+ }
 }

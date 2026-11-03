@@ -147,6 +147,21 @@ def apply(state: dict, data: dict) -> list[str]:
                     lines.append(f"{u['name']}: за время вылета продвинулся на {adv:.1f} км.")
                     u["progress_km"] = head
 
+    # ---- флот: потопленные в миссии корабли и повреждения (остаток прочности в DCS) ----
+    from . import i18n_en, naval
+    life = data.get("ships_life") or {}
+    for sh in man.get("ships") or []:
+        u = state["units"].get(sh["unit"])
+        if not u:
+            continue
+        model_name = {i18n_en.en(n): n for _t, n in naval.ship_names(u)}   # английская миссия - имена латиницей
+        model_name.update({n: n for _t, n in naval.ship_names(u)})
+        for x in sh["ships"]:
+            nm = model_name.get(x["name"], x["name"])
+            if x["name"] in lost:
+                lines.append(naval.sink(u, nm, "бой в миссии"))
+        lines += naval.from_mission(state, u, {model_name.get(k, k): v for k, v in life.items()})
+
     # ---- своё звено ----
     from . import pilots
     for fl in flights:                           # все звенья тактической группы, не только звено игрока

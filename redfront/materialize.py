@@ -175,7 +175,10 @@ SITE_RADAR_GAP_M = 120   # ОЦЕНКА: РЛС позиции - не в одн�
 def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
     """Позиция ЗРК: РЛС в центре (каждая следующая - в SITE_RADAR_GAP_M в стороне), пункт управления рядом, пусковые -
     по SITE_LAYOUT системы (иначе - по кругу 300 м). Все машины развёрнуты на ось угрозы (threat_axis_deg).
-    token - ЗРК вдали от задачи: РЛС и не больше SAM_TOKEN_LN пусковых, вес пусковой - не больше MAX_WEIGHT."""
+    token - ЗРК вдали от задачи: РЛС и не больше SAM_TOKEN_LN пусковых, вес пусковой - не больше MAX_WEIGHT.
+    Корабельная группа (угроза коридора) - не здесь: корабли в миссии - флотом (build.carrier_groups), группа пустая."""
+    if model.category(unit) == "naval":
+        return {"unit": unit["id"], "kind": "sam", "side": unit["side"], "vehicles": []}
     c = model.unit_pos(state, unit)
     axis = threat_axis_deg(state, unit)
     k = math.cos(math.radians(c["lat"]))
@@ -439,7 +442,7 @@ def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
         groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
         groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
         return [g for g in groups if g["vehicles"]]
-    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam"):   # объект тыла - сам в миссии как объекты карты
+    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam", "naval"):   # объект тыла, корабли - сами в миссии
         groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
         placed = set()
         for sid in task["threats"]:

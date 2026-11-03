@@ -75,11 +75,35 @@ BASE_ALIAS = {"Hama": "Ной-Бай (Хама)", "Bassel Al-Assad": "Кеп (Б
               "Al Qusayr": "Куанглан (Эль-Кусайр)", "Shayrat": "Байтхыонг (Шайрат)", "Beirut-Rafic Hariri": "Дананг (Бейрут)",
               "Rene Mouawad": "Фубай (Кляят)", "Hatay": "Удорн (Хатай)", "Incirlik": "Корат (Инджирлик)",
               "Akrotiri": "У-Тапао (Акротири)"}
-CARRIERS = {   # 'Янки-стейшн': (имя, тип, широта, долгота, TACAN, позывной, ICLS, МГц, эскорт); позиции - ОЦЕНКА
-    "cv63": ("USS Kitty Hawk (CV-63)", "Forrestal", 35.05, 35.45, 63, "KTH", 3, 127.5, ["TICONDEROG", "PERRY"]),
-    "cv64": ("USS Constellation (CV-64)", "Forrestal", 34.80, 35.40, 64, "CON", 4, 128.5, ["TICONDEROG", "PERRY"]),
-    "cv43": ("USS Coral Sea (CV-43)", "Forrestal", 35.30, 35.50, 43, "COR", 5, 129.5, ["PERRY"]),
+CARRIERS = {   # 'Янки-стейшн': авианосцы - реальные корабли DCS (имя, класс, широта, долгота, TACAN, позывной, ICLS, МГц, группа).
+    # Исторически в апреле 1972 г. - Kitty Hawk, Constellation, Coral Sea, Hancock: в DCS их нет. Вместо них - USS Forrestal
+    # (CV-59; сам воевал у Вьетнама в 1967 г.) и USS Carl Vinson (CVN-70; в строю с 1982 г. - АНАХРОНИЗМ, ДОПУЩЕНИЕ).
+    # Позиции - ОЦЕНКА.
+    "cv63": ("USS Forrestal (CV-59)", "Forrestal", 35.05, 35.45, 59, "FOR", 3, 127.5, "blue_csg_forrestal"),
+    "cv64": ("USS Carl Vinson (CVN-70)", "VINSON", 34.80, 35.40, 70, "VIN", 4, 128.5, "blue_csg_vinson"),
 }
+from naval_common import from_template as T   # noqa: E402
+NAVAL = [   # корабельные группы: охранение - корабли DCS (Ticonderoga, Perry - в 1972 г. ещё не в строю: вместо крейсеров
+    # Belknap/Leahy и эсминцев - ДОПУЩЕНИЕ), имена - реальные корабли класса
+    ("blue_csg_forrestal", "Авианосная ударная группа USS Forrestal", "blue", 35.05, 35.45,
+     T("us_csg_1972", ("Forrestal", "carrier", "USS Forrestal (CV-59)"),
+       ["USS Sterett (DLG-31)", "USS Higbee (DD-806)", "USS Lloyd Thomas (DD-764)"]), "CSG 59"),
+    ("blue_csg_vinson", "Авианосная ударная группа USS Carl Vinson", "blue", 34.80, 35.40,
+     T("us_csg_1972", ("VINSON", "carrier", "USS Carl Vinson (CVN-70)"),
+       ["USS Biddle (DLG-34)", "USS Berkeley (DDG-15)", "USS Buchanan (DDG-14)"]), "CSG 70"),
+    ("red_fac_haiphong", "Торпедные катера ВМС ДРВ (Хайфон)", "red", 35.55, 35.70,
+     [("Type_021_1", "boat", "Катер №1"), ("Type_021_1", "boat", "Катер №2"), ("Type_021_1", "boat", "Катер №3")],
+     "пр. 183 (P-6) и пр. 123 - в DCS Type 021-1; 19.04.1972 у Донгхоя атаковали эсминцы США (с МиГ-17)"),
+    ("red_convoy_haiphong", "Советские транспорты у Хайфона", "red", 35.62, 35.60,
+     [("Dry_cargo_ship_1", "transport", "Транспорт №1"), ("Dry_cargo_ship_2", "transport", "Транспорт №2")],
+     "морской подвоз ДРВ: удары по судам СССР были запрещены (с 9.05 - минирование Хайфона)"),
+    ("blue_convoy_danang", "Транспорты снабжения (Дананг)", "blue", 33.95, 35.30,
+     [("HandyWind", "transport", "SS Transcolumbia"), ("Dry_cargo_ship_1", "transport", "SS Green Wave")], ""),
+]
+SEA_LANES = [   # морской подвоз: (id, сторона, порт - пункт со складом, конвой - группа флота, т/сутки - ОЦЕНКА)
+    ("lane_haiphong", "red", "Haiphong", "red_convoy_haiphong", 400),
+    ("lane_danang", "blue", "DaNang", "blue_convoy_danang", 500),
+]
 AXES = {"dmz": {"title": "ДМЗ: Жолинь - Донгха - Куангчи - Хюэ", "objectives": ["DongHa", "QuangTri", "Hue"]},
         "west": {"title": "Запад: Ашау - Бастонь - Хюэ", "objectives": ["Bastogne", "Hue"]}}
 
@@ -143,18 +167,15 @@ BRIDGES = [   # мосты - места ОЦЕНКА (середина учас�
 ]
 F4_NOTE = "F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)"
 AIR = [   # (id, имя, сторона, роль, тип, база, число, радиус км, примечание)
-    ("us_vf114", "VF-114, VF-213 (F-4J, Kitty Hawk)", "blue", "fighter", "F_14A_135_GR_Early", "cv63", 24, 500, F4_NOTE),
-    ("us_va_kh", "VA-192, VA-195 (A-7E), Kitty Hawk", "blue", "fighter_bomber", "FA_18C_hornet", "cv63", 24, 500, "A-7E - F/A-18C"),
-    ("us_va52", "VA-52 (A-6A, Kitty Hawk)", "blue", "fighter_bomber", "A6E", "cv63", 12, 600, "A-6A - A-6E"),
+    ("us_vf114", "VF-114, VF-213 (F-4J, Forrestal)", "blue", "fighter", "F_14A_135_GR_Early", "cv63", 24, 500, F4_NOTE),
+    ("us_va_kh", "VA-192, VA-195 (A-7E), Forrestal", "blue", "fighter_bomber", "FA_18C_hornet", "cv63", 24, 500, "A-7E - F/A-18C"),
+    ("us_va52", "VA-52 (A-6A, Forrestal)", "blue", "fighter_bomber", "A6E", "cv63", 12, 600, "A-6A - A-6E"),
     ("us_e2_kh", "VAW-114 (E-2B)", "blue", "awacs", "E_2C", "cv63", 4, 1000, "E-2B - E-2C"),
-    ("us_ka6_kh", "KA-6D (Kitty Hawk)", "blue", "tanker", "S_3B_Tanker", "cv63", 4, 800, "KA-6D - S-3B Tanker"),
-    ("us_vf96", "VF-92, VF-96 (F-4J, Constellation)", "blue", "fighter", "F_14A_135_GR_Early", "cv64", 24, 500, F4_NOTE),
-    ("us_va_con", "VA-146, VA-147 (A-7E), Constellation", "blue", "fighter_bomber", "FA_18C_hornet", "cv64", 24, 500, "A-7E - F/A-18C"),
-    ("us_va165", "VA-165 (A-6A, Constellation)", "blue", "fighter_bomber", "A6E", "cv64", 12, 600, "A-6A - A-6E"),
+    ("us_ka6_kh", "KA-6D (Forrestal)", "blue", "tanker", "S_3B_Tanker", "cv63", 4, 800, "KA-6D - S-3B Tanker"),
+    ("us_vf96", "VF-92, VF-96 (F-4J, Carl Vinson)", "blue", "fighter", "F_14A_135_GR_Early", "cv64", 24, 500, F4_NOTE),
+    ("us_va_con", "VA-146, VA-147 (A-7E), Carl Vinson", "blue", "fighter_bomber", "FA_18C_hornet", "cv64", 24, 500, "A-7E - F/A-18C"),
+    ("us_va165", "VA-165 (A-6A, Carl Vinson)", "blue", "fighter_bomber", "A6E", "cv64", 12, 600, "A-6A - A-6E"),
     ("us_e2_con", "VAW-116 (E-2B)", "blue", "awacs", "E_2C", "cv64", 4, 1000, "E-2B - E-2C"),
-    ("us_vf51", "VF-51, VF-111 (F-4B, Coral Sea)", "blue", "fighter", "F_14A_135_GR_Early", "cv43", 24, 500, F4_NOTE),
-    ("us_va_cs", "VA-22, VA-94 (A-7E), Coral Sea", "blue", "fighter_bomber", "FA_18C_hornet", "cv43", 20, 500, "A-7E - F/A-18C"),
-    ("us_vma224", "VMA(AW)-224 (A-6A, Coral Sea)", "blue", "fighter_bomber", "A6E", "cv43", 10, 600, "A-6A - A-6E"),
     ("us_366", "366-е тактическое крыло (F-4E, Дананг)", "blue", "fighter_bomber", "F_4E", "Beirut-Rafic Hariri", 36, 500, ""),
     ("us_432", "432-е разведывательное крыло (F-4D/E, Удорн): MiGCAP", "blue", "fighter", "F_4E", "Hatay", 36, 600, "F-4D - F-4E"),
     ("us_8tfw", "8-е тактическое крыло 'Волчья стая' (F-4D, Убон): управляемые бомбы", "blue", "fighter_bomber", "F_4E",
@@ -210,13 +231,16 @@ def main() -> None:
             airbases[bid_of(n)] = {"name": n, "airport": n, "side": side, "military": True, "alias": BASE_ALIAS[n]}
     af_ll = {bid: (lambda ll: (ll.lat, ll.lng))(terrain.airports[b["name"]].position.latlng()) for bid, b in airbases.items()}
     carriers = {cid: {"name": n, "side": "blue", "ship": t, "lat": la, "lon": lo, "tacan": tc, "tacan_id": tid,
-                      "icls": icls or None, "freq": f, "escorts": esc, "estimate": True}
-                for cid, (n, t, la, lo, tc, tid, icls, f, esc) in CARRIERS.items()}
+                      "icls": icls or None, "freq": f, "naval": nv, "estimate": True}
+                for cid, (n, t, la, lo, tc, tid, icls, f, nv) in CARRIERS.items()}
     sector = {
         "_about": "Вьетнам, апрель 1972 - условная география на карте Syria (см. tools/gen_vietnam72.py). Координаты - точки "
                   "карты Syria, имена - вьетнамские.",
         "theatre": "syria", "places": places, "airbases": airbases, "carriers": carriers,
         "links": [list(l) for l in LINKS], "supply_entry": SUPPLY_ENTRY, "off_limits": OFF_LIMITS,
+        "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
+        "naval_bases": {"red": [{"name": "Хайфон", "lat": 35.53, "lon": 35.76}]},
+        "asm_stock": {"blue": {"count": 0, "per_day": 0, "note": "AGM-84 Harpoon - с 1977 г.; 1972 - бомбы (Mk 20 Rockeye)"}, "red": {"count": 0, "per_day": 0, "note": "у ВВС ДРВ ПКР нет: 19.04.1972 - бомбы МиГ-17"}},   # запас авиационных ПКР сторон (naval.use_air_asm; ОЦЕНКА)
         "air_limits": {"blue": [], "red": []},   # авиация бьёт по всему Северу (кроме зон по дням - task_rules _zones)
         "axes": {k: v["title"] for k, v in AXES.items()},
         "objectives": {"red": {k: v["objectives"] for k, v in AXES.items()}, "blue": []},
@@ -252,6 +276,15 @@ def main() -> None:
         units.append({"id": sid, "name": name, "side": side, "role": role, "state": "deployed", "fixed": True,
                       "pos": {"lat": la, "lon": lo}, "composition": [{"type": t, "count": c, "role": r} for t, r, c in cmp_],
                       "source": SRC + "; место - ОЦЕНКА", "estimate": True})
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from naval_common import group
+    for uid, name, side, la, lo, ships, note in NAVAL:
+        u = group(uid, name, side, la, lo, ships, note="" if note.startswith("CSG") else note, source=SRC + "; состав и место - ОЦЕНКА",
+                  abbr=note if note.startswith("CSG") else "")
+        if uid == "red_convoy_haiphong":
+            u["protected"] = True                # суда СССР - не цель (политика США до минирования)
+        units.append(u)
     for uid, name, side, role, typ, base, count, radius, note in AIR:
         b = base if base in carriers else bid_of(base)
         assert b in airbases or b in carriers, (uid, base)
@@ -262,7 +295,7 @@ def main() -> None:
         "_about": "Вьетнам, апрель 1972: Пасхальное наступление и воздушная кампания США (условная география, карта Syria).",
         "theatre": "syria",
         "preset": {"title": "Апрель 1972: Вьетнам, Пасхальное наступление", "year": 1972, "date": "1972-04-06"},
-        "date": "1972-04-06", "countries": {"red": "Vietnam", "blue": "USA"}, "doctrine": {"blue": "us72"}, "units": units,
+        "date": "1972-04-06", "countries": {"red": "Vietnam", "blue": "USA"}, "doctrine": {"blue": "us72", "red": "vpaf72"}, "units": units,
         "variants": [{"name": "base", "title": "Апрель 1972: 'Freedom Train' и Пасхальное наступление",
                       "posture": {"red": "offense", "blue": "defense"},
                       "task_rules": {"blue": {
@@ -287,26 +320,21 @@ def linebacker2(sector: dict, oob: dict) -> None:
     """'Лайнбэкер-2' (18-29.12.1972): та же условная география, обстановка декабря. Куангчи отбит АРВ (16.09), фронт
     стоит по реке Тхатьхан (стороны в обороне); Ханой, Хайфон и аэродромы МиГов открыты; B-52 - ночью ячейками по три
     (729 вылетов за 11 суток, 15 сбито С-75 - Michel, 'The Eleven Days of Christmas'); палубные 'Альфы' - днём и ночью
-    (A-6). Авианосцы декабря: Enterprise, Saratoga, America (и др.) - тип Forrestal. Числа - ОЦЕНКИ."""
+    (A-6). Авианосцы декабря (Enterprise, Saratoga, America и др.) в DCS нет - те же Forrestal и Carl Vinson. Числа - ОЦЕНКИ."""
     import copy
     sec, ob = copy.deepcopy(sector), copy.deepcopy(oob)
     sec["_about"] = sec["_about"].replace("апрель", "декабрь") + " Обстановка 18.12.1972 ('Лайнбэкер-2')."
     sec["places"]["QuangTri"]["side"] = "blue"     # Куангчи отбит 16.09.1972
     sec["places"]["DongHa"]["side"] = "red"        # Донгха - у ВНА (фронт по реке Тхатьхан)
     sec["objectives"] = {"red": [], "blue": []}
-    sec["carriers"] = {
-        "cv65": {**sec["carriers"]["cv63"], "name": "USS Enterprise (CVN-65)", "tacan": 65, "tacan_id": "ENT"},
-        "cv60": {**sec["carriers"]["cv64"], "name": "USS Saratoga (CV-60)", "tacan": 60, "tacan_id": "SAR"},
-        "cv66": {**sec["carriers"]["cv43"], "name": "USS America (CV-66)", "tacan": 66, "tacan_id": "AME",
-                 "escorts": ["TICONDEROG", "PERRY"]},
-    }
-    cmap = {"cv63": "cv65", "cv64": "cv60", "cv43": "cv66"}
+    # авианосцы декабря (Enterprise, Saratoga, America...) - в DCS нет: те же Forrestal и Carl Vinson (ДОПУЩЕНИЕ)
+    cmap = {}
     units = []
     for u in ob["units"]:
         u = dict(u)
         if u.get("base") in cmap:
             u["base"] = cmap[u["base"]]
-            u["name"] = (u["name"].replace("Kitty Hawk", "Enterprise").replace("Constellation", "Saratoga")
+            u["name"] = (u["name"].replace("Forrestal", "Enterprise").replace("Carl Vinson", "Saratoga")
                          .replace("Coral Sea", "America"))
         if u["id"] == "us_b52":
             u["count"] = 60                          # ОЦЕНКА: доля сил (в операции - ~200 B-52 с Гуама и У-Тапао)

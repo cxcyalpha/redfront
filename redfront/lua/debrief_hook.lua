@@ -121,6 +121,23 @@ local function liftOut()
   for id, kg in pairs(REDFRONT_LIFT) do o[#o + 1] = string.format('"%s":%d', esc(id), kg) end
   return "{" .. table.concat(o, ",") .. "}"
 end
+-- корабли флота: остаток прочности (getLife / getLife0) живых кораблей - модель переносит повреждения (naval.py)
+local function shipsLife()
+  local o = {}
+  if not (coalition and coalition.getGroups and Group and Group.Category and Group.Category.SHIP) then return "{}" end
+  for _, side in ipairs({1, 2}) do
+    for _, g in ipairs(coalition.getGroups(side, Group.Category.SHIP) or {}) do
+      for _, u in ipairs(g:getUnits() or {}) do
+        if u and u:isExist() then
+          local l0 = u:getLife0() or 0
+          if l0 > 0 then o[#o + 1] = string.format('"%s":%.3f', esc(u:getName()), (u:getLife() or 0) / l0) end
+        end
+      end
+    end
+  end
+  return "{" .. table.concat(o, ",") .. "}"
+end
+
 local function positions()
   local o = {}
   for _, n in ipairs(TRACK) do
@@ -138,8 +155,8 @@ local function dump()
   local f = io.open(OUT, "w")
   if not f then return end
   f:write(string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"ulift":%s,"evac":%s,"hit":%s,"timing":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), uliftOut(), evacOut(), keys(hit), timingOut()))
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"ulift":%s,"evac":%s,"hit":%s,"timing":%s,"ships_life":%s}',
+    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), uliftOut(), evacOut(), keys(hit), timingOut(), shipsLife()))
   f:close()
 end
 local function nameOf(obj)

@@ -7,6 +7,10 @@
   "date": "1973-10-06"
  },
  "date": "1973-10-06",
+ "doctrine": {
+  "red": "arab",
+  "blue": "iaf73"
+ },
  "countries": {
   "red": "Syria",
   "blue": "Israel"
@@ -1031,6 +1035,167 @@
     }
    ],
    "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; рота - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_saar",
+   "name": "Катера ВМС Израиля 'Сааръ' (Хайфа)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.86,
+    "lon": 34.92
+   },
+   "composition": [
+    {
+     "type": "La_Combattante_II",
+     "count": 5,
+     "role": "boat",
+     "names": [
+      "INS Reshef",
+      "INS Gaash",
+      "INS Mivtach",
+      "INS Miznak",
+      "INS Hanit"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 35.5,
+      "lon": 35.65
+     },
+     "until_day": 2
+    }
+   ],
+   "quality": 1.5,
+   "ecm": 0.97
+  },
+  {
+   "id": "red_osa_latakia",
+   "name": "Ракетные катера ВМС Сирии (Латакия)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 35.52,
+    "lon": 35.7
+   },
+   "composition": [
+    {
+     "type": "Type_021_1",
+     "count": 4,
+     "role": "boat",
+     "names": [
+      "Катер пр. 205 'Оса' №1",
+      "Катер пр. 205 'Оса' №2",
+      "Катер пр. 183Р 'Комар' №1",
+      "Катер пр. 183Р 'Комар' №2"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_osa_tartus",
+   "name": "Ракетные катера ВМС Сирии (Тартус)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.92,
+    "lon": 35.8
+   },
+   "composition": [
+    {
+     "type": "Type_021_1",
+     "count": 2,
+     "role": "boat",
+     "names": [
+      "Катер пр. 205 'Оса' №3",
+      "Катер пр. 205 'Оса' №4"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_convoy_tartus",
+   "name": "Советские транспорты (морской мост в Тартус)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.95,
+    "lon": 35.4
+   },
+   "composition": [
+    {
+     "type": "Dry_cargo_ship_1",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №1"
+     ]
+    },
+    {
+     "type": "Dry_cargo_ship_2",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №2"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_convoy_haifa",
+   "name": "Транспорты снабжения (Хайфа)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.9,
+    "lon": 34.7
+   },
+   "composition": [
+    {
+     "type": "HandyWind",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт ZIM №1"
+     ]
+    },
+    {
+     "type": "Dry_cargo_ship_1",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт ZIM №2"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав и место - ОЦЕНКА",
    "estimate": true
   },
   {

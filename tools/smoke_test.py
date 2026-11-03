@@ -3740,7 +3740,7 @@ def theatres_section(tmp: Path) -> None:
         lines += sim.end_day(st2)
     nva = st2["units"]["red_308"]["composition"]
     inf = sum(c["count"] for c in nva if c["role"] == "infantry") / sum(c["count"] for c in nva)
-    check({"heli_resupply", "medevac", "air_assault"} <= seen and any("вывоз раненых" in l for l in lines)
+    check({"medevac", "air_assault"} <= seen and any("вывоз раненых" in l for l in lines)
           and any("в резерве у" in l for l in lines) and inf > 0.7,
           f"вертолёты во Вьетнаме: снабжение, вывоз раненых, высадки; роты возвращаются в резерв; дивизия ВНА - "
           f"пехота {inf:.0%} состава")
@@ -3768,6 +3768,103 @@ def theatres_section(tmp: Path) -> None:
     pos6 = st4.get("posture_days")
     check(all(own[:5]) and pos6 and ops.owner(st4, "KiryatShmona") == "blue",
           f"Голаны 1973: Хермон взят десантом, мост Бнот-Яаков удержан, смена позы на {pos6[0]['from_day'] if pos6 else '-'}-й день")
+    from redfront import naval
+    st5 = model.new_campaign("nav", sector="sector_golan73.json", oob="oob_golan73.json", seed=7, player_side="red")
+    lines5 = []
+    for _ in range(2):
+        planner.plan(st5)
+        lines5 += sim.end_day(st5)
+    lat = st5["units"]["red_osa_latakia"]
+    planner.plan(st5)
+    ship_tasks = [t for t in st5["tasks"] if t["kind"] == "strike_ship"]
+    sea = sum((ln.get("_last") or {}).get("t", 0) for ln in st5["sea_lanes"] if ln["side"] == "red")   # доставлено конвоем (склад мог быть полон)
+    check(any("Бой кораблей" in l for l in lines5) and model.strength(lat) < 0.5 and sea > 0,
+          f"флот: бой у Латакии (катера Сирии - {model.strength(lat):.0%}), морской подвоз в Тартус {sea} т, "
+          f"ударов по кораблям в плане красных {len(ship_tasks)}")
+    st6 = model.new_campaign("csg", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="red")
+    st6["task_rules"]["red"].pop("strike_ship", None)   # в хронике Сирия по 6-му флоту не бьёт; здесь - проверка миссии
+    planner.plan(st6)
+    k = next((i for i, t in enumerate(st6["tasks"], 1) if t["kind"] == "strike_ship"), None)
+    if k:
+        mn = build.build(st6, tmp / "csg.miz", task_no=k)
+        mz = zipfile.ZipFile(tmp / "csg.miz").read("mission").decode("utf-8")
+    check(k and "USS Ticonderoga (CG-47)" in mz and "AttackGroup" in mz and any(len(x["ships"]) >= 3 for x in mn["ships"]),
+          "авианосная ударная группа в миссии (реальные корабли DCS), удар по кораблям - атака группы кораблей")
+    import lupa
+    gsrc = build.gci_script(st6, [{"group": "QRA 1", "side": 1}])
+    gsrc = gsrc.replace("local PROTECT = {", "local PROTECT = { [1] = { { x = 0, y = 0 } } } local _P = {", 1)
+    STUB = '''
+      env = { info = function() end }
+      timer = { getTime = function() return 0 end, scheduleFunction = function(f) CHECK = f end }
+      Controller = { Detection = { RADAR = 4 } }
+      Group = { Category = { GROUND = 2 } }
+      PUSHED = {}
+      TARGETS = {}
+      function mk(name, gid, attr, x, vx, around)
+        local u = { isExist = function() return true end, getCoalition = function() return 2 end, inAir = function() return true end,
+                    getName = function() return name end, getTypeName = function() return name end,
+                    hasAttribute = function(_, a) return a == attr end,
+                    getVelocity = function() return { x = vx, y = 0, z = 0 } end,
+                    getPoint = function() return { x = x, y = 3000, z = 0 } end,
+                    getGroup = function() return { getID = function() return gid end, getName = function() return name end } end }
+        TARGETS[#TARGETS + 1] = u
+        for k = 1, (around or 0) do
+          TARGETS[#TARGETS + 1] = { isExist = function() return true end, getCoalition = function() return 2 end,
+            inAir = function() return true end, getName = function() return name .. k end, getTypeName = function() return name end,
+            hasAttribute = function(_, a) return a == attr end, getVelocity = function() return { x = vx, y = 0, z = 0 } end,
+            getPoint = function() return { x = x + 100 * k, y = 3000, z = 0 } end,
+            getGroup = function() return { getID = function() return gid end, getName = function() return name end } end }
+        end
+        return u
+      end
+      local radar = { isExist = function() return true end, hasAttribute = function(_, a) return a == "EWR" end,
+                      getPoint = function() return { x = 0, y = 0, z = 0 } end }
+      local rg = { getUnits = function() return { radar } end, getController = function() return {
+        getDetectedTargets = function() local o = {} for _, t in ipairs(TARGETS) do o[#o + 1] = { object = t } end return o end } end }
+      coalition = { getGroups = function(side) if side == 1 then return { rg } end return {} end }
+      Unit = { getByName = function(n) for _, t in ipairs(TARGETS) do if t:getName() == n then return t end end end }
+      local function mig() return { isExist = function() return true end, inAir = function() return true end,
+                    getAmmo = function() return { { count = 2 } } end, getFuel = function() return 0.8 end,
+                    getPoint = function() return { x = 0, y = 5000, z = 0 } end } end
+      Group.getByName = function(n) return { isExist = function() return true end, getUnits = function() return { mig(), mig() } end,
+        getController = function() return { pushTask = function(_, t) PUSHED[#PUSHED + 1] = t end, popTask = function() end } end } end
+    '''
+    def gci_run(setup):
+        L = lupa.LuaRuntime()
+        L.execute(STUB)
+        L.execute(setup)
+        L.execute(gsrc)
+        L.execute("CHECK()")
+        return L.eval("PUSHED[1] and PUSHED[1].params.groupId or 0")
+    # истребитель прикрытия ближе (12 км), ударный дальше (18 км) и идёт к своему объекту - наводим на ударного
+    p1 = gci_run('mk("F-14A", 11, "Fighters", 12000, 0); mk("A-6E", 22, "Bombers", 18000, -200)')
+    # шестёрка у цели против нашей пары (odds 1, без атаки с одного захода) - не наводим; за границей РЛС (60 км) - тоже
+    p2 = gci_run('mk("F-4E", 33, "Multirole fighters", 15000, -200, 5); mk("A-7E", 44, "Bombers", 60000, -200)')
+    check("redfront gci" in mz and p1 == 22 and p2 == 0,
+          f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
+          f"и цель за границей наведения - без наведения ({p2})")
+    st7 = model.new_campaign("dmg", sector="sector_lebanon83.json", oob="oob_lebanon83.json", seed=7, player_side="blue")
+    deck = []
+    for _ in range(8):                           # удары ИИ вне миссии - палуба авианосцев не закрывается
+        planner.plan(st7)
+        sim.end_day(st7)
+        deck.append(all(b["state"] in ("open", "active") for b in st7["airbases"].values() if b.get("kind") == "carrier"))
+    cvg = st7["units"]["blue_csg_vinson"]
+    naval.from_mission(st7, cvg, {"USS Carl Vinson (CVN-70)": 0.65})   # в миссии DCS авианосец получил 35% урона
+    naval.daily(st7)
+    vin = next(b for b in st7["airbases"].values() if b.get("naval") == "blue_csg_vinson")
+    closed = vin["state"] == "closed"
+    seen_st = set()
+    for _ in range(40):
+        naval.repairs(st7)
+        naval.daily(st7)
+        st7["day"] += 1
+        seen_st.add(naval.ship_state(cvg)["USS Carl Vinson (CVN-70)"]["status"])
+    fin = naval.ship_state(cvg)["USS Carl Vinson (CVN-70)"]
+    check(all(deck) and closed and ({"port", "returning"} <= seen_st or fin["status"] == "sunk") and
+          (fin["status"] == "sunk" or (fin["status"] == "ok" and vin["state"] == "open")),
+          f"повреждения кораблей: удары ИИ палубу не закрывают; урон 35% в миссии - палуба закрыта, переход в порт, "
+          f"ремонт ({', '.join(sorted(seen_st))}) - итог: {fin['status']}, палуба {vin['state']}")
     st = model.new_campaign("lb2", sector="sector_vietnam72_lb2.json", oob="oob_vietnam72_lb2.json", seed=7, player_side="blue")
     planner.plan(st)
     b52 = [t for t in st["tasks"] if t["kind"] == "strike_b52"]

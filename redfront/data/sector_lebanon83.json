@@ -181,35 +181,29 @@
  },
  "carriers": {
   "cv62": {
-   "name": "USS Independence (CV-62)",
+   "name": "USS Forrestal (CV-59)",
    "side": "blue",
    "ship": "Forrestal",
    "lat": 33.95,
    "lon": 35.2,
-   "tacan": 62,
-   "tacan_id": "IND",
+   "tacan": 59,
+   "tacan_id": "FOR",
    "icls": 2,
    "freq": 127.5,
-   "escorts": [
-    "TICONDEROG",
-    "PERRY"
-   ],
+   "naval": "blue_csg_forrestal",
    "estimate": true
   },
   "cv67": {
-   "name": "USS John F. Kennedy (CV-67)",
+   "name": "USS Carl Vinson (CVN-70)",
    "side": "blue",
-   "ship": "Forrestal",
+   "ship": "VINSON",
    "lat": 33.72,
    "lon": 35.1,
-   "tacan": 67,
-   "tacan_id": "JFK",
+   "tacan": 70,
+   "tacan_id": "VIN",
    "icls": 7,
    "freq": 128.5,
-   "escorts": [
-    "TICONDEROG",
-    "PERRY"
-   ],
+   "naval": "blue_csg_vinson",
    "estimate": true
   },
   "lha1": {
@@ -222,9 +216,7 @@
    "tacan_id": "TAR",
    "icls": null,
    "freq": 129.5,
-   "escorts": [
-    "PERRY"
-   ],
+   "naval": "blue_arg_tarawa",
    "estimate": true
   }
  },
@@ -403,5 +395,36 @@
   }
  ],
  "bridges": [],
- "ad_sites": []
+ "ad_sites": [],
+ "sea_lanes": [
+  {
+   "id": "lane_jounieh",
+   "side": "blue",
+   "port": "Jounieh",
+   "convoy": "blue_convoy_jounieh",
+   "t_per_day": 250
+  }
+ ],
+ "naval_bases": {
+  "red": [
+   {
+    "name": "Тартус",
+    "lat": 34.9,
+    "lon": 35.86
+   }
+  ]
+ },
+ "asm_stock": {
+  "blue": {
+   "count": 24,
+   "per_day": 2,
+   "type": "AGM-84 Harpoon (A-6E)",
+   "note": "ОЦЕНКА: запас на 2 авианосцах, пополнение с транспорта боеприпасов"
+  },
+  "red": {
+   "count": 0,
+   "per_day": 0,
+   "note": "у ВВС Сирии 1983 г. авиационных ПКР нет - только бомбы"
+  }
+ }
 }

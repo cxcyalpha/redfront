@@ -35,7 +35,9 @@ def power(state: dict, unit: dict) -> float:
     spf = sim.get("supply_power_factor", 1.0)
     # quality - выучка экипажей и командиров части по сценарию (1973: соотношение потерь танков на Голанах ~4:1
     # в пользу Израиля - ОЦЕНКА), по умолчанию 1
-    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * unit.get("quality", 1.0)
+    # night_power - ночной бой стороны относительно дня (доктрина: армии арабских стран 1973 ночью слабее - ОЦЕНКА)
+    night = sim.get("night_power", 1.0) if state.get("_night_now") else 1.0
+    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * unit.get("quality", 1.0) * night
 
 
 def artillery_k(state: dict, unit: dict) -> float:
@@ -281,11 +283,13 @@ def advance(state: dict, to_s: float, ground: bool = True) -> list[str]:
         lines += airwar.resolve(state, t, t + dt)
         if ground:                               # ночью (вне лётного дня) марш и бой медленнее (night_*, доктрина)
             nm, nb = _night(state, t)
+            state["_night_now"] = nb != 1.0 or nm != 1.0      # сила ночью по доктрине стороны (power, night_power)
             lines += _checks(state)
             lines += battles(state, dt / DAY_S * nb, f"-{int(t // 3600)}")
             lines += movement(state, dt / DAY_S * nm)
             lines += ops.capture(state)
         t += dt
+    state.pop("_night_now", None)
     state["ground_s"] = t
     for u in _maneuver(state):                   # сводка за отрезок
         if u["id"] in s0 and s0[u["id"]] - model.strength(u) > 0.005:
@@ -351,6 +355,9 @@ def end_day(state: dict) -> list[str]:
     lines += assault.linkup(state)
     lines += assault.medevac(state)              # вывоз раненых вертолётами (рейсы суток)
     lines += assault.recall(state)               # аэромобильные роты - обратно в резерв
+    from . import naval
+    lines += naval.daily_moves(state)            # флот: переходы по приказам и бой кораблей
+    lines += naval.daily(state)                  # флот: потопленные группы, авианосцы-базы
     lines += logistics.repairs(state)
     for u in state["units"].values():            # артиллерия частей: орудие в сутки из ремонта и пополнения (ОЦЕНКА)
         if u.get("art_lost"):

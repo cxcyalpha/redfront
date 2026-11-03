@@ -242,6 +242,20 @@ const TAC = (() => {
            `<path d="M-4.2 -4.2 H4.2 M0 -4.2 V5" stroke="${t}" stroke-width="2.2"/>` +
            (off ? `<path d="M-8 -8 L8 8 M8 -8 L-8 8" stroke="${c}" stroke-width="1.6"/>` : "") + `</svg>`;
   }
+  // корабельная группа (APP-6 "надводные силы"): своя - круг, противник - ромб; внутри - вид головного корабля
+  // (CV - авианосец, CG/DDG/FFG - охранение, PG - ракетные катера, LS - десантный, MS - транспорты); на советской карте
+  // - тот же знак цветом стороны (наши - красным)
+  function ship(g, nato, friend) {
+    const ink = nato ? INK : sideCol(g.side);
+    const fill = nato ? (friend ? "#80e0ff" : "#ff8080") : "#fffdf6";
+    const frame = friend ? `<circle r="12" fill="${fill}" stroke="${ink}" stroke-width="1.5"/>`
+                         : `<path d="M0 -14 L14 0 L0 14 L-14 0 Z" fill="${fill}" stroke="${ink}" stroke-width="1.5"/>`;
+    const lbl = {CSG: "CV", SAG: g.lead || "DD", FAC: "PG", ARG: "LS", CONVOY: "MS"}[g.kind] || "DD";
+    const dmg = g.strength < 1 ? `<path d="M-12 12 L12 -12" stroke="${ink}" stroke-width="1" stroke-dasharray="2 2"/>` : "";
+    return `<svg width="32" height="32" viewBox="-16 -16 32 32" style="opacity:${g.strength <= 0 ? .4 : 1}">${frame}${dmg}` +
+           `<text y="3.5" text-anchor="middle" font-size="9" font-weight="700" fill="${ink}">${lbl}</text></svg>` +
+           `<div class="ulbl" style="color:${ink}">${esc(g.abbr || "")}</div>`;
+  }
   function target(o) {
     const dead = o.state === "lost" || o.damage >= 1;
     const c = o.role === "bridge" ? INK : sideCol(o.side);
@@ -296,5 +310,5 @@ const TAC = (() => {
       `<div class="lg" style="color:#555">${t("⚠ - часть без полного снабжения", "⚠ - unit without full supply")}</div>`;
   }
 
-  return {front, bearingTo, bearing, unitSU, unitNATO, sam, airbase, farp, target, arrowHead, legend, sideCol, RED, BLUE, INK};
+  return {front, bearingTo, bearing, unitSU, unitNATO, sam, airbase, farp, ship, target, arrowHead, legend, sideCol, RED, BLUE, INK};
 })();

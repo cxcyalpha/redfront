@@ -35,6 +35,7 @@ PLACES = {   # (широта, долгота, сторона на 6.10.1973 до
     "Jassem": (32.990, 36.060, "red"), "SheikhMaskin": (32.830, 36.158, "red"), "Sanamayn": (33.070, 36.180, "red"),
     "Kiswah": (33.360, 36.240, "red"), "Katana": (33.437, 36.080, "red"), "Damascus": (33.513, 36.292, "red"),
     "Deraa": (32.625, 36.105, "red"), "Homs": (34.730, 36.710, "red"),
+    "Tartus": (34.890, 35.890, "red"), "Latakia": (35.520, 35.790, "red"),
 }
 LINKS = [
     ("Haifa", "Afula"), ("Haifa", "Safed"), ("Afula", "Tiberias"), ("Tiberias", "RoshPina"), ("Safed", "RoshPina"),
@@ -46,10 +47,10 @@ LINKS = [
     ("ElAl", "SheikhMaskin"), ("KhanArnabah", "TelShams"), ("TelShams", "Sasa"), ("Sasa", "Kanaker"), ("Kanaker", "Kiswah"),
     ("Sasa", "Katana"), ("Katana", "Damascus"), ("Kiswah", "Damascus"), ("Kudne", "Jassem"), ("Jassem", "Nawa"),
     ("Nawa", "SheikhMaskin"), ("Jassem", "Sanamayn"), ("SheikhMaskin", "Sanamayn"), ("SheikhMaskin", "Deraa"),
-    ("Sanamayn", "Kiswah"), ("Damascus", "Homs"), ("MajdalShams", "TelShams"),
+    ("Sanamayn", "Kiswah"), ("Damascus", "Homs"), ("MajdalShams", "TelShams"), ("Homs", "Tartus"), ("Tartus", "Latakia"),
 ]
 SUPPLY_ENTRY = {"red": ["Damascus", "Homs", "Deraa"], "blue": ["Haifa", "Afula"]}
-OFF_LIMITS = {"blue": ["Kiswah", "Katana", "Damascus", "Homs", "Sanamayn", "Deraa"],   # дальше Сасы и Канакера Израиль не шёл
+OFF_LIMITS = {"blue": ["Kiswah", "Katana", "Damascus", "Homs", "Sanamayn", "Deraa", "Tartus", "Latakia"],   # дальше Сасы и Канакера Израиль не шёл
               "red": ["Haifa", "Afula", "Tiberias", "Safed", "RoshPina", "KiryatShmona"]}   # Сирия - только Голаны
 
 AIRBASES = {
@@ -128,7 +129,28 @@ DEPOTS = [("blue_depot_roshpina", "Склад снабжения (Рош-Пин�
           ("blue_depot_tiberias", "Склад снабжения (Тверия)", "blue", "Tiberias"),
           ("red_depot_kiswah", "Склады снабжения сирийской армии (Кисве)", "red", "Kiswah"),
           ("red_depot_katana", "Склад снабжения (Катана)", "red", "Katana"),
-          ("red_depot_sanamayn", "Склад снабжения (Санамейн)", "red", "Sanamayn")]
+          ("red_depot_sanamayn", "Склад снабжения (Санамейн)", "red", "Sanamayn"),
+          ("red_depot_tartus", "Порт и склады (Тартус)", "red", "Tartus"),
+          ("blue_depot_haifa", "Порт и склады (Хайфа)", "blue", "Haifa")]
+NAVAL = [   # флот 1973: бой у Латакии (6-7.10) - израильские катера 'Сааръ' (в DCS La Combattante IIa - тот же тип,
+    # Сааръ 3 построен по проекту La Combattante II) против сирийских 'Оса' и 'Комар' (в DCS Type 021-1 - копия 'Осы');
+    # израильские катера - 'Габриэль' и РЭБ (quality 1.5, ecm 0.97: у Латакии и Балтима ни одного попадания 'Термитов' - ОЦЕНКА;
+    # при 16 ракетах залпа шанс хотя бы одного попадания ~13%: потеря катера возможна, но редка)
+    ("blue_saar", "Катера ВМС Израиля 'Сааръ' (Хайфа)", "blue", 32.86, 34.92,
+     [("La_Combattante_II", "boat", "INS Reshef"), ("La_Combattante_II", "boat", "INS Gaash"), ("La_Combattante_II", "boat", "INS Mivtach"),
+      ("La_Combattante_II", "boat", "INS Miznak"), ("La_Combattante_II", "boat", "INS Hanit")],
+     [{"day": 1, "to": {"lat": 35.50, "lon": 35.65}, "until_day": 2}], 1.5, 0.97),
+    ("red_osa_latakia", "Ракетные катера ВМС Сирии (Латакия)", "red", 35.52, 35.70,
+     [("Type_021_1", "boat", "Катер пр. 205 'Оса' №1"), ("Type_021_1", "boat", "Катер пр. 205 'Оса' №2"),
+      ("Type_021_1", "boat", "Катер пр. 183Р 'Комар' №1"), ("Type_021_1", "boat", "Катер пр. 183Р 'Комар' №2")], None, None),
+    ("red_osa_tartus", "Ракетные катера ВМС Сирии (Тартус)", "red", 34.92, 35.80,
+     [("Type_021_1", "boat", "Катер пр. 205 'Оса' №3"), ("Type_021_1", "boat", "Катер пр. 205 'Оса' №4")], None, None),
+    ("red_convoy_tartus", "Советские транспорты (морской мост в Тартус)", "red", 34.95, 35.40,
+     [("Dry_cargo_ship_1", "transport", "Транспорт №1"), ("Dry_cargo_ship_2", "transport", "Транспорт №2")], None, None),
+    ("blue_convoy_haifa", "Транспорты снабжения (Хайфа)", "blue", 32.90, 34.70,
+     [("HandyWind", "transport", "Транспорт ZIM №1"), ("Dry_cargo_ship_1", "transport", "Транспорт ZIM №2")], None, None),
+]
+SEA_LANES = [("lane_tartus", "red", "Tartus", "red_convoy_tartus", 300), ("lane_haifa", "blue", "Haifa", "blue_convoy_haifa", 300)]
 BRIDGES = [
     {"id": "br_bnot_yaakov", "name": "Мост Бнот-Яаков через Иордан", "lat": 33.003, "lon": 35.628,
      "links": [["RoshPina", "BnotYaakov"]], "source": "по памяти - проверить (зонд карты)"},
@@ -214,6 +236,9 @@ def main() -> None:
                        "blue": {k: v["objectives"] for k, v in BLUE_AXES.items()}},
         "depots": [{"id": i, "name": n, "side": s, "place": p} for i, n, s, p in DEPOTS],
         "bridges": BRIDGES, "ad_sites": sites,
+        "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
+        "naval_bases": {"blue": [{"name": "Хайфа", "lat": 32.83, "lon": 35.00}], "red": [{"name": "Тартус", "lat": 34.90, "lon": 35.86}, {"name": "Латакия", "lat": 35.52, "lon": 35.76}]},
+        "asm_stock": {"blue": {"count": 0, "per_day": 0, "note": "у ВВС Израиля 1973 г. авиационных ПКР нет ('Габриэль' - корабельная)"}, "red": {"count": 0, "per_day": 0, "note": "у ВВС Сирии 1973 г. авиационных ПКР нет"}},   # запас авиационных ПКР сторон (naval.use_air_asm; ОЦЕНКА)
     }
     (DATA / "sector_golan73.json").write_text(json.dumps(sector, ensure_ascii=False, indent=1), encoding="utf-8")
     units = []
@@ -239,6 +264,12 @@ def main() -> None:
                       "daily_advance_km": 10, "composition": [{"type": "Paratrooper_AKS_74", "count": 20, "role": "infantry"},
                                                               {"type": "Paratrooper_RPG_16", "count": 5, "role": "infantry"}],
                       "source": SRC + "; рота - ОЦЕНКА", "estimate": True})
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from naval_common import group
+    for uid, name, side, la, lo, ships, orders, q, *ecm in NAVAL:
+        units.append(group(uid, name, side, la, lo, ships, source=SRC + "; состав и место - ОЦЕНКА", orders=orders, quality=q,
+                           ecm=ecm[0] if ecm else None))
     for sid, name, side, role, cmp_, la, lo in SAMS:
         units.append({"id": sid, "name": name, "side": side, "role": role, "state": "deployed", "fixed": True,
                       "pos": {"lat": la, "lon": lo}, "composition": [{"type": t, "count": c, "role": r} for t, r, c in cmp_],
@@ -253,7 +284,7 @@ def main() -> None:
         "_about": "Октябрьская война 1973 г., Голанский фронт (Израиль - Сирия, Ирак, Иордания). tools/gen_golan73.py.",
         "theatre": "syria",
         "preset": {"title": "Октябрь 1973: Голаны", "year": 1973, "date": "1973-10-06"},
-        "date": "1973-10-06", "countries": {"red": "Syria", "blue": "Israel"}, "units": units,
+        "date": "1973-10-06", "doctrine": {"red": "arab", "blue": "iaf73"}, "countries": {"red": "Syria", "blue": "Israel"}, "units": units,
         "variants": [{"name": "base", "title": "Октябрь 1973: Голаны",
                       "posture": {"red": "offense", "blue": "defense"},
                       "posture_days": [{"from_day": 6, "red": "defense", "blue": "offense"}],

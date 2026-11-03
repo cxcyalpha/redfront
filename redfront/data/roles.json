@@ -22,7 +22,8 @@
     "bridge":         {"title": "мост",                          "category": "bridge"},
     "supply_route":   {"title": "путь подвоза (колонны снабжения)", "category": "convoy"},
     "airfield":       {"title": "военный аэродром",              "category": "airfield"},
-    "factory":        {"title": "завод (промышленный объект)",   "category": "factory"}
+    "factory":        {"title": "завод (промышленный объект)",   "category": "factory"},
+    "naval":          {"title": "корабельная группа",            "category": "naval"}
   },
   "elements": {
     "MBT":      "танк",

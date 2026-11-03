@@ -7,6 +7,9 @@
   "date": "1983-12-04"
  },
  "date": "1983-12-04",
+ "doctrine": {
+  "red": "arab"
+ },
  "countries": {
   "red": "Syria",
   "blue": "USA"
@@ -661,8 +664,186 @@
    "estimate": true
   },
   {
+   "id": "blue_csg_forrestal",
+   "name": "Авианосная ударная группа USS Forrestal",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.95,
+    "lon": 35.2
+   },
+   "composition": [
+    {
+     "type": "Forrestal",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Forrestal (CV-59)"
+     ]
+    },
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Ticonderoga (CG-47)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Clark (FFG-11)",
+      "USS John A. Moore (FFG-19)"
+     ]
+    }
+   ],
+   "abbr": "CSG 59",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_csg_vinson",
+   "name": "Авианосная ударная группа USS Carl Vinson",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.72,
+    "lon": 35.1
+   },
+   "composition": [
+    {
+     "type": "VINSON",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Carl Vinson (CVN-70)"
+     ]
+    },
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Belknap (CG-26)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Aubrey Fitch (FFG-34)",
+      "USS Clifton Sprague (FFG-16)"
+     ]
+    }
+   ],
+   "abbr": "CSG 70",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_arg_tarawa",
+   "name": "Десантная группа USS Tarawa",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.83,
+    "lon": 35.36
+   },
+   "composition": [
+    {
+     "type": "LHA_Tarawa",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Tarawa (LHA-1)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Estocin (FFG-15)",
+      "USS Wadsworth (FFG-9)"
+     ]
+    }
+   ],
+   "abbr": "ARG",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_fac_tartus",
+   "name": "Ракетные катера ВМС Сирии (Тартус)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.95,
+    "lon": 35.8
+   },
+   "composition": [
+    {
+     "type": "Type_021_1",
+     "count": 3,
+     "role": "boat",
+     "names": [
+      "Катер пр. 205 №1",
+      "Катер пр. 205 №2",
+      "Катер пр. 205 №3"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА; пр. 205 'Оса' - в DCS Type 021-1 (китайская копия 'Осы')",
+   "estimate": true
+  },
+  {
+   "id": "blue_convoy_jounieh",
+   "name": "Транспорты снабжения (Джуния)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.05,
+    "lon": 35.45
+   },
+   "composition": [
+    {
+     "type": "Dry_cargo_ship_1",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №1"
+     ]
+    },
+    {
+     "type": "Ship_Tilde_Supply",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №2"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
    "id": "us_vf14",
-   "name": "VF-14, VF-32 (F-14A, Independence)",
+   "name": "VF-14, VF-32 (F-14A, Forrestal)",
    "side": "blue",
    "role": "fighter",
    "base": "cv62",
@@ -674,7 +855,7 @@
   },
   {
    "id": "us_va_ind",
-   "name": "VA-15, VA-87 (A-7E, Independence)",
+   "name": "VA-15, VA-87 (A-7E, Forrestal)",
    "side": "blue",
    "role": "fighter_bomber",
    "base": "cv62",
@@ -686,7 +867,7 @@
   },
   {
    "id": "us_va176",
-   "name": "VA-176 (A-6E, Independence)",
+   "name": "VA-176 (A-6E, Forrestal)",
    "side": "blue",
    "role": "fighter_bomber",
    "base": "cv62",
@@ -722,7 +903,7 @@
   },
   {
    "id": "us_vf11",
-   "name": "VF-11, VF-31 (F-14A, Kennedy)",
+   "name": "VF-11, VF-31 (F-14A, Carl Vinson)",
    "side": "blue",
    "role": "fighter",
    "base": "cv67",
@@ -734,7 +915,7 @@
   },
   {
    "id": "us_va_jfk",
-   "name": "VA-15 (A-7E, Kennedy)",
+   "name": "VA-15 (A-7E, Carl Vinson)",
    "side": "blue",
    "role": "fighter_bomber",
    "base": "cv67",
@@ -746,7 +927,7 @@
   },
   {
    "id": "us_va75",
-   "name": "VA-75, VA-85 (A-6E, Kennedy)",
+   "name": "VA-75, VA-85 (A-6E, Carl Vinson)",
    "side": "blue",
    "role": "fighter_bomber",
    "base": "cv67",
@@ -842,6 +1023,12 @@
      "strike_factory": {
       "off": true,
       "why": "удары - только по войскам и ПВО в Ливане"
+     }
+    },
+    "red": {
+     "strike_ship": {
+      "off": true,
+      "why": "Сирия в 1983 г. по кораблям 6-го флота не била (огонь ЗРК - только по самолётам)"
      }
     }
    }
