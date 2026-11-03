@@ -13,13 +13,11 @@
       "night": true
     },
     "Su_25": {
-      "cold_start_min": 5,
       "fit": {"cas": 0.85, "interdiction": 0.65, "strike": 0.55, "sead": 0.2, "air": 0.05},
       "crew": 1,
       "night": false
     },
     "MiG_21Bis": {
-      "cold_start_min": 6,
       "recon": {"photo": 5, "elint": 80, "profile": "low", "as": "МиГ-21Р с контейнером Р (в DCS - МиГ-21бис)"},
       "fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.3, "air": 0.45},
       "crew": 1,
@@ -41,26 +39,22 @@
       "night": false
     },
     "MiG_29_Fulcrum": {
-      "cold_start_min": 5,
       "fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.8},
       "crew": 1,
       "night": true
     },
     "F_4E_45MC": {
-      "cold_start_min": 12,
       "recon": {"photo": 6, "ir": 3, "slar": 25, "elint": 150, "profile": "low", "as": "RF-4C/E: KS-87, AN/AAS-18, РЛС БО AN/APQ-102, TEREC (в DCS - F-4E)"},
       "fit": {"cas": 0.5, "interdiction": 0.6, "strike": 0.6, "sead": 0.45, "air": 0.6},
       "crew": 2,
       "night": true
     },
     "F_15C": {
-      "cold_start_min": 6,
       "fit": {"air": 1.0},
       "crew": 1,
       "night": true
     },
     "F_16C_50": {
-      "cold_start_min": 7,
       "fit": {"cas": 0.7, "interdiction": 0.75, "strike": 0.75, "sead": 0.8, "air": 0.85},
       "crew": 1,
       "night": true
@@ -72,13 +66,11 @@
       "night": true
     },
     "A_10A": {
-      "cold_start_min": 6,
       "fit": {"cas": 1.0, "interdiction": 0.8, "strike": 0.5, "sead": 0.2, "air": 0.05},
       "crew": 1,
       "night": false
     },
     "AV8BNA": {
-      "cold_start_min": 8,
       "fit": {"cas": 0.75, "interdiction": 0.6, "strike": 0.55, "air": 0.25},
       "crew": 1,
       "night": false
@@ -96,7 +88,6 @@
       "night": true
     },
     "Mi_24P": {
-      "cold_start_min": 8,
       "fit": {"cas": 0.7},
       "cargo_t": 1.5,
       "troops": 8,
@@ -104,7 +95,6 @@
       "night": false
     },
     "SA342M": {
-      "cold_start_min": 4,
       "combat_hours_month": 68,
       "fit": {"cas": 0.55},
       "crew": 2,
@@ -127,7 +117,6 @@
       "night": true
     },
     "MiG_29A": {
-      "cold_start_min": 5,
       "fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.8},
       "crew": 1,
       "night": true
@@ -138,13 +127,12 @@
       "crew": 2,
       "night": true
     },
-    "FA_18C_hornet": { "cold_start_min": 8,"carrier": true, 
+    "FA_18C_hornet": {"carrier": true, 
       "fit": {"cas": 0.75, "interdiction": 0.75, "strike": 0.8, "sead": 0.8, "air": 0.8},
       "crew": 1,
       "night": true
     },
     "L_39ZA": {
-      "cold_start_min": 6,
       "fit": {"cas": 0.25, "strike": 0.15, "air": 0.1},
       "crew": 1,
       "night": false
@@ -165,7 +153,6 @@
       "night": true
     },
     "Mi_8MT": {
-      "cold_start_min": 8,
       "cargo_t": 4,
       "troops": 24,
       "crew": 3,
@@ -185,7 +172,6 @@
       "night": true
     },
     "UH_1H": {
-      "cold_start_min": 5,
       "combat_hours_month": 79,
       "cargo_t": 1.5,
       "troops": 11,
@@ -212,19 +198,16 @@
       "night": true
     },
     "F_5E_3": {
-      "cold_start_min": 5,
       "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "RF-5E Tigereye (в DCS - F-5E)"},
       "crew": 1,
       "night": false
     },
     "Mirage_F1CR": {
-      "cold_start_min": 8,
       "recon": {"photo": 6, "ir": 3, "slar": 50, "elint": 150, "profile": "low", "as": "Mirage F1CR: АФА, ИК Super Cyclope, контейнеры Raphael и ASTAC"},
       "crew": 1,
       "night": true
     },
     "AJS37": {
-      "cold_start_min": 8,
       "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "SF37 (в DCS - AJS37)"},
       "crew": 1,
       "night": false
@@ -244,25 +227,24 @@
       "crew": 5,
       "night": false
     },
-    "Su_25T": { "cold_start_min": 5,"fit": {"cas": 0.9, "interdiction": 0.7, "strike": 0.6, "sead": 0.45, "air": 0.05}, "crew": 1, "night": false},
+    "Su_25T": {"fit": {"cas": 0.9, "interdiction": 0.7, "strike": 0.6, "sead": 0.45, "air": 0.05}, "crew": 1, "night": false},
     "Tu_22M3": {"fit": {"strike": 0.8, "interdiction": 0.5}, "crew": 4, "night": true},
-    "Su_27": { "cold_start_min": 5,"fit": {"air": 0.95}, "crew": 1, "night": true},
-    "MiG_29S": { "cold_start_min": 5,"fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.85}, "crew": 1, "night": false},
-    "L_39C": { "cold_start_min": 6,"fit": {"cas": 0.15, "air": 0.05}, "crew": 2, "night": false},
-    "Mi_24V": { "cold_start_min": 8,"fit": {"cas": 0.7}, "cargo_t": 1.5, "troops": 8, "crew": 2, "night": false},
+    "Su_27": {"fit": {"air": 0.95}, "crew": 1, "night": true},
+    "MiG_29S": {"fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.85}, "crew": 1, "night": false},
+    "L_39C": {"fit": {"cas": 0.15, "air": 0.05}, "crew": 2, "night": false},
+    "Mi_24V": {"fit": {"cas": 0.7}, "cargo_t": 1.5, "troops": 8, "crew": 2, "night": false},
     "E_2C": {"carrier": true, "crew": 5, "night": true},
-    "A_4E_C": { "cold_start_min": 5,"fit": {"cas": 0.6, "interdiction": 0.55, "strike": 0.55, "sead": 0.3, "air": 0.2}, "crew": 1, "night": false},
+    "A_4E_C": {"fit": {"cas": 0.6, "interdiction": 0.55, "strike": 0.55, "sead": 0.3, "air": 0.2}, "crew": 1, "night": false},
     "B_52H": {"fit": {"interdiction": 0.5, "strike": 0.7}, "crew": 6, "night": true},
-    "MiG_19P": { "cold_start_min": 5,"fit": {"cas": 0.15, "air": 0.4}, "crew": 1, "night": false},
-    "MiG_15bis": { "cold_start_min": 4,"fit": {"cas": 0.15, "air": 0.25}, "crew": 1, "night": false},
-    "F_14A_135_GR": { "cold_start_min": 12,"carrier": true, "fit": {"air": 0.9}, "crew": 2, "night": true},
+    "MiG_19P": {"fit": {"cas": 0.15, "air": 0.4}, "crew": 1, "night": false},
+    "MiG_15bis": {"fit": {"cas": 0.15, "air": 0.25}, "crew": 1, "night": false},
+    "F_14A_135_GR": {"carrier": true, "fit": {"air": 0.9}, "crew": 2, "night": true},
     "A6E": {"carrier": true, "fit": {"cas": 0.55, "interdiction": 0.7, "strike": 0.8, "sead": 0.3}, "crew": 2, "night": true},
-    "Mirage_F1CE": { "cold_start_min": 8,"fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.35, "air": 0.7}, "crew": 1, "night": false},
+    "Mirage_F1CE": {"fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.35, "air": 0.7}, "crew": 1, "night": false},
     "AH_1W": {"fit": {"cas": 0.65}, "troops": 0, "crew": 2, "night": false},
     "S_3B_Tanker": {"carrier": true, "crew": 4, "night": true},
-    "F_14A_135_GR_Early": { "cold_start_min": 12,"carrier": true, "fit": {"air": 0.85}, "crew": 2, "night": true}
+    "F_14A_135_GR_Early": {"carrier": true, "fit": {"air": 0.85}, "crew": 2, "night": true}
   },
-  "_about_cold_start": "cold_start_min - запуск игрока с холодного старта до готовности к рулению, мин (ОЦЕНКА по модулям DCS: F-4E и F-14 - выставка ИНС ~10-12 мин; F-16C, F/A-18C - ~7-8 мин; типы FC3 - ~5 мин); нет - timing доктрины",
   "_about_carrier": "carrier - тип взлетает с палубы и садится на неё в DCS (авианосные части - только такие типы; вертолёты - все).",
   "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность); нет поля - груз не возит (ящики CTLD - тоже по нему).",
   "_about_fit": "fit - пригодность типа по видам задач на одной шкале для всех эпох (0..1; cas - удар по войскам, interdiction - по колоннам и путям подвоза, strike - по объектам тыла, sead - по ПВО, air - воздушный бой и перехват). Сравнивается с лучшим типом этой кампании (fitness.py): эпоху задаёт состав сил. ОЦЕНКИ по назначению, вооружению и прицельному оборудованию типа.",

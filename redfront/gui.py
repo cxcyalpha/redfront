@@ -219,6 +219,7 @@ def view(st: dict, history: bool = True) -> dict:
         "randomness": st["settings"].get("randomness", True),
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
+        "takeoff_min": st["settings"].get("player_takeoff_min", build_mod.PLAYER_TAKEOFF_MIN),
         "weather": wx_lines[0], "weather_text": "\n".join(wx_lines[1:] + wx_cancel),
         "mods": [{"id": k, "title": v["title"], "url": v["url"], "on": k in (st["settings"].get("mods") or []),
                   "available": _mods_available(k)} for k, v in _mods_list().items()],
@@ -611,6 +612,8 @@ class App:
                 st["settings"]["mission_budget"] = max(0, int(req["budget"]))
             if str(req.get("air") or "").strip():
                 st["settings"]["mission_air"] = max(0, int(req["air"]))
+            if str(req.get("takeoff") or "").strip():   # минут от начала миссии до взлёта игрока
+                st["settings"]["player_takeoff_min"] = max(0, min(60, int(float(req["takeoff"]))))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),
                                   humans=int(req.get("humans") or 1), player=not req.get("ai"))
             n = sum(len(g["vehicles"]) for g in man["ground"])

@@ -1314,6 +1314,7 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
             ut = fg.units[0].unit_type
             t_off = float(times_player.get("takeoff_s", 0)) if times_player else 0.0   # взлёт игрока - после запуска
             route, t, prev = [], max(float(getattr(fg.points[0], "ETA", 0) or 0), t_off), None
+            obj_done = False
             for i, pt in enumerate(fg.points):     # время точек: заданное (ETA), иначе - по участкам и скорости точки
                 if prev is not None:
                     eta = float(getattr(pt, "ETA", 0) or 0)
@@ -1322,8 +1323,9 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 if times_player and i > 0:          # опорные точки - по плану пакета (сбор, цель), остальное - по участкам
                     if pt.name in ("Сбор", "Rendezvous") and times_player.get("rv_s") is not None:
                         t = float(times_player["rv_s"])
-                    elif pt.name in ("Цель", "Target", "Рубеж атаки", "Attack line") and times_player.get("objective_s"):
-                        t = float(times_player["objective_s"])
+                    elif (pt.name in ("Цель", "Target", "Рубеж атаки", "Attack line", "Рубеж пуска", "Launch line")
+                          and times_player.get("objective_s") and not obj_done):   # первая точка выхода на объект - TOT
+                        t, obj_done = float(times_player["objective_s"]), True
                 route.append(f"{i:2d}  {hhmm(t)}  {pt.alt:>6.0f} {L('м', 'm')}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
@@ -1427,17 +1429,19 @@ def _airborne(state: dict, g: dict, spd_kmh: float, secs: float) -> bool:
     return False
 
 
-TAXI_MIN = 3     # ОЦЕНКА: руление и взлёт группы игрока после запуска
 JOIN_MIN = 2     # ОЦЕНКА: сбор группы игрока после взлёта (вираж над аэродромом)
 
 
+PLAYER_TAKEOFF_MIN = 15   # от начала миссии до взлёта игрока (запуск, руление), мин - настройка player_takeoff_min
+
+
 def player_takeoff_s(state: dict, tdef: dict, groups: list[dict], fly: str, join: bool = True) -> int:
-    """Взлёт группы игрока от начала миссии, с: запуск по типу ЛА (aircraft.json cold_start_min, иначе timing
-    доктрины) + руление и взлёт (TAXI_MIN) + сбор группы (JOIN_MIN)."""
-    g = next((x for x in groups if x["group"] == fly), None)
-    typ = (state["units"].get(g["performer"]) or {}).get("type", "") if g else ""
-    cold = model.aircraft_info(typ).get("cold_start_min") or tdef["timing"]["player_cold_start_min"]
-    return int((cold + TAXI_MIN + (JOIN_MIN if join else 0)) * 60)
+    """Взлёт группы игрока от начала миссии, с: настройка игрока (settings.player_takeoff_min - запуск и руление,
+    по умолчанию PLAYER_TAKEOFF_MIN) + сбор группы (JOIN_MIN)."""
+    mins = (state.get("settings") or {}).get("player_takeoff_min")
+    if mins is None:
+        mins = PLAYER_TAKEOFF_MIN
+    return int((float(mins) + (JOIN_MIN if join else 0)) * 60)
 
 
 def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str, dict]:
@@ -1968,6 +1972,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 hold.stop_after_time(hold_until)
                 w.tasks.append(hold)
                 g["hold"] = {"alt_m": alt, "until_s": hold_until, "launch_km": round(planner.launch_distance_km(sam, sup), 1)}
+            if is_player:                        # игроку - точка на каждой цели (ЗРК известен - позиция, иначе последняя по
+                for k, sid in enumerate(obj["units"]):   # разведке): для навигации и прицела; лететь на неё не обязательно
+                    wp(model.unit_pos(state, state["units"][sid]), low, "Цель" if len(obj["units"]) == 1 else f"Цель {k + 1}")
             if g["route"]:                       # после пуска - уход к базе, без пролёта над ЗРК
                 last = g["route"][-1]
                 d = model.dist_km(base, last)
