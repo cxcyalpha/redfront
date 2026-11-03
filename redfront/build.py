@@ -1219,6 +1219,43 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
     return fg
 
 
+PLAYER_AWACS_STANDOFF_KM = 150   # ОЦЕНКА: зона E-2C игрока - за серединой фронта, как у ДРЛО доктрины НАТО
+
+
+def player_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> str | None:
+    """Игровое допущение: у стороны игрока нет ДРЛО в миссии (Израиль 1973, ВВС ДРВ...) - E-2C над своей территорией
+    до конца миссии, бессмертный и невидимый для противника (его нет в истории: не цель, не потеря). Через него игрок
+    получает картину по радио (AWACS в меню связи); ИИ своей стороны DCS его данные тоже видит. Отключение -
+    settings.player_awacs = False."""
+    if not (state.get("settings") or {}).get("player_awacs", True):
+        return None
+    side = tk["side"]
+    for c in m.coalition[side].countries.values():
+        for grp in c.plane_group:
+            if "awacs" in grp.name or any(getattr(u.unit_type, "id", "") in ("E-2C", "E-3A", "A-50", "KJ-2000") for u in grp.units):
+                return None
+    pos = planner.orbit_point(state, side, PLAYER_AWACS_STANDOFF_KM)
+    if pos is None:
+        return None
+    from dcs import planes as _planes
+    alt, spd = 8000, 500
+    p = _pt(m, pos)
+    ac = _planes.E_2C if side == "blue" else _planes.A_50          # красным - А-50 (Ту-126 в DCS нет)
+    fg = m.flight_group_inflight(_country(m, state, side), f"player awacs {sortie}", ac, p, alt,
+                                 speed=spd, maintask=task.AWACS, group_size=1)
+    w = fg.points[0]
+    if not any(isinstance(t_, task.AWACSTaskAction) for t_ in w.tasks):
+        w.tasks.append(task.AWACSTaskAction())
+    w.tasks += [task.SetImmortalCommand(True), task.SetInvisibleCommand(True)]
+    w.tasks.append(task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.RaceTrack)))
+    fg.add_waypoint(Point(p.x + 40_000, p.y, m.terrain), alt, speed=spd)
+    return i18n.L(i18n.lang(state),
+                  ("ДРЛО E-2C" if side == "blue" else "ДРЛО А-50") + " над своей территорией - игровое допущение (у стороны в этой войне ДРЛО не было): "
+                  "картина по радио, бессмертный, противник его не видит",
+                  ("E-2C" if side == "blue" else "A-50") + " AWACS over friendly territory - a gameplay concession (this side had no AWACS in this war): "
+                  "picture by radio, immortal, invisible to the enemy")
+
+
 def _callsign(u) -> str:
     d = getattr(u, "callsign_dict", None)
     if isinstance(d, dict) and d.get("name"):
@@ -1264,7 +1301,7 @@ def radio_setup(m: Mission, state: dict, tk: dict, pkg: list[dict], sortie: int,
 
 
 def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines: list[str], comm_lines: list[str],
-               wx_text: str, lg: str) -> int:
+               wx_text: str, lg: str, times_player: dict | None = None) -> int:
     """Наколенный планшет ЛА игрока (kneeboard.py): задание и маршрут со временем, связь, погода и аэродромы."""
     from . import kneeboard
     L = lambda ru, en: i18n.L(lg, ru, en)
@@ -1275,12 +1312,20 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
             if not any(u.skill in (Skill.Client, Skill.Player) for u in fg.units):
                 continue
             ut = fg.units[0].unit_type
-            route, t, prev = [], float(getattr(fg.points[0], "ETA", 0) or 0), None
+            t_off = float(times_player.get("takeoff_s", 0)) if times_player else 0.0   # взлёт игрока - после запуска
+            route, t, prev = [], max(float(getattr(fg.points[0], "ETA", 0) or 0), t_off), None
+            obj_done = False
             for i, pt in enumerate(fg.points):     # время точек: заданное (ETA), иначе - по участкам и скорости точки
                 if prev is not None:
                     eta = float(getattr(pt, "ETA", 0) or 0)
                     t = eta if getattr(pt, "ETA_locked", False) and eta else t + prev.position.distance_to_point(pt.position) / max(pt.speed or 150.0, 30.0)
                 prev = pt
+                if times_player and i > 0:          # опорные точки - по плану пакета (сбор, цель), остальное - по участкам
+                    if pt.name in ("Сбор", "Rendezvous") and times_player.get("rv_s") is not None:
+                        t = float(times_player["rv_s"])
+                    elif (pt.name in ("Цель", "Target", "Рубеж атаки", "Attack line", "Рубеж пуска", "Launch line")
+                          and times_player.get("objective_s") and not obj_done):   # первая точка выхода на объект - TOT
+                        t, obj_done = float(times_player["objective_s"]), True
                 route.append(f"{i:2d}  {hhmm(t)}  {pt.alt:>6.0f} {L('м', 'm')}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
@@ -1288,8 +1333,19 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                       if ab else [L("Взлёт и посадка: палуба", "Deck launch and recovery")])
             fields += carrier_lines(state, fg.units[0].position)
             sub = f"{fg.name} - {ut.id} x{len(fg.units)} - {L('день', 'day')} {state['day']}"
+            clock = []
+            if times_player:                       # часы вылета: запуск, взлёт, сбор, цель - как в плане пакета
+                tp = times_player
+                clock.append(L(f"Начало миссии {hhmm(0)} (запуск); взлёт не позже {hhmm(tp['takeoff_s'])}",
+                               f"Mission start {hhmm(0)} (start-up); take off by {hhmm(tp['takeoff_s'])}"))
+                if tp.get("rv_s") is not None:
+                    clock.append(L(f"Сбор {hhmm(tp['rv_s'])}", f"Rendezvous {hhmm(tp['rv_s'])}"))
+                clock.append(L(f"Время на цели (TOT) {hhmm(tp['objective_s'])}", f"Time on target (TOT) {hhmm(tp['objective_s'])}"))
+                tpos = tk.get("target_pos") or {}
+                if tpos:
+                    clock.append(L("Цель: ", "Target: ") + _dms(tpos["lat"], "NS") + " " + _dms(tpos["lon"], "EW"))
             pages = [
-                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), [L(f"Удаление цели {tk['distance_km']:.0f} км", f"Target distance {tk['distance_km']:.0f} km"),
+                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), clock + [L(f"Удаление цели {tk['distance_km']:.0f} км", f"Target distance {tk['distance_km']:.0f} km"),
                                            L("Угрозы: ", "Threats: ") + (", ".join(state["units"][t]["name"] for t in tk["threats"]) or L("не выявлены", "none detected"))]),
                                           (L("Тактическая группа", "Package"), lines),
                                           (L("Порядок действий", "Sequence"), order_lines),
@@ -1301,6 +1357,14 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 seen.add((ut.id, fg.name))
                 groups.append({"type": ut, "sub": sub, "pages": pages})
     return kneeboard.build(m, lg, groups)
+
+
+def _dms(v: float, hemi: str) -> str:
+    h = hemi[0] if v >= 0 else hemi[1]
+    v = abs(v)
+    d = int(v)
+    mnt = (v - d) * 60
+    return f"{h}{d:02d}°{mnt:06.3f}'"
 
 
 def package_order(pkg: list[dict], times: dict, lg: str = "ru") -> list[str]:
@@ -1365,6 +1429,21 @@ def _airborne(state: dict, g: dict, spd_kmh: float, secs: float) -> bool:
     return False
 
 
+JOIN_MIN = 2     # ОЦЕНКА: сбор группы игрока после взлёта (вираж над аэродромом)
+
+
+PLAYER_TAKEOFF_MIN = 15   # от начала миссии до взлёта игрока (запуск, руление), мин - настройка player_takeoff_min
+
+
+def player_takeoff_s(state: dict, tdef: dict, groups: list[dict], fly: str, join: bool = True) -> int:
+    """Взлёт группы игрока от начала миссии, с: настройка игрока (settings.player_takeoff_min - запуск и руление,
+    по умолчанию PLAYER_TAKEOFF_MIN) + сбор группы (JOIN_MIN)."""
+    mins = (state.get("settings") or {}).get("player_takeoff_min")
+    if mins is None:
+        mins = PLAYER_TAKEOFF_MIN
+    return int((float(mins) + (JOIN_MIN if join else 0)) * 60)
+
+
 def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str, dict]:
     """Задержки взлёта групп пакета. Опорная - группа игрока: холодный старт (timing.player_cold_start_min, ОЦЕНКА)
     плюс полёт до объекта. Группа обеспечения выходит на свой объект за lead_min до выхода ударной группы на цель
@@ -1372,7 +1451,7 @@ def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str,
     fly_s = {g["group"]: _path_km(state["airbases"][g["base"]], planner.route_points(g)) * 1000 / (model.group_speed_kmh(state, g, tdef) / 3.6)
              + (0 if g["group"] == fly else ato.AI_TAKEOFF_S) for g in groups}   # скорость задачи доктрины; ИИ - разбег и сбор
     lead = {g["group"]: g.get("lead_min", 0) * 60 for g in groups}
-    t_player = tdef["timing"]["player_cold_start_min"] * 60 + fly_s[fly]
+    t_player = player_takeoff_s(state, tdef, groups, fly) + fly_s[fly]
     eta_strike = t_player + lead[fly]
     # миссия начинается с холодного старта игрока (как в Falcon BMS и Liberation: время на цели - по плану, группа
     # игрока - с земли); группы ИИ, которым по плану взлетать раньше начала миссии, к её началу уже в воздухе на своём
@@ -1893,6 +1972,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 hold.stop_after_time(hold_until)
                 w.tasks.append(hold)
                 g["hold"] = {"alt_m": alt, "until_s": hold_until, "launch_km": round(planner.launch_distance_km(sam, sup), 1)}
+            if is_player:                        # игроку - точка на каждой цели (ЗРК известен - позиция, иначе последняя по
+                for k, sid in enumerate(obj["units"]):   # разведке): для навигации и прицела; лететь на неё не обязательно
+                    wp(model.unit_pos(state, state["units"][sid]), low, "Цель" if len(obj["units"]) == 1 else f"Цель {k + 1}")
             if g["route"]:                       # после пуска - уход к базе, без пролёта над ЗРК
                 last = g["route"][-1]
                 d = model.dist_km(base, last)
@@ -2110,7 +2192,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода
     m.triggerrules.triggers.append(trig)
 
+    pa = player_awacs(m, state, tk, sortie) if player and player_air else None   # игроку - картина ДРЛО
     comm_lines = radio_setup(m, state, tk, pkg, sortie, player_air)
+    if pa:
+        comm_lines.append(pa)
     order_lines = package_order(pkg, times, i18n.lang(state))
     lg = i18n.lang(state)
     Lx = lambda ru, en: i18n.L(lg, ru, en)
@@ -2141,7 +2226,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             for act in tr_.actions:
                 if isinstance(act, DoScript):
                     act.text = String(lua_en(str(act.text)))
-    kb_pages = _kneeboard(m, state, tk, lines, order_lines, comm_lines, wx_text, lg)
+    tpl = dict(times.get(fly) or {})
+    tpl["takeoff_s"] = player_takeoff_s(state, tdef, pkg, fly, join=False)   # в планшете - взлёт; сбор - отдельно
+    kb_pages = _kneeboard(m, state, tk, lines, order_lines, comm_lines, wx_text, lg, tpl)
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

@@ -272,7 +272,7 @@ def package_section(tmp: Path) -> None:
     man = build.build(st, tmp / "pkg.miz")
     m = dcs.Mission(Germany())
     m.load_file(str(tmp / "pkg.miz"))
-    pg = {g.name.split(" ")[1]: g for g in plane_groups(m)}
+    pg = {g.name.split(" ")[1]: g for g in plane_groups(m) if not g.name.startswith("player awacs")}   # ДРЛО игрока - не пакет
     vgs = {g.name: g for c in m.coalition["blue"].countries.values() for g in c.vehicle_group}
     def attack_ids(g, kind="AttackGroup"):
         return [t.params["groupId"] for p in g.points for t in p.tasks if getattr(t, "id", None) == kind]
@@ -3872,6 +3872,16 @@ def theatres_section(tmp: Path) -> None:
     check(q1 == 1 and q8 == 2 and q0 == 0,
           f"дежурные звенья поднимаются по налёту: одиночный - {q1}, восьмёрка - {q8} (резерв на земле), "
           f"вертолёт и уходящая цель - {q0}")
+    stg = model.new_campaign("ia", sector="sector_golan73.json", oob="oob_golan73.json", seed=1, player_side="blue")
+    planner.plan(stg)
+    build.build(stg, tmp / "ia.miz", task_no=1)
+    mzg = zipfile.ZipFile(tmp / "ia.miz").read("mission").decode("utf-8")
+    stg["settings"]["player_awacs"] = False
+    build.build(stg, tmp / "ia0.miz", task_no=1)
+    mz0 = zipfile.ZipFile(tmp / "ia0.miz").read("mission").decode("utf-8")
+    check("player awacs" in mzg and "SetImmortal" in mzg and "player awacs" not in mz0,
+          "игровое допущение: у Израиля 1973 ДРЛО нет - игроку E-2C над своей территорией (бессмертный, невидимый); "
+          "настройка player_awacs выключает")
     check("redfront gci" in mz and p1 == 22 and p2 == 0,
           f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
           f"и цель за границей наведения - без наведения ({p2})")
