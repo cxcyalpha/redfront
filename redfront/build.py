@@ -103,6 +103,19 @@ def _country(m: Mission, state: dict, side: str):
     return m.coalition[side].country(name)
 
 
+def _guard(src: str) -> str:
+    """Скрипт миссии в pcall: ошибка - в DCS.log (env.error) и сообщением на экран, без остановки остальных."""
+    head, _, rest = src.partition("\n")
+    if not head.startswith("--"):                # первая строка - заголовок скрипта (комментарий): остаётся первой
+        head, rest = "", src
+    first = head[:80].replace("\\", "/").replace('"', "'")
+    return (head + "\nlocal _rf_ok, _rf_err = pcall(function()\n" + rest + "\nend)\n"
+            "if not _rf_ok then\n"
+            f'  if env and env.error then env.error("redfront script error ({first}): " .. tostring(_rf_err)) end\n'
+            f'  if trigger and trigger.action and trigger.action.outText then trigger.action.outText("redfront script error ({first}): " .. tostring(_rf_err), 30) end\n'
+            "end\n")
+
+
 def lua_hook(campaign_id: str, sortie: int, track: list[str]) -> str:
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     return (LUA.read_text(encoding="utf-8")
@@ -2205,7 +2218,12 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String(evac_script(state["campaign_id"], state["sortie"], evac_specs))))
     if assault_specs:                            # десант: рота выходит при посадке бортов на площадку (assault.lua)
         trig.add_action(DoScript(String(assault_script(state["campaign_id"], state["sortie"], assault_specs))))
-    trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))  # String(...), не m.string(...): иначе DCS исполняет ключ перевода
+    # хук - последним: колонна и позиции ПВО пересоздаются раньше (их снятие - не потери); ошибка любого скрипта до
+    # хука его не останавливает - каждый скрипт в pcall. String(...), не m.string(...): иначе DCS исполняет ключ перевода
+    trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))
+    for act in trig.actions:                     # каждый скрипт - в pcall: ошибка одного - строка в DCS.log и на экране,
+        if isinstance(act, DoScript):            # остальные работают
+            act.text = String(_guard(act.text.id))
     m.triggerrules.triggers.append(trig)
 
     pa = player_awacs(m, state, tk, sortie) if player and player_air else None   # игроку - картина ДРЛО
@@ -2241,7 +2259,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for tr_ in m.triggerrules.triggers:
             for act in tr_.actions:
                 if isinstance(act, DoScript):
-                    act.text = String(lua_en(str(act.text)))
+                    act.text = String(lua_en(act.text.id))
     tpl = dict(times.get(fly) or {})
     tpl["takeoff_s"] = player_takeoff_s(state, tdef, pkg, fly, join=False)   # в планшете - взлёт; сбор - отдельно
     kb_pages = _kneeboard(m, state, tk, lines, order_lines, comm_lines, wx_text, lg, tpl)

@@ -3879,6 +3879,14 @@ def theatres_section(tmp: Path) -> None:
     check(q1 == 1 and q8 == 2 and q0 == 0,
           f"дежурные звенья поднимаются по налёту: одиночный - {q1}, восьмёрка - {q8} (резерв на земле), "
           f"вертолёт и уходящая цель - {q0}")
+    ste = model.new_campaign("en", sector="sector_golan73.json", oob="oob_golan73.json", seed=1, player_side="blue")
+    ste["settings"]["lang"] = "en"
+    planner.plan(ste)
+    build.build(ste, tmp / "en.miz", task_no=1)
+    mze = zipfile.ZipFile(tmp / "en.miz")
+    dic = mze.read("l10n/DEFAULT/dictionary").decode("utf-8") + mze.read("mission").decode("utf-8")
+    check("redfront debrief hook" in dic and "lfs.writedir" in dic and "pcall(function()" in dic,
+          "английская миссия: тексты скриптов на месте (скрипты в pcall) - не пустые строки")
     stg = model.new_campaign("ia", sector="sector_golan73.json", oob="oob_golan73.json", seed=1, player_side="blue")
     planner.plan(stg)
     build.build(stg, tmp / "ia.miz", task_no=1)
