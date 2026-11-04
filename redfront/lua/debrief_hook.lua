@@ -11,6 +11,7 @@ end
 local DIR = lfs.writedir() .. "redfront"
 lfs.mkdir(DIR)
 local OUT = DIR .. "\\debrief_@CAMPAIGN@_@SORTIE@.json"
+if env.info then env.info("redfront debrief: results -> " .. OUT) end
 local TRACK = { @TRACK@ }        -- наземные юниты, пересоздаваемые скриптами при старте (колонна, части в бою); позиции пишем
 local dead, ejected, landed, takeoff = {}, {}, {}, {}
 local hit = {}                   -- по ЛА попало оружие: его потеря - боевая (без попадания ИИ разбился сам - не засчитывается)
@@ -151,12 +152,25 @@ local function positions()
   end
   return "{" .. table.concat(o, ",") .. "}"
 end
+local function part(fn, empty)       -- часть отчёта: ошибка в одной не мешает записать остальные (пишется в DCS.log)
+  local ok, v = pcall(fn)
+  if ok and v ~= nil then return v end
+  if env.warning then env.warning("redfront debrief: " .. tostring(v)) end
+  return empty or "{}"
+end
 local function dump()
-  local f = io.open(OUT, "w")
-  if not f then return end
-  f:write(string.format(
+  local body = string.format(
     '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"ulift":%s,"evac":%s,"hit":%s,"timing":%s,"ships_life":%s}',
-    tostring(ended), math.floor(timer.getTime()), keys(dead), keys(ejected), keys(landed), keys(takeoff), positions(), roads(), columnLog(), sites(), siteLog(), targets(), assault(), ejectPos(), csarOut(), qraOut(), liftOut(), uliftOut(), evacOut(), keys(hit), timingOut(), shipsLife()))
+    tostring(ended), math.floor(timer.getTime()), part(function() return keys(dead) end, "[]"), part(function() return keys(ejected) end, "[]"),
+    part(function() return keys(landed) end, "[]"), part(function() return keys(takeoff) end, "[]"), part(positions), part(roads),
+    part(columnLog, "[]"), part(sites), part(siteLog, "[]"), part(targets), part(assault), part(ejectPos), part(csarOut),
+    part(qraOut), part(liftOut), part(uliftOut), part(evacOut), part(function() return keys(hit) end, "[]"), part(timingOut), part(shipsLife))
+  local f, err = io.open(OUT, "w")
+  if not f then
+    env.warning("redfront debrief: cannot write " .. OUT .. ": " .. tostring(err))
+    return
+  end
+  f:write(body)
   f:close()
 end
 local function nameOf(obj)

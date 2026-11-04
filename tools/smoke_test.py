@@ -958,8 +958,12 @@ def air_section(tmp: Path) -> None:
     check(all(n_ <= st["units"][k]["count"] for k, n_ in used.items()), f"самолёты эскадрилий не расходуются сверх наличия: {used}")
     allp = [g_ for side_ in ("red", "blue") for c in m.coalition[side_].countries.values() for g_ in c.plane_group]
     leak = [g_.name for g_ in allp if g_.units[0].skill != dcs.unit.Skill.Player
-            and any(getattr(t_, "id", None) == "EngageTargets" for t_ in g_.points[0].tasks)]
-    check(not leak, "у групп ИИ нет 'поражать цели по пути' от основной задачи DCS - только своя задача")
+            and any(getattr(t_, "id", None) == "EngageTargets" and t_.params.get("value") != "Planes"
+                    for t_ in g_.points[0].tasks)]
+    selfd = [g_.name for g_ in allp if any(getattr(t_, "id", None) == "EngageTargets" and t_.params.get("value") == "Planes"
+                                          and t_.params.get("maxDist") == build.SELF_DEFENSE_KM * 1000 for t_ in g_.points[0].tasks)]
+    check(not leak and selfd, "у групп ИИ нет 'поражать цели по пути' от основной задачи DCS - только своя задача и "
+          f"самооборона от самолётов ближе {build.SELF_DEFENSE_KM} км ({len(selfd)} групп)")
     jg0 = st["units"]["blue_jg_1"]["count"]
     jg = next(fl for fl in en if fl["performer"] == "blue_jg_1") if any(fl["performer"] == "blue_jg_1" for fl in en) else en[0]
     c0 = st["units"][jg["performer"]]["count"]

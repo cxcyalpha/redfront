@@ -15,18 +15,46 @@ from . import explain, model, roads
 FULL_DAMAGE = {"depot": 0.5, "airfield": 0.3, "bridge": 0.01, "factory": 0.5}   # ОЦЕНКА: доля разрушенных объектов карты = полное повреждение
 
 
+def saved_games(home: Path | None = None) -> list[Path]:
+    """Папки Saved Games: <home>\\Saved Games, перенаправленная (Windows: реестр User Shell Folders - другой диск,
+    OneDrive) и OneDrive. Только существующие, без повторов."""
+    out = [(home or Path.home()) / "Saved Games"]
+    if home is None:
+        try:
+            import winreg, os
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                                r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders") as k:
+                v, _t = winreg.QueryValueEx(k, "{4C5C32FF-BB9D-43b0-B5B4-2D72E54EAAA4}")
+                out.append(Path(os.path.expandvars(v)))
+        except (ImportError, OSError):
+            pass
+        out += [Path.home() / "OneDrive" / "Saved Games"]
+    seen, res = set(), []
+    for p in out:
+        k = str(p).lower()
+        if k not in seen and p.is_dir():
+            seen.add(k)
+            res.append(p)
+    return res or out[:1]
+
+
 def find_file(state: dict, home: Path | None = None) -> Path:
     """Файл дебрифа последнего собранного вылета: <Saved Games>\\DCS*\\redfront\\debrief_<кампания>_<вылет>.json.
-    Папка Saved Games может называться DCS, DCS.openbeta и т.п. - проверяются все."""
+    Папка Saved Games может быть перенаправлена, а DCS - называться DCS, DCS.openbeta и т.п. - проверяются все."""
     man = state.get("manifest")
     if not man:
         raise RuntimeError("в кампании нет собранного вылета (manifest): сначала build")
     name = f"debrief_{state['campaign_id']}_{man['sortie']}.json"
-    sg = (home or Path.home()) / "Saved Games"
-    found = sorted(sg.glob(f"DCS*/redfront/{name}"), key=lambda p: p.stat().st_mtime, reverse=True)
+    dirs = saved_games(home)
+    found = sorted((p for sg in dirs for p in sg.glob(f"DCS*/redfront/{name}")), key=lambda p: p.stat().st_mtime, reverse=True)
     if not found:
-        raise FileNotFoundError(f"не найден {name} в {sg}\\DCS*\\redfront - вылет не летали, или io/lfs не разблокированы "
-                                f"в MissionScripting.lua; можно указать файл явно")
+        other = sorted((p for sg in dirs for p in sg.glob(f"DCS*/redfront/debrief_{state['campaign_id']}_*.json")),
+                       key=lambda p: p.stat().st_mtime, reverse=True)
+        hint = (f" Есть файлы других вылетов этой кампании: {', '.join(p.name for p in other[:3])} - миссия собрана "
+                f"заново после полёта? Слетайте последнюю собранную или укажите файл явно.") if other else \
+            (" Проверьте DCS.log (Saved Games\\DCS\\Logs): строка 'redfront debrief: results ->' - куда хук пишет; "
+             "'io/lfs sanitized' - файл MissionScripting.lua не тот (он в папке установки DCS\\Scripts, не в Saved Games).")
+        raise FileNotFoundError(f"не найден {name} в {'; '.join(str(d) for d in dirs)}\\DCS*\\redfront.{hint}")
     return found[0]
 
 

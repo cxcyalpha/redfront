@@ -934,6 +934,7 @@ RUNWAY_GAP_S = 30         # ОЦЕНКА: интервал взлёта груп
 AIR_START_MIN_M = 500      # ОЦЕНКА: высота появления группы, которая к началу миссии уже в воздухе
 AI_LOW_MIN_M = 100         # ОЦЕНКА: точки маршрута групп ИИ не ниже этого (у игрока - как в доктрине, 50 м)
 LOW_ENTRY_KM = 20         # ОЦЕНКА: группа подавления ПВО снижается до предельно малой за столько км до зоны ЗРК
+SELF_DEFENSE_KM = 15       # ОЦЕНКА: группы ИИ (удар, подавление ПВО) вступают в бой с самолётами противника ближе (доктрина self_defense_km)
 EGRESS_KM = 15             # ОЦЕНКА: точка ухода группы подавления ПВО - на столько км от рубежа пуска в сторону базы
 
 
@@ -1743,6 +1744,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             # (pydcs вешает EngageTargets по maintask: SEAD - любые ПВО, CAS - любые наземные; camp8: Су-24М и Су-25
             # бросали задачу и шли на Patriot). Свои атаки - задачами точек маршрута (AttackGroup/EngageGroup/зона).
             fg.points[0].tasks = [t for t in fg.points[0].tasks if getattr(t, "id", None) != "EngageTargets"]
+            sd_km = float(tdg.get("self_defense_km", SELF_DEFENSE_KM))
+            if sd_km > 0 and model.category(perf) == "air" and g["objective"]["kind"] not in ("orbit", "alert", "airlift"):
+                # самооборона: истребитель противника ближе sd_km - бой (ударная группа не пролетает мимо Су-17 в 3 км);
+                # дальше - своя задача. Приоритет ниже задач маршрута.
+                sd = task.EngageTargets(max_distance=int(sd_km * 1000), targets=[task.Targets.All.Air.Planes])
+                sd.params["priority"] = 1
+                fg.points[0].tasks.append(sd)
         if g.get("roe") == "return_fire":
             fg.points[0].tasks.append(task.OptROE(task.OptROE.Values.ReturnFire))
         ai = g.get("ai") or {}
