@@ -182,7 +182,9 @@ AIR = [   # (id, имя, сторона, роль, тип, аэродром, ч�
 ]
 MOD_TYPES = {"A_4E_C": "a4ec"}
 AD_TEMPLATES = {
-    "red": {"short": [{"name": "Стрела-1, ЗСУ-23-4", "composition": [("Strela_1_9P31", "launcher", 2), ("ZSU_23_4_Shilka", "launcher", 2)]}]},
+    # объектовая ПВО тыла Сирии 1973 (аэродромы, объекты): ЗУ-23 на грузовиках и ПЗРК ('Стрела-2' - в DCS 'Игла',
+    # ДОПУЩЕНИЕ); 'Стрела-1' и ЗСУ-23-4 - войсковая ПВО дивизий (SY_ADD), не тыла (ОЦЕНКА)
+    "red": {"short": [{"name": "ЗУ-23, ПЗРК", "composition": [("Ural_375_ZU_23", "launcher", 2), ("SA-18 Igla manpad", "launcher", 2)]}]},
     "blue": {"short": [{"name": "Вулкан", "composition": [("Vulcan", "launcher", 4)]}]},
 }
 AD_AF_OFFSET_KM = 1.5

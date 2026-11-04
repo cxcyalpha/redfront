@@ -612,6 +612,8 @@ class App:
                 st["settings"]["mission_budget"] = max(0, int(req["budget"]))
             if str(req.get("air") or "").strip():
                 st["settings"]["mission_air"] = max(0, int(req["air"]))
+            if req.get("strict") is not None:          # правила срыва удара и отхода групп (build.strict_abort)
+                st["settings"]["abort_mode"] = "strict" if str(req["strict"]) == "1" else "soft"
             if str(req.get("takeoff") or "").strip():   # минут от начала миссии до взлёта игрока
                 st["settings"]["player_takeoff_min"] = max(0, min(60, int(float(req["takeoff"]))))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),

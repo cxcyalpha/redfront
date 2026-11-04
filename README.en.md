@@ -126,7 +126,7 @@ script execution policy). Campaign window — `run.bat` (`python -m redfront gui
 
 * Cold War Germany map.
 * **The debrief hook needs `io`/`lfs` unlocked** in `<DCS>\Scripts\MissionScripting.lua`: comment out the lines
-  `sanitizeModule('io')` and `sanitizeModule('lfs')` (keep a backup; DCS updates restore the file). The Saved Games
+  `sanitizeModule('io')` and `sanitizeModule('lfs')` (ready-made file: `dcs/MissionScripting.lua`; keep a backup; DCS updates restore the file). The Saved Games
   folder may be named `DCS` or `DCS.openbeta` — the hook writes to `lfs.writedir()`.
 
 ---

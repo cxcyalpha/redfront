@@ -211,7 +211,7 @@ A-4 Израиля в Ливане 1982); описание типа — `redfron
 
 * Карта Cold War Germany.
 * **Хуку дебрифа нужен разблокированный `io`/`lfs`** в `<DCS>\Scripts\MissionScripting.lua`: закомментировать строки
-  `sanitizeModule('io')` и `sanitizeModule('lfs')` (сделайте резервную копию; обновления DCS возвращают файл).
+  `sanitizeModule('io')` и `sanitizeModule('lfs')` (готовый файл - `dcs/MissionScripting.lua`) (сделайте резервную копию; обновления DCS возвращают файл).
   Папка Saved Games может называться `DCS` или `DCS.openbeta` — хук пишет в `lfs.writedir()`.
 
 ---

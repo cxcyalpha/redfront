@@ -725,6 +725,7 @@ MSGS += [
     ("ВВС ДРВ, 1972: перехват по наведению с земли", "North Vietnamese Air Force, 1972: GCI interception"),
     ("ВВС и армии арабских стран (советская школа, 1967-1985): зонтик ПВО", "Arab air forces and armies (Soviet school, 1967-1985): SAM umbrella"),
     ("ВВС и армия Израиля, 1973", "Israeli Air Force and Army, 1973"),
+    ("ЗУ-23, ПЗРК", "ZU-23, MANPADS"), ("ПЗРК", "MANPADS"),
     ("{a} (ОЦЕНКА)", "{a|tr} (ESTIMATE)"),
 ]
 # от длинных к коротким: частный шаблон раньше общего

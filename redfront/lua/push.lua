@@ -2,9 +2,11 @@
 -- Удар по готовности подавления ПВО. Ударные группы ИИ пакета ждут на ИПМ (круг до флага), пока РЛС всех ЗРК,
 -- которые прикрывают цель (sams: группа и её РЛС), не уничтожены или не молчат под ПРР (iads.lua: REDFRONT_IADS.dark).
 -- Подавление стреляет, но подавлены не все - удар через SUPPRESS_WAIT_S после первого пуска (окно подавления).
--- Все группы подавления сбиты, не выстрелив, - удар отменяется: ударные уходят домой (переход на точку посадки).
+-- Все группы подавления сбиты, не выстрелив: строгий режим (STRICT) - удар отменяется, ударные уходят домой (переход
+-- на точку посадки); мягкий (по умолчанию, играбельность) - удар по сроку, ударные идут сами.
 -- К сроку ничего из этого - удар по сроку (РЛС молчат сами). Итог - REDFRONT_PUSH (хук пишет в дебриф).
 REDFRONT_PUSH = REDFRONT_PUSH or {}
+local STRICT = @STRICT@
 local CHECK_S, SUPPRESS_WAIT_S = 5, 120   -- ОЦЕНКА: окно подавления после первого пуска ПРР
 local SPECS = { @SPECS@ }   -- { id, side, title, flag, strikes = {}, ip = {}, home = {}, sead = {}, sead_start = {}, deadline }
 local SAY = {
@@ -12,6 +14,7 @@ local SAY = {
   sead = "подавление ПВО ведёт пуски - удар в окне подавления",
   deadline = "пусков подавления нет, РЛС ПВО молчат - удар по времени",
   abort = "группы подавления ПВО сбиты - удар отменён, ударным группам - домой",
+  lost = "группы подавления ПВО сбиты - удар по сроку без подавления",
 }
 
 local function alive(name)
@@ -90,8 +93,11 @@ local function check()
         push(s, "clear")
       elseif s.first_shot and now >= s.first_shot + SUPPRESS_WAIT_S then
         push(s, "sead")
-      elseif not any then
+      elseif not any and STRICT then
         push(s, "abort")
+      elseif not any and not s.lost_said then    -- мягкий режим: удар не отменяется, ждём срока
+        s.lost_said = true
+        if trigger.action.outTextForCoalition then trigger.action.outTextForCoalition(s.side, s.title .. ": " .. SAY.lost, 15) end
       elseif now >= s.deadline then
         push(s, "deadline")
       end

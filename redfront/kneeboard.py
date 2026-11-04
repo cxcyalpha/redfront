@@ -27,35 +27,51 @@ def _font(names, size):
     return ImageFont.load_default()
 
 
-def _page(title: str, sub: str, blocks: list[tuple[str, list[str]]], path: Path) -> Path:
-    """Страница: заголовок, подзаголовок (группа), разделы (заголовок, строки); длинные строки переносятся."""
+def _page(title: str, sub: str, blocks: list[tuple[str, list[str]]], path: Path) -> list[Path]:
+    """Страница: заголовок, подзаголовок (группа), разделы (заголовок, строки); длинные строки переносятся. Не помещается -
+    продолжение на следующих страницах (заголовок с номером листа), ничего не обрезается."""
     from PIL import Image, ImageDraw
-    img = Image.new("RGB", (W, H), (246, 242, 230))
-    d = ImageDraw.Draw(img)
     ft, fs, fh, fb = _font(BOLD, 30), _font(FONTS, 18), _font(BOLD, 20), _font(FONTS, 18)
-    d.rectangle([0, 0, W, 70], fill=(40, 48, 60))
-    d.text((MARGIN, 16), title, font=ft, fill=(255, 255, 255))
-    y = 82
-    d.text((MARGIN, y), sub, font=fs, fill=(90, 90, 90))
-    y += 34
     cw = max(8.0, fb.getlength("Ж")) if hasattr(fb, "getlength") else 10.0
     cols = int((W - 2 * MARGIN) / cw) - 1
+    rows: list[tuple[str, str]] = []             # (вид строки, текст): head, line, gap
     for head, lines in blocks:
-        if y > H - 60:
-            break
         for part in textwrap.wrap(head, int(cols * 0.85)) or [""]:
-            d.text((MARGIN, y), part, font=fh, fill=(150, 30, 30))
-            y += 28
-        d.line([MARGIN, y - 4, W - MARGIN, y - 4], fill=(180, 170, 150), width=1)
+            rows.append(("head", part))
+        rows.append(("rule", ""))
         for ln in lines:
             for part in textwrap.wrap(ln, cols, subsequent_indent="  ") or [""]:
-                if y > H - 30:
-                    break
-                d.text((MARGIN, y), part, font=fb, fill=(20, 20, 20))
-                y += 23
-        y += 12
-    img.save(path)
-    return path
+                rows.append(("line", part))
+        rows.append(("gap", ""))
+    step = {"head": 28, "line": 23, "gap": 12, "rule": 0}
+    sheets: list[list[tuple[str, str]]] = [[]]
+    y = 116
+    for kind, txt in rows:
+        if y + step[kind] > H - 24 and kind != "gap":
+            sheets.append([])
+            y = 116
+        sheets[-1].append((kind, txt))
+        y += step[kind]
+    out = []
+    for k, sheet in enumerate(sheets):
+        img = Image.new("RGB", (W, H), (246, 242, 230))
+        d = ImageDraw.Draw(img)
+        d.rectangle([0, 0, W, 70], fill=(40, 48, 60))
+        d.text((MARGIN, 16), title + (f" ({k + 1}/{len(sheets)})" if len(sheets) > 1 else ""), font=ft, fill=(255, 255, 255))
+        d.text((MARGIN, 82), sub, font=fs, fill=(90, 90, 90))
+        y = 116
+        for kind, txt in sheet:
+            if kind == "head":
+                d.text((MARGIN, y), txt, font=fh, fill=(150, 30, 30))
+            elif kind == "rule":
+                d.line([MARGIN, y - 4, W - MARGIN, y - 4], fill=(180, 170, 150), width=1)
+            elif kind == "line":
+                d.text((MARGIN, y), txt, font=fb, fill=(20, 20, 20))
+            y += step[kind]
+        pth = path.with_name(f"{path.stem}_{k}{path.suffix}")
+        img.save(pth)
+        out.append(pth)
+    return out
 
 
 def build(m, lg: str, groups: list[dict]) -> int:
@@ -69,7 +85,7 @@ def build(m, lg: str, groups: list[dict]) -> int:
     n = 0
     for gi, g in enumerate(groups):
         for pi, (title, blocks) in enumerate(g["pages"]):
-            p = _page(title, g["sub"], blocks, tmp / f"{gi:02d}_{pi:02d}.png")
-            m.add_aircraft_kneeboard(g["type"], p)
-            n += 1
+            for p in _page(title, g["sub"], blocks, tmp / f"{gi:02d}_{pi:02d}.png"):
+                m.add_aircraft_kneeboard(g["type"], p)
+                n += 1
     return n
