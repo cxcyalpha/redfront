@@ -233,6 +233,7 @@ body.past #map { box-shadow: inset 0 0 0 3px #b8860b; filter: sepia(.25); }
     <label data-t="takeoffMin"></label>
     <input id="sTakeoff" type="number" min="0" max="60" step="1" data-t-title="takeoffTip">
     <label><input type="checkbox" id="sEnemy" style="width:auto"> <span data-t="enemyPlan"></span></label>
+    <label data-t-title="strictTip"><input type="checkbox" id="sStrict" style="width:auto"> <span data-t="strictAbort"></span></label>
     <div class="sect"><b data-t="campSet"></b>
       <label data-t="nDate"></label>
       <div class="row"><input id="sDate" type="date" style="flex:1"><button type="button" id="bDate" data-t="apply"></button></div>
@@ -287,6 +288,7 @@ const I18N = {
     budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
     airBudgetTip: "Нагрузка на DCS: ваш пакет ставится всегда, вылеты ИИ подальше от него - нет (в модели они всё равно летают); 0 - без ограничения.",
     budgetTip: "Нагрузка на DCS: дальние от вашего вылета войска прореживаются; 0 - без ограничения.", enemyPlan: "показывать план вылетов противника (для проверки)",
+    strictAbort: "строгие правила срыва (реализм)", strictTip: "Включено: удар ИИ отменяется, если сбиты все группы подавления ПВО, пара уходит домой, потеряв ведомого. Выключено: удар идёт по сроку, группа уходит, потеряв половину.",
     mapTools: "Привязка целей к карте DCS (необязательно)",
     mapToolsTip: "Склады и мосты сначала стоят по примерным координатам. Чтобы привязать их к настоящим объектам карты: «Зонд карты» создаёт служебную миссию - запустите её в DCS (можно наблюдателем), дождитесь сообщения и нажмите «Применить зонд». Дороги - так же.",
     probe: "Зонд карты", probeApply: "Применить зонд", roadsProbe: "Зонд дорог", roadsApply: "Применить дороги",
@@ -386,6 +388,7 @@ const I18N = {
     budget: "Max ground vehicles in the mission", airBudget: "Max aircraft and helicopters in the mission",
     airBudgetTip: "DCS performance: your package is always included, AI sorties farther away are left out (the model still flies them); 0 - unlimited.",
     budgetTip: "DCS performance: troops far from your sortie are thinned out; 0 - unlimited.", enemyPlan: "show the enemy sortie plan (for checking)",
+    strictAbort: "strict abort rules (realism)", strictTip: "On: an AI strike is cancelled if all SEAD flights are shot down, a pair returns after losing a wingman. Off: the strike goes on time, a flight returns after losing half.",
     mapTools: "Snap targets to the DCS map (optional)",
     mapToolsTip: "Depots and bridges start at estimated coordinates. To snap them to real map objects: “Map probe” creates a service mission - run it in DCS (spectating is fine), wait for the message, then press “Apply probe”. Roads work the same way.",
     probe: "Map probe", probeApply: "Apply probe", roadsProbe: "Roads probe", roadsApply: "Apply roads",
@@ -754,7 +757,7 @@ function renderInspector() {
   const go = box.querySelector(".go");
   if (go) go.onclick = e => act("build", {task: ti + 1, fly: box.querySelector(".fly").value, humans: box.querySelector(".hum").value,
     ai: box.querySelector(".aitest").checked,
-    budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", "")}, e.target);
+    budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", ""), strict: pref("rf_strict", "0")}, e.target);
   const ed = box.querySelector(".atoEd"); if (ed) ed.onclick = () => atoEditor(box.querySelector(".item"));
   const rm = box.querySelector(".atoRm"); if (rm) rm.onclick = e => { if (confirm(T("removeQ"))) act("atoremove", {id: r.id}, e.target); };
 }
@@ -1106,7 +1109,7 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b
 $("#bPlan").onclick = async e => { SEL = 0; TAB = "sorties"; SELID = null; await act("plan", {}, e.currentTarget);
   if (ST && ST.tasks.length && ST.tasks[0].ato_id) selectSortie(ST.tasks[0].ato_id); };
 $("#bBuild").onclick = e => { act("build", {task: SEL + 1, fly: ($("#insp .fly") || {}).value || "strike",
-  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", "")}, e.currentTarget); };
+  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", ""), strict: pref("rf_strict", "0")}, e.currentTarget); };
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
 $("#bEnd").onclick = e => { if (confirm(T("endQ"))) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();
@@ -1117,6 +1120,7 @@ $("#bSet").onclick = () => {
   $("#sAir").value = pref("rf_air", "") || (ST ? ST.air_budget : "");
   $("#sTakeoff").value = pref("rf_takeoff", "") || (ST ? ST.takeoff_min : "");
   $("#sEnemy").checked = pref("rf_ato_enemy", "0") === "1";
+  $("#sStrict").checked = pref("rf_strict", "0") === "1";
   const wx = (ST && ST.wx) || {};
   $("#sDate").value = (ST && ST.date) || ""; $("#sWxMode").value = wx.weather_mode || "climate";
   $("#sWxType").value = wx.weather_type || "high"; $("#sWxFog").checked = !!wx.weather_fog;
@@ -1141,6 +1145,7 @@ $("#bMods").onclick = e => act("setmods", {mods: [...document.querySelectorAll("
 $("#bWx").onclick = e => act("setweather", {mode: $("#sWxMode").value, type: $("#sWxType").value, fog: $("#sWxFog").checked,
   effects: $("#sWxEff").checked}, e.target);
 $("#sEnemy").onchange = e => { setPref("rf_ato_enemy", e.target.checked ? "1" : "0"); render(); };
+$("#sStrict").onchange = e => setPref("rf_strict", e.target.checked ? "1" : "0");
 window.addEventListener("resize", () => map.invalidateSize());
 $("#bProbe").onclick = e => act("mapprobe", {}, e.target);
 $("#bApply").onclick = e => act("mapapply", {}, e.target);

@@ -3,6 +3,7 @@
 -- самолёт (одиночка в зоне не дежурит). Остаток топлива и расход ракет - опции DCS группы (RTB on bingo / out of
 -- AAM, build). Смена приходит по плану полётов до ухода предыдущей (ato.RELIEF_OVERLAP_S).
 local CHECK_S = 10
+local STRICT = @STRICT@   -- строгий режим: домой, потеряв ведомого; мягкий - потеряв половину группы (пара - обоих)
 local SPECS = { @SPECS@ }   -- { group, size, zone (номер точки зоны), home (номер точки посадки), side, title }
 local gone = {}
 
@@ -20,14 +21,15 @@ local function check()
       local g = Group.getByName(s.group)
       if g and g:isExist() then
         local n = count(g)
-        if n > 0 and n < s.size then
+        local rtb = STRICT and n < s.size or (not STRICT and s.size >= 4 and n <= s.size / 2)
+        if n > 0 and rtb then
           gone[s.group] = true
           pcall(function()
             g:getController():setCommand({ id = "SwitchWaypoint",
               params = { fromWaypointIndex = s.zone, goToWaypointIndex = s.home } })
           end)
           if trigger.action.outTextForCoalition then
-            trigger.action.outTextForCoalition(s.side, s.title .. ": потерян ведомый - уходим домой", 10)
+            trigger.action.outTextForCoalition(s.side, s.title .. (STRICT and ": потерян ведомый - уходим домой" or ": потеряна половина группы - уходим домой"), 10)
           end
           env.info("redfront cap: " .. s.group .. " - wingman lost, RTB")
         end

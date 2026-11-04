@@ -2085,15 +2085,15 @@
   "red": {
    "short": [
     {
-     "name": "Стрела-1, ЗСУ-23-4",
+     "name": "ЗУ-23, ПЗРК",
      "composition": [
       {
-       "type": "Strela_1_9P31",
+       "type": "Ural_375_ZU_23",
        "role": "launcher",
        "count": 2
       },
       {
-       "type": "ZSU_23_4_Shilka",
+       "type": "SA-18 Igla manpad",
        "role": "launcher",
        "count": 2
       }

@@ -3293,6 +3293,8 @@ def push_qra_section(tmp: Path) -> None:
           f"ждут своего подавления ПВО ({len(ai_hold)})")
     script = next(a.text.id for r in m.triggerrules.triggers for a in r.actions
                   if hasattr(a, "text") and "redfront push" in getattr(a.text, "id", ""))
+    soft_ok = "local STRICT = false" in script   # по умолчанию - мягкие правила; отмена проверяется в строгом режиме
+    script = script.replace("local STRICT = false", "local STRICT = true", 1)
     sead_name = next(g.name for c in m.coalition["red"].countries.values() for g in c.plane_group if " sead " in g.name)
     def run(events):
         L = lupa.LuaRuntime(unpack_returned_tuples=True)
@@ -3313,9 +3315,10 @@ def push_qra_section(tmp: Path) -> None:
     check(G1.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "deadline" and G2.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "sead"
           and G3.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "abort" and G3.CMDS[1] and G3.FLAGS[build.PUSH_FLAG]
           and "удар отменён" in G3.TEXTS[1] and "окне подавления" in G2.TEXTS[1]
-          and G4.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "clear" and "удар разрешён" in G4.TEXTS[1],
+          and G4.REDFRONT_PUSH["push-" + str(man["sortie"]) + "-0"] == "clear" and "удар разрешён" in G4.TEXTS[1] and soft_ok,
           "push.lua: РЛС прикрывающих ЗРК уничтожены или молчат - удар; пуски ПРР - удар в окне подавления (2 мин); "
-          "подавление сбито, не выстрелив, - удар отменён (домой); ничего к сроку - удар; сообщения своей стороне")
+          "подавление сбито, не выстрелив, - удар отменён (домой, строгий режим; по умолчанию - мягкий: "
+          f"{soft_ok}); ничего к сроку - удар; сообщения своей стороне")
     d_ = m.description_text()
     pl = next(g for c in m.coalition["red"].countries.values() for g in c.plane_group
               if g.units[0].skill in (dcs.unit.Skill.Client, dcs.unit.Skill.Player))

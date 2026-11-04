@@ -415,16 +415,22 @@ def iads_script(campaign_id: str, sortie: int, sams: list[dict], net: list[dict]
             .replace("@NET_M@", str(int(IADS_NET_KM * 1000))).replace("@SAMS@", si).replace("@NET@", ni))
 
 
-def cap_script(campaign_id: str, sortie: int, specs: list[dict]) -> str:
+def cap_script(campaign_id: str, sortie: int, specs: list[dict], strict: bool = False) -> str:
     """lua/cap.lua: пары прикрытия ИИ уходят домой, потеряв самолёт (группа, размер, точка зоны, точка посадки)."""
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     items = [f'{{ group = {q(c["group"])}, size = {int(c["size"])}, zone = {int(c["zone"])}, home = {int(c["home"])}, '
              f'side = {c["side"]}, title = {q(c["title"])} }}' for c in specs]
     return (CAP_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
-            .replace("@SPECS@", ", ".join(items)))
+            .replace("@SPECS@", ", ".join(items)).replace("@STRICT@", "true" if strict else "false"))
 
 
-def push_script(campaign_id: str, sortie: int, specs) -> str:
+def strict_abort(state: dict) -> bool:
+    """Правила срыва (settings.abort_mode): strict - удар отменяется, если все группы подавления сбиты; пара домой,
+    потеряв ведомого. soft (по умолчанию, играбельность) - удар идёт по сроку; группа домой, потеряв половину."""
+    return (state.get("settings") or {}).get("abort_mode", "soft") == "strict"
+
+
+def push_script(campaign_id: str, sortie: int, specs, strict: bool = False) -> str:
     """lua/push.lua: удар по готовности подавления ПВО - ударные группы (имя, точка ИПМ, точка посадки), группы
     подавления (имя, взлёт, с), флаг, срок (с от начала миссии)."""
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
@@ -436,7 +442,7 @@ def push_script(campaign_id: str, sortie: int, specs) -> str:
               f'deadline = {int(spec["deadline"])}, sams = {{ ' + ", ".join(f'{{ group = {q(g)}, radars = {lst(r)} }}' for g, r in (spec.get("sams") or {}).items()) + " } }")
              for spec in specs]
     return (PUSH_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", campaign_id).replace("@SORTIE@", str(int(sortie)))
-            .replace("@SPECS@", ", ".join(items)))
+            .replace("@SPECS@", ", ".join(items)).replace("@STRICT@", "true" if strict else "false"))
 
 
 def lz_script(campaign_id: str, sortie: int) -> str:
@@ -565,6 +571,8 @@ LUA_EN = {   # сообщения скриптов миссии по-англи�
     " - взлёт по ": " - scramble against ", "redfront: результаты не сохранятся - MissionScripting.lua не разблокирован":
         "redfront: results will not be saved - MissionScripting.lua is not unlocked",
     ": потерян ведомый - уходим домой": ": wingman lost - returning to base",
+    ": потеряна половина группы - уходим домой": ": half the flight lost - returning to base",
+    "группы подавления ПВО сбиты - удар по сроку без подавления": "SEAD flights shot down - strike goes on time without suppression",
 }
 
 
@@ -2166,7 +2174,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String(iads_script(state["campaign_id"], state["sortie"], iads_sams, iads_net))))
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
-        trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p))))
+        trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p, strict_abort(state)))))
     if timing_specs:                             # проверка плана по времени: факт выхода групп ИИ на рубеж
         q = lambda x: '"' + str(x).replace('"', "'") + '"'
         items = ", ".join(f'{{ group = {q(t["group"])}, x = {t["x"]:.0f}, y = {t["y"]:.0f}, eta = {t["eta"]} }}' for t in timing_specs)
@@ -2174,7 +2182,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                         .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(state["sortie"]))
                                         .replace("@SPECS@", items))))
     if cap_specs:                                # пары прикрытия ИИ: без ведомого - домой
-        trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs))))
+        trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs, strict_abort(state)))))
     gs = gci_sides(state)                        # наземное наведение (КРУ) истребителей ИИ: дежурные пары и пары прикрытия
     gci_f = [{"group": x["group"], "side": x["side"]} for x in qra_specs + cap_specs if x["side"] in gs]
     if qra_specs or gci_f:                       # общая картина обстановки (airpic.lua) - до qra.lua и gci.lua
