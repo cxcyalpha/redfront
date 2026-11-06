@@ -106,9 +106,14 @@ def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None
     march = model.doctrine(state, unit["side"])["march"]
     rank = {r: i for i, r in enumerate(march["order"])}
     alive = model.alive_by_type(unit)
+    roles = {c["type"]: c["role"] for c in unit["composition"]}
+    # пехота на марше - в машинах (БМП, БТР, грузовики): в колонну не ставится - медленная и съедает бюджет машин;
+    # пешая часть без техники (десант, пехота ДРВ) - как есть
+    riding = {t: a for t, a in alive.items() if roles.get(t) != "infantry"}
+    if riding:
+        alive = riding
     counts, weight = _deploy(state, alive, density, cap)
     ad_cap = _ad_cap(cap)
-    roles = {c["type"]: c["role"] for c in unit["composition"]}
     order = sorted((t for t in counts if counts[t] > 0), key=lambda t: rank.get(roles[t], len(rank)))
     pts = model.route_points(state, unit)
     head_km = unit["progress_km"]
@@ -229,6 +234,12 @@ def gci_site(state: dict, unit: dict) -> dict:
             "core": True}                       # бюджет миссии КРУ не трогает: одна машина, нужна игроку
 
 
+def _on_foot(t: str) -> bool:
+    """Пеший тип (расчёт ПЗРК, пехотинец) - на марше едет в машине, отдельно в колонне не ставится."""
+    tl = t.lower()
+    return "manpad" in tl or tl.startswith(("soldier", "infantry", "paratrooper")) or "stinger" in tl
+
+
 def attached_column(state: dict, unit: dict, parent_group: dict, cap: int | None = None) -> dict:
     """Приданная части группа (войсковая ПВО) - отдельной группой в той же колонне, сразу за танками части
     (ОЦЕНКА порядка следования). Отдельной - чтобы ограничение 'огонь только по наземным целям' не касалось ПВО.
@@ -240,7 +251,7 @@ def attached_column(state: dict, unit: dict, parent_group: dict, cap: int | None
     roles = {c["type"]: c["role"] for c in parent["composition"]}
     n_ahead = sum(1 for v in parent_group["vehicles"] if roles.get(v["type"]) == "MBT")
     start_km = parent["progress_km"] - n_ahead * spacing_km      # в разрыв, оставленный колонной за танками
-    alive = model.alive_by_type(unit)
+    alive = {t: a for t, a in model.alive_by_type(unit).items() if not _on_foot(t)} or model.alive_by_type(unit)   # ПЗРК - в машинах
     counts, weight = _deploy_ad(alive, _ad_share(unit, parent, len(parent_group["vehicles"]),
                                                  cap if cap is not None else parent_group.get("ad_cap")))
     vehicles, i = [], 0

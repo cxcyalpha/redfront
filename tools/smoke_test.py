@@ -302,7 +302,7 @@ def package_section(tmp: Path) -> None:
           "Су-24М: задача DCS SEAD, подвеска 'Retribution SEAD' (Х-58У, Р-60М, Л-081 на пилоне 5)")
     roe = [t for p in pg["recon"].points for t in p.tasks if type(t).__name__ == "OptROE"]
     zone = [t for p in pg["recon"].points for t in p.tasks if getattr(t, "id", None) == "EngageTargetsInZone"]
-    orbit = [t for p in pg["recon"].points for t in p.tasks if getattr(t, "id", None) == "ControlledTask"]
+    orbit = [t for p in pg["recon"].points if p.name != "Сбор" for t in p.tasks if getattr(t, "id", None) == "ControlledTask"]
     center, radius_km = build.search_zone(st, st["units"]["blue_pzgren_bn_1"],
                                           build.timeline(model.doctrine(st, "red")["tasks"]["strike_column_march"], st, tk["package"], "strike")["recon"]["objective_s"], 3)
     check(not roe and len(zone) == 1 and abs(zone[0].params["zoneRadius"] - radius_km * 1000) < 1 and len(orbit) == 1
@@ -925,7 +925,7 @@ def air_section(tmp: Path) -> None:
     blue = [g for c in m.coalition["blue"].countries.values() for g in c.plane_group if "_qra_" not in g.name]   # дежурные пары - qra_section
     t = build.timeline(model.doctrine(st, "red")["tasks"][t1["kind"]], st, t1["package"], "strike")
     zone = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "EngageTargetsInZone"]
-    orb = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "ControlledTask"]
+    orb = [x for p in red["cover"].points if p.name != "Сбор" for x in p.tasks if getattr(x, "id", None) == "ControlledTask"]
     check(zone and list(dict(zone[0].params["targetTypes"]).values()) == ["Air"] and orb and orb[0].params["stopCondition"] == {"time": t["strike"]["objective_s"] + 300}
           and next(p for p in red["cover"].points if p.name == "Зона прикрытия").alt == 3000
           and any("R-27R" in weapons.name_of(d["CLSID"]) for d in red["cover"].units[0].pylons.values()),
@@ -996,7 +996,8 @@ def column_road_section(tmp: Path) -> None:
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
           and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
-                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront timing", "-- redfront debrief hook"],
+                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront timing", "-- redfront rv",
+                        "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
         print("SKIP lupa не установлена: перекладка колонны в Lua не исполняется")
@@ -3346,8 +3347,8 @@ def push_qra_section(tmp: Path) -> None:
                      if not any(x in g.name for x in ("awacs", "tanker", "qra"))) for side in ("red", "blue")}
     check(min(acn.values()) >= build.BALANCE * max(acn.values()) - 4,
           f"соотношение ЛА сторон в миссии (без дежурств): {acn} - не в разы")
-    check(all(st["units"][t["performer"]]["role"] in ("fighter", "interceptor") for t in q),
-          "на дежурстве - только истребительные и перехватывающие части")
+    check(all(planner.role_ok(st, st["units"][t["performer"]], ["fighter", "interceptor"]) for t in q),
+          "на дежурстве - истребительные части и многоцелевые, сильные в бою в воздухе (F-4E, F-16)")
     check("A-50" in types["red"] and "E-3A" in types["blue"] and "KC-135" in types["blue"],
           "в миссии ДРЛО обеих сторон (А-50, E-3A) и заправщик синих (KC-135; у ОВД фронтовой авиации заправщиков не было)")
 
