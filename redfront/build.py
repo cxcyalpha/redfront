@@ -425,6 +425,8 @@ SAMCTL_LUA = Path(__file__).parent / "lua" / "samctl.lua"
 AAA_RX = r"ZU-23|ZU_23|S-60|S_60|KS-19|KS_19|Vulcan|Gepard|ZSU|M163|flak|Bofors|M1939|2A|Shilka"
 MANPAD_RX = r"manpad|Stinger|Igla|Strela-2|SA-18|SA-7|Soldier stinger"
 SAM_DELAY_S = {"long": 45, "medium": 25, "short": 12}   # ОЦЕНКА: реакция расчёта от обнаружения до огня (выучка 1)
+SAM_AUTONOMOUS = {"Osa_9A33_ln", "Strela_1_9P31", "Strela_10M3", "X_2S6_Tunguska", "Tor 9A331", "Roland_ADS",
+                  "M48 Chaparral", "M1097 Avenger", "HQ-7_LN_SP", "rapier_fsa_launcher"}   # РЛС/оптика - на пусковой
 SAM_K_RANGE = 0.7     # ОЦЕНКА: пуск - ближе 70% зоны поражения
 AAA_SKILL = "Average"  # ОЦЕНКА: зенитная артиллерия - средняя выучка (прицельный огонь ИИ DCS слишком точен)
 
@@ -451,7 +453,11 @@ def samctl_spec(state: dict, vg_by_unit: dict) -> list[dict]:
             for x in vg.units:
                 x.skill = Skill.Average if AAA_SKILL == "Average" else x.skill
         out.append({"group": vg.name, "kind": kind, "r": (r or 3) * 1000, "k": SAM_K_RANGE,
-                    "delay": SAM_DELAY_S[tier] / max(0.5, q), "mobile": _lg.sam_mobile(u) and kind == "sam",
+                    # переезд в миссии - только самоходные комплексы одной машиной (Оса, Стрела, Тунгуска); батарея
+                    # с отдельной РЛС (Куб, Hawk) в бою не снимается - она меняет позицию между сутками (logistics)
+                    "delay": SAM_DELAY_S[tier] / max(0.5, q),
+                    "mobile": kind == "sam" and all(t in SAM_AUTONOMOUS or _re.search(AAA_RX + "|" + MANPAD_RX, t, _re.I)
+                                                    for t in types),
                     "manpad": n_mp > 0})
     return out
 

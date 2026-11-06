@@ -59,7 +59,12 @@ def find_file(state: dict, home: Path | None = None) -> Path:
 
 
 def read(path: Path) -> dict:
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+    """Файл дебрифа; сильно повреждённая наземная техника (damaged - хук: ниже 40% прочности, РЛС ЗРК - ниже 75%)
+    считается потерей, как уничтоженная."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if data.get("damaged"):
+        data["dead"] = list(dict.fromkeys(list(data.get("dead", [])) + list(data["damaged"])))
+    return data
 
 
 def _humans(fl: dict) -> list[str]:
