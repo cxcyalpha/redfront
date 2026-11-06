@@ -421,6 +421,50 @@ def iads_spec(m: Mission, state: dict, vg_by_unit: dict) -> tuple[list[dict], li
     return sams, net
 
 
+SAMCTL_LUA = Path(__file__).parent / "lua" / "samctl.lua"
+AAA_RX = r"ZU-23|ZU_23|S-60|S_60|KS-19|KS_19|Vulcan|Gepard|ZSU|M163|flak|Bofors|M1939|2A|Shilka"
+MANPAD_RX = r"manpad|Stinger|Igla|Strela-2|SA-18|SA-7|Soldier stinger"
+SAM_DELAY_S = {"long": 45, "medium": 25, "short": 12}   # ОЦЕНКА: реакция расчёта от обнаружения до огня (выучка 1)
+SAM_K_RANGE = 0.7     # ОЦЕНКА: пуск - ближе 70% зоны поражения
+AAA_SKILL = "Average"  # ОЦЕНКА: зенитная артиллерия - средняя выучка (прицельный огонь ИИ DCS слишком точен)
+
+
+def samctl_spec(state: dict, vg_by_unit: dict) -> list[dict]:
+    """ПВО в миссии для samctl.lua: вид (ЗРК / зенитки / ПЗРК), зона, задержка реакции (по зоне и выучке части),
+    подвижность (стрельба с переездом)."""
+    import re as _re
+    from . import logistics as _lg
+    out = []
+    for uid, vg in vg_by_unit.items():
+        u = state["units"].get(uid)
+        if not u or model.category(u) != "sam":
+            continue
+        types = [x.type for x in vg.units]
+        n_aaa = sum(1 for t in types if _re.search(AAA_RX, t, _re.I))
+        n_mp = sum(1 for t in types if _re.search(MANPAD_RX, t, _re.I))
+        kind = ("sam" if n_aaa + n_mp < len(types) else "aaa" if n_aaa else "manpad")   # есть ЗРК - ЗРК; пушки (+ПЗРК) - зенитки
+        r = planner.threat_radius_km(u)
+        tier = "long" if r >= 30 else "medium" if r >= 10 else "short"
+        parent = state["units"].get(u.get("attached_to") or "") or {}
+        q = float(u.get("quality") or parent.get("quality") or 1.0)
+        if kind == "aaa":
+            for x in vg.units:
+                x.skill = Skill.Average if AAA_SKILL == "Average" else x.skill
+        out.append({"group": vg.name, "kind": kind, "r": (r or 3) * 1000, "k": SAM_K_RANGE,
+                    "delay": SAM_DELAY_S[tier] / max(0.5, q), "mobile": _lg.sam_mobile(u) and kind == "sam",
+                    "manpad": n_mp > 0})
+    return out
+
+
+def samctl_script(state: dict, specs: list[dict]) -> str:
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    items = ", ".join(f'{{ group = {q(a["group"])}, kind = "{a["kind"]}", r = {a["r"]:.0f}, k_range = {a["k"]}, '
+                      f'delay = {a["delay"]:.0f}, mobile = {"true" if a["mobile"] else "false"}, '
+                      f'manpad = {"true" if a.get("manpad") else "false"} }}' for a in specs)
+    return (SAMCTL_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SPECS@", items))
+
+
 def iads_script(campaign_id: str, sortie: int, sams: list[dict], net: list[dict]) -> str:
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     b = lambda v: "true" if v else "false"
@@ -2365,6 +2409,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     iads_sams, iads_net = iads_spec(m, state, vg_by_unit)
     if iads_sams:                                # сеть ПВО: ЗРК на связи молчат до цели в зоне, реакция на ПРР
         trig.add_action(DoScript(String(iads_script(state["campaign_id"], state["sortie"], iads_sams, iads_net))))
+    sc_specs = samctl_spec(state, vg_by_unit)    # огонь ПВО: реакция расчёта, дальность пуска, заграждение зениток,
+    if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска
+        trig.add_action(DoScript(String(samctl_script(state, sc_specs))))
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p, strict_abort(state)))))

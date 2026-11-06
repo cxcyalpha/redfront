@@ -999,7 +999,7 @@ def column_road_section(tmp: Path) -> None:
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
           and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
-                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront timing", "-- redfront rv",
+                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront samctl", "-- redfront timing", "-- redfront rv",
                         "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
@@ -3912,6 +3912,46 @@ def theatres_section(tmp: Path) -> None:
     check("player awacs" in mzg and "SetImmortal" in mzg and "player awacs" not in mz0,
           "игровое допущение: у Израиля 1973 ДРЛО нет - игроку E-2C над своей территорией (бессмертный, невидимый); "
           "настройка player_awacs выключает")
+    # samctl.lua: реакция расчёта и дальность пуска, ПЗРК - 2 пуска
+    sc = build.samctl_script(st6, [{"group": "SAM1", "kind": "sam", "r": 20000, "k": 0.7, "delay": 25, "mobile": False},
+                                   {"group": "MP1", "kind": "aaa", "r": 3000, "k": 0.7, "delay": 5, "mobile": False, "manpad": True}])
+    Ls = lupa.LuaRuntime()
+    Ls.execute('''
+      NOW = 0; ROE = {}; HANDLERS = {}
+      timer = { getTime = function() return NOW end, scheduleFunction = function(f) CHECK = f end }
+      AI = { Option = { Ground = { id = { ROE = 0, ALARM_STATE = 9 }, val = { ROE = { OPEN_FIRE = 2, WEAPON_HOLD = 4 },
+             ALARM_STATE = { GREEN = 1, RED = 2 } } } } }
+      Object = { Category = { UNIT = 1 } }
+      world = { event = { S_EVENT_SHOT = 1 }, addEventHandler = function(h) HANDLERS[#HANDLERS + 1] = h end }
+      env = { info = function() end }
+      TX = 15000
+      local tgt = { isExist = function() return true end, getCategory = function() return 1 end, inAir = function() return true end,
+                    getCoalition = function() return 2 end, getPoint = function() return { x = TX, y = 3000, z = 0 } end,
+                    getVelocity = function() return { x = -100, y = 0, z = 0 } end }
+      local function mk(name)
+        local u = { isExist = function() return true end, getLife = function() return 1 end, getCoalition = function() return 1 end,
+                    getPoint = function() return { x = 0, y = 0, z = 0 } end }
+        return { isExist = function() return true end, getUnits = function() return { u } end, getName = function() return name end,
+          getController = function() return { setOption = function(_, k, v) if k == 0 then ROE[name] = v end end,
+            getDetectedTargets = function() return { { object = tgt } } end, pushTask = function() end, setTask = function() end } end }
+      end
+      G = { SAM1 = mk("SAM1"), MP1 = mk("MP1") }
+      Group = { getByName = function(n) return G[n] end }
+    ''')
+    Ls.execute(sc)
+    Ls.execute("NOW = 2; CHECK()")
+    far = Ls.eval("ROE.SAM1")                      # 15 км при зоне 20 (больше 70%) - огонь запрещён
+    Ls.execute("TX = 12000; NOW = 10; CHECK()")
+    early = Ls.eval("ROE.SAM1")                    # ближе 70%, но реакция 25 с не прошла
+    Ls.execute("NOW = 30; CHECK()")
+    late = Ls.eval("ROE.SAM1")
+    Ls.execute("TX = 2000; NOW = 40; CHECK()")
+    mp_open = Ls.eval("ROE.MP1")
+    Ls.execute("local e = { id = 1, initiator = { getGroup = function() return G.MP1 end } }; "
+               "for _ = 1, 2 do HANDLERS[1]:onEvent(e) end; NOW = 42; CHECK()")
+    mp_after = Ls.eval("ROE.MP1")
+    check(far == 4 and early == 4 and late == 2 and mp_open == 2 and mp_after == 4,
+          "samctl.lua: ЗРК - огонь ближе 70% зоны и после реакции расчёта (25 с); ПЗРК - по близкой цели, 2 пуска и всё")
     check("redfront gci" in mz and p1 == 22 and p2 == 0,
           f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
           f"и цель за границей наведения - без наведения ({p2})")
