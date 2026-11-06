@@ -19,6 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import i18n_en, build as build_mod, materialize
+from . import natonames
 from . import ato, command, convoys, csar, dcstypes, debrief, explain, i18n, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
@@ -129,7 +130,7 @@ def view(st: dict, history: bool = True) -> dict:
     for u in units.values():
         cat = model.category(u)
         if cat in ("depot", "bridge", "airfield", "factory"):
-            objects.append({"id": u["id"], "name": u["name"], "role": cat, "side": u.get("side"), "pos": _ll(u["pos"]),
+            objects.append({"id": u["id"], "name": natonames.name(st, u), "role": cat, "side": u.get("side"), "pos": _ll(u["pos"]),
                             "damage": round(u.get("damage", 0.0), 2), "state": u.get("state"),
                             "checked": bool(u.get("pos_checked")) or cat == "airfield",
                             "info": explain.obj(st, u, st["player_side"]),      # что это и что даст удар (explain.py)
@@ -139,7 +140,7 @@ def view(st: dict, history: bool = True) -> dict:
                                if cat == "depot" and u.get("cap_t") else {})})
         elif cat in ("air", "heli"):
             b = st["airbases"].get(u["base"], {})
-            air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
+            air.append({"id": u["id"], "name": natonames.name(st, u), "side": u["side"], "type": u["type"], "role": u["role"],
                         "count": u.get("count", 0), "count0": u.get("count0", u.get("count", 0)),
                         "available": logistics.available(st, u), "base": b.get("name", u["base"]),
                         "crews": u.get("crews"), "crews0": u.get("crews0"),
@@ -156,7 +157,7 @@ def view(st: dict, history: bool = True) -> dict:
                 pos = intel.known_pos(st, u)   # ЗРК противника - где его видели последний раз (туман войны)
             if not pos:
                 continue
-            g = {"id": u["id"], "name": u["name"], "side": u["side"], "cat": cat, "state": u["state"],
+            g = {"id": u["id"], "name": natonames.name(st, u), "side": u["side"], "cat": cat, "state": u["state"],
                  "order": u.get("order"), "strength": round(model.strength(u), 2), "pos": _ll(pos),
                  "supply": u.get("supply", 1.0), "supply_frac": u.get("supply_frac", 1.0 if u.get("supply", 1.0) >= 1 else 0.0),
                  "attached": bool(u.get("attached_to")),
@@ -192,7 +193,7 @@ def view(st: dict, history: bool = True) -> dict:
     tasks = []
     for i, t in enumerate(st.get("tasks") or [], 1):
         base = st["airbases"].get(t["base"], {})
-        tasks.append({"n": i, "ato_id": t.get("ato_id"), "title": tr(t["title"]), "km": round(t["distance_km"]), "base": base.get("name", t["base"]),
+        tasks.append({"n": i, "ato_id": t.get("ato_id"), "title": tr(natonames.text(st, model.enemy(st["player_side"]), t["title"])), "km": round(t["distance_km"]), "base": base.get("name", t["base"]),
                       "tot": ato.hhmm(t["tot_s"]) if t.get("tot_s") is not None else "",
                       "time": (i18n.L(lg, f"взлёт {ato.hhmm(t['takeoff_s'])}, на объекте {ato.hhmm(t['tot_s'])}",
                                       f"takeoff {ato.hhmm(t['takeoff_s'])}, time on target {ato.hhmm(t['tot_s'])}")

@@ -13,6 +13,7 @@ import tempfile
 from pathlib import Path
 
 from dcs import Mission, task
+from . import natonames
 from dcs.action import DoScript, DoScriptFile
 from dcs.mapping import LatLng, Point, Vector2
 from dcs.mission import StartType
@@ -1396,8 +1397,8 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 if tpos:
                     clock.append(L("Цель: ", "Target: ") + _dms(tpos["lat"], "NS") + " " + _dms(tpos["lon"], "EW"))
             pages = [
-                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), clock + [L("Удаление цели ", "Target distance ") + fmt_dist(state, tk["side"], tk["distance_km"], lg),
-                                           L("Угрозы: ", "Threats: ") + (", ".join(state["units"][t]["name"] for t in tk["threats"]) or L("не выявлены", "none detected"))]),
+                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(natonames.text(state, model.enemy(tk["side"]), tk["title"], tk["side"]), lg), clock + [L("Удаление цели ", "Target distance ") + fmt_dist(state, tk["side"], tk["distance_km"], lg),
+                                           L("Угрозы: ", "Threats: ") + (", ".join(natonames.name(state, state["units"][t], tk["side"]) for t in tk["threats"]) or L("не выявлены", "none detected"))]),
                                           (L("Тактическая группа", "Package"), lines),
                                           (L("Порядок действий", "Sequence"), order_lines),
                                           (L("Маршрут (точка, время, высота, скорость)", "Route (point, time, altitude, speed)"), route)]),
@@ -2386,7 +2387,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         + ((Lx("\nПорядок действий группы:\n", "\nSequence of the package:\n") + "\n".join(f"- {ln}" for ln in order_lines)) if order_lines else "")
         + ((Lx("\n\nСвязь:\n", "\n\nCommunications:\n") + "\n".join(f"- {ln}" for ln in comm_lines)) if comm_lines else "")
         + Lx(f"\n\nУдаление цели: {tk['distance_km']:.0f} км. Угрозы на маршруте: ", f"\n\nTarget distance: {tk['distance_km']:.0f} km. Threats en route: ")
-        + (", ".join(state['units'][t]['name'] for t in tk['threats']) or Lx("не выявлены", "none detected"))
+        + (", ".join(natonames.name(state, state['units'][t], tk['side']) for t in tk['threats']) or Lx("не выявлены", "none detected"))
         + (Lx("\nЗамечания планировщика: ", "\nPlanner notes: ") + tk['package_notes'] if tk.get("package_notes") else "")
         + ((Lx("\n\nДругие вылеты наших сил в это время:\n", "\n\nOther friendly sorties at this time:\n") + "\n".join(f"- {ln}" for ln in ai_lines)) if ai_lines else "")
         + (Lx("\nРазведка: в районе возможна активность авиации противника.", "\nIntelligence: enemy air activity is possible in the area.") if enemy_lines else "")
