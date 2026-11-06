@@ -1527,6 +1527,34 @@ def _lock_eta(fg, objective_s: float, spd_kmh: float) -> dict | None:
     return None
 
 
+CRAWL_S = 60          # ОЦЕНКА: группа приходит на точку раньше залоченного времени больше чем на столько - ждёт в круге
+
+
+def _no_crawl(fg, spd_kmh: float) -> None:
+    """Залоченное время точки (ETA) раньше, чем группа долетит своей скоростью, DCS выполняет, замедляя группу
+    до 150-250 км/ч (мираж на 154 км/ч, 'Хьюи' на 76). Вместо этого: скорость - своя (speed_locked), на точке -
+    круг ожидания до её времени; точка ждёт, а не маршрут ползёт. Позже - ETA остаётся (DCS ускорится)."""
+    pts = fg.points
+    if not pts:
+        return
+    t = float(getattr(fg, "start_time", 0) or 0) + float(getattr(pts[0], "ETA", 0) or 0)
+    v = max(spd_kmh / 3.6, 15.0)
+    for i in range(1, len(pts)):
+        w, prev = pts[i], pts[i - 1]
+        t_nat = t + prev.position.distance_to_point(w.position) / v
+        if getattr(w, "ETA_locked", False) and w.ETA and w.ETA > t_nat + CRAWL_S:
+            w.ETA_locked, w.speed_locked, w.speed = False, True, v
+            if not any(getattr(x, "id", None) == "ControlledTask" and "Orbit" in str(getattr(x, "params", {}))
+                       for x in w.tasks):
+                hold = task.ControlledTask(task.OrbitAction(altitude=int(w.alt or 1000), speed=int(spd_kmh),
+                                                            pattern=task.OrbitAction.OrbitPattern.Circle))
+                hold.stop_after_time(int(w.ETA))
+                w.tasks.insert(0, hold)
+            t = float(w.ETA)
+        else:
+            t = max(t_nat, float(w.ETA or 0)) if getattr(w, "ETA_locked", False) else t_nat
+
+
 def _airborne(state: dict, g: dict, spd_kmh: float, secs: float) -> bool:
     """Группа ИИ, взлетевшая по плану за secs до начала миссии, - в воздухе там, где она к этому времени (как в Falcon
     BMS: миссия начинается со взлёта игрока, остальные вылеты пакета и плана - уже в пути). Точка - по маршруту база -
@@ -2217,6 +2245,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             ts = _lock_eta(fg, times[g["group"]]["objective_s"], spd)
             if ts:
                 timing_specs.append(ts)
+            _no_crawl(fg, spd)                   # раньше времени - круг ожидания на точке, а не 150 км/ч по маршруту
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)

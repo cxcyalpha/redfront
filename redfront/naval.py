@@ -146,6 +146,7 @@ def ship_names(unit: dict) -> list[tuple[str, str]]:
 
 # ---------- выход в море и бой кораблей (конец суток) ----------
 SPEED_KM_DAY = {"FAC": 600, "default": 450}     # ОЦЕНКА: переход за сутки (катера ~25 уз., корабли ~18 уз. с манёврами)
+CONTACT_KM = 20        # ОЦЕНКА: переход останавливает встреча ближе (обнаружение РЛС катера); дальше - проход мимо
 ENGAGE_KM = 40          # ОЦЕНКА: бой кораблей - группы ближе этого (дальность П-15 'Термит' ~40 км, 'Габриэль' ~20 км)
 P_HIT = 0.3             # ОЦЕНКА: доля попаданий ПКР залпа (без РЭБ и ЗРК цели)
 AD_SAVE = 0.5           # ОЦЕНКА: ЗРК и артиллерия корабля-цели сбивают столько ракет
@@ -176,8 +177,19 @@ def _move(state: dict, u: dict) -> str | None:
     if d < 1:
         return None
     step = SPEED_KM_DAY.get(kind(u), SPEED_KM_DAY["default"])
-    u["pos"] = dict(goal) if d <= step else _m.lerp(u["pos"], goal, step / d)
-    return f"{u['name']}: переход {'домой' if goal is home else 'в район'} ({min(d, step):.0f} км)."
+    run = min(d, step)
+    # переход - по шагам: встретил корабли противника ближе ENGAGE_KM - остановка (бой - engage), а не проход
+    # сквозь их группу за сутки в их тыл
+    foes = [f for f in ships(state, _m.enemy(u["side"])) if kind(f) != "CONVOY"]   # боевые корабли, не транспорты
+    k, start = 0.0, dict(u["pos"])
+    while k < run:
+        k = min(run, k + 5.0)
+        q = _m.lerp(start, goal, k / d)
+        if any(_m.dist_km(q, f["pos"]) <= CONTACT_KM for f in foes):
+            u["pos"] = q
+            return f"{u['name']}: переход {'домой' if goal is home else 'в район'} - встреча с кораблями противника ({k:.0f} км)."
+    u["pos"] = dict(goal) if d <= step else _m.lerp(start, goal, step / d)
+    return f"{u['name']}: переход {'домой' if goal is home else 'в район'} ({run:.0f} км)."
 
 
 def asm_left(unit: dict, typ: str, name: str) -> int:

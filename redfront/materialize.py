@@ -272,6 +272,7 @@ ATTACK_STANDOFF_KM = 1.2  # ОЦЕНКА: наступающий останав�
 LINE_SPACING_M = 80     # ОЦЕНКА: интервал машин в боевом порядке
 LINE_ROW_M = 150        # ОЦЕНКА: дистанция между линиями
 LINE_WIDTH = 10         # ОЦЕНКА: машин в линии
+AD_SPREAD_M = 600       # ОЦЕНКА: интервал средств войсковой ПВО по фронту части
 AD_BEHIND_M = 800       # ОЦЕНКА: войсковая ПВО за боевым порядком
 
 
@@ -361,7 +362,10 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
     seq = [t for t in order for _ in range(counts[t])]
     # боевой порядок - по доктрине стороны (formations.py): роты, эшелоны, позиции; оборона или наступление
     from . import formations
-    offs = formations.layout((state.get("doctrine") or {}).get(unit["side"], ""),
+    pkg = (state.get("doctrine") or {}).get(unit["side"], "")
+    doc = model.doctrine(state, unit["side"])
+    family = doc.get("base") or ("nato" if doc.get("units") == "imperial" else "wp" if pkg != "generic" else pkg)
+    offs = formations.layout(family,                   # производные пакеты (arab, iaf73, us72) - по своей школе
                              "defend" if unit.get("defending") else "attack", len(seq), [roles[t] for t in seq])
     vehicles = []
     for i, (t, (fwd, right)) in enumerate(zip(seq, offs)):
@@ -388,7 +392,10 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
         for comp in a["composition"]:
             for _ in range(a_counts.get(comp["type"], 0)):
                 k = len(av)
-                p = model.offset(center, axis, -AD_BEHIND_M, (k - 1.5) * 200)
+                # ПВО - по фронту части, а не кучей за центром: точки через AD_SPREAD_M, в глубину 500-1100 м (ОЦЕНКА)
+                n_ad = max(1, sum(a_counts.values()))
+                p = model.offset(center, axis, -AD_BEHIND_M + (300 if k % 2 else -300),
+                                 (k - (n_ad - 1) / 2) * AD_SPREAD_M)
                 av.append({"name": f"{a['id']}#{k + 1:02d}", "type": comp["type"], "lat": p["lat"], "lon": p["lon"],
                            "weight": a_weight[comp["type"]], "heading": axis})
         out.append({"unit": a["id"], "side": a["side"], "kind": "sam_site", "name": a["id"], "vehicles": av, "waypoints": [], "speed_kmh": 0,

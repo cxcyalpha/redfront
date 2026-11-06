@@ -302,7 +302,8 @@ def package_section(tmp: Path) -> None:
           "Су-24М: задача DCS SEAD, подвеска 'Retribution SEAD' (Х-58У, Р-60М, Л-081 на пилоне 5)")
     roe = [t for p in pg["recon"].points for t in p.tasks if type(t).__name__ == "OptROE"]
     zone = [t for p in pg["recon"].points for t in p.tasks if getattr(t, "id", None) == "EngageTargetsInZone"]
-    orbit = [t for p in pg["recon"].points if p.name != "Сбор" for t in p.tasks if getattr(t, "id", None) == "ControlledTask"]
+    orbit = [t for p in pg["recon"].points if p.name != "Сбор" for t in p.tasks if getattr(t, "id", None) == "ControlledTask"
+             and "duration" in t.params.get("stopCondition", {})]   # круг поиска (ожидание ко времени - отдельно)
     center, radius_km = build.search_zone(st, st["units"]["blue_pzgren_bn_1"],
                                           build.timeline(model.doctrine(st, "red")["tasks"]["strike_column_march"], st, tk["package"], "strike")["recon"]["objective_s"], 3)
     check(not roe and len(zone) == 1 and abs(zone[0].params["zoneRadius"] - radius_km * 1000) < 1 and len(orbit) == 1
@@ -2439,7 +2440,10 @@ def qra_section(tmp: Path) -> None:
         Gl.T = 10; L.execute("runDue()")
         quiet = not Gl.ACTIVATED[gname]
         Gl.SEEN = True
-        Gl.T = 20; L.execute("runDue()")
+        for tt in (20, 32, 44, 56):              # засветка на секунду - не тревога: сопровождение 30 с (airpic TRACK_S)
+            Gl.T = tt; L.execute("runDue()")
+            if tt == 32:
+                quiet = quiet and not Gl.ACTIVATED[gname]
         check(quiet and Gl.ACTIVATED[gname] and Gl.REDFRONT_QRA[qid],
               "qra.lua: налёт к базе, но радары стороны его не видят - пара стоит; увидели - пара поднята, время - в дебриф")
     else:
@@ -3172,7 +3176,10 @@ def mixed_section(tmp: Path) -> None:
     pg = {g.name.split(" ")[1]: g for g in plane_groups(m)}
     rv = next(p for p in pg["recon"].points if p.name == "Сбор")
     t_ = build.timeline(model.doctrine(st, "red")["tasks"]["strike_column_march"], st, tk["package"], "strike")
-    check(rv.ETA == t_["recon"]["rv_s"] and rv.ETA_locked and "Сбор" in [p.name for p in pg["strike"].points],
+    rv_hold = [x.params.get("stopCondition", {}).get("time") for x in rv.tasks if getattr(x, "id", None) == "ControlledTask"]
+    check(((rv.ETA == t_["recon"]["rv_s"] and rv.ETA_locked)
+           or any(h in (t_["recon"]["rv_s"], t_["recon"]["rv_s"] + build.RV_WAIT_S) for h in rv_hold))   # раньше - ждёт в круге
+          and "Сбор" in [p.name for p in pg["strike"].points],
           f"группа ИИ приходит в точку сбора ко времени (ETA {rv.ETA // 60} мин), у игрока точка сбора в маршруте")
     order = t_["sead"]["objective_s"] < t_["recon"]["objective_s"] < t_["strike"]["objective_s"]
     desc = m.description_text()
@@ -3821,7 +3828,8 @@ def theatres_section(tmp: Path) -> None:
     gsrc = apic + "\n" + build.gci_script(st6, [{"group": "QRA 1", "side": 1}])
     STUB = '''
       env = { info = function() end }
-      timer = { getTime = function() return 0 end, scheduleFunction = function(f) CHECK = f end }
+      NOW = 0
+      timer = { getTime = function() return NOW end, scheduleFunction = function(f) CHECK = f end }
       Controller = { Detection = { RADAR = 4 } }
       Group = { Category = { GROUND = 2 } }
       PUSHED = {}
@@ -3863,7 +3871,7 @@ def theatres_section(tmp: Path) -> None:
         L.execute(STUB)
         L.execute(setup)
         L.execute(gsrc)
-        L.execute("CHECK()")
+        L.execute("for i = 0, 4 do NOW = i * 12; CHECK() end")   # сопровождение - не меньше 30 с (airpic TRACK_S)
         return L.eval("PUSHED[1] and PUSHED[1].params.groupId or 0")
     # истребитель прикрытия ближе (12 км), ударный дальше (18 км) и идёт к своему объекту - наводим на ударного
     p1 = gci_run('mk("F-14A", 11, "Fighters", 12000, 0); mk("A-6E", 22, "Bombers", 18000, -200)')
@@ -3878,7 +3886,7 @@ def theatres_section(tmp: Path) -> None:
                   "g.activate = function() ACT = ACT + 1 end; return g end")
         L.execute(setup)
         L.execute(qsrc)
-        L.execute("CHECK()")
+        L.execute("for i = 0, 4 do NOW = i * 12; CHECK() end")
         return L.eval("ACT")
     q1 = qra_run('mk("A-6E", 22, "Bombers", 60000, -200)')                       # одиночный ударный к объекту - 1 звено
     q8 = qra_run('mk("F-4E", 33, "Multirole fighters", 80000, -200, 7)')         # налёт из 8 - 2 звена, третье в резерве
