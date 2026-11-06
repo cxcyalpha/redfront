@@ -660,10 +660,8 @@ def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "Carr
             sh.heading = hdg
             sg.add_unit(sh)
         kmh = CARRIER_KMH if base else (46 if naval.kind(u) == "FAC" else 19)
-        leg = model.offset(u["pos"], hdg, CARRIER_LEG_M if base else 15_000)
-        sg.add_waypoint(_pt(m, leg), kmh)
-        sg.add_waypoint(pos, kmh)
-        sg.add_waypoint(_pt(m, leg), kmh)
+        for p_ in ship_route(state, u, hdg, bool(base)):
+            sg.add_waypoint(_pt(m, p_), kmh)
         NAVAL_GROUPS[u["id"]] = sg
         NAVAL_SHIPS[u["id"]] = lst
         if base:
@@ -675,6 +673,32 @@ def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "Carr
                 sg.points[0].tasks.append(task.ActivateICLSCommand(channel=int(b["icls"]), unit_id=sg.units[0].id))
             out[bid] = CarrierPad(sg, b)
     return out
+
+
+SHIP_PATROL_M = 30_000   # ОЦЕНКА: галс патрулирования корабельной группы без приказа
+PORT_STANDOFF_KM = 3     # ОЦЕНКА: конвой идёт к точке в стольких км от порта со стороны моря
+
+
+def ship_route(state: dict, u: dict, hdg: float, carrier: bool) -> list[dict]:
+    """Маршрут группы в миссии: авианосец - галсы против ветра; конвой - в порт назначения морского пути (sea_lanes);
+    группа с приказом на сутки (orders) - к своей точке; остальные - патрулирование галсами вдоль позиции."""
+    from . import naval
+    pos = u["pos"]
+    if carrier:
+        leg = model.offset(pos, hdg, CARRIER_LEG_M)
+        return [leg, pos, leg]
+    lane = next((ln for ln in state.get("sea_lanes") or [] if ln.get("convoy") == u["id"]), None)
+    if lane and lane.get("port") in state.get("places", {}):
+        port = state["places"][lane["port"]]
+        d = model.dist_km(pos, port)
+        if d > PORT_STANDOFF_KM + 1:
+            return [model.lerp(pos, port, 0.5), model.lerp(pos, port, 1 - PORT_STANDOFF_KM / d)]
+    goal = naval.goal_today(state, u)
+    if goal and model.dist_km(pos, goal) > 2:
+        return [model.lerp(pos, goal, 0.5), dict(goal), model.offset(goal, hdg + 90, SHIP_PATROL_M / 2)]
+    a = model.offset(pos, hdg + 90, SHIP_PATROL_M / 2)
+    b = model.offset(pos, hdg - 90, SHIP_PATROL_M / 2)
+    return [a, b, a, b]
 
 
 def naval_manifest() -> list[dict]:

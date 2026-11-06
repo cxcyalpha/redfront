@@ -152,6 +152,16 @@ AD_SAVE = 0.5           # ОЦЕНКА: ЗРК и артиллерия кора�
 HITS_TO_SINK = {"CV": 4, "LH": 3, "CG": 2.5, "DDG": 2, "FFG": 1.5, "FF": 1.2, "FAC": 1, "LS": 1.5, "AK": 1.5, "AO": 1.5}
 
 
+def goal_today(state: dict, u: dict) -> dict | None:
+    """Точка приказа группы на сутки (orders): к ней, после until_day - домой; нет приказа - None."""
+    home = u.get("home_pos") or u["pos"]
+    goal = None
+    for o in sorted(u.get("orders") or [], key=lambda o: o["day"]):
+        if state["day"] >= o["day"]:
+            goal = o["to"] if state["day"] < o.get("until_day", 10**6) else home
+    return goal
+
+
 def _move(state: dict, u: dict) -> str | None:
     """Приказ группы на сутки (orders: [{day, to: {lat, lon}, until_day}]): переход к точке, после until_day - домой."""
     from . import model as _m
