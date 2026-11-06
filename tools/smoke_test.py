@@ -3952,6 +3952,17 @@ def theatres_section(tmp: Path) -> None:
     mp_after = Ls.eval("ROE.MP1")
     check(far == 4 and early == 4 and late == 2 and mp_open == 2 and mp_after == 4,
           "samctl.lua: ЗРК - огонь ближе 70% зоны и после реакции расчёта (25 с); ПЗРК - по близкой цели, 2 пуска и всё")
+    from redfront import gui as _gui
+    _orig = _gui.liveries
+    _gui.liveries = lambda st_, u_: [{"id": "IAF 69th Squadron", "name": "IAF 69th Squadron"},
+                                     {"id": "USAF 52 TFW", "name": "USAF 52 TFW"}, {"id": "default", "name": "default"}]
+    try:
+        lv1 = _gui.match_livery(st6, {"name": "69-я и 107-я эскадрильи (F-4E 'Курнас')"})
+        lv2 = _gui.match_livery(st6, {"name": "Эскадрилья без номера"})
+    finally:
+        _gui.liveries = _orig
+    check(lv1 == "IAF 69th Squadron" and lv2 is None,
+          f"ливреи по названию полка: '69-я и 107-я эскадрильи' -> {lv1}; без общего номера - нет ({lv2})")
     check("redfront gci" in mz and p1 == 22 and p2 == 0,
           f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
           f"и цель за границей наведения - без наведения ({p2})")

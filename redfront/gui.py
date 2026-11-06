@@ -348,6 +348,45 @@ def liveries(st: dict, u: dict) -> list[dict]:
         return []
 
 
+def _tokens(text: str) -> set[str]:
+    """Признаки названия полка для сравнения с ливреей: номера (69, 107, VF-114 -> 114, vf114), латинские слова."""
+    import re as _re
+    t = text.lower()
+    out = set(_re.findall(r"\d{2,4}", t))
+    out |= {a + b for a, b in _re.findall(r"([a-z]{2,5})[- ]?(\d{2,4})", t)}
+    out |= {w for w in _re.findall(r"[a-z]{4,}", t) if w not in ("squadron", "wing", "group", "fighter", "the", "and")}
+    return out
+
+
+def match_livery(st: dict, u: dict) -> str | None:
+    """Стандартная ливрея DCS, подходящая полку по названию: общий номер эскадрильи/крыла (69, 107, VF-114) - главное,
+    слова (aggressor, sea hag) - добавка; без общего номера - нет. Нет DCS - None."""
+    lvs = liveries(st, u)
+    if not lvs:
+        return None
+    mine = _tokens(u.get("name", "") + " " + (u.get("source") or "")[:0])
+    nums = {t for t in mine if t.isdigit() or any(ch.isdigit() for ch in t)}
+    best, bs = None, 0
+    for lv in lvs:
+        th = _tokens(lv["id"] + " " + lv["name"])
+        sc = 3 * len(nums & th) + len((mine - nums) & th)
+        if sc > bs:
+            best, bs = lv["id"], sc
+    return best if bs >= 3 else None
+
+
+def auto_liveries(st: dict, force: bool = False) -> int:
+    """Полкам без ливреи (force - всем) - стандартная ливрея DCS по названию. Возвращает число назначенных."""
+    n = 0
+    for u in st["units"].values():
+        if model.category(u) not in ("air", "heli") or (u.get("livery") and not force):
+            continue
+        lv = match_livery(st, u)
+        if lv:
+            u["livery"], n = lv, n + 1
+    return n
+
+
 def _types_txt(st: dict, u: dict) -> str:
     """Состав: тип исправных/штат; уничтоженные - видно сразу (Kub_1S91_str 0/1)."""
     lost = u.get("lost") or {}
@@ -427,8 +466,15 @@ class App:
         return out
 
     def livery_file(self, st: dict) -> Path:
-        """Ливреи полков по умолчанию для театра кампании: liveries_<театр>.json в папке кампаний."""
-        return self.root / f"liveries_{roads.sector_id(st['sector'])}.json"
+        """Пресет ливрей полков сценария - в папке пользователя (не в папке установки redfront): <Saved Games>\\redfront\\
+        liveries\\<сценарий>.json; переживает обновление и переустановку программы."""
+        d = (self.home or Path.home()) / "Saved Games" / "redfront" / "liveries"
+        d.mkdir(parents=True, exist_ok=True)
+        key = Path(str(st.get("oob") or roads.sector_id(st["sector"]))).stem   # пресет сценария (oob_golan73, свой пресет)
+        return d / f"{key}.json"
+
+    def livery_file_old(self, st: dict) -> Path:
+        return self.root / f"liveries_{roads.sector_id(st['sector'])}.json"   # прежнее место (до переноса) - читается
 
     def preset_path(self, tid: str, key: str | None) -> str | Path:
         """Файл пресета по ключу из presets() (только из списка - путь извне не принимается)."""
@@ -482,6 +528,8 @@ class App:
             else:
                 lines.append("Зонда карты нет: склады и мосты по оценочным координатам (кнопка 'Зонд карты').")
             lf = self.livery_file(st)                # ливреи по умолчанию (кнопка на вкладке «Авиация»): полк того же типа
+            if not lf.exists() and self.livery_file_old(st).exists():
+                lf = self.livery_file_old(st)
             if lf.exists():
                 try:
                     lv = json.loads(lf.read_text(encoding="utf-8"))
@@ -493,7 +541,10 @@ class App:
                     if u and u.get("type") == x.get("type") and x.get("livery"):
                         u["livery"], n = x["livery"], n + 1
                 if n:
-                    lines.append(f"Ливреи по умолчанию: {n} полков ({lf.name}).")
+                    lines.append(f"Ливреи по умолчанию: {n} полков ({lf}).")
+            na = auto_liveries(st)                   # остальным - стандартная ливрея DCS по названию полка (номер эскадрильи)
+            if na:
+                lines.append(f"Ливреи по названию полка (стандартные DCS): {na}.")
             sc = st.get("scenario") or {}
             lines.append(f"Создана кампания {p.name}: {sc.get('title') or sc.get('variant')}, seed {sc.get('seed')}.")
             snapshot(st)                             # хронология карты: начало 1-го дня
@@ -609,12 +660,15 @@ class App:
             lines.append(f"{u['name']}: ливрея {lv or 'по умолчанию DCS'}.")
             model.save(st, p)
             return {"lines": lines, "state": view(st)}
+        if action == "liveryauto":                   # подобрать стандартные ливреи DCS по названиям полков
+            n = auto_liveries(st, force=bool(req.get("force")))
+            lines.append(i18n.L(i18n.lang(st), f"Ливреи подобраны по названию полка: {n}.", f"Liveries matched by unit name: {n}."))
         if action == "liverydefaults":               # ливреи полков кампании - по умолчанию для новых кампаний театра
             f = self.livery_file(st)
             data = {u["id"]: {"type": u.get("type"), "livery": u["livery"]} for u in st["units"].values()
                     if model.category(u) in ("air", "heli") and u.get("livery")}
             f.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
-            lines.append(f"Ливреи по умолчанию ({len(data)} полков) - {f.name}: новые кампании театра получат их сразу.")
+            lines.append(f"Пресет ливрей ({len(data)} полков) - {f}: новые кампании этого сценария получат их сразу.")
             return {"lines": lines}
         if action == "rebaseoptions":                # режим командующего: куда можно перебазировать часть
             return {"options": command.base_options(st, req["id"])}
