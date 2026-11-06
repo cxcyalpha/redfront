@@ -401,7 +401,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
         performers = [u for u in state["units"].values()
                       if u["side"] == side and role_ok(state, u, tdef["performers"]) and logistics.available(state, u) > 0
-                      and kind in u.get("tasks_only", [kind]) and not u.get("mod_off")]   # специализированная часть (спасатели HH-53) - только свои задачи
+                      and kind in u.get("tasks_only", [kind]) and kind not in u.get("tasks_not", [])
+                      and not u.get("mod_off")]   # специализированная часть (спасатели HH-53) - только свои задачи
         if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
             from . import assault
             performers = [u for u in performers if assault.troops(u.get("type", "")) > 0]
@@ -501,7 +502,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 d = model.dist_km(state["airbases"][r["base"]], tpos)
                 # сначала - пригодный тип (оценка относительно лучшего в кампании) с поправкой на загрузку: задачи
                 # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
-                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls), 3), d)
+                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls)
+                             + (r.get("task_penalty") or {}).get(kind, 0.0), 3), d)   # задача - не основная для части
                 if d <= radius and (best is None or key < best[0]):
                     best = (key, r)
             if best is None:

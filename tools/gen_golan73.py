@@ -282,9 +282,10 @@ def main() -> None:
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": bid, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
                       "estimate": True, **({"mod": MOD_TYPES[typ]} if typ in MOD_TYPES else {}),
-                      # F-4E ВВС Израиля в начале войны - без контейнеров РЭБ (ALQ-119 - с воздушным мостом США, после
-                      # 14.10; ОЦЕНКА, по памяти): на месте РЭБ - AIM-7
-                      **({"ecm_pods": False} if typ == "F_4E_45MC" else {})})
+                      # F-4E ВВС Израиля 1973: в основном глубокие удары и подавление ЗРК, CAS у переднего края - чаще A-4
+                      # (распределение задач ВВС Израиля): CAS 'Фантому' - только если нет A-4 (штраф к выбору, не
+                      # запрет; вылет вручную - можно); контейнеры РЭБ - были (ecm_pods по умолчанию)
+                      **({"task_penalty": {"cas_contact": 1.0, "cas_helo": 1.0}} if typ == "F_4E_45MC" else {})})
     oob = {
         "_about": "Октябрьская война 1973 г., Голанский фронт (Израиль - Сирия, Ирак, Иордания). tools/gen_golan73.py.",
         "theatre": "syria",

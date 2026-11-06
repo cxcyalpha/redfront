@@ -1887,7 +1887,10 @@
    "strike_radius_km": 500,
    "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
    "estimate": true,
-   "ecm_pods": false
+   "task_penalty": {
+    "cas_contact": 1.0,
+    "cas_helo": 1.0
+   }
   },
   {
    "id": "i_f4_hz",
@@ -1900,7 +1903,10 @@
    "strike_radius_km": 500,
    "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
    "estimate": true,
-   "ecm_pods": false
+   "task_penalty": {
+    "cas_contact": 1.0,
+    "cas_helo": 1.0
+   }
   },
   {
    "id": "i_f4_tn",
@@ -1913,7 +1919,10 @@
    "strike_radius_km": 500,
    "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; число и радиус - ОЦЕНКА",
    "estimate": true,
-   "ecm_pods": false
+   "task_penalty": {
+    "cas_contact": 1.0,
+    "cas_helo": 1.0
+   }
   },
   {
    "id": "i_a4_hz",
