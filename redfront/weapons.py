@@ -17,7 +17,7 @@ YEARS = [   # (образец имени, год) - ОЦЕНКИ
     # воздух-воздух
     (r"AIM-120C", 1996), (r"AIM-120", 1991), (r"AIM-9X", 2003), (r"AIM-9M", 1982), (r"AIM-9L", 1978),
     (r"AIM-9P", 1978), (r"AIM-7MH", 1987), (r"AIM-7M", 1982), (r"AIM-7F", 1976), (r"AIM-54C", 1986),
-    (r"R-77", 1994), (r"R-73", 1983), (r"R-27E[RT]", 1987), (r"R-27[RT]", 1984), (r"R-60M", 1982),
+    (r"R-77", 1994), (r"R-73", 1983), (r"R-27E[RT]", 1987), (r"R-27[RT]", 1984), (r"R-60M", 1982), (r"R-60", 1974),
     (r"Python-?4|Python 4", 1993), (r"Magic ?(II|2)", 1986), (r"Super ?530D", 1987), (r"MICA", 1996),
     (r"IRIS-T", 2005), (r"ASRAAM", 2002), (r"Meteor", 2016), (r"Derby", 1995), (r"PL-12", 2005),
     # управляемое воздух-поверхность
@@ -27,6 +27,7 @@ YEARS = [   # (образец имени, год) - ОЦЕНКИ
     (r"AGM-122", 1986), (r"AGM-154", 1999), (r"AGM-84[EHK]", 1990),
     (r"AGM-84", 1977), (r"AGM-114", 1985), (r"AGM-119", 1986), (r"AGM-130", 1994), (r"AGM-62", 1967),
     (r"Kh-31", 1990), (r"Kh-29", 1980), (r"Kh-25MPU", 1993), (r"Kh-25MP", 1981), (r"Kh-25ML", 1975),
+    (r"Kh-25MR", 1975), (r"Kh-23", 1974), (r"Kh-66", 1968), (r"Kh-28", 1973), (r"S-25L", 1980),
     (r"Kh-58", 1978), (r"Kh-59M", 1990), (r"Kh-59", 1980), (r"Kh-35", 2003), (r"Kh-38", 2012),
     (r"Kh-41", 1995), (r"9M127|Vikhr", 1992), (r"9M120|Ataka", 1996), (r"9M114|Shturm", 1976),
     (r"ALARM", 1990), (r"Sea Eagle", 1985), (r"Kormoran ?2", 1991), (r"Storm Shadow|SCALP", 2002),
@@ -63,6 +64,7 @@ FALLBACK = {   # семейство (образец) -> замены по пор
     r"CBU-8[79]": [r"Mk-20", r"CBU-52"],
     r"Kh-31P|Kh-25MPU": [r"Kh-58", r"Kh-25MP\b", r"Kh-28"],
     r"Kh-29|Kh-38|Kh-59": [r"Kh-29", r"Kh-25ML", r"Kh-23"],
+    r"Kh-25M[LR]|Kh-23": [r"Kh-25ML", r"Kh-23", r"Kh-66"],
     r"KAB-500S": [r"KAB-500Kr", r"KAB-500L"],
     r"9M127|Vikhr": [r"S-8KOM", r"S-5"],
     r"9M120|Ataka": [r"9M114|Shturm", r"S-8", r"S-5"],
@@ -126,8 +128,49 @@ def substitute(ac, num: int, name: str, year: int) -> dict | None:
     return None
 
 
-def degrade(fg, year: int | None) -> list[str]:
-    """Подвеска группы - по году кампании: новее - замена или снятие. Возвращает строки 'было -> стало'."""
+ECM_RX = r"ALQ-|ECM|Jammer|SPS-141|SPS-5|Sorbtsiya|Barax|BOZ-|Tracker|AN/ALQ"
+AA_RX = r"AIM-|R-\d|Magic|Python|Shafrir|Sidewinder|Sparrow|Matra R|R550|R530|Super 530"
+UNGUIDED_RX = r"FAB|OFAB|BetAB|Mk-8[1-4]|M117|Mk-20|CBU-|RBK|BL-755|BLU-|SAMP|BAP|S-5|S-8|S-24|S-25|UB-|B-8|LAU-|Hydra|FFAR|Zuni|Matra F|SNEB|MBD|MER|TER"
+SKIP_RX = r"Fuel|Tank|PTB|Smoke|pod|Pod|TGP|AN/AAQ|Pave|LANTIRN|Kopyo|Kh-|AGM|GBU|KAB|Laser"
+
+
+def is_ecm(name: str) -> bool:
+    return bool(re.search(ECM_RX, name, re.I)) and not re.search(r"L-081|Fantasmagoria", name, re.I)
+
+
+def ecm_substitute(ac, num: int, ecm: bool) -> dict | None:
+    """РЭБ новее года: ecm (сторона и эпоха летали с РЭБ) - самый ранний контейнер РЭБ этого пилона, даже если по году
+    он новее (в DCS РЭБ условен - лучше любой, чем никакого); без РЭБ - ракета воздух-воздух (у F-4E - AIM-7)."""
+    opts = _pylon_options(ac, num)
+    if ecm:
+        pods = [w for w in opts if is_ecm(w["name"])]
+        return min(pods, key=lambda w: year_of(w["name"])) if pods else None
+    aa = [w for w in opts if re.search(AA_RX, w["name"], re.I) and year_of(w["name"]) == 0]
+    return min(aa, key=lambda w: (0 if "AIM-7" in w["name"] else 1, len(w["name"]))) if aa else None
+
+
+def dumb_substitute(ac, num: int, name: str, year: int, wt: float = 0.0) -> dict | None:
+    """Управляемого оружия по году нет: неуправляемое этого пилона - НАР вместо ракет (Х-25, AGM-65, С-25Л), бомбы
+    вместо УАБ; ракета воздух-воздух - самая старая этого пилона. Ближе по массе к исходному. Нет - None."""
+    opts = [w for w in _pylon_options(ac, num) if year_of(w["name"]) <= year]
+    if re.search(AA_RX, name, re.I):
+        aa = [w for w in opts if re.search(AA_RX, w["name"], re.I)]
+        return min(aa, key=lambda w: year_of(w["name"])) if aa else None
+    if re.search(r"Fuel|Tank|PTB|Smoke", name, re.I) or is_ecm(name):
+        return None
+    dumb = [w for w in opts if re.search(UNGUIDED_RX, w["name"], re.I) and not re.search(SKIP_RX, w["name"])]
+    if not dumb:
+        return None
+    rockets = re.search(r"Kh-2[59]|Kh-23|AGM-65|AGM-62|S-25L|Maverick|AS-?30|Vikhr|Hellfire|9M1", name, re.I)
+    pref = [w for w in dumb if re.search(r"S-5|S-8|S-24|S-25|UB-|B-8|LAU-|Hydra|FFAR|Zuni|SNEB|Matra F", w["name"])] if rockets else \
+        [w for w in dumb if re.search(r"FAB|OFAB|Mk-8|M117|BetAB|MBD|MER|TER|SAMP|BAP|CBU-|RBK|Mk-20|BL-755", w["name"])]
+    pool = pref or dumb
+    return min(pool, key=lambda w: abs(float(w.get("weight") or 0) - wt))
+
+
+def degrade(fg, year: int | None, ecm: bool = True) -> list[str]:
+    """Подвеска группы - по году кампании: новее - замена (более старым той же роли, РЭБ - самым ранним контейнером
+    или ракетой, управляемое - неуправляемым), снятие - только если на пилоне нечем заменить. Строки 'было -> стало'."""
     if not year:
         return []
     notes = []
@@ -138,6 +181,10 @@ def degrade(fg, year: int | None) -> list[str]:
             if not name or year_of(name) <= year:
                 continue
             w = substitute(ac, int(num), name, year)
+            if not w and is_ecm(name):           # РЭБ: был в реальности - самый ранний контейнер DCS (даже новее года:
+                w = ecm_substitute(ac, int(num), ecm)   # РЭБ в DCS условен); не было - ракета воздух-воздух на место
+            if not w:                            # нет управляемого по году - неуправляемое той же роли, а не пустой пилон
+                w = dumb_substitute(ac, int(num), name, year, float((by_clsid().get(d.get("CLSID", "")) or {}).get("weight") or 0))
             if w:
                 u.pylons[num] = {"CLSID": w["clsid"]}
                 note = f"{name} -> {w['name']}"

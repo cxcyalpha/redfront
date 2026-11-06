@@ -824,6 +824,8 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
     Ничего - загрузка DCS по умолчанию для maintask (None)."""
     from . import weapons
     year = weapons.campaign_year(state) if state else None
+    perf = ((state or {}).get("units") or {}).get(fg.name.split(" ")[0]) or {}
+    ecm = perf.get("ecm_pods", True)             # часть летала с контейнерами РЭБ (нет - на их место ракета)
     for cat in cats:
         if cat.startswith(("rt:", "my:")):       # выбранная подвеска: по задаче (payloads.json) или своя (custom_loadouts)
             src = ((state or {}).get("custom_loadouts") or {}) if cat.startswith("my:") else model.load_json("payloads.json").get("types", {})
@@ -834,7 +836,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                     for num, d in pls["pylons"].items():
                         if int(num) in ac.pylons:
                             u.pylons[int(num)] = dict(d)
-                weapons.degrade(fg, year)
+                weapons.degrade(fg, year, ecm)
                 weapons.fixups(fg, year)
                 return cat[3:].replace("Retribution ", "")
     for cat in cats:
@@ -846,10 +848,10 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                 for num, d in pylons.items():
                     if int(num) in ac.pylons:
                         u.pylons[int(num)] = dict(d)
-            weapons.degrade(fg, year)
+            weapons.degrade(fg, year, ecm)
             weapons.fixups(fg, year)
             return name.replace("Retribution ", "")   # подвеска - по функции (Strike, CAS, SEAD...)
-    weapons.degrade(fg, year)
+    weapons.degrade(fg, year, ecm)
     return None
 
 

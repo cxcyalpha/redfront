@@ -281,7 +281,10 @@ def main() -> None:
         assert bid in airbases, (uid, base)
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": bid, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
-                      "estimate": True, **({"mod": MOD_TYPES[typ]} if typ in MOD_TYPES else {})})
+                      "estimate": True, **({"mod": MOD_TYPES[typ]} if typ in MOD_TYPES else {}),
+                      # F-4E ВВС Израиля в начале войны - без контейнеров РЭБ (ALQ-119 - с воздушным мостом США, после
+                      # 14.10; ОЦЕНКА, по памяти): на месте РЭБ - AIM-7
+                      **({"ecm_pods": False} if typ == "F_4E_45MC" else {})})
     oob = {
         "_about": "Октябрьская война 1973 г., Голанский фронт (Израиль - Сирия, Ирак, Иордания). tools/gen_golan73.py.",
         "theatre": "syria",
