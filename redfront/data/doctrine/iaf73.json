@@ -2247,6 +2247,7 @@
   "source": "ATP-27(C)/AJP-3.3.2 Air Interdiction and Close Air Support (1999), 401.4: совместные действия вертолётов и самолётов (JAAT) - по одной цели, вертолёты первыми по ПВО и головным машинам; время - ОЦЕНКА"
  },
  "nation_bonus": null,
+ "units": "imperial",
  "base": "nato",
  "gci": {
   "channels": 4,

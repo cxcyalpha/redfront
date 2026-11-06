@@ -2854,5 +2854,6 @@
    "strike": 0.1,
    "sead": 0.15
   }
- }
+ },
+ "units": "imperial"
 }

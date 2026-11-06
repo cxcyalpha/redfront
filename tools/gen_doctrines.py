@@ -53,6 +53,8 @@ PACKAGES = [
                                "method_source": "19.04.1972: пара МиГ-17 бомбами с малой высоты по эсминцам у Донгхоя - "
                                                 "единичный эпизод (размер группы - ОЦЕНКА)"}},
         sim={"night_power": 1.2, "attack_min_strength": 0.6, "withdraw_below": 0.45,
+             "sam_scoot_types": ["S_75M_Volhov", "SNR_75V"], "sam_move_days": [2, 6],
+             "sam_note_vn": "дивизионы С-75 ДРВ меняли позиции часто - через 2-6 суток, каждый в свой день (ОЦЕНКА)",
              "night_note": "Северовьетнамская армия: ночные действия и просачивание - сильная сторона (night_power 1.2 - "
                            "ОЦЕНКА); атаки - и при меньшей боеспособности (attack_min_strength 0.6, отход ниже 0.45 - ОЦЕНКА)"},
     ),
@@ -137,9 +139,40 @@ YEAR_GATES = {   # задачи по году кампании в базовых
 }
 
 
+# Профили высот по доктрине и эпохе (ОЦЕНКИ). Низко (НАТО 80-х, Израиль 1973, ВД) - под РЛС ЗРК, рельефом; средние
+# высоты (США над Северным Вьетнамом 1972) - выше зенитной артиллерии и ПЗРК, от С-75 - манёвром, ПРР и помехами;
+# снижения в зонах ЗРК нет (low_alt = transit). Удар - с пикирования (attack_alt - высота ввода).
+ALT_PROFILES = {
+    "us72": {
+        "_note": "США 1972 (Лайнбэкер): ударные группы ВМС и ВВС на 12-18 тыс. футов (3,5-5,5 км), бомбометание с "
+                 "пикирования, MiGCAP выше - ОЦЕНКА по Michel (1997); B-52 - 30-35 тыс. футов",
+        "strike": {"transit_alt_m_agl": 4500, "low_alt_m_agl": 4500, "attack_alt_m_agl": 2500, "egress_alt_m_agl": 4500,
+                   "medium_alt_m_agl": 4500},
+        "cas": {"transit_alt_m_agl": 3000, "low_alt_m_agl": 3000, "attack_alt_m_agl": 1200, "egress_alt_m_agl": 3000},
+        "b52": {"transit_alt_m_agl": 10000, "low_alt_m_agl": 10000, "attack_alt_m_agl": 10000, "egress_alt_m_agl": 10000},
+        "support_alt": {"cover": 6000, "migcap": 7000},
+    },
+}
+STRIKE_METHODS = ("on_call", "sequential_on_call", "interdiction")
+
+
+def alt_patch(d: dict, prof: dict) -> None:
+    for k, t in d["tasks"].items():
+        if t.get("method") not in STRIKE_METHODS or "attack_helo" in t.get("performers", []) or k == "cas_helo":
+            continue
+        key = "b52" if k == "strike_b52" else "cas" if k == "cas_contact" else "strike"
+        t.update(prof[key])
+        t["alt_source"] = prof["_note"]
+        for sp in t.get("support", []):
+            if sp["id"] in prof["support_alt"]:
+                sp["alt_m"] = prof["support_alt"][sp["id"]]
+
+
 def main() -> None:
     us = json.loads((DOC / "us72.json").read_text(encoding="utf-8"))   # us72 - на основе nato (файл не генерируется)
     qra_patch(us, QRA["nato"])
+    alt_patch(us, ALT_PROFILES["us72"])
+    us["units"] = "imperial"
     (DOC / "us72.json").write_text(json.dumps(us, ensure_ascii=False, indent=1), encoding="utf-8")
     for base, gates in YEAR_GATES.items():
         p = DOC / f"{base}.json"
@@ -147,6 +180,7 @@ def main() -> None:
         for k, (y, why) in gates.items():
             if k in d["tasks"]:
                 d["tasks"][k]["from_year"], d["tasks"][k]["from_year_source"] = y, why
+        d["units"] = "imperial" if base == "nato" else "metric"   # единицы планирования: футы и узлы НАТО / метры ОВД
         if base in BASE_GCI:
             d["gci"] = BASE_GCI[base]
         if base in QRA:

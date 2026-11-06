@@ -1370,7 +1370,8 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                     elif (pt.name in ("Цель", "Target", "Рубеж атаки", "Attack line", "Рубеж пуска", "Launch line")
                           and times_player.get("objective_s") and not obj_done):   # первая точка выхода на объект - TOT
                         t, obj_done = float(times_player["objective_s"]), True
-                route.append(f"{i:2d}  {hhmm(t)}  {pt.alt:>6.0f} {L('м', 'm')}  {pt.name or ''}")
+                sp = f"  {fmt_spd(state, tk['side'], (pt.speed or 0) * 3.6, lg)}" if i > 0 and pt.speed else ""
+                route.append(f"{i:2d}  {hhmm(t)}  {fmt_alt(state, tk['side'], pt.alt, lg)}{sp}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
             fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-"), L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")]
@@ -1389,11 +1390,11 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 if tpos:
                     clock.append(L("Цель: ", "Target: ") + _dms(tpos["lat"], "NS") + " " + _dms(tpos["lon"], "EW"))
             pages = [
-                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), clock + [L(f"Удаление цели {tk['distance_km']:.0f} км", f"Target distance {tk['distance_km']:.0f} km"),
+                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), clock + [L("Удаление цели ", "Target distance ") + fmt_dist(state, tk["side"], tk["distance_km"], lg),
                                            L("Угрозы: ", "Threats: ") + (", ".join(state["units"][t]["name"] for t in tk["threats"]) or L("не выявлены", "none detected"))]),
                                           (L("Тактическая группа", "Package"), lines),
                                           (L("Порядок действий", "Sequence"), order_lines),
-                                          (L("Маршрут (точка, время, высота)", "Route (point, time, altitude)"), route)]),
+                                          (L("Маршрут (точка, время, высота, скорость)", "Route (point, time, altitude, speed)"), route)]),
                 (L("СВЯЗЬ", "COMMS"), [(L("Каналы и позывные", "Channels and callsigns"), comm_lines or ["-"])]),
                 (L("ПОГОДА", "WEATHER"), [(L("Погода", "Weather"), wx_text.split("\n")), (L("Аэродромы", "Airfields"), fields)]),
             ]
@@ -1401,6 +1402,52 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 seen.add((ut.id, fg.name))
                 groups.append({"type": ut, "sub": sub, "pages": pages})
     return kneeboard.build(m, lg, groups)
+
+
+FT, KT, NM = 0.3048, 1.852, 1.852   # м в футе, км/ч в узле, км в морской миле
+
+
+def imperial(state: dict, side: str) -> bool:
+    """Единицы стороны (доктрина units): imperial - футы, узлы, мили (НАТО, США, Израиль); metric - метры, км/ч (ОВД)."""
+    return model.doctrine(state, side).get("units", "metric") == "imperial"
+
+
+def q_alt(state: dict, side: str, alt_m: float) -> float:
+    """Высота точки - круглым числом в единицах стороны: футы - по 100 до 1000, по 500 до 10 000, выше по 1000;
+    метры - по 10 до 300, по 50 до 1000, выше по 100."""
+    if alt_m <= 0:
+        return alt_m
+    if imperial(state, side):
+        ft = alt_m / FT
+        step = 100 if ft < 1000 else 500 if ft < 10000 else 1000
+        return round(max(step, round(ft / step) * step) * FT, 1)
+    step = 10 if alt_m < 300 else 50 if alt_m < 1000 else 100
+    return float(max(step, round(alt_m / step) * step))
+
+
+def q_spd(state: dict, side: str, kmh: float) -> float:
+    """Скорость - узлы по 10 (НАТО) или км/ч по 50 (ОВД)."""
+    if imperial(state, side):
+        return round(round(kmh / KT / 10) * 10 * KT, 1)
+    return float(round(kmh / 50) * 50)
+
+
+def fmt_alt(state: dict, side: str, alt_m: float, lg: str) -> str:
+    if imperial(state, side):
+        return f"{alt_m / FT:>6.0f} " + i18n.L(lg, "фт", "ft")
+    return f"{alt_m:>6.0f} " + i18n.L(lg, "м", "m")
+
+
+def fmt_dist(state: dict, side: str, km: float, lg: str) -> str:
+    if imperial(state, side):
+        return f"{km / NM:.0f} " + i18n.L(lg, "миль", "NM")
+    return f"{km:.0f} " + i18n.L(lg, "км", "km")
+
+
+def fmt_spd(state: dict, side: str, kmh: float, lg: str) -> str:
+    if imperial(state, side):
+        return f"{kmh / KT:.0f} " + i18n.L(lg, "уз", "kt")
+    return f"{kmh:.0f} " + i18n.L(lg, "км/ч", "km/h")
 
 
 def _dms(v: float, hemi: str) -> str:
@@ -1795,9 +1842,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         def wp(p, alt, name, keep_alt=False):
             if not keep_alt and side_g == tk["side"] and in_threat(p, circles):   # в известной зоне ЗРК - на предельно малой высоте
                 alt = min(alt, tdg.get("low_alt_m_agl", alt))
+            alt = q_alt(state, side_g, alt)          # круглые высоты в единицах стороны (футы НАТО / метры ОВД)
             if not is_player and not helo and alt < AI_LOW_MIN_M:  # ИИ ниже этого бьётся о землю (Су-24М: 3 случая на 40-80 м)
                 alt = AI_LOW_MIN_M
-            w = fg.add_waypoint(_pt(m, p), alt, speed=spd, name=name)
+            w = fg.add_waypoint(_pt(m, p), alt, speed=q_spd(state, side_g, spd), name=name)
             w.alt_type = "RADIO"
             return w
         if not is_player:                        # ИИ - только своя задача: без "поражать цели по пути" от основной задачи DCS

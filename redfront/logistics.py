@@ -460,7 +460,14 @@ SAM_REPAIR_DAYS = {"radar": 6, "launcher": 2, "other": 2}   # ОЦЕНКА: су
 # с завода или из резерва, пусковые и ракеты - подвоз); доктрина: sim.sam_repair_days
 SAM_MOBILE = {"Kub_1S91_str", "Kub_2P25_ln", "Osa_9A33_ln", "Strela_1_9P31", "Strela_10M3", "Roland_ADS", "Roland_Radar",
               "X_2S6_Tunguska", "Tor 9A331", "M48 Chaparral", "Gepard", "ZSU_23_4_Shilka", "Vulcan", "rapier_fsa_launcher"}
-SAM_MOVE_DAYS = 3            # ОЦЕНКА: подвижный ЗРК (Куб, Оса) меняет позицию и без потерь - раз в столько суток
+SAM_MOVE_DAYS = (2, 4)       # ОЦЕНКА: подвижный ЗРК (Куб, Оса) меняет позицию и без потерь - через случайный срок, сут
+# (доктрина: sim.sam_move_days [от, до]; sim.sam_scoot_types - и эти типы, например С-75 ДРВ)
+
+
+def _move_gap(state: dict, u: dict, sim: dict) -> int:
+    lo, hi = sim.get("sam_move_days") or SAM_MOVE_DAYS
+    r = model.rng(state, f"sam-gap-{u['id']}-{state['day']}")
+    return int(r.randint(int(lo), int(hi))) if r else int(round((lo + hi) / 2))
 
 
 def is_radar(c: dict) -> bool:
@@ -493,9 +500,14 @@ def air_defence(state: dict) -> list[str]:
         parent = state["units"].get(u.get("attached_to") or "")
         lost_now = sum(u["lost"].values())
         hit = lost_now > u.get("lost_at_move", 0.0) + 1e-6
-        due = sam_mobile(u) and state["day"] - u.get("moved_day", 0) >= SAM_MOVE_DAYS   # Куб, Оса - и без потерь
-        if not parent and "pos" in u and (not u.get("fixed") or sam_mobile(u)) and (hit or due) and not u.get("point") and not u.get("covers"):
+        scoot = sam_mobile(u) or any(c["type"] in (sim.get("sam_scoot_types") or []) for c in u.get("composition", []))
+        if scoot and "next_move_day" not in u:   # первая плановая смена - у каждой батареи в свой день (не все разом)
+            u["next_move_day"] = state["day"] + _move_gap(state, u, sim)
+        due = scoot and state["day"] >= u.get("next_move_day", 10**6)   # Куб, Оса; С-75 ДРВ - и без потерь
+        if not parent and "pos" in u and (not u.get("fixed") or scoot) and (hit or due) and not u.get("point") and not u.get("covers"):
             u["moved_day"] = state["day"]
+            if scoot:
+                u["next_move_day"] = state["day"] + _move_gap(state, u, sim)   # следующая - через случайный срок
             r = model.rng(state, f"sam-move-{u['id']}")
             axis = materialize.threat_axis_deg(state, u)
             brg = (axis + 180.0 + (r.uniform(-90.0, 90.0) if r else 0.0)) % 360.0
