@@ -520,6 +520,11 @@ false
 false
 ],
 [
+"Барражирование\\ над\\ прикрываемым\\ районом",
+"Barrier CAP over a defended area",
+false
+],
+[
 "Вся\\ карта:\\ фронт\\ от\\ Балтики\\ до\\ Хофа\\ \\((?P<y>[\\d/.,:?~%\\- ]+?)\\)",
 "Whole map: front from the Baltic to Hof ({y})",
 false
@@ -1062,6 +1067,11 @@ false
 [
 "удар\\ с\\ воздуха,\\ бомбы",
 "air strike, bombs",
+false
+],
+[
+"пара\\ прикрытия\\ МиГ\\-21",
+"MiG-21 escort pair",
 false
 ],
 [
@@ -1627,6 +1637,11 @@ true
 [
 "ЗУ\\-23,\\ ПЗРК",
 "ZU-23, MANPADS",
+false
+],
+[
+"пара\\ МиГ\\-21",
+"MiG-21 pair",
 false
 ],
 [

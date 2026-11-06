@@ -245,9 +245,9 @@
   "strike_ship": {
    "title": "Удар по кораблям",
    "performers": [
-    "bomber",
-    "fighter_bomber",
-    "attack"
+    "fighter",
+    "attack",
+    "fighter_bomber"
    ],
    "target": {
     "category": "naval",
@@ -285,63 +285,16 @@
     ],
     "ai": {
      "restrict_jettison": true
-    }
+    },
+    "types": [
+     "MiG_15bis",
+     "MiG_19P"
+    ]
    },
    "support": [
     {
-     "id": "sead",
-     "title": "группа подавления ПВО",
-     "when": "threats",
-     "required": true,
-     "required_note": "толкование, не цитата: 1.3.3 - полёт над территорией противника выполняется с преодолением его ПВО через обеспечивающие действия; без группы подавления при ЗРК на маршруте задача не ставится",
-     "performers": [
-      "attack",
-      "fighter_bomber",
-      "bomber"
-     ],
-     "size": 2,
-     "maintask": [
-      "SEAD",
-      "GroundAttack",
-      "CAS"
-     ],
-     "loadout": [
-      "sead",
-      "anti_armor"
-     ],
-     "lead_min": 4,
-     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
-     "estimate_fields": [
-      "detect_margin_km",
-      "flights",
-      "hold_after_min",
-      "launch_alt_m",
-      "lead_min",
-      "orbit_radius_km",
-      "size",
-      "standoff_km"
-     ],
-     "ai": {
-      "react_on_threat": "EvadeFire",
-      "restrict_jettison": true,
-      "attack": {
-       "weapon": "ARM",
-       "expend": "All",
-       "group_attack": true
-      },
-      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
-     },
-     "flights": 1,
-     "standoff_km": 40,
-     "detect_margin_km": 2,
-     "orbit_radius_km": 3,
-     "hold_after_min": 5,
-     "launch_alt_m": 1000,
-     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ."
-    },
-    {
      "id": "cover",
-     "title": "группа прикрытия",
+     "title": "пара прикрытия МиГ-21",
      "when": "enemy_fighters",
      "required": false,
      "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
@@ -349,7 +302,7 @@
       "fighter",
       "interceptor"
      ],
-     "size": 2,
+     "size": 4,
      "maintask": [
       "CAP",
       "Escort"
@@ -359,57 +312,19 @@
      ],
      "lead_min": 3,
      "mode": "cover_zone",
-     "alt_m": 2000,
+     "alt_m": 3000,
      "zone_km": 40,
      "hold_after_min": 5,
-     "source": "толкование, не цитата: 3.3.3 - тактическая группа включает группы обеспечения; прикрытие от истребителей противника - зона над районом удара на время удара",
+     "source": "19.04.1972: удар МиГ-17 по эсминцам у Донгхоя - прикрытие МиГ-21 (ОЦЕНКА состава)",
      "estimate_fields": [
       "size",
       "lead_min",
       "alt_m",
       "zone_km",
       "hold_after_min"
-     ]
-    },
-    {
-     "id": "kill",
-     "title": "группа добивания ЗРК",
-     "when": "threats",
-     "required": false,
-     "mode": "kill",
-     "pair_with": "sead",
-     "performers": [
-      "attack",
-      "fighter_bomber",
-      "bomber"
      ],
-     "size": 2,
-     "maintask": [
-      "GroundAttack",
-      "CAS"
-     ],
-     "loadout": [
-      "dead",
-      "anti_armor"
-     ],
-     "lead_min": 2,
-     "standoff_km": 40,
-     "detect_margin_km": 2,
-     "prefer_other_type": true,
-     "ai": {
-      "react_on_threat": "EvadeFire",
-      "restrict_jettison": true,
-      "attack": {
-       "weapon": "Auto",
-       "expend": "All",
-       "group_attack": true
-      }
-     },
-     "source": "толкование, не цитата: 3.3.3 - группа уничтожения (подавления) средств ПВО; одна пара подавляет ПРР, другая (другого типа: Су-17М4, МиГ-27К при Су-24М) за ней добивает ЗРК кассетами и НАР",
-     "estimate_fields": [
-      "size",
-      "lead_min",
-      "standoff_km"
+     "types": [
+      "MiG_21Bis"
      ]
     }
    ],
@@ -422,6 +337,62 @@
    "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
    "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
    "bomb_alt_m": 1000
+  },
+  "cap_object": {
+   "title": "Барражирование над прикрываемым районом",
+   "performers": [
+    "fighter",
+    "interceptor"
+   ],
+   "target": {
+    "category": "airfield",
+    "state": "active",
+    "side": "own"
+   },
+   "method": "zone_patrol",
+   "method_source": "ВВС ДРВ: пары МиГ-21 в зонах ожидания над аэродромами и районами Ханой - Хайфон, выход на перехват - по командам КП наведения (Michel 1997); ОЦЕНКА постановки",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 5000,
+   "attack_alt_m_agl": 5000,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "attack_alt_m_agl",
+    "ip_offset_km"
+   ],
+   "strike": {
+    "title": "пара МиГ-21",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "CAP",
+     "Fighter Sweep",
+     "Intercept"
+    ],
+    "loadout": [
+     "cap"
+    ],
+    "mode": "cap_zone",
+    "alt_m": 5000,
+    "zone_km": 30,
+    "cap_min": 20,
+    "estimate_fields": [
+     "size",
+     "alt_m",
+     "zone_km",
+     "cap_min"
+    ],
+    "types": [
+     "MiG_21Bis"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   }
   }
  },
  "march": {
@@ -437,7 +408,9 @@
  "apportionment": {
   "source": "ВВС Северного Вьетнама 1972 г. (на основе wp.json): оборонительная война в воздухе - перехват ударных групп США по наведению с земли (GCI), атака с одного захода и уход (МиГ-21 на скорости сзади-снизу, МиГ-17 на малой высоте); ударов по аэродромам и войскам Юга почти не было - единичный удар МиГ-17 по эсминцам у Донгхоя 19.04.1972 (USS Higbee). Главная ПВО - С-75 и зенитная артиллерия. Источники: M. Michel, Clashes: Air Combat over North Vietnam 1965-1972 (1997); R. Toperczer, MiG-21 Units of the Vietnam War (2001). Доли задач - ОЦЕНКА.",
   "classes": {
-   "DCA": [],
+   "DCA": [
+    "cap_object"
+   ],
    "OCA": [],
    "SEAD": [],
    "APCLO": [

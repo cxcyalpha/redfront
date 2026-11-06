@@ -206,6 +206,34 @@ def alt_patch(d: dict, prof: dict) -> None:
                 sp["alt_m"] = prof["support_alt"][sp["id"]]
 
 
+def vpaf_patch(d: dict, wp: dict) -> None:
+    """ВВС ДРВ 1972: барражирование МиГ-21 над прикрываемыми районами (аэродромы, Ханой - Хайфон) по наведению с
+    земли и прикрытие (эскорт) МиГ-21 ударной пары МиГ-17 по кораблям (19.04.1972, Донгхой); групп подавления ПВО у
+    ВВС ДРВ не было. Источники: Michel (1997), Toperczer (2001); размеры, высоты и время - ОЦЕНКИ."""
+    cap = copy.deepcopy(wp["tasks"]["cap_own_troops"])
+    cap.update({"title": "Барражирование над прикрываемым районом",
+                "target": {"category": "airfield", "state": "active", "side": "own"},
+                "method_source": "ВВС ДРВ: пары МиГ-21 в зонах ожидания над аэродромами и районами Ханой - Хайфон, "
+                                 "выход на перехват - по командам КП наведения (Michel 1997); ОЦЕНКА постановки",
+                "transit_alt_m_agl": 5000, "attack_alt_m_agl": 5000})
+    cap["strike"].update({"title": "пара МиГ-21", "alt_m": 5000, "zone_km": 30, "cap_min": 20, "types": ["MiG_21Bis"]})
+    d["tasks"]["cap_object"] = cap
+    ss = d["tasks"].get("strike_ship")
+    if ss:
+        cover = next((x for x in wp["tasks"]["strike_airfield"].get("support", []) if x["id"] == "cover"), None)
+        ss["performers"] = ["fighter", "attack", "fighter_bomber"]   # МиГ-17 (в DCS - МиГ-15бис) - бомбы с малой высоты
+        ss["strike"]["types"] = ["MiG_15bis", "MiG_19P"]          # ударная пара - МиГ-17/МиГ-19, МиГ-21 - прикрытие
+        ss["support"] = []
+        if cover:
+            c = copy.deepcopy(cover)
+            c.update({"title": "пара прикрытия МиГ-21", "types": ["MiG_21Bis"], "alt_m": 3000,
+                      "source": "19.04.1972: удар МиГ-17 по эсминцам у Донгхоя - прикрытие МиГ-21 (ОЦЕНКА состава)"})
+            ss["support"].append(c)
+    cls = (d.get("apportionment") or {}).get("classes", {})
+    if "DCA" in cls and "cap_object" not in cls["DCA"]:
+        cls["DCA"].append("cap_object")
+
+
 def main() -> None:
     us = json.loads((DOC / "us72.json").read_text(encoding="utf-8"))   # us72 - на основе nato (файл не генерируется)
     qra_patch(us, QRA["nato"])
@@ -232,6 +260,8 @@ def main() -> None:
             qra_patch(d, QRA[base])
         p.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
     for d in PACKAGES:
+        if d["package"] == "vpaf72":
+            vpaf_patch(d, json.loads((DOC / "wp.json").read_text(encoding="utf-8")))
         if d["package"] in ECHELONS:
             echelon_patch(d, ECHELONS[d["package"]])
         if d["package"] == "iaf73":

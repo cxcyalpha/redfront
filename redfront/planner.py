@@ -402,6 +402,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         performers = [u for u in state["units"].values()
                       if u["side"] == side and role_ok(state, u, tdef["performers"]) and logistics.available(state, u) > 0
                       and kind in u.get("tasks_only", [kind]) and kind not in u.get("tasks_not", [])
+                      and (not (tdef.get("strike") or {}).get("types") or u.get("type") in tdef["strike"]["types"])
                       and not u.get("mod_off")]   # специализированная часть (спасатели HH-53) - только свои задачи
         if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
             from . import assault
