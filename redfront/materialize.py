@@ -174,7 +174,60 @@ SITE_LAYOUT = {
     "S_75M_Volhov": (250, 360, "ring"), "5p73 s-125 ln": (150, 360, "ring"), "S_200_Launcher": (200, 180, "rear"),
     "Kub_2P25_ln": (400, 360, "ring"), "Hawk_ln": (250, 120, "front"), "Patriot_ln": (400, 140, "rear"),
 }
+# Геометрия по системе (ОЦЕНКИ по схемам и снимкам позиций): (вид, параметры). arc - пусковые дугой: радиус, сектор,
+# центр сектора (ring - круг, front - к угрозе, rear - от неё); pairs - пары пусковых дугой (С-300П: ведущая 5П85С +
+# ведомая 5П85Д, интервал пары); disp - машины рассредоточены кольцом от r1 до r2 в секторе (Бук: СОУ со своей РЛС -
+# 2-5 км; самоходные ЗРК малой дальности - 0,5-1,5 км; ПЗРК - 0,8-2 км); hex - зенитная батарея шестиугольником.
+SITE_LAYOUT_RX = [
+    (r"S_75M_Volhov", ("arc", 250, 360, "ring")),                 # С-75 - 'звезда' из 6 обвалований
+    (r"5p73", ("arc", 150, 360, "ring")),                         # С-125 - 4 ПУ ближе к кабине
+    (r"S_200_Launcher", ("arc", 200, 180, "rear")),               # С-200 - ПУ полукругом у кабины
+    (r"Kub_2P25", ("arc", 250, 180, "front")),                    # Куб - 4 СПУ дугой 200-300 м в переднем секторе
+    (r"Hawk_ln", ("arc", 250, 120, "front")),                     # HAWK - огневые взводы впереди РЛС
+    (r"Patriot_ln", ("arc", 400, 140, "rear")),                   # Patriot - ПУ веером позади РЛС
+    (r"5P85", ("pairs", 200, 270, "rear", 35)),                   # С-300П - подкова пар СПУ 100-300 м вокруг КП и РПН
+    (r"Buk.*LN|Buk_LN", ("disp", 2000, 4000, 200, "front")),     # Бук - СОУ со своей РЛС в 2-5 км друг от друга
+    (r"S_60|S-60|KS_19|KS-19|M1939|Bofors|bofors|[Ff]lak", ("hex", 70)),   # зенитная батарея - 6 орудий шестиугольником
+    (r"ZU-23|ZU_23", ("hex", 90)),                                # ЗУ-23 - парами вокруг объекта
+    (r"manpad|Stinger|stinger|Igla|SA-18", ("disp", 800, 2000, 360, "ring")),
+    (r"Osa|Roland|Gepard|Tor|Tunguska|Strela|Chaparral|ZSU_23_4|ZSU-23-4|Vulcan|rapier", ("disp", 500, 1500, 360, "ring")),
+]
 SITE_RADAR_GAP_M = 120   # ОЦЕНКА: РЛС позиции - не в одной точке (обнаружения - в стороне от наведения)
+
+
+def site_layout(type_name: str, unit: dict) -> tuple:
+    import re as _re
+    for rx, lay in SITE_LAYOUT_RX:
+        if _re.search(rx, type_name):
+            return lay
+    return ("arc", 300, 360, "ring")
+
+
+def layout_point(lay: tuple, slot: float, full: int, rnd) -> tuple[float, float]:
+    """Смещение машины (вперёд, вправо), м, по виду расстановки системы; slot - номер в штатном составе."""
+    kind = lay[0]
+    if kind == "hex":
+        b = 2 * math.pi * slot / max(1, full)
+        return lay[1] * math.cos(b), lay[1] * math.sin(b)
+    if kind == "disp":                           # рассредоточение: равномерно по сектору, дальность - случайная в полосе
+        r1, r2, arc, face = lay[1], lay[2], lay[3], lay[4]
+        a = math.radians(-arc / 2 + arc * (slot + 0.5) / max(1, full)) + (math.pi if face == "rear" else 0.0)
+        if arc >= 360:
+            a = 2 * math.pi * (slot + rnd() * 0.5) / max(1, full)
+        r = r1 + (r2 - r1) * rnd()
+        return r * math.cos(a), r * math.sin(a)
+    r, arc, face = lay[1], lay[2], lay[3]
+    if kind == "pairs":                          # пары: центр пары на дуге, ведомая - в интервале от ведущей
+        pair = int(slot // 2)
+        n_pairs = max(1, (full + 1) // 2)
+        b = math.radians(-arc / 2 + arc * (pair + 0.5) / n_pairs) + (math.pi if face == "rear" else 0.0)
+        side = lay[4] if int(slot) % 2 else 0.0
+        return r * math.cos(b) - side * math.sin(b), r * math.sin(b) + side * math.cos(b)
+    if arc >= 360:
+        b = 2 * math.pi * slot / max(1, full)
+    else:
+        b = math.radians(-arc / 2 + arc * (slot + 0.5) / max(1, full)) + (math.pi if face == "rear" else 0.0)
+    return r * math.cos(b), r * math.sin(b)
 
 
 def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
@@ -185,6 +238,9 @@ def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
     if model.category(unit) == "naval":
         return {"unit": unit["id"], "kind": "sam", "side": unit["side"], "vehicles": []}
     c = model.unit_pos(state, unit)
+    cov = state["units"].get(unit.get("covers") or "")
+    if unit.get("point") and cov and cov.get("pos"):   # ПВО объекта - кольцом вокруг самого объекта, а не сбоку от него
+        c = dict(cov["pos"])
     axis = threat_axis_deg(state, unit)
     k = math.cos(math.radians(c["lat"]))
     def off(fwd_m, right_m):                     # смещение по оси угрозы: вперёд, вправо
@@ -193,6 +249,8 @@ def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
         dy = fwd_m * math.cos(a) - right_m * math.sin(a)
         return {"lat": c["lat"] + dy / 111_320.0, "lon": c["lon"] + dx / (111_320.0 * k)}
     alive = model.alive_by_type(unit)
+    r_ = model.rng(state, f"site-{unit['id']}")
+    rnd = (lambda: r_.random()) if r_ else (lambda: 0.5)
     vehicles, i, n_radar, n_ctl = [], 0, 0, 0
     for comp in unit["composition"]:
         n = int(round(alive[comp["type"]]))
@@ -201,19 +259,15 @@ def sam_site(state: dict, unit: dict, token: bool = False) -> dict:
         shown, w = n, 1.0
         if token and comp["role"] == "launcher" and n > SAM_TOKEN_LN:
             shown, w = SAM_TOKEN_LN, min(alive[comp["type"]] / SAM_TOKEN_LN, MAX_WEIGHT)   # остальное - не в миссии
-        r, arc, face = SITE_LAYOUT.get(comp["type"], (300, 360, "ring"))
+        lay = site_layout(comp["type"], unit)
         full = max(comp.get("count", n), shown)
         for j in range(shown):
-            if comp["role"] == "radar":
+            if comp["role"] == "radar" and lay[0] not in ("disp",):
                 p = off(0, n_radar * SITE_RADAR_GAP_M * (1 if n_radar % 2 else -1))
                 n_radar += 1
-            elif comp["role"] == "launcher":
-                slot = j * full / shown          # знак - пусковые по всему сектору, а не подряд
-                if arc >= 360:
-                    b = 2 * math.pi * slot / full
-                else:
-                    b = math.radians(-arc / 2 + arc * (slot + 0.5) / full) + (math.pi if face == "rear" else 0.0)
-                p = off(r * math.cos(b), r * math.sin(b))
+            elif comp["role"] in ("launcher", "radar") or lay[0] == "disp":
+                fwd, right = layout_point(lay, j * full / shown, full, rnd)
+                p = off(fwd, right)
             else:
                 p = off(-60, 80 + 20 * n_ctl)
                 n_ctl += 1
@@ -272,6 +326,22 @@ ATTACK_STANDOFF_KM = 1.2  # ОЦЕНКА: наступающий останав�
 LINE_SPACING_M = 80     # ОЦЕНКА: интервал машин в боевом порядке
 LINE_ROW_M = 150        # ОЦЕНКА: дистанция между линиями
 LINE_WIDTH = 10         # ОЦЕНКА: машин в линии
+AD_ECHELON = {   # глубина войсковой ПВО за боевым порядком по классу и школе, м (ОЦЕНКИ): ВД - Шилки при батальонах
+    # первого эшелона 300-500 м, Стрела/Оса - 1,5-3 км; НАТО - Gepard при ротах 300 м, Roland/Chaparral - 2,5 км
+    "wp": {"gun": 400, "manpad": 150, "sam": 2000},
+    "nato": {"gun": 300, "manpad": 150, "sam": 2500},
+}
+
+
+def ad_class(t: str) -> str:
+    import re as _re
+    if _re.search(r"manpad|Stinger|stinger|Igla|SA-18", t):
+        return "manpad"
+    if _re.search(r"ZSU|Shilka|Gepard|Vulcan|ZU-23|ZU_23|S_60|S-60|KS|M163|Bofors|flak", t):
+        return "gun"
+    return "sam"
+
+
 AD_SPREAD_M = 600       # ОЦЕНКА: интервал средств войсковой ПВО по фронту части
 AD_BEHIND_M = 800       # ОЦЕНКА: войсковая ПВО за боевым порядком
 
@@ -389,13 +459,30 @@ def battle_line(state: dict, unit: dict, density: float = 1.0, cap: int | None =
             continue
         av = []
         a_counts, a_weight = _deploy_ad(model.alive_by_type(a), _ad_share(a, unit, len(vehicles), _ad_cap(cap)))
+        rights = [r_ for _f, r_ in offs] or [0.0]
+        width = max(400.0, max(rights) - min(rights))    # фронт боевого порядка части
+        by_cls: dict[str, int] = {}
+        tot_cls: dict[str, int] = {}
+        for comp in a["composition"]:
+            c_ = ad_class(comp["type"])
+            tot_cls[c_] = tot_cls.get(c_, 0) + a_counts.get(comp["type"], 0)
         for comp in a["composition"]:
             for _ in range(a_counts.get(comp["type"], 0)):
                 k = len(av)
-                # ПВО - по фронту части, а не кучей за центром: точки через AD_SPREAD_M, в глубину 500-1100 м (ОЦЕНКА)
-                n_ad = max(1, sum(a_counts.values()))
-                p = model.offset(center, axis, -AD_BEHIND_M + (300 if k % 2 else -300),
-                                 (k - (n_ad - 1) / 2) * AD_SPREAD_M)
+                # войсковая ПВО по доктрине (AD_ECHELON): пушки - парами за первым эшелоном, ПЗРК - с ротами, ЗРК
+                # малой дальности - глубже; по фронту - равномерно по ширине боевого порядка (ОЦЕНКИ)
+                cls_ = ad_class(comp["type"])
+                j = by_cls.get(cls_, 0)
+                by_cls[cls_] = j + 1
+                n_c = max(1, tot_cls.get(cls_, 1))
+                depth = AD_ECHELON.get(family, AD_ECHELON["wp"])[cls_]
+                if cls_ == "gun":                    # парами: пара - одна точка по фронту, в паре - 80 м
+                    slot, sub = j // 2, j % 2
+                    n_slot = max(1, (n_c + 1) // 2)
+                    right = (slot - (n_slot - 1) / 2) * width / n_slot + sub * 80
+                else:
+                    right = (j - (n_c - 1) / 2) * width / n_c
+                p = model.offset(center, axis, -depth + (150 if k % 2 else -150), right)
                 av.append({"name": f"{a['id']}#{k + 1:02d}", "type": comp["type"], "lat": p["lat"], "lon": p["lon"],
                            "weight": a_weight[comp["type"]], "heading": axis})
         out.append({"unit": a["id"], "side": a["side"], "kind": "sam_site", "name": a["id"], "vehicles": av, "waypoints": [], "speed_kmh": 0,
