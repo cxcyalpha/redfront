@@ -624,7 +624,7 @@ function drawMap() {
     if (g.state === "destroyed" || g.attached) continue;
     const tip = `<b>${esc(g.name)}</b><br>${esc(stateTxt(g))} · ${strengthTxt(g)}` +
       (g.engaged.length ? `<br>${T("fighting")}: ${esc(g.engaged.join(", "))}` : "") + (g.supply < 1 ? `<br><b>${T("supplyOf")} ${Math.round(g.supply_frac * 100)}${T("ofNorm")}</b>` : "") +
-      `<br><span style="color:#888">${esc(g.types)}</span>` + intelTxt(g);
+      `<br><span style="color:#888">${esc(g.types)}</span>` + (g.radar ? `<br><b>${esc(g.radar)}</b>` : "") + intelTxt(g);
     const c = col(g.side), friend = g.side === ST.side;
     if (g.cat === "sam" || g.cat === "gci") {
       if (g.cat === "sam" && g.threat_km && g.state !== "pending")

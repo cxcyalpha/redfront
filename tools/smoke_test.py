@@ -1688,8 +1688,12 @@ def air_defence_section(tmp: Path) -> None:
     pos0 = {u["id"]: dict(u["pos"]) for u in (hawk, s200)}
     lines = logistics.air_defence(st)
     moved = model.dist_km(pos0[hawk["id"]], hawk["pos"])
-    check(0 < model.strength(hawk) < 1 and 0 < model.strength(s200) < 1,
-          f"разбитые ЗРК восстанавливаются: HAWK {model.strength(hawk):.0%}, С-200 {model.strength(s200):.0%} за сутки")
+    d1 = (model.strength(hawk), model.strength(s200))
+    for _ in range(3):                           # ремонт целыми машинами: пусковые - через 2 суток, РЛС - через 6
+        lines += logistics.air_defence(st)
+    check(d1 == (0.0, 0.0) and 0 < model.strength(hawk) < 1 and 0 < model.strength(s200) < 1 and not planner.radar_ok(hawk),
+          f"разбитые ЗРК восстанавливаются целыми машинами: за сутки - ничего, за 4 - HAWK {model.strength(hawk):.0%}, "
+          f"С-200 {model.strength(s200):.0%} (пусковые), РЛС ещё в ремонте")
     check(abs(moved - model.doctrine(st, "blue")["sim"]["sam_relocate_km"]) < 0.5 and s200["pos"] == pos0[s200["id"]],
           f"раскрытый HAWK сменил позицию на {moved:.1f} км, объектовая ПВО (С-200) - на месте")
     logistics.air_defence(st)

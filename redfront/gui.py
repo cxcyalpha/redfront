@@ -162,7 +162,7 @@ def view(st: dict, history: bool = True) -> dict:
                  "attached": bool(u.get("attached_to")),
                  "arrives": u.get("arrives_day"),
                  "engaged": [units[f]["name"] for f in u.get("engaged", []) if f in units],
-                 "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", [])),
+                 "types": _types_txt(st, u),
                  "abbr": symbols.abbr(u), "branch": symbols.branch(u), "echelon": symbols.echelon(u),
                  "vehicle": symbols.vehicle(u), "tier": symbols.sam_tier(u)}   # условный знак
             if fog:                               # что известно: точно - как есть; примерно и присутствие - как видели
@@ -176,6 +176,8 @@ def view(st: dict, history: bool = True) -> dict:
                         g["types"] = ""
             if cat == "sam":
                 g["threat_km"] = round(planner.threat_radius_km(u), 1)
+                if not fog or lv == "exact":     # состояние РЛС: исправна / уничтожена (ремонт ~N сут)
+                    g["radar"] = _radar_txt(st, u)
             if intel.tracked(st, u):                 # данные разведки: на какие сутки
                 rec = (st.get("intel") or {}).get(u["id"]) or {}
                 g["intel_day"] = rec.get("day")
@@ -343,6 +345,40 @@ def liveries(st: dict, u: dict) -> list[dict]:
                        for lv in ac.iter_liveries()), key=lambda x: x["name"])
     except Exception:                            # DCS не установлен (или pydcs не нашёл папки) - вручную
         return []
+
+
+def _types_txt(st: dict, u: dict) -> str:
+    """Состав: тип исправных/штат; уничтоженные - видно сразу (Kub_1S91_str 0/1)."""
+    lost = u.get("lost") or {}
+    out = []
+    for c in u.get("composition", []):
+        alive = max(0, int(round(c["count"] - lost.get(c["type"], 0.0))))
+        out.append(f"{c['type']} {alive}/{c['count']}" if alive < c["count"] else f"{c['type']} x{c['count']}")
+    return ", ".join(out)
+
+
+def _radar_txt(st: dict, u: dict) -> str:
+    """РЛС ЗРК: исправны или уничтожены и через сколько суток восстановят (logistics.sam_repair_days)."""
+    lost = u.get("lost") or {}
+    sim = model.doctrine(st, u["side"])["sim"]
+    comp = u.get("composition", [])
+    radars = [c for c in comp if c.get("role") == "radar"] or [c for c in comp if c["type"] in planner.RADAR_SAM_TYPES]
+    if not radars:
+        return ""
+    lg = i18n.lang(st)
+    parts = []
+    for c in radars:
+        dead = int(round(lost.get(c["type"], 0.0)))
+        if dead <= 0:
+            continue
+        left = max(1, int(round(logistics.sam_repair_days(sim, c) - (u.get("repair") or {}).get(c["type"], 0.0))))
+        parts.append(i18n.L(lg, f"РЛС {c['type']}: уничтожена {dead} из {c['count']}, ремонт ~{left} сут",
+                            f"radar {c['type']}: {dead} of {c['count']} destroyed, repair ~{left} days"))
+    if not parts:
+        return i18n.L(lg, "РЛС исправны", "radars operational")
+    if not planner.radar_ok(u):
+        parts.append(i18n.L(lg, "ЗРК без РЛС - не стреляет", "no radar - the SAM cannot fire"))
+    return "; ".join(parts)
 
 
 def unit_info(st: dict, uid: str) -> dict:
