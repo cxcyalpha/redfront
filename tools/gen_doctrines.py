@@ -53,6 +53,8 @@ PACKAGES = [
                                "method_source": "19.04.1972: пара МиГ-17 бомбами с малой высоты по эсминцам у Донгхоя - "
                                                 "единичный эпизод (размер группы - ОЦЕНКА)"}},
         sim={"night_power": 1.2, "attack_min_strength": 0.6, "withdraw_below": 0.45,
+             "sam_scoot_types": ["S_75M_Volhov", "SNR_75V"], "sam_move_days": [2, 6],
+             "sam_note_vn": "дивизионы С-75 ДРВ меняли позиции часто - через 2-6 суток, каждый в свой день (ОЦЕНКА)",
              "night_note": "Северовьетнамская армия: ночные действия и просачивание - сильная сторона (night_power 1.2 - "
                            "ОЦЕНКА); атаки - и при меньшей боеспособности (attack_min_strength 0.6, отход ниже 0.45 - ОЦЕНКА)"},
     ),
@@ -137,9 +139,108 @@ YEAR_GATES = {   # задачи по году кампании в базовых
 }
 
 
+# Профили высот по доктрине и эпохе (ОЦЕНКИ). Низко (НАТО 80-х, Израиль 1973, ВД) - под РЛС ЗРК, рельефом; средние
+# высоты (США над Северным Вьетнамом 1972) - выше зенитной артиллерии и ПЗРК, от С-75 - манёвром, ПРР и помехами;
+# снижения в зонах ЗРК нет (low_alt = transit). Удар - с пикирования (attack_alt - высота ввода).
+ALT_PROFILES = {
+    "us72": {
+        "_note": "США 1972 (Лайнбэкер): ударные группы ВМС и ВВС на 12-18 тыс. футов (3,5-5,5 км), бомбометание с "
+                 "пикирования, MiGCAP выше - ОЦЕНКА по Michel (1997); B-52 - 30-35 тыс. футов",
+        "strike": {"transit_alt_m_agl": 4500, "low_alt_m_agl": 4500, "attack_alt_m_agl": 2500, "egress_alt_m_agl": 4500,
+                   "medium_alt_m_agl": 4500},
+        "cas": {"transit_alt_m_agl": 3000, "low_alt_m_agl": 3000, "attack_alt_m_agl": 1200, "egress_alt_m_agl": 3000},
+        "b52": {"transit_alt_m_agl": 10000, "low_alt_m_agl": 10000, "attack_alt_m_agl": 10000, "egress_alt_m_agl": 10000},
+        "support_alt": {"cover": 6000, "migcap": 7000},
+    },
+}
+STRIKE_METHODS = ("on_call", "sequential_on_call", "interdiction")
+
+# Высоты групп пакета по ролям (ОЦЕНКИ по смыслу источников): ВД (Ионин, 'Тактика ВВС'; FM 100-2-1) - ударная на
+# предельно малой, прикрытие сзади-сверху на 1-2 км выше, расчистка и демонстративная - средние и большие высоты;
+# НАТО 80-х (ATP-27, RAND R-3385) - прикрытие района 15-25 тыс. футов над маловысотными ударными, Wild Weasel (F-4G) -
+# средние высоты (РЛС ЗРК должна его видеть); США 1972 - Iron Hand на высоте ударной; Израиль 1973 - 'Миражи'
+# прикрытия 15-20 тыс. футов над маловысотными F-4/A-4, подавление ПВО ('Дугман') - низко.
+ECHELONS = {
+    "wp": {"cover": {"alt_m": 2000}, "sweep": {"alt_m": 6000}, "feint": {"alt_m": 6000}},
+    "nato": {"cover": {"alt_m": 5000}, "sweep": {"alt_m": 7500}, "sead": {"medium_alt_m": 4500, "launch_alt_m": 4500}},
+    "us72": {"cover": {"alt_m": 6000}, "migcap": {"alt_m": 7000}, "sead": {"medium_alt_m": 4500, "launch_alt_m": 4500}},
+    "iaf73": {"cover": {"alt_m": 5000}, "sead": {"medium_alt_m": None, "launch_alt_m": 1000}},
+}
+MEDIUM_OVER_SUPPRESSED = {   # переход на средние высоты, когда ЗРК средней дальности на маршруте подавляются пакетом
+    "nato": {"from_year": 1987, "alt_m": 6000,
+             "source": "ОЦЕНКА: после ввода HARM и EF-111/F-4G - ударные над ПЗРК и зенитками (Ирак 1991: 20-30 тыс. футов)"},
+    "us72": {"alt_m": 4500, "source": "1972: ударные над зенитной артиллерией, С-75 - помехами и ПРР (ОЦЕНКА)"},
+}
+
+
+def echelon_patch(d: dict, ech: dict) -> None:
+    for t in d["tasks"].values():
+        for sp in t.get("support", []):
+            for k, v in (ech.get(sp["id"]) or {}).items():
+                if v is None:
+                    sp.pop(k, None)
+                else:
+                    sp[k] = v
+
+
+def add_sweep(d: dict, wp: dict) -> None:
+    """НАТО: расчистка воздуха перед ударом по аэродрому (как у ВД) - из пакета wp, свои исполнители."""
+    t = d["tasks"].get("strike_airfield")
+    src = next((x for x in wp["tasks"]["strike_airfield"].get("support", []) if x["id"] == "sweep"), None)
+    if t and src and not any(x["id"] == "sweep" for x in t.get("support", [])):
+        sw = copy.deepcopy(src)
+        sw["performers"] = ["fighter", "interceptor"]
+        sw["source"] = "ОЦЕНКА: OCA НАТО - fighter sweep перед ударной группой по аэродрому"
+        t.setdefault("support", []).append(sw)
+
+
+def alt_patch(d: dict, prof: dict) -> None:
+    for k, t in d["tasks"].items():
+        if t.get("method") not in STRIKE_METHODS or "attack_helo" in t.get("performers", []) or k == "cas_helo":
+            continue
+        key = "b52" if k == "strike_b52" else "cas" if k == "cas_contact" else "strike"
+        t.update(prof[key])
+        t["alt_source"] = prof["_note"]
+        for sp in t.get("support", []):
+            if sp["id"] in prof["support_alt"]:
+                sp["alt_m"] = prof["support_alt"][sp["id"]]
+
+
+def vpaf_patch(d: dict, wp: dict) -> None:
+    """ВВС ДРВ 1972: барражирование МиГ-21 над прикрываемыми районами (аэродромы, Ханой - Хайфон) по наведению с
+    земли и прикрытие (эскорт) МиГ-21 ударной пары МиГ-17 по кораблям (19.04.1972, Донгхой); групп подавления ПВО у
+    ВВС ДРВ не было. Источники: Michel (1997), Toperczer (2001); размеры, высоты и время - ОЦЕНКИ."""
+    cap = copy.deepcopy(wp["tasks"]["cap_own_troops"])
+    cap.update({"title": "Барражирование над прикрываемым районом",
+                "target": {"category": "airfield", "state": "active", "side": "own"},
+                "method_source": "ВВС ДРВ: пары МиГ-21 в зонах ожидания над аэродромами и районами Ханой - Хайфон, "
+                                 "выход на перехват - по командам КП наведения (Michel 1997); ОЦЕНКА постановки",
+                "transit_alt_m_agl": 5000, "attack_alt_m_agl": 5000})
+    cap["strike"].update({"title": "пара МиГ-21", "alt_m": 5000, "zone_km": 30, "cap_min": 20, "types": ["MiG_21Bis"]})
+    d["tasks"]["cap_object"] = cap
+    ss = d["tasks"].get("strike_ship")
+    if ss:
+        cover = next((x for x in wp["tasks"]["strike_airfield"].get("support", []) if x["id"] == "cover"), None)
+        ss["performers"] = ["fighter", "attack", "fighter_bomber"]   # МиГ-17 (в DCS - МиГ-15бис) - бомбы с малой высоты
+        ss["strike"]["types"] = ["MiG_15bis", "MiG_19P"]          # ударная пара - МиГ-17/МиГ-19, МиГ-21 - прикрытие
+        ss["support"] = []
+        if cover:
+            c = copy.deepcopy(cover)
+            c.update({"title": "пара прикрытия МиГ-21", "types": ["MiG_21Bis"], "alt_m": 3000,
+                      "source": "19.04.1972: удар МиГ-17 по эсминцам у Донгхоя - прикрытие МиГ-21 (ОЦЕНКА состава)"})
+            ss["support"].append(c)
+    cls = (d.get("apportionment") or {}).get("classes", {})
+    if "DCA" in cls and "cap_object" not in cls["DCA"]:
+        cls["DCA"].append("cap_object")
+
+
 def main() -> None:
     us = json.loads((DOC / "us72.json").read_text(encoding="utf-8"))   # us72 - на основе nato (файл не генерируется)
     qra_patch(us, QRA["nato"])
+    alt_patch(us, ALT_PROFILES["us72"])
+    us["units"] = "imperial"
+    echelon_patch(us, ECHELONS["us72"])
+    us["medium_over_suppressed"] = MEDIUM_OVER_SUPPRESSED["us72"]
     (DOC / "us72.json").write_text(json.dumps(us, ensure_ascii=False, indent=1), encoding="utf-8")
     for base, gates in YEAR_GATES.items():
         p = DOC / f"{base}.json"
@@ -147,12 +248,24 @@ def main() -> None:
         for k, (y, why) in gates.items():
             if k in d["tasks"]:
                 d["tasks"][k]["from_year"], d["tasks"][k]["from_year_source"] = y, why
+        d["units"] = "imperial" if base == "nato" else "metric"   # единицы планирования: футы и узлы НАТО / метры ОВД
+        echelon_patch(d, ECHELONS[base])
+        if base == "nato":
+            add_sweep(d, json.loads((DOC / "wp.json").read_text(encoding="utf-8")))
+        if base in MEDIUM_OVER_SUPPRESSED:
+            d["medium_over_suppressed"] = MEDIUM_OVER_SUPPRESSED[base]
         if base in BASE_GCI:
             d["gci"] = BASE_GCI[base]
         if base in QRA:
             qra_patch(d, QRA[base])
         p.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
     for d in PACKAGES:
+        if d["package"] == "vpaf72":
+            vpaf_patch(d, json.loads((DOC / "wp.json").read_text(encoding="utf-8")))
+        if d["package"] in ECHELONS:
+            echelon_patch(d, ECHELONS[d["package"]])
+        if d["package"] == "iaf73":
+            d.pop("medium_over_suppressed", None)   # 1973: SA-6 не подавлен - низко
         if d["package"] in QRA_DERIVED:
             qra_patch(d, QRA_DERIVED[d["package"]])
         (DOC / f"{d['package']}.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")

@@ -456,6 +456,34 @@ def available(state: dict, unit: dict) -> int:
     return min(n, unit["crews"]) if "crews" in unit else n   # без экипажей самолёт не летит (csar.py)
 
 
+SAM_REPAIR_DAYS = {"radar": 6, "launcher": 2, "other": 2}   # ОЦЕНКА: суток на восстановление одной машины (РЛС - замена
+# с завода или из резерва, пусковые и ракеты - подвоз); доктрина: sim.sam_repair_days
+SAM_MOBILE = {"Kub_1S91_str", "Kub_2P25_ln", "Osa_9A33_ln", "Strela_1_9P31", "Strela_10M3", "Roland_ADS", "Roland_Radar",
+              "X_2S6_Tunguska", "Tor 9A331", "M48 Chaparral", "Gepard", "ZSU_23_4_Shilka", "Vulcan", "rapier_fsa_launcher"}
+SAM_MOVE_DAYS = (2, 4)       # ОЦЕНКА: подвижный ЗРК (Куб, Оса) меняет позицию и без потерь - через случайный срок, сут
+# (доктрина: sim.sam_move_days [от, до]; sim.sam_scoot_types - и эти типы, например С-75 ДРВ)
+
+
+def _move_gap(state: dict, u: dict, sim: dict) -> int:
+    lo, hi = sim.get("sam_move_days") or SAM_MOVE_DAYS
+    r = model.rng(state, f"sam-gap-{u['id']}-{state['day']}")
+    return int(r.randint(int(lo), int(hi))) if r else int(round((lo + hi) / 2))
+
+
+def is_radar(c: dict) -> bool:
+    from . import planner
+    return c.get("role") == "radar" or (not c.get("role") and c["type"] in planner.RADAR_SAM_TYPES)
+
+
+def sam_repair_days(sim: dict, c: dict) -> float:
+    d = {**SAM_REPAIR_DAYS, **(sim.get("sam_repair_days") or {})}
+    return float(d["radar"] if is_radar(c) else d.get(c.get("role", "other"), d["other"]))
+
+
+def sam_mobile(u: dict) -> bool:
+    return any(c["type"] in SAM_MOBILE for c in u.get("composition", []))
+
+
 def air_defence(state: dict) -> list[str]:
     """ЗРК за сутки (ОЦЕНКИ, sam_note доктрины): потери восстанавливаются на repair_sam в сутки (ремонт, подвоз
     пусковых и ракет; x промышленность и снабжение стороны), - иначе после первого удачного подавления ПВО в небе её
@@ -471,20 +499,42 @@ def air_defence(state: dict) -> list[str]:
         sim = _sim(state, u["side"])
         parent = state["units"].get(u.get("attached_to") or "")
         lost_now = sum(u["lost"].values())
-        if not parent and "pos" in u and not u.get("fixed") and lost_now > u.get("lost_at_move", 0.0) + 1e-6:
+        hit = lost_now > u.get("lost_at_move", 0.0) + 1e-6
+        scoot = sam_mobile(u) or any(c["type"] in (sim.get("sam_scoot_types") or []) for c in u.get("composition", []))
+        if scoot and "next_move_day" not in u:   # первая плановая смена - у каждой батареи в свой день (не все разом)
+            u["next_move_day"] = state["day"] + _move_gap(state, u, sim)
+        due = scoot and state["day"] >= u.get("next_move_day", 10**6)   # Куб, Оса; С-75 ДРВ - и без потерь
+        if not parent and "pos" in u and (not u.get("fixed") or scoot) and (hit or due) and not u.get("point") and not u.get("covers"):
+            u["moved_day"] = state["day"]
+            if scoot:
+                u["next_move_day"] = state["day"] + _move_gap(state, u, sim)   # следующая - через случайный срок
             r = model.rng(state, f"sam-move-{u['id']}")
             axis = materialize.threat_axis_deg(state, u)
             brg = (axis + 180.0 + (r.uniform(-90.0, 90.0) if r else 0.0)) % 360.0
-            u["pos"] = model.offset(u["pos"], brg, sim.get("sam_relocate_km", 5) * 1000)
-            lines.append(f"{u['name']}: позиция раскрыта, ЗРК сменил позицию ({sim.get('sam_relocate_km', 5)} км).")
+            home = u.setdefault("home_pos", dict(u["pos"]))   # позиции - вокруг района батареи, а не дрейф в тыл
+            u["pos"] = model.offset(home, brg, sim.get("sam_relocate_km", 5) * 1000)
+            lines.append(f"{u['name']}: " + ("позиция раскрыта, " if hit else "плановая ") + f"смена позиции ({sim.get('sam_relocate_km', 5)} км).")
         if parent and parent["state"] == "battle":
             u["lost_at_move"] = lost_now
             continue
         was = model.strength(u)
-        if was < 1.0:
-            rate = sim.get("repair_sam", 0.0) * industry(state, u["side"]) * min(1.0, (parent or u).get("supply", 1.0))
+        if was < 1.0:                            # ремонт целыми машинами: РЛС - дефицит, дольше пусковых (sam_repair_days)
+            k = industry(state, u["side"]) * min(1.0, (parent or u).get("supply", 1.0))
+            rep = u.setdefault("repair", {})
             for c in u["composition"]:
-                u["lost"][c["type"]] = u["lost"].get(c["type"], 0.0) * (1 - rate)
+                t = c["type"]
+                lost = u["lost"].get(t, 0.0)
+                if lost < 0.5:
+                    u["lost"][t] = 0.0
+                    rep.pop(t, None)
+                    continue
+                need = sam_repair_days(sim, c)
+                rep[t] = rep.get(t, 0.0) + k
+                if rep[t] >= need:               # одна машина типа восстановлена (подвоз, ремонт)
+                    u["lost"][t] = max(0.0, lost - 1.0)
+                    rep[t] = 0.0
+                    if is_radar(c):
+                        lines.append(f"{u['name']}: РЛС {t} восстановлена.")
             if was <= 0 < model.strength(u) or (was < 0.5 <= model.strength(u)):
                 lines.append(f"{u['name']}: восстановлен до {model.strength(u):.0%}.")
         u["lost_at_move"] = sum(u["lost"].values())

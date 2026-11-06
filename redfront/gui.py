@@ -19,6 +19,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from . import i18n_en, build as build_mod, materialize
+from . import natonames
 from . import ato, command, convoys, csar, dcstypes, debrief, explain, i18n, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
@@ -129,7 +130,7 @@ def view(st: dict, history: bool = True) -> dict:
     for u in units.values():
         cat = model.category(u)
         if cat in ("depot", "bridge", "airfield", "factory"):
-            objects.append({"id": u["id"], "name": u["name"], "role": cat, "side": u.get("side"), "pos": _ll(u["pos"]),
+            objects.append({"id": u["id"], "name": natonames.name(st, u), "role": cat, "side": u.get("side"), "pos": _ll(u["pos"]),
                             "damage": round(u.get("damage", 0.0), 2), "state": u.get("state"),
                             "checked": bool(u.get("pos_checked")) or cat == "airfield",
                             "info": explain.obj(st, u, st["player_side"]),      # что это и что даст удар (explain.py)
@@ -139,7 +140,7 @@ def view(st: dict, history: bool = True) -> dict:
                                if cat == "depot" and u.get("cap_t") else {})})
         elif cat in ("air", "heli"):
             b = st["airbases"].get(u["base"], {})
-            air.append({"id": u["id"], "name": u["name"], "side": u["side"], "type": u["type"], "role": u["role"],
+            air.append({"id": u["id"], "name": natonames.name(st, u), "side": u["side"], "type": u["type"], "role": u["role"],
                         "count": u.get("count", 0), "count0": u.get("count0", u.get("count", 0)),
                         "available": logistics.available(st, u), "base": b.get("name", u["base"]),
                         "crews": u.get("crews"), "crews0": u.get("crews0"),
@@ -156,13 +157,13 @@ def view(st: dict, history: bool = True) -> dict:
                 pos = intel.known_pos(st, u)   # ЗРК противника - где его видели последний раз (туман войны)
             if not pos:
                 continue
-            g = {"id": u["id"], "name": u["name"], "side": u["side"], "cat": cat, "state": u["state"],
+            g = {"id": u["id"], "name": natonames.name(st, u), "side": u["side"], "cat": cat, "state": u["state"],
                  "order": u.get("order"), "strength": round(model.strength(u), 2), "pos": _ll(pos),
                  "supply": u.get("supply", 1.0), "supply_frac": u.get("supply_frac", 1.0 if u.get("supply", 1.0) >= 1 else 0.0),
                  "attached": bool(u.get("attached_to")),
                  "arrives": u.get("arrives_day"),
                  "engaged": [units[f]["name"] for f in u.get("engaged", []) if f in units],
-                 "types": ", ".join(f"{c['type']} x{c['count']}" for c in u.get("composition", [])),
+                 "types": _types_txt(st, u),
                  "abbr": symbols.abbr(u), "branch": symbols.branch(u), "echelon": symbols.echelon(u),
                  "vehicle": symbols.vehicle(u), "tier": symbols.sam_tier(u)}   # условный знак
             if fog:                               # что известно: точно - как есть; примерно и присутствие - как видели
@@ -176,6 +177,8 @@ def view(st: dict, history: bool = True) -> dict:
                         g["types"] = ""
             if cat == "sam":
                 g["threat_km"] = round(planner.threat_radius_km(u), 1)
+                if not fog or lv == "exact":     # состояние РЛС: исправна / уничтожена (ремонт ~N сут)
+                    g["radar"] = _radar_txt(st, u)
             if intel.tracked(st, u):                 # данные разведки: на какие сутки
                 rec = (st.get("intel") or {}).get(u["id"]) or {}
                 g["intel_day"] = rec.get("day")
@@ -190,7 +193,7 @@ def view(st: dict, history: bool = True) -> dict:
     tasks = []
     for i, t in enumerate(st.get("tasks") or [], 1):
         base = st["airbases"].get(t["base"], {})
-        tasks.append({"n": i, "ato_id": t.get("ato_id"), "title": tr(t["title"]), "km": round(t["distance_km"]), "base": base.get("name", t["base"]),
+        tasks.append({"n": i, "ato_id": t.get("ato_id"), "title": tr(natonames.text(st, model.enemy(st["player_side"]), t["title"])), "km": round(t["distance_km"]), "base": base.get("name", t["base"]),
                       "tot": ato.hhmm(t["tot_s"]) if t.get("tot_s") is not None else "",
                       "time": (i18n.L(lg, f"взлёт {ato.hhmm(t['takeoff_s'])}, на объекте {ato.hhmm(t['tot_s'])}",
                                       f"takeoff {ato.hhmm(t['takeoff_s'])}, time on target {ato.hhmm(t['tot_s'])}")
@@ -343,6 +346,40 @@ def liveries(st: dict, u: dict) -> list[dict]:
                        for lv in ac.iter_liveries()), key=lambda x: x["name"])
     except Exception:                            # DCS не установлен (или pydcs не нашёл папки) - вручную
         return []
+
+
+def _types_txt(st: dict, u: dict) -> str:
+    """Состав: тип исправных/штат; уничтоженные - видно сразу (Kub_1S91_str 0/1)."""
+    lost = u.get("lost") or {}
+    out = []
+    for c in u.get("composition", []):
+        alive = max(0, int(round(c["count"] - lost.get(c["type"], 0.0))))
+        out.append(f"{c['type']} {alive}/{c['count']}" if alive < c["count"] else f"{c['type']} x{c['count']}")
+    return ", ".join(out)
+
+
+def _radar_txt(st: dict, u: dict) -> str:
+    """РЛС ЗРК: исправны или уничтожены и через сколько суток восстановят (logistics.sam_repair_days)."""
+    lost = u.get("lost") or {}
+    sim = model.doctrine(st, u["side"])["sim"]
+    comp = u.get("composition", [])
+    radars = [c for c in comp if c.get("role") == "radar"] or [c for c in comp if c["type"] in planner.RADAR_SAM_TYPES]
+    if not radars:
+        return ""
+    lg = i18n.lang(st)
+    parts = []
+    for c in radars:
+        dead = int(round(lost.get(c["type"], 0.0)))
+        if dead <= 0:
+            continue
+        left = max(1, int(round(logistics.sam_repair_days(sim, c) - (u.get("repair") or {}).get(c["type"], 0.0))))
+        parts.append(i18n.L(lg, f"РЛС {c['type']}: уничтожена {dead} из {c['count']}, ремонт ~{left} сут",
+                            f"radar {c['type']}: {dead} of {c['count']} destroyed, repair ~{left} days"))
+    if not parts:
+        return i18n.L(lg, "РЛС исправны", "radars operational")
+    if not planner.radar_ok(u):
+        parts.append(i18n.L(lg, "ЗРК без РЛС - не стреляет", "no radar - the SAM cannot fire"))
+    return "; ".join(parts)
 
 
 def unit_info(st: dict, uid: str) -> dict:

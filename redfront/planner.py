@@ -65,7 +65,7 @@ def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str, l
         if u["side"] != against or cat not in ("sam", "naval") or u["state"] in ("destroyed", "sunk") or model.strength(u) <= 0:
             continue
         r = naval.threat_km(u) if cat == "naval" else threat_radius_km(u)   # ПВО кораблей - как ЗРК
-        if r <= 0:
+        if r <= 0 or (cat == "sam" and not radar_ok(u)):   # ЗРК с уничтоженными РЛС - не угроза (ракетам нечем наводиться)
             continue
         if low_alt_m is not None:
             r = min(r, radar_horizon_km(naval.RADAR_MAST_M if cat == "naval" else RADAR_MAST_M, low_alt_m))
@@ -79,6 +79,17 @@ RADAR_SAM_TYPES = {"Osa_9A33_ln", "Roland_ADS", "X_2S6_Tunguska", "Tor 9A331", "
 DENSE_SAMS, DENSE_KM, WAVE_GAP_MIN = 3, 25, 3   # ОЦЕНКИ: плотная ПВО у цели - второй эшелон удара через 3 мин
 SEAD_MAX_FLIGHTS = 3    # ОЦЕНКА: групп подавления в пакете - не больше (по одной на прикрывающую батарею)
 GATE_BELT = 2           # ОЦЕНКА: столько ЗРК средней/большой дальности на пути к цели в глубине - пояс ПВО: цель ждёт
+
+
+def radar_ok(unit: dict) -> bool:
+    """У ЗРК с радиолокационным наведением осталась хотя бы одна РЛС (роль radar в составе, минус потери). Без РЛС в
+    составе (ПЗРК, пушки, Стрела, Чапарэл) - True: стреляет и без них."""
+    comp = unit.get("composition", [])
+    radars = [c for c in comp if c.get("role") == "radar"] or [c for c in comp if c["type"] in RADAR_SAM_TYPES]
+    if not radars:
+        return True
+    lost = unit.get("lost") or {}
+    return any(c["count"] - lost.get(c["type"], 0) > 0.5 for c in radars)
 
 
 def sead_target(unit: dict) -> bool:
@@ -227,6 +238,40 @@ def _book(state: dict, tasked: dict, uid: str) -> None:
     tasked[t] = tasked.get(t, 0) + 1
 
 
+SUP_LOAD_K = 2.0      # ОЦЕНКА: минус к пригодности группы обеспечения за долю самолётов части, уже отданных за сутки
+SWING_AIR_MIN = 0.8   # ОЦЕНКА: истребитель-бомбардировщик с оценкой боя в воздухе не ниже этой доли лучшего - и на
+                      # истребительные задачи (F-4E 1973 - прикрытие и сопровождение наравне с 'Миражами')
+
+
+def role_ok(state: dict, u: dict, performers: list[str]) -> bool:
+    """Часть подходит по роли: роль в списке исполнителей; истребительные задачи - и многоцелевой тип (F-4E, F-16),
+    если он хорош в бою в воздухе (fitness air)."""
+    if u["role"] in performers:
+        return True
+    return (u["role"] == "fighter_bomber" and "fighter" in performers
+            and fitness.relative(state, u.get("type", ""), "air") >= SWING_AIR_MIN)
+
+
+SHORT_RANGE_KM = 15   # ОЦЕНКА: ЗРК с зоной не больше - ПЗРК, пушки, малой дальности: средние высоты выше их
+
+
+def medium_alt(state: dict, side: str, tdef: dict, threats: list[str], groups: list[dict]) -> float | None:
+    """Средние высоты перехода: в коридоре нет ЗРК; или (доктрина medium_over_suppressed с года from_year) остались
+    только ЗРК малой дальности - средней и большой дальности на маршруте подавляет этот же пакет (группы sead/kill)
+    либо их нет. Выше ПЗРК и зенитной артиллерии (Ирак 1991: 20-30 тыс. футов после подавления). None - низко."""
+    med = tdef.get("medium_alt_m_agl")
+    if not threats:
+        return med
+    rule = model.doctrine(state, side).get("medium_over_suppressed") or {}
+    year = campaign_year(state)
+    if not rule or (rule.get("from_year") and year and year < rule["from_year"]):
+        return None
+    covered = {sid for g in groups if g["objective"]["kind"] == "sam" for sid in g["objective"].get("units", [])}
+    left = [t for t in threats if t not in covered and t in state["units"]
+            and threat_radius_km(state["units"][t]) > SHORT_RANGE_KM]
+    return None if left else (med or rule.get("alt_m"))
+
+
 def under_umbrella(state: dict, side: str, pos: dict, km: float) -> bool:
     """Точка под зонтиком своих ЗРК (не объектовая ПВО): ближе km от кромки зоны поражения исправного ЗРК стороны."""
     for u in state["units"].values():
@@ -355,8 +400,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if tdef.get("from_year") and year and year < tdef["from_year"]:
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
         performers = [u for u in state["units"].values()
-                      if u["side"] == side and u["role"] in tdef["performers"] and logistics.available(state, u) > 0
-                      and kind in u.get("tasks_only", [kind]) and not u.get("mod_off")]   # специализированная часть (спасатели HH-53) - только свои задачи
+                      if u["side"] == side and role_ok(state, u, tdef["performers"]) and logistics.available(state, u) > 0
+                      and kind in u.get("tasks_only", [kind]) and kind not in u.get("tasks_not", [])
+                      and (not (tdef.get("strike") or {}).get("types") or u.get("type") in tdef["strike"]["types"])
+                      and not u.get("mod_off")]   # специализированная часть (спасатели HH-53) - только свои задачи
         if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
             from . import assault
             performers = [u for u in performers if assault.troops(u.get("type", "")) > 0]
@@ -413,6 +460,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                        and not u.get("attached_to") and u["state"] not in ("destroyed", "pending")
                        and model.strength(u) >= tdef["target"].get("min_strength", 0.5)
                        and (u.get("fixed") or not tdef["target"].get("fixed"))
+                       and radar_ok(u)                  # РЛС уничтожены (в миссии или раньше) - не цель подавления
                        and not u.get("point")]          # ПВО склада/моста (ЗУ, ПЗРК) - не цель отдельного удара
         else:
             targets = [u for u in state["units"].values()
@@ -455,7 +503,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 d = model.dist_km(state["airbases"][r["base"]], tpos)
                 # сначала - пригодный тип (оценка относительно лучшего в кампании) с поправкой на загрузку: задачи
                 # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
-                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls), 3), d)
+                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls)
+                             + (r.get("task_penalty") or {}).get(kind, 0.0), 3), d)   # задача - не основная для части
                 if d <= radius and (best is None or key < best[0]):
                     best = (key, r)
             if best is None:
@@ -473,9 +522,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             n_kind += 1
             for g in groups:
                 _book(state, tasked, g["performer"])
-            if not threats and tdef.get("medium_alt_m_agl"):   # угроз ЗРК в коридоре нет - переход на средних высотах
+            med = medium_alt(state, side, tdef, threats, groups)
+            if med:                              # угроз нет или ЗРК средней дальности подавляются пакетом - средние высоты
                 for g in groups:
-                    g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
+                    g["transit_alt_m_agl"] = med
             tasks.append({
                 "kind": kind, "side": side, "title": f"{tdef['title']}: {tgt['name']}",
                 "performer": perf["id"], "target": tgt["id"], "group_size": groups[0]["size"], "base": perf["base"],
@@ -732,9 +782,10 @@ def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers
             continue
         for g in groups:
             _book(state, tasked, g["performer"])
-        if not threats and tdef.get("medium_alt_m_agl"):
+        med = medium_alt(state, side, tdef, threats, groups)
+        if med:
             for g in groups:
-                g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
+                g["transit_alt_m_agl"] = med
         out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {link.replace('>', ' - ')} (~{t:.0f} т/сутки)",
                     "performer": perf["id"], "target": cid, "target_kind": "convoy", "link": link,
                     "group_size": groups[0]["size"], "base": perf["base"], "target_pos": tpos, "ip": ip,
@@ -1106,7 +1157,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         need = g["size"] * flights
         from . import pilots
         cands = [u for u in units.values()
-                 if u["side"] == perf["side"] and u["role"] in g["performers"] and avail.get(u["id"], 0) >= need
+                 if u["side"] == perf["side"] and role_ok(state, u, g["performers"]) and avail.get(u["id"], 0) >= need
                  and not u.get("mod_off")
                  and nation_ok(state, u, g) and (not g.get("types") or u.get("type") in g["types"])          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
                  and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]
@@ -1121,8 +1172,11 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         cands.sort(key=lambda u: (pref.index(u["id"]) if u["id"] in pref else len(pref),
                                   bool(tdef.get("same_service")) and sea(u) != sea(perf),   # пакет одной службы (флот / ВВС)
                                   bool(mate) and bool(g.get("prefer_other_type")) and u["type"] == mate["type"],
-                                  bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]), -round(fitness.relative(state, u.get("type", ""), gcls), 1),
-                                  round(_SUP_LOAD.get(u["id"], 0) / max(1, u.get("count", 1)), 1),   # загрузка части за сутки
+                                  bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]),
+                                  # пригодность типа с поправкой на загрузку части за сутки: близкие по классу типы (F-4E и
+                                  # 'Мираж' в прикрытии) делят вылеты, а не всё лучшему (ОЦЕНКА SUP_LOAD_K)
+                                  -round(fitness.relative(state, u.get("type", ""), gcls)
+                                         - SUP_LOAD_K * _SUP_LOAD.get(u["id"], 0) / max(1, u.get("count", 1)), 2),
                                   u["id"] != perf["id"],
                                   model.dist_km(state["airbases"][u["base"]], tpos)))
         chosen = None
@@ -1193,7 +1247,7 @@ def _known_sams(state: dict, side: str) -> list[tuple[dict, float]]:
 CLEAR_MARGIN_KM = 5     # ОЦЕНКА: зона истребителей - на столько дальше края зоны поражения ЗРК
 
 
-def clear_point(state: dict, side: str, p: dict, home: dict, step_km: float = 5, max_km: float = 80,
+def clear_point(state: dict, side: str, p: dict, home: dict, step_km: float = 5, max_km: float = 400,
                 margin_km: float = CLEAR_MARGIN_KM) -> dict:
     """Ближайшая к p точка на линии p - home вне зон поражения известных ЗРК (+margin_km): зоны расчистки воздуха и
     прикрытия - истребители прикрывают от авиации, а не висят над ЗРК. Нет такой в max_km - самая дальняя проверенная."""

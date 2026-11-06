@@ -13,6 +13,7 @@ import tempfile
 from pathlib import Path
 
 from dcs import Mission, task
+from . import natonames
 from dcs.action import DoScript, DoScriptFile
 from dcs.mapping import LatLng, Point, Vector2
 from dcs.mission import StartType
@@ -47,7 +48,9 @@ ARM_P = [(r"Patriot", None), (r"Kub|S-?75|SNR|S-?125|Hawk|Rapier", 0.3), (r"Rola
          (r"Strela|Chaparral|Vulcan|Igla|Stinger", 0.0)]
 ART_MISSIONS = 4         # ОЦЕНКА: огневых налётов батареи за миссию
 ART_ROUNDS = 24          # ОЦЕНКА: снарядов на налёт (батарея)
-ART_RADIUS_M = 250       # ОЦЕНКА: рассеивание по площади
+ART_RADIUS_M = 150       # ОЦЕНКА: рассеивание по площади (точка - машина противника)
+ARTY_ACTIVE_KM = 30      # ОЦЕНКА: батареи ведут огонь в миссии только ближе к цели игрока (дальние - в модели)
+MRL_MAX_ROUNDS = 40      # ОЦЕНКА: ракет РСЗО за миссию на сторону (один дивизионный залп Град - 240: нагрузка на DCS)
 PUSH_FLAG = 7001         # флаг DCS: ударные группы ИИ уходят с ИПМ на цель
 PUSH_WAIT_S = 180        # ОЦЕНКА: сколько ударная группа ждёт пусков ПРР на ИПМ сверх расчётного времени
 BEACON_FILE = "redfront_beacon.wav"
@@ -585,6 +588,7 @@ LUA_EN = {   # сообщения скриптов миссии по-англи�
         "redfront: results will not be saved - MissionScripting.lua is not unlocked",
     ": потерян ведомый - уходим домой": ": wingman lost - returning to base",
     ": потеряна половина группы - уходим домой": ": half the flight lost - returning to base",
+    "redfront: пакет собран - на маршрут": "redfront: package joined - pushing",
     "группы подавления ПВО сбиты - удар по сроку без подавления": "SEAD flights shot down - strike goes on time without suppression",
 }
 
@@ -821,6 +825,8 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
     Ничего - загрузка DCS по умолчанию для maintask (None)."""
     from . import weapons
     year = weapons.campaign_year(state) if state else None
+    perf = ((state or {}).get("units") or {}).get(fg.name.split(" ")[0]) or {}
+    ecm = perf.get("ecm_pods", True)             # часть летала с контейнерами РЭБ (нет - на их место ракета)
     for cat in cats:
         if cat.startswith(("rt:", "my:")):       # выбранная подвеска: по задаче (payloads.json) или своя (custom_loadouts)
             src = ((state or {}).get("custom_loadouts") or {}) if cat.startswith("my:") else model.load_json("payloads.json").get("types", {})
@@ -831,7 +837,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                     for num, d in pls["pylons"].items():
                         if int(num) in ac.pylons:
                             u.pylons[int(num)] = dict(d)
-                weapons.degrade(fg, year)
+                weapons.degrade(fg, year, ecm)
                 weapons.fixups(fg, year)
                 return cat[3:].replace("Retribution ", "")
     for cat in cats:
@@ -843,10 +849,10 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                 for num, d in pylons.items():
                     if int(num) in ac.pylons:
                         u.pylons[int(num)] = dict(d)
-            weapons.degrade(fg, year)
+            weapons.degrade(fg, year, ecm)
             weapons.fixups(fg, year)
             return name.replace("Retribution ", "")   # подвеска - по функции (Strike, CAS, SEAD...)
-    weapons.degrade(fg, year)
+    weapons.degrade(fg, year, ecm)
     return None
 
 
@@ -964,11 +970,22 @@ def _ai_options(ai: dict) -> list:
 def _attack(group_id: int, ai: dict, altitude: int | None = None):
     """AttackGroup с параметрами из доктрины: тип оружия, расход, атака всей группой, высота атаки (горка для пуска ПРР)."""
     a = ai.get("attack") or {}
-    return task.AttackGroup(group_id, weapon_type=getattr(task.WeaponType, a.get("weapon", "Auto")),
-                            group_attack=bool(a.get("group_attack", False)), expend=getattr(task.Expend, a.get("expend", "Auto")),
-                            altitude=altitude)
+    t = task.AttackGroup(group_id, weapon_type=getattr(task.WeaponType, a.get("weapon", "Auto")),
+                         group_attack=bool(a.get("group_attack", False)), expend=getattr(task.Expend, a.get("expend", "Auto")),
+                         altitude=altitude)
+    # не больше ATTACK_PASSES заходов: группа не кружит над целью под огнём соседнего ЗРК, уходит по маршруту
+    t.params["attackQtyLimit"], t.params["attackQty"] = True, int(a.get("passes", ATTACK_PASSES))
+    return t
 
 
+RV_FLAG = 9301          # флаг DCS: игрок пришёл на точку сбора пакета (rv.lua) - группы пакета уходят с круга
+RV_WAIT_S = 600         # ОЦЕНКА: группы пакета ждут игрока на сборе не дольше (после своего времени сбора)
+RV_NEAR_M = 8000        # ОЦЕНКА: игрок ближе к точке сбора - пакет собран
+ALT_JITTER = 0.04         # ОЦЕНКА: разброс высоты группы от доктрины (+-4%: 3000 м - 2880..3120)
+ALT_JITTER_MIN_M = 500    # ниже - без разброса (предельно малые высоты)
+BARO_FROM_M = 1500        # ОЦЕНКА: точки выше - эшелон от уровня моря (BARO), ниже и у вертолётов - от земли (RADIO)
+ATTACK_PASSES = 2      # ОЦЕНКА: заходов ИИ на цель (AttackGroup), затем - уход по маршруту
+SEAD_AREA_KM = 20      # ОЦЕНКА: группы подавления после своих ЗРК - поиск и поражение любых РЛС ПВО в этом радиусе от цели пакета
 SEAD_SEARCH_KM = 5     # ОЦЕНКА: поиск РЛС ЗРК без свежих данных - район радиусом неточность места + столько
 
 
@@ -994,6 +1011,17 @@ def _sead_zone(m, state: dict, sid: str):
     c = _pt(m, intel.known_pos(state, u) or model.unit_pos(state, u))
     r = int((intel.unc_km(state, sid) + SEAD_SEARCH_KM) * 1000)
     return task.EngageTargetsInZone(Vector2(c.x, c.y), r, [task.Targets.All.GroundUnits.AirDefence])
+
+
+def _sead_area(m, state: dict, g: dict, obj: dict):
+    """Подавление в районе цели пакета: любые средства ПВО (РЛС ЗРК) ближе SEAD_AREA_KM - после назначенных ЗРК
+    группа не слепнет к соседнему, который бьёт по ударной группе (en-route: действует, пока группа на рубеже)."""
+    pts = [model.unit_pos(state, state["units"][sid]) for sid in obj["units"] if sid in state["units"]]
+    c0 = pts[0] if pts else g["route"][0]
+    c = _pt(m, {"lat": sum(p["lat"] for p in pts) / len(pts), "lon": sum(p["lon"] for p in pts) / len(pts)} if pts else c0)
+    t = task.EngageTargetsInZone(Vector2(c.x, c.y), int(SEAD_AREA_KM * 1000), [task.Targets.All.GroundUnits.AirDefence])
+    t.params["priority"] = 1
+    return t
 
 
 def _engage(group_id: int, ai: dict, altitude: int | None = None):
@@ -1348,7 +1376,9 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                     elif (pt.name in ("Цель", "Target", "Рубеж атаки", "Attack line", "Рубеж пуска", "Launch line")
                           and times_player.get("objective_s") and not obj_done):   # первая точка выхода на объект - TOT
                         t, obj_done = float(times_player["objective_s"]), True
-                route.append(f"{i:2d}  {hhmm(t)}  {pt.alt:>6.0f} {L('м', 'm')}  {pt.name or ''}")
+                sp = f"  {fmt_spd(state, tk['side'], (pt.speed or 0) * 3.6, lg)}" if i > 0 and pt.speed else ""
+                ref = (" AGL" if getattr(pt, "alt_type", "BARO") == "RADIO" else " MSL") if pt.alt else "    "
+                route.append(f"{i:2d}  {hhmm(t)}  {fmt_alt(state, tk['side'], pt.alt, lg)}{ref}{sp}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
             fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-"), L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")]
@@ -1367,11 +1397,11 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 if tpos:
                     clock.append(L("Цель: ", "Target: ") + _dms(tpos["lat"], "NS") + " " + _dms(tpos["lon"], "EW"))
             pages = [
-                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(tk["title"], lg), clock + [L(f"Удаление цели {tk['distance_km']:.0f} км", f"Target distance {tk['distance_km']:.0f} km"),
-                                           L("Угрозы: ", "Threats: ") + (", ".join(state["units"][t]["name"] for t in tk["threats"]) or L("не выявлены", "none detected"))]),
+                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(natonames.text(state, model.enemy(tk["side"]), tk["title"], tk["side"]), lg), clock + [L("Удаление цели ", "Target distance ") + fmt_dist(state, tk["side"], tk["distance_km"], lg),
+                                           L("Угрозы: ", "Threats: ") + (", ".join(natonames.name(state, state["units"][t], tk["side"]) for t in tk["threats"]) or L("не выявлены", "none detected"))]),
                                           (L("Тактическая группа", "Package"), lines),
                                           (L("Порядок действий", "Sequence"), order_lines),
-                                          (L("Маршрут (точка, время, высота)", "Route (point, time, altitude)"), route)]),
+                                          (L("Маршрут (точка, время, высота, скорость)", "Route (point, time, altitude, speed)"), route)]),
                 (L("СВЯЗЬ", "COMMS"), [(L("Каналы и позывные", "Channels and callsigns"), comm_lines or ["-"])]),
                 (L("ПОГОДА", "WEATHER"), [(L("Погода", "Weather"), wx_text.split("\n")), (L("Аэродромы", "Airfields"), fields)]),
             ]
@@ -1379,6 +1409,52 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 seen.add((ut.id, fg.name))
                 groups.append({"type": ut, "sub": sub, "pages": pages})
     return kneeboard.build(m, lg, groups)
+
+
+FT, KT, NM = 0.3048, 1.852, 1.852   # м в футе, км/ч в узле, км в морской миле
+
+
+def imperial(state: dict, side: str) -> bool:
+    """Единицы стороны (доктрина units): imperial - футы, узлы, мили (НАТО, США, Израиль); metric - метры, км/ч (ОВД)."""
+    return model.doctrine(state, side).get("units", "metric") == "imperial"
+
+
+def q_alt(state: dict, side: str, alt_m: float) -> float:
+    """Высота точки - круглым числом в единицах стороны: футы - по 100 до 1000, по 500 до 10 000, выше по 1000;
+    метры - по 10 до 300, по 50 до 1000, выше по 100."""
+    if alt_m <= 0:
+        return alt_m
+    if imperial(state, side):
+        ft = alt_m / FT
+        step = 100 if ft < 1000 else 500 if ft < 10000 else 1000
+        return round(max(step, round(ft / step) * step) * FT, 1)
+    step = 10 if alt_m < 300 else 50 if alt_m < 1000 else 100
+    return float(max(step, round(alt_m / step) * step))
+
+
+def q_spd(state: dict, side: str, kmh: float) -> float:
+    """Скорость - узлы по 10 (НАТО) или км/ч по 50 (ОВД)."""
+    if imperial(state, side):
+        return round(round(kmh / KT / 10) * 10 * KT, 1)
+    return float(round(kmh / 50) * 50)
+
+
+def fmt_alt(state: dict, side: str, alt_m: float, lg: str) -> str:
+    if imperial(state, side):
+        return f"{alt_m / FT:>6.0f} " + i18n.L(lg, "фт", "ft")
+    return f"{alt_m:>6.0f} " + i18n.L(lg, "м", "m")
+
+
+def fmt_dist(state: dict, side: str, km: float, lg: str) -> str:
+    if imperial(state, side):
+        return f"{km / NM:.0f} " + i18n.L(lg, "миль", "NM")
+    return f"{km:.0f} " + i18n.L(lg, "км", "km")
+
+
+def fmt_spd(state: dict, side: str, kmh: float, lg: str) -> str:
+    if imperial(state, side):
+        return f"{kmh / KT:.0f} " + i18n.L(lg, "уз", "kt")
+    return f"{kmh:.0f} " + i18n.L(lg, "км/ч", "km/h")
 
 
 def _dms(v: float, hemi: str) -> str:
@@ -1524,6 +1600,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     carriers = carrier_groups(m, state, (wx_now.get("wind_dir") or 0) % 360)   # авианосные группы - базы на море
     groups = materialize.theatre(state, tk, density)
     vg_by_unit, platoons = {}, {}
+    mrl_used: dict[str, bool] = {}              # РСЗО в миссии - одна на сторону (build, огонь батарей)
+    rv_wait: list[dict] = []                     # точки сбора, где группы пакета ждут игрока (rv.lua)
     keys = sorted({g["cluster"] for g in groups if g.get("cluster")})        # бои (кластеры) - у каждого своё место
     sites = {k: (state.get("battle_sites") or {}).get(k) for k in keys}
     def shift_of(g):
@@ -1537,20 +1615,43 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     arts = [dict(a, cluster=g.get("cluster")) for g in groups if g["kind"] == "battle" and g.get("fire_at")
             for a in materialize.artillery(state, state["units"][g["unit"]], g["center"], g["axis"], g["fire_at"])]
     for g in groups + arts:
-        if g["kind"] == "artillery":             # батарея части в бою: огневые налёты по линии противника
+        if g["kind"] == "artillery":             # батарея части в бою: огневые налёты по машинам противника в этом бою
             vg = _ground_group(m, state, g, shift_of(g))
-            sx, sy = shift_of(g)
-            c = _pt(m, g["fire_at"])
+            gp = _pt(m, g["vehicles"][len(g["vehicles"]) // 2])
+            sx0, sy0 = shift_of(g)
+            near_player = model.dist_km(g["vehicles"][0], tk["target_pos"]) <= ARTY_ACTIVE_KM if tk.get("target_pos") else True
+            if g.get("mrl"):                     # РСЗО: одна на сторону в миссии (300 ракет разом - не реализм и не FPS)
+                near_player = near_player and not mrl_used.get(g["side"])
+            if not near_player:                  # вдали от вылета игрока - батарея стоит (цель), огонь - в модели
+                continue
+            own_b = next((b for b in groups if b["kind"] == "battle" and b["unit"] == g["unit"]), None)
+            engaged = set(g.get("engaged") or (own_b or {}).get("engaged") or [])
+            foes = [b for b in groups if b["kind"] == "battle" and b["unit"] in engaged and b["side"] != g["side"]]
+            aims = []                            # точки налётов - машины противника (с его сдвигом позиции), а не середина линии
             if g.get("target") == "counterbattery":  # РСЗО НАТО: по огневым позициям артиллерии противника в этом бою
-                foe = next((a for a in arts if not a.get("mrl") and a["unit"] in g.get("engaged", [])), None)
+                foe = next((a for a in arts if not a.get("mrl") and a["unit"] in engaged), None)
                 if foe:
                     fx, fy = shift_of(foe)
                     q = _pt(m, foe["vehicles"][len(foe["vehicles"]) // 2])
-                    c, sx, sy = q, fx, fy
+                    aims = [(q.x + fx, q.y + fy)]
+            if not aims:
+                for b in foes:
+                    bx, by = shift_of(b)
+                    for v in b["vehicles"][::max(1, len(b["vehicles"]) // 4)]:
+                        q = _pt(m, v)
+                        aims.append((q.x + bx, q.y + by))
+            if not aims:
+                c = _pt(m, g["fire_at"])
+                aims = [(c.x + sx0, c.y + sy0)]
+            aims.sort(key=lambda a: (a[0] - gp.x) ** 2 + (a[1] - gp.y) ** 2)   # ближние к батарее - первыми
             n_m = int(g.get("missions", ART_MISSIONS))
-            for k in range(n_m):                 # налёты подряд: по линии противника, со сдвигом по фронту (ОЦЕНКА)
-                off = (k - (n_m - 1) / 2) * 300
-                vg.points[0].tasks.append(task.FireAtPoint(Vector2(c.x + sx + off, c.y + sy), rounds=int(g.get("rounds", ART_ROUNDS)),
+            rounds = int(g.get("rounds", ART_ROUNDS))
+            if g.get("mrl"):
+                mrl_used[g["side"]] = True
+                n_m, rounds = 1, min(rounds, MRL_MAX_ROUNDS)
+            for k in range(n_m):                 # налёты подряд - по разным машинам противника
+                ax, ay = aims[k % len(aims)]
+                vg.points[0].tasks.append(task.FireAtPoint(Vector2(ax, ay), rounds=rounds,
                                                            radius=ART_RADIUS_M * (2 if g.get("mrl") else 1)))
             continue
         if g["kind"] == "battle":
@@ -1745,13 +1846,19 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             needs_mod = _set_player(u, client=multi) or needs_mod
         for u in (fg.units[hum:] if is_player else fg.units):
             u.skill = Skill.High
+        r_alt = model.rng(state, f"alt-{perf['id']}-{g['group']}-{sortie}")
+        jit = 1.0 + (r_alt.uniform(-ALT_JITTER, ALT_JITTER) if r_alt else 0.0)   # своя высота у каждой группы рядом с доктриной
         def wp(p, alt, name, keep_alt=False):
             if not keep_alt and side_g == tk["side"] and in_threat(p, circles):   # в известной зоне ЗРК - на предельно малой высоте
                 alt = min(alt, tdg.get("low_alt_m_agl", alt))
+            if alt >= ALT_JITTER_MIN_M:
+                alt = alt * jit
+            alt = q_alt(state, side_g, alt)          # круглые высоты в единицах стороны (футы НАТО / метры ОВД)
             if not is_player and not helo and alt < AI_LOW_MIN_M:  # ИИ ниже этого бьётся о землю (Су-24М: 3 случая на 40-80 м)
                 alt = AI_LOW_MIN_M
-            w = fg.add_waypoint(_pt(m, p), alt, speed=spd, name=name)
-            w.alt_type = "RADIO"
+            w = fg.add_waypoint(_pt(m, p), alt, speed=q_spd(state, side_g, spd), name=name)
+            # вертолёты и маловысотные - от земли (RADIO), эшелоны выше - от уровня моря (BARO)
+            w.alt_type = "RADIO" if helo or alt < BARO_FROM_M else "BARO"
             return w
         if not is_player:                        # ИИ - только своя задача: без "поражать цели по пути" от основной задачи DCS
             # (pydcs вешает EngageTargets по maintask: SEAD - любые ПВО, CAS - любые наземные; camp8: Су-24М и Су-25
@@ -1791,6 +1898,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             rv_s = times[g["group"]].get("rv_s")
             if rv_s is not None and not is_player:
                 w.ETA, w.ETA_locked, w.speed_locked = max(0, rv_s), True, False
+                if player and not g.get("_ai") and not g.get("_enemy"):   # пакет игрока: ждать игрока на сборе (круг), уход -
+                    hold_rv = task.ControlledTask(task.OrbitAction(altitude=int(w.alt), speed=spd,   # когда игрок подошёл
+                                                                   pattern=task.OrbitAction.OrbitPattern.Circle))  # или срок
+                    hold_rv.stop_if_user_flag(RV_FLAG, True)
+                    hold_rv.stop_after_time(int(max(0, rv_s) + RV_WAIT_S))
+                    w.tasks.append(hold_rv)
+                    rv_wait.append(g["rv"])
             g["_rv_s"] = rv_s
         if obj["kind"] == "airlift":             # воздушная перевозка: перелёт и посадка на аэродроме назначения
             dest = state["airbases"][obj["airbase"]]
@@ -1964,6 +2078,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         elif obj["kind"] == "sam":               # группа подавления ПВО: рубеж пуска по каждому ЗРК, ближний первым
             low = tdg.get("low_alt_m_agl", transit)
             sup = g.get("_support") or support.get(g.get("support_id"), {})
+            med = sup.get("medium_alt_m") if sup.get("mode") != "kill" else None
+            if med:                              # Wild Weasel / Iron Hand: на средних высотах - РЛС ЗРК видит и включается
+                low = transit = med
             hold_until = t_strk + int(sup.get("hold_after_min", 0) * 60)
             if sup.get("mode") == "kill" and g["route"]:   # добивание (killer): за hunter на рубеж, оттуда атака каждого ЗРК
                 sam_pos = model.unit_pos(state, state["units"][obj["units"][0]])
@@ -1975,6 +2092,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 for sid in obj["units"]:
                     w.tasks.append(_attack(vg_by_unit[sid].id, ai) if sead_known(state, side_g, sid)
                                    else _sead_zone(m, state, sid))
+                w.tasks.append(_sead_area(m, state, g, obj))
             elif not sup.get("standoff_km"):     # доктрина без рубежа - атака с прохода по каждому ЗРК (как в 0.2)
                 for sid, p in zip(obj["units"], g["route"]):
                     w = wp(p, low, "Рубеж пуска")
@@ -1993,6 +2111,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                     # свежие данные разведки - по группе ЗРК (заранее спланированный пуск), иначе - поиск в районе
                     w.tasks.append(_engage(vg_by_unit[sid].id, ai, g.get("launch_alt_m")) if sead_known(state, side_g, sid)
                                    else _sead_zone(m, state, sid))
+                w.tasks.append(_sead_area(m, state, g, obj))   # свои ЗРК подавлены или сбили соседа - работать по соседним РЛС
                 # ожидание: на высоте пуска, если рубеж вне зоны поражения любого из ЗРК, иначе на малой (ОЦЕНКА)
                 inside = any(model.dist_km(g["route"][0], model.unit_pos(state, state["units"][sid]))
                              - sup.get("orbit_radius_km", 0) <= planner.threat_radius_km(state["units"][sid]) for sid in obj["units"])
@@ -2050,7 +2169,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             orbit.stop_after_duration(int((g.get("orbit_min") or 6) * 60))
             w.tasks.append(orbit)
         elif obj["kind"] in ("cap_zone", "cover_zone", "sweep_zone"):   # прикрытие / расчистка воздуха
-            alt = int(g.get("alt_m") or 3000)
+            alt = q_alt(state, side_g, int(g.get("alt_m") or 3000) * jit)
             w = wp(obj["pos"], alt, "Зона расчистки" if obj["kind"] == "sweep_zone" else "Зона прикрытия", keep_alt=True)
             w.alt_type = "BARO"
             c = _pt(m, obj["pos"])
@@ -2204,6 +2323,29 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                         .replace("@SPECS@", items))))
     if cap_specs:                                # пары прикрытия ИИ: без ведомого - домой
         trig.add_action(DoScript(String(cap_script(state["campaign_id"], state["sortie"], cap_specs, strict_abort(state)))))
+    humans_all = [n for f in flights if f.get("player") for n in f.get("humans", [])]
+    if rv_wait and humans_all:                   # сбор пакета: игрок ближе RV_NEAR_M к точке сбора - флаг, группы уходят с круга
+        p0 = _pt(m, rv_wait[0])
+        names = ", ".join('"' + n.replace('"', "'") + '"' for n in humans_all)
+        trig.add_action(DoScript(String(
+            f"-- redfront rv | campaign {state['campaign_id']} | sortie {state['sortie']}\n"
+            f"-- Сбор пакета: игрок подошёл к точке сбора - флаг {RV_FLAG}: группы пакета уходят с круга ожидания.\n"
+            f"local RV, NAMES, R = {{ x = {p0.x:.0f}, z = {p0.y:.0f} }}, {{ {names} }}, {RV_NEAR_M}\n"
+            "local function chk()\n"
+            "  for _, n in ipairs(NAMES) do\n"
+            "    local u = Unit.getByName(n)\n"
+            "    if u and u:isExist() and u:inAir() then\n"
+            "      local p = u:getPoint()\n"
+            "      if (p.x - RV.x) ^ 2 + (p.z - RV.z) ^ 2 <= R * R then\n"
+            f"        trigger.action.setUserFlag({RV_FLAG}, true)\n"
+            "        trigger.action.outText('redfront: пакет собран - на маршрут', 10)\n"
+            "        return nil\n"
+            "      end\n"
+            "    end\n"
+            "  end\n"
+            "  return timer.getTime() + 5\n"
+            "end\n"
+            "timer.scheduleFunction(chk, nil, timer.getTime() + 5)\n")))
     gs = gci_sides(state)                        # наземное наведение (КРУ) истребителей ИИ: дежурные пары и пары прикрытия
     gci_f = [{"group": x["group"], "side": x["side"]} for x in qra_specs + cap_specs if x["side"] in gs]
     if qra_specs or gci_f:                       # общая картина обстановки (airpic.lua) - до qra.lua и gci.lua
@@ -2245,7 +2387,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         + ((Lx("\nПорядок действий группы:\n", "\nSequence of the package:\n") + "\n".join(f"- {ln}" for ln in order_lines)) if order_lines else "")
         + ((Lx("\n\nСвязь:\n", "\n\nCommunications:\n") + "\n".join(f"- {ln}" for ln in comm_lines)) if comm_lines else "")
         + Lx(f"\n\nУдаление цели: {tk['distance_km']:.0f} км. Угрозы на маршруте: ", f"\n\nTarget distance: {tk['distance_km']:.0f} km. Threats en route: ")
-        + (", ".join(state['units'][t]['name'] for t in tk['threats']) or Lx("не выявлены", "none detected"))
+        + (", ".join(natonames.name(state, state['units'][t], tk['side']) for t in tk['threats']) or Lx("не выявлены", "none detected"))
         + (Lx("\nЗамечания планировщика: ", "\nPlanner notes: ") + tk['package_notes'] if tk.get("package_notes") else "")
         + ((Lx("\n\nДругие вылеты наших сил в это время:\n", "\n\nOther friendly sorties at this time:\n") + "\n".join(f"- {ln}" for ln in ai_lines)) if ai_lines else "")
         + (Lx("\nРазведка: в районе возможна активность авиации противника.", "\nIntelligence: enemy air activity is possible in the area.") if enemy_lines else "")

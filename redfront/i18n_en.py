@@ -58,11 +58,27 @@ def reload() -> None:
     _catalog.cache_clear(); _templates.cache_clear(); _names_rx.cache_clear(); _words.cache_clear(); en.cache_clear()
 
 
+EXTRA: dict[str, str] = {}   # переводы, добавленные на ходу (имена в обозначениях НАТО: natonames.register)
+
+
+def register(ru: str, en_text: str) -> None:
+    """Перевод строки, которой нет в каталоге (составлена в программе): 'Батарея SA-6 №2' -> 'SA-6 battery No. 2'."""
+    if ru != en_text and EXTRA.get(ru) != en_text:
+        EXTRA[ru] = en_text
+        en.cache_clear()
+
+
 @lru_cache(maxsize=200_000)
 def en(text: str) -> str:
     """Русский текст -> английский (каталог, шаблоны, части). Нет перевода - текст как есть."""
     if not isinstance(text, str) or not CYR.search(text):
         return text
+    if text in EXTRA:
+        return EXTRA[text]
+    for k in sorted((k for k in EXTRA if k in text), key=len, reverse=True):   # имя внутри фразы (заголовок задачи)
+        text = text.replace(k, EXTRA[k])
+        if not CYR.search(text):
+            return text
     cat = _catalog()
     if text in cat:
         return cat[text]
