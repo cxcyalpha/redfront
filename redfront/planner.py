@@ -252,6 +252,26 @@ def role_ok(state: dict, u: dict, performers: list[str]) -> bool:
             and fitness.relative(state, u.get("type", ""), "air") >= SWING_AIR_MIN)
 
 
+SHORT_RANGE_KM = 15   # ОЦЕНКА: ЗРК с зоной не больше - ПЗРК, пушки, малой дальности: средние высоты выше их
+
+
+def medium_alt(state: dict, side: str, tdef: dict, threats: list[str], groups: list[dict]) -> float | None:
+    """Средние высоты перехода: в коридоре нет ЗРК; или (доктрина medium_over_suppressed с года from_year) остались
+    только ЗРК малой дальности - средней и большой дальности на маршруте подавляет этот же пакет (группы sead/kill)
+    либо их нет. Выше ПЗРК и зенитной артиллерии (Ирак 1991: 20-30 тыс. футов после подавления). None - низко."""
+    med = tdef.get("medium_alt_m_agl")
+    if not threats:
+        return med
+    rule = model.doctrine(state, side).get("medium_over_suppressed") or {}
+    year = campaign_year(state)
+    if not rule or (rule.get("from_year") and year and year < rule["from_year"]):
+        return None
+    covered = {sid for g in groups if g["objective"]["kind"] == "sam" for sid in g["objective"].get("units", [])}
+    left = [t for t in threats if t not in covered and t in state["units"]
+            and threat_radius_km(state["units"][t]) > SHORT_RANGE_KM]
+    return None if left else (med or rule.get("alt_m"))
+
+
 def under_umbrella(state: dict, side: str, pos: dict, km: float) -> bool:
     """Точка под зонтиком своих ЗРК (не объектовая ПВО): ближе km от кромки зоны поражения исправного ЗРК стороны."""
     for u in state["units"].values():
@@ -499,9 +519,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             n_kind += 1
             for g in groups:
                 _book(state, tasked, g["performer"])
-            if not threats and tdef.get("medium_alt_m_agl"):   # угроз ЗРК в коридоре нет - переход на средних высотах
+            med = medium_alt(state, side, tdef, threats, groups)
+            if med:                              # угроз нет или ЗРК средней дальности подавляются пакетом - средние высоты
                 for g in groups:
-                    g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
+                    g["transit_alt_m_agl"] = med
             tasks.append({
                 "kind": kind, "side": side, "title": f"{tdef['title']}: {tgt['name']}",
                 "performer": perf["id"], "target": tgt["id"], "group_size": groups[0]["size"], "base": perf["base"],
@@ -758,9 +779,10 @@ def interdiction_tasks(state: dict, side: str, kind: str, tdef: dict, performers
             continue
         for g in groups:
             _book(state, tasked, g["performer"])
-        if not threats and tdef.get("medium_alt_m_agl"):
+        med = medium_alt(state, side, tdef, threats, groups)
+        if med:
             for g in groups:
-                g["transit_alt_m_agl"] = tdef["medium_alt_m_agl"]
+                g["transit_alt_m_agl"] = med
         out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {link.replace('>', ' - ')} (~{t:.0f} т/сутки)",
                     "performer": perf["id"], "target": cid, "target_kind": "convoy", "link": link,
                     "group_size": groups[0]["size"], "base": perf["base"], "target_pos": tpos, "ip": ip,

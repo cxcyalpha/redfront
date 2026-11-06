@@ -927,9 +927,11 @@ def air_section(tmp: Path) -> None:
     zone = [x for p in red["cover"].points for x in p.tasks if getattr(x, "id", None) == "EngageTargetsInZone"]
     orb = [x for p in red["cover"].points if p.name != "Сбор" for x in p.tasks if getattr(x, "id", None) == "ControlledTask"]
     check(zone and list(dict(zone[0].params["targetTypes"]).values()) == ["Air"] and orb and orb[0].params["stopCondition"] == {"time": t["strike"]["objective_s"] + 300}
-          and next(p for p in red["cover"].points if p.name == "Зона прикрытия").alt == 3000
+          and abs(next(p for p in red["cover"].points if p.name == "Зона прикрытия").alt
+                  - next(x for x in model.doctrine(st, "red")["tasks"][t1["kind"]]["support"] if x["id"] == "cover")["alt_m"])
+              <= build.ALT_JITTER * 3000 + 60
           and any("R-27R" in weapons.name_of(d["CLSID"]) for d in red["cover"].units[0].pylons.values()),
-          f"прикрытие: зона 40 км над целью на 3000 м, перехват воздушных целей, до удара + 5 мин; МиГ-29 с Р-27Р и Р-73")
+          f"прикрытие: зона 40 км над целью на высоте доктрины (+-разброс), перехват воздушных целей, до удара + 5 мин; МиГ-29 с Р-27Р и Р-73")
     en = [fl for fl in man["flights"] if fl.get("side") == "blue" and "_qra_" not in fl["group"]]
     own_ai = [fl for fl in man["flights"] if fl["group"].startswith("ai") and "_qra_" not in fl["group"]]
     qra_lines = [ln for ln in man["enemy_lines"] + man["ai_lines"] if "в готовности на стоянке" in ln]

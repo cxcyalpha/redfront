@@ -155,6 +155,44 @@ ALT_PROFILES = {
 }
 STRIKE_METHODS = ("on_call", "sequential_on_call", "interdiction")
 
+# Высоты групп пакета по ролям (ОЦЕНКИ по смыслу источников): ВД (Ионин, 'Тактика ВВС'; FM 100-2-1) - ударная на
+# предельно малой, прикрытие сзади-сверху на 1-2 км выше, расчистка и демонстративная - средние и большие высоты;
+# НАТО 80-х (ATP-27, RAND R-3385) - прикрытие района 15-25 тыс. футов над маловысотными ударными, Wild Weasel (F-4G) -
+# средние высоты (РЛС ЗРК должна его видеть); США 1972 - Iron Hand на высоте ударной; Израиль 1973 - 'Миражи'
+# прикрытия 15-20 тыс. футов над маловысотными F-4/A-4, подавление ПВО ('Дугман') - низко.
+ECHELONS = {
+    "wp": {"cover": {"alt_m": 2000}, "sweep": {"alt_m": 6000}, "feint": {"alt_m": 6000}},
+    "nato": {"cover": {"alt_m": 5000}, "sweep": {"alt_m": 7500}, "sead": {"medium_alt_m": 4500, "launch_alt_m": 4500}},
+    "us72": {"cover": {"alt_m": 6000}, "migcap": {"alt_m": 7000}, "sead": {"medium_alt_m": 4500, "launch_alt_m": 4500}},
+    "iaf73": {"cover": {"alt_m": 5000}, "sead": {"medium_alt_m": None, "launch_alt_m": 1000}},
+}
+MEDIUM_OVER_SUPPRESSED = {   # переход на средние высоты, когда ЗРК средней дальности на маршруте подавляются пакетом
+    "nato": {"from_year": 1987, "alt_m": 6000,
+             "source": "ОЦЕНКА: после ввода HARM и EF-111/F-4G - ударные над ПЗРК и зенитками (Ирак 1991: 20-30 тыс. футов)"},
+    "us72": {"alt_m": 4500, "source": "1972: ударные над зенитной артиллерией, С-75 - помехами и ПРР (ОЦЕНКА)"},
+}
+
+
+def echelon_patch(d: dict, ech: dict) -> None:
+    for t in d["tasks"].values():
+        for sp in t.get("support", []):
+            for k, v in (ech.get(sp["id"]) or {}).items():
+                if v is None:
+                    sp.pop(k, None)
+                else:
+                    sp[k] = v
+
+
+def add_sweep(d: dict, wp: dict) -> None:
+    """НАТО: расчистка воздуха перед ударом по аэродрому (как у ВД) - из пакета wp, свои исполнители."""
+    t = d["tasks"].get("strike_airfield")
+    src = next((x for x in wp["tasks"]["strike_airfield"].get("support", []) if x["id"] == "sweep"), None)
+    if t and src and not any(x["id"] == "sweep" for x in t.get("support", [])):
+        sw = copy.deepcopy(src)
+        sw["performers"] = ["fighter", "interceptor"]
+        sw["source"] = "ОЦЕНКА: OCA НАТО - fighter sweep перед ударной группой по аэродрому"
+        t.setdefault("support", []).append(sw)
+
 
 def alt_patch(d: dict, prof: dict) -> None:
     for k, t in d["tasks"].items():
@@ -173,6 +211,8 @@ def main() -> None:
     qra_patch(us, QRA["nato"])
     alt_patch(us, ALT_PROFILES["us72"])
     us["units"] = "imperial"
+    echelon_patch(us, ECHELONS["us72"])
+    us["medium_over_suppressed"] = MEDIUM_OVER_SUPPRESSED["us72"]
     (DOC / "us72.json").write_text(json.dumps(us, ensure_ascii=False, indent=1), encoding="utf-8")
     for base, gates in YEAR_GATES.items():
         p = DOC / f"{base}.json"
@@ -181,12 +221,21 @@ def main() -> None:
             if k in d["tasks"]:
                 d["tasks"][k]["from_year"], d["tasks"][k]["from_year_source"] = y, why
         d["units"] = "imperial" if base == "nato" else "metric"   # единицы планирования: футы и узлы НАТО / метры ОВД
+        echelon_patch(d, ECHELONS[base])
+        if base == "nato":
+            add_sweep(d, json.loads((DOC / "wp.json").read_text(encoding="utf-8")))
+        if base in MEDIUM_OVER_SUPPRESSED:
+            d["medium_over_suppressed"] = MEDIUM_OVER_SUPPRESSED[base]
         if base in BASE_GCI:
             d["gci"] = BASE_GCI[base]
         if base in QRA:
             qra_patch(d, QRA[base])
         p.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
     for d in PACKAGES:
+        if d["package"] in ECHELONS:
+            echelon_patch(d, ECHELONS[d["package"]])
+        if d["package"] == "iaf73":
+            d.pop("medium_over_suppressed", None)   # 1973: SA-6 не подавлен - низко
         if d["package"] in QRA_DERIVED:
             qra_patch(d, QRA_DERIVED[d["package"]])
         (DOC / f"{d['package']}.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")

@@ -978,6 +978,9 @@ def _attack(group_id: int, ai: dict, altitude: int | None = None):
 RV_FLAG = 9301          # флаг DCS: игрок пришёл на точку сбора пакета (rv.lua) - группы пакета уходят с круга
 RV_WAIT_S = 600         # ОЦЕНКА: группы пакета ждут игрока на сборе не дольше (после своего времени сбора)
 RV_NEAR_M = 8000        # ОЦЕНКА: игрок ближе к точке сбора - пакет собран
+ALT_JITTER = 0.04         # ОЦЕНКА: разброс высоты группы от доктрины (+-4%: 3000 м - 2880..3120)
+ALT_JITTER_MIN_M = 500    # ниже - без разброса (предельно малые высоты)
+BARO_FROM_M = 1500        # ОЦЕНКА: точки выше - эшелон от уровня моря (BARO), ниже и у вертолётов - от земли (RADIO)
 ATTACK_PASSES = 2      # ОЦЕНКА: заходов ИИ на цель (AttackGroup), затем - уход по маршруту
 SEAD_AREA_KM = 20      # ОЦЕНКА: группы подавления после своих ЗРК - поиск и поражение любых РЛС ПВО в этом радиусе от цели пакета
 SEAD_SEARCH_KM = 5     # ОЦЕНКА: поиск РЛС ЗРК без свежих данных - район радиусом неточность места + столько
@@ -1371,7 +1374,8 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                           and times_player.get("objective_s") and not obj_done):   # первая точка выхода на объект - TOT
                         t, obj_done = float(times_player["objective_s"]), True
                 sp = f"  {fmt_spd(state, tk['side'], (pt.speed or 0) * 3.6, lg)}" if i > 0 and pt.speed else ""
-                route.append(f"{i:2d}  {hhmm(t)}  {fmt_alt(state, tk['side'], pt.alt, lg)}{sp}  {pt.name or ''}")
+                ref = (" AGL" if getattr(pt, "alt_type", "BARO") == "RADIO" else " MSL") if pt.alt else "    "
+                route.append(f"{i:2d}  {hhmm(t)}  {fmt_alt(state, tk['side'], pt.alt, lg)}{ref}{sp}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
             fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-"), L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")]
@@ -1839,14 +1843,19 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             needs_mod = _set_player(u, client=multi) or needs_mod
         for u in (fg.units[hum:] if is_player else fg.units):
             u.skill = Skill.High
+        r_alt = model.rng(state, f"alt-{perf['id']}-{g['group']}-{sortie}")
+        jit = 1.0 + (r_alt.uniform(-ALT_JITTER, ALT_JITTER) if r_alt else 0.0)   # своя высота у каждой группы рядом с доктриной
         def wp(p, alt, name, keep_alt=False):
             if not keep_alt and side_g == tk["side"] and in_threat(p, circles):   # в известной зоне ЗРК - на предельно малой высоте
                 alt = min(alt, tdg.get("low_alt_m_agl", alt))
+            if alt >= ALT_JITTER_MIN_M:
+                alt = alt * jit
             alt = q_alt(state, side_g, alt)          # круглые высоты в единицах стороны (футы НАТО / метры ОВД)
             if not is_player and not helo and alt < AI_LOW_MIN_M:  # ИИ ниже этого бьётся о землю (Су-24М: 3 случая на 40-80 м)
                 alt = AI_LOW_MIN_M
             w = fg.add_waypoint(_pt(m, p), alt, speed=q_spd(state, side_g, spd), name=name)
-            w.alt_type = "RADIO"
+            # вертолёты и маловысотные - от земли (RADIO), эшелоны выше - от уровня моря (BARO)
+            w.alt_type = "RADIO" if helo or alt < BARO_FROM_M else "BARO"
             return w
         if not is_player:                        # ИИ - только своя задача: без "поражать цели по пути" от основной задачи DCS
             # (pydcs вешает EngageTargets по maintask: SEAD - любые ПВО, CAS - любые наземные; camp8: Су-24М и Су-25
@@ -2066,6 +2075,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         elif obj["kind"] == "sam":               # группа подавления ПВО: рубеж пуска по каждому ЗРК, ближний первым
             low = tdg.get("low_alt_m_agl", transit)
             sup = g.get("_support") or support.get(g.get("support_id"), {})
+            med = sup.get("medium_alt_m") if sup.get("mode") != "kill" else None
+            if med:                              # Wild Weasel / Iron Hand: на средних высотах - РЛС ЗРК видит и включается
+                low = transit = med
             hold_until = t_strk + int(sup.get("hold_after_min", 0) * 60)
             if sup.get("mode") == "kill" and g["route"]:   # добивание (killer): за hunter на рубеж, оттуда атака каждого ЗРК
                 sam_pos = model.unit_pos(state, state["units"][obj["units"][0]])
@@ -2154,7 +2166,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             orbit.stop_after_duration(int((g.get("orbit_min") or 6) * 60))
             w.tasks.append(orbit)
         elif obj["kind"] in ("cap_zone", "cover_zone", "sweep_zone"):   # прикрытие / расчистка воздуха
-            alt = int(g.get("alt_m") or 3000)
+            alt = q_alt(state, side_g, int(g.get("alt_m") or 3000) * jit)
             w = wp(obj["pos"], alt, "Зона расчистки" if obj["kind"] == "sweep_zone" else "Зона прикрытия", keep_alt=True)
             w.alt_type = "BARO"
             c = _pt(m, obj["pos"])
