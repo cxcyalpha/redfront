@@ -493,124 +493,142 @@
     }
    },
    "STRIKE": {
-    "tasks": {},
+    "tasks": [
+     32
+    ],
     "pylons": {
      "1": {
-      "CLSID": "{HB_A6E_MK82_MER_6x}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      },
      "2": {
-      "CLSID": "{HB_A6E_MK82_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK82_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK82_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK82_MER_6x}"
-     }
-    }
-   },
-   "CAS": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     }
-    }
-   },
-   "BAI": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     }
-    }
-   },
-   "DEAD": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     }
-    }
-   },
-   "OCA/Runway": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "2": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "3": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "4": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "5": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     }
-    }
-   },
-   "SEAD": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      },
      "3": {
       "CLSID": "{HB_A6E_AERO1D}"
      },
      "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      },
      "5": {
-      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      }
-    }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "CAS": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "BAI": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "DEAD": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     },
+     "2": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "OCA/Runway": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "2": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "5": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "SEAD": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     },
+     "2": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
    },
    "Anti-ship": {
     "tasks": {},

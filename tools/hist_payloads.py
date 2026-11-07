@@ -94,13 +94,32 @@ AV8 = {"cls": "AV8BNA", "page": "av-8b",
        "loads": {"Retribution CAS": AV("Mk-20"), "Retribution BAI": AV("Mk-82 Snakeye", "AIM-9M"),
                  "Retribution Strike": AV("Mk-83 - 1000lb", "AIM-9M")}}
 SPECS = [H, F16C, F16A, F15C, *F14, F4E, F4HB, A10A, AV8]
-# A-6E - нет: у него свои подвески по задачам из файлов DCS (A6E.lua, коммит e7c63bf), они точнее
+# A-6E (описание из DCS Retribution, redfront.mods.a6e): 1, 5 - внешние; 2, 4 - внутренние; 3 - центр (бак почти всегда).
+# Заменяет подвески по задачам из A6E.lua (там - максимальная загрузка: 28 Mk-82 без бака, 28 Rockeye и в CAS, и в BAI).
+# Противокорабельная (2 Harpoon, ALQ-167, AIM-9M, бак) - остаётся как была: она реалистична.
+try:
+    from redfront.mods import a6e as _a6e
+    T6 = "=AERO 1D 300 Gallons Fuel Tank"
+    MER82, MER20 = "=6x Mk-82 - 500lb GP Bomb LD (MER)", "=6x Mk-20 Rockeye - 490lbs CBU, 247 x HEAT Bomblets (MER)"
+    TER82 = "=3x Mk-82 Snakeye - 500lb GP Bomb HD (TER)"
+    A6 = {"cls_obj": _a6e.A6E, "page": "a-6e",
+          "loads": {"STRIKE": ["=Mk-83 - 1000lb GP Bomb LD"] * 2 + [T6] + ["=Mk-83 - 1000lb GP Bomb LD"] * 2,
+                    "BAI": [MER82, None, T6, None, MER82],
+                    "CAS": [MER20, "=GBU-12 - 500lb Laser Guided Bomb", T6, "=GBU-12 - 500lb Laser Guided Bomb", MER20],
+                    "DEAD": [TER82, "AGM-88C", T6, "AGM-88C", TER82],
+                    "SEAD": [TER82, "AGM-88C", T6, "AGM-88C", TER82],
+                    "OCA/Runway": ["=Mk-84 - 2000lb GP Bomb LD"] * 2 + [T6] + ["=Mk-84 - 2000lb GP Bomb LD"] * 2}}
+    SPECS.append(A6)
+except ImportError:
+    pass
 
 
 def clsid(cls, n: int, prefix: str) -> str:
     py = getattr(cls, f"Pylon{n}")
     ws = [v[1] for v in vars(py).values() if isinstance(v, tuple) and len(v) == 2 and isinstance(v[1], dict)]
-    for test in (lambda nm: nm.startswith(prefix), lambda nm: prefix in nm):   # начало имени, затем - часть имени
+    tests = ([lambda nm: nm.strip() == prefix[1:].strip()] if prefix.startswith("=") else
+             [lambda nm: nm.startswith(prefix), lambda nm: prefix in nm])    # "=имя" - точно; иначе начало, часть
+    for test in tests:   # начало имени, затем - часть имени
         for w in ws:
             if test(w.get("name", "")):
                 return w["clsid"]
