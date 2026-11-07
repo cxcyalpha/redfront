@@ -23,7 +23,7 @@ MODS = {   # id -> название, модуль, типы (имя класса
              "types": {"Su_30SM": "Su-30SM", "Su_30MKA": "Su-30MKA", "Su_30MKM": "Su-30MKM", "Su_30MKI": "Su-30MKI"},
              "url": ""},
     "su35s": {"title": "Су-35С Flanker-M (мод сообщества)", "module": "su35s",
-              "types": {"Su_35S": "Su-35S", "Su_35S_AG": "Su-35S-AG"}, "url": ""},
+              "types": {"Su_35S": "Su-35S"}, "url": ""},
 }
 _LOADED: set[str] = set()
 
