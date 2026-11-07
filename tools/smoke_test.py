@@ -3953,6 +3953,42 @@ def theatres_section(tmp: Path) -> None:
     mp_after = Ls.eval("ROE.MP1")
     check(far == 4 and early == 4 and late == 2 and mp_open == 2 and mp_after == 4,
           "samctl.lua: ЗРК - огонь ближе 70% зоны и после реакции расчёта (25 с); ПЗРК - по близкой цели, 2 пуска и всё")
+    # РЭБ: постановщик вне зоны сокращает рубеж пуска и удлиняет реакцию, но не делает ЗРК слепым (прожиг, потолки)
+    def jam_run(jam: bool, tx: float, now2: float) -> int:
+        sj = build.samctl_script(st6, [{"group": "SAM1", "kind": "sam", "r": 20000, "k": 0.7, "delay": 25,
+                                        "mobile": False, "eccm": 0}], ["J1"] if jam else [])
+        Lj = lupa.LuaRuntime()
+        Lj.execute('''
+          NOW = 0; ROE = {}; TX = 0
+          timer = { getTime = function() return NOW end, scheduleFunction = function(f) CHECK = f end }
+          AI = { Option = { Ground = { id = { ROE = 0, ALARM_STATE = 9 }, val = { ROE = { OPEN_FIRE = 2, WEAPON_HOLD = 4 },
+                 ALARM_STATE = { GREEN = 1, RED = 2 } } } } }
+          Object = { Category = { UNIT = 1 } }
+          world = { event = { S_EVENT_SHOT = 1 }, addEventHandler = function() end }
+          local function air(px) return { isExist = function() return true end, getCategory = function() return 1 end,
+            inAir = function() return true end, getCoalition = function() return 2 end, getTypeName = function() return "X" end,
+            getPoint = function() return { x = px(), y = 5000, z = 0 } end, getVelocity = function() return { x = 0, y = 0, z = 0 } end } end
+          local tgt = air(function() return TX end)
+          local jmr = air(function() return TX + 1000 end)
+          local u = { isExist = function() return true end, getLife = function() return 1 end, getCoalition = function() return 1 end,
+                      getPoint = function() return { x = 0, y = 0, z = 0 } end }
+          G = { SAM1 = { isExist = function() return true end, getUnits = function() return { u } end,
+                  getController = function() return { setOption = function(_, k, v) if k == 0 then ROE.SAM1 = v end end,
+                    getDetectedTargets = function() return { { object = tgt } } end } end },
+                J1 = { isExist = function() return true end, getUnits = function() return { jmr } end } }
+          Group = { getByName = function(n) return G[n] end }
+        ''')
+        Lj.execute(sj)
+        Lj.execute(f"TX = {tx}; NOW = 1; CHECK(); NOW = {now2}; CHECK()")
+        return Lj.eval("ROE.SAM1")
+    j_clear = jam_run(False, 12000, 30)            # без помех: 12 км (< 70% зоны) после 25 с - огонь
+    j_far = jam_run(True, 12000, 30)               # под помехой: рубеж ближе - 12 км уже вне рубежа
+    j_slow = jam_run(True, 8000, 30)               # под помехой: на 8 км - реакция дольше (не 25 с)
+    j_near = jam_run(True, 8000, 60)               # но огонь будет: реакция не дольше 2x, рубеж не ближе 45% зоны
+    j_burn = jam_run(True, 6000, 30)               # прожиг (ближе 35% зоны): помехи нет - обычная реакция
+    check(j_clear == 2 and j_far == 4 and j_slow == 4 and j_near == 2 and j_burn == 2,
+          "РЭБ (samctl.lua): постановщик помех сокращает рубеж пуска и удлиняет реакцию ЗРК, но в пределах: рубеж не "
+          "ближе 45% зоны, реакция не дольше 2x, ближе 35% зоны - прожиг")
     from redfront import gui as _gui
     _orig = _gui.liveries
     _gui.liveries = lambda st_, u_: [{"id": "IAF 69th Squadron", "name": "IAF 69th Squadron"},

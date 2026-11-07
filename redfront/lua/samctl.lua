@@ -8,6 +8,11 @@
 --   4. Стрельба с переездом (подвижные ЗРК: Куб, Оса...): после SCOOT_SHOTS пусков - РЛС выключены, переезд на
 --      SCOOT_M и тишина SCOOT_MIN..SCOOT_MAX с (iads.lua не включает их на это время).
 --   6. ПЗРК: огонь - по цели ближе MANPAD_M и медленнее MANPAD_V, не больше MANPAD_SHOTS пусков на группу за миссию.
+--   7. Помехи (РЭБ): постановщик вне зоны (JAMS) - по всем целям в его секторе, самолётная станция помех (SELFJ) -
+--      только по своему самолёту. Помеха удлиняет реакцию и сокращает рубеж пуска, но не запрещает огонь:
+--      ближе рубежа прожига (BURN x зоны) помехи нет; сила помехи ограничена JAM_MAX, две и больше станций
+--      складываются с убыванием; помехозащищённость ЗРК (eccm) ослабляет помеху. Помехи не действуют на
+--      оптику и ПЗРК, и на зенитки ближе прожига.
 -- Итог - REDFRONT_SAMCTL (хук пишет в дебриф).
 REDFRONT_SAMCTL = REDFRONT_SAMCTL or { scoot = {}, events = {} }
 local CHECK_S, BARRAGE_S, FORGET_S = 2, 8, 90
@@ -28,6 +33,49 @@ local function setROE(g, open)
   end)
 end
 local function note(s, what) local e = REDFRONT_SAMCTL.events; e[#e + 1] = { group = s.group, what = what, t = math.floor(timer.getTime()) } end
+
+-- ОЦЕНКИ РЭБ: потолок силы помехи, прожиг (доля зоны поражения), сектор постановщика (cos половины угла), дальность
+-- действия постановщика, предел удлинения реакции и предел сокращения рубежа - чтобы помехи не делали ПВО слепой
+local JAM_MAX, BURN, JAM_COS, JAM_RANGE_M, DELAY_MAX_K, RANGE_MIN_K = 0.6, 0.35, math.cos(math.rad(15)), 150000, 2.0, 0.45
+local SELFJ = { @SELFJ@ }   -- тип DCS -> сила самолётной станции помех
+local JAMS = { @JAMS@ }     -- группы постановщиков помех
+local SOJ_POWER = 0.5
+
+local function jammers()
+  local out = {}
+  for _, n in ipairs(JAMS) do
+    local g = grp(n)
+    for _, u in ipairs(g and g:getUnits() or {}) do
+      if u and u:isExist() and u:inAir() then out[#out + 1] = u end
+    end
+  end
+  return out
+end
+
+-- сила помехи для ЗРК s (позиция up) по цели o на дальности bd: 0..JAM_MAX
+local function jam_of(s, up, o, bd, sojs)
+  if bd <= s.r * BURN then return 0 end                -- прожиг: на малой дальности отражение сильнее помехи
+  local sum = {}
+  local okt, tn = pcall(function() return o:getTypeName() end)
+  local self_p = okt and SELFJ[tn] or nil
+  if self_p then sum[#sum + 1] = self_p end
+  local op = o:getPoint()
+  local tx, tz = op.x - up.x, op.z - up.z
+  for _, j in ipairs(sojs) do
+    if j:getCoalition() == o:getCoalition() then
+      local jp = j:getPoint()
+      local jx, jz = jp.x - up.x, jp.z - up.z
+      local dj = math.sqrt(jx * jx + jz * jz)
+      if dj > 1 and dj <= JAM_RANGE_M and (jx * tx + jz * tz) / (dj * bd) >= JAM_COS then
+        sum[#sum + 1] = SOJ_POWER * math.min(1, bd / dj)  -- дальше цель от ЗРК, ближе постановщик - помеха сильнее
+      end
+    end
+  end
+  table.sort(sum, function(a, b) return a > b end)
+  local p, w = 0, 1
+  for _, v in ipairs(sum) do p = p + v * w; w = w * 0.5 end   -- каждая следующая станция - вдвое слабее
+  return math.min(JAM_MAX, p * (1 - (s.eccm or 0)))
+end
 
 local function targets(g)
   local out = {}
@@ -70,6 +118,7 @@ end
 
 local function check()
   local now = timer.getTime()
+  local sojs = jammers()
   for _, s in ipairs(SPECS) do
     local g = grp(s.group)
     local u = g and lead(g)
@@ -104,7 +153,12 @@ local function check()
           c.b = now
         end
       elseif s.kind == "sam" and (REDFRONT_SAMCTL.scoot[s.group] or 0) <= now then
-        open = best ~= nil and bd <= s.r * s.k_range and now - c.first >= s.delay
+        local j = best and jam_of(s, up, best, bd, sojs) or 0
+        local kr = math.max(RANGE_MIN_K, s.k_range * (1 - j))       -- рубеж пуска под помехой - ближе, но не ближе предела
+        local dl = s.delay * math.min(DELAY_MAX_K, 1 + j * 1.5)      -- реакция под помехой - дольше, но не дольше предела
+        open = best ~= nil and bd <= s.r * kr and now - c.first >= dl
+        if j > 0 and best and bd <= s.r * s.k_range and not open and not c.jn then c.jn = true; note(s, "jammed") end
+        if j == 0 then c.jn = nil end
       end
       if open ~= c.open then
         setROE(g, open)

@@ -431,6 +431,19 @@ SAM_K_RANGE = 0.7     # ОЦЕНКА: пуск - ближе 70% зоны пор�
 AAA_SKILL = "Average"  # ОЦЕНКА: зенитная артиллерия - средняя выучка (прицельный огонь ИИ DCS слишком точен)
 
 
+# РЭБ (ОЦЕНКИ). Сила помехи 0..1 - насколько помеха удлиняет реакцию и сокращает рубеж пуска ЗРК (см. samctl.lua).
+# Самолётная станция помех (самозащита) - только по своему самолёту и слабее; постановщик вне зоны - по всем целям
+# в секторе ЗРК. Типы - с обычной для них станцией (ALQ-119/131/126, СПС-141/Сорбция, Remora/Barax...).
+ECM_SELF = {"F-4E": 0.25, "F-4E-45MC": 0.25, "F-16A": 0.25, "F-16C_50": 0.3, "F-15C": 0.3, "F-14A": 0.2,
+            "F-14A-135-GR": 0.2, "F-14A-135-GR-Early": 0.2, "FA-18C_hornet": 0.3, "A-6E": 0.25, "A-10A": 0.25,
+            "AV8BNA": 0.2, "Tornado IDS": 0.3, "Tornado GR4": 0.3, "B-52H": 0.4, "Su-24M": 0.3, "Su-25": 0.2,
+            "Su-25T": 0.25, "Su-17M4": 0.2, "MiG-27K": 0.25, "Tu-22M3": 0.35, "Su-27": 0.25, "MiG-29A": 0.15,
+            "MiG-29S": 0.2, "Mirage-F1CE": 0.15, "AJS37": 0.25}
+ECM_SELF_FROM = {"F-16C_50": 1984, "FA-18C_hornet": 1984, "MiG-29S": 1990, "Su-27": 1985}
+SAM_ECCM = {"S-300": 0.6, "SA-11": 0.5, "Buk": 0.5, "Patriot": 0.6, "Tor": 0.5, "SA-15": 0.5, "Hawk": 0.3,
+            "Kub": 0.1, "SA-6": 0.1, "S-125": 0.1, "S-75": 0.0, "Roland": 0.3, "Osa": 0.2, "Tunguska": 0.3}   # помехозащищённость
+
+
 def samctl_spec(state: dict, vg_by_unit: dict) -> list[dict]:
     """ПВО в миссии для samctl.lua: вид (ЗРК / зенитки / ПЗРК), зона, задержка реакции (по зоне и выучке части),
     подвижность (стрельба с переездом)."""
@@ -458,17 +471,23 @@ def samctl_spec(state: dict, vg_by_unit: dict) -> list[dict]:
                     "delay": SAM_DELAY_S[tier] / max(0.5, q),
                     "mobile": kind == "sam" and all(t in SAM_AUTONOMOUS or _re.search(AAA_RX + "|" + MANPAD_RX, t, _re.I)
                                                     for t in types),
-                    "manpad": n_mp > 0})
+                    "manpad": n_mp > 0,
+                    "eccm": max([v for k_, v in SAM_ECCM.items()
+                                 if any(k_.lower() in (t + " " + str(u.get("name", ""))).lower() for t in types)] or [0.2])})
     return out
 
 
-def samctl_script(state: dict, specs: list[dict]) -> str:
+def samctl_script(state: dict, specs: list[dict], jam_groups: list[str] | None = None) -> str:
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     items = ", ".join(f'{{ group = {q(a["group"])}, kind = "{a["kind"]}", r = {a["r"]:.0f}, k_range = {a["k"]}, '
                       f'delay = {a["delay"]:.0f}, mobile = {"true" if a["mobile"] else "false"}, '
-                      f'manpad = {"true" if a.get("manpad") else "false"} }}' for a in specs)
+                      f'manpad = {"true" if a.get("manpad") else "false"}, eccm = {a.get("eccm", 0):.2f} }}' for a in specs)
+    yr = int(str(state.get("date", "1985"))[:4])
+    selfj = ", ".join(f'["{t}"] = {p:.2f}' for t, p in ECM_SELF.items() if yr >= ECM_SELF_FROM.get(t, 0))
+    jams = ", ".join(q(n) for n in (jam_groups or []))
     return (SAMCTL_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
-            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SPECS@", items))
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SPECS@", items)
+            .replace("@SELFJ@", selfj).replace("@JAMS@", jams))
 
 
 def iads_script(campaign_id: str, sortie: int, sams: list[dict], net: list[dict]) -> str:
@@ -890,7 +909,7 @@ KIND_CATS = {   # категория подвески по виду задачи
     "strike_bridge": ["strike"], "strike_depot": ["strike"], "strike_factory": ["strike"],
     "cap_own_troops": ["cap"], "qra": ["cap"], "fleet_cap": ["cap"], "strike_ship": ["antiship", "strike"],
 }
-GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "escort": ["cas"], "helo": ["cas"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"]}
+GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "escort": ["cas"], "helo": ["cas"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"], "jam": ["jam"]}
 PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retribution (data/payloads.json), по порядку предпочтения
     "cas": ["Retribution CAS", "CAS"],
     "anti_armor": ["Retribution BAI", "Retribution CAS", "CAS"],
@@ -1689,7 +1708,7 @@ def package_order(pkg: list[dict], times: dict, lg: str = "ru") -> list[str]:
     return out
 
 
-ETA_POINTS = ("ИПМ", "Рубеж пуска", "Рубеж атаки", "Зона прикрытия", "Зона расчистки", "Демонстрация", "Район поиска",
+ETA_POINTS = ("ИПМ", "Рубеж пуска", "Рубеж атаки", "Зона прикрытия", "Зона расчистки", "Зона постановки помех", "Демонстрация", "Район поиска",
               "Площадка", "Экипаж", "Зона дежурства")   # точки, к которым группа ИИ выходит ко времени
 
 
@@ -1952,6 +1971,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     cap_specs: list[dict] = []                   # пары прикрытия ИИ (cap.lua)
     timing_specs: list[dict] = []                # выход групп ИИ на рубеж: факт против плана (timing.lua)
+    jam_groups: list[str] = []                   # постановщики помех вне зоны ПВО (samctl.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
     ctld = {"pilots": [], "actions": {}, "limits": {}, "cargo": {}, "logistic": [], "pickup": [], "groups": [],
             "crates": [], "lifts": [], "jtacs": [], "extract": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
@@ -2401,6 +2421,20 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                                          pattern=task.OrbitAction.OrbitPattern.Circle))
             orbit.stop_after_time(t_strk + int(g.get("land_s") or 120) + 120)
             w.tasks.append(orbit)
+        elif obj["kind"] == "jam_orbit":        # постановщик помех: круг вне зоны ЗРК до конца удара, станция помех включена
+            alt = q_alt(state, side_g, int(g.get("alt_m") or 6000) * jit)
+            w = wp(obj["pos"], alt, "Зона постановки помех", keep_alt=True)
+            w.alt_type = "BARO"
+            orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
+            orbit.stop_after_time(t_strk + int((g.get("hold_after_min") or 5) * 60))
+            w.tasks.append(orbit)
+            fg.points[0].tasks.append(task.OptECMUsing(task.OptECMUsing.Values.AlwaysUse))
+            fg.points[0].tasks.append(task.OptReactOnThreat(task.OptReactOnThreat.Values.EvadeFire))
+            for u_ in fg.units:                  # оружия у постановщика нет (EA-6B на модели A-6E - без бомб и ПРР)
+                u_.pylons.clear()
+            fg.points[0].tasks = [t_ for t_ in fg.points[0].tasks if not isinstance(t_, task.EngageTargets)]
+            fg.points[0].tasks.append(task.OptROE(task.OptROE.Values.WeaponHold))
+            jam_groups.append(fg.name)
         elif obj["kind"] == "feint":            # демонстративная: на средней высоте к точке другим направлением, круг, домой
             alt = int(g.get("alt_m") or 4000)
             w = fg.add_waypoint(_pt(m, obj["pos"]), alt, speed=spd, name="Демонстрация")
@@ -2569,8 +2603,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     if iads_sams:                                # сеть ПВО: ЗРК на связи молчат до цели в зоне, реакция на ПРР
         trig.add_action(DoScript(String(iads_script(state["campaign_id"], state["sortie"], iads_sams, iads_net))))
     sc_specs = samctl_spec(state, vg_by_unit)    # огонь ПВО: реакция расчёта, дальность пуска, заграждение зениток,
-    if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска
-        trig.add_action(DoScript(String(samctl_script(state, sc_specs))))
+    if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска, помехи (постановщики и самолётные)
+        trig.add_action(DoScript(String(samctl_script(state, sc_specs, jam_groups))))
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p, strict_abort(state)))))

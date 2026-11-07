@@ -110,7 +110,7 @@ def rel_times(state: dict, tdef: dict, task: dict) -> dict[str, dict]:
             dwell = -obj + (g.get("land_s") or 120) + 120
         elif kind == "feint":
             dwell = (g.get("orbit_min") or 6) * 60
-        elif kind in ("cover_zone", "sam"):
+        elif kind in ("cover_zone", "sam", "jam_orbit"):
             dwell = -obj + (g.get("hold_after_min") or 5) * 60
         else:
             dwell = DWELL_S

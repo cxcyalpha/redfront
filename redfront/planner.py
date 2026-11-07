@@ -184,6 +184,13 @@ def detection_radius_km(unit: dict) -> float | None:
     return r if r is not None else dcstypes.detection_range_km([c["type"] for c in unit.get("composition", [])])
 
 
+def jam_point(state: dict, sam: dict, base: dict, g: dict) -> dict:
+    """Круг постановщика помех: на линии ЗРК - база, за зоной поражения ЗРК на standoff_km (ОЦЕНКА: помехи - из-за
+    зоны, не над ней)."""
+    pos = intel.known_pos(state, sam) if intel.tracked(state, sam) else model.unit_pos(state, sam)
+    return _toward(pos, base, threat_radius_km(sam) + g.get("standoff_km", 20))
+
+
 def launch_distance_km(sam: dict, g: dict) -> float:
     """Удаление рубежа пуска ПРР от ЗРК: min(standoff_km, дальность обнаружения его РЛС - detect_margin_km) -
     ПРР наводится на излучение, и рубеж должен быть там, где РЛС ЗРК самолёт видит (в DCS пара на 15 км
@@ -1084,6 +1091,8 @@ def refresh(state: dict, task: dict) -> list[str]:
                 task["ip"] = ip
         elif o["kind"] in ("cover_zone", "cap_zone"):
             g["route"] = [tpos]
+        elif o["kind"] == "jam_orbit":
+            continue
         elif o["kind"] in ("search_zone", "flyover"):
             g["route"] = [ip_point(base, tpos, tdef["ip_offset_km"]), tpos]
         else:
@@ -1191,6 +1200,15 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         elif g.get("mode") == "cover_zone":       # прикрытие группы: зона на подходе к цели вне зон ЗРК (не над ней)
             objective = {"kind": "cover_zone", "unit": tgt["id"], "pos": tpos}
             route_of = lambda base: [clear_point(state, perf["side"], tpos, base)]
+        elif g.get("mode") == "jam_orbit":        # постановщик помех: круг вне зоны ближнего к цели ЗРК, на линии ЗРК - база
+            if not any(u["side"] == perf["side"] and role_ok(state, u, g["performers"]) for u in units.values()):
+                continue                         # постановщиков помех у стороны нет - без группы и без замечания
+            objs = sorted((units[t] for t in threats if sead_target(units[t])),
+                          key=lambda u: model.dist_km(tpos, model.unit_pos(state, u)))
+            if not objs:
+                continue
+            objective = {"kind": "jam_orbit", "units": [u["id"] for u in objs]}
+            route_of = lambda base, g=g, objs=objs: [jam_point(state, objs[0], base, g)]
         else:
             kind = "search_zone" if g.get("mode") == "search_zone" else "flyover"
             objective = {"kind": kind, "unit": tgt["id"], "pos": tpos}
@@ -1249,7 +1267,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
             cb = state["airbases"][chosen["base"]]
             obj_k = {"kind": "sam", "units": [per[k]["id"]]} if per else objective
             route_k = [hold_point(state, per[k], cb, g)] if per else route_of(cb)
-            if obj_k.get("kind") == "cover_zone":    # центр зоны прикрытия - точка маршрута (вне ЗРК)
+            if obj_k.get("kind") in ("cover_zone", "jam_orbit"):    # центр зоны прикрытия - точка маршрута (вне ЗРК)
                 obj_k = dict(obj_k, pos=route_k[0])
             groups.append({"group": g["id"] if k == 0 else f"{g['id']}{k + 1}", "support_id": g["id"],
                            "title": g["title"] if flights == 1 else

@@ -150,6 +150,8 @@ NAMES = {
     "Нефтяная платформа Сассан (база КСИР)": "Sassan oil platform (IRGC base)", "Нефтяная платформа Сирри-D (база КСИР)": "Sirri-D oil platform (IRGC base)",
     "Нефтяная платформа Ростам (база КСИР)": "Rostam oil platform (IRGC base)", "VA-95 (KA-6D, заправщик)": "VA-95 (KA-6D, tanker)",
     "VA-95 (A-6E, Enterprise)": "VA-95 (A-6E, Enterprise)", "VAW-117 (E-2C)": "VAW-117 (E-2C)",
+    "VAQ-135 (EA-6B, Enterprise)": "VAQ-135 (EA-6B, Enterprise)", "постановщик помех": "stand-off jammer",
+    "постановщики помех": "stand-off jammers", "Зона постановки помех": "Jamming orbit",
     "VA-22, VA-94 (A-7E, Enterprise)": "VA-22, VA-94 (A-7E, Enterprise)", "VF-114, VF-213 (F-14A, Enterprise)": "VF-114, VF-213 (F-14A, Enterprise)",
     "Бандар-Аббас": "Bandar Abbas",
     "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47F)": "No. 18 Squadron RAF (Chinook HC.1; CH-47F in DCS)",

@@ -467,6 +467,18 @@
    "estimate": true
   },
   {
+   "id": "us_vaq135",
+   "name": "VAQ-135 (EA-6B, Enterprise)",
+   "side": "blue",
+   "role": "ew",
+   "base": "cvn65",
+   "type": "A6E",
+   "count": 4,
+   "strike_radius_km": 600,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; EA-6B Prowler - в DCS нет, модель A-6E; постановщик помех вне зоны ПВО",
+   "estimate": true
+  },
+  {
    "id": "us_ka6",
    "name": "VA-95 (KA-6D, заправщик)",
    "side": "blue",

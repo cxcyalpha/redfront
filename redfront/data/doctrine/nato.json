@@ -492,6 +492,33 @@
       "zone_km",
       "hold_after_min"
      ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
+      "hold_after_min"
+     ]
     }
    ],
    "timing": {
@@ -798,6 +825,33 @@
       "alt_m",
       "zone_km"
      ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
+      "hold_after_min"
+     ]
     }
    ],
    "timing": {
@@ -1013,6 +1067,33 @@
       "lead_min",
       "alt_m",
       "zone_km",
+      "hold_after_min"
+     ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
       "hold_after_min"
      ]
     }
@@ -1234,6 +1315,33 @@
       "hold_after_min"
      ],
      "size_source": "ОЦЕНКА: удар по объекту и BAI/FOFA - звено (4), вооружённая разведка путей - пара, CAS (A-10 в Европе) - пара; прикрытие ударов в глубину (аэродромы, FOFA) - звено"
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
+      "hold_after_min"
+     ]
     }
    ],
    "timing": {
@@ -1422,6 +1530,33 @@
       "us"
      ],
      "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска"
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
+      "hold_after_min"
+     ]
     }
    ],
    "timing": {
@@ -1645,6 +1780,33 @@
       "zone_km",
       "hold_after_min"
      ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
+      "hold_after_min"
+     ]
     }
    ],
    "timing": {
@@ -1866,6 +2028,33 @@
       "zone_km",
       "hold_after_min"
      ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
+      "hold_after_min"
+     ]
     }
    ],
    "timing": {
@@ -2085,6 +2274,33 @@
       "lead_min",
       "alt_m",
       "zone_km",
+      "hold_after_min"
+     ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
       "hold_after_min"
      ]
     }
@@ -2637,6 +2853,33 @@
       "lead_min",
       "alt_m",
       "zone_km",
+      "hold_after_min"
+     ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
       "hold_after_min"
      ]
     }
