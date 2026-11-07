@@ -65,14 +65,45 @@ T_ESC = ["LAU-7 AIM-9M", "LAU-7 AIM-9M", "Fuel tank 300 gal", "AIM-7M", "AIM-7M"
 F14 = [{"cls": c, "page": "f-14",
         "loads": {"Retribution BARCAP": T_CAP, "Retribution Escort": T_ESC, "Retribution Fighter Sweep": T_ESC}}
        for c in ("F_14A_135_GR", "F_14A_135_GR_Early")]
-SPECS = [H, F16C, F16A, F15C, *F14]
+# F-4E (ИИ DCS): 1, 9 - внешние (баки); 2, 8 - внутренние; 3, 4, 6, 7 - ниши AIM-7 (3 - контейнер РЭБ); 5 - центр (бак)
+F4_ROW = lambda w: ["F-4 Fuel tank-W", w, "ALQ-131", "AIM-7M", "F-4 Fuel tank-C", "AIM-7M", "AIM-7M", w, "F-4 Fuel tank-W"]
+F4E = {"cls": "F_4E", "page": "f-4",
+       "loads": {"Retribution CAS": F4_ROW("BRU-42 - 3 x Mk-20"), "Retribution BAI": F4_ROW("BRU-42 - 3 x Mk-82"),
+                 "Retribution Strike": F4_ROW("GBU-10"), "Retribution SEAD": F4_ROW("LAU-118A - AGM-45B"),
+                 "Retribution BARCAP": ["F-4 Fuel tank-W", "LAU-7 - 2 x AIM-9M", "AIM-7M", "AIM-7M", "F-4 Fuel tank-C",
+                                        "AIM-7M", "AIM-7M", "LAU-7 - 2 x AIM-9M", "F-4 Fuel tank-W"]}}
+F4E["loads"]["Retribution Escort"] = F4E["loads"]["Retribution BARCAP"]
+# F-4E (Heatblur): 1, 13 - внешние; 3, 11 - внутренние (2, 4, 10, 12 - направляющие AIM-9 на них); 5, 6, 8, 9 - ниши
+# AIM-7 (6 - контейнер РЭБ); 7 - центр
+HB = lambda w, a9=None: ["Fuel", a9, w, a9, None, "ALQ-131", "Fuel", "AIM-7M", "AIM-7M", a9, w, a9, "Fuel"]
+F4HB = {"cls": "F_4E_45MC", "page": "f-4",
+        "loads": {"Retribution CAS": HB("2x CBU-87", "AIM-9M"), "Retribution BAI": HB("2x AGM-65D", "AIM-9M"),
+                  "Retribution Strike": HB("2x Mk-83 - 1000lb GP Bomb LD (TER)", "AIM-9M"),
+                  "Retribution BARCAP": ["Fuel", "AIM-9M", None, "AIM-9M", "AIM-7M", "AIM-7M", "Fuel", "AIM-7M", "AIM-7M",
+                                         "AIM-9M", None, "AIM-9M", "Fuel"]}}
+F4HB["loads"]["Retribution Escort"] = F4HB["loads"]["Retribution BARCAP"]
+# A-10A: 1 - 2 x AIM-9M, 11 - контейнер РЭБ, 3, 9 - Maverick, 4-8 - бомбы (6 - пусто), 2, 10 - пусто
+A10 = lambda w3, w4, w5: ["LAU-105 - 2 x AIM-9M", None, w3, w4, w5, None, w5, w4, w3, None, "ALQ-131"]
+A10A = {"cls": "A_10A", "page": "a-10",
+        "loads": {"Retribution CAS": A10("LAU-117 - AGM-65D", "Mk-20", "Mk-20"),
+                  "Retribution BAI": A10("LAU-88 - 2 x AGM-65D", "BRU-42 - 3 x Mk-82 -", None),
+                  "Retribution Strike": A10("LAU-117 - AGM-65D", "BRU-42 - 3 x Mk-82 -", "Mk-82 -")}}
+# AV-8B: 1, 8 - внешние (AIM-9M), 2, 3, 6, 7 - бомбы, 4 - пушка GAU-12, 5 - ALQ-164
+AV = lambda w, a1=None: [a1, w, w, "GAU 12 Gunpod w/HE", "AN/ALQ-164", w, w, "AIM-9M"]
+AV8 = {"cls": "AV8BNA", "page": "av-8b",
+       "loads": {"Retribution CAS": AV("Mk-20"), "Retribution BAI": AV("Mk-82 Snakeye", "AIM-9M"),
+                 "Retribution Strike": AV("Mk-83 - 1000lb", "AIM-9M")}}
+SPECS = [H, F16C, F16A, F15C, *F14, F4E, F4HB, A10A, AV8]
+# A-6E - нет: у него свои подвески по задачам из файлов DCS (A6E.lua, коммит e7c63bf), они точнее
 
 
 def clsid(cls, n: int, prefix: str) -> str:
     py = getattr(cls, f"Pylon{n}")
-    for v in vars(py).values():
-        if isinstance(v, tuple) and len(v) == 2 and isinstance(v[1], dict) and v[1].get("name", "").startswith(prefix):
-            return v[1]["clsid"]
+    ws = [v[1] for v in vars(py).values() if isinstance(v, tuple) and len(v) == 2 and isinstance(v[1], dict)]
+    for test in (lambda nm: nm.startswith(prefix), lambda nm: prefix in nm):   # начало имени, затем - часть имени
+        for w in ws:
+            if test(w.get("name", "")):
+                return w["clsid"]
     raise SystemExit(f"{cls.id} пилон {n}: нет оружия '{prefix}'")
 
 
@@ -80,7 +111,7 @@ def main() -> None:
     d = json.loads(OUT.read_text(encoding="utf-8"))
     ret = json.loads((OUT.parent / "payloads.json").read_text(encoding="utf-8"))["types"]
     for sp in SPECS:
-        cls = getattr(P, sp["cls"])
+        cls = sp.get("cls_obj") or getattr(P, sp["cls"])
         t = d["types"].setdefault(cls.id, {})
         nums = sp.get("pylons") or list(range(1, 20))
         for name, row in sp["loads"].items():

@@ -946,11 +946,12 @@ def loadout_cats(kind: str, g: dict) -> list[str]:
 
 
 def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
-    """Подвеска для типа и категории: (имя, пилоны) или None. Свои (payloads_custom.json) - первыми, затем DCS
+    """Подвеска для типа и категории: (имя, пилоны) или None. По порядку имён категории; при одном имени свои (payloads_custom.json) - раньше DCS
     Retribution; из подвесок категории - первая, где всё оружие есть на год кампании, иначе первая (по году её
     поправит weapons.degrade)."""
     from . import weapons
     found = []
+    names = PAYLOAD_NAMES.get(cat, [])
     for f in ("payloads_custom.json", "payloads.json"):
         try:
             pls = model.load_json(f).get("types", {}).get(ac.id) or {}
@@ -963,6 +964,18 @@ def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
                 continue                         # своя историческая подвеска - до года until (позже - подвеска Retribution)
             if k and pls[k]["pylons"] and (k, f) not in [(x[0], x[2]) for x in found]:
                 found.append((k, pls[k]["pylons"], f))
+    # порядок - по имени подвески категории, при одном имени своя - раньше Retribution: своя подвеска заменяет только
+    # ту же (своя 'Strike' не перебивает противокорабельную Retribution с Harpoon)
+    heads = {v[0].lower() for c, v in PAYLOAD_NAMES.items() if c != cat and v}
+    own = set()                                  # свои имена категории - до первого имени, главного у другой категории
+    for n in names:
+        if n.lower() in heads:
+            break
+        own.add(n.lower())
+    own.add(cat.lower())
+    rank = {n.lower(): i for i, n in enumerate(names)}
+    custom = lambda x: x[2] == "payloads_custom.json"
+    found.sort(key=lambda x: (not (custom(x) and x[0].lower() in own), rank.get(x[0].lower(), len(names)), not custom(x)))
     if not found:
         return None
     k, pyl, _f = next((x for x in found if weapons.valid(x[1], year)), found[0])
