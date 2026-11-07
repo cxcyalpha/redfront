@@ -27,6 +27,7 @@ THEATRE_INFO = {   # карта DCS: класс pydcs, центр (восход/
     "germany": {"cls": "Germany", "lat": 51.5, "lon": 10.5, "utc": 1, "climate": "hannover"},
     "caucasus": {"cls": "Caucasus", "lat": 42.5, "lon": 43.5, "utc": 4, "climate": "tbilisi"},
     "syria": {"cls": "Syria", "lat": 33.5, "lon": 35.8, "utc": 3, "climate": "beirut"},
+    "persiangulf": {"cls": "PersianGulf", "lat": 26.3, "lon": 55.5, "utc": 4, "climate": "dubai"},
 }
 
 
@@ -631,3 +632,30 @@ def sync_ad_sites(st: dict) -> None:
         x = sites.get(u["id"])
         if x:
             u["pos"] = {"lat": x["lat"], "lon": x["lon"]}
+
+
+# Вариант модели: часть на более старом самолёте летает на модели DCS новее (F-16A - на F-16C блок 50: пилотируемая
+# модель); разница - в оружии и задачах. Вариант - по имени части (F-16A в имени) и типу модели.
+VARIANTS = {
+    "F-16A": {"type": "F_16C_50", "name_rx": r"F-16A",
+              # F-16A блок 10/15: HARM не было (HARM на F-16 - блок 30 с 1991, полноценно - блок 50/52), подавление ПВО
+              # ракетами (sead) - не его задача; удар бомбами по позиции ЗРК и добивание (kill) - можно. AMRAAM - только
+              # у F-16A ADF с 1989-1991 (ОЦЕНКА; в кампаниях 80-х его снимет и год). Maverick - можно: 174-е TFW
+              # (F-16A блок 10) в 1991 - LAU-117 с AGM-65D (dstorm.eu), испытания AGM-65 на блоке 15 - 1984 (f-16.net)
+              "tasks_not": ["sead", "sead2"],
+              "weapons_not": ["AGM-88", "AIM-120", "AGM-154", "GBU-31", "GBU-38", "GBU-54", "CBU-97",
+                              "CBU-103", "CBU-105", "AN/AAQ-28", "LITENING", "AN/ASQ-213", "HTS"]},
+}
+
+
+def variant(unit: dict) -> dict:
+    """Вариант модели части ({} - нет)."""
+    import re as _re
+    for v in VARIANTS.values():
+        if unit.get("type") == v["type"] and _re.search(v["name_rx"], unit.get("name", "")):
+            return v
+    return {}
+
+
+def tasks_not(unit: dict) -> list[str]:
+    return list(unit.get("tasks_not", [])) + variant(unit).get("tasks_not", [])

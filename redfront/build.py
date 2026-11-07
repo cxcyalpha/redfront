@@ -431,6 +431,19 @@ SAM_K_RANGE = 0.7     # ОЦЕНКА: пуск - ближе 70% зоны пор�
 AAA_SKILL = "Average"  # ОЦЕНКА: зенитная артиллерия - средняя выучка (прицельный огонь ИИ DCS слишком точен)
 
 
+# РЭБ (ОЦЕНКИ). Сила помехи 0..1 - насколько помеха удлиняет реакцию и сокращает рубеж пуска ЗРК (см. samctl.lua).
+# Самолётная станция помех (самозащита) - только по своему самолёту и слабее; постановщик вне зоны - по всем целям
+# в секторе ЗРК. Типы - с обычной для них станцией (ALQ-119/131/126, СПС-141/Сорбция, Remora/Barax...).
+ECM_SELF = {"F-4E": 0.25, "F-4E-45MC": 0.25, "F-16A": 0.25, "F-16C_50": 0.3, "F-15C": 0.3, "F-14A": 0.2,
+            "F-14A-135-GR": 0.2, "F-14A-135-GR-Early": 0.2, "FA-18C_hornet": 0.3, "A-6E": 0.25, "A-10A": 0.25,
+            "AV8BNA": 0.2, "Tornado IDS": 0.3, "Tornado GR4": 0.3, "B-52H": 0.4, "Su-24M": 0.3, "Su-25": 0.2,
+            "Su-25T": 0.25, "Su-17M4": 0.2, "MiG-27K": 0.25, "Tu-22M3": 0.35, "Su-27": 0.25, "MiG-29A": 0.15,
+            "MiG-29S": 0.2, "Mirage-F1CE": 0.15, "AJS37": 0.25}
+ECM_SELF_FROM = {"F-16C_50": 1984, "FA-18C_hornet": 1984, "MiG-29S": 1990, "Su-27": 1985}
+SAM_ECCM = {"S-300": 0.6, "SA-11": 0.5, "Buk": 0.5, "Patriot": 0.6, "Tor": 0.5, "SA-15": 0.5, "Hawk": 0.3,
+            "Kub": 0.1, "SA-6": 0.1, "S-125": 0.1, "S-75": 0.0, "Roland": 0.3, "Osa": 0.2, "Tunguska": 0.3}   # помехозащищённость
+
+
 def samctl_spec(state: dict, vg_by_unit: dict) -> list[dict]:
     """ПВО в миссии для samctl.lua: вид (ЗРК / зенитки / ПЗРК), зона, задержка реакции (по зоне и выучке части),
     подвижность (стрельба с переездом)."""
@@ -458,17 +471,23 @@ def samctl_spec(state: dict, vg_by_unit: dict) -> list[dict]:
                     "delay": SAM_DELAY_S[tier] / max(0.5, q),
                     "mobile": kind == "sam" and all(t in SAM_AUTONOMOUS or _re.search(AAA_RX + "|" + MANPAD_RX, t, _re.I)
                                                     for t in types),
-                    "manpad": n_mp > 0})
+                    "manpad": n_mp > 0,
+                    "eccm": max([v for k_, v in SAM_ECCM.items()
+                                 if any(k_.lower() in (t + " " + str(u.get("name", ""))).lower() for t in types)] or [0.2])})
     return out
 
 
-def samctl_script(state: dict, specs: list[dict]) -> str:
+def samctl_script(state: dict, specs: list[dict], jam_groups: list[str] | None = None) -> str:
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     items = ", ".join(f'{{ group = {q(a["group"])}, kind = "{a["kind"]}", r = {a["r"]:.0f}, k_range = {a["k"]}, '
                       f'delay = {a["delay"]:.0f}, mobile = {"true" if a["mobile"] else "false"}, '
-                      f'manpad = {"true" if a.get("manpad") else "false"} }}' for a in specs)
+                      f'manpad = {"true" if a.get("manpad") else "false"}, eccm = {a.get("eccm", 0):.2f} }}' for a in specs)
+    yr = int(str(state.get("date", "1985"))[:4])
+    selfj = ", ".join(f'["{t}"] = {p:.2f}' for t, p in ECM_SELF.items() if yr >= ECM_SELF_FROM.get(t, 0))
+    jams = ", ".join(q(n) for n in (jam_groups or []))
     return (SAMCTL_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
-            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SPECS@", items))
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SPECS@", items)
+            .replace("@SELFJ@", selfj).replace("@JAMS@", jams))
 
 
 def iads_script(campaign_id: str, sortie: int, sams: list[dict], net: list[dict]) -> str:
@@ -756,6 +775,54 @@ def naval_manifest() -> list[dict]:
     return [{"unit": uid, "ships": [{"name": nm, "type": typ} for typ, nm in lst]} for uid, lst in NAVAL_SHIPS.items()]
 
 
+BEACON_FILES = {"PersianGulf": "persiangulf", "Caucasus": "caucasus", "Syria": "syria", "GermanyCW": "germanycoldwar"}
+_BEACONS: dict[str, dict] = {}
+
+
+def navaid_lines(m: Mission, airport, lg: str) -> list[str]:
+    """Радиосредства аэродрома для планшета: TACAN (канал), VOR/VORTAC, ILS (частота, позывной), РСБН (канал), ПРМГ,
+    приводные (кГц). Данные - DCS Retribution, resources/dcs/beacons (LGPL-3.0); id маяков - airport.beacons (pydcs)."""
+    if airport is None:
+        return []
+    key = BEACON_FILES.get(m.terrain.name)
+    if not key:
+        return []
+    if key not in _BEACONS:
+        try:
+            _BEACONS[key] = model.load_json(f"beacons/{key}.json")
+        except FileNotFoundError:
+            _BEACONS[key] = {}
+    db = _BEACONS[key]
+    out = []
+    seen = set()
+    ids = [getattr(b, "id", "") for b in getattr(airport, "beacons", []) or []]
+    ids += [k for k in db if k.startswith(f"airfield{airport.id}_") and k not in ids]   # ILS/ПРМГ - у полос, не в beacons
+    for bid in sorted(ids, key=lambda k: (k.split("_")[0], int(k.split("_")[-1]) if k.split("_")[-1].isdigit() else 0)):
+        x = db.get(bid)
+        if not x:
+            continue
+        t, hz, ch, cs = x["beacon_type"], x.get("hertz") or 0, x.get("channel"), x.get("callsign", "")
+        if t in (4, 5):
+            s_ = f"TACAN {ch}X {cs}" + (" (VORTAC)" if t == 5 else "")
+        elif t in (1, 3):
+            s_ = f"VOR {hz / 1e6:.2f} {cs}"
+        elif t == 16640:
+            s_ = f"ILS {hz / 1e6:.2f} {cs}"
+        elif t == 128:
+            s_ = i18n.L(lg, f"РСБН канал {ch} {cs}", f"RSBN ch {ch} {cs}")
+        elif t == 33024:
+            s_ = i18n.L(lg, "ПРМГ " + (f"канал {ch} " if ch else "") + (f"{hz / 1e6:.2f} " if hz else "") + cs,
+                        "PRMG " + (f"ch {ch} " if ch else "") + (f"{hz / 1e6:.2f} " if hz else "") + cs)
+        elif t in (8, 4104, 4136, 16408, 16424):
+            s_ = i18n.L(lg, f"привод {hz / 1e3:.0f} кГц {cs}", f"NDB {hz / 1e3:.0f} kHz {cs}")
+        else:
+            continue
+        if s_ not in seen:
+            seen.add(s_)
+            out.append("  " + s_)
+    return out
+
+
 def carrier_lines(state: dict, side_pos=None) -> list[str]:
     """Строки брифинга и планшета: авианосцы кампании - TACAN, ICLS, частота (своей стороны)."""
     out = []
@@ -842,7 +909,7 @@ KIND_CATS = {   # категория подвески по виду задачи
     "strike_bridge": ["strike"], "strike_depot": ["strike"], "strike_factory": ["strike"],
     "cap_own_troops": ["cap"], "qra": ["cap"], "fleet_cap": ["cap"], "strike_ship": ["antiship", "strike"],
 }
-GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "escort": ["cas"], "helo": ["cas"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"]}
+GROUP_CATS = {"cover": ["escort", "cap"], "sead": ["sead"], "sead2": ["sead"], "kill": ["dead"], "escort": ["cas"], "helo": ["cas"], "sweep": ["cap"], "feint": ["cap", "escort"], "recon": ["bai", "cas"], "jam": ["jam"]}
 PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retribution (data/payloads.json), по порядку предпочтения
     "cas": ["Retribution CAS", "CAS"],
     "anti_armor": ["Retribution BAI", "Retribution CAS", "CAS"],
@@ -861,10 +928,17 @@ PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retr
 def loadout_cats(kind: str, g: dict) -> list[str]:
     """Категории подвески группы по порядку: вид задачи (для ударной группы) или роль группы обеспечения, затем
     категории доктрины (loadout группы)."""
+    gid = re.sub(r"\d+$", "", g.get("group", "")).split("_")[0]
     first = [] if g.get("loadout_user") else \
-        GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], []) if g.get("group") not in ("strike", "strike2") \
+        GROUP_CATS.get(gid, []) if g.get("group") not in ("strike", "strike2") \
         else KIND_CATS.get(kind, [])
+    # своя подвеска (payloads_custom.json) - и точнее категории: по задаче и группе ("strike_bridge", "strike_airfield/
+    # cover", "sead"): сначала самая точная, затем роль группы, затем категория (масштабируется без кода)
+    own = [] if g.get("loadout_user") else ([f"{kind}/{gid}", gid] if g.get("group") not in ("strike", "strike2") else [kind])
     out = []
+    for c in own:
+        if c not in out:
+            out.append(c)
     for c in first + list(g.get("loadout") or []):
         if c not in out:
             out.append(c)
@@ -872,11 +946,12 @@ def loadout_cats(kind: str, g: dict) -> list[str]:
 
 
 def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
-    """Подвеска для типа и категории: (имя, пилоны) или None. Свои (payloads_custom.json) - первыми, затем DCS
+    """Подвеска для типа и категории: (имя, пилоны) или None. По порядку имён категории; при одном имени свои (payloads_custom.json) - раньше DCS
     Retribution; из подвесок категории - первая, где всё оружие есть на год кампании, иначе первая (по году её
     поправит weapons.degrade)."""
     from . import weapons
     found = []
+    names = PAYLOAD_NAMES.get(cat, [])
     for f in ("payloads_custom.json", "payloads.json"):
         try:
             pls = model.load_json(f).get("types", {}).get(ac.id) or {}
@@ -885,12 +960,40 @@ def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
         low = {k.lower(): k for k in pls}
         for name in PAYLOAD_NAMES.get(cat, []) + ([cat] if f == "payloads_custom.json" else []):
             k = low.get(name.lower())
+            if k and year and pls[k].get("until") and year > pls[k]["until"]:
+                continue                         # своя историческая подвеска - до года until (позже - подвеска Retribution)
             if k and pls[k]["pylons"] and (k, f) not in [(x[0], x[2]) for x in found]:
                 found.append((k, pls[k]["pylons"], f))
+    # порядок - по имени подвески категории, при одном имени своя - раньше Retribution: своя подвеска заменяет только
+    # ту же (своя 'Strike' не перебивает противокорабельную Retribution с Harpoon)
+    heads = {v[0].lower() for c, v in PAYLOAD_NAMES.items() if c != cat and v}
+    own = set()                                  # свои имена категории - до первого имени, главного у другой категории
+    for n in names:
+        if n.lower() in heads:
+            break
+        own.add(n.lower())
+    own.add(cat.lower())
+    rank = {n.lower(): i for i, n in enumerate(names)}
+    custom = lambda x: x[2] == "payloads_custom.json"
+    found.sort(key=lambda x: (not (custom(x) and x[0].lower() in own), rank.get(x[0].lower(), len(names)), not custom(x)))
     if not found:
         return None
     k, pyl, _f = next((x for x in found if weapons.valid(x[1], year)), found[0])
     return k, pyl
+
+
+def _weapons_not(fg, perf: dict) -> None:
+    """Вариант модели (F-16A на модели F-16C): оружие, которого у варианта не было (weapons_not - части имён
+    оружия pydcs), снимается с пилонов."""
+    import re as _re
+    from dcs.weapons_data import weapon_ids
+    pats = list(perf.get("weapons_not") or []) + model.variant(perf).get("weapons_not", [])
+    if not pats:
+        return
+    rx = _re.compile("|".join(_re.escape(p) for p in pats), _re.I)
+    for u in fg.units:
+        for num in [n for n, d in u.pylons.items() if rx.search((weapon_ids.get(d.get("CLSID")) or {}).get("name", ""))]:
+            del u.pylons[num]
 
 
 def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None = None) -> str | None:
@@ -913,6 +1016,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                             u.pylons[int(num)] = dict(d)
                 weapons.degrade(fg, year, ecm)
                 weapons.fixups(fg, year)
+                _weapons_not(fg, perf)
                 return cat[3:].replace("Retribution ", "")
     for cat in cats:
         pl = _payload(ac, cat, year)
@@ -925,8 +1029,10 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                         u.pylons[int(num)] = dict(d)
             weapons.degrade(fg, year, ecm)
             weapons.fixups(fg, year)
+            _weapons_not(fg, perf)
             return name.replace("Retribution ", "")   # подвеска - по функции (Strike, CAS, SEAD...)
     weapons.degrade(fg, year, ecm)
+    _weapons_not(fg, perf)
     return None
 
 
@@ -1039,6 +1145,60 @@ def _ai_options(ai: dict) -> list:
     if ai.get("restrict_jettison"):
         out.append(task.OptRestrictJettison(True))
     return out
+
+
+# Блок наведения AGM-45 Shrike (Heatblur F-4E: настройка NFP_rfgu_type) под РЛС цели: 1 Mk 22, 2 Mk 23, 3 Mk 24.5,
+# 4 Mk 24.34, 5 Mk 25, 6 Mk 36, 7 Mk 37, 8 Mk 49.0, 9 Mk 49.1, 10 Mk 50. Источники: DCS Retribution, resources/weapons/
+# standoff/AGM-45A.yaml (LGPL-3.0) - 2, 7, 9, 10; остальное - таблица головок руководства Heatblur F-4E (v3.10):
+# РЛС, по которой у головки есть тон. Порядок - сверху вниз, первое совпадение типа РЛС.
+SHRIKE_RFGU = [
+    (r"snr s-125 tr|40B6M tr|30H6_tr|Kub.?1S91|RPC_5N62V|Osa.?9A33|Buk LN|Buk_LN|Buk SR|Buk_SR|Strela-10|Strela_10", 9),
+    (r"Tor|Pantsir|Tunguska|SNR_75V|SNR-75|Patriot_str", 10),
+    (r"64H6E|40B6MD|Tin Shield|Big Bird|SON_9|Gepard", 2),
+    (r"p-19|P-19|Flat Face|Hawk_sr", 7),
+    (r"Hawk_tr|Roland", 6),
+    (r"Dog Ear|9S80|1L13|55G6", 1),
+]
+
+
+def tune_arm(state: dict, fg, g: dict) -> list[str]:
+    """Головки Shrike группы - под РЛС её целей (ЗРК подавления, добивания, удара по ЗРК): у каждой ПРР - блок
+    наведения по таблице SHRIKE_RFGU; несколько разных РЛС - по пилонам по очереди. Остальные ракеты и настройки
+    подвески - как были. Возвращает строки 'РЛС -> блок' для брифинга."""
+    import re as _re
+    from . import weapons
+    obj = g.get("objective") or {}
+    sids = list(obj.get("units") or ([obj["unit"]] if obj.get("unit") else []))
+    radars: list[str] = []
+    for sid in sids:
+        u = state["units"].get(sid)
+        if not u or model.category(u) != "sam":
+            continue
+        comp = u.get("composition", [])
+        rs = [c["type"] for c in comp if c.get("role") == "radar"] or [c["type"] for c in comp]
+        tr = [t for t in rs if _re.search(r"tr\b|str|SNR|1S91|Hawk_tr|9A33|Buk LN|Tor|Tunguska", t, _re.I)] or rs
+        radars += [t for t in tr if t not in radars]
+    kits = []
+    for t in radars:
+        k = next((v for rx, v in SHRIKE_RFGU if _re.search(rx, t, _re.I)), None)
+        if k and k not in kits:
+            kits.append(k)
+    if not kits:
+        return []
+    for u in fg.units:
+        j = 0
+        for num, d in list(u.pylons.items()):
+            if _re.search(r"AGM-45|Shrike", weapons.name_of(d.get("CLSID", "")), _re.I):
+                st = dict(d.get("settings") or {})
+                st["NFP_rfgu_type"] = kits[j % len(kits)]
+                d = dict(d, settings=st)
+                u.pylons[num] = d
+                j += 1
+    names = {1: "Mk 22", 2: "Mk 23", 3: "Mk 24.5", 4: "Mk 24.34", 5: "Mk 25", 6: "Mk 36", 7: "Mk 37", 8: "Mk 49.0",
+             9: "Mk 49.1", 10: "Mk 50"}
+    note = "Shrike: " + ", ".join(names[k] for k in kits)
+    fg.__dict__.setdefault("_rf_degraded", []).append(note)
+    return [note]
 
 
 def _attack(group_id: int, ai: dict, altitude: int | None = None):
@@ -1476,7 +1636,10 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 route.append(f"{i:2d}  {hhmm(t)}  {fmt_alt(state, tk['side'], pt.alt, lg)}{ref}{sp}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
-            fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-"), L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")]
+            by_id = {a.id: a for a in m.terrain.airports.values()}
+            fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-")] + navaid_lines(m, by_id.get(ab[0]), lg)
+                      + ([L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")] + navaid_lines(m, by_id.get(ab[-1]), lg)
+                         if ab[-1] != ab[0] else [L("Посадка: там же", "Arrival: same")])
                       if ab else [L("Взлёт и посадка: палуба", "Deck launch and recovery")])
             fields += carrier_lines(state, fg.units[0].position)
             sub = f"{fg.name} - {ut.id} x{len(fg.units)} - {L('день', 'day')} {state['day']}"
@@ -1577,7 +1740,7 @@ def package_order(pkg: list[dict], times: dict, lg: str = "ru") -> list[str]:
     return out
 
 
-ETA_POINTS = ("ИПМ", "Рубеж пуска", "Рубеж атаки", "Зона прикрытия", "Зона расчистки", "Демонстрация", "Район поиска",
+ETA_POINTS = ("ИПМ", "Рубеж пуска", "Рубеж атаки", "Зона прикрытия", "Зона расчистки", "Зона постановки помех", "Демонстрация", "Район поиска",
               "Площадка", "Экипаж", "Зона дежурства")   # точки, к которым группа ИИ выходит ко времени
 
 
@@ -1840,6 +2003,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     qra_specs: list[dict] = []                   # дежурные пары ПВО (qra.lua)
     cap_specs: list[dict] = []                   # пары прикрытия ИИ (cap.lua)
     timing_specs: list[dict] = []                # выход групп ИИ на рубеж: факт против плана (timing.lua)
+    jam_groups: list[str] = []                   # постановщики помех вне зоны ПВО (samctl.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
     ctld = {"pilots": [], "actions": {}, "limits": {}, "cargo": {}, "logistic": [], "pickup": [], "groups": [],
             "crates": [], "lifts": [], "jtacs": [], "extract": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
@@ -1968,6 +2132,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
+        tune_arm(state, fg, g)                   # головки ПРР (Shrike) - под РЛС ЗРК своей цели
         needs_mod = False
         for u in fg.units[:hum] if is_player else []:
             needs_mod = _set_player(u, client=multi) or needs_mod
@@ -2288,6 +2453,20 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                                          pattern=task.OrbitAction.OrbitPattern.Circle))
             orbit.stop_after_time(t_strk + int(g.get("land_s") or 120) + 120)
             w.tasks.append(orbit)
+        elif obj["kind"] == "jam_orbit":        # постановщик помех: круг вне зоны ЗРК до конца удара, станция помех включена
+            alt = q_alt(state, side_g, int(g.get("alt_m") or 6000) * jit)
+            w = wp(obj["pos"], alt, "Зона постановки помех", keep_alt=True)
+            w.alt_type = "BARO"
+            orbit = task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.Circle))
+            orbit.stop_after_time(t_strk + int((g.get("hold_after_min") or 5) * 60))
+            w.tasks.append(orbit)
+            fg.points[0].tasks.append(task.OptECMUsing(task.OptECMUsing.Values.AlwaysUse))
+            fg.points[0].tasks.append(task.OptReactOnThreat(task.OptReactOnThreat.Values.EvadeFire))
+            for u_ in fg.units:                  # оружия у постановщика нет (EA-6B на модели A-6E - без бомб и ПРР)
+                u_.pylons.clear()
+            fg.points[0].tasks = [t_ for t_ in fg.points[0].tasks if not isinstance(t_, task.EngageTargets)]
+            fg.points[0].tasks.append(task.OptROE(task.OptROE.Values.WeaponHold))
+            jam_groups.append(fg.name)
         elif obj["kind"] == "feint":            # демонстративная: на средней высоте к точке другим направлением, круг, домой
             alt = int(g.get("alt_m") or 4000)
             w = fg.add_waypoint(_pt(m, obj["pos"]), alt, speed=spd, name="Демонстрация")
@@ -2321,6 +2500,21 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             if ts:
                 timing_specs.append(ts)
             _no_crawl(fg, spd)                   # раньше времени - круг ожидания на точке, а не 150 км/ч по маршруту
+        rc = g.get("reach") or ""
+        if rc == "tanker":                       # за радиусом: дозаправка на обратном пути у зоны заправщика
+            ttd = model.doctrine(state, side_g)["tasks"].get("tanker_orbit") or {}
+            tp = planner.orbit_point(state, side_g, ttd.get("standoff_km", 200))
+            if tp:
+                w = wp(tp, int(ttd.get("transit_alt_m_agl") or 7000), "Заправка", keep_alt=True)
+                w.tasks.append(task.RefuelingTaskAction())
+                g["_reach_note"] = i18n.L(i18n.lang(state), "дозаправка на обратном пути (точка 'Заправка')",
+                                          "air refuelling on the way back (waypoint 'Refuel')")
+        elif rc.startswith("divert:"):           # не хватает топлива домой - посадка на своём аэродроме ближе к цели
+            b = state["airbases"].get(rc.split(":", 1)[1])
+            if b and b.get("airport") in m.terrain.airports:
+                land = m.terrain.airports[b["airport"]]
+                g["_reach_note"] = i18n.L(i18n.lang(state), f"посадка на запасном: {b['name']} (топлива домой не хватает)",
+                                          f"recovery at {b['name']} (not enough fuel to return home)")
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)
@@ -2441,8 +2635,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     if iads_sams:                                # сеть ПВО: ЗРК на связи молчат до цели в зоне, реакция на ПРР
         trig.add_action(DoScript(String(iads_script(state["campaign_id"], state["sortie"], iads_sams, iads_net))))
     sc_specs = samctl_spec(state, vg_by_unit)    # огонь ПВО: реакция расчёта, дальность пуска, заграждение зениток,
-    if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска
-        trig.add_action(DoScript(String(samctl_script(state, sc_specs))))
+    if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска, помехи (постановщики и самолётные)
+        trig.add_action(DoScript(String(samctl_script(state, sc_specs, jam_groups))))
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p, strict_abort(state)))))
@@ -2499,6 +2693,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             act.text = String(_guard(act.text.id))
     m.triggerrules.triggers.append(trig)
 
+    for g in pkg:                                # дозаправка или запасной аэродром - строка в брифинге
+        if g.get("_reach_note"):
+            lines.append(f"{i18n.tr(g['title'], i18n.lang(state))}: {g['_reach_note']}")
     for g in pkg:                                # управляемая версия типа у группы игрока - строка в брифинге
         if g.get("_variant"):
             lines.append(i18n.L(i18n.lang(state),

@@ -493,124 +493,142 @@
     }
    },
    "STRIKE": {
-    "tasks": {},
+    "tasks": [
+     32
+    ],
     "pylons": {
      "1": {
-      "CLSID": "{HB_A6E_MK82_MER_6x}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      },
      "2": {
-      "CLSID": "{HB_A6E_MK82_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK82_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK82_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK82_MER_6x}"
-     }
-    }
-   },
-   "CAS": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     }
-    }
-   },
-   "BAI": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     }
-    }
-   },
-   "DEAD": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
-     },
-     "3": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     },
-     "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
-     },
-     "5": {
-      "CLSID": "{HB_A6E_MK20_MER_6x}"
-     }
-    }
-   },
-   "OCA/Runway": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "2": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "3": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "4": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     },
-     "5": {
-      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
-     }
-    }
-   },
-   "SEAD": {
-    "tasks": {},
-    "pylons": {
-     "1": {
-      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
-     },
-     "2": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_LEFT}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      },
      "3": {
       "CLSID": "{HB_A6E_AERO1D}"
      },
      "4": {
-      "CLSID": "{HB_A6E_MK20_MER_5x_RIGHT}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      },
      "5": {
-      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
      }
-    }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "CAS": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     },
+     "2": {
+      "CLSID": "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK20_MER_6x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "BAI": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82_MER_6x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "DEAD": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     },
+     "2": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "OCA/Runway": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "2": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "5": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "SEAD": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     },
+     "2": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "3": {
+      "CLSID": "{HB_A6E_AERO1D}"
+     },
+     "4": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "5": {
+      "CLSID": "{HB_A6E_MK82SE_TER_3x}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-6e.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
    },
    "Anti-ship": {
     "tasks": {},
@@ -631,6 +649,1744 @@
       "CLSID": "{HB_A6E_LAU7_AIM9M}"
      }
     }
+   }
+  },
+  "FA-18C_hornet": {
+   "Retribution Strike": {
+    "tasks": [
+     11,
+     32,
+     33
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{BRU33_2X_MK-83}"
+     },
+     "3": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "8": {
+      "CLSID": "{BRU33_2X_MK-83}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution OCA/Runway": {
+    "tasks": [
+     34
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "3": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "8": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BAI": {
+    "tasks": [
+     31
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{BRU33_2X_MK-82}"
+     },
+     "3": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{BCE4E030-38E9-423E-98ED-24BE3DA87C32}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "8": {
+      "CLSID": "{BRU33_2X_MK-82}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution CAS": {
+    "tasks": [
+     31
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{BRU33_2X_ROCKEYE}"
+     },
+     "3": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "8": {
+      "CLSID": "{BRU33_2X_ROCKEYE}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution SEAD": {
+    "tasks": [
+     29
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "3": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "8": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution DEAD": {
+    "tasks": [
+     11,
+     31
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "3": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "8": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BARCAP": {
+    "tasks": [
+     11,
+     18,
+     19,
+     10
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{LAU-115 - AIM-7M}"
+     },
+     "3": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "8": {
+      "CLSID": "{LAU-115 - AIM-7M}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": [
+     11,
+     31
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{LAU-115 - AIM-7M}"
+     },
+     "3": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "8": {
+      "CLSID": "{LAU-115 - AIM-7M}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Anti-ship": {
+    "tasks": [
+     11,
+     30
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{AGM_84D}"
+     },
+     "3": {
+      "CLSID": "{AGM_84D}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{FPU_8A_FUEL_TANK}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{AGM_84D}"
+     },
+     "8": {
+      "CLSID": "{AGM_84D}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-18.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "F-16C_50": {
+   "Retribution Strike": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "7": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution OCA/Runway": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "4": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "7": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BAI": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{TER_9A_3*MK-82}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "7": {
+      "CLSID": "{TER_9A_3*MK-82}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution CAS": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{CBU-87}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "7": {
+      "CLSID": "{CBU-87}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution SEAD": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "7": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution DEAD": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "7": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BARCAP": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "5": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "6": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "F-16A": {
+   "Retribution Strike": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "6": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "7": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "8": {
+      "CLSID": "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "10": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BAI": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "6": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "7": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "8": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "10": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution CAS": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "3": {
+      "CLSID": "{0B9ABA77-93B8-45FC-9C63-82AFB2CB50A4}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "6": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "7": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "8": {
+      "CLSID": "{0B9ABA77-93B8-45FC-9C63-82AFB2CB50A4}"
+     },
+     "10": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BARCAP": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "6": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "7": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "10": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": [
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "4": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "6": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "7": {
+      "CLSID": "{F376DBEE-4CAE-41BA-ADD9-B2910AC95DEC}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "10": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-16.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "F-15C": {
+   "Retribution BARCAP": {
+    "tasks": [
+     18,
+     19,
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "3": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "6": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "10": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "11": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-15c.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": [
+     18,
+     19,
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "3": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "6": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "10": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "11": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-15c.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Fighter Sweep": {
+    "tasks": [
+     18,
+     19,
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "3": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "6": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "9": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "10": {
+      "CLSID": "{E1F29B21-F291-4589-9FD8-3272EEC69506}"
+     },
+     "11": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-15c.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "F-14A-135-GR": {
+   "Retribution BARCAP": {
+    "tasks": [
+     10
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     },
+     "2": {
+      "CLSID": "{SHOULDER AIM-7M}"
+     },
+     "3": {
+      "CLSID": "{F14-300gal}"
+     },
+     "4": {
+      "CLSID": "{AIM_54C_Mk47}"
+     },
+     "5": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{AIM_54C_Mk47}"
+     },
+     "8": {
+      "CLSID": "{F14-300gal}"
+     },
+     "9": {
+      "CLSID": "{SHOULDER AIM-7M}"
+     },
+     "10": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-14.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": [
+     10
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     },
+     "2": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "3": {
+      "CLSID": "{F14-300gal}"
+     },
+     "4": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "5": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "6": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "8": {
+      "CLSID": "{F14-300gal}"
+     },
+     "9": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "10": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-14.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Fighter Sweep": {
+    "tasks": [
+     10
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     },
+     "2": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "3": {
+      "CLSID": "{F14-300gal}"
+     },
+     "4": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "5": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "6": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "8": {
+      "CLSID": "{F14-300gal}"
+     },
+     "9": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "10": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-14.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "F-14A-135-GR-Early": {
+   "Retribution BARCAP": {
+    "tasks": [
+     10
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     },
+     "2": {
+      "CLSID": "{SHOULDER AIM-7M}"
+     },
+     "3": {
+      "CLSID": "{F14-300gal}"
+     },
+     "4": {
+      "CLSID": "{AIM_54C_Mk47}"
+     },
+     "5": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{AIM_54C_Mk47}"
+     },
+     "8": {
+      "CLSID": "{F14-300gal}"
+     },
+     "9": {
+      "CLSID": "{SHOULDER AIM-7M}"
+     },
+     "10": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-14.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": [
+     10
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     },
+     "2": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "3": {
+      "CLSID": "{F14-300gal}"
+     },
+     "4": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "5": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "6": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "8": {
+      "CLSID": "{F14-300gal}"
+     },
+     "9": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "10": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-14.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Fighter Sweep": {
+    "tasks": [
+     10
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     },
+     "2": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "3": {
+      "CLSID": "{F14-300gal}"
+     },
+     "4": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "5": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "6": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{BELLY AIM-7M}"
+     },
+     "8": {
+      "CLSID": "{F14-300gal}"
+     },
+     "9": {
+      "CLSID": "{LAU-7 - AIM-9M}"
+     },
+     "10": {
+      "CLSID": "{LAU-7 wtip - AIM-9M}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-14.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "F-4E": {
+   "Retribution CAS": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     },
+     "2": {
+      "CLSID": "{B83CB620-5BBE-4BEA-910C-EB605A327EF9}"
+     },
+     "3": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8B9E3FD0-F034-4A07-B6CE-C269884CC71B}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{B83CB620-5BBE-4BEA-910C-EB605A327EF9}"
+     },
+     "9": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BAI": {
+    "tasks": [
+     18,
+     19,
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     },
+     "2": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "3": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8B9E3FD0-F034-4A07-B6CE-C269884CC71B}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "9": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Strike": {
+    "tasks": [
+     32
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     },
+     "2": {
+      "CLSID": "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}"
+     },
+     "3": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8B9E3FD0-F034-4A07-B6CE-C269884CC71B}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}"
+     },
+     "9": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution SEAD": {
+    "tasks": [
+     29
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     },
+     "2": {
+      "CLSID": "{3E6B632D-65EB-44D2-9501-1C2D04515405}"
+     },
+     "3": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8B9E3FD0-F034-4A07-B6CE-C269884CC71B}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{3E6B632D-65EB-44D2-9501-1C2D04515405}"
+     },
+     "9": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BARCAP": {
+    "tasks": [
+     18,
+     19,
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     },
+     "2": {
+      "CLSID": "{9DDF5297-94B9-42FC-A45E-6E316121CD85}"
+     },
+     "3": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8B9E3FD0-F034-4A07-B6CE-C269884CC71B}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{9DDF5297-94B9-42FC-A45E-6E316121CD85}"
+     },
+     "9": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": [
+     18,
+     19,
+     11
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     },
+     "2": {
+      "CLSID": "{9DDF5297-94B9-42FC-A45E-6E316121CD85}"
+     },
+     "3": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "4": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "5": {
+      "CLSID": "{8B9E3FD0-F034-4A07-B6CE-C269884CC71B}"
+     },
+     "6": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "7": {
+      "CLSID": "{8D399DDA-FF81-4F14-904D-099B34FE7918}"
+     },
+     "8": {
+      "CLSID": "{9DDF5297-94B9-42FC-A45E-6E316121CD85}"
+     },
+     "9": {
+      "CLSID": "{7B4B122D-C12C-4DB4-834E-4D8BB4D863A8}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "F-4E-45MC": {
+   "Retribution CAS": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL}"
+     },
+     "2": {
+      "CLSID": "{AIM-9M}"
+     },
+     "3": {
+      "CLSID": "{HB_F4E_CBU-87_2x}"
+     },
+     "4": {
+      "CLSID": "{AIM-9M}"
+     },
+     "6": {
+      "CLSID": "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}"
+     },
+     "7": {
+      "CLSID": "{F4_SARGENT_TANK_600_GAL}"
+     },
+     "8": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "9": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "10": {
+      "CLSID": "{AIM-9M}"
+     },
+     "11": {
+      "CLSID": "{HB_F4E_CBU-87_2x}"
+     },
+     "12": {
+      "CLSID": "{AIM-9M}"
+     },
+     "13": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL_R}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BAI": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL}"
+     },
+     "2": {
+      "CLSID": "{AIM-9M}"
+     },
+     "3": {
+      "CLSID": "{HB_F4EAGM-65D_LAU88_2x_Left}"
+     },
+     "4": {
+      "CLSID": "{AIM-9M}"
+     },
+     "6": {
+      "CLSID": "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}"
+     },
+     "7": {
+      "CLSID": "{F4_SARGENT_TANK_600_GAL}"
+     },
+     "8": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "9": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "10": {
+      "CLSID": "{AIM-9M}"
+     },
+     "11": {
+      "CLSID": "{HB_F4EAGM-65D_LAU88_2x_Right}"
+     },
+     "12": {
+      "CLSID": "{AIM-9M}"
+     },
+     "13": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL_R}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Strike": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL}"
+     },
+     "2": {
+      "CLSID": "{AIM-9M}"
+     },
+     "3": {
+      "CLSID": "{HB_F4E_MK-83_2x_Left}"
+     },
+     "4": {
+      "CLSID": "{AIM-9M}"
+     },
+     "6": {
+      "CLSID": "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}"
+     },
+     "7": {
+      "CLSID": "{F4_SARGENT_TANK_600_GAL}"
+     },
+     "8": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "9": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "10": {
+      "CLSID": "{AIM-9M}"
+     },
+     "11": {
+      "CLSID": "{HB_F4E_MK-83_2x_Right}"
+     },
+     "12": {
+      "CLSID": "{AIM-9M}"
+     },
+     "13": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL_R}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BARCAP": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL}"
+     },
+     "2": {
+      "CLSID": "{AIM-9M}"
+     },
+     "4": {
+      "CLSID": "{AIM-9M}"
+     },
+     "5": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "6": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{F4_SARGENT_TANK_600_GAL}"
+     },
+     "8": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "9": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "10": {
+      "CLSID": "{AIM-9M}"
+     },
+     "12": {
+      "CLSID": "{AIM-9M}"
+     },
+     "13": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL_R}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Escort": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL}"
+     },
+     "2": {
+      "CLSID": "{AIM-9M}"
+     },
+     "4": {
+      "CLSID": "{AIM-9M}"
+     },
+     "5": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "6": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "7": {
+      "CLSID": "{F4_SARGENT_TANK_600_GAL}"
+     },
+     "8": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "9": {
+      "CLSID": "{HB_F4E_AIM-7M}"
+     },
+     "10": {
+      "CLSID": "{AIM-9M}"
+     },
+     "12": {
+      "CLSID": "{AIM-9M}"
+     },
+     "13": {
+      "CLSID": "{F4_SARGENT_TANK_370_GAL_R}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/f-4.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "A-10A": {
+   "Retribution CAS": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{DB434044-F5D0-4F1F-9BA9-B73027E18DD3}"
+     },
+     "3": {
+      "CLSID": "{444BA8AE-82A7-4345-842E-76154EFCCA46}"
+     },
+     "4": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "5": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "7": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "8": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "9": {
+      "CLSID": "{444BA8AE-82A7-4345-842E-76154EFCCA46}"
+     },
+     "11": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-10.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BAI": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{DB434044-F5D0-4F1F-9BA9-B73027E18DD3}"
+     },
+     "3": {
+      "CLSID": "{E6A6262A-CA08-4B3D-B030-E1A993B98452}"
+     },
+     "4": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "8": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "9": {
+      "CLSID": "{E6A6262A-CA08-4B3D-B030-E1A993B98453}"
+     },
+     "11": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-10.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Strike": {
+    "tasks": {},
+    "pylons": {
+     "1": {
+      "CLSID": "{DB434044-F5D0-4F1F-9BA9-B73027E18DD3}"
+     },
+     "3": {
+      "CLSID": "{444BA8AE-82A7-4345-842E-76154EFCCA46}"
+     },
+     "4": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "5": {
+      "CLSID": "{BCE4E030-38E9-423E-98ED-24BE3DA87C32}"
+     },
+     "7": {
+      "CLSID": "{BCE4E030-38E9-423E-98ED-24BE3DA87C32}"
+     },
+     "8": {
+      "CLSID": "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"
+     },
+     "9": {
+      "CLSID": "{444BA8AE-82A7-4345-842E-76154EFCCA46}"
+     },
+     "11": {
+      "CLSID": "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/a-10.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   }
+  },
+  "AV8BNA": {
+   "Retribution CAS": {
+    "tasks": [
+     31
+    ],
+    "pylons": {
+     "2": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "3": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "4": {
+      "CLSID": "{GAU_12_Equalizer_HE}"
+     },
+     "5": {
+      "CLSID": "{ALQ_164_RF_Jammer}"
+     },
+     "6": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "7": {
+      "CLSID": "{ADD3FAE1-EBF6-4EF9-8EFC-B36B5DDF1E6B}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/av-8b.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution BAI": {
+    "tasks": [
+     31
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{Mk82SNAKEYE}"
+     },
+     "3": {
+      "CLSID": "{Mk82SNAKEYE}"
+     },
+     "4": {
+      "CLSID": "{GAU_12_Equalizer_HE}"
+     },
+     "5": {
+      "CLSID": "{ALQ_164_RF_Jammer}"
+     },
+     "6": {
+      "CLSID": "{Mk82SNAKEYE}"
+     },
+     "7": {
+      "CLSID": "{Mk82SNAKEYE}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/av-8b.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
+   },
+   "Retribution Strike": {
+    "tasks": [
+     31
+    ],
+    "pylons": {
+     "1": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     },
+     "2": {
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
+     },
+     "3": {
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
+     },
+     "4": {
+      "CLSID": "{GAU_12_Equalizer_HE}"
+     },
+     "5": {
+      "CLSID": "{ALQ_164_RF_Jammer}"
+     },
+     "6": {
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
+     },
+     "7": {
+      "CLSID": "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}"
+     },
+     "8": {
+      "CLSID": "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"
+     }
+    },
+    "until": 1997,
+    "note": "dstorm.eu (Desert Storm loadouts, обн. 10.12.2023), https://www.dstorm.eu/pages/loadout/av-8b.html: типичная подвеска для задачи (не копия одного вылета); нет в DCS - ближайшее или бак"
    }
   }
  }
