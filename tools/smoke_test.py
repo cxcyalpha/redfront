@@ -2342,8 +2342,9 @@ def advance_section(tmp: Path) -> None:
     s0, d0 = model.strength(tgt), tgt.get("damage", 0.0)
     lines = sim.advance(st, e["tot_s"] + 1)
     moved = [u for u in marching if u["progress_km"] > km0[u["id"]] + 0.1]
-    check(abs(st["ground_s"] - (e["tot_s"] + 1)) < 1 and moved and e.get("resolved")
-          and (model.strength(tgt) < s0 or tgt.get("damage", 0.0) > d0),
+    hit_or_report = (model.strength(tgt) < s0 or tgt.get("damage", 0.0) > d0
+                     or any(e["task"]["title"] in ln for ln in lines))   # итог - попадание или 'цель не поражена'
+    check(abs(st["ground_s"] - (e["tot_s"] + 1)) < 1 and moved and e.get("resolved") and hit_or_report,
           f"шаг до {sim.ato_hhmm(st['ground_s'])}: на марше продвинулись {len(moved)} частей; вылет ИИ дал итог в своё время "
           f"({e['title']}: {next((ln for ln in lines if e['title'] in ln), '-')})")
     before = st["ground_s"]

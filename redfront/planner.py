@@ -12,6 +12,43 @@ import math
 from . import dcstypes, fitness, intel, logistics, model, ops
 
 
+TANKER_EXT = 1.5   # ОЦЕНКА: с дозаправкой на обратном пути радиус части больше в столько раз
+REFUEL = {"KC-135": "boom", "KC135MPRS": "drogue", "KC130": "drogue", "KC130J": "drogue", "S-3B Tanker": "drogue",
+          "IL-78M": "drogue", "KC-10A": "boom"}   # заправщик DCS -> способ (штанга / шланг-конус)
+
+
+def reach(state: dict, side: str, r: dict, tpos: dict, radius: float, d: float) -> str | None:
+    """Достаёт ли часть r до цели: '' - в радиусе; 'tanker' - с дозаправкой (у стороны есть заправщик её способа:
+    aircraft.json refuel - boom/probe); 'divert:<аэродром>' - посадка на своём аэродроме ближе к цели (путь туда и
+    обратно до него - в двойной радиус); None - нет."""
+    if d <= radius:
+        return ""
+    way = model.aircraft_info(r.get("type", "")).get("refuel")
+    if way and d <= radius * TANKER_EXT:
+        want = "boom" if way == "boom" else "drogue"
+        for u in state["units"].values():
+            if u["side"] == side and u.get("role") == "tanker" and REFUEL.get(_dcs_id(u.get("type", ""))) == want \
+                    and logistics.available(state, u) > 0:
+                return "tanker"
+    if d > radius * 2:
+        return None
+    best = None
+    for bid, b in state["airbases"].items():
+        if b.get("side") != side or b.get("kind") in ("carrier", "farp") or b.get("state") not in (None, "open", "active"):
+            continue
+        db = model.dist_km(b, tpos)
+        if db < d and d + db <= 2 * radius and (best is None or db < best[0]):
+            best = (db, bid)
+    return f"divert:{best[1]}" if best else None
+
+
+def _dcs_id(type_name: str) -> str:
+    try:
+        return dcstypes.flying(type_name).id
+    except KeyError:
+        return type_name
+
+
 def strike_radius_km(unit: dict) -> float | None:
     """Радиус части: явный у части в составе сил, иначе по роли (roles.json). None - не задан нигде."""
     r = unit.get("strike_radius_km")
@@ -505,12 +542,13 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
                 key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls)
                              + (r.get("task_penalty") or {}).get(kind, 0.0), 3), d)   # задача - не основная для части
-                if d <= radius and (best is None or key < best[0]):
-                    best = (key, r)
+                how = reach(state, side, r, tpos, radius, d)   # радиус; дальше - дозаправка или посадка на запасном
+                if how is not None and (best is None or (how != "", key) < (best[2] != "", best[0])):
+                    best = (key, r, how)                  # в радиусе - первыми, затем с дозаправкой/запасным
             if best is None:
                 reasons.append(f"{tdef['title']}: {tgt['name']} - нет исполнителей ({', '.join(tdef['performers'])}) в радиусе")
                 continue
-            (_n, d), perf = best
+            (_n, d), perf, how_reach = best
             base = state["airbases"][perf["base"]]
             ip = ip_point(base, tpos, tdef["ip_offset_km"])
             threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe, tdef.get("low_alt_m_agl"))
@@ -518,6 +556,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             if groups is None:
                 reasons.append(f"{tdef['title']}: {tgt['name']} - {why}")
                 continue
+            if how_reach:                            # ударная группа за радиусом: дозаправка или посадка на запасном
+                for g in groups:
+                    if g["performer"] == perf["id"]:
+                        g["reach"] = how_reach
             found = True
             n_kind += 1
             for g in groups:

@@ -7,7 +7,7 @@
       "crew": 1,
       "night": false
     },
-    "Su_24M": {
+    "Su_24M": { "refuel": "probe",
       "fit": {"cas": 0.4, "interdiction": 0.8, "strike": 0.85, "sead": 0.55, "air": 0.05},
       "crew": 2,
       "night": true
@@ -43,34 +43,34 @@
       "crew": 1,
       "night": true
     },
-    "F_4E_45MC": {
+    "F_4E_45MC": { "refuel": "boom",
       "recon": {"photo": 6, "ir": 3, "slar": 25, "elint": 150, "profile": "low", "as": "RF-4C/E: KS-87, AN/AAS-18, РЛС БО AN/APQ-102, TEREC (в DCS - F-4E)"},
       "fit": {"cas": 0.5, "interdiction": 0.6, "strike": 0.6, "sead": 0.45, "air": 0.6},
       "crew": 2,
       "night": true
     },
-    "F_15C": {
+    "F_15C": { "refuel": "boom",
       "fit": {"air": 1.0},
       "crew": 1,
       "night": true
     },
-    "F_16C_50": {
+    "F_16C_50": { "refuel": "boom",
       "fit": {"cas": 0.7, "interdiction": 0.75, "strike": 0.75, "sead": 0.8, "air": 0.85},
       "crew": 1,
       "night": true
     },
-    "Tornado_IDS": {
+    "Tornado_IDS": { "refuel": "probe",
       "recon": {"photo": 5, "ir": 3, "profile": "low", "as": "Tornado IDS с разведывательным контейнером"},
       "fit": {"cas": 0.45, "interdiction": 0.9, "strike": 0.85, "sead": 0.6, "air": 0.1},
       "crew": 2,
       "night": true
     },
-    "A_10A": {
+    "A_10A": { "refuel": "boom",
       "fit": {"cas": 1.0, "interdiction": 0.8, "strike": 0.5, "sead": 0.2, "air": 0.05},
       "crew": 1,
       "night": false
     },
-    "AV8BNA": {
+    "AV8BNA": { "refuel": "probe",
       "fit": {"cas": 0.75, "interdiction": 0.6, "strike": 0.55, "air": 0.25},
       "crew": 1,
       "night": false
@@ -122,13 +122,13 @@
       "crew": 1,
       "night": true
     },
-    "Tornado_GR4": {
+    "Tornado_GR4": { "refuel": "probe",
       "recon": {"ir": 5, "profile": "low", "as": "Tornado GR.1A: ИК TIRRS и SLIR, без плёнки (в DCS - GR4)"},
       "fit": {"cas": 0.5, "interdiction": 0.9, "strike": 0.9, "sead": 0.55, "air": 0.1},
       "crew": 2,
       "night": true
     },
-    "FA_18C_hornet": {"carrier": true, 
+    "FA_18C_hornet": { "refuel": "probe","carrier": true, 
       "fit": {"cas": 0.75, "interdiction": 0.75, "strike": 0.8, "sead": 0.8, "air": 0.8},
       "crew": 1,
       "night": true
@@ -220,7 +220,7 @@
       "crew": 2,
       "night": true
     },
-    "F_16A": {
+    "F_16A": { "refuel": "boom",
       "recon": {"photo": 6, "ir": 3, "profile": "low", "as": "F-16A(R) с контейнером Orpheus (ВВС Нидерландов)"},
       "crew": 1,
       "night": true
@@ -237,25 +237,26 @@
     "L_39C": {"fit": {"cas": 0.15, "air": 0.05}, "crew": 2, "night": false},
     "Mi_24V": {"fit": {"cas": 0.7}, "cargo_t": 1.5, "troops": 8, "crew": 2, "night": false},
     "E_2C": {"carrier": true, "crew": 5, "night": true},
-    "A_4E_C": {"fit": {"cas": 0.6, "interdiction": 0.55, "strike": 0.55, "sead": 0.3, "air": 0.2}, "crew": 1, "night": false},
+    "A_4E_C": { "refuel": "probe","fit": {"cas": 0.6, "interdiction": 0.55, "strike": 0.55, "sead": 0.3, "air": 0.2}, "crew": 1, "night": false},
     "UH_60L": {"combat_hours_month": 76, "cargo_t": 4, "troops": 11, "crew": 2, "night": true},
     "UH_60L_DAP": {"fit": {"cas": 0.45}, "combat_hours_month": 76, "crew": 2, "night": true},
     "KC130J": {"cargo_t": 19, "crew": 3, "night": true},
-    "Su_30SM": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
-    "Su_30MKA": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
-    "Su_30MKM": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
-    "Su_30MKI": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
-    "Su_35S": {"fit": {"cas": 0.3, "interdiction": 0.5, "strike": 0.55, "sead": 0.5, "air": 1.0}, "crew": 1, "night": true},
-    "B_52H": {"fit": {"interdiction": 0.5, "strike": 0.7}, "crew": 6, "night": true},
+    "Su_30SM": { "refuel": "probe","fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_30MKA": { "refuel": "probe","fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_30MKM": { "refuel": "probe","fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_30MKI": { "refuel": "probe","fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_35S": { "refuel": "probe","fit": {"cas": 0.3, "interdiction": 0.5, "strike": 0.55, "sead": 0.5, "air": 1.0}, "crew": 1, "night": true},
+    "B_52H": { "refuel": "boom","fit": {"interdiction": 0.5, "strike": 0.7}, "crew": 6, "night": true},
     "MiG_19P": {"fit": {"cas": 0.15, "air": 0.4}, "crew": 1, "night": false},
     "MiG_15bis": {"fit": {"cas": 0.15, "air": 0.25}, "crew": 1, "night": false},
-    "F_14A_135_GR": {"carrier": true, "fit": {"air": 0.9}, "crew": 2, "night": true},
-    "A6E": {"carrier": true, "fit": {"cas": 0.55, "interdiction": 0.7, "strike": 0.8, "sead": 0.3}, "crew": 2, "night": true},
-    "Mirage_F1CE": {"fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.35, "air": 0.7}, "crew": 1, "night": false},
+    "F_14A_135_GR": { "refuel": "probe","carrier": true, "fit": {"air": 0.9}, "crew": 2, "night": true},
+    "A6E": { "refuel": "probe","carrier": true, "fit": {"cas": 0.55, "interdiction": 0.7, "strike": 0.8, "sead": 0.3}, "crew": 2, "night": true},
+    "Mirage_F1CE": { "refuel": "probe","fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.35, "air": 0.7}, "crew": 1, "night": false},
     "AH_1W": {"fit": {"cas": 0.65}, "troops": 0, "crew": 2, "night": false},
     "S_3B_Tanker": {"carrier": true, "crew": 4, "night": true},
-    "F_14A_135_GR_Early": {"carrier": true, "fit": {"air": 0.85}, "crew": 2, "night": true}
+    "F_14A_135_GR_Early": { "refuel": "probe","carrier": true, "fit": {"air": 0.85}, "crew": 2, "night": true}
   },
+  "_about_refuel": "refuel - способ дозаправки в воздухе: boom - штанга (ВВС США), probe - штанга-приёмник (шланг-конус: ВМС, НАТО, СССР). ОЦЕНКА по типам; планировщик - planner.reach",
   "_about_carrier": "carrier - тип взлетает с палубы и садится на неё в DCS (авианосные части - только такие типы; вертолёты - все).",
   "_about_cargo": "cargo_t - груз одного борта в воздушной перевозке, т (ОЦЕНКА по справочной грузоподъёмности, с запасом на дальность); нет поля - груз не возит (ящики CTLD - тоже по нему).",
   "_about_fit": "fit - пригодность типа по видам задач на одной шкале для всех эпох (0..1; cas - удар по войскам, interdiction - по колоннам и путям подвоза, strike - по объектам тыла, sead - по ПВО, air - воздушный бой и перехват). Сравнивается с лучшим типом этой кампании (fitness.py): эпоху задаёт состав сил. ОЦЕНКИ по назначению, вооружению и прицельному оборудованию типа.",

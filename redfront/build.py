@@ -2383,6 +2383,21 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             if ts:
                 timing_specs.append(ts)
             _no_crawl(fg, spd)                   # раньше времени - круг ожидания на точке, а не 150 км/ч по маршруту
+        rc = g.get("reach") or ""
+        if rc == "tanker":                       # за радиусом: дозаправка на обратном пути у зоны заправщика
+            ttd = model.doctrine(state, side_g)["tasks"].get("tanker_orbit") or {}
+            tp = planner.orbit_point(state, side_g, ttd.get("standoff_km", 200))
+            if tp:
+                w = wp(tp, int(ttd.get("transit_alt_m_agl") or 7000), "Заправка", keep_alt=True)
+                w.tasks.append(task.RefuelingTaskAction())
+                g["_reach_note"] = i18n.L(i18n.lang(state), "дозаправка на обратном пути (точка 'Заправка')",
+                                          "air refuelling on the way back (waypoint 'Refuel')")
+        elif rc.startswith("divert:"):           # не хватает топлива домой - посадка на своём аэродроме ближе к цели
+            b = state["airbases"].get(rc.split(":", 1)[1])
+            if b and b.get("airport") in m.terrain.airports:
+                land = m.terrain.airports[b["airport"]]
+                g["_reach_note"] = i18n.L(i18n.lang(state), f"посадка на запасном: {b['name']} (топлива домой не хватает)",
+                                          f"recovery at {b['name']} (not enough fuel to return home)")
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)
@@ -2561,6 +2576,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             act.text = String(_guard(act.text.id))
     m.triggerrules.triggers.append(trig)
 
+    for g in pkg:                                # дозаправка или запасной аэродром - строка в брифинге
+        if g.get("_reach_note"):
+            lines.append(f"{i18n.tr(g['title'], i18n.lang(state))}: {g['_reach_note']}")
     for g in pkg:                                # управляемая версия типа у группы игрока - строка в брифинге
         if g.get("_variant"):
             lines.append(i18n.L(i18n.lang(state),
