@@ -131,6 +131,8 @@ def _chaikin(line: list[tuple[float, float]], closed: bool = False) -> list[tupl
 def compute(state: dict, side: str) -> dict:
     """Линии (красная, синяя) и территория стороны side в широте/долготе."""
     pts = sites(state, side)
+    if state.get("no_front"):                    # сценарий без сухопутного фронта (война на море): линии и заливки нет
+        return {"red": [], "blue": [], "own": []}
     if not any(p[2] == "red" for p in pts) or not any(p[2] == "blue" for p in pts):
         return {"red": [], "blue": [], "own": []}
     f, near, lat, lon = _grid(pts)

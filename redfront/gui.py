@@ -229,7 +229,7 @@ def view(st: dict, history: bool = True) -> dict:
                   "available": _mods_available(k)} for k, v in _mods_list().items()],
         "wx": {k: st["settings"].get(k, v) for k, v in (("weather_mode", "climate"), ("weather_type", "high"),
                                                          ("weather_fog", False), ("weather_effects", True))},
-        "places": places, "links": links, "ground": ground, "objects": objects, "air": air,
+        "places": places, "links": links, "no_front": bool(st.get("no_front")), "ground": ground, "objects": objects, "air": air,
         "naval": _naval(st),
         "airbases": [{"id": k, "name": b["name"], "side": b.get("side"), "pos": _ll(b), "state": b.get("state", "open"),
                       "kind": b.get("kind", "airfield"),       # farp - вертолётная площадка (farp.py)
