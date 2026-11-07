@@ -959,6 +959,8 @@ def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
         low = {k.lower(): k for k in pls}
         for name in PAYLOAD_NAMES.get(cat, []) + ([cat] if f == "payloads_custom.json" else []):
             k = low.get(name.lower())
+            if k and year and pls[k].get("until") and year > pls[k]["until"]:
+                continue                         # своя историческая подвеска - до года until (позже - подвеска Retribution)
             if k and pls[k]["pylons"] and (k, f) not in [(x[0], x[2]) for x in found]:
                 found.append((k, pls[k]["pylons"], f))
     if not found:
