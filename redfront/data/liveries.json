@@ -104,15 +104,15 @@
  },
  "b_ltg61": {
   "_name": "LTG 61 (C-160 Transall; в DCS - C-130)",
-  "C_130": ""
+  "C_130J_30": ""
  },
  "b_ltg62": {
   "_name": "LTG 62 (C-160 Transall; в DCS - C-130)",
-  "C_130": ""
+  "C_130J_30": ""
  },
  "b_ltg63": {
   "_name": "LTG 63 (C-160 Transall; в DCS - C-130)",
-  "C_130": ""
+  "C_130J_30": ""
  },
  "b_naew": {
   "_name": "Силы ДРЛО НАТО (E-3A)",

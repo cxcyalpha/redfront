@@ -100,6 +100,7 @@
       "crew": 2,
       "night": false
     },
+    "AH_64D_BLK_II": {"combat_hours_month": 65, "fit": {"cas": 1.0}, "crew": 2, "night": true},
     "AH_64A": {
       "combat_hours_month": 65,
       "fit": {"cas": 1.0},
@@ -147,6 +148,7 @@
       "crew": 3,
       "night": true
     },
+    "C_130J_30": {"cargo_t": 20, "crew": 3, "night": true},
     "C_130": {
       "cargo_t": 19,
       "crew": 5,
@@ -164,6 +166,7 @@
       "crew": 5,
       "night": true
     },
+    "CH_47Fbl1": {"combat_hours_month": 58, "cargo_t": 10, "troops": 33, "crew": 3, "night": true},
     "CH_47D": {
       "combat_hours_month": 58,
       "cargo_t": 10,
@@ -235,6 +238,14 @@
     "Mi_24V": {"fit": {"cas": 0.7}, "cargo_t": 1.5, "troops": 8, "crew": 2, "night": false},
     "E_2C": {"carrier": true, "crew": 5, "night": true},
     "A_4E_C": {"fit": {"cas": 0.6, "interdiction": 0.55, "strike": 0.55, "sead": 0.3, "air": 0.2}, "crew": 1, "night": false},
+    "UH_60L": {"combat_hours_month": 76, "cargo_t": 4, "troops": 11, "crew": 2, "night": true},
+    "UH_60L_DAP": {"fit": {"cas": 0.45}, "combat_hours_month": 76, "crew": 2, "night": true},
+    "KC130J": {"cargo_t": 19, "crew": 3, "night": true},
+    "Su_30SM": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_30MKA": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_30MKM": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_30MKI": {"fit": {"cas": 0.45, "interdiction": 0.7, "strike": 0.75, "sead": 0.6, "air": 0.95}, "crew": 2, "night": true},
+    "Su_35S": {"fit": {"cas": 0.3, "interdiction": 0.5, "strike": 0.55, "sead": 0.5, "air": 1.0}, "crew": 1, "night": true},
     "B_52H": {"fit": {"interdiction": 0.5, "strike": 0.7}, "crew": 6, "night": true},
     "MiG_19P": {"fit": {"cas": 0.15, "air": 0.4}, "crew": 1, "night": false},
     "MiG_15bis": {"fit": {"cas": 0.15, "air": 0.25}, "crew": 1, "night": false},

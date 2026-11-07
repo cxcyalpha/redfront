@@ -302,7 +302,8 @@ def package_section(tmp: Path) -> None:
           "Су-24М: задача DCS SEAD, подвеска 'Retribution SEAD' (Х-58У, Р-60М, Л-081 на пилоне 5)")
     roe = [t for p in pg["recon"].points for t in p.tasks if type(t).__name__ == "OptROE"]
     zone = [t for p in pg["recon"].points for t in p.tasks if getattr(t, "id", None) == "EngageTargetsInZone"]
-    orbit = [t for p in pg["recon"].points if p.name != "Сбор" for t in p.tasks if getattr(t, "id", None) == "ControlledTask"]
+    orbit = [t for p in pg["recon"].points if p.name != "Сбор" for t in p.tasks if getattr(t, "id", None) == "ControlledTask"
+             and "duration" in t.params.get("stopCondition", {})]   # круг поиска (ожидание ко времени - отдельно)
     center, radius_km = build.search_zone(st, st["units"]["blue_pzgren_bn_1"],
                                           build.timeline(model.doctrine(st, "red")["tasks"]["strike_column_march"], st, tk["package"], "strike")["recon"]["objective_s"], 3)
     check(not roe and len(zone) == 1 and abs(zone[0].params["zoneRadius"] - radius_km * 1000) < 1 and len(orbit) == 1
@@ -998,7 +999,7 @@ def column_road_section(tmp: Path) -> None:
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
           and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
-                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront timing", "-- redfront rv",
+                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront samctl", "-- redfront timing", "-- redfront rv",
                         "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
@@ -2439,7 +2440,10 @@ def qra_section(tmp: Path) -> None:
         Gl.T = 10; L.execute("runDue()")
         quiet = not Gl.ACTIVATED[gname]
         Gl.SEEN = True
-        Gl.T = 20; L.execute("runDue()")
+        for tt in (20, 32, 44, 56):              # засветка на секунду - не тревога: сопровождение 30 с (airpic TRACK_S)
+            Gl.T = tt; L.execute("runDue()")
+            if tt == 32:
+                quiet = quiet and not Gl.ACTIVATED[gname]
         check(quiet and Gl.ACTIVATED[gname] and Gl.REDFRONT_QRA[qid],
               "qra.lua: налёт к базе, но радары стороны его не видят - пара стоит; увидели - пара поднята, время - в дебриф")
     else:
@@ -3172,7 +3176,10 @@ def mixed_section(tmp: Path) -> None:
     pg = {g.name.split(" ")[1]: g for g in plane_groups(m)}
     rv = next(p for p in pg["recon"].points if p.name == "Сбор")
     t_ = build.timeline(model.doctrine(st, "red")["tasks"]["strike_column_march"], st, tk["package"], "strike")
-    check(rv.ETA == t_["recon"]["rv_s"] and rv.ETA_locked and "Сбор" in [p.name for p in pg["strike"].points],
+    rv_hold = [x.params.get("stopCondition", {}).get("time") for x in rv.tasks if getattr(x, "id", None) == "ControlledTask"]
+    check(((rv.ETA == t_["recon"]["rv_s"] and rv.ETA_locked)
+           or any(h in (t_["recon"]["rv_s"], t_["recon"]["rv_s"] + build.RV_WAIT_S) for h in rv_hold))   # раньше - ждёт в круге
+          and "Сбор" in [p.name for p in pg["strike"].points],
           f"группа ИИ приходит в точку сбора ко времени (ETA {rv.ETA // 60} мин), у игрока точка сбора в маршруте")
     order = t_["sead"]["objective_s"] < t_["recon"]["objective_s"] < t_["strike"]["objective_s"]
     desc = m.description_text()
@@ -3821,7 +3828,8 @@ def theatres_section(tmp: Path) -> None:
     gsrc = apic + "\n" + build.gci_script(st6, [{"group": "QRA 1", "side": 1}])
     STUB = '''
       env = { info = function() end }
-      timer = { getTime = function() return 0 end, scheduleFunction = function(f) CHECK = f end }
+      NOW = 0
+      timer = { getTime = function() return NOW end, scheduleFunction = function(f) CHECK = f end }
       Controller = { Detection = { RADAR = 4 } }
       Group = { Category = { GROUND = 2 } }
       PUSHED = {}
@@ -3863,7 +3871,7 @@ def theatres_section(tmp: Path) -> None:
         L.execute(STUB)
         L.execute(setup)
         L.execute(gsrc)
-        L.execute("CHECK()")
+        L.execute("for i = 0, 4 do NOW = i * 12; CHECK() end")   # сопровождение - не меньше 30 с (airpic TRACK_S)
         return L.eval("PUSHED[1] and PUSHED[1].params.groupId or 0")
     # истребитель прикрытия ближе (12 км), ударный дальше (18 км) и идёт к своему объекту - наводим на ударного
     p1 = gci_run('mk("F-14A", 11, "Fighters", 12000, 0); mk("A-6E", 22, "Bombers", 18000, -200)')
@@ -3878,7 +3886,7 @@ def theatres_section(tmp: Path) -> None:
                   "g.activate = function() ACT = ACT + 1 end; return g end")
         L.execute(setup)
         L.execute(qsrc)
-        L.execute("CHECK()")
+        L.execute("for i = 0, 4 do NOW = i * 12; CHECK() end")
         return L.eval("ACT")
     q1 = qra_run('mk("A-6E", 22, "Bombers", 60000, -200)')                       # одиночный ударный к объекту - 1 звено
     q8 = qra_run('mk("F-4E", 33, "Multirole fighters", 80000, -200, 7)')         # налёт из 8 - 2 звена, третье в резерве
@@ -3904,6 +3912,57 @@ def theatres_section(tmp: Path) -> None:
     check("player awacs" in mzg and "SetImmortal" in mzg and "player awacs" not in mz0,
           "игровое допущение: у Израиля 1973 ДРЛО нет - игроку E-2C над своей территорией (бессмертный, невидимый); "
           "настройка player_awacs выключает")
+    # samctl.lua: реакция расчёта и дальность пуска, ПЗРК - 2 пуска
+    sc = build.samctl_script(st6, [{"group": "SAM1", "kind": "sam", "r": 20000, "k": 0.7, "delay": 25, "mobile": False},
+                                   {"group": "MP1", "kind": "aaa", "r": 3000, "k": 0.7, "delay": 5, "mobile": False, "manpad": True}])
+    Ls = lupa.LuaRuntime()
+    Ls.execute('''
+      NOW = 0; ROE = {}; HANDLERS = {}
+      timer = { getTime = function() return NOW end, scheduleFunction = function(f) CHECK = f end }
+      AI = { Option = { Ground = { id = { ROE = 0, ALARM_STATE = 9 }, val = { ROE = { OPEN_FIRE = 2, WEAPON_HOLD = 4 },
+             ALARM_STATE = { GREEN = 1, RED = 2 } } } } }
+      Object = { Category = { UNIT = 1 } }
+      world = { event = { S_EVENT_SHOT = 1 }, addEventHandler = function(h) HANDLERS[#HANDLERS + 1] = h end }
+      env = { info = function() end }
+      TX = 15000
+      local tgt = { isExist = function() return true end, getCategory = function() return 1 end, inAir = function() return true end,
+                    getCoalition = function() return 2 end, getPoint = function() return { x = TX, y = 3000, z = 0 } end,
+                    getVelocity = function() return { x = -100, y = 0, z = 0 } end }
+      local function mk(name)
+        local u = { isExist = function() return true end, getLife = function() return 1 end, getCoalition = function() return 1 end,
+                    getPoint = function() return { x = 0, y = 0, z = 0 } end }
+        return { isExist = function() return true end, getUnits = function() return { u } end, getName = function() return name end,
+          getController = function() return { setOption = function(_, k, v) if k == 0 then ROE[name] = v end end,
+            getDetectedTargets = function() return { { object = tgt } } end, pushTask = function() end, setTask = function() end } end }
+      end
+      G = { SAM1 = mk("SAM1"), MP1 = mk("MP1") }
+      Group = { getByName = function(n) return G[n] end }
+    ''')
+    Ls.execute(sc)
+    Ls.execute("NOW = 2; CHECK()")
+    far = Ls.eval("ROE.SAM1")                      # 15 км при зоне 20 (больше 70%) - огонь запрещён
+    Ls.execute("TX = 12000; NOW = 10; CHECK()")
+    early = Ls.eval("ROE.SAM1")                    # ближе 70%, но реакция 25 с не прошла
+    Ls.execute("NOW = 30; CHECK()")
+    late = Ls.eval("ROE.SAM1")
+    Ls.execute("TX = 2000; NOW = 40; CHECK()")
+    mp_open = Ls.eval("ROE.MP1")
+    Ls.execute("local e = { id = 1, initiator = { getGroup = function() return G.MP1 end } }; "
+               "for _ = 1, 2 do HANDLERS[1]:onEvent(e) end; NOW = 42; CHECK()")
+    mp_after = Ls.eval("ROE.MP1")
+    check(far == 4 and early == 4 and late == 2 and mp_open == 2 and mp_after == 4,
+          "samctl.lua: ЗРК - огонь ближе 70% зоны и после реакции расчёта (25 с); ПЗРК - по близкой цели, 2 пуска и всё")
+    from redfront import gui as _gui
+    _orig = _gui.liveries
+    _gui.liveries = lambda st_, u_: [{"id": "IAF 69th Squadron", "name": "IAF 69th Squadron"},
+                                     {"id": "USAF 52 TFW", "name": "USAF 52 TFW"}, {"id": "default", "name": "default"}]
+    try:
+        lv1 = _gui.match_livery(st6, {"name": "69-я и 107-я эскадрильи (F-4E 'Курнас')"})
+        lv2 = _gui.match_livery(st6, {"name": "Эскадрилья без номера"})
+    finally:
+        _gui.liveries = _orig
+    check(lv1 == "IAF 69th Squadron" and lv2 is None,
+          f"ливреи по названию полка: '69-я и 107-я эскадрильи' -> {lv1}; без общего номера - нет ({lv2})")
     check("redfront gci" in mz and p1 == 22 and p2 == 0,
           f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
           f"и цель за границей наведения - без наведения ({p2})")

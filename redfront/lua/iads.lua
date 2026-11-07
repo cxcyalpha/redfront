@@ -82,8 +82,8 @@ local function check()
       state[s.group] = st
       local sx, sz = pos(u)
       local mode
-      if now < st.dark_until then
-        mode = "dark"
+      if now < st.dark_until or (REDFRONT_SAMCTL and (REDFRONT_SAMCTL.scoot[s.group] or 0) > now) then
+        mode = "dark"                          -- молчит под ПРР или переезжает после пусков (samctl.lua)
       elseif not s.net then
         mode = "auto"
       elseif not connected(s, sx, sz) then

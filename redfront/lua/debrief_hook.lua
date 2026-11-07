@@ -152,6 +152,27 @@ local function positions()
   end
   return "{" .. table.concat(o, ",") .. "}"
 end
+-- повреждённая наземная техника - потеря: ниже DMG_KILL прочности - как уничтоженная (экипаж оставил машину, в бою
+-- она не участвует); РЛС ЗРК - ниже DMG_RADAR (антенна, электроника - не работает). ОЦЕНКИ.
+local DMG_KILL, DMG_RADAR = 0.4, 0.75
+local RADAR_ATTR = { "SAM SR", "SAM TR", "EWR" }
+local function damagedOut()
+  local o = {}
+  for _, side in ipairs({ 1, 2 }) do
+    for _, g in ipairs(coalition.getGroups(side, Group.Category.GROUND) or {}) do
+      for _, u in ipairs(g:getUnits() or {}) do
+        if u and u:isExist() then
+          local l0 = u:getLife0() or 0
+          local f = l0 > 0 and (u:getLife() or 0) / l0 or 1
+          local thr = DMG_KILL
+          for _, a in ipairs(RADAR_ATTR) do if u:hasAttribute(a) then thr = DMG_RADAR end end
+          if f < thr and not dead[u:getName()] then o[#o + 1] = '"' .. esc(u:getName()) .. '"' end
+        end
+      end
+    end
+  end
+  return "[" .. table.concat(o, ",") .. "]"
+end
 local function part(fn, empty)       -- часть отчёта: ошибка в одной не мешает записать остальные (пишется в DCS.log)
   local ok, v = pcall(fn)
   if ok and v ~= nil then return v end
@@ -160,11 +181,11 @@ local function part(fn, empty)       -- часть отчёта: ошибка в
 end
 local function dump()
   local body = string.format(
-    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"ulift":%s,"evac":%s,"hit":%s,"timing":%s,"ships_life":%s}',
+    '{"campaign":"@CAMPAIGN@","sortie":@SORTIE@,"mission_ended":%s,"time":%d,"dead":%s,"ejected":%s,"landed":%s,"takeoff":%s,"positions":%s,"roads":%s,"column_log":%s,"sites":%s,"site_log":%s,"targets":%s,"assault":%s,"ejectpos":%s,"csar":%s,"qra":%s,"lift":%s,"ulift":%s,"evac":%s,"hit":%s,"timing":%s,"ships_life":%s,"damaged":%s}',
     tostring(ended), math.floor(timer.getTime()), part(function() return keys(dead) end, "[]"), part(function() return keys(ejected) end, "[]"),
     part(function() return keys(landed) end, "[]"), part(function() return keys(takeoff) end, "[]"), part(positions), part(roads),
     part(columnLog, "[]"), part(sites), part(siteLog, "[]"), part(targets), part(assault), part(ejectPos), part(csarOut),
-    part(qraOut), part(liftOut), part(uliftOut), part(evacOut), part(function() return keys(hit) end, "[]"), part(timingOut), part(shipsLife))
+    part(qraOut), part(liftOut), part(uliftOut), part(evacOut), part(function() return keys(hit) end, "[]"), part(timingOut), part(shipsLife), part(damagedOut, "[]"))
   local f, err = io.open(OUT, "w")
   if not f then
     env.warning("redfront debrief: cannot write " .. OUT .. ": " .. tostring(err))

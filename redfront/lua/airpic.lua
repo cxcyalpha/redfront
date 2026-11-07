@@ -9,7 +9,8 @@ RF_AIR = RF_AIR or {}
 local PIC_S, RADAR_S, RAID_M = 10, 60, 15000
 local RADAR_ATTR = { "EWR", "SAM SR" }
 RF_AIR.PROTECT = { @PROTECT@ }       -- [сторона] = { {x, y}, ... }
-local radarCache, picCache = {}, {}
+local radarCache, picCache, tracks = {}, {}, {}
+local TRACK_S, GAP_S = 30, 25      -- ОЦЕНКА: устойчивое сопровождение - 30 с, разрыв до 25 с (3 обзора) не сбрасывает
 
 local function d2(a, b) return math.sqrt((a.x - b.x) ^ 2 + (a.z - b.z) ^ 2) end
 RF_AIR.d2 = d2
@@ -54,6 +55,7 @@ function RF_AIR.picture(side, awacs)   -- { list = единицы, seen = имя
   local p = picCache[key]
   if p and now - p.t < PIC_S then return p end
   local seen, list = {}, {}
+  local raw = {}
   local r = radars(side, awacs)
   if foesAirborne(side) then
     for _, c in ipairs(r.ctrl) do
@@ -61,12 +63,23 @@ function RF_AIR.picture(side, awacs)   -- { list = единицы, seen = имя
       for _, d in ipairs(ok and dets or {}) do
         local o = d.object
         if o and o.isExist and o:isExist() and o.getCoalition and o:getCoalition() ~= side and o.inAir and o:inAir() then
-          local n = o:getName()
-          if not seen[n] then seen[n] = true; list[#list + 1] = o end
+          raw[o:getName()] = o
         end
       end
     end
   end
+  -- сопровождение: цель - в картине, только если РЛС держат её не меньше TRACK_S (разрывы короче GAP_S - не сброс);
+  -- засветка на секунду (горка над хребтом) тревоги и наведения не даёт - маловысотный профиль работает
+  local tr = tracks[key] or {}
+  for n, o in pairs(raw) do
+    local t = tr[n]
+    if not t or now - t.last > GAP_S then t = { first = now } end
+    t.last = now
+    tr[n] = t
+    if now - t.first >= TRACK_S and not seen[n] then seen[n] = true; list[#list + 1] = o end
+  end
+  for n, t in pairs(tr) do if now - t.last > GAP_S then tr[n] = nil end end
+  tracks[key] = tr
   p = { t = now, list = list, seen = seen, rpos = r.pos }
   picCache[key] = p
   return p

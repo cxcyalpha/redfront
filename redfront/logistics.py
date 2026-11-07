@@ -466,6 +466,8 @@ SAM_MOVE_DAYS = (2, 4)       # ОЦЕНКА: подвижный ЗРК (Куб, 
 
 def _move_gap(state: dict, u: dict, sim: dict) -> int:
     lo, hi = sim.get("sam_move_days") or SAM_MOVE_DAYS
+    if any(c.get("role") == "radar" for c in u.get("composition", [])):   # батарея (Куб, Бук): в бою не переезжает -
+        lo, hi = max(1, lo - 1), max(1, hi - 1)                            # между сутками - чаще (ОЦЕНКА)
     r = model.rng(state, f"sam-gap-{u['id']}-{state['day']}")
     return int(r.randint(int(lo), int(hi))) if r else int(round((lo + hi) / 2))
 

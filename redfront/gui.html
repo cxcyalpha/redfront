@@ -313,7 +313,8 @@ const I18N = {
     allIn: "все части других пресетов уже в кампании", ownReg: "Свой полк", regName: "название, напр. 116-й гв. бап",
     acInReg: "ЛА в полку", radius: "радиус, км", radiusTip: "радиус действия; пусто - по роли или оценка", addOwn: "Добавить свой",
     nextDay: "В план полётов полк попадает со следующих суток.", farp: "площадка ",
-    regLivery: "Ливрея полка", lvDef: "Ливреи - по умолчанию", lvDefTip: "запомнить ливреи полков этой кампании: новые кампании этого театра получат их сразу (тот же полк, тот же тип)", regLiveryTip: "(во всех его вылетах, пока не сменить)", dcsDefault: "по умолчанию DCS",
+    regLivery: "Ливрея полка", lvDef: "Сохранить пресет ливрей", lvDefTip: "сохранить ливреи полков как пресет сценария (в Saved Games\\redfront\\liveries, не в папке программы): новые кампании этого сценария получат их сразу",
+    lvAuto: "Подобрать ливреи", lvAutoTip: "стандартные ливреи DCS по названию полка (номер эскадрильи, крыла); полкам без ливреи; Shift - всем", regLiveryTip: "(во всех его вылетах, пока не сменить)", dcsDefault: "по умолчанию DCS",
     liveryFolder: "имя папки ливреи (DCS не найден)", set: "Задать", pilots: "Лётчики", pilotsTip: "имя в DCS - звание и фамилия, ведущий - старший",
     sorties: "выл.", onGround: "На земле (сбиты):", lost: "Выбыли:", dayN: "сутки", now: "сейчас", toEnemy: "до противника", kmFromHere: "км отсюда",
     helosUpTo: "вертолётов до", slots: "мест", order: "Приказ",
@@ -413,7 +414,8 @@ const I18N = {
     allIn: "all units of other presets are already in the campaign", ownReg: "Custom regiment", regName: "name, e.g. 116th Gds BAP",
     acInReg: "aircraft in regiment", radius: "radius, km", radiusTip: "combat radius; empty - by role or estimate", addOwn: "Add custom",
     nextDay: "The regiment enters the air tasking order from the next day.", farp: "FARP ",
-    regLivery: "Regiment livery", lvDef: "Liveries as default", lvDefTip: "save regiment liveries of this campaign: new campaigns of this theatre get them (same regiment, same type)", regLiveryTip: "(all its sorties until changed)", dcsDefault: "DCS default",
+    regLivery: "Regiment livery", lvDef: "Save livery preset", lvDefTip: "save regiment liveries as the scenario preset (in Saved Games\\redfront\\liveries, not the program folder): new campaigns of this scenario get them",
+    lvAuto: "Match liveries", lvAutoTip: "stock DCS liveries by unit name (squadron, wing number); units without a livery; Shift - all", regLiveryTip: "(all its sorties until changed)", dcsDefault: "DCS default",
     liveryFolder: "livery folder name (DCS not found)", set: "Set", pilots: "Pilots", pilotsTip: "name in DCS is rank and surname; the leader is the senior",
     sorties: "sorties", onGround: "On the ground (downed):", lost: "Lost:", dayN: "day", now: "now", toEnemy: "to enemy", kmFromHere: "km from here",
     helosUpTo: "helicopters up to", slots: "slots", order: "Order",
@@ -930,7 +932,8 @@ function render() {
 
 function renderAir(p) {
   p.innerHTML = `<div class="row" style="margin-bottom:8px"><button id="bAdd">${T("addRegiment")}</button>` +
-    `<button id="bLvDef" title="${esc(T("lvDefTip"))}">${T("lvDef")}</button></div><div id="addForm"></div>` +
+    `<button id="bLvDef" title="${esc(T("lvDefTip"))}">${T("lvDef")}</button>` +
+    `<button id="bLvAuto" title="${esc(T("lvAutoTip"))}">${T("lvAuto")}</button></div><div id="addForm"></div>` +
     ["red", "blue"].map(s => `<h4 class="${s}">${sideName(s, true)}</h4>` +
     ST.air.filter(a => a.side === s).map(a => `<div class="item" data-id="${esc(a.id)}"><b>${esc(a.name)}</b>${a.added ? ` <i class="meta">(${a.added === "custom" ? T("custom") : T("assumption")})</i>` : ""}
      <div class="d">${esc(a.type)} · ${esc(a.base)} · ${T("inService")} ${a.count}/${a.count0}${a.crews != null ? ` · ${T("crews")} ${a.crews}/${a.crews0}` : ""} · ${T("ready")} ${a.available}</div>
@@ -942,6 +945,7 @@ function renderAir(p) {
      <div class="d">${T("beacon")} ${d.freq} kHz · ${T("sinceDay")} ${d.day}</div></div>`).join("") : "");
   p.querySelectorAll(".item[data-pos]").forEach(el => el.onclick = () => map.setView(el.dataset.pos.split(",").map(Number), 11));
   $("#bLvDef").onclick = e => act("liverydefaults", {}, e.target);
+  $("#bLvAuto").onclick = e => act("liveryauto", {force: e.shiftKey}, e.target);
   $("#bAdd").onclick = async () => {               // добавить полк: из списка допущений или свой
     const f = $("#addForm");
     if (f.innerHTML) { f.innerHTML = ""; return; }

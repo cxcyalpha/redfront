@@ -14,12 +14,29 @@ from typing import Any
 MODS = {   # id -> название, модуль, типы (имя класса pydcs -> DCS id), страница мода
     "a4ec": {"title": "A-4E-C Skyhawk (мод сообщества)", "module": "a4ec", "types": {"A_4E_C": "A-4E-C"},
              "url": "https://github.com/Community-A-4E/community-a4e-c"},
+    # описания типов - DCS Retribution, под версии модов UH-60L v2.1.5, Su-30 v2.8.04b + CWS 3.72, Su-35S v2.0.27b;
+    # у другой версии мода имена оружия и пилоны могут отличаться
+    "uh60l": {"title": "UH-60L Black Hawk (мод сообщества)", "module": "uh60l",
+              "types": {"UH_60L": "UH-60L", "UH_60L_DAP": "UH-60L_DAP", "KC130J": "KC130J"},
+              "url": "https://github.com/Kinkkujuustovoileipa/uh-60l"},
+    "su30": {"title": "Су-30 Flanker-H (мод сообщества)", "module": "su30",
+             "types": {"Su_30SM": "Su-30SM", "Su_30MKA": "Su-30MKA", "Su_30MKM": "Su-30MKM", "Su_30MKI": "Su-30MKI"},
+             "url": ""},
+    "su35s": {"title": "Су-35С Flanker-M (мод сообщества)", "module": "su35s",
+              "types": {"Su_35S": "Su-35S"}, "url": ""},
 }
 _LOADED: set[str] = set()
 
 
 def _bundle() -> None:   # pragma: no cover - не вызывается: явный импорт, чтобы сборщик (PyInstaller) включил описания модов
-    from . import a4ec, a6e  # noqa: F401
+    from . import a4ec, a6e, su30, su35s, uh60l  # noqa: F401
+
+
+def helicoptermod(heli):
+    """Вертолёт мода - в справочник pydcs (как game.modsupport.helicoptermod в Retribution)."""
+    from dcs.helicopters import helicopter_map
+    helicopter_map[heli.id] = heli
+    return heli
 
 
 def planemod(plane):

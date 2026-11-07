@@ -421,6 +421,56 @@ def iads_spec(m: Mission, state: dict, vg_by_unit: dict) -> tuple[list[dict], li
     return sams, net
 
 
+SAMCTL_LUA = Path(__file__).parent / "lua" / "samctl.lua"
+AAA_RX = r"ZU-23|ZU_23|S-60|S_60|KS-19|KS_19|Vulcan|Gepard|ZSU|M163|flak|Bofors|M1939|2A|Shilka"
+MANPAD_RX = r"manpad|Stinger|Igla|Strela-2|SA-18|SA-7|Soldier stinger"
+SAM_DELAY_S = {"long": 45, "medium": 25, "short": 12}   # ОЦЕНКА: реакция расчёта от обнаружения до огня (выучка 1)
+SAM_AUTONOMOUS = {"Osa_9A33_ln", "Strela_1_9P31", "Strela_10M3", "X_2S6_Tunguska", "Tor 9A331", "Roland_ADS",
+                  "M48 Chaparral", "M1097 Avenger", "HQ-7_LN_SP", "rapier_fsa_launcher"}   # РЛС/оптика - на пусковой
+SAM_K_RANGE = 0.7     # ОЦЕНКА: пуск - ближе 70% зоны поражения
+AAA_SKILL = "Average"  # ОЦЕНКА: зенитная артиллерия - средняя выучка (прицельный огонь ИИ DCS слишком точен)
+
+
+def samctl_spec(state: dict, vg_by_unit: dict) -> list[dict]:
+    """ПВО в миссии для samctl.lua: вид (ЗРК / зенитки / ПЗРК), зона, задержка реакции (по зоне и выучке части),
+    подвижность (стрельба с переездом)."""
+    import re as _re
+    from . import logistics as _lg
+    out = []
+    for uid, vg in vg_by_unit.items():
+        u = state["units"].get(uid)
+        if not u or model.category(u) != "sam":
+            continue
+        types = [x.type for x in vg.units]
+        n_aaa = sum(1 for t in types if _re.search(AAA_RX, t, _re.I))
+        n_mp = sum(1 for t in types if _re.search(MANPAD_RX, t, _re.I))
+        kind = ("sam" if n_aaa + n_mp < len(types) else "aaa" if n_aaa else "manpad")   # есть ЗРК - ЗРК; пушки (+ПЗРК) - зенитки
+        r = planner.threat_radius_km(u)
+        tier = "long" if r >= 30 else "medium" if r >= 10 else "short"
+        parent = state["units"].get(u.get("attached_to") or "") or {}
+        q = float(u.get("quality") or parent.get("quality") or 1.0)
+        if kind == "aaa":
+            for x in vg.units:
+                x.skill = Skill.Average if AAA_SKILL == "Average" else x.skill
+        out.append({"group": vg.name, "kind": kind, "r": (r or 3) * 1000, "k": SAM_K_RANGE,
+                    # переезд в миссии - только самоходные комплексы одной машиной (Оса, Стрела, Тунгуска); батарея
+                    # с отдельной РЛС (Куб, Hawk) в бою не снимается - она меняет позицию между сутками (logistics)
+                    "delay": SAM_DELAY_S[tier] / max(0.5, q),
+                    "mobile": kind == "sam" and all(t in SAM_AUTONOMOUS or _re.search(AAA_RX + "|" + MANPAD_RX, t, _re.I)
+                                                    for t in types),
+                    "manpad": n_mp > 0})
+    return out
+
+
+def samctl_script(state: dict, specs: list[dict]) -> str:
+    q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
+    items = ", ".join(f'{{ group = {q(a["group"])}, kind = "{a["kind"]}", r = {a["r"]:.0f}, k_range = {a["k"]}, '
+                      f'delay = {a["delay"]:.0f}, mobile = {"true" if a["mobile"] else "false"}, '
+                      f'manpad = {"true" if a.get("manpad") else "false"} }}' for a in specs)
+    return (SAMCTL_LUA.read_text(encoding="utf-8").replace("@CAMPAIGN@", state["campaign_id"])
+            .replace("@SORTIE@", str(int(state["sortie"]))).replace("@SPECS@", items))
+
+
 def iads_script(campaign_id: str, sortie: int, sams: list[dict], net: list[dict]) -> str:
     q = lambda s: '"' + str(s).replace("\\", "/").replace('"', "'") + '"'
     b = lambda v: "true" if v else "false"
@@ -660,10 +710,8 @@ def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "Carr
             sh.heading = hdg
             sg.add_unit(sh)
         kmh = CARRIER_KMH if base else (46 if naval.kind(u) == "FAC" else 19)
-        leg = model.offset(u["pos"], hdg, CARRIER_LEG_M if base else 15_000)
-        sg.add_waypoint(_pt(m, leg), kmh)
-        sg.add_waypoint(pos, kmh)
-        sg.add_waypoint(_pt(m, leg), kmh)
+        for p_ in ship_route(state, u, hdg, bool(base)):
+            sg.add_waypoint(_pt(m, p_), kmh)
         NAVAL_GROUPS[u["id"]] = sg
         NAVAL_SHIPS[u["id"]] = lst
         if base:
@@ -675,6 +723,32 @@ def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "Carr
                 sg.points[0].tasks.append(task.ActivateICLSCommand(channel=int(b["icls"]), unit_id=sg.units[0].id))
             out[bid] = CarrierPad(sg, b)
     return out
+
+
+SHIP_PATROL_M = 30_000   # ОЦЕНКА: галс патрулирования корабельной группы без приказа
+PORT_STANDOFF_KM = 3     # ОЦЕНКА: конвой идёт к точке в стольких км от порта со стороны моря
+
+
+def ship_route(state: dict, u: dict, hdg: float, carrier: bool) -> list[dict]:
+    """Маршрут группы в миссии: авианосец - галсы против ветра; конвой - в порт назначения морского пути (sea_lanes);
+    группа с приказом на сутки (orders) - к своей точке; остальные - патрулирование галсами вдоль позиции."""
+    from . import naval
+    pos = u["pos"]
+    if carrier:
+        leg = model.offset(pos, hdg, CARRIER_LEG_M)
+        return [leg, pos, leg]
+    lane = next((ln for ln in state.get("sea_lanes") or [] if ln.get("convoy") == u["id"]), None)
+    if lane and lane.get("port") in state.get("places", {}):
+        port = state["places"][lane["port"]]
+        d = model.dist_km(pos, port)
+        if d > PORT_STANDOFF_KM + 1:
+            return [model.lerp(pos, port, 0.5), model.lerp(pos, port, 1 - PORT_STANDOFF_KM / d)]
+    goal = naval.goal_today(state, u)
+    if goal and model.dist_km(pos, goal) > 2:
+        return [model.lerp(pos, goal, 0.5), dict(goal), model.offset(goal, hdg + 90, SHIP_PATROL_M / 2)]
+    a = model.offset(pos, hdg + 90, SHIP_PATROL_M / 2)
+    b = model.offset(pos, hdg - 90, SHIP_PATROL_M / 2)
+    return [a, b, a, b]
 
 
 def naval_manifest() -> list[dict]:
@@ -1272,6 +1346,27 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
 PLAYER_AWACS_STANDOFF_KM = 150   # ОЦЕНКА: зона E-2C игрока - за серединой фронта, как у ДРЛО доктрины НАТО
 
 
+PLAYER_VARIANTS = {   # тип полка в сценарии (только ИИ в DCS) -> управляемая версия для группы игрока; (тип, мод или None)
+    "AH_64A": ("AH_64D_BLK_II", None),
+    "UH_60A": ("UH_60L", "uh60l"),
+}
+
+
+def player_variant(state: dict, type_name: str) -> str | None:
+    """Игровое допущение: полк в сценарии на типе только для ИИ (AH-64A) - группа игрока летит на управляемой версии
+    (AH-64D); ИИ и модель - на типе сценария. Мод версии (UH-60L) - только если он включён в кампании.
+    Выключение - settings.player_variants = False."""
+    if not (state.get("settings") or {}).get("player_variants", True):
+        return None
+    v = PLAYER_VARIANTS.get(type_name)
+    if not v:
+        return None
+    pv, mod = v
+    if mod and mod not in ((state.get("settings") or {}).get("mods") or []):
+        return None
+    return pv
+
+
 def player_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> str | None:
     """Игровое допущение: у стороны игрока нет ДРЛО в миссии (Израиль 1973, ВВС ДРВ...) - E-2C над своей территорией
     до конца миссии, бессмертный и невидимый для противника (его нет в истории: не цель, не потеря). Через него игрок
@@ -1501,6 +1596,34 @@ def _lock_eta(fg, objective_s: float, spd_kmh: float) -> dict | None:
                 return {"group": fg.name, "x": w.position.x, "y": w.position.y, "eta": int(eta)}   # проверка (timing.lua)
             return None
     return None
+
+
+CRAWL_S = 60          # ОЦЕНКА: группа приходит на точку раньше залоченного времени больше чем на столько - ждёт в круге
+
+
+def _no_crawl(fg, spd_kmh: float) -> None:
+    """Залоченное время точки (ETA) раньше, чем группа долетит своей скоростью, DCS выполняет, замедляя группу
+    до 150-250 км/ч (мираж на 154 км/ч, 'Хьюи' на 76). Вместо этого: скорость - своя (speed_locked), на точке -
+    круг ожидания до её времени; точка ждёт, а не маршрут ползёт. Позже - ETA остаётся (DCS ускорится)."""
+    pts = fg.points
+    if not pts:
+        return
+    t = float(getattr(fg, "start_time", 0) or 0) + float(getattr(pts[0], "ETA", 0) or 0)
+    v = max(spd_kmh / 3.6, 15.0)
+    for i in range(1, len(pts)):
+        w, prev = pts[i], pts[i - 1]
+        t_nat = t + prev.position.distance_to_point(w.position) / v
+        if getattr(w, "ETA_locked", False) and w.ETA and w.ETA > t_nat + CRAWL_S:
+            w.ETA_locked, w.speed_locked, w.speed = False, True, v
+            if not any(getattr(x, "id", None) == "ControlledTask" and "Orbit" in str(getattr(x, "params", {}))
+                       for x in w.tasks):
+                hold = task.ControlledTask(task.OrbitAction(altitude=int(w.alt or 1000), speed=int(spd_kmh),
+                                                            pattern=task.OrbitAction.OrbitPattern.Circle))
+                hold.stop_after_time(int(w.ETA))
+                w.tasks.insert(0, hold)
+            t = float(w.ETA)
+        else:
+            t = max(t_nat, float(w.ETA or 0)) if getattr(w, "ETA_locked", False) else t_nat
 
 
 def _airborne(state: dict, g: dict, spd_kmh: float, secs: float) -> bool:
@@ -1772,6 +1895,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         ac = dcstypes.flying(perf["type"])
         hum = 0 if g.get("_ai") or g.get("_enemy") else hum_of.get(g["group"], 0)
         is_player = player and hum > 0
+        pv = player_variant(state, perf["type"]) if is_player else None
+        if pv:                                   # игроку - управляемая версия типа полка (ИИ и модель - тип сценария)
+            ac = dcstypes.flying(pv)
+            g["_variant"] = pv
         helo = model.category(perf) == "heli"    # вертолёты: предельно малая высота и для ИИ
         mt = _maintask(ac, g["maintask"])
         if g["objective"]["kind"] == "alert":    # дежурная пара ПВО: на стоянке, взлёт по обнаружению (qra.lua)
@@ -2193,6 +2320,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             ts = _lock_eta(fg, times[g["group"]]["objective_s"], spd)
             if ts:
                 timing_specs.append(ts)
+            _no_crawl(fg, spd)                   # раньше времени - круг ожидания на точке, а не 150 км/ч по маршруту
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)
@@ -2212,7 +2340,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             continue
         lg = i18n.lang(state)
         Lx = lambda ru, en: i18n.L(lg, ru, en)
-        (ai_lines if g.get("_ai") else lines).append(f"{i18n.tr(g['title'], lg)}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, "
+        (ai_lines if g.get("_ai") else lines).append(f"{i18n.tr(g['title'], lg)}: {g['size']} x {g.get('_variant') or perf['type']} ({perf['name']}), {base['name']}, "
                      + ((Lx("игрок, холодный старт", "player, cold start")
                          + (Lx(" (в базовом DCS тип только для ИИ - нужен мод)", " (AI-only type in base DCS - a mod is required)") if needs_mod else "")
                          + (Lx(f", ВЗЛЁТ через ~{t['takeoff_s'] // 60} мин (время удара - по самой медленной группе; раньше - ждать в точке сбора)",
@@ -2312,6 +2440,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     iads_sams, iads_net = iads_spec(m, state, vg_by_unit)
     if iads_sams:                                # сеть ПВО: ЗРК на связи молчат до цели в зоне, реакция на ПРР
         trig.add_action(DoScript(String(iads_script(state["campaign_id"], state["sortie"], iads_sams, iads_net))))
+    sc_specs = samctl_spec(state, vg_by_unit)    # огонь ПВО: реакция расчёта, дальность пуска, заграждение зениток,
+    if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска
+        trig.add_action(DoScript(String(samctl_script(state, sc_specs))))
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p, strict_abort(state)))))
@@ -2368,6 +2499,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             act.text = String(_guard(act.text.id))
     m.triggerrules.triggers.append(trig)
 
+    for g in pkg:                                # управляемая версия типа у группы игрока - строка в брифинге
+        if g.get("_variant"):
+            lines.append(i18n.L(i18n.lang(state),
+                                f"игровое допущение: ваша группа - {g['_variant']} вместо {state['units'][g['performer']]['type']} "
+                                "(тип полка только для ИИ); ИИ и потери - по типу полка",
+                                f"gameplay concession: your flight flies {g['_variant']} instead of "
+                                f"{state['units'][g['performer']]['type']} (AI-only type); AI and losses use the unit type"))
     pa = player_awacs(m, state, tk, sortie) if player and player_air else None   # игроку - картина ДРЛО
     comm_lines = radio_setup(m, state, tk, pkg, sortie, player_air)
     if pa:
