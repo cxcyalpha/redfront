@@ -36,6 +36,7 @@ THEATRES = [   # (id, сектор, состав сил, название)
     ("vietnam72", "sector_vietnam72.json", "oob_vietnam72.json", "Вьетнам: апрель 1972 (условная география, авианосцы)"),
     ("vietnam72_lb2", "sector_vietnam72_lb2.json", "oob_vietnam72_lb2.json", "Вьетнам: декабрь 1972, Лайнбэкер-2 (условная география)"),
     ("golan73", "sector_golan73.json", "oob_golan73.json", "Голаны: октябрь 1973 (Война Судного дня)"),
+    ("tankerwar88", "sector_tankerwar88.json", "oob_tankerwar88.json", "Персидский залив: апрель 1988 (Танкерная война)"),
 ]
 
 

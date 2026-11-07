@@ -1,0 +1,583 @@
+{
+ "_about": "Танкерная война, апрель 1988: ВМС США против ВМС Ирана и КСИР (Praying Mantis). tools/gen_tankerwar88.py.",
+ "theatre": "persiangulf",
+ "preset": {
+  "title": "Апрель 1988: Танкерная война (Praying Mantis)",
+  "year": 1988,
+  "date": "1988-04-18"
+ },
+ "date": "1988-04-18",
+ "doctrine": {
+  "blue": "nato",
+  "red": "nato"
+ },
+ "countries": {
+  "red": "Iran",
+  "blue": "USA"
+ },
+ "units": [
+  {
+   "id": "red_hawk_bandarabbas",
+   "name": "Батарея HAWK (Бандар-Аббас)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 27.16,
+    "lon": 56.2
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_hawk_qeshm",
+   "name": "Батарея HAWK (Кешм)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 26.8,
+    "lon": 55.9
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_zu_abumusa",
+   "name": "Зенитная артиллерия (Абу-Муса)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 25.88,
+    "lon": 55.02
+   },
+   "composition": [
+    {
+     "type": "ZU-23 Emplacement",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_csg_enterprise",
+   "name": "Авианосная ударная группа USS Enterprise",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 25.1,
+    "lon": 57.4
+   },
+   "composition": [
+    {
+     "type": "VINSON",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Enterprise (CVN-65)"
+     ]
+    },
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Truxtun (CGN-35)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Reasoner (FF-1063)",
+      "USS Rentz (FFG-46)"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 1.3,
+   "ecm": 0.3
+  },
+  {
+   "id": "blue_sag_bravo",
+   "name": "SAG Bravo (платформа Сассан)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 25.75,
+    "lon": 53.6
+   },
+   "composition": [
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "destroyer",
+     "names": [
+      "USS Merrill (DD-976)",
+      "USS Lynde McCormick (DDG-8)"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 25.9,
+      "lon": 53.15
+     },
+     "until_day": 3
+    }
+   ],
+   "quality": 1.3,
+   "ecm": 0.3
+  },
+  {
+   "id": "blue_sag_charlie",
+   "name": "SAG Charlie (платформа Сирри)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 25.6,
+    "lon": 54.4
+   },
+   "composition": [
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Wainwright (CG-28)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Simpson (FFG-56)",
+      "USS Bagley (FF-1069)"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 25.85,
+      "lon": 54.45
+     },
+     "until_day": 3
+    }
+   ],
+   "quality": 1.3,
+   "ecm": 0.3
+  },
+  {
+   "id": "blue_sag_delta",
+   "name": "SAG Delta (Ормузский пролив)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 26.2,
+    "lon": 56.7
+   },
+   "composition": [
+    {
+     "type": "PERRY",
+     "count": 3,
+     "role": "frigate",
+     "names": [
+      "USS Jack Williams (FFG-24)",
+      "USS O'Brien (DD-975)",
+      "USS Joseph Strauss (DDG-16)"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 1.3,
+   "ecm": 0.3
+  },
+  {
+   "id": "blue_convoy_earnestwill",
+   "name": "Конвой Earnest Will (кувейтские танкеры)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 25.4,
+    "lon": 56.9
+   },
+   "composition": [
+    {
+     "type": "HandyWind",
+     "count": 3,
+     "role": "transport",
+     "names": [
+      "MV Bridgeton",
+      "MV Gas Prince",
+      "MV Sea Isle City"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 25.7,
+      "lon": 53.8
+     },
+     "until_day": 4
+    }
+   ]
+  },
+  {
+   "id": "red_irin_sahand",
+   "name": "Фрегаты ВМС Ирана (Sahand, Sabalan)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 26.7,
+    "lon": 55.9
+   },
+   "composition": [
+    {
+     "type": "Leander_gun_andromeda",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "IRIS Sahand",
+      "IRIS Sabalan"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
+   "id": "red_irin_joshan",
+   "name": "Ракетный катер Joshan (Бушер - Сирри)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 26.1,
+    "lon": 54.1
+   },
+   "composition": [
+    {
+     "type": "La_Combattante_II",
+     "count": 1,
+     "role": "boat",
+     "names": [
+      "IRIS Joshan"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
+   "id": "red_irgcn_abumusa",
+   "name": "Катера КСИР (Абу-Муса)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 25.9,
+    "lon": 55.05
+   },
+   "composition": [
+    {
+     "type": "Speedboat",
+     "count": 4,
+     "role": "boat",
+     "names": [
+      "Boghammar №1",
+      "Boghammar №2",
+      "Boghammar №3",
+      "Boghammar №4"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
+   "id": "red_irgcn_larak",
+   "name": "Катера КСИР (Ларак)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 26.85,
+    "lon": 56.4
+   },
+   "composition": [
+    {
+     "type": "Speedboat",
+     "count": 3,
+     "role": "boat",
+     "names": [
+      "Boghammar №5",
+      "Boghammar №6",
+      "Boghammar №7"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
+   "id": "us_vf114",
+   "name": "VF-114, VF-213 (F-14A, Enterprise)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "cvn65",
+   "type": "F_14A_135_GR",
+   "count": 20,
+   "strike_radius_km": 500,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_va95",
+   "name": "VA-95 (A-6E, Enterprise)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cvn65",
+   "type": "A6E",
+   "count": 10,
+   "strike_radius_km": 600,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; A-6E с Harpoon",
+   "estimate": true
+  },
+  {
+   "id": "us_va22",
+   "name": "VA-22, VA-94 (A-7E, Enterprise)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cvn65",
+   "type": "FA_18C_hornet",
+   "count": 20,
+   "strike_radius_km": 500,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; A-7E в DCS нет - F/A-18C (допущение)",
+   "estimate": true
+  },
+  {
+   "id": "us_vaw117",
+   "name": "VAW-117 (E-2C)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "cvn65",
+   "type": "E_2C",
+   "count": 4,
+   "strike_radius_km": 1000,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_ka6",
+   "name": "VA-95 (KA-6D, заправщик)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "cvn65",
+   "type": "S_3B_Tanker",
+   "count": 4,
+   "strike_radius_km": 800,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; KA-6D - S-3B Tanker",
+   "estimate": true
+  },
+  {
+   "id": "ir_tfb9_f4",
+   "name": "91-я тактическая эскадрилья (F-4E, Бандар-Аббас)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "bandar_abbas_intl",
+   "type": "F_4E_45MC",
+   "count": 12,
+   "strike_radius_km": 400,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; в строю - часть машин (эмбарго)",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
+   "id": "ir_f14",
+   "name": "Эскадрилья F-14A (Шираз)",
+   "side": "red",
+   "role": "fighter",
+   "base": "shiraz_intl",
+   "type": "F_14A_135_GR",
+   "count": 6,
+   "strike_radius_km": 500,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; в строю немного F-14A (запчасти)",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
+   "id": "ir_f5",
+   "name": "Эскадрилья F-5E (Бандар-Аббас)",
+   "side": "red",
+   "role": "fighter",
+   "base": "bandar_abbas_intl",
+   "type": "F_5E_3",
+   "count": 10,
+   "strike_radius_km": 300,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
+   "id": "ir_cobra",
+   "name": "Вертолёты AH-1J КСИР/армии (Бандар-Аббас)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "havadarya",
+   "type": "AH_1W",
+   "count": 6,
+   "strike_radius_km": 150,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; AH-1J - AH-1W",
+   "estimate": true,
+   "quality": 0.8
+  }
+ ],
+ "variants": [
+  {
+   "name": "base",
+   "title": "Апрель 1988: Танкерная война (Praying Mantis)",
+   "posture": {
+    "red": "defense",
+    "blue": "defense"
+   },
+   "task_rules": {
+    "blue": {
+     "strike_airfield": {
+      "off": true,
+      "why": "удары по территории Ирана запрещены"
+     },
+     "strike_depot": {
+      "off": true,
+      "why": "удары по территории Ирана запрещены"
+     },
+     "strike_sam_site": {
+      "off": true,
+      "why": "ПВО материка - вне ответного удара"
+     },
+     "strike_bridge": {
+      "off": true,
+      "why": "нет целей"
+     }
+    },
+    "red": {
+     "strike_airfield": {
+      "off": true,
+      "why": "у США в районе нет аэродромов"
+     },
+     "strike_factory": {
+      "off": true,
+      "why": "нет целей"
+     },
+     "strike_depot": {
+      "off": true,
+      "why": "нет целей"
+     }
+    }
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 0,
+  "note": "ОЦЕНКА: короткая операция"
+ },
+ "_not_included": "мины, береговые ПКР HY-2 'Silkworm', P-3C, вертолёты SH-60B и морская пехота, Бахрейн и Кувейт (вне карты)."
+}

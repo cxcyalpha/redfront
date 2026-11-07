@@ -27,6 +27,7 @@ THEATRE_INFO = {   # карта DCS: класс pydcs, центр (восход/
     "germany": {"cls": "Germany", "lat": 51.5, "lon": 10.5, "utc": 1, "climate": "hannover"},
     "caucasus": {"cls": "Caucasus", "lat": 42.5, "lon": 43.5, "utc": 4, "climate": "tbilisi"},
     "syria": {"cls": "Syria", "lat": 33.5, "lon": 35.8, "utc": 3, "climate": "beirut"},
+    "persiangulf": {"cls": "PersianGulf", "lat": 26.3, "lon": 55.5, "utc": 4, "climate": "dubai"},
 }
 
 

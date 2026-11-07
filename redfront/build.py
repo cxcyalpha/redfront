@@ -756,6 +756,54 @@ def naval_manifest() -> list[dict]:
     return [{"unit": uid, "ships": [{"name": nm, "type": typ} for typ, nm in lst]} for uid, lst in NAVAL_SHIPS.items()]
 
 
+BEACON_FILES = {"PersianGulf": "persiangulf", "Caucasus": "caucasus", "Syria": "syria", "GermanyCW": "germanycoldwar"}
+_BEACONS: dict[str, dict] = {}
+
+
+def navaid_lines(m: Mission, airport, lg: str) -> list[str]:
+    """Радиосредства аэродрома для планшета: TACAN (канал), VOR/VORTAC, ILS (частота, позывной), РСБН (канал), ПРМГ,
+    приводные (кГц). Данные - DCS Retribution, resources/dcs/beacons (LGPL-3.0); id маяков - airport.beacons (pydcs)."""
+    if airport is None:
+        return []
+    key = BEACON_FILES.get(m.terrain.name)
+    if not key:
+        return []
+    if key not in _BEACONS:
+        try:
+            _BEACONS[key] = model.load_json(f"beacons/{key}.json")
+        except FileNotFoundError:
+            _BEACONS[key] = {}
+    db = _BEACONS[key]
+    out = []
+    seen = set()
+    ids = [getattr(b, "id", "") for b in getattr(airport, "beacons", []) or []]
+    ids += [k for k in db if k.startswith(f"airfield{airport.id}_") and k not in ids]   # ILS/ПРМГ - у полос, не в beacons
+    for bid in sorted(ids, key=lambda k: (k.split("_")[0], int(k.split("_")[-1]) if k.split("_")[-1].isdigit() else 0)):
+        x = db.get(bid)
+        if not x:
+            continue
+        t, hz, ch, cs = x["beacon_type"], x.get("hertz") or 0, x.get("channel"), x.get("callsign", "")
+        if t in (4, 5):
+            s_ = f"TACAN {ch}X {cs}" + (" (VORTAC)" if t == 5 else "")
+        elif t in (1, 3):
+            s_ = f"VOR {hz / 1e6:.2f} {cs}"
+        elif t == 16640:
+            s_ = f"ILS {hz / 1e6:.2f} {cs}"
+        elif t == 128:
+            s_ = i18n.L(lg, f"РСБН канал {ch} {cs}", f"RSBN ch {ch} {cs}")
+        elif t == 33024:
+            s_ = i18n.L(lg, "ПРМГ " + (f"канал {ch} " if ch else "") + (f"{hz / 1e6:.2f} " if hz else "") + cs,
+                        "PRMG " + (f"ch {ch} " if ch else "") + (f"{hz / 1e6:.2f} " if hz else "") + cs)
+        elif t in (8, 4104, 4136, 16408, 16424):
+            s_ = i18n.L(lg, f"привод {hz / 1e3:.0f} кГц {cs}", f"NDB {hz / 1e3:.0f} kHz {cs}")
+        else:
+            continue
+        if s_ not in seen:
+            seen.add(s_)
+            out.append("  " + s_)
+    return out
+
+
 def carrier_lines(state: dict, side_pos=None) -> list[str]:
     """Строки брифинга и планшета: авианосцы кампании - TACAN, ICLS, частота (своей стороны)."""
     out = []
@@ -1537,7 +1585,10 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 route.append(f"{i:2d}  {hhmm(t)}  {fmt_alt(state, tk['side'], pt.alt, lg)}{ref}{sp}  {pt.name or ''}")
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
-            fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-"), L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")]
+            by_id = {a.id: a for a in m.terrain.airports.values()}
+            fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-")] + navaid_lines(m, by_id.get(ab[0]), lg)
+                      + ([L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")] + navaid_lines(m, by_id.get(ab[-1]), lg)
+                         if ab[-1] != ab[0] else [L("Посадка: там же", "Arrival: same")])
                       if ab else [L("Взлёт и посадка: палуба", "Deck launch and recovery")])
             fields += carrier_lines(state, fg.units[0].position)
             sub = f"{fg.name} - {ut.id} x{len(fg.units)} - {L('день', 'day')} {state['day']}"
