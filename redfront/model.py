@@ -420,6 +420,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "places": sec["places"],
         "links": sec.get("links", []),            # связи пунктов - граф оперативного уровня (ops.py)
         "supply_entry": sec.get("supply_entry", {}),   # пункты входа подвоза из тыла (вне карты), если заданы в секторе
+        "no_front": bool(sec.get("no_front")),    # нет сухопутного фронта (война на море) - линия соприкосновения не рисуется
         "off_limits": sec.get("off_limits", {}),   # пункты, на которые сторона не наступает (политика сценария)
         "point_ad": forces.get("point_ad") or {},   # ПВО объектов тыла по сценарию (нет - model.POINT_AD)
         "sea_lanes": copy.deepcopy(sec.get("sea_lanes") or []),

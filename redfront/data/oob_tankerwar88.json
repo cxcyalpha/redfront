@@ -509,10 +509,10 @@
    "side": "red",
    "role": "fighter",
    "base": "shiraz_intl",
-   "type": "F_14A_135_GR",
+   "type": "F_14A_95_GR",
    "count": 6,
    "strike_radius_km": 500,
-   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; в строю немного F-14A (запчасти)",
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; в строю немного F-14A (запчасти); модуль F-14A-95-GR (Heatblur) - экспортный, иранский: ливреи, вооружение, кабина",
    "estimate": true,
    "quality": 0.8
   },

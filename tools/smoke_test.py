@@ -4000,6 +4000,17 @@ def theatres_section(tmp: Path) -> None:
         _gui.liveries = _orig
     check(lv1 == "IAF 69th Squadron" and lv2 is None,
           f"ливреи по названию полка: '69-я и 107-я эскадрильи' -> {lv1}; без общего номера - нет ({lv2})")
+    _gui.liveries = lambda st_, u_: [{"id": "21 diviz", "name": "21. Diviz Zagreb", "countries": ["CRO"]},
+                                     {"id": "syria (1)", "name": "Syria (1)", "countries": []},
+                                     {"id": "iaf 117", "name": "IAF 117 Sqn", "countries": ["ISR"]}]
+    st_lv = {"countries": {"red": "Syria", "blue": "Israel"}, "date": "1982-06-06"}
+    try:
+        lv3 = _gui.match_livery(st_lv, {"name": "5-я бригада (МиГ-21МФ)", "type": "MiG_21Bis", "side": "red"})
+        lv4 = _gui.match_livery(st_lv, {"name": "117-я эскадрилья (F-16A)", "type": "F_16C_50", "side": "blue"})
+    finally:
+        _gui.liveries = _orig
+    check(lv3 == "syria (1)" and lv4 == "iaf 117",
+          f"ливреи: сначала страна (МиГ-21 Сирии -> {lv3}, не хорватская '21 диви' по цифре типа), затем номер полка ({lv4})")
     check("redfront gci" in mz and p1 == 22 and p2 == 0,
           f"наземное наведение (КРУ): ударный, идущий к объекту, важнее истребителя (цель {p1}); превосходящая группа "
           f"и цель за границей наведения - без наведения ({p2})")

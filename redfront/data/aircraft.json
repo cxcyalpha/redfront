@@ -250,6 +250,7 @@
     "MiG_19P": {"fit": {"cas": 0.15, "air": 0.4}, "crew": 1, "night": false},
     "MiG_15bis": {"fit": {"cas": 0.15, "air": 0.25}, "crew": 1, "night": false},
     "F_14A_135_GR": { "refuel": "probe","carrier": true, "fit": {"air": 0.9}, "crew": 2, "night": true},
+    "F_14A_95_GR": { "refuel": "probe", "fit": {"air": 0.9}, "crew": 2, "night": true, "note": "F-14A экспортный (Иран, Heatblur F-14A-95-GR): без авианосца"},
     "A6E": { "refuel": "probe","carrier": true, "fit": {"cas": 0.55, "interdiction": 0.7, "strike": 0.8, "sead": 0.3}, "crew": 2, "night": true},
     "Mirage_F1CE": { "refuel": "probe","fit": {"cas": 0.3, "interdiction": 0.3, "strike": 0.35, "air": 0.7}, "crew": 1, "night": false},
     "AH_1W": {"fit": {"cas": 0.65}, "troops": 0, "crew": 2, "night": false},

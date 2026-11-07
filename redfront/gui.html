@@ -605,7 +605,8 @@ function drawMap() {
   const sites = V.places.filter(p => p.side).map(p => ({lat: p.pos[0], lon: p.pos[1], side: p.side}))
     .concat(field.map(g => ({lat: g.pos[0], lon: g.pos[1], side: g.side})));
   const key = JSON.stringify(sites);
-  if (key !== frontKey) { frontKey = key; frontCache = TAC.front(sites); }
+  if (V.no_front) { frontKey = null; frontCache = null; }   // сценарий без сухопутного фронта (война на море)
+  else if (key !== frontKey) { frontKey = key; frontCache = TAC.front(sites); }
   if (frontCache) {
     L.imageOverlay(frontCache.image, frontCache.bounds, {pane: "terrain", interactive: false, opacity: 1, className: "terr"}).addTo(layers.front);
     for (const ln of frontCache.red) L.polyline(ln, {color: TAC.RED, weight: 3, opacity: .95, interactive: false}).addTo(layers.front);
