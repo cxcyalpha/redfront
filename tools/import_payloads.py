@@ -7,6 +7,7 @@ MissionEditor\\UnitPayloads\\<тип>.lua); подвески с именем к�
 anti_armor, sead, dead, runway, antiship) - в redfront/data/payloads_custom.json, поверх Retribution. Подвеска -
 самая современная; по году кампании её поправит weapons.degrade."""
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -51,8 +52,9 @@ if CUSTOM:                                       # свои: только под
     n = 0
     for ty, pls in out.items():
         for name, p in pls.items():
-            if name.strip().lower() in CATS:
-                cur.setdefault("types", {}).setdefault(ty, {})[name.strip().lower()] = p
+            key = name.strip().lower()
+            if key in CATS or re.fullmatch(r"[a-z_]+(/[a-z_0-9]+)?", key):   # категория, задача или задача/группа
+                cur.setdefault("types", {}).setdefault(ty, {})[key] = p
                 n += 1
             else:
                 print(f"пропуск {ty}: '{name}' - имя не категория ({', '.join(sorted(CATS))})")

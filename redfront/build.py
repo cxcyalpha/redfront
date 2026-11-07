@@ -861,10 +861,17 @@ PAYLOAD_NAMES = {   # категория -> имена подвесок DCS Retr
 def loadout_cats(kind: str, g: dict) -> list[str]:
     """Категории подвески группы по порядку: вид задачи (для ударной группы) или роль группы обеспечения, затем
     категории доктрины (loadout группы)."""
+    gid = re.sub(r"\d+$", "", g.get("group", "")).split("_")[0]
     first = [] if g.get("loadout_user") else \
-        GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], []) if g.get("group") not in ("strike", "strike2") \
+        GROUP_CATS.get(gid, []) if g.get("group") not in ("strike", "strike2") \
         else KIND_CATS.get(kind, [])
+    # своя подвеска (payloads_custom.json) - и точнее категории: по задаче и группе ("strike_bridge", "strike_airfield/
+    # cover", "sead"): сначала самая точная, затем роль группы, затем категория (масштабируется без кода)
+    own = [] if g.get("loadout_user") else ([f"{kind}/{gid}", gid] if g.get("group") not in ("strike", "strike2") else [kind])
     out = []
+    for c in own:
+        if c not in out:
+            out.append(c)
     for c in first + list(g.get("loadout") or []):
         if c not in out:
             out.append(c)
@@ -1039,6 +1046,60 @@ def _ai_options(ai: dict) -> list:
     if ai.get("restrict_jettison"):
         out.append(task.OptRestrictJettison(True))
     return out
+
+
+# Блок наведения AGM-45 Shrike (Heatblur F-4E: настройка NFP_rfgu_type) под РЛС цели: 1 Mk 22, 2 Mk 23, 3 Mk 24.5,
+# 4 Mk 24.34, 5 Mk 25, 6 Mk 36, 7 Mk 37, 8 Mk 49.0, 9 Mk 49.1, 10 Mk 50. Источники: DCS Retribution, resources/weapons/
+# standoff/AGM-45A.yaml (LGPL-3.0) - 2, 7, 9, 10; остальное - таблица головок руководства Heatblur F-4E (v3.10):
+# РЛС, по которой у головки есть тон. Порядок - сверху вниз, первое совпадение типа РЛС.
+SHRIKE_RFGU = [
+    (r"snr s-125 tr|40B6M tr|30H6_tr|Kub.?1S91|RPC_5N62V|Osa.?9A33|Buk LN|Buk_LN|Buk SR|Buk_SR|Strela-10|Strela_10", 9),
+    (r"Tor|Pantsir|Tunguska|SNR_75V|SNR-75|Patriot_str", 10),
+    (r"64H6E|40B6MD|Tin Shield|Big Bird|SON_9|Gepard", 2),
+    (r"p-19|P-19|Flat Face|Hawk_sr", 7),
+    (r"Hawk_tr|Roland", 6),
+    (r"Dog Ear|9S80|1L13|55G6", 1),
+]
+
+
+def tune_arm(state: dict, fg, g: dict) -> list[str]:
+    """Головки Shrike группы - под РЛС её целей (ЗРК подавления, добивания, удара по ЗРК): у каждой ПРР - блок
+    наведения по таблице SHRIKE_RFGU; несколько разных РЛС - по пилонам по очереди. Остальные ракеты и настройки
+    подвески - как были. Возвращает строки 'РЛС -> блок' для брифинга."""
+    import re as _re
+    from . import weapons
+    obj = g.get("objective") or {}
+    sids = list(obj.get("units") or ([obj["unit"]] if obj.get("unit") else []))
+    radars: list[str] = []
+    for sid in sids:
+        u = state["units"].get(sid)
+        if not u or model.category(u) != "sam":
+            continue
+        comp = u.get("composition", [])
+        rs = [c["type"] for c in comp if c.get("role") == "radar"] or [c["type"] for c in comp]
+        tr = [t for t in rs if _re.search(r"tr\b|str|SNR|1S91|Hawk_tr|9A33|Buk LN|Tor|Tunguska", t, _re.I)] or rs
+        radars += [t for t in tr if t not in radars]
+    kits = []
+    for t in radars:
+        k = next((v for rx, v in SHRIKE_RFGU if _re.search(rx, t, _re.I)), None)
+        if k and k not in kits:
+            kits.append(k)
+    if not kits:
+        return []
+    for u in fg.units:
+        j = 0
+        for num, d in list(u.pylons.items()):
+            if _re.search(r"AGM-45|Shrike", weapons.name_of(d.get("CLSID", "")), _re.I):
+                st = dict(d.get("settings") or {})
+                st["NFP_rfgu_type"] = kits[j % len(kits)]
+                d = dict(d, settings=st)
+                u.pylons[num] = d
+                j += 1
+    names = {1: "Mk 22", 2: "Mk 23", 3: "Mk 24.5", 4: "Mk 24.34", 5: "Mk 25", 6: "Mk 36", 7: "Mk 37", 8: "Mk 49.0",
+             9: "Mk 49.1", 10: "Mk 50"}
+    note = "Shrike: " + ", ".join(names[k] for k in kits)
+    fg.__dict__.setdefault("_rf_degraded", []).append(note)
+    return [note]
 
 
 def _attack(group_id: int, ai: dict, altitude: int | None = None):
@@ -1968,6 +2029,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
+        tune_arm(state, fg, g)                   # головки ПРР (Shrike) - под РЛС ЗРК своей цели
         needs_mod = False
         for u in fg.units[:hum] if is_player else []:
             needs_mod = _set_player(u, client=multi) or needs_mod
