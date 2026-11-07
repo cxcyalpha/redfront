@@ -343,7 +343,8 @@ def liveries(st: dict, u: dict) -> list[dict]:
     DCS не найден - пусто (ливрею можно вписать вручную - имя папки ливреи)."""
     try:
         ac = dcstypes.flying(u["type"])
-        return sorted(({"id": lv.id, "name": lv.name + (f" ({', '.join(sorted(lv.countries))})" if lv.countries else "")}
+        return sorted(({"id": lv.id, "name": lv.name + (f" ({', '.join(sorted(lv.countries))})" if lv.countries else ""),
+                        "countries": sorted(lv.countries) if lv.countries else []}
                        for lv in ac.iter_liveries()), key=lambda x: x["name"])
     except Exception:                            # DCS не установлен (или pydcs не нашёл папки) - вручную
         return []
@@ -359,21 +360,64 @@ def _tokens(text: str) -> set[str]:
     return out
 
 
+# страна части -> короткие имена стран DCS (Livery.countries) и слова страны в имени ливреи (ливреи без списка стран)
+NATION_CC = {"su": ["SUN", "RUS"], "gdr": ["GDR"], "frg": ["GER"], "uk": ["UK"], "be": ["BEL"], "nl": ["NETH"],
+             "ca": ["CAN"], "us": ["USA"]}
+CC_WORDS = {"SYR": ["syria", "saaf"], "ISR": ["israel", "iaf", "idf"], "IRN": ["iran", "iriaf"], "IRQ": ["iraq"],
+            "VNM": ["vietnam", "vpaf"], "SUN": ["ussr", "soviet", "vvs", "cccp"], "RUS": ["russia", "vvs", "vks"],
+            "GDR": ["nva", "gdr", "ddr", "lsk"], "GER": ["luftwaffe", "germany", "bundes"], "USA": ["usaf", "usn", "usmc", "ang"],
+            "UK": ["raf", "royal"], "BEL": ["belg"], "NETH": ["netherl", "dutch", "klu"], "CAN": ["canad", "rcaf"],
+            "GRG": ["georgia"], "LBN": ["leban"]}
+
+
+def unit_countries(st: dict, u: dict) -> list[str]:
+    """Страна части (короткие имена DCS): явная национальность части (ФРГ, ННА, RAF... - pilots.NATION_RE) или страна
+    стороны в сценарии (Сирия, Израиль, Иран); СССР до 1992 - и SUN, и RUS."""
+    import re as _re
+    from dcs import countries as _c
+    from . import pilots
+    nat = u.get("nation") if u.get("nation") in NATION_CC else next(
+        (n for n, rx in pilots.NATION_RE if _re.search(rx, u.get("name", ""))), None)
+    if nat:
+        return NATION_CC[nat]
+    name = (st.get("countries") or {}).get(u.get("side"), "")
+    try:
+        cc = _c.get_by_name(name).shortname
+    except Exception:
+        return []
+    return ["SUN", "RUS"] if cc == "RUS" and int(str(st.get("date", "2000"))[:4]) < 1992 else [cc]
+
+
 def match_livery(st: dict, u: dict) -> str | None:
-    """Стандартная ливрея DCS, подходящая полку по названию: общий номер эскадрильи/крыла (69, 107, VF-114) - главное,
-    слова (aggressor, sea hag) - добавка; без общего номера - нет. Нет DCS - None."""
+    """Стандартная ливрея DCS для полка. Сначала страна: только ливреи страны части (по списку стран ливреи или по
+    слову страны в имени - 'syria (1)'); ливреи без списка стран - если своих нет; чужой страны - никогда. Среди них -
+    по названию полка: общий номер эскадрильи/крыла (69, 107, VF-114) - главное, слова - добавка; цифры типа
+    (21 у МиГ-21, 16 у F-16) - не номер полка. Номер не совпал - первая ливрея страны. Нет DCS - None."""
+    import re as _re
     lvs = liveries(st, u)
     if not lvs:
         return None
-    mine = _tokens(u.get("name", "") + " " + (u.get("source") or "")[:0])
-    nums = {t for t in mine if t.isdigit() or any(ch.isdigit() for ch in t)}
+    ccs = unit_countries(st, u)
+    words = [w for c in ccs for w in CC_WORDS.get(c, [])]
+    def own(lv):
+        text = (lv["id"] + " " + lv["name"]).lower()
+        return bool(set(lv.get("countries") or []) & set(ccs)) or (not lv.get("countries") and any(w in text for w in words))
+    pool = [lv for lv in lvs if own(lv)] or [lv for lv in lvs if not lv.get("countries")]
+    if not pool:
+        return None
+    type_nums = set(_re.findall(r"\d+", u.get("type", "")))
+    mine = _tokens(u.get("name", "")) - type_nums
+    nums = {t for t in mine if any(ch.isdigit() for ch in t)}
     best, bs = None, 0
-    for lv in lvs:
-        th = _tokens(lv["id"] + " " + lv["name"])
+    for lv in pool:
+        th = _tokens(lv["id"] + " " + lv["name"]) - type_nums
         sc = 3 * len(nums & th) + len((mine - nums) & th)
         if sc > bs:
             best, bs = lv["id"], sc
-    return best if bs >= 3 else None
+    if bs >= 3:
+        return best
+    named = [lv for lv in pool if any(w in (lv["id"] + " " + lv["name"]).lower() for w in words)]
+    return (named or pool)[0]["id"] if own(pool[0]) or named else None
 
 
 def auto_liveries(st: dict, force: bool = False) -> int:
