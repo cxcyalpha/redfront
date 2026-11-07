@@ -133,7 +133,7 @@ NAMES = {
     "Крыло RAF Брюгген (Tornado GR.1; в DCS - GR.4)": "RAF Brüggen Wing (Tornado GR.1; GR.4 in DCS)",
     "Крыло RAF Лаарбрух (Tornado GR.1; в DCS - GR.4)": "RAF Laarbruch Wing (Tornado GR.1; GR.4 in DCS)",
     "2-я эскадрилья RAF (Jaguar GR.1, к концу 80-х Tornado GR.1A; в DCS - Tornado GR.4)": "No. 2 Squadron RAF (Jaguar GR.1, Tornado GR.1A by the late 1980s; Tornado GR.4 in DCS)",
-    "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47D)": "No. 18 Squadron RAF (Chinook HC.1; CH-47D in DCS)",
+    "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47F)": "No. 18 Squadron RAF (Chinook HC.1; CH-47F in DCS)",
     "230-я эскадрилья RAF (Puma HC.1; в DCS - UH-1H)": "No. 230 Squadron RAF (Puma HC.1; UH-1H in DCS)",
     "4-е крыло ВВС Канады (CF-18; в DCS - F/A-18C)": "4 Wing, Canadian Forces (CF-18; F/A-18C in DCS)",
     "1-я ютландская бригада (Дания) (LANDJUT)": "1st Jutland Brigade (Denmark) (LANDJUT)",
@@ -301,6 +301,8 @@ NAMES = {
     "аэродромы МиГов - с 'Лайнбэкера' (10.05.1972)": "MiG airfields only from Linebacker (10 May 1972)",
     "фронт стоит; усилия - на Север": "the front is static; the effort goes North", "усилия - на объекты Ханоя и Хайфона": "the effort goes to Hanoi and Haiphong targets",
     "A-4E-C Skyhawk (мод сообщества)": "A-4E-C Skyhawk (community mod)",
+    "UH-60L Black Hawk (мод сообщества)": "UH-60L Black Hawk (community mod)",
+    "Су-30 Flanker-H (мод сообщества)": "Su-30 Flanker-H (community mod)", "Су-35С Flanker-M (мод сообщества)": "Su-35S Flanker-M (community mod)",
     "Пархим": "Parchim", "Лаге": "Laage", "Стендаль": "Stendal", "Дамгартен": "Damgarten", "Мальвинкель": "Mahlwinkel",
     "Вунсторф": "Wunstorf", "Фасберг": "Fassberg", "Целле": "Celle", "Ютерзен": "Uetersen", "Нордхольц": "Nordholz",
 }

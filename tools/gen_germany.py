@@ -601,15 +601,15 @@ AIR_HISTORY = [
     ("nva_tfg44", "red", "transport", 8, [
         ("1970-01", None, "Marxwalde", "Yak_40", "TFG-44 ННА (Ту-134/Як-40/Ан-26; в DCS - Як-40)", "")], USER),
     ("b_raf_18sqn", "blue", "transport_helo", 12, [
-        ("1983-01", None, "Gutersloh", "CH_47D", "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47D)", "")], USER),
+        ("1983-01", None, "Gutersloh", "CH_47Fbl1", "18-я эскадрилья RAF (Chinook HC.1; в DCS - CH-47F)", "")], USER),
     ("b_raf_230sqn", "blue", "transport_helo", 12, [
         ("1980-01", None, "Gutersloh", "UH_1H", "230-я эскадрилья RAF (Puma HC.1; в DCS - UH-1H)", "Puma в DCS нет - замена")], USER),
     ("b_ltg62", "blue", "transport", 20, [
-        ("1970-01", None, "Wunstorf", "C_130", "LTG 62 (C-160 Transall; в DCS - C-130)", "Transall в DCS нет - замена")], MEMORY),
+        ("1970-01", None, "Wunstorf", "C_130J_30", "LTG 62 (C-160 Transall; в DCS - C-130J-30)", "Transall в DCS нет - замена")], MEMORY),
     ("b_ltg61", "blue", "transport", 20, [
-        ("1970-01", None, "OFF:Penzing", "C_130", "LTG 61 (C-160 Transall; в DCS - C-130)", "Transall в DCS нет - замена")], MEMORY),
+        ("1970-01", None, "OFF:Penzing", "C_130J_30", "LTG 61 (C-160 Transall; в DCS - C-130J-30)", "Transall в DCS нет - замена")], MEMORY),
     ("b_ltg63", "blue", "transport", 20, [
-        ("1970-01", None, "OFF:Hohn", "C_130", "LTG 63 (C-160 Transall; в DCS - C-130)", "Transall в DCS нет - замена")], MEMORY),
+        ("1970-01", None, "OFF:Hohn", "C_130J_30", "LTG 63 (C-160 Transall; в DCS - C-130J-30)", "Transall в DCS нет - замена")], MEMORY),
     ("b_us_lift", "blue", "transport_helo", 24, [
         ("1980-01", None, "Wiesbaden", "UH_60A", "Вертолётный батальон армии США (UH-60A)", "часть и аэродром - ОЦЕНКА")], MEMORY),
     ("b_hfr35", "blue", "transport_helo", 18, [

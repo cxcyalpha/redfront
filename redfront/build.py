@@ -1346,6 +1346,27 @@ def orbit_group(m: Mission, state: dict, g: dict, perf: dict, ac, mt, side: str,
 PLAYER_AWACS_STANDOFF_KM = 150   # ОЦЕНКА: зона E-2C игрока - за серединой фронта, как у ДРЛО доктрины НАТО
 
 
+PLAYER_VARIANTS = {   # тип полка в сценарии (только ИИ в DCS) -> управляемая версия для группы игрока; (тип, мод или None)
+    "AH_64A": ("AH_64D_BLK_II", None),
+    "UH_60A": ("UH_60L", "uh60l"),
+}
+
+
+def player_variant(state: dict, type_name: str) -> str | None:
+    """Игровое допущение: полк в сценарии на типе только для ИИ (AH-64A) - группа игрока летит на управляемой версии
+    (AH-64D); ИИ и модель - на типе сценария. Мод версии (UH-60L) - только если он включён в кампании.
+    Выключение - settings.player_variants = False."""
+    if not (state.get("settings") or {}).get("player_variants", True):
+        return None
+    v = PLAYER_VARIANTS.get(type_name)
+    if not v:
+        return None
+    pv, mod = v
+    if mod and mod not in ((state.get("settings") or {}).get("mods") or []):
+        return None
+    return pv
+
+
 def player_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> str | None:
     """Игровое допущение: у стороны игрока нет ДРЛО в миссии (Израиль 1973, ВВС ДРВ...) - E-2C над своей территорией
     до конца миссии, бессмертный и невидимый для противника (его нет в истории: не цель, не потеря). Через него игрок
@@ -1874,6 +1895,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         ac = dcstypes.flying(perf["type"])
         hum = 0 if g.get("_ai") or g.get("_enemy") else hum_of.get(g["group"], 0)
         is_player = player and hum > 0
+        pv = player_variant(state, perf["type"]) if is_player else None
+        if pv:                                   # игроку - управляемая версия типа полка (ИИ и модель - тип сценария)
+            ac = dcstypes.flying(pv)
+            g["_variant"] = pv
         helo = model.category(perf) == "heli"    # вертолёты: предельно малая высота и для ИИ
         mt = _maintask(ac, g["maintask"])
         if g["objective"]["kind"] == "alert":    # дежурная пара ПВО: на стоянке, взлёт по обнаружению (qra.lua)
@@ -2315,7 +2340,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             continue
         lg = i18n.lang(state)
         Lx = lambda ru, en: i18n.L(lg, ru, en)
-        (ai_lines if g.get("_ai") else lines).append(f"{i18n.tr(g['title'], lg)}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, "
+        (ai_lines if g.get("_ai") else lines).append(f"{i18n.tr(g['title'], lg)}: {g['size']} x {g.get('_variant') or perf['type']} ({perf['name']}), {base['name']}, "
                      + ((Lx("игрок, холодный старт", "player, cold start")
                          + (Lx(" (в базовом DCS тип только для ИИ - нужен мод)", " (AI-only type in base DCS - a mod is required)") if needs_mod else "")
                          + (Lx(f", ВЗЛЁТ через ~{t['takeoff_s'] // 60} мин (время удара - по самой медленной группе; раньше - ждать в точке сбора)",
@@ -2474,6 +2499,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             act.text = String(_guard(act.text.id))
     m.triggerrules.triggers.append(trig)
 
+    for g in pkg:                                # управляемая версия типа у группы игрока - строка в брифинге
+        if g.get("_variant"):
+            lines.append(i18n.L(i18n.lang(state),
+                                f"игровое допущение: ваша группа - {g['_variant']} вместо {state['units'][g['performer']]['type']} "
+                                "(тип полка только для ИИ); ИИ и потери - по типу полка",
+                                f"gameplay concession: your flight flies {g['_variant']} instead of "
+                                f"{state['units'][g['performer']]['type']} (AI-only type); AI and losses use the unit type"))
     pa = player_awacs(m, state, tk, sortie) if player and player_air else None   # игроку - картина ДРЛО
     comm_lines = radio_setup(m, state, tk, pkg, sortie, player_air)
     if pa:
