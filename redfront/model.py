@@ -632,3 +632,28 @@ def sync_ad_sites(st: dict) -> None:
         x = sites.get(u["id"])
         if x:
             u["pos"] = {"lat": x["lat"], "lon": x["lon"]}
+
+
+# Вариант модели: часть на более старом самолёте летает на модели DCS новее (F-16A - на F-16C блок 50: пилотируемая
+# модель); разница - в оружии и задачах. Вариант - по имени части (F-16A в имени) и типу модели.
+VARIANTS = {
+    "F-16A": {"type": "F_16C_50", "name_rx": r"F-16A",
+              # F-16A блок 10/15 (1980-е): без HARM, AMRAAM, Maverick и контейнеров целеуказания - бомбы, Rockeye/CBU,
+              # AIM-9; подавление ПВО - не его задача (ОЦЕНКА по составу вооружения F-16A/B до MLU)
+              "tasks_not": ["strike_sam_site", "sead", "sead2", "kill", "jam"],
+              "weapons_not": ["AGM-88", "AIM-120", "AGM-65", "AGM-154", "GBU-31", "GBU-38", "GBU-54", "CBU-97",
+                              "CBU-103", "CBU-105", "AN/AAQ-28", "LITENING", "AN/ASQ-213", "HTS"]},
+}
+
+
+def variant(unit: dict) -> dict:
+    """Вариант модели части ({} - нет)."""
+    import re as _re
+    for v in VARIANTS.values():
+        if unit.get("type") == v["type"] and _re.search(v["name_rx"], unit.get("name", "")):
+            return v
+    return {}
+
+
+def tasks_not(unit: dict) -> list[str]:
+    return list(unit.get("tasks_not", [])) + variant(unit).get("tasks_not", [])

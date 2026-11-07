@@ -982,6 +982,20 @@ def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
     return k, pyl
 
 
+def _weapons_not(fg, perf: dict) -> None:
+    """Вариант модели (F-16A на модели F-16C): оружие, которого у варианта не было (weapons_not - части имён
+    оружия pydcs), снимается с пилонов."""
+    import re as _re
+    from dcs.weapons_data import weapon_ids
+    pats = list(perf.get("weapons_not") or []) + model.variant(perf).get("weapons_not", [])
+    if not pats:
+        return
+    rx = _re.compile("|".join(_re.escape(p) for p in pats), _re.I)
+    for u in fg.units:
+        for num in [n for n, d in u.pylons.items() if rx.search((weapon_ids.get(d.get("CLSID")) or {}).get("name", ""))]:
+            del u.pylons[num]
+
+
 def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None = None) -> str | None:
     """Подвеска группы: первая категория, для которой есть подвеска по задачам DCS Retribution (payloads.json); затем -
     по году кампании (weapons.py: новее - замена своим по эпохе или снятие) и обязательные дополнения (weapons.fixups).
@@ -1002,6 +1016,7 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                             u.pylons[int(num)] = dict(d)
                 weapons.degrade(fg, year, ecm)
                 weapons.fixups(fg, year)
+                _weapons_not(fg, perf)
                 return cat[3:].replace("Retribution ", "")
     for cat in cats:
         pl = _payload(ac, cat, year)
@@ -1014,8 +1029,10 @@ def _apply_loadout(fg, ac, type_name: str, cats: list[str], state: dict | None =
                         u.pylons[int(num)] = dict(d)
             weapons.degrade(fg, year, ecm)
             weapons.fixups(fg, year)
+            _weapons_not(fg, perf)
             return name.replace("Retribution ", "")   # подвеска - по функции (Strike, CAS, SEAD...)
     weapons.degrade(fg, year, ecm)
+    _weapons_not(fg, perf)
     return None
 
 

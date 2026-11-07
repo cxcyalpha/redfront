@@ -445,7 +445,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
         performers = [u for u in state["units"].values()
                       if u["side"] == side and role_ok(state, u, tdef["performers"]) and logistics.available(state, u) > 0
-                      and kind in u.get("tasks_only", [kind]) and kind not in u.get("tasks_not", [])
+                      and kind in u.get("tasks_only", [kind]) and kind not in model.tasks_not(u)
                       and (not (tdef.get("strike") or {}).get("types") or u.get("type") in tdef["strike"]["types"])
                       and not u.get("mod_off")]   # специализированная часть (спасатели HH-53) - только свои задачи
         if tdef.get("method") in ("air_assault", "air_evac", "csar"):   # людей возит тип ЛА, а не роль: Ми-24 - да, Апач - нет
@@ -1218,6 +1218,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         from . import pilots
         cands = [u for u in units.values()
                  if u["side"] == perf["side"] and role_ok(state, u, g["performers"]) and avail.get(u["id"], 0) >= need
+                 and g["id"] not in model.tasks_not(u)   # вариант модели (F-16A на F-16C): без подавления ПВО
                  and not u.get("mod_off")
                  and nation_ok(state, u, g) and (not g.get("types") or u.get("type") in g["types"])          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
                  and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]

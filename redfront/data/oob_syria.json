@@ -1722,7 +1722,7 @@
    "side": "blue",
    "role": "fighter_bomber",
    "base": "ramat_david",
-   "type": "F_16A",
+   "type": "F_16C_50",
    "count": 36,
    "strike_radius_km": 500,
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; число и радиус - ОЦЕНКА",
