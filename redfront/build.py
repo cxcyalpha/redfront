@@ -1239,12 +1239,18 @@ def intel_exact(state: dict, sid: str) -> bool:
     return True
 
 
-def _sead_zone(m, state: dict, sid: str):
-    """Нет свежих данных: поиск и поражение средств ПВО в районе, где ЗРК видели (EngageTargetsInZone, Air Defence)."""
+SEAD_AREA_PRIORITY = 50   # приоритет DCS (меньше - важнее): запланированные ЗРК - 0, 1, 2... по плану, район - после них
+
+
+def _sead_zone(m, state: dict, sid: str, prio: int = 0):
+    """Нет свежих данных: поиск и поражение средств ПВО в районе, где ЗРК видели (EngageTargetsInZone, Air Defence).
+    prio - место ЗРК в плане (0 - главная цель)."""
     u = state["units"][sid]
     c = _pt(m, intel.known_pos(state, u) or model.unit_pos(state, u))
     r = int((intel.unc_km(state, sid) + SEAD_SEARCH_KM) * 1000)
-    return task.EngageTargetsInZone(Vector2(c.x, c.y), r, [task.Targets.All.GroundUnits.AirDefence])
+    t = task.EngageTargetsInZone(Vector2(c.x, c.y), r, [task.Targets.All.GroundUnits.AirDefence])
+    t.params["priority"] = prio
+    return t
 
 
 def _sead_area(m, state: dict, g: dict, obj: dict):
@@ -1254,17 +1260,18 @@ def _sead_area(m, state: dict, g: dict, obj: dict):
     c0 = pts[0] if pts else g["route"][0]
     c = _pt(m, {"lat": sum(p["lat"] for p in pts) / len(pts), "lon": sum(p["lon"] for p in pts) / len(pts)} if pts else c0)
     t = task.EngageTargetsInZone(Vector2(c.x, c.y), int(SEAD_AREA_KM * 1000), [task.Targets.All.GroundUnits.AirDefence])
-    t.params["priority"] = 1
+    t.params["priority"] = SEAD_AREA_PRIORITY    # прочие РЛС ПВО - только после запланированных ЗРК
     return t
 
 
-def _engage(group_id: int, ai: dict, altitude: int | None = None):
+def _engage(group_id: int, ai: dict, altitude: int | None = None, prio: int = 1):
     """EngageGroup - задача 'по пути' (en-route): действует всё время, пока группа выполняет другие задачи точки
     (здесь - круг ожидания), в отличие от AttackGroup, которая заканчивается, если цель не обнаружена сразу.
     pydcs задаёт только groupId/weaponType; расход, атаку группой и высоту дописываем полями DCS (те же, что у
     AttackGroup; в DCS ещё не проверено)."""
     a = ai.get("attack") or {}
     t = task.EngageGroup(group_id)
+    t.params["priority"] = prio                  # место цели в плане: 0 - главная (меньше - важнее)
     t.params["weaponType"] = getattr(task.WeaponType, a.get("weapon", "Auto")).value
     t.params["expend"] = getattr(task.Expend, a.get("expend", "Auto")).value
     t.params["groupAttack"] = bool(a.get("group_attack", False))
@@ -2004,6 +2011,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     cap_specs: list[dict] = []                   # пары прикрытия ИИ (cap.lua)
     timing_specs: list[dict] = []                # выход групп ИИ на рубеж: факт против плана (timing.lua)
     jam_groups: list[str] = []                   # постановщики помех вне зоны ПВО (samctl.lua)
+    sead_prio: list[dict] = []                   # группы подавления ПВО: запланированные ЗРК по порядку (seadprio.lua)
     rescuers: list[dict] = []                    # вертолёты ИИ за экипажами (csar.lua пересчитает посадку)
     ctld = {"pilots": [], "actions": {}, "limits": {}, "cargo": {}, "logistic": [], "pickup": [], "groups": [],
             "crates": [], "lifts": [], "jtacs": [], "extract": []}   # CTLD (ctld_cfg.lua): борта игрока, зоны, ящики, авианаводчики
@@ -2381,10 +2389,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 if total > entry_km + 5:
                     wp(model.lerp(sam_pos, base, entry_km / total), transit, "Снижение", keep_alt=True)
                 w = wp(g["route"][0], low, "Рубеж атаки")
-                for sid in obj["units"]:
+                for k, sid in enumerate(obj["units"]):   # по плану: главная цель - первой
                     w.tasks.append(_attack(vg_by_unit[sid].id, ai) if sead_known(state, side_g, sid)
-                                   else _sead_zone(m, state, sid))
+                                   else _sead_zone(m, state, sid, k))
                 w.tasks.append(_sead_area(m, state, g, obj))
+                sead_prio.append({"group": fg.name, "sams": [vg_by_unit[sid].name for sid in obj["units"] if sid in vg_by_unit]})
             elif not sup.get("standoff_km"):     # доктрина без рубежа - атака с прохода по каждому ЗРК (как в 0.2)
                 for sid, p in zip(obj["units"], g["route"]):
                     w = wp(p, low, "Рубеж пуска")
@@ -2399,10 +2408,12 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 if total > entry_km + 5:
                     wp(model.lerp(sam_pos, base, entry_km / total), transit, "Снижение", keep_alt=True)
                 w = wp(g["route"][0], low, "Рубеж пуска")             # подход к рубежу на предельно малой высоте
-                for sid in obj["units"]:                              # атака - по всем ЗРК коридора, пока идёт ожидание
+                for k, sid in enumerate(obj["units"]):                # атака - по всем ЗРК коридора, пока идёт ожидание;
+                    # приоритет - по плану (главная цель - 0): пока главный ЗРК жив, звено бьёт его, потом - следующие;
                     # свежие данные разведки - по группе ЗРК (заранее спланированный пуск), иначе - поиск в районе
-                    w.tasks.append(_engage(vg_by_unit[sid].id, ai, g.get("launch_alt_m")) if sead_known(state, side_g, sid)
-                                   else _sead_zone(m, state, sid))
+                    w.tasks.append(_engage(vg_by_unit[sid].id, ai, g.get("launch_alt_m"), k) if sead_known(state, side_g, sid)
+                                   else _sead_zone(m, state, sid, k))
+                sead_prio.append({"group": fg.name, "sams": [vg_by_unit[sid].name for sid in obj["units"] if sid in vg_by_unit]})
                 w.tasks.append(_sead_area(m, state, g, obj))   # свои ЗРК подавлены или сбили соседа - работать по соседним РЛС
                 # ожидание: на высоте пуска, если рубеж вне зоны поражения любого из ЗРК, иначе на малой (ОЦЕНКА)
                 inside = any(model.dist_km(g["route"][0], model.unit_pos(state, state["units"][sid]))
@@ -2637,6 +2648,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     sc_specs = samctl_spec(state, vg_by_unit)    # огонь ПВО: реакция расчёта, дальность пуска, заграждение зениток,
     if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска, помехи (постановщики и самолётные)
         trig.add_action(DoScript(String(samctl_script(state, sc_specs, jam_groups))))
+    if sead_prio:                                # самооборона групп подавления: стреляющий по звену ЗРК - вне очереди
+        q_ = lambda x: '"' + str(x).replace('"', "'") + '"'
+        items = ", ".join("{ group = " + q_(s_["group"]) + ", sams = { " + ", ".join(q_(n) for n in s_["sams"]) + " } }"
+                          for s_ in sead_prio)
+        trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
+                                        .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(int(state["sortie"])))
+                                        .replace("@SPECS@", items))))
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p, strict_abort(state)))))

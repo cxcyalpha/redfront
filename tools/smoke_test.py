@@ -999,7 +999,7 @@ def column_road_section(tmp: Path) -> None:
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
           and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
-                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront samctl", "-- redfront timing", "-- redfront rv",
+                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront samctl", "-- redfront seadprio", "-- redfront timing", "-- redfront rv",
                         "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
@@ -3989,6 +3989,31 @@ def theatres_section(tmp: Path) -> None:
     check(j_clear == 2 and j_far == 4 and j_slow == 4 and j_near == 2 and j_burn == 2,
           "РЭБ (samctl.lua): постановщик помех сокращает рубеж пуска и удлиняет реакцию ЗРК, но в пределах: рубеж не "
           "ближе 45% зоны, реакция не дольше 2x, ближе 35% зоны - прожиг")
+    # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
+    sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
+    sp_src = sp_src.replace("@SPECS@", '{ group = "F1", sams = { "SAM_A" } }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")
+    Lp = lupa.LuaRuntime()
+    Lp.execute('''
+      PUSH = {}
+      world = { event = { S_EVENT_SHOT = 1 }, addEventHandler = function(h) HND = h end }
+      timer = { getTime = function() return 10 end }
+      Group = { Category = { GROUND = 2 } }
+      local function grp(name, cat) return { getName = function() return name end, getCategory = function() return cat end,
+        isExist = function() return true end, getID = function() return 7 end,
+        getController = function() return { pushTask = function(_, t) PUSH[#PUSH + 1] = name end } end } end
+      G = { F1 = grp("F1", 0), SAM_A = grp("SAM_A", 2), SAM_B = grp("SAM_B", 2) }
+      Group.getByName = function(n) return G[n] end
+      function UNIT(gn) return { getGroup = function() return G[gn] end } end
+    ''')
+    Lp.execute(sp_src)
+    Lp.execute('''
+      local function shot(f, t) HND:onEvent({ id = 1, initiator = UNIT(f), weapon = { getTarget = function() return UNIT(t) end } }) end
+      shot("SAM_A", "F1"); shot("SAM_B", "F1"); shot("SAM_B", "F1")
+    ''')
+    n_push = len(list(Lp.eval("PUSH").values()))
+    check(n_push == 1 and build.SEAD_AREA_PRIORITY > 0,
+          f"приоритет целей подавления ПВО: запланированные ЗРК - 0, 1, 2 по плану, прочие РЛС - {build.SEAD_AREA_PRIORITY}; "
+          f"стреляющий по звену незапланированный ЗРК - ответ вне очереди один раз ({n_push})")
     from redfront import gui as _gui
     _orig = _gui.liveries
     _gui.liveries = lambda st_, u_: [{"id": "IAF 69th Squadron", "name": "IAF 69th Squadron"},
