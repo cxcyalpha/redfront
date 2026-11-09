@@ -115,6 +115,7 @@ def corridor_threats(state: dict, legs: list[tuple[dict, dict]], against: str, l
 RADAR_SAM_TYPES = {"Osa_9A33_ln", "Roland_ADS", "X_2S6_Tunguska", "Tor 9A331", "Kub_2P25_ln", "rapier_fsa_blindfire_radar"}
 DENSE_SAMS, DENSE_KM, WAVE_GAP_MIN = 3, 25, 3   # ОЦЕНКИ: плотная ПВО у цели - второй эшелон удара через 3 мин
 SEAD_MAX_FLIGHTS = 3    # ОЦЕНКА: групп подавления в пакете - не больше (по одной на прикрывающую батарею)
+KILL_MAX_SAMS = 3       # ОЦЕНКА: ЗРК у группы добивания - не больше (ближние к цели удара): звено бьёт их по очереди
 GATE_BELT = 2           # ОЦЕНКА: столько ЗРК средней/большой дальности на пути к цели в глубине - пояс ПВО: цель ждёт
 
 
@@ -1185,6 +1186,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                           key=lambda u: model.dist_km(tpos, model.unit_pos(state, u)))
             if not objs:
                 continue                         # в коридоре только пушки и ПЗРК - подавлять ПРР нечего
+            if g.get("mode") == "kill":
+                objs = objs[:KILL_MAX_SAMS]      # добивание - ближние к цели ЗРК, не весь район (17 ЗРК - неразбериха)
             objective = {"kind": "sam", "units": [u["id"] for u in objs]}
             route_of = lambda base, g=g, objs=objs: [hold_point(state, objs[0], base, g)]
             if g.get("mode") is None and int(g.get("flights", 1)) == 1:
