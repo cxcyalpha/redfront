@@ -3903,6 +3903,17 @@ def theatres_section(tmp: Path) -> None:
     dic = mze.read("l10n/DEFAULT/dictionary").decode("utf-8") + mze.read("mission").decode("utf-8")
     check("redfront debrief hook" in dic and "lfs.writedir" in dic and "pcall(function()" in dic,
           "английская миссия: тексты скриптов на месте (скрипты в pcall) - не пустые строки")
+    import re  # noqa: E402
+    # исполняемая строка триггеров (trig.actions: a_do_script) - та же, что в редакторе: переведена и в pcall
+    mis_e = mze.read("mission").decode("utf-8")
+    trig_e = mis_e[mis_e.find('["trig"]'):mis_e.find('["trigrules"]')]
+    trig_u = trig_e
+    for _ in range(3):
+        trig_u = trig_u.replace('\\\\', '\\').replace('\\"', '"').replace('\\n', '\n')
+    trig_u = re.sub(r"--[^\n]*", "", trig_u)
+    ru_lit = re.findall(r'"([^"\n]*[А-Яа-яЁё][^"\n]*)"', trig_u)
+    check(not ru_lit and trig_e.count("redfront script error") >= 2,
+          f"английская миссия: в исполняемых скриптах (trig) русских строк нет ({ru_lit[:3]}), скрипты - в pcall")
     stg = model.new_campaign("ia", sector="sector_golan73.json", oob="oob_golan73.json", seed=1, player_side="blue")
     planner.plan(stg)
     build.build(stg, tmp / "ia.miz", task_no=1)

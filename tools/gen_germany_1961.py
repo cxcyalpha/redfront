@@ -81,7 +81,7 @@ def main() -> None:
             base_name = u["name"].split(" (")[0].replace("A-10A", "F-100D")
             base_en = i18n_en.en(u["name"]).split(" (")[0].replace("A-10A", "F-100D")
             u = dict(u, type=typ, name=f"{base_name} ({label})", name_en=f"{base_en} ({LABEL_EN.get(label, label)})",
-                     source=(u.get("source") or "") + "; 1961: тип - эпохи, часть и база - как в 1985 (ОЦЕНКА)")
+                     source=(u.get("source") or "") + "; в 1961 году тип эпохи, часть и база как в 1985 (ОЦЕНКА)")
             u.pop("mod", None)
         elif u.get("composition"):
             comp = []
@@ -95,7 +95,7 @@ def main() -> None:
             u = dict(u, composition=comp)
         if u.get("role") == "ssm":
             en = i18n_en.en(u["name"])
-            u = dict(u, name=u["name"].replace("ракетная бригада", "ракетная бригада Р-11"),
+            u = dict(u, name=u["name"].replace("ракетная бригада", "ракетная бригада Р-11").replace("Ракетная бригада", "Ракетная бригада Р-11"),
                      name_en=en.replace("Missile Brigade", "R-11 Missile Brigade").replace("missile brigade", "R-11 missile brigade"))
         units.append(u)
     oob["units"] = units

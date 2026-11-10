@@ -213,7 +213,9 @@ def view(st: dict, history: bool = True) -> dict:
     man = st.get("manifest") or {}
     from . import weather as _wx                # погода суток: сводка и вылеты, отменённые по погоде
     wx_lines = _wx.summary(st, st.get("start_hour", 7), i18n.lang(st)).split("\n")
-    wx_cancel = [f"{i18n.L(i18n.lang(st), 'отменён по погоде', 'cancelled by weather')}: {c['title']} ({c['why']})"
+    from . import i18n_en as _en
+    _w = (lambda x: _en.en(x)) if i18n.lang(st) == "en" else (lambda x: x)   # части строки - по отдельности
+    wx_cancel = [f"{i18n.L(i18n.lang(st), 'отменён по погоде', 'cancelled by weather')}: {_w(c['title'])} ({_w(c['why'])})"
                  for c in (st.get("ato") or {}).get("weather_cancelled", [])
                  if c["title"].startswith(st["player_side"] + ":") or (st.get("settings") or {}).get("show_enemy_ato")]
     ent = {e["id"]: e for e in (st.get("ato") or {}).get("entries", [])}

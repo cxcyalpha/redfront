@@ -106,6 +106,14 @@ def _country(m: Mission, state: dict, side: str):
     return m.coalition[side].country(name)
 
 
+def _set_script(act, src: str) -> None:
+    """Текст DoScript: и поле text (редактор, trigrules), и params - из них pydcs собирает строку, которую исполняет
+    DCS (trig.actions: a_do_script(...)); замена только text оставляла в игре прежний скрипт."""
+    s = String(src)
+    act.text = s
+    act.params[:] = [s]
+
+
 def _guard(src: str) -> str:
     """Скрипт миссии в pcall: ошибка - в DCS.log (env.error) и сообщением на экран, без остановки остальных."""
     head, _, rest = src.partition("\n")
@@ -658,6 +666,9 @@ LUA_EN = {   # сообщения скриптов миссии по-англи�
     ": потерян ведомый - уходим домой": ": wingman lost - returning to base",
     ": потеряна половина группы - уходим домой": ": half the flight lost - returning to base",
     "redfront: пакет собран - на маршрут": "redfront: package joined - pushing",
+    " - взлёт по налёту ": " - scramble against a raid of ", " км)": " km)",
+    "Вы не на площадке (до неё %.1f км): высадка не засчитана. Заберите группу обратно (Unload / Extract Troops) и высадите на площадке.":
+        "You are not at the landing zone (%.1f km away): the landing does not count. Pick the group up again (Unload / Extract Troops) and land them at the zone.",
     "группы подавления ПВО сбиты - удар по сроку без подавления": "SEAD flights shot down - strike goes on time without suppression",
 }
 
@@ -2346,7 +2357,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                         ctld["pilots"].append(u.name)
                     ctld["actions"][u0.unit_type.id] = {"crates": False, "troops": True}
                     ctld["limits"][u0.unit_type.id] = int(model.aircraft_info(perf["type"]).get("troops") or 10)
-                    zone = f"Погрузка {sortie}" + ("" if g["group"] == fly else f" {g['group']}")
+                    zone = i18n.L(i18n.lang(state), "Погрузка", "Pickup") + f" {sortie}" + ("" if g["group"] == fly else f" {g['group']}")
                     m.triggers.add_triggerzone(u0.position, radius=CTLD_PICKUP_M, hidden=False, name=zone)
                     ctld["pickup"].append({"zone": zone, "side": spec["side"], "limit": 1})
                     ctld_lines.append(f"Десант: погрузка у стоянки (зона {CTLD_PICKUP_M} м) - F10 -> CTLD -> Troop Transport -> "
@@ -2720,7 +2731,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     trig.add_action(DoScript(String(lua_hook(state["campaign_id"], state["sortie"], track))))
     for act in trig.actions:                     # каждый скрипт - в pcall: ошибка одного - строка в DCS.log и на экране,
         if isinstance(act, DoScript):            # остальные работают
-            act.text = String(_guard(act.text.id))
+            _set_script(act, _guard(act.text.id))
     m.triggerrules.triggers.append(trig)
 
     for g in pkg:                                # дозаправка или запасной аэродром - строка в брифинге
@@ -2766,7 +2777,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         for tr_ in m.triggerrules.triggers:
             for act in tr_.actions:
                 if isinstance(act, DoScript):
-                    act.text = String(lua_en(act.text.id))
+                    _set_script(act, lua_en(act.text.id))
     tpl = dict(times.get(fly) or {})
     tpl["takeoff_s"] = player_takeoff_s(state, tdef, pkg, fly, join=False)   # в планшете - взлёт; сбор - отдельно
     kb_pages = _kneeboard(m, state, tk, lines, order_lines, comm_lines, wx_text, lg, tpl)
