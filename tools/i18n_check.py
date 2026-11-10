@@ -34,7 +34,7 @@ def miz_text(path: Path) -> set[str]:
     return out
 
 
-def run(theatres: list[str], days: int) -> collections.Counter:
+def run(theatres: list[str], days: int, preset: str | None = None) -> collections.Counter:
     seen: collections.Counter = collections.Counter()
     tmp = Path(tempfile.mkdtemp(prefix="redfront_i18n_"))
     (tmp / "Saved Games" / "DCS" / "Missions").mkdir(parents=True)   # миссии - сюда (menu.missions_dir)
@@ -57,7 +57,7 @@ def run(theatres: list[str], days: int) -> collections.Counter:
         for side in ("red", "blue"):
             f = f"{tid}_{side}"
             print(f"  {f}", flush=True)
-            do("new", {"file": f, "theatre": tid, "side": side, "seed": 7, "overwrite": True})
+            do("new", {"file": f, "theatre": tid, "side": side, "seed": 7, "overwrite": True, "preset": preset})
             do("setlang", {"file": f, "lang": "en"})
             for day in range(days):
                 r = do("plan", {"file": f})
@@ -87,8 +87,9 @@ def main() -> int:
     ap.add_argument("theatres", nargs="*")
     ap.add_argument("--out", default="i18n_missing.txt")
     ap.add_argument("--days", type=int, default=2)
+    ap.add_argument("--preset", default=None, help="пресет состава сил (oob_germany_1961.json)")
     a = ap.parse_args()
-    seen = run(a.theatres, a.days)
+    seen = run(a.theatres, a.days, a.preset)
     Path(a.out).write_text("\n".join(f"{n}\t{s}" for s, n in seen.most_common()), encoding="utf-8")
     print(f"непереведённых строк: {len(seen)} -> {a.out}")
     return 0 if not seen else 1

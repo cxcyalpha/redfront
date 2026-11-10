@@ -74,6 +74,8 @@ NAMES = {
     "Ракетная бригада 3-й ударной армии ГСВГ (Альтенграбов)": "GSFG 3rd Shock Army missile brigade (Altengrabow)",
     "Дивизион ОТР Точка-У 58-й армии (Джава)": "58th Army Tochka-U battalion (Java)",
     "Дивизион ОТРК Искандер (Алагир)": "Iskander battalion (Alagir)",
+    "1961: Берлинский кризис (гипотетическая война)": "1961: Berlin Crisis (hypothetical war)",
+    "Ракетная бригада 3-й ударной армии ГСВГ (Р-11, Скад-А) (Альтенграбов)": "GSFG 3rd Shock Army missile brigade (R-11 Scud-A) (Altengrabow)",
     "1987: наступление НАТО (гипотетическое, упреждающий удар)": "1987: NATO offensive (hypothetical pre-emptive attack)",
     "ракетные войска (оперативно-тактические ракеты)": "missile troops (tactical ballistic missiles)",
     # --- Кавказ 2008
@@ -671,7 +673,10 @@ MSGS += [
     # погода
     ("антициклон", "high pressure"), ("тыл циклона", "post-frontal"), ("прохождение фронта", "frontal passage"), ("ясно", "clear"),
     ("ветер {d}° {v} м/с (на {h} м - {x})", "wind {d}° {v} m/s ({x} at {h} m)"), ("видимость {k} км", "visibility {k} km"),
-    ("QNH {p} гПа", "QNH {p} hPa"), ("нижняя граница {h} м", "cloud base {h} m"), ("облачность {c}", "cloud {c}"),
+    ("QNH {p} гПа", "QNH {p} hPa"), ("нижняя граница облаков {h} м", "cloud base {h} m"), ("нижняя граница {h} м", "cloud base {h} m"),
+    ("Погода: отменён вылет «{t}» - нижняя граница облаков {h} м.", "Weather: sortie «{t|tr}» cancelled - cloud base {h} m."),
+    ("Погода: отменён вылет «{t}» - {r}.", "Weather: sortie «{t|tr}» cancelled - {r|tr}."),
+    ("Груз: {n} x {t} по ~{k} т = ~{d} т на склад за рейс.", "Cargo: {n} x {t} at ~{k} t = ~{d} t to the depot per trip."), ("облачность {c}", "cloud {c}"),
     # подвеска, план
     ("{a} -> снято", "{a} -> removed"), ("в плане дня задач {n}", "{n} tasks in the daily plan"), ("номер {n} вне списка (сначала plan)", "number {n} is out of range (plan first)"),
     ("перебазировать можно только свою авиачасть", "only own air units can be rebased"), ("план противника не правится", "the enemy plan cannot be edited"),
@@ -800,6 +805,8 @@ def main() -> None:
     cyr = re.compile("[А-Яа-яЁё]")
     extra = {}
     def walk(x, k=None):
+        if isinstance(x, dict) and isinstance(x.get("name"), str) and isinstance(x.get("name_en"), str):
+            extra[x["name"]] = x["name_en"]      # перевод имени задан в данных (пресет 1961 - по имени части 80-х)
         if isinstance(x, dict):
             for kk, v in x.items():
                 walk(v, kk)

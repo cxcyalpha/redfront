@@ -1175,6 +1175,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     notes = []
     chosen_by: dict[str, dict] = {}
     for g in tdef.get("support", []):
+        if g.get("from_year") and int(str(state.get("date", "2000"))[:4]) < g["from_year"]:
+            continue                             # группы ещё нет на год кампании (подавление ПВО ракетами - с ПРР)
         if g["when"] == "threats" and not threats:
             continue
         if g["when"] == "moving_target" and tgt.get("state") != "march":
