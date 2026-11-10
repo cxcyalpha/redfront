@@ -1221,6 +1221,48 @@
    "estimate": true
   },
   {
+   "id": "r_tochka_58a",
+   "name": "Дивизион ОТР Точка-У 58-й армии (Джава)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "tochka",
+   "pos": {
+    "lat": 42.4,
+    "lon": 43.93
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "HRW 'Up in Flames' (2009): применение Россией ракет Точка-У по целям в Грузии; место и число - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "r_iskander_58a",
+   "name": "Дивизион ОТРК Искандер (Алагир)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "iskander",
+   "pos": {
+    "lat": 43.04,
+    "lon": 44.21
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "применение Искандера в 2008 - спорно (сообщения о ударе по Гори, Россия отрицала); оставлен как возможность, ОЦЕНКА",
+   "estimate": true
+  },
+  {
    "id": "r368shap",
    "name": "368-й ошап (Су-25)",
    "side": "red",
@@ -1425,6 +1467,12 @@
    "estimate": true
   }
  ],
+ "strategic_stock": {
+  "red": {
+   "tochka": 16,
+   "iskander": 6
+  }
+ },
  "variants": [
   {
    "name": "base",

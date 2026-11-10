@@ -2648,6 +2648,18 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     sc_specs = samctl_spec(state, vg_by_unit)    # огонь ПВО: реакция расчёта, дальность пуска, заграждение зениток,
     if sc_specs:                                 # переезд после пусков, ПЗРК - 2 пуска, помехи (постановщики и самолётные)
         trig.add_action(DoScript(String(samctl_script(state, sc_specs, jam_groups))))
+    from . import strategic
+    ssm = [l for l in strategic.mission_launches(state, int(m0), ato.MISSION_LEN_S) if l["unit"] in vg_by_unit]
+    if ssm:                                      # пуски ОТР суток во время миссии - по-настоящему (ssm.lua)
+        q_ = lambda x: '"' + str(x).replace('"', "'") + '"'
+        items = []
+        for l in ssm:
+            tp = _pt(m, model.unit_pos(state, state["units"][l["target"]]))
+            items.append(f'{{ group = {q_(vg_by_unit[l["unit"]].name)}, x = {tp.x:.0f}, y = {tp.y:.0f}, at = {l["at_s"]}, '
+                         f'target = {q_(state["units"][l["target"]]["name"])} }}')
+        trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "ssm.lua").read_text(encoding="utf-8")
+                                        .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(int(state["sortie"])))
+                                        .replace("@SPECS@", ", ".join(items)))))
     if sead_prio:                                # самооборона групп подавления: стреляющий по звену ЗРК - вне очереди
         q_ = lambda x: '"' + str(x).replace('"', "'") + '"'
         items = ", ".join("{ group = " + q_(s_["group"]) + ", sams = { " + ", ".join(q_(n) for n in s_["sams"]) + " } }"

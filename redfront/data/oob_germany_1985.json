@@ -5117,6 +5117,69 @@
    "estimate": true
   },
   {
+   "id": "nva_5rbr",
+   "name": "5-я ракетная бригада ННА (Демен)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "scud",
+   "pos": {
+    "lat": 53.63,
+    "lon": 11.75
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "5. Raketenbrigade NVA, Demen - по памяти, проверить",
+   "estimate": true
+  },
+  {
+   "id": "nva_3rbr",
+   "name": "3-я ракетная бригада ННА (Таутенхайн)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "scud",
+   "pos": {
+    "lat": 50.93,
+    "lon": 12.08
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "3. Raketenbrigade NVA, Tautenhain - по памяти, проверить",
+   "estimate": true
+  },
+  {
+   "id": "gsvg_rbr",
+   "name": "Ракетная бригада 3-й ударной армии ГСВГ (Альтенграбов)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "scud",
+   "pos": {
+    "lat": 52.16,
+    "lon": 12.17
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ракетные бригады армий ГСВГ (Р-17) - номер и место ОЦЕНКА",
+   "estimate": true
+  },
+  {
    "id": "r33iap",
    "name": "33-й иап (МиГ-23М/МЛ; в DCS - МиГ-23МЛД)",
    "side": "red",
@@ -6175,6 +6238,16 @@
  "replacements": {
   "air_per_day": 2,
   "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "strategic_stock": {
+  "red": {
+   "scud": 36
+  }
+ },
+ "strategic_per_day": {
+  "red": {
+   "scud": 6
+  }
  },
  "ad_templates": {
   "red": {

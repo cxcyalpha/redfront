@@ -29,7 +29,6 @@ CTYPES = {".js": "application/javascript", ".css": "text/css", ".png": "image/pn
 SECTOR = "sector_hamburg.json"     # кампании без поля sector (созданы до театра всей карты)
 THEATRES = [   # (id, сектор, состав сил, название)
     ("germany", "sector_germany.json", "oob_germany.json", "Вся карта: фронт от Балтики до Хофа (1989)"),
-    ("hamburg", "sector_hamburg.json", "oob_hamburg.json", "Сектор Гамбург - Люнебург (полигон)"),
     ("caucasus", "sector_caucasus.json", "oob_caucasus.json", "Кавказ: август 2008 (Южная Осетия и Абхазия)"),
     ("syria", "sector_syria.json", "oob_syria.json", "Сирия - Ливан: июнь 1982 (долина Бекаа)"),
     ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы США, гипотетическая)"),

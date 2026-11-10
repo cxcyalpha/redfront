@@ -66,6 +66,16 @@ PLACES = {
 }
 
 NAMES = {
+    "Охота за пусковыми ОТР": "Scud hunt (TBM launchers)", "R-17 (Скад-Б)": "R-17 (Scud-B)",
+    "Р-17 (Скад-Б)": "R-17 (Scud-B)", "9К79-1 Точка-У": "9K79-1 Tochka-U (SS-21)", "9К720 Искандер-М": "9K720 Iskander-M (SS-26)",
+    "BGM-109 Томагавк": "BGM-109 Tomahawk",
+    "5-я ракетная бригада ННА (Демен)": "NVA 5th Missile Brigade (Demen)",
+    "3-я ракетная бригада ННА (Таутенхайн)": "NVA 3rd Missile Brigade (Tautenhain)",
+    "Ракетная бригада 3-й ударной армии ГСВГ (Альтенграбов)": "GSFG 3rd Shock Army missile brigade (Altengrabow)",
+    "Дивизион ОТР Точка-У 58-й армии (Джава)": "58th Army Tochka-U battalion (Java)",
+    "Дивизион ОТРК Искандер (Алагир)": "Iskander battalion (Alagir)",
+    "1987: наступление НАТО (гипотетическое, упреждающий удар)": "1987: NATO offensive (hypothetical pre-emptive attack)",
+    "ракетные войска (оперативно-тактические ракеты)": "missile troops (tactical ballistic missiles)",
     # --- Кавказ 2008
     "135-й мсп 19-й мсд (58-я армия)": "135th Motor Rifle Regiment, 19th MRD (58th Army)",
     "693-й мсп 19-й мсд (58-я армия)": "693rd Motor Rifle Regiment, 19th MRD (58th Army)",
@@ -756,6 +766,9 @@ MSGS += [
     ("пара МиГ-21", "MiG-21 pair"), ("пара прикрытия МиГ-21", "MiG-21 escort pair"), ("РЛС {t} восстановлена.", "radar {t} restored."), ("РЛС исправны", "radars operational"),
     ("плановая смена позиции ({k} км).", "routine relocation ({k} km)."), ("позиция раскрыта, смена позиции ({k} км).", "position revealed, relocating ({k} km)."), ("ПЗРК", "MANPADS"),
     ("{a} (ОЦЕНКА)", "{a|tr} (ESTIMATE)"),
+    ("Ракетный удар (сторона {s}) - {r} по объекту {t}, пусков {n}, перехвачено {i}, попаданий {h}.",
+     "Missile strike ({s} side) - {r|tr} on {t|tr}, launched {n}, intercepted {i}, hits {h}."),
+    ("План пусков ракет на сутки - {n} ({s}).", "Missile launches planned for the day - {n} ({s})."),
 ]
 # от длинных к коротким: частный шаблон раньше общего
 MSGS.sort(key=lambda m: -len(re.sub(r"\{\w+\}", "", m[0])))

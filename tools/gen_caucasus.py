@@ -191,6 +191,14 @@ def dist_km(a, b):
     return math.hypot((a[0] - b[0]) * 111.32, (a[1] - b[1]) * 111.32 * k)
 
 
+SSM = [   # (id, имя, сторона, ракета, пусковых, широта, долгота, источник)
+    ("r_tochka_58a", "Дивизион ОТР Точка-У 58-й армии (Джава)", "red", "tochka", 4, 42.40, 43.93,
+     "HRW 'Up in Flames' (2009): применение Россией ракет Точка-У по целям в Грузии; место и число - ОЦЕНКА"),
+    ("r_iskander_58a", "Дивизион ОТРК Искандер (Алагир)", "red", "iskander", 4, 43.04, 44.21,
+     "применение Искандера в 2008 - спорно (сообщения о ударе по Гори, Россия отрицала); оставлен как возможность, ОЦЕНКА"),
+]
+
+
 def main() -> None:
     from dcs.terrain import Caucasus
     terrain = Caucasus()
@@ -265,6 +273,10 @@ def main() -> None:
                       "pos": {"lat": la, "lon": lo},
                       "composition": [{"type": t, "count": c, "role": r} for t, r, c in cmp_],
                       "source": SRC + "; место - ОЦЕНКА", "estimate": True})
+    for sid, name, side, missile, n, la, lo, src in SSM:   # пусковые ОТР (strategic.py): модель DCS - по ракете
+        units.append({"id": sid, "name": name, "side": side, "role": "ssm", "state": "deployed", "missile": missile,
+                      "pos": {"lat": la, "lon": lo}, "composition": [{"type": "Scud_B", "count": n, "role": "launcher"}],
+                      "source": src, "estimate": True})
     for uid, name, side, role, typ, base, count, radius, note in AIR:
         bid = base.lower().replace(" ", "_").replace("-", "_")
         assert bid in airbases, (uid, base)
@@ -279,6 +291,8 @@ def main() -> None:
         "date": "2008-08-08",
         "countries": {"red": "Russia", "blue": "Georgia"},
         "units": units,
+        # ракеты ОТР: ограниченный запас - политически ограниченная война (ОЦЕНКА); у Грузии ОТР в 2008 не было
+        "strategic_stock": {"red": {"tochka": 16, "iskander": 6}},
         "variants": [{"name": "base", "title": "Август 2008: Южная Осетия и Абхазия",
                       "task_rules": {"blue": {"strike_airfield": {"off": True, "why": "у ВВС Грузии нет средств для ударов по аэродромам России"}}}}],
         "replacements": {"air_per_day": 1, "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."},
