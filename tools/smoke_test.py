@@ -4016,6 +4016,21 @@ def theatres_section(tmp: Path) -> None:
           and sum(stc["strategic_stock"]["red"].values()) == stock0 - n_plan,
           f"ОТР: план суток {n_plan} пусков (предел - доля запаса), пуски в миссии (ssm.lua), исход - повреждение "
           f"{dmg:.2f}, расход ракет; {res[0] if res else ''}")
+    # налёт бомбардировщиков с крылатыми ракетами: план (носитель - Ту-95МС, Х-555), группа в миссии с ракетами, исход
+    stb = model.new_campaign("alcm", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1, player_side="blue")
+    stb["units"]["r52tbap"]["type"] = "Tu_95MS"
+    stb["strategic_stock"]["red"] = {"kh555": 12}
+    stb.pop("ssm_plan", None)
+    planner.plan(stb)
+    raids = [p_ for p_ in stb["ssm_plan"] if p_.get("air")]
+    for p_ in raids:
+        p_["t_s"] = int(8.75 * 3600)
+    build.build(stb, tmp / "alcm.miz", task_no=1)
+    mzb = zipfile.ZipFile(tmp / "alcm.miz").read("mission").decode("utf-8")
+    resb = [x for x in strategic.resolve(stb) if "Х-555" in x]
+    check(raids and "r52tbap raid" in mzb and "{Kh-555}" in mzb and "Bombing" in mzb and resb
+          and stb["strategic_stock"]["red"]["kh555"] == 12 - len(raids),
+          f"налёт Ту-95МС: {len(raids)} ракет Х-555 по плану, группа в миссии с ракетами и пуском по цели, исход - {resb[:1]}")
     # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
     sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
     sp_src = sp_src.replace("@SPECS@", '{ group = "F1", sams = { "SAM_A" } }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")

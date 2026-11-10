@@ -106,6 +106,50 @@ def _country(m: Mission, state: dict, side: str):
     return m.coalition[side].country(name)
 
 
+RAID_KMH = 800           # ОЦЕНКА: крейсерская скорость налёта бомбардировщиков
+RAID_ALT_M = 9000        # ОЦЕНКА: высота налёта
+RAID_LEAD_KM = 250       # ОЦЕНКА: группа появляется не дальше этого от рубежа пуска (успеть перехватить)
+
+
+def raid_group(m: Mission, state: dict, r: dict):
+    """Налёт бомбардировщиков (strategic.mission_raids): группа ИИ в воздухе идёт к рубежу пуска (на линии цель -
+    аэродром части, не дальше LAUNCH_KM от цели), пускает крылатые ракеты по цели (Bombing, тип - крылатые ракеты)
+    и уходит домой. Появляется так, чтобы выйти на рубеж ко времени пуска; перехватить её - задача ПВО противника."""
+    from . import strategic
+    u = state["units"][r["unit"]]
+    t = state["units"][r["target"]]
+    ms = strategic.MISSILES[r["missile"]]
+    base = state["airbases"][u["base"]]
+    tpos = model.unit_pos(state, t)
+    d_bt = model.dist_km(base, tpos)
+    launch = model.lerp(tpos, base, min(1.0, min(strategic.LAUNCH_KM, ms["range_km"] * 0.8, max(30.0, d_bt - 30)) / d_bt))
+    lead = min(RAID_LEAD_KM, RAID_KMH * max(60, r["at_s"]) / 3600, model.dist_km(launch, base))
+    start = model.lerp(launch, base, lead / max(1.0, model.dist_km(launch, base)))
+    load = strategic.ALCM_CARRIERS.get(u.get("type"), (None, 1))[1]
+    n_ac = max(1, min(4, -(-r["n"] // max(1, load))))
+    ac = dcstypes.flying(u["type"])
+    fg = m.flight_group_inflight(_country(m, state, u["side"]), f"{u['id']} raid {r['target']}", ac, _pt(m, start),
+                                 RAID_ALT_M, speed=RAID_KMH, maintask=task.GroundAttack, group_size=n_ac)
+    prefix = ms.get("pylon", "")
+    for unit in fg.units:                        # подвеска: ракеты на все пилоны, где они вешаются
+        unit.pylons.clear()
+        for n in range(1, 30):
+            py = getattr(ac, f"Pylon{n}", None)
+            if not py:
+                continue
+            for v in vars(py).values():
+                if isinstance(v, tuple) and len(v) == 2 and isinstance(v[1], dict) and prefix and prefix in v[1].get("name", ""):
+                    unit.pylons[n] = {"CLSID": v[1]["clsid"]}
+                    break
+    fg.points[0].tasks.append(task.OptROE(task.OptROE.Values.OpenFire))
+    w = fg.add_waypoint(_pt(m, launch), RAID_ALT_M, RAID_KMH, name="Рубеж пуска")
+    c = _pt(m, tpos)
+    w.tasks.append(task.Bombing(Vector2(c.x, c.y), weapon_type=task.WeaponType.CruiseMissile, expend=task.Expend.All,
+                                attack_qty=1, group_attack=True))
+    fg.add_waypoint(_pt(m, base), RAID_ALT_M, RAID_KMH, name="Домой")
+    return fg
+
+
 def _set_script(act, src: str) -> None:
     """Текст DoScript: и поле text (редактор, trigrules), и params - из них pydcs собирает строку, которую исполняет
     DCS (trig.actions: a_do_script(...)); замена только text оставляла в игре прежний скрипт."""
@@ -2671,6 +2715,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "ssm.lua").read_text(encoding="utf-8")
                                         .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(int(state["sortie"])))
                                         .replace("@SPECS@", ", ".join(items)))))
+    for r in strategic.mission_raids(state, int(m0), ato.MISSION_LEN_S):   # налёты бомбардировщиков с крылатыми ракетами
+        raid_group(m, state, r)
     if sead_prio:                                # самооборона групп подавления: стреляющий по звену ЗРК - вне очереди
         q_ = lambda x: '"' + str(x).replace('"', "'") + '"'
         items = ", ".join("{ group = " + q_(s_["group"]) + ", sams = { " + ", ".join(q_(n) for n in s_["sams"]) + " } }"
