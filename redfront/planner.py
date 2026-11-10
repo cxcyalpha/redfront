@@ -439,7 +439,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         pos = _aim(state, side, u)
         near = min(state["places"], key=lambda n: model.dist_km(state["places"][n], pos))
         return near not in banned
+    tparams = (state.get("task_params") or {}).get(side) or {}
     for kind, tdef in doc["tasks"].items():
+        if kind in tparams:                      # параметры задачи по сценарию поверх доктрины (Гостомель: дальность десанта)
+            tdef = {**tdef, **tparams[kind]}
         rule = rules.get(kind) or {}
         if rule.get("off") or state["day"] < rule.get("from_day", 0):
             reasons.append(f"{tdef['title']}: " + (rule.get("why") or "не в замысле сценария") +
