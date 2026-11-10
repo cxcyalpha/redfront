@@ -1,6 +1,6 @@
 {
- "_about": "Вьетнам, 'Лайнбэкер-2' (18-29.12.1972): условная география на карте Syria. tools/gen_vietnam72.py.",
- "theatre": "syria",
+ "_about": "Вьетнам, 'Лайнбэкер-2' (18-29.12.1972): условная география на карте Caucasus. tools/gen_vietnam72.py.",
+ "theatre": "caucasus",
  "preset": {
   "title": "Декабрь 1972: 'Лайнбэкер-2'",
   "year": 1972,
@@ -832,8 +832,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.2,
-    "lon": 36.7
+    "lat": 45.1,
+    "lon": 38.9
    },
    "composition": [
     {
@@ -863,8 +863,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.08,
-    "lon": 36.82
+    "lat": 44.98,
+    "lon": 39.05
    },
    "composition": [
     {
@@ -894,8 +894,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.18,
-    "lon": 36.85
+    "lat": 45.08,
+    "lon": 39.1
    },
    "composition": [
     {
@@ -925,8 +925,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.06,
-    "lon": 36.66
+    "lat": 44.97,
+    "lon": 38.88
    },
    "composition": [
     {
@@ -956,8 +956,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.22,
-    "lon": 36.78
+    "lat": 45.13,
+    "lon": 39.0
    },
    "composition": [
     {
@@ -987,8 +987,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.12,
-    "lon": 36.6
+    "lat": 45.02,
+    "lon": 38.8
    },
    "composition": [
     {
@@ -1018,8 +1018,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.55,
-    "lon": 35.85
+    "lat": 44.76,
+    "lon": 37.85
    },
    "composition": [
     {
@@ -1049,8 +1049,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.47,
-    "lon": 35.82
+    "lat": 44.68,
+    "lon": 37.86
    },
    "composition": [
     {
@@ -1080,8 +1080,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.58,
-    "lon": 35.95
+    "lat": 44.8,
+    "lon": 37.98
    },
    "composition": [
     {
@@ -1111,8 +1111,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.15,
-    "lon": 36.0
+    "lat": 44.14,
+    "lon": 39.12
    },
    "composition": [
     {
@@ -1142,8 +1142,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.22,
-    "lon": 35.98
+    "lat": 44.08,
+    "lon": 39.18
    },
    "composition": [
     {
@@ -1173,8 +1173,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 34.92,
-    "lon": 35.95
+    "lat": 43.64,
+    "lon": 39.78
    },
    "composition": [
     {
@@ -1204,8 +1204,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 34.86,
-    "lon": 35.97
+    "lat": 43.56,
+    "lon": 39.85
    },
    "composition": [
     {
@@ -1235,8 +1235,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 34.7,
-    "lon": 36.02
+    "lat": 43.04,
+    "lon": 40.98
    },
    "composition": [
     {
@@ -1266,8 +1266,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.05,
-    "lon": 35.45
+    "lat": 43.95,
+    "lon": 38.55
    },
    "composition": [
     {
@@ -1308,8 +1308,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 34.8,
-    "lon": 35.4
+    "lat": 43.55,
+    "lon": 39.05
    },
    "composition": [
     {
@@ -1350,8 +1350,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.55,
-    "lon": 35.7
+    "lat": 44.66,
+    "lon": 37.7
    },
    "composition": [
     {
@@ -1377,8 +1377,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 35.62,
-    "lon": 35.6
+    "lat": 44.62,
+    "lon": 37.55
    },
    "composition": [
     {
@@ -1411,8 +1411,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 33.95,
-    "lon": 35.3
+    "lat": 41.7,
+    "lon": 41.45
    },
    "composition": [
     {
@@ -1549,7 +1549,7 @@
    "name": "366-е тактическое крыло (F-4E, Дананг)",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "beirut_rafic_hariri",
+   "base": "batumi",
    "type": "F_4E_45MC",
    "count": 36,
    "strike_radius_km": 500,
@@ -1561,7 +1561,7 @@
    "name": "432-е разведывательное крыло (F-4D/E, Удорн): MiGCAP",
    "side": "blue",
    "role": "fighter",
-   "base": "hatay",
+   "base": "vaziani",
    "type": "F_4E_45MC",
    "count": 36,
    "strike_radius_km": 600,
@@ -1573,7 +1573,7 @@
    "name": "8-е тактическое крыло 'Волчья стая' (F-4D, Убон): управляемые бомбы",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "incirlik",
+   "base": "tbilisi_lochini",
    "type": "F_4E_45MC",
    "count": 36,
    "strike_radius_km": 600,
@@ -1585,7 +1585,7 @@
    "name": "17-я эскадрилья 'Дикая ласка' (F-105G, Корат)",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "incirlik",
+   "base": "tbilisi_lochini",
    "type": "F_4E_45MC",
    "count": 12,
    "strike_radius_km": 600,
@@ -1597,7 +1597,7 @@
    "name": "KC-135 (Таиланд)",
    "side": "blue",
    "role": "tanker",
-   "base": "incirlik",
+   "base": "tbilisi_lochini",
    "type": "KC_135",
    "count": 4,
    "strike_radius_km": 2000,
@@ -1609,7 +1609,7 @@
    "name": "B-52D/G (Гуам, У-Тапао): 'Лайнбэкер-2'",
    "side": "blue",
    "role": "bomber",
-   "base": "akrotiri",
+   "base": "soganlug",
    "type": "B_52H",
    "count": 60,
    "strike_radius_km": 2000,
@@ -1621,7 +1621,7 @@
    "name": "37-я спасательная эскадрилья (HH-53, Дананг)",
    "side": "blue",
    "role": "transport_helo",
-   "base": "beirut_rafic_hariri",
+   "base": "batumi",
    "type": "CH_53E",
    "count": 6,
    "strike_radius_km": 200,
@@ -1636,7 +1636,7 @@
    "name": "Армейские AH-1G (Фубай)",
    "side": "blue",
    "role": "attack_helo",
-   "base": "rene_mouawad",
+   "base": "kobuleti",
    "type": "AH_1W",
    "count": 24,
    "strike_radius_km": 120,
@@ -1648,7 +1648,7 @@
    "name": "Вертолётные роты армии США (UH-1H, Дананг)",
    "side": "blue",
    "role": "transport_helo",
-   "base": "beirut_rafic_hariri",
+   "base": "batumi",
    "type": "UH_1H",
    "count": 24,
    "strike_radius_km": 150,
@@ -1660,7 +1660,7 @@
    "name": "ВВС Южного Вьетнама (UH-1H, Фубай)",
    "side": "blue",
    "role": "transport_helo",
-   "base": "rene_mouawad",
+   "base": "kobuleti",
    "type": "UH_1H",
    "count": 16,
    "strike_radius_km": 150,
@@ -1672,7 +1672,7 @@
    "name": "921-й истребительный полк 'Красная звезда' (МиГ-21ПФ/МФ, Ной-Бай)",
    "side": "red",
    "role": "fighter",
-   "base": "hama",
+   "base": "krasnodar_pashkovsky",
    "type": "MiG_21Bis",
    "count": 21,
    "strike_radius_km": 250,
@@ -1684,7 +1684,7 @@
    "name": "927-й истребительный полк 'Ламшон' (МиГ-21, Кеп)",
    "side": "red",
    "role": "fighter",
-   "base": "bassel_al_assad",
+   "base": "krymsk",
    "type": "MiG_21Bis",
    "count": 16,
    "strike_radius_km": 250,
@@ -1696,7 +1696,7 @@
    "name": "923-й истребительный полк 'Йенбай' (МиГ-17, Кеп)",
    "side": "red",
    "role": "fighter",
-   "base": "bassel_al_assad",
+   "base": "krymsk",
    "type": "MiG_15bis",
    "count": 16,
    "strike_radius_km": 200,
@@ -1708,7 +1708,7 @@
    "name": "925-й истребительный полк (J-6/МиГ-19, Йенбай)",
    "side": "red",
    "role": "fighter",
-   "base": "abu_al_duhur",
+   "base": "maykop_khanskaya",
    "type": "MiG_19P",
    "count": 14,
    "strike_radius_km": 250,
@@ -1720,7 +1720,7 @@
    "name": "Передовая группа МиГ-21 (Куанглан)",
    "side": "red",
    "role": "fighter",
-   "base": "al_qusayr",
+   "base": "gudauta",
    "type": "MiG_21Bis",
    "count": 8,
    "strike_radius_km": 200,
