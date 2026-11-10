@@ -328,6 +328,9 @@ def supply(state: dict) -> list[str]:
             if b.get("side") != side:
                 continue
             need = sorties.get(bid, 0.0)
+            if b.get("supply_external"):         # аэродром снабжается извне (база другой страны: Гудаута 1993)
+                b["supply"] = 1.0
+                continue
             if need <= 0:
                 b["supply"] = 1.0 if b.get("supply") is None else min(1.0, b["supply"] + 0.5)   # без вылетов - копит
                 continue

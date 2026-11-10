@@ -216,6 +216,8 @@ TASK_RULES = {"blue": {"strike_airfield": {"off": True, "why": "у ВВС Гру
 NOT_INCLUDED = ("Черноморский флот (бой у Очамчире 10.08), спецназ ГРУ, батальоны 'Восток' и 'Запад', "
                 "российские миротворцы в Цхинвали, ВМС Грузии.")
 EXTRA_VARIANT: dict = {}
+EXTERNAL_SUPPLY: set = set()                       # аэродромы со снабжением извне (не со складов стороны)
+DOCTRINE: dict | None = None                       # пакеты доктрины сторон (нет - по умолчанию)
 
 
 def main() -> None:
@@ -236,7 +238,8 @@ def main() -> None:
     for side, names in AIRBASES.items():
         for n in names:
             bid = n.lower().replace(" ", "_").replace("-", "_")
-            airbases[bid] = {"name": n, "airport": n, "side": side, "military": True}
+            airbases[bid] = {"name": n, "airport": n, "side": side, "military": True,
+                             **({"supply_external": True} if n in EXTERNAL_SUPPLY else {})}
             ll = terrain.airports[n].position.latlng()
             af_pos[bid] = (ll.lat, ll.lng, side, n)
     border = [((places[a]["lat"] + places[b]["lat"]) / 2, (places[a]["lon"] + places[b]["lon"]) / 2)
@@ -305,6 +308,7 @@ def main() -> None:
         "preset": {"title": TITLE, "year": YEAR, "date": DATE},
         "date": DATE,
         "countries": COUNTRIES,
+        **({"doctrine": DOCTRINE} if DOCTRINE else {}),
         "units": units,
         "strategic_stock": STRATEGIC,
         "variants": [{"name": "base", "title": TITLE, "task_rules": TASK_RULES, **EXTRA_VARIANT}],
