@@ -25,7 +25,8 @@ ADF_KHZ = (200, 1200)        # маяк сбитого - в диапазоне �
 
 
 def crew_size(type_name: str) -> int:
-    return int(model.aircraft_info(type_name).get("crew") or 1)
+    c = model.aircraft_info(type_name).get("crew")
+    return 1 if c is None else int(c)            # беспилотник - 0
 
 
 def owner_at(state: dict, pos: dict) -> str | None:
@@ -44,7 +45,10 @@ def _freq(state: dict) -> int:
 
 
 def add_downed(state: dict, unit: dict, aircraft: str, pos: dict, note: str = "") -> dict:
-    """Экипаж сбитого самолёта на земле (катапультировался, в миссии не подобран). Экипаж выбывает из части до возврата."""
+    """Экипаж сбитого самолёта на земле (катапультировался, в миссии не подобран). Экипаж выбывает из части до возврата.
+    Беспилотник (crew 0) - экипажа нет: None."""
+    if crew_size(unit.get("type", "")) == 0:
+        return None
     state.setdefault("downed", [])
     state["_downed_seq"] = state.get("_downed_seq", 0) + 1
     d = {"id": f"downed_{state['_downed_seq']}", "side": unit["side"], "unit": unit["id"], "type": unit.get("type", ""),

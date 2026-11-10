@@ -1,0 +1,349 @@
+{
+ "_about": "Карабах, 27.09.2020. Генерирован tools/gen_karabakh.py. Условная география на карте Caucasus (Квемо-Картли и Триалети); координаты - ОЦЕНКИ.",
+ "theatre": "caucasus",
+ "places": {
+  "Ganja": {
+   "lat": 41.716,
+   "lon": 44.783,
+   "estimate": true,
+   "side": "red"
+  },
+  "Barda": {
+   "lat": 41.549,
+   "lon": 44.993,
+   "estimate": true,
+   "side": "red"
+  },
+  "Tartar": {
+   "lat": 41.78,
+   "lon": 44.65,
+   "estimate": true,
+   "side": "red"
+  },
+  "Beylagan": {
+   "lat": 41.475,
+   "lon": 44.808,
+   "estimate": true,
+   "side": "red"
+  },
+  "Horadiz": {
+   "lat": 41.3,
+   "lon": 44.76,
+   "estimate": true,
+   "side": "red"
+  },
+  "Agdam": {
+   "lat": 41.62,
+   "lon": 44.5,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Martakert": {
+   "lat": 41.8,
+   "lon": 44.3,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Stepanakert": {
+   "lat": 41.7,
+   "lon": 44.26,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Shusha": {
+   "lat": 41.545,
+   "lon": 44.34,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Fuzuli": {
+   "lat": 41.43,
+   "lon": 44.48,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hadrut": {
+   "lat": 41.45,
+   "lon": 44.24,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Jabrayil": {
+   "lat": 41.33,
+   "lon": 44.41,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Zangilan": {
+   "lat": 41.25,
+   "lon": 44.21,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kubatli": {
+   "lat": 41.38,
+   "lon": 44.08,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Lachin": {
+   "lat": 41.6,
+   "lon": 43.97,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Goris": {
+   "lat": 41.42,
+   "lon": 43.36,
+   "estimate": true,
+   "side": "blue"
+  }
+ },
+ "airbases": {
+  "tbilisi_lochini": {
+   "name": "Tbilisi-Lochini",
+   "airport": "Tbilisi-Lochini",
+   "side": "red",
+   "military": true
+  },
+  "vaziani": {
+   "name": "Vaziani",
+   "airport": "Vaziani",
+   "side": "red",
+   "military": true
+  },
+  "soganlug": {
+   "name": "Soganlug",
+   "airport": "Soganlug",
+   "side": "red",
+   "military": true
+  },
+  "kutaisi": {
+   "name": "Kutaisi",
+   "airport": "Kutaisi",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "links": [
+  [
+   "Ganja",
+   "Barda"
+  ],
+  [
+   "Ganja",
+   "Tartar"
+  ],
+  [
+   "Barda",
+   "Beylagan"
+  ],
+  [
+   "Beylagan",
+   "Horadiz"
+  ],
+  [
+   "Barda",
+   "Agdam"
+  ],
+  [
+   "Tartar",
+   "Martakert"
+  ],
+  [
+   "Agdam",
+   "Stepanakert"
+  ],
+  [
+   "Martakert",
+   "Stepanakert"
+  ],
+  [
+   "Beylagan",
+   "Fuzuli"
+  ],
+  [
+   "Horadiz",
+   "Jabrayil"
+  ],
+  [
+   "Fuzuli",
+   "Jabrayil"
+  ],
+  [
+   "Fuzuli",
+   "Hadrut"
+  ],
+  [
+   "Jabrayil",
+   "Zangilan"
+  ],
+  [
+   "Zangilan",
+   "Kubatli"
+  ],
+  [
+   "Hadrut",
+   "Shusha"
+  ],
+  [
+   "Shusha",
+   "Stepanakert"
+  ],
+  [
+   "Shusha",
+   "Lachin"
+  ],
+  [
+   "Kubatli",
+   "Lachin"
+  ],
+  [
+   "Lachin",
+   "Goris"
+  ],
+  [
+   "Kubatli",
+   "Goris"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Ganja"
+  ],
+  "blue": [
+   "Goris"
+  ]
+ },
+ "off_limits": {
+  "red": [
+   "Goris"
+  ]
+ },
+ "axes": {
+  "south": "Юг: Физули - Джебраил - Гадрут - Шуша",
+  "lachin": "Зангелан - Кубатлы - Лачин",
+  "north": "Агдам - Мартакерт"
+ },
+ "objectives": {
+  "red": {
+   "south": [
+    "Fuzuli",
+    "Jabrayil",
+    "Hadrut",
+    "Shusha"
+   ],
+   "lachin": [
+    "Zangilan",
+    "Kubatli",
+    "Lachin"
+   ],
+   "north": [
+    "Agdam",
+    "Martakert"
+   ]
+  },
+  "blue": []
+ },
+ "_about_objectives": "Оси Азербайджана - по ходу войны: юг (Физули - Джебраил - Гадрут - Шуша), Зангелан - Кубатлы - Лачин, Агдам.",
+ "depots": [
+  {
+   "id": "red_depot_ganja",
+   "name": "Склад снабжения (Гянджа)",
+   "side": "red",
+   "place": "Ganja"
+  },
+  {
+   "id": "red_depot_barda",
+   "name": "Склад снабжения (Барда)",
+   "side": "red",
+   "place": "Barda"
+  },
+  {
+   "id": "red_depot_beylagan",
+   "name": "Передовой склад (Бейлаган)",
+   "side": "red",
+   "place": "Beylagan"
+  },
+  {
+   "id": "blue_depot_stepanakert",
+   "name": "Склад снабжения (Степанакерт)",
+   "side": "blue",
+   "place": "Stepanakert"
+  },
+  {
+   "id": "blue_depot_shusha",
+   "name": "Склад (Шуша)",
+   "side": "blue",
+   "place": "Shusha"
+  },
+  {
+   "id": "blue_depot_goris",
+   "name": "Склад снабжения (Горис)",
+   "side": "blue",
+   "place": "Goris"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_lachin",
+   "name": "Мост в Лачинском коридоре",
+   "lat": 41.59,
+   "lon": 44.15,
+   "links": [
+    [
+     "Shusha",
+     "Lachin"
+    ]
+   ],
+   "source": "условно: середина участка Шуша - Лачин"
+  }
+ ],
+ "ad_sites": [
+  {
+   "id": "blue_ad_af_kutaisi",
+   "name": "ПВО аэродрома Kutaisi",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_kutaisi",
+   "lat": 42.1742,
+   "lon": 42.4988,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_soganlug",
+   "name": "ПВО аэродрома Soganlug",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_soganlug",
+   "lat": 41.644,
+   "lon": 44.9219,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_tbilisi_lochini",
+   "name": "ПВО аэродрома Tbilisi-Lochini",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_tbilisi_lochini",
+   "lat": 41.6608,
+   "lon": 44.9403,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_vaziani",
+   "name": "ПВО аэродрома Vaziani",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_vaziani",
+   "lat": 41.6262,
+   "lon": 45.0096,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  }
+ ],
+ "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил."
+}

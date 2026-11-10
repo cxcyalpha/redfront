@@ -217,7 +217,8 @@ NOT_INCLUDED = ("Черноморский флот (бой у Очамчире 1
                 "российские миротворцы в Цхинвали, ВМС Грузии.")
 EXTRA_VARIANT: dict = {}
 EXTERNAL_SUPPLY: set = set()                       # аэродромы со снабжением извне (не со складов стороны)
-DOCTRINE: dict | None = None                       # пакеты доктрины сторон (нет - по умолчанию)
+DOCTRINE: dict | None = None
+SAM_FIXED = False                                  # позиции ЗРК известны (объектовая ПВО) - цели ударов по позициям                       # пакеты доктрины сторон (нет - по умолчанию)
 
 
 def main() -> None:
@@ -289,7 +290,7 @@ def main() -> None:
                           "source": "ОЦЕНКА", "estimate": True})
     for sid, name, side, role, cmp_, la, lo in SAMS:
         units.append({"id": sid, "name": name, "side": side, "role": role, "state": "deployed",
-                      "pos": {"lat": la, "lon": lo},
+                      **({"fixed": True} if SAM_FIXED else {}), "pos": {"lat": la, "lon": lo},
                       "composition": [{"type": t, "count": c, "role": r} for t, r, c in cmp_],
                       "source": SRC + "; место - ОЦЕНКА", "estimate": True})
     for sid, name, side, missile, n, la, lo, src in SSM:   # пусковые ОТР (strategic.py): модель DCS - по ракете
