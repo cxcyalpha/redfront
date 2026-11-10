@@ -3903,6 +3903,17 @@ def theatres_section(tmp: Path) -> None:
     dic = mze.read("l10n/DEFAULT/dictionary").decode("utf-8") + mze.read("mission").decode("utf-8")
     check("redfront debrief hook" in dic and "lfs.writedir" in dic and "pcall(function()" in dic,
           "английская миссия: тексты скриптов на месте (скрипты в pcall) - не пустые строки")
+    import re  # noqa: E402
+    # исполняемая строка триггеров (trig.actions: a_do_script) - та же, что в редакторе: переведена и в pcall
+    mis_e = mze.read("mission").decode("utf-8")
+    trig_e = mis_e[mis_e.find('["trig"]'):mis_e.find('["trigrules"]')]
+    trig_u = trig_e
+    for _ in range(3):
+        trig_u = trig_u.replace('\\\\', '\\').replace('\\"', '"').replace('\\n', '\n')
+    trig_u = re.sub(r"--[^\n]*", "", trig_u)
+    ru_lit = re.findall(r'"([^"\n]*[А-Яа-яЁё][^"\n]*)"', trig_u)
+    check(not ru_lit and trig_e.count("redfront script error") >= 2,
+          f"английская миссия: в исполняемых скриптах (trig) русских строк нет ({ru_lit[:3]}), скрипты - в pcall")
     stg = model.new_campaign("ia", sector="sector_golan73.json", oob="oob_golan73.json", seed=1, player_side="blue")
     planner.plan(stg)
     build.build(stg, tmp / "ia.miz", task_no=1)
@@ -3989,6 +4000,22 @@ def theatres_section(tmp: Path) -> None:
     check(j_clear == 2 and j_far == 4 and j_slow == 4 and j_near == 2 and j_burn == 2,
           "РЭБ (samctl.lua): постановщик помех сокращает рубеж пуска и удлиняет реакцию ЗРК, но в пределах: рубеж не "
           "ближе 45% зоны, реакция не дольше 2x, ближе 35% зоны - прожиг")
+    # стратегический уровень: ОТР (Точка-У, Искандер) - план суток с пределом, исход (повреждение, расход), пуски в миссии
+    from redfront import strategic
+    stc = model.new_campaign("ssm", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1, player_side="blue")
+    planner.plan(stc)
+    n_plan = len(stc["ssm_plan"])
+    for p_ in stc["ssm_plan"]:
+        p_["t_s"] = int(8.75 * 3600)
+    build.build(stc, tmp / "ssm.miz", task_no=1)
+    mzs = zipfile.ZipFile(tmp / "ssm.miz").read("mission").decode("utf-8")
+    stock0 = sum(stc["strategic_stock"]["red"].values())
+    res = strategic.resolve(stc)
+    dmg = sum(u.get("damage", 0) for u in stc["units"].values() if u["side"] == "blue" and u["role"] in ("airfield", "depot"))
+    check(0 < n_plan <= 6 and "redfront ssm" in mzs and "FireAtPoint" in mzs and dmg > 0
+          and sum(stc["strategic_stock"]["red"].values()) == stock0 - n_plan,
+          f"ОТР: план суток {n_plan} пусков (предел - доля запаса), пуски в миссии (ssm.lua), исход - повреждение "
+          f"{dmg:.2f}, расход ракет; {res[0] if res else ''}")
     # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
     sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
     sp_src = sp_src.replace("@SPECS@", '{ group = "F1", sams = { "SAM_A" } }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")

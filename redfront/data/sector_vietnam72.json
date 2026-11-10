@@ -1,210 +1,210 @@
 {
- "_about": "Вьетнам, апрель 1972 - условная география на карте Syria (см. tools/gen_vietnam72.py). Координаты - точки карты Syria, имена - вьетнамские.",
- "theatre": "syria",
+ "_about": "Вьетнам, апрель 1972 - условная география на карте Caucasus (см. tools/gen_vietnam72.py). Координаты - точки карты Caucasus, имена - вьетнамские.",
+ "theatre": "caucasus",
  "places": {
   "Hanoi": {
-   "lat": 35.135,
-   "lon": 36.75,
+   "lat": 45.035,
+   "lon": 38.975,
    "estimate": true,
    "side": "red"
   },
   "ThaiNguyen": {
-   "lat": 35.25,
-   "lon": 36.57,
+   "lat": 44.61,
+   "lon": 40.1,
    "estimate": true,
    "side": "red"
   },
   "HaiDuong": {
-   "lat": 35.445,
-   "lon": 36.06,
+   "lat": 45.26,
+   "lon": 38.125,
    "estimate": true,
    "side": "red"
   },
   "Haiphong": {
-   "lat": 35.52,
-   "lon": 35.79,
+   "lat": 44.72,
+   "lon": 37.77,
    "estimate": true,
    "side": "red"
   },
   "NamDinh": {
-   "lat": 35.36,
-   "lon": 35.93,
+   "lat": 44.93,
+   "lon": 37.99,
    "estimate": true,
    "side": "red"
   },
   "PhuLy": {
-   "lat": 35.07,
-   "lon": 36.34,
+   "lat": 44.63,
+   "lon": 39.13,
    "estimate": true,
    "side": "red"
   },
   "ThanhHoa": {
-   "lat": 35.18,
-   "lon": 35.95,
+   "lat": 44.1,
+   "lon": 39.075,
    "estimate": true,
    "side": "red"
   },
   "Vinh": {
-   "lat": 34.89,
-   "lon": 35.89,
+   "lat": 43.6,
+   "lon": 39.73,
    "estimate": true,
    "side": "red"
   },
   "NinhBinh": {
-   "lat": 34.73,
-   "lon": 36.71,
+   "lat": 44.47,
+   "lon": 39.73,
    "estimate": true,
    "side": "red"
   },
   "DongHoi": {
-   "lat": 34.72,
-   "lon": 35.94,
+   "lat": 43.003,
+   "lon": 41.015,
    "estimate": true,
    "side": "red"
   },
   "MuGia": {
-   "lat": 34.67,
-   "lon": 36.26,
+   "lat": 43.68,
+   "lon": 40.2,
    "estimate": true,
    "side": "red"
   },
   "GioLinh": {
-   "lat": 34.63,
-   "lon": 35.985,
+   "lat": 42.627,
+   "lon": 41.737,
    "estimate": true,
    "side": "red"
   },
   "CampCarroll": {
-   "lat": 34.56,
-   "lon": 36.17,
+   "lat": 42.854,
+   "lon": 41.684,
    "estimate": true,
    "side": "red"
   },
   "KheSanh": {
-   "lat": 34.5,
-   "lon": 36.4,
+   "lat": 42.72,
+   "lon": 42.05,
    "estimate": true,
    "side": "red"
   },
   "ALuoi": {
-   "lat": 34.33,
-   "lon": 36.25,
+   "lat": 42.41,
+   "lon": 42.38,
    "estimate": true,
    "side": "red"
   },
   "DongHa": {
-   "lat": 34.555,
-   "lon": 35.99,
+   "lat": 42.509,
+   "lon": 41.871,
    "estimate": true,
    "side": "blue"
   },
   "QuangTri": {
-   "lat": 34.545,
-   "lon": 36.08,
+   "lat": 42.315,
+   "lon": 41.898,
    "estimate": true,
    "side": "blue"
   },
   "Hue": {
-   "lat": 34.436,
-   "lon": 35.85,
+   "lat": 42.146,
+   "lon": 41.672,
    "estimate": true,
    "side": "blue"
   },
   "Bastogne": {
-   "lat": 34.35,
-   "lon": 36.0,
+   "lat": 42.27,
+   "lon": 42.067,
    "estimate": true,
    "side": "blue"
   },
   "PhuBai": {
-   "lat": 34.255,
-   "lon": 35.66,
+   "lat": 41.82,
+   "lon": 41.776,
    "estimate": true,
    "side": "blue"
   },
   "HaiVan": {
-   "lat": 34.12,
-   "lon": 35.65,
+   "lat": 41.725,
+   "lon": 41.735,
    "estimate": true,
    "side": "blue"
   },
   "DaNang": {
-   "lat": 33.9,
-   "lon": 35.52,
+   "lat": 41.643,
+   "lon": 41.64,
    "estimate": true,
    "side": "blue"
   }
  },
  "airbases": {
-  "hama": {
-   "name": "Hama",
-   "airport": "Hama",
+  "krasnodar_pashkovsky": {
+   "name": "Krasnodar-Pashkovsky",
+   "airport": "Krasnodar-Pashkovsky",
    "side": "red",
    "military": true,
-   "alias": "Ной-Бай (Хама)"
+   "alias": "Ной-Бай (Пашковский)"
   },
-  "bassel_al_assad": {
-   "name": "Bassel Al-Assad",
-   "airport": "Bassel Al-Assad",
+  "krymsk": {
+   "name": "Krymsk",
+   "airport": "Krymsk",
    "side": "red",
    "military": true,
-   "alias": "Кеп (Басиль-Асад)"
+   "alias": "Кеп (Крымск)"
   },
-  "abu_al_duhur": {
-   "name": "Abu al-Duhur",
-   "airport": "Abu al-Duhur",
+  "maykop_khanskaya": {
+   "name": "Maykop-Khanskaya",
+   "airport": "Maykop-Khanskaya",
    "side": "red",
    "military": true,
-   "alias": "Йенбай (Абу-аль-Духур)"
+   "alias": "Йенбай (Майкоп)"
   },
-  "al_qusayr": {
-   "name": "Al Qusayr",
-   "airport": "Al Qusayr",
+  "gelendzhik": {
+   "name": "Gelendzhik",
+   "airport": "Gelendzhik",
    "side": "red",
    "military": true,
-   "alias": "Куанглан (Эль-Кусайр)"
+   "alias": "Кьенан (Геленджик)"
   },
-  "shayrat": {
-   "name": "Shayrat",
-   "airport": "Shayrat",
+  "gudauta": {
+   "name": "Gudauta",
+   "airport": "Gudauta",
    "side": "red",
    "military": true,
-   "alias": "Байтхыонг (Шайрат)"
+   "alias": "Донгхой (Гудаута)"
   },
-  "beirut_rafic_hariri": {
-   "name": "Beirut-Rafic Hariri",
-   "airport": "Beirut-Rafic Hariri",
+  "batumi": {
+   "name": "Batumi",
+   "airport": "Batumi",
    "side": "blue",
    "military": true,
-   "alias": "Дананг (Бейрут)"
+   "alias": "Дананг (Батуми)"
   },
-  "rene_mouawad": {
-   "name": "Rene Mouawad",
-   "airport": "Rene Mouawad",
+  "kobuleti": {
+   "name": "Kobuleti",
+   "airport": "Kobuleti",
    "side": "blue",
    "military": true,
-   "alias": "Фубай (Кляят)"
+   "alias": "Фубай (Кобулети)"
   },
-  "hatay": {
-   "name": "Hatay",
-   "airport": "Hatay",
+  "vaziani": {
+   "name": "Vaziani",
+   "airport": "Vaziani",
    "side": "blue",
    "military": true,
-   "alias": "Удорн (Хатай)"
+   "alias": "Удорн (Вазиани)"
   },
-  "incirlik": {
-   "name": "Incirlik",
-   "airport": "Incirlik",
+  "tbilisi_lochini": {
+   "name": "Tbilisi-Lochini",
+   "airport": "Tbilisi-Lochini",
    "side": "blue",
    "military": true,
-   "alias": "Корат (Инджирлик)"
+   "alias": "Корат (Тбилиси)"
   },
-  "akrotiri": {
-   "name": "Akrotiri",
-   "airport": "Akrotiri",
+  "soganlug": {
+   "name": "Soganlug",
+   "airport": "Soganlug",
    "side": "blue",
    "military": true,
-   "alias": "У-Тапао (Акротири)"
+   "alias": "У-Тапао (Соганлуг)"
   }
  },
  "carriers": {
@@ -212,8 +212,8 @@
    "name": "USS Forrestal (CV-59)",
    "side": "blue",
    "ship": "Forrestal",
-   "lat": 35.05,
-   "lon": 35.45,
+   "lat": 43.95,
+   "lon": 38.55,
    "tacan": 59,
    "tacan_id": "FOR",
    "icls": 3,
@@ -225,8 +225,8 @@
    "name": "USS Carl Vinson (CVN-70)",
    "side": "blue",
    "ship": "VINSON",
-   "lat": 34.8,
-   "lon": 35.4,
+   "lat": 43.55,
+   "lon": 39.05,
    "tacan": 70,
    "tacan_id": "VIN",
    "icls": 4,
@@ -398,8 +398,8 @@
   "red": [
    {
     "name": "Хайфон",
-    "lat": 35.53,
-    "lon": 35.76
+    "lat": 44.72,
+    "lon": 37.79
    }
   ]
  },
@@ -479,96 +479,96 @@
   {
    "id": "br_thanhhoa",
    "name": "Мост Тханьхоа (Хамронг)",
-   "lat": 35.27,
-   "lon": 35.94,
    "links": [
     [
      "NamDinh",
      "ThanhHoa"
     ]
    ],
-   "source": "условно: середина участка Намдинь - Тханьхоа"
+   "source": "условно: середина участка Намдинь - Тханьхоа",
+   "lat": 44.515,
+   "lon": 38.532
   },
   {
    "id": "br_doumer",
    "name": "Мост Думера (Ханой)",
-   "lat": 35.19,
-   "lon": 36.66,
    "links": [
     [
      "Hanoi",
      "ThaiNguyen"
     ]
    ],
-   "source": "условно: середина участка Ханой - Тхайнгуен"
+   "source": "условно: середина участка Ханой - Тхайнгуен",
+   "lat": 44.822,
+   "lon": 39.538
   },
   {
    "id": "br_dongha",
    "name": "Мост Донгха",
-   "lat": 34.59,
-   "lon": 35.99,
    "links": [
     [
      "GioLinh",
      "DongHa"
     ]
    ],
-   "source": "условно: середина участка Жолинь - Донгха"
+   "source": "условно: середина участка Жолинь - Донгха (река Ингури - река Бенхай)",
+   "lat": 42.568,
+   "lon": 41.804
   }
  ],
  "ad_sites": [
   {
-   "id": "red_ad_af_hama",
-   "name": "Зенитная артиллерия аэродрома Ной-Бай (Хама)",
+   "id": "red_ad_af_krasnodar_pashkovsky",
+   "name": "Зенитная артиллерия аэродрома Ной-Бай (Пашковский)",
    "side": "red",
    "tier": "short",
-   "covers": "af_hama",
-   "lat": 35.13,
-   "lon": 36.712379497444346,
+   "covers": "af_krasnodar_pashkovsky",
+   "lat": 45.05,
+   "lon": 39.1881352399431,
    "variant": 0,
    "rule": "ПВО объекта: у каждого аэродрома ДРВ"
   },
   {
-   "id": "red_ad_af_bassel_al_assad",
-   "name": "Зенитная артиллерия аэродрома Кеп (Басиль-Асад)",
+   "id": "red_ad_af_krymsk",
+   "name": "Зенитная артиллерия аэродрома Кеп (Крымск)",
    "side": "red",
    "tier": "short",
-   "covers": "af_bassel_al_assad",
-   "lat": 35.4158,
-   "lon": 35.95023986967886,
+   "covers": "af_krymsk",
+   "lat": 44.9799,
+   "lon": 37.995030274403014,
    "variant": 0,
    "rule": "ПВО объекта: у каждого аэродрома ДРВ"
   },
   {
-   "id": "red_ad_af_abu_al_duhur",
-   "name": "Зенитная артиллерия аэродрома Йенбай (Абу-аль-Духур)",
+   "id": "red_ad_af_maykop_khanskaya",
+   "name": "Зенитная артиллерия аэродрома Йенбай (Майкоп)",
    "side": "red",
    "tier": "short",
-   "covers": "af_abu_al_duhur",
-   "lat": 35.7443,
-   "lon": 37.10412796442225,
+   "covers": "af_maykop_khanskaya",
+   "lat": 44.6933,
+   "lon": 40.03525433454862,
    "variant": 0,
    "rule": "ПВО объекта: у каждого аэродрома ДРВ"
   },
   {
-   "id": "red_ad_af_al_qusayr",
-   "name": "Зенитная артиллерия аэродрома Куанглан (Эль-Кусайр)",
+   "id": "red_ad_af_gelendzhik",
+   "name": "Зенитная артиллерия аэродрома Кьенан (Геленджик)",
    "side": "red",
    "tier": "short",
-   "covers": "af_al_qusayr",
-   "lat": 34.5813,
-   "lon": 36.57145372619807,
+   "covers": "af_gelendzhik",
+   "lat": 44.5849,
+   "lon": 38.01161441703992,
    "variant": 0,
    "rule": "ПВО объекта: у каждого аэродрома ДРВ"
   },
   {
-   "id": "red_ad_af_shayrat",
-   "name": "Зенитная артиллерия аэродрома Байтхыонг (Шайрат)",
+   "id": "red_ad_af_gudauta",
+   "name": "Зенитная артиллерия аэродрома Донгхой (Гудаута)",
    "side": "red",
    "tier": "short",
-   "covers": "af_shayrat",
-   "lat": 34.5022,
-   "lon": 36.90761267456729,
+   "covers": "af_gudauta",
+   "lat": 43.1263,
+   "lon": 40.569741075949,
    "variant": 0,
    "rule": "ПВО объекта: у каждого аэродрома ДРВ"
   }

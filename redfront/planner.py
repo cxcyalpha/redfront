@@ -239,6 +239,9 @@ def plan(state: dict) -> dict | None:
     авиация на них считается независимо. Возвращает первую (она же state['task']); нет задач - None и причина
     в state['task_reason']."""
     from . import ato                            # ato импортирует planner
+    if "ssm_plan" not in state:                  # первые сутки кампании: план пусков ОТР (дальше - конец суток, strategic.py)
+        from . import strategic
+        strategic.plan(state)
     state["task"] = None
     state["tasks"] = []
     intel.update(state)                          # соприкосновение - что видно у фронта сейчас
@@ -1157,7 +1160,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     if s.get("mode") == "cap_zone":              # прикрытие района (истребители): зона над своими войсками
         cz = clear_point(state, perf["side"], tpos, state["airbases"][perf["base"]])   # над своими войсками, но вне ЗРК противника
         route, objective = [cz], {"kind": "cap_zone", "unit": tgt["id"], "pos": cz}
-    elif model.category(tgt) == "sam":           # позиция ЗРК: атака группы на позиции
+    elif model.category(tgt) in ("sam", "ssm"):  # позиция ЗРК или пусковой ОТР: атака группы на позиции
         route, objective = [ip, tpos], {"kind": "site", "unit": tgt["id"], "pos": tpos}
     elif model.category(tgt) == "naval":         # корабельная группа: атака группы кораблей (ПКР, бомбы)
         route, objective = [ip, tpos], {"kind": "ship", "unit": tgt["id"], "pos": tpos}
@@ -1172,6 +1175,8 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     notes = []
     chosen_by: dict[str, dict] = {}
     for g in tdef.get("support", []):
+        if g.get("from_year") and int(str(state.get("date", "2000"))[:4]) < g["from_year"]:
+            continue                             # группы ещё нет на год кампании (подавление ПВО ракетами - с ПРР)
         if g["when"] == "threats" and not threats:
             continue
         if g["when"] == "moving_target" and tgt.get("state") != "march":

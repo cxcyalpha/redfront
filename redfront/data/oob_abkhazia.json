@@ -1,0 +1,788 @@
+{
+ "_about": "Состав сил 16.09.1993 (Абхазия, КГНК, скрытая поддержка России - Грузия). Генерирован tools/gen_abkhazia.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+ "theatre": "caucasus",
+ "preset": {
+  "title": "Абхазия, сентябрь 1993: штурм Сухуми",
+  "year": 1993,
+  "date": "1993-09-16"
+ },
+ "date": "1993-09-16",
+ "countries": {
+  "red": "Abkhazia",
+  "blue": "Georgia"
+ },
+ "doctrine": {
+  "red": "wp",
+  "blue": "wp"
+ },
+ "units": [
+  {
+   "id": "red_ab_guard1",
+   "name": "Абхазская гвардия (Гумистинский фронт)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Eshera"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "T_55",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "sukhumi",
+   "note": "наступление через Гумисту 16.09"
+  },
+  {
+   "id": "red_ab_guard1_pvo",
+   "name": "Войсковая ПВО: Абхазская гвардия (Гумистинский фронт)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_ab_guard1",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ab_guard2",
+   "name": "Абхазская гвардия (Гудаутская бригада)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "NewAthos"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "T_55",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "sukhumi"
+  },
+  {
+   "id": "red_ab_guard2_pvo",
+   "name": "Войсковая ПВО: Абхазская гвардия (Гудаутская бригада)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_ab_guard2",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kgnk",
+   "name": "Добровольцы КГНК (батальоны северокавказских добровольцев)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Eshera"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_70",
+     "count": 8,
+     "role": "APC"
+    },
+    {
+     "type": "BRDM_2",
+     "count": 4,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "sukhumi",
+   "note": "Конфедерация горских народов Кавказа; число - ОЦЕНКА"
+  },
+  {
+   "id": "red_kgnk_pvo",
+   "name": "Войсковая ПВО: Добровольцы КГНК (батальоны северокавказских добровольцев)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_kgnk",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bagramyan",
+   "name": "Батальон им. Баграмяна",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "NewAthos"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMP_1",
+     "count": 6,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 4,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "sukhumi",
+   "note": "армянский батальон; ввод - ОЦЕНКА"
+  },
+  {
+   "id": "red_bagramyan_pvo",
+   "name": "Войсковая ПВО: Батальон им. Баграмяна",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_bagramyan",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_tkv",
+   "name": "Гарнизон Ткварчели (Восточный фронт)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Tkvarcheli"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 3,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 6,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 4,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "east",
+   "note": "анклав в окружении; снабжение - вертолётами"
+  },
+  {
+   "id": "red_tkv_pvo",
+   "name": "Войсковая ПВО: Гарнизон Ткварчели (Восточный фронт)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_tkv",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_sukhumi",
+   "name": "Сухумская группировка грузинских войск (Нацгвардия, Мхедриони)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sukhumi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 12,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 12,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "оборона Сухуми"
+  },
+  {
+   "id": "blue_ge_sukhumi_pvo",
+   "name": "Войсковая ПВО: Сухумская группировка грузинских войск (Нацгвардия, Мхедриони)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ge_sukhumi",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_kelasuri",
+   "name": "Грузинская бригада (Келасури)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kelasuri"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 12,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 12,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_kelasuri_pvo",
+   "name": "Войсковая ПВО: Грузинская бригада (Келасури)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ge_kelasuri",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_ochamchire",
+   "name": "Грузинские части в Очамчире (блокада Ткварчели)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Ochamchire"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 6,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_ochamchire_pvo",
+   "name": "Войсковая ПВО: Грузинские части в Очамчире (блокада Ткварчели)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ge_ochamchire",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_gali",
+   "name": "Резерв (Гали)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Gali"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 6,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_reinf",
+   "name": "Подкрепления из Грузии (воздушный мост на Бабушару)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Zugdidi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 6,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "note": "переброска самолётами 20-23.09 - ОЦЕНКА"
+  },
+  {
+   "id": "blue_ge_reinf_pvo",
+   "name": "Войсковая ПВО: Подкрепления из Грузии (воздушный мост на Бабушару)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ge_reinf",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 4,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ge_svan",
+   "name": "Сванские отряды (Кодори)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Azhara"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_70",
+     "count": 4,
+     "role": "APC"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_s75_sukhumi",
+   "name": "Дивизион С-75 (Сухуми)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 42.99,
+    "lon": 41.06
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 3,
+     "role": "launcher"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_strela_gudauta",
+   "name": "ПВО российского гарнизона Гудауты (Стрела-10, ЗСУ-23-4)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "pos": {
+    "lat": 43.11,
+    "lon": 40.58
+   },
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su25",
+   "name": "Су-25 (скрытая поддержка России, Гудаута)",
+   "side": "red",
+   "role": "attack",
+   "base": "gudauta",
+   "type": "Su_25",
+   "count": 6,
+   "strike_radius_km": 250,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА; удары по Сухуми приписываются российской авиации; Россия отрицала - спорно, ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su27",
+   "name": "Су-27 (скрытая поддержка России, Гудаута)",
+   "side": "red",
+   "role": "fighter",
+   "base": "gudauta",
+   "type": "Su_27",
+   "count": 4,
+   "strike_radius_km": 400,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА; Су-27 сбит над Сухуми 19.03.1993; число - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ab_l39",
+   "name": "ВВС Абхазии (Л-39)",
+   "side": "red",
+   "role": "attack",
+   "base": "gudauta",
+   "type": "L_39C",
+   "count": 2,
+   "strike_radius_km": 150,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ab_mi8",
+   "name": "ВВС Абхазии (Ми-8: снабжение Ткварчели)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "gudauta",
+   "type": "Mi_8MT",
+   "count": 4,
+   "strike_radius_km": 200,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА; Ми-8 с беженцами сбит у Лата 14.12.1992 - вертолёты летали в Ткварчели",
+   "estimate": true
+  },
+  {
+   "id": "ge_su25",
+   "name": "ВВС Грузии (Су-25)",
+   "side": "blue",
+   "role": "attack",
+   "base": "senaki_kolkhi",
+   "type": "Su_25",
+   "count": 4,
+   "strike_radius_km": 250,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА; Марнеули - вне сцены, Сенаки",
+   "estimate": true
+  },
+  {
+   "id": "ge_l39",
+   "name": "ВВС Грузии (Л-39)",
+   "side": "blue",
+   "role": "attack",
+   "base": "kutaisi",
+   "type": "L_39C",
+   "count": 2,
+   "strike_radius_km": 150,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ge_mi24",
+   "name": "Вертолёты Грузии (Ми-24)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "sukhumi_babushara",
+   "type": "Mi_24P",
+   "count": 8,
+   "strike_radius_km": 150,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА; число - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ge_mi8",
+   "name": "Вертолёты Грузии (Ми-8)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "senaki_kolkhi",
+   "type": "Mi_8MT",
+   "count": 6,
+   "strike_radius_km": 200,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ge_airlift",
+   "name": "Воздушный мост на Сухуми (Ту-134/Ту-154; в DCS - Ан-26)",
+   "side": "blue",
+   "role": "transport",
+   "base": "kutaisi",
+   "type": "An_26B",
+   "count": 4,
+   "strike_radius_km": 400,
+   "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; число и радиус - ОЦЕНКА; 21-23.09 в Бабушаре сбиты Ту-134 и Ту-154",
+   "estimate": true
+  }
+ ],
+ "strategic_stock": {},
+ "variants": [
+  {
+   "name": "base",
+   "title": "Абхазия, сентябрь 1993: штурм Сухуми",
+   "task_rules": {
+    "blue": {
+     "strike_airfield": {
+      "off": true,
+      "why": "Гудаута - база российских войск: удар по ней - война с Россией"
+     }
+    }
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 1,
+  "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "ЗУ-23, ПЗРК",
+     "composition": [
+      {
+       "type": "ZU_23_Emplacement",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "SA_18_Igla_manpad",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "ЗУ-23, ПЗРК",
+     "composition": [
+      {
+       "type": "ZU_23_Emplacement",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "SA_18_Igla_manpad",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "Морские десанты (Тамыш, 2.07.1993), катера; ополчение Мегрелии и сторонники Гамсахурдиа (гражданская война в Грузии); Ту-134/Ту-154 транспортной авиации (в DCS - Ан-26 / Як-40); 'Мхедриони' - в составе грузинских частей."
+}

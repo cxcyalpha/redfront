@@ -29,12 +29,12 @@ CTYPES = {".js": "application/javascript", ".css": "text/css", ".png": "image/pn
 SECTOR = "sector_hamburg.json"     # кампании без поля sector (созданы до театра всей карты)
 THEATRES = [   # (id, сектор, состав сил, название)
     ("germany", "sector_germany.json", "oob_germany.json", "Вся карта: фронт от Балтики до Хофа (1989)"),
-    ("hamburg", "sector_hamburg.json", "oob_hamburg.json", "Сектор Гамбург - Люнебург (полигон)"),
     ("caucasus", "sector_caucasus.json", "oob_caucasus.json", "Кавказ: август 2008 (Южная Осетия и Абхазия)"),
+    ("abkhazia", "sector_abkhazia.json", "oob_abkhazia.json", "Абхазия: сентябрь 1993 (штурм Сухуми)"),
     ("syria", "sector_syria.json", "oob_syria.json", "Сирия - Ливан: июнь 1982 (долина Бекаа)"),
     ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы США, гипотетическая)"),
-    ("vietnam72", "sector_vietnam72.json", "oob_vietnam72.json", "Вьетнам: апрель 1972 (условная география, авианосцы)"),
-    ("vietnam72_lb2", "sector_vietnam72_lb2.json", "oob_vietnam72_lb2.json", "Вьетнам: декабрь 1972, Лайнбэкер-2 (условная география)"),
+    ("vietnam72", "sector_vietnam72.json", "oob_vietnam72.json", "Вьетнам: апрель 1972 (условная география на карте Кавказа, авианосцы)"),
+    ("vietnam72_lb2", "sector_vietnam72_lb2.json", "oob_vietnam72_lb2.json", "Вьетнам: декабрь 1972, Лайнбэкер-2 (условная география на карте Кавказа)"),
     ("golan73", "sector_golan73.json", "oob_golan73.json", "Голаны: октябрь 1973 (Война Судного дня)"),
     ("tankerwar88", "sector_tankerwar88.json", "oob_tankerwar88.json", "Персидский залив: апрель 1988 (Танкерная война)"),
 ]
@@ -213,7 +213,9 @@ def view(st: dict, history: bool = True) -> dict:
     man = st.get("manifest") or {}
     from . import weather as _wx                # погода суток: сводка и вылеты, отменённые по погоде
     wx_lines = _wx.summary(st, st.get("start_hour", 7), i18n.lang(st)).split("\n")
-    wx_cancel = [f"{i18n.L(i18n.lang(st), 'отменён по погоде', 'cancelled by weather')}: {c['title']} ({c['why']})"
+    from . import i18n_en as _en
+    _w = (lambda x: _en.en(x)) if i18n.lang(st) == "en" else (lambda x: x)   # части строки - по отдельности
+    wx_cancel = [f"{i18n.L(i18n.lang(st), 'отменён по погоде', 'cancelled by weather')}: {_w(c['title'])} ({_w(c['why'])})"
                  for c in (st.get("ato") or {}).get("weather_cancelled", [])
                  if c["title"].startswith(st["player_side"] + ":") or (st.get("settings") or {}).get("show_enemy_ato")]
     ent = {e["id"]: e for e in (st.get("ato") or {}).get("entries", [])}

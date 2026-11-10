@@ -66,6 +66,54 @@ PLACES = {
 }
 
 NAMES = {
+    # Абхазия, 1993
+    "Будённовск - вне карты, на Моздок": "Budyonnovsk - off the map, at Mozdok", "Будённовск - вне карты": "Budyonnovsk - off the map",
+    "Иваново - вне карты": "Ivanovo - off the map", "Мариновка - вне карты": "Marinovka - off the map",
+    "Миллерово - вне карты": "Millerovo - off the map", "Морозовск - вне карты": "Morozovsk - off the map",
+    "Шайковка - вне карты": "Shaikovka - off the map", "Алексеевка - Соганлуг": "Alekseevka - Soganlug",
+    "база - Марнеули (в DCS нет) - Вазиани": "base - Marneuli (not in DCS) - Vaziani", "Су-25КМ - Су-25": "Su-25KM - Su-25",
+    "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить": "'Tanks of August' (CAST, 2009) / IIFFMCG report (2009), from memory - to be verified",
+    "циклон": "low pressure", "Марнеули - вне сцены, Сенаки": "Marneuli - off the scene, Senaki",
+    "21-23.09 в Бабушаре сбиты Ту-134 и Ту-154": "21-23.09 a Tu-134 and a Tu-154 were shot down at Babushara",
+    "Ми-8 с беженцами сбит у Лата 14.12.1992 - вертолёты летали в Ткварчели": "a Mi-8 with refugees was shot down near Lata on 14.12.1992 - helicopters flew to Tkvarcheli",
+    "удары по Сухуми приписываются российской авиации": "strikes on Sukhumi are attributed to Russian aviation",
+    "Россия отрицала - спорно, ОЦЕНКА": "Russia denied it - disputed, ESTIMATE",
+    "Су-27 сбит над Сухуми 19.03.1993": "a Su-27 was shot down over Sukhumi on 19.03.1993", "число - ОЦЕНКА": "number - ESTIMATE",
+    "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), from memory - to be verified",
+    "Абхазия, сентябрь 1993: штурм Сухуми": "Abkhazia, September 1993: the storming of Sukhumi",
+    "Абхазия: сентябрь 1993 (штурм Сухуми)": "Abkhazia: September 1993 (storming of Sukhumi)",
+    "Су-25 (скрытая поддержка России, Гудаута)": "Su-25 (covert Russian support, Gudauta)",
+    "Су-27 (скрытая поддержка России, Гудаута)": "Su-27 (covert Russian support, Gudauta)",
+    "ВВС Абхазии (Л-39)": "Abkhaz Air Force (L-39)", "ВВС Абхазии (Ми-8: снабжение Ткварчели)": "Abkhaz Air Force (Mi-8: Tkvarcheli supply)",
+    "ВВС Грузии (Су-25)": "Georgian Air Force (Su-25)", "ВВС Грузии (Л-39)": "Georgian Air Force (L-39)",
+    "Вертолёты Грузии (Ми-24)": "Georgian helicopters (Mi-24)", "Вертолёты Грузии (Ми-8)": "Georgian helicopters (Mi-8)",
+    "Воздушный мост на Сухуми (Ту-134/Ту-154; в DCS - Ан-26)": "Sukhumi air bridge (Tu-134/Tu-154; An-26 in DCS)",
+    "ПВО российского гарнизона Гудауты (Стрела-10, ЗСУ-23-4)": "Russian Gudauta garrison air defence (Strela-10, ZSU-23-4)",
+    "Дивизион С-75 (Сухуми)": "S-75 battalion (Sukhumi)",
+    "Абхазская гвардия (Гумистинский фронт)": "Abkhaz Guard (Gumista front)", "Абхазская гвардия (Гудаутская бригада)": "Abkhaz Guard (Gudauta brigade)",
+    "Добровольцы КГНК (батальоны северокавказских добровольцев)": "CMPC volunteers (North Caucasus volunteer battalions)",
+    "Батальон им. Баграмяна": "Bagramyan battalion", "Гарнизон Ткварчели (Восточный фронт)": "Tkvarcheli garrison (Eastern front)",
+    "Сухумская группировка грузинских войск (Нацгвардия, Мхедриони)": "Georgian Sukhumi group (National Guard, Mkhedrioni)",
+    "Грузинская бригада (Келасури)": "Georgian brigade (Kelasuri)", "Грузинские части в Очамчире (блокада Ткварчели)": "Georgian forces at Ochamchire (Tkvarcheli blockade)",
+    "Резерв (Гали)": "Reserve (Gali)", "Подкрепления из Грузии (воздушный мост на Бабушару)": "Reinforcements from Georgia (air bridge to Babushara)",
+    "Сванские отряды (Кодори)": "Svan detachments (Kodori)", "Мост через Гумисту (Сухуми)": "Gumista bridge (Sukhumi)",
+    "Склад гарнизона (Ткварчели)": "Garrison depot (Tkvarcheli)", "Склад снабжения (Гудаута)": "Supply depot (Gudauta)",
+    "Склад снабжения (Сухуми)": "Supply depot (Sukhumi)", "Склад снабжения (Зугдиди)": "Supply depot (Zugdidi)",
+    "Склад снабжения (Сенаки)": "Supply depot (Senaki)", "Мост через Ингури (Рухи)": "Inguri bridge (Rukhi)",
+    "Гумиста - Сухуми": "Gumista - Sukhumi", "Ткварчели - Очамчире - Гали": "Tkvarcheli - Ochamchire - Gali",
+    "Охота за пусковыми ОТР": "Scud hunt (TBM launchers)", "R-17 (Скад-Б)": "R-17 (Scud-B)",
+    "Р-17 (Скад-Б)": "R-17 (Scud-B)", "9К79-1 Точка-У": "9K79-1 Tochka-U (SS-21)", "9К720 Искандер-М": "9K720 Iskander-M (SS-26)",
+    "BGM-109 Томагавк": "BGM-109 Tomahawk",
+    "5-я ракетная бригада ННА (Демен)": "NVA 5th Missile Brigade (Demen)",
+    "3-я ракетная бригада ННА (Таутенхайн)": "NVA 3rd Missile Brigade (Tautenhain)",
+    "Ракетная бригада 3-й ударной армии ГСВГ (Альтенграбов)": "GSFG 3rd Shock Army missile brigade (Altengrabow)",
+    "Дивизион ОТР Точка-У 58-й армии (Джава)": "58th Army Tochka-U battalion (Java)",
+    "Дивизион ОТРК Искандер (Алагир)": "Iskander battalion (Alagir)",
+    "1961: Берлинский кризис (гипотетическая война)": "1961: Berlin Crisis (hypothetical war)",
+    "в 1961 году тип эпохи, часть и база как в 1985": "in 1961 the type is of the period, unit and base as in 1985",
+    "Ракетная бригада 3-й ударной армии ГСВГ (Р-11, Скад-А) (Альтенграбов)": "GSFG 3rd Shock Army missile brigade (R-11 Scud-A) (Altengrabow)",
+    "1987: наступление НАТО (гипотетическое, упреждающий удар)": "1987: NATO offensive (hypothetical pre-emptive attack)",
+    "ракетные войска (оперативно-тактические ракеты)": "missile troops (tactical ballistic missiles)",
     # --- Кавказ 2008
     "135-й мсп 19-й мсд (58-я армия)": "135th Motor Rifle Regiment, 19th MRD (58th Army)",
     "693-й мсп 19-й мсд (58-я армия)": "693rd Motor Rifle Regiment, 19th MRD (58th Army)",
@@ -293,10 +341,12 @@ NAMES = {
     "Центр: Набатия - Джеззин - Айн-Жальта": "Centre: Nabatieh - Jezzine - Ain Zhalta",
     "Бекаа: Хасбайя - Рашайя - Джуб-Джаннин - Штора": "Bekaa: Hasbaya - Rashaya - Joub Jannine - Chtaura",
     "ДМЗ: Жолинь - Донгха - Куангчи - Хюэ": "DMZ: Gio Linh - Dong Ha - Quang Tri - Hue", "Запад: Ашау - Бастонь - Хюэ": "West: A Shau - Bastogne - Hue",
-    "Ной-Бай (Хама)": "Noi Bai (Hama)", "Кеп (Басиль-Асад)": "Kep (Bassel al-Assad)", "Йенбай (Абу-аль-Духур)": "Yen Bai (Abu al-Duhur)",
-    "Куанглан (Эль-Кусайр)": "Quang Lang (Al Qusayr)", "Байтхыонг (Шайрат)": "Bai Thuong (Shayrat)", "Дананг (Бейрут)": "Da Nang (Beirut)",
-    "Фубай (Кляят)": "Phu Bai (Qlayaat)", "Удорн (Хатай)": "Udorn (Hatay)", "Корат (Инджирлик)": "Korat (Incirlik)",
-    "У-Тапао (Акротири)": "U-Tapao (Akrotiri)",
+    "Ной-Бай (Пашковский)": "Noi Bai (Pashkovsky)", "Кеп (Крымск)": "Kep (Krymsk)", "Йенбай (Майкоп)": "Yen Bai (Maykop)",
+    "Кьенан (Геленджик)": "Kien An (Gelendzhik)", "Донгхой (Гудаута)": "Dong Hoi (Gudauta)", "Дананг (Батуми)": "Da Nang (Batumi)",
+    "Фубай (Кобулети)": "Phu Bai (Kobuleti)", "Удорн (Вазиани)": "Udorn (Vaziani)", "Корат (Тбилиси)": "Korat (Tbilisi)",
+    "У-Тапао (Соганлуг)": "U-Tapao (Soganlug)",
+    "Вьетнам: апрель 1972 (условная география на карте Кавказа, авианосцы)": "Vietnam: April 1972 (notional geography on the Caucasus map, carriers)",
+    "Вьетнам: декабрь 1972, Лайнбэкер-2 (условная география на карте Кавказа)": "Vietnam: December 1972, Linebacker II (notional geography on the Caucasus map)",
     # --- доктрины: названия
     "Общий профиль (без доктрины)": "Generic profile (no doctrine)", "НАТО (Центральный фронт)": "NATO (Central Front)",
     "Варшавский договор": "Warsaw Pact", "США, Вьетнам 1972: налёт 'Альфа' (ВМС) и ударный пакет ВВС": "USA, Vietnam 1972: Navy Alpha strike and USAF strike package",
@@ -435,7 +485,7 @@ MSGS = [
     # авиация, пополнения
     ("пополнение +{n} ЛА, в строю {m}.", "replacements +{n} aircraft, {m} in service."),
     ("пополнение +{n} экипаж(а), экипажей {m}.", "replacements +{n} crew(s), {m} crews."),
-    ("цель не поражена.", "target not hit."), ("потеряно {n} {t}", "lost {n} {t}"), ("потеряно {n}", "lost {n}"),
+    ("цель не поражена.", "target not hit."), ("потеряно {n} {t}", "lost {n} {t|tr}"), ("потеряно {n}", "lost {n}"),
     ("боеспособность цели {a} -> {b}.", "target strength {a} -> {b}."),
     ("повреждение {a} -> {b}.", "damage {a} -> {b}."),
     ("повреждение {a} -> {b}. С аэродрома к вылету ~{c} -> ~{d} ЛА.", "damage {a} -> {b}. Aircraft available at the airfield ~{c} -> ~{d}."),
@@ -661,7 +711,11 @@ MSGS += [
     # погода
     ("антициклон", "high pressure"), ("тыл циклона", "post-frontal"), ("прохождение фронта", "frontal passage"), ("ясно", "clear"),
     ("ветер {d}° {v} м/с (на {h} м - {x})", "wind {d}° {v} m/s ({x} at {h} m)"), ("видимость {k} км", "visibility {k} km"),
-    ("QNH {p} гПа", "QNH {p} hPa"), ("нижняя граница {h} м", "cloud base {h} m"), ("облачность {c}", "cloud {c}"),
+    ("QNH {p} гПа", "QNH {p} hPa"), ("нижняя граница облаков {h} м", "cloud base {h} m"), ("нижняя граница {h} м", "cloud base {h} m"),
+    ("Погода: отменён вылет «{t}» - нижняя граница облаков {h} м.", "Weather: sortie «{t|tr}» cancelled - cloud base {h} m."),
+    ("Погода: отменён вылет «{t}» - {r}.", "Weather: sortie «{t|tr}» cancelled - {r|tr}."),
+    ("{t}, передовая группа", "{t|tr}, forward group"),
+    ("Груз: {n} x {t} по ~{k} т = ~{d} т на склад за рейс.", "Cargo: {n} x {t} at ~{k} t = ~{d} t to the depot per trip."), ("облачность {c}", "cloud {c}"),
     # подвеска, план
     ("{a} -> снято", "{a} -> removed"), ("в плане дня задач {n}", "{n} tasks in the daily plan"), ("номер {n} вне списка (сначала plan)", "number {n} is out of range (plan first)"),
     ("перебазировать можно только свою авиачасть", "only own air units can be rebased"), ("план противника не правится", "the enemy plan cannot be edited"),
@@ -756,6 +810,9 @@ MSGS += [
     ("пара МиГ-21", "MiG-21 pair"), ("пара прикрытия МиГ-21", "MiG-21 escort pair"), ("РЛС {t} восстановлена.", "radar {t} restored."), ("РЛС исправны", "radars operational"),
     ("плановая смена позиции ({k} км).", "routine relocation ({k} km)."), ("позиция раскрыта, смена позиции ({k} км).", "position revealed, relocating ({k} km)."), ("ПЗРК", "MANPADS"),
     ("{a} (ОЦЕНКА)", "{a|tr} (ESTIMATE)"),
+    ("Ракетный удар (сторона {s}) - {r} по объекту {t}, пусков {n}, перехвачено {i}, попаданий {h}.",
+     "Missile strike ({s} side) - {r|tr} on {t|tr}, launched {n}, intercepted {i}, hits {h}."),
+    ("План пусков ракет на сутки - {n} ({s}).", "Missile launches planned for the day - {n} ({s})."),
 ]
 # от длинных к коротким: частный шаблон раньше общего
 MSGS.sort(key=lambda m: -len(re.sub(r"\{\w+\}", "", m[0])))
@@ -787,6 +844,9 @@ def main() -> None:
     cyr = re.compile("[А-Яа-яЁё]")
     extra = {}
     def walk(x, k=None):
+        if isinstance(x, dict) and isinstance(x.get("name"), str) and isinstance(x.get("name_en"), str) \
+                and x["name"] not in names:      # перевод каталога - главнее (одно русское имя - один перевод)
+            extra.setdefault(x["name"], x["name_en"])      # перевод имени задан в данных (пресет 1961 - по имени части 80-х)
         if isinstance(x, dict):
             for kk, v in x.items():
                 walk(v, kk)

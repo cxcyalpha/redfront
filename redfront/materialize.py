@@ -288,6 +288,22 @@ def gci_site(state: dict, unit: dict) -> dict:
             "core": True}                       # бюджет миссии КРУ не трогает: одна машина, нужна игроку
 
 
+def ssm_site(state: dict, unit: dict) -> dict:
+    """Пусковые ОТР (Скад, Точка, Искандер) на позиции: модель - по ракете части (strategic.MISSILES dcs)."""
+    from . import strategic
+    p = model.unit_pos(state, unit)
+    m = strategic.MISSILES.get(unit.get("missile", "scud"), {})
+    dcs_type = m.get("dcs")                      # модель пусковой - по ракете (Точка - модель Скада, Искандер - CHAP_9K720_HE)
+    vehicles = []
+    for c in unit["composition"]:
+        for i in range(int(round(model.alive_by_type(unit)[c["type"]]))):
+            t = dcs_type if (dcs_type and c.get("role") == "launcher") else c["type"]
+            vehicles.append({"name": f"{unit['id']}#{len(vehicles) + 1:02d}", "type": t, "lat": p["lat"] + len(vehicles) * 0.0006,
+                             "lon": p["lon"], "weight": 1.0})
+    return {"unit": unit["id"], "side": unit["side"], "kind": "ssm_site", "name": unit["id"], "vehicles": vehicles,
+            "waypoints": [], "speed_kmh": 0, "core": True}
+
+
 def _on_foot(t: str) -> bool:
     """Пеший тип (расчёт ПЗРК, пехотинец) - на марше едет в машине, отдельно в колонне не ставится."""
     tl = t.lower()
@@ -677,6 +693,13 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     for u in units.values():                     # КРУ - все исправные (по одной машине; наведение - на 250 км)
         if model.category(u) == "gci" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0:
             groups.append(gci_site(state, u))
+    fire = {pl["unit"] for pl in state.get("ssm_plan") or []}
+    tgt_id = task.get("target")
+    for u in units.values():                     # пусковые ОТР: с пусками суток, рядом с объектом задачи или цель задачи
+        if (model.category(u) == "ssm" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
+                and u["id"] not in placed and (u["id"] in fire or u["id"] == tgt_id
+                                               or model.dist_km(model.unit_pos(state, u), center) <= DETAIL_KM)):
+            groups.append(ssm_site(state, u))
     core = {g["unit"] for g in groups if g.get("core")}
     # приданная ПВО части уже в окне (угроза коридора) - второй раз с частью не ставится (была двумя группами DCS)
     groups = [g for g in groups if g["vehicles"] and (g.get("core") or g["unit"] not in core)]

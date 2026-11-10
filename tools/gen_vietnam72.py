@@ -1,16 +1,18 @@
-"""Генератор сценария "Вьетнам, апрель 1972" на карте DCS Syria (условная география): data/sector_vietnam72.json,
+"""Генератор сценария "Вьетнам, апрель 1972" на карте DCS Caucasus (условная география): data/sector_vietnam72.json,
 data/oob_vietnam72.json.
 
 Сценарий: Пасхальное наступление ДРВ (с 30.03.1972) через демилитаризованную зону на Куангчи и Хюэ и воздушная
 кампания США: "Freedom Train" (с 6.04 - удары по ДРВ южнее 20-й параллели), "Freedom Porch Bravo" (16.04 - B-52 по
 Хайфону), "Лайнбэкер" (с 10.05 - Ханой и Хайфон открыты для ударов). Старт - 6 апреля 1972 г.
 
-Условная география (не перенос театра: масштаб боёв, не карта): Северный Вьетнам - побережье Сирии (Ханой - Хама,
-Хайфон - Латакия, Тханьхоа - Баниас, Винь - Тартус, Донгхой - Хамидия), ДМЗ (река Бенхай) - река Нахр-эль-Кабир на
-границе Сирии и Ливана, Южный Вьетнам - север Ливана (Донгха, Куангчи - Аккар, Хюэ - Триполи, Дананг - аэропорт
-Бейрута). Тонкинский залив ("Янки-стейшн") - море у Тартуса. Таиланд - юг Турции (Хатай, Инджирлик), Гуам и У-Тапао
-- Кипр (Акротири). Расстояния короче вьетнамских (ОЦЕНКА: вдвое); соотношение "авианосец - побережье - глубина"
-сохранено.
+Условная география на карте Caucasus (не перенос театра - схема: дельта, побережье, горы, залив). Северный Вьетнам -
+Кубань и черноморское побережье России: Ханой - Краснодар (дельта - Кубанская низменность, рисовые чеки), Хайфон -
+Новороссийск, Тханьхоа (мост Хамронг) - Туапсе, Винь - Сочи, Донгхой - Сухуми; перевал Мугиа ("тропа Хо Ши Мина") -
+Красная Поляна. ДМЗ (река Бенхай) - река Ингури. Южный Вьетнам - Мегрелия, Гурия, Аджария: Донгха - Зугдиди, Куангчи -
+Хоби, Хюэ - Поти, Фубай - Кобулети, Дананг - Батуми (перевал Хайван - Чакви). Тонкинский залив ("Янки-стейшн") - море
+у Туапсе. Таиланд (Удорн, Корат) и У-Тапао - за горами: Вазиани, Тбилиси, Соганлуг. Расстояния - близки к
+вьетнамским (Краснодар - Ингури ~400 км, Ханой - ДМЗ ~500 км); зелёный рельеф и субтропики побережья ближе к Вьетнаму,
+чем пустыня карты Syria (прежняя география).
 
 Источники (общие, проверять): M. Michel, "Clashes: Air Combat over North Vietnam 1965-1972" (1997); D. Andrade,
 "Trial by Fire: The 1972 Easter Offensive" (1995); W. Momyer, "Airpower in Three Wars" (1978); A. Lavalle (ред.),
@@ -27,31 +29,31 @@ from pathlib import Path
 DATA = Path(__file__).resolve().parent.parent / "redfront" / "data"
 SRC = "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить"
 
-PLACES = {   # условное имя: (широта, долгота, сторона 6.04.1972) - точка на карте Syria (что это на карте - в комментарии)
+PLACES = {   # условное имя: (широта, долгота, сторона 6.04.1972) - точка на карте Caucasus (что это на карте - в комментарии)
     # Северный Вьетнам
-    "Hanoi": (35.135, 36.750, "red"),          # Хама
-    "ThaiNguyen": (35.250, 36.570, "red"),     # Мхарде
-    "HaiDuong": (35.445, 36.060, "red"),       # Кардаха
-    "Haiphong": (35.520, 35.790, "red"),       # Латакия
-    "NamDinh": (35.360, 35.930, "red"),        # Джебла
-    "PhuLy": (35.070, 36.340, "red"),          # Масьяф
-    "ThanhHoa": (35.180, 35.950, "red"),       # Баниас
-    "Vinh": (34.890, 35.890, "red"),           # Тартус
-    "NinhBinh": (34.730, 36.710, "red"),       # Хомс
-    "DongHoi": (34.720, 35.940, "red"),        # Хамидия
-    "MuGia": (34.670, 36.260, "red"),          # Телль-Калах (перевал Мугиа - начало "Тропы Хо Ши Мина")
-    # ДМЗ и Южный Вьетнам (север Ливана); занятое ДРВ к 6.04
-    "GioLinh": (34.630, 35.985, "red"),        # Арида
-    "CampCarroll": (34.560, 36.170, "red"),    # Аккар (лагерь Кэррол сдан 2.04)
-    "KheSanh": (34.500, 36.400, "red"),        # Хермель-север
-    "ALuoi": (34.330, 36.250, "red"),          # долина Ашау
-    "DongHa": (34.555, 35.990, "blue"),        # Аабде - Кляят
-    "QuangTri": (34.545, 36.080, "blue"),      # Халба
-    "Hue": (34.436, 35.850, "blue"),           # Триполи
-    "Bastogne": (34.350, 36.000, "blue"),      # огневая база "Бастонь" (горы Згарты)
-    "PhuBai": (34.255, 35.660, "blue"),        # Батрун
-    "HaiVan": (34.120, 35.650, "blue"),        # Библ (перевал Хайван)
-    "DaNang": (33.900, 35.520, "blue"),        # Бейрут
+    "Hanoi": (45.035, 38.975, "red"),          # Краснодар
+    "ThaiNguyen": (44.610, 40.100, "red"),     # Майкоп (металлургия Тхайнгуена - промышленность Майкопа)
+    "HaiDuong": (45.260, 38.125, "red"),       # Славянск-на-Кубани
+    "Haiphong": (44.720, 37.770, "red"),       # Новороссийск
+    "NamDinh": (44.930, 37.990, "red"),        # Крымск
+    "PhuLy": (44.630, 39.130, "red"),          # Горячий Ключ
+    "ThanhHoa": (44.100, 39.075, "red"),       # Туапсе
+    "Vinh": (43.600, 39.730, "red"),           # Сочи
+    "NinhBinh": (44.470, 39.730, "red"),       # Апшеронск
+    "DongHoi": (43.003, 41.015, "red"),        # Сухуми
+    "MuGia": (43.680, 40.200, "red"),          # Красная Поляна (перевал Мугиа - начало "Тропы Хо Ши Мина")
+    # ДМЗ (Ингури) и Южный Вьетнам; занятое ДРВ к 6.04
+    "GioLinh": (42.627, 41.737, "red"),        # Гали
+    "CampCarroll": (42.854, 41.684, "red"),    # Ткварчели (лагерь Кэррол сдан 2.04)
+    "KheSanh": (42.720, 42.050, "red"),        # Джвари
+    "ALuoi": (42.410, 42.380, "red"),          # Мартвили (долина Ашау)
+    "DongHa": (42.509, 41.871, "blue"),        # Зугдиди
+    "QuangTri": (42.315, 41.898, "blue"),      # Хоби
+    "Hue": (42.146, 41.672, "blue"),           # Поти
+    "Bastogne": (42.270, 42.067, "blue"),      # Сенаки (огневая база "Бастонь")
+    "PhuBai": (41.820, 41.776, "blue"),        # Кобулети
+    "HaiVan": (41.725, 41.735, "blue"),        # Чакви (перевал Хайван)
+    "DaNang": (41.643, 41.640, "blue"),        # Батуми
 }
 LINKS = [
     ("Hanoi", "ThaiNguyen"), ("Hanoi", "PhuLy"), ("Hanoi", "NinhBinh"), ("ThaiNguyen", "HaiDuong"), ("HaiDuong", "Haiphong"),
@@ -68,36 +70,36 @@ ZONES = [{"places": ["Hanoi", "ThaiNguyen", "HaiDuong", "Haiphong"], "until_day"
           "why": "Ханой и Хайфон закрыты для ударов до 'Лайнбэкера' (10.05.1972); 'Freedom Train' - только юг ДРВ"}]
 
 AIRBASES = {
-    "red": ["Hama", "Bassel Al-Assad", "Abu al-Duhur", "Al Qusayr", "Shayrat"],   # Ной-Бай, Кеп, Йенбай, Куанглан, Байтхыонг
-    "blue": ["Beirut-Rafic Hariri", "Rene Mouawad", "Hatay", "Incirlik", "Akrotiri"],   # Дананг, Фубай, Удорн, Корат, У-Тапао
+    "red": ["Krasnodar-Pashkovsky", "Krymsk", "Maykop-Khanskaya", "Gelendzhik", "Gudauta"],   # Ной-Бай, Кеп, Йенбай, Кьенан, Донгхой
+    "blue": ["Batumi", "Kobuleti", "Vaziani", "Tbilisi-Lochini", "Soganlug"],   # Дананг, Фубай, Удорн, Корат, У-Тапао
 }
-BASE_ALIAS = {"Hama": "Ной-Бай (Хама)", "Bassel Al-Assad": "Кеп (Басиль-Асад)", "Abu al-Duhur": "Йенбай (Абу-аль-Духур)",
-              "Al Qusayr": "Куанглан (Эль-Кусайр)", "Shayrat": "Байтхыонг (Шайрат)", "Beirut-Rafic Hariri": "Дананг (Бейрут)",
-              "Rene Mouawad": "Фубай (Кляят)", "Hatay": "Удорн (Хатай)", "Incirlik": "Корат (Инджирлик)",
-              "Akrotiri": "У-Тапао (Акротири)"}
+BASE_ALIAS = {"Krasnodar-Pashkovsky": "Ной-Бай (Пашковский)", "Krymsk": "Кеп (Крымск)", "Maykop-Khanskaya": "Йенбай (Майкоп)",
+              "Gelendzhik": "Кьенан (Геленджик)", "Gudauta": "Донгхой (Гудаута)", "Batumi": "Дананг (Батуми)",
+              "Kobuleti": "Фубай (Кобулети)", "Vaziani": "Удорн (Вазиани)", "Tbilisi-Lochini": "Корат (Тбилиси)",
+              "Soganlug": "У-Тапао (Соганлуг)"}
 CARRIERS = {   # 'Янки-стейшн': авианосцы - реальные корабли DCS (имя, класс, широта, долгота, TACAN, позывной, ICLS, МГц, группа).
     # Исторически в апреле 1972 г. - Kitty Hawk, Constellation, Coral Sea, Hancock: в DCS их нет. Вместо них - USS Forrestal
     # (CV-59; сам воевал у Вьетнама в 1967 г.) и USS Carl Vinson (CVN-70; в строю с 1982 г. - АНАХРОНИЗМ, ДОПУЩЕНИЕ).
     # Позиции - ОЦЕНКА.
-    "cv63": ("USS Forrestal (CV-59)", "Forrestal", 35.05, 35.45, 59, "FOR", 3, 127.5, "blue_csg_forrestal"),
-    "cv64": ("USS Carl Vinson (CVN-70)", "VINSON", 34.80, 35.40, 70, "VIN", 4, 128.5, "blue_csg_vinson"),
+    "cv63": ("USS Forrestal (CV-59)", "Forrestal", 43.95, 38.55, 59, "FOR", 3, 127.5, "blue_csg_forrestal"),
+    "cv64": ("USS Carl Vinson (CVN-70)", "VINSON", 43.55, 39.05, 70, "VIN", 4, 128.5, "blue_csg_vinson"),
 }
 from naval_common import from_template as T   # noqa: E402
 NAVAL = [   # корабельные группы: охранение - корабли DCS (Ticonderoga, Perry - в 1972 г. ещё не в строю: вместо крейсеров
     # Belknap/Leahy и эсминцев - ДОПУЩЕНИЕ), имена - реальные корабли класса
-    ("blue_csg_forrestal", "Авианосная ударная группа USS Forrestal", "blue", 35.05, 35.45,
+    ("blue_csg_forrestal", "Авианосная ударная группа USS Forrestal", "blue", 43.95, 38.55,
      T("us_csg_1972", ("Forrestal", "carrier", "USS Forrestal (CV-59)"),
        ["USS Sterett (DLG-31)", "USS Higbee (DD-806)", "USS Lloyd Thomas (DD-764)"]), "CSG 59"),
-    ("blue_csg_vinson", "Авианосная ударная группа USS Carl Vinson", "blue", 34.80, 35.40,
+    ("blue_csg_vinson", "Авианосная ударная группа USS Carl Vinson", "blue", 43.55, 39.05,
      T("us_csg_1972", ("VINSON", "carrier", "USS Carl Vinson (CVN-70)"),
        ["USS Biddle (DLG-34)", "USS Berkeley (DDG-15)", "USS Buchanan (DDG-14)"]), "CSG 70"),
-    ("red_fac_haiphong", "Торпедные катера ВМС ДРВ (Хайфон)", "red", 35.55, 35.70,
+    ("red_fac_haiphong", "Торпедные катера ВМС ДРВ (Хайфон)", "red", 44.66, 37.70,
      [("Type_021_1", "boat", "Катер №1"), ("Type_021_1", "boat", "Катер №2"), ("Type_021_1", "boat", "Катер №3")],
      "пр. 183 (P-6) и пр. 123 - в DCS Type 021-1; 19.04.1972 у Донгхоя атаковали эсминцы США (с МиГ-17)"),
-    ("red_convoy_haiphong", "Советские транспорты у Хайфона", "red", 35.62, 35.60,
+    ("red_convoy_haiphong", "Советские транспорты у Хайфона", "red", 44.62, 37.55,
      [("Dry_cargo_ship_1", "transport", "Транспорт №1"), ("Dry_cargo_ship_2", "transport", "Транспорт №2")],
      "морской подвоз ДРВ: удары по судам СССР были запрещены (с 9.05 - минирование Хайфона)"),
-    ("blue_convoy_danang", "Транспорты снабжения (Дананг)", "blue", 33.95, 35.30,
+    ("blue_convoy_danang", "Транспорты снабжения (Дананг)", "blue", 41.70, 41.45,
      [("HandyWind", "transport", "SS Transcolumbia"), ("Dry_cargo_ship_1", "transport", "SS Green Wave")], ""),
 ]
 SEA_LANES = [   # морской подвоз: (id, сторона, порт - пункт со складом, конвой - группа флота, т/сутки - ОЦЕНКА)
@@ -144,11 +146,11 @@ AIRMOBILE = [   # (id, имя, пункт, человек) - аэромобил�
 ]
 S75 = [("p-19 s-125 sr", "radar", 1), ("SNR_75V", "radar", 1), ("S_75M_Volhov", "launcher", 6)]
 # 361-я, 363-я, 365-я дивизии ПВО: дивизионы С-75 (места - ОЦЕНКА, по районам: Ханой - Хайфон - юг ДРВ - у ДМЗ)
-SAM_POS = {"Ханой": [(35.20, 36.70), (35.08, 36.82), (35.18, 36.85), (35.06, 36.66), (35.22, 36.78), (35.12, 36.60)],
-           "Хайфон": [(35.55, 35.85), (35.47, 35.82), (35.58, 35.95)],
-           "Тханьхоа": [(35.15, 36.00), (35.22, 35.98)],
-           "Винь": [(34.92, 35.95), (34.86, 35.97)],
-           "Донгхой": [(34.70, 36.02)]}
+SAM_POS = {"Ханой": [(45.10, 38.90), (44.98, 39.05), (45.08, 39.10), (44.97, 38.88), (45.13, 39.00), (45.02, 38.80)],
+           "Хайфон": [(44.76, 37.85), (44.68, 37.86), (44.80, 37.98)],
+           "Тханьхоа": [(44.14, 39.12), (44.08, 39.18)],
+           "Винь": [(43.64, 39.78), (43.56, 39.85)],
+           "Донгхой": [(43.04, 40.98)]}
 SAMS = [(f"red_s75_{i}_{k}", f"Дивизион С-75 ({area}) №{k}", "red", "sam_medium", S75, la, lo)
         for i, (area, pos) in enumerate(SAM_POS.items()) for k, (la, lo) in enumerate(pos, 1)]
 DEPOTS = [("red_depot_haiphong", "Нефтебаза и порт Хайфона", "red", "Haiphong"),
@@ -157,14 +159,17 @@ DEPOTS = [("red_depot_haiphong", "Нефтебаза и порт Хайфона"
           ("red_depot_donghoi", "Перевалка Донгхой", "red", "DongHoi"),
           ("blue_depot_danang", "Склады Дананга", "blue", "DaNang"),
           ("blue_depot_hue", "Склады Хюэ", "blue", "Hue")]
-BRIDGES = [   # мосты - места ОЦЕНКА (середина участка дороги)
-    {"id": "br_thanhhoa", "name": "Мост Тханьхоа (Хамронг)", "lat": 35.27, "lon": 35.94, "links": [["NamDinh", "ThanhHoa"]],
+BRIDGES = [   # мосты - на участках дорог (место - середина участка, уточняется зондом карты)
+    {"id": "br_thanhhoa", "name": "Мост Тханьхоа (Хамронг)", "links": [["NamDinh", "ThanhHoa"]],
      "source": "условно: середина участка Намдинь - Тханьхоа"},
-    {"id": "br_doumer", "name": "Мост Думера (Ханой)", "lat": 35.19, "lon": 36.66, "links": [["Hanoi", "ThaiNguyen"]],
+    {"id": "br_doumer", "name": "Мост Думера (Ханой)", "links": [["Hanoi", "ThaiNguyen"]],
      "source": "условно: середина участка Ханой - Тхайнгуен"},
-    {"id": "br_dongha", "name": "Мост Донгха", "lat": 34.59, "lon": 35.99, "links": [["GioLinh", "DongHa"]],
-     "source": "условно: середина участка Жолинь - Донгха"},
+    {"id": "br_dongha", "name": "Мост Донгха", "links": [["GioLinh", "DongHa"]],
+     "source": "условно: середина участка Жолинь - Донгха (река Ингури - река Бенхай)"},
 ]
+for _b in BRIDGES:
+    _a, _c = (PLACES[x] for x in _b["links"][0])
+    _b["lat"], _b["lon"] = round((_a[0] + _c[0]) / 2, 3), round((_a[1] + _c[1]) / 2, 3)
 F4_NOTE = "F-4J/B - F-14A: палубного F-4 в DCS нет (F-4E с авианосца не летает), F-14 - анахронизм (в строю с 1974)"
 AIR = [   # (id, имя, сторона, роль, тип, база, число, радиус км, примечание)
     ("us_vf114", "VF-114, VF-213 (F-4J, Forrestal)", "blue", "fighter", "F_14A_135_GR_Early", "cv63", 24, 500, F4_NOTE),
@@ -176,29 +181,29 @@ AIR = [   # (id, имя, сторона, роль, тип, база, число,
     ("us_va_con", "VA-146, VA-147 (A-7E), Carl Vinson", "blue", "fighter_bomber", "FA_18C_hornet", "cv64", 24, 500, "A-7E - F/A-18C"),
     ("us_va165", "VA-165 (A-6A, Carl Vinson)", "blue", "fighter_bomber", "A6E", "cv64", 12, 600, "A-6A - A-6E"),
     ("us_e2_con", "VAW-116 (E-2B)", "blue", "awacs", "E_2C", "cv64", 4, 1000, "E-2B - E-2C"),
-    ("us_366", "366-е тактическое крыло (F-4E, Дананг)", "blue", "fighter_bomber", "F_4E_45MC", "Beirut-Rafic Hariri", 36, 500, ""),
-    ("us_432", "432-е разведывательное крыло (F-4D/E, Удорн): MiGCAP", "blue", "fighter", "F_4E_45MC", "Hatay", 36, 600, "F-4D - F-4E"),
+    ("us_366", "366-е тактическое крыло (F-4E, Дананг)", "blue", "fighter_bomber", "F_4E_45MC", "Batumi", 36, 500, ""),
+    ("us_432", "432-е разведывательное крыло (F-4D/E, Удорн): MiGCAP", "blue", "fighter", "F_4E_45MC", "Vaziani", 36, 600, "F-4D - F-4E"),
     ("us_8tfw", "8-е тактическое крыло 'Волчья стая' (F-4D, Убон): управляемые бомбы", "blue", "fighter_bomber", "F_4E_45MC",
-     "Incirlik", 36, 600, "F-4D - F-4E"),
-    ("us_ww", "17-я эскадрилья 'Дикая ласка' (F-105G, Корат)", "blue", "fighter_bomber", "F_4E_45MC", "Incirlik", 12, 600,
+     "Tbilisi-Lochini", 36, 600, "F-4D - F-4E"),
+    ("us_ww", "17-я эскадрилья 'Дикая ласка' (F-105G, Корат)", "blue", "fighter_bomber", "F_4E_45MC", "Tbilisi-Lochini", 12, 600,
      "F-105G - F-4E"),
-    ("us_kc135", "KC-135 (Таиланд)", "blue", "tanker", "KC_135", "Incirlik", 4, 2000, ""),
-    ("us_b52", "B-52D/G (У-Тапао, Гуам): 'Арк Лайт', 'Freedom Porch'", "blue", "bomber", "B_52H", "Akrotiri", 24, 2000,
+    ("us_kc135", "KC-135 (Таиланд)", "blue", "tanker", "KC_135", "Tbilisi-Lochini", 4, 2000, ""),
+    ("us_b52", "B-52D/G (У-Тапао, Гуам): 'Арк Лайт', 'Freedom Porch'", "blue", "bomber", "B_52H", "Soganlug", 24, 2000,
      "B-52D/G - B-52H"),
-    ("us_37arrs", "37-я спасательная эскадрилья (HH-53, Дананг)", "blue", "transport_helo", "CH_53E", "Beirut-Rafic Hariri", 6,
+    ("us_37arrs", "37-я спасательная эскадрилья (HH-53, Дананг)", "blue", "transport_helo", "CH_53E", "Batumi", 6,
      200, "HH-53 - CH-53E"),
-    ("us_ah1", "Армейские AH-1G (Фубай)", "blue", "attack_helo", "AH_1W", "Rene Mouawad", 24, 120,
+    ("us_ah1", "Армейские AH-1G (Фубай)", "blue", "attack_helo", "AH_1W", "Kobuleti", 24, 120,
      "AH-1G - AH-1W; два кавалерийских эскадрона армии США в I корпусе - ОЦЕНКА"),
-    ("us_uh1", "Вертолётные роты армии США (UH-1H, Дананг)", "blue", "transport_helo", "UH_1H", "Beirut-Rafic Hariri", 24, 150,
+    ("us_uh1", "Вертолётные роты армии США (UH-1H, Дананг)", "blue", "transport_helo", "UH_1H", "Batumi", 24, 150,
      "1-я авиационная бригада: подъём рот АРВН"),
-    ("vn_uh1", "ВВС Южного Вьетнама (UH-1H, Фубай)", "blue", "transport_helo", "UH_1H", "Rene Mouawad", 16, 150, ""),
-    ("r_921", "921-й истребительный полк 'Красная звезда' (МиГ-21ПФ/МФ, Ной-Бай)", "red", "fighter", "MiG_21Bis", "Hama", 30, 250,
+    ("vn_uh1", "ВВС Южного Вьетнама (UH-1H, Фубай)", "blue", "transport_helo", "UH_1H", "Kobuleti", 16, 150, ""),
+    ("r_921", "921-й истребительный полк 'Красная звезда' (МиГ-21ПФ/МФ, Ной-Бай)", "red", "fighter", "MiG_21Bis", "Krasnodar-Pashkovsky", 30, 250,
      "МиГ-21ПФ/МФ - МиГ-21бис"),
-    ("r_927", "927-й истребительный полк 'Ламшон' (МиГ-21, Кеп)", "red", "fighter", "MiG_21Bis", "Bassel Al-Assad", 24, 250, ""),
-    ("r_923", "923-й истребительный полк 'Йенбай' (МиГ-17, Кеп)", "red", "fighter", "MiG_15bis", "Bassel Al-Assad", 24, 200,
+    ("r_927", "927-й истребительный полк 'Ламшон' (МиГ-21, Кеп)", "red", "fighter", "MiG_21Bis", "Krymsk", 24, 250, ""),
+    ("r_923", "923-й истребительный полк 'Йенбай' (МиГ-17, Кеп)", "red", "fighter", "MiG_15bis", "Krymsk", 24, 200,
      "МиГ-17 - МиГ-15бис"),
-    ("r_925", "925-й истребительный полк (J-6/МиГ-19, Йенбай)", "red", "fighter", "MiG_19P", "Abu al-Duhur", 20, 250, "J-6 - МиГ-19П"),
-    ("r_fwd", "Передовая группа МиГ-21 (Куанглан)", "red", "fighter", "MiG_21Bis", "Al Qusayr", 8, 200, ""),
+    ("r_925", "925-й истребительный полк (J-6/МиГ-19, Йенбай)", "red", "fighter", "MiG_19P", "Maykop-Khanskaya", 20, 250, "J-6 - МиГ-19П"),
+    ("r_fwd", "Передовая группа МиГ-21 (Куанглан)", "red", "fighter", "MiG_21Bis", "Gudauta", 8, 200, ""),
 ]
 AD_TEMPLATES = {   # ствольная зенитка ДРВ - самая плотная ПВО эпохи: у каждого моста, склада и аэродрома
     "red": {"short": [{"name": "КС-19, С-60, ЗУ-23", "composition": [("KS_19", "launcher", 2), ("S_60_Type59_Artillery", "launcher", 4),
@@ -211,8 +216,8 @@ def bid_of(n):
 
 
 def main() -> None:
-    from dcs.terrain import Syria
-    terrain = Syria()
+    from dcs.terrain import Caucasus
+    terrain = Caucasus()
     places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s} for n, (la, lo, s) in PLACES.items()}
     adj = {n: set() for n in places}
     for a, b in LINKS:
@@ -234,12 +239,12 @@ def main() -> None:
                       "icls": icls or None, "freq": f, "naval": nv, "estimate": True}
                 for cid, (n, t, la, lo, tc, tid, icls, f, nv) in CARRIERS.items()}
     sector = {
-        "_about": "Вьетнам, апрель 1972 - условная география на карте Syria (см. tools/gen_vietnam72.py). Координаты - точки "
-                  "карты Syria, имена - вьетнамские.",
-        "theatre": "syria", "places": places, "airbases": airbases, "carriers": carriers,
+        "_about": "Вьетнам, апрель 1972 - условная география на карте Caucasus (см. tools/gen_vietnam72.py). Координаты - точки "
+                  "карты Caucasus, имена - вьетнамские.",
+        "theatre": "caucasus", "places": places, "airbases": airbases, "carriers": carriers,
         "links": [list(l) for l in LINKS], "supply_entry": SUPPLY_ENTRY, "off_limits": OFF_LIMITS,
         "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
-        "naval_bases": {"red": [{"name": "Хайфон", "lat": 35.53, "lon": 35.76}]},
+        "naval_bases": {"red": [{"name": "Хайфон", "lat": 44.72, "lon": 37.79}]},
         "asm_stock": {"blue": {"count": 0, "per_day": 0, "note": "AGM-84 Harpoon - с 1977 г.; 1972 - бомбы (Mk 20 Rockeye)"}, "red": {"count": 0, "per_day": 0, "note": "у ВВС ДРВ ПКР нет: 19.04.1972 - бомбы МиГ-17"}},   # запас авиационных ПКР сторон (naval.use_air_asm; ОЦЕНКА)
         "air_limits": {"blue": [], "red": []},   # авиация бьёт по всему Северу (кроме зон по дням - task_rules _zones)
         "axes": {k: v["title"] for k, v in AXES.items()},
@@ -292,8 +297,8 @@ def main() -> None:
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
                       "estimate": True, **({"tasks_only": ["csar"]} if uid == "us_37arrs" else {})})
     oob = {
-        "_about": "Вьетнам, апрель 1972: Пасхальное наступление и воздушная кампания США (условная география, карта Syria).",
-        "theatre": "syria",
+        "_about": "Вьетнам, апрель 1972: Пасхальное наступление и воздушная кампания США (условная география, карта Caucasus).",
+        "theatre": "caucasus",
         "preset": {"title": "Апрель 1972: Вьетнам, Пасхальное наступление", "year": 1972, "date": "1972-04-06"},
         "date": "1972-04-06", "countries": {"red": "Vietnam", "blue": "USA"}, "doctrine": {"blue": "us72", "red": "vpaf72"}, "units": units,
         "variants": [{"name": "base", "title": "Апрель 1972: 'Freedom Train' и Пасхальное наступление",
@@ -350,7 +355,7 @@ def linebacker2(sector: dict, oob: dict) -> None:
     ob["units"] = units
     ob["preset"] = {"title": "Декабрь 1972: 'Лайнбэкер-2'", "year": 1972, "date": "1972-12-18"}
     ob["date"] = "1972-12-18"
-    ob["_about"] = "Вьетнам, 'Лайнбэкер-2' (18-29.12.1972): условная география на карте Syria. tools/gen_vietnam72.py."
+    ob["_about"] = "Вьетнам, 'Лайнбэкер-2' (18-29.12.1972): условная география на карте Caucasus. tools/gen_vietnam72.py."
     ob["variants"] = [{"name": "base", "title": "Декабрь 1972: 'Лайнбэкер-2'",
                        "posture": {"red": "defense", "blue": "defense"},
                        "task_rules": {"blue": {"cas_contact": {"off": True, "why": "фронт стоит; усилия - на Север"},

@@ -780,6 +780,33 @@ def gabriel(pos: dict) -> set[tuple[str, str]]:
     return out
 
 
+SSM = [   # ракетные бригады (Р-17 Скад-Б): (id, имя, ракета, пусковых в модели, широта, долгота, источник) - места ОЦЕНКИ
+    ("nva_5rbr", "5-я ракетная бригада ННА (Демен)", "scud", 6, 53.63, 11.75, "5. Raketenbrigade NVA, Demen - по памяти, проверить"),
+    ("nva_3rbr", "3-я ракетная бригада ННА (Таутенхайн)", "scud", 6, 50.93, 12.08, "3. Raketenbrigade NVA, Tautenhain - по памяти, проверить"),
+    ("gsvg_rbr", "Ракетная бригада 3-й ударной армии ГСВГ (Альтенграбов)", "scud", 6, 52.16, 12.17,
+     "ракетные бригады армий ГСВГ (Р-17) - номер и место ОЦЕНКА"),
+]
+NATO_ATTACK_PRESET = 1987
+# Наступление НАТО (гипотетическое): у НАТО не было плана наступления на ГДР - только передовая оборона и, с 1982
+# (AirLand Battle, FOFA), удары по вторым эшелонам и контрудары. Сценарий - 'что если': НАТО по данным разведки о
+# готовящемся ударе ОВД (как в кризис Able Archer, 1983) бьёт первым. Оси - зеркально осям ОВД: корпус LANDJUT -
+# Мекленбург, I NL/I GE - Хагенов-Пархим, I BR - Альтмарк, I BE/III US - Магдебург, III GE - Гарц-Галле, V US -
+# Тюрингия (Фульдский коридор наоборот), VII US - Майнинген-Зуль и Плауэн-Гера. ОВД - в обороне в исходных районах.
+NATO_ATTACK = {
+    "title": "1987: наступление НАТО (гипотетическое, упреждающий удар)",
+    "posture": {"blue": "offense", "red": "defense"},
+    "objectives": {"blue": {"north": ["Grevesmuhlen", "Wismar", "Schwerin", "Rostock"],
+                            "elbe": ["Boizenburg", "Hagenow", "Ludwigslust", "Parchim"],
+                            "altmark": ["Salzwedel", "Gardelegen", "Stendal"],
+                            "center": ["Haldensleben", "Magdeburg", "Burg"],
+                            "harz": ["Halberstadt", "Nordhausen", "Sangerhausen", "Halle"],
+                            "fulda": ["Eisenach", "Gotha", "Erfurt", "Weimar"],
+                            "main": ["Meiningen", "Suhl"], "hof": ["Plauen", "Gera"]},
+                   "red": []},
+    "_about": "гипотетический сценарий: НАТО наступает, ОВД обороняется; состав сил - пресета 1987",
+}
+
+
 def main() -> None:
     ham = json.loads((DATA / "sector_hamburg.json").read_text(encoding="utf-8"))
     places = {}
@@ -905,6 +932,10 @@ def main() -> None:
                       "march_kmh": 5, "daily_advance_km": 10,
                       "composition": [{"type": t, "count": c, "role": "infantry"} for t, c in comp],
                       "source": src, "estimate": True})
+    for sid, name, missile, n, la, lo, src in SSM:   # ракетные бригады ОВД (strategic.py)
+        units.append({"id": sid, "name": name, "side": "red", "role": "ssm", "state": "deployed", "missile": missile,
+                      "pos": {"lat": la, "lon": lo}, "composition": [{"type": "Scud_B", "count": n, "role": "launcher"}],
+                      "source": src, "estimate": True})
     ground_units = units
     for year, date, title in PRESETS:
         units = list(ground_units)
@@ -926,6 +957,9 @@ def main() -> None:
             "variants": [{"name": "base", "title": title, "assembly": ["red", "blue"],
                           "_about_assembly": "первый эшелон ОВД - в исходных районах у границы; НАТО - передовая оборона (Vorneverteidigung): бригады первого дня - в пунктах у границы (model.assembly_areas)"}],
             "replacements": {"air_per_day": 2, "note": "Пополнение полков: самолётов в сутки до штата (ОЦЕНКА)."},
+            # ОТР ОВД в обычной войне: Скады - прежде всего носители спецбоеприпасов, обычных ракет немного (ОЦЕНКА);
+            # у НАТО ОТР в DCS нет (Lance, Pershing) - не включены
+            "strategic_stock": {"red": {"scud": 36}}, "strategic_per_day": {"red": {"scud": 6}},
             "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                                for t, r, c in v["composition"]]}
                                            for v in vs] for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
@@ -941,6 +975,11 @@ def main() -> None:
         text = json.dumps(oob, ensure_ascii=False, indent=1)
         # пресет по умолчанию - oob_germany.json (его знают старые кампании и окно), остальные - oob_germany_<год>.json
         (DATA / ("oob_germany.json" if year == DEFAULT_PRESET else f"oob_germany_{year}.json")).write_text(text, encoding="utf-8")
+        if year == NATO_ATTACK_PRESET:          # тот же состав сил - наступает НАТО (отдельный пресет в окне)
+            oob_n = json.loads(text)
+            oob_n["preset"] = {"title": NATO_ATTACK["title"], "year": year, "date": date}
+            oob_n["variants"] = [dict(NATO_ATTACK, name="nato_attack", assembly=["red", "blue"])]
+            (DATA / f"oob_germany_{year}_nato.json").write_text(json.dumps(oob_n, ensure_ascii=False, indent=1), encoding="utf-8")
         n_air = sum(1 for u in units if u.get("count") is not None and u.get("type"))
         print(f"пресет {year} ({date}): авиачастей {n_air}")
     n_g = sum(1 for u in units if u["role"] == "maneuver")

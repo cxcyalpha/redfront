@@ -424,7 +424,11 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "off_limits": sec.get("off_limits", {}),   # пункты, на которые сторона не наступает (политика сценария)
         "point_ad": forces.get("point_ad") or {},   # ПВО объектов тыла по сценарию (нет - model.POINT_AD)
         "sea_lanes": copy.deepcopy(sec.get("sea_lanes") or []),
-        "asm_stock": copy.deepcopy(sec.get("asm_stock") or {}),   # запас авиационных ПКР сторон (naval.use_air_asm)
+        "asm_stock": copy.deepcopy(sec.get("asm_stock") or {}),
+        # запас ракет стратегического уровня (strategic.py): сторона -> {scud, tochka, iskander, tlam: число}, пополнение в сутки
+        "strategic_stock": copy.deepcopy(forces.get("strategic_stock") or sec.get("strategic_stock") or {}),
+        "strategic_resupply": copy.deepcopy(forces.get("strategic_resupply") or sec.get("strategic_resupply") or {}),
+        "strategic_per_day": copy.deepcopy(forces.get("strategic_per_day") or sec.get("strategic_per_day") or {}),   # запас авиационных ПКР сторон (naval.use_air_asm)
         "naval_bases": copy.deepcopy(sec.get("naval_bases") or {}),   # порты ремонта кораблей (naval.port_of); нет - за картой   # морской подвоз (naval.sea_supply)
         "air_limits": sec.get("air_limits", sec.get("off_limits", {})),   # пункты, по которым авиация не бьёт (нет - как off_limits)
         "task_rules": (chosen or {}).get("task_rules", {}),   # задачи сценария: с какого дня, запрет (1982: Бекаа - с 4-го)

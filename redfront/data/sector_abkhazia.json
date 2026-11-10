@@ -1,0 +1,427 @@
+{
+ "_about": "Абхазия, сентябрь 1993. Генерирован tools/gen_abkhazia.py. Координаты - ОЦЕНКИ (+-2 км). Стороны - 16.09.1993: фронт по Гумисте у Сухуми, Ткварчели - абхазский анклав в окружении.",
+ "theatre": "caucasus",
+ "places": {
+  "Sochi": {
+   "lat": 43.43,
+   "lon": 39.925,
+   "estimate": true,
+   "side": "red"
+  },
+  "Adler": {
+   "lat": 43.44,
+   "lon": 39.92,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gagra": {
+   "lat": 43.33,
+   "lon": 40.25,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gudauta": {
+   "lat": 43.104,
+   "lon": 40.627,
+   "estimate": true,
+   "side": "red"
+  },
+  "NewAthos": {
+   "lat": 43.09,
+   "lon": 40.81,
+   "estimate": true,
+   "side": "red"
+  },
+  "Eshera": {
+   "lat": 43.055,
+   "lon": 40.925,
+   "estimate": true,
+   "side": "red"
+  },
+  "Tkvarcheli": {
+   "lat": 42.854,
+   "lon": 41.684,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sukhumi": {
+   "lat": 43.003,
+   "lon": 41.015,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Babushara": {
+   "lat": 42.858,
+   "lon": 41.128,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kelasuri": {
+   "lat": 42.985,
+   "lon": 41.07,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Ochamchire": {
+   "lat": 42.713,
+   "lon": 41.468,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Gali": {
+   "lat": 42.627,
+   "lon": 41.737,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Azhara": {
+   "lat": 43.1,
+   "lon": 41.76,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Zugdidi": {
+   "lat": 42.509,
+   "lon": 41.871,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Khobi": {
+   "lat": 42.315,
+   "lon": 41.898,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Jvari": {
+   "lat": 42.72,
+   "lon": 42.05,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Senaki": {
+   "lat": 42.27,
+   "lon": 42.067,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Poti": {
+   "lat": 42.146,
+   "lon": 41.672,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Samtredia": {
+   "lat": 42.163,
+   "lon": 42.34,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kutaisi": {
+   "lat": 42.267,
+   "lon": 42.718,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kobuleti": {
+   "lat": 41.82,
+   "lon": 41.776,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Batumi": {
+   "lat": 41.643,
+   "lon": 41.64,
+   "estimate": true,
+   "side": "blue"
+  }
+ },
+ "airbases": {
+  "gudauta": {
+   "name": "Gudauta",
+   "airport": "Gudauta",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "sochi_adler": {
+   "name": "Sochi-Adler",
+   "airport": "Sochi-Adler",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "sukhumi_babushara": {
+   "name": "Sukhumi-Babushara",
+   "airport": "Sukhumi-Babushara",
+   "side": "blue",
+   "military": true
+  },
+  "senaki_kolkhi": {
+   "name": "Senaki-Kolkhi",
+   "airport": "Senaki-Kolkhi",
+   "side": "blue",
+   "military": true
+  },
+  "kutaisi": {
+   "name": "Kutaisi",
+   "airport": "Kutaisi",
+   "side": "blue",
+   "military": true
+  },
+  "kobuleti": {
+   "name": "Kobuleti",
+   "airport": "Kobuleti",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "links": [
+  [
+   "Adler",
+   "Sochi"
+  ],
+  [
+   "Adler",
+   "Gagra"
+  ],
+  [
+   "Gagra",
+   "Gudauta"
+  ],
+  [
+   "Gudauta",
+   "NewAthos"
+  ],
+  [
+   "NewAthos",
+   "Eshera"
+  ],
+  [
+   "Eshera",
+   "Sukhumi"
+  ],
+  [
+   "Sukhumi",
+   "Kelasuri"
+  ],
+  [
+   "Kelasuri",
+   "Babushara"
+  ],
+  [
+   "Babushara",
+   "Ochamchire"
+  ],
+  [
+   "Kelasuri",
+   "Azhara"
+  ],
+  [
+   "Ochamchire",
+   "Tkvarcheli"
+  ],
+  [
+   "Ochamchire",
+   "Gali"
+  ],
+  [
+   "Gali",
+   "Zugdidi"
+  ],
+  [
+   "Zugdidi",
+   "Jvari"
+  ],
+  [
+   "Zugdidi",
+   "Khobi"
+  ],
+  [
+   "Khobi",
+   "Senaki"
+  ],
+  [
+   "Senaki",
+   "Poti"
+  ],
+  [
+   "Senaki",
+   "Samtredia"
+  ],
+  [
+   "Samtredia",
+   "Kutaisi"
+  ],
+  [
+   "Poti",
+   "Kobuleti"
+  ],
+  [
+   "Kobuleti",
+   "Batumi"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Adler"
+  ],
+  "blue": [
+   "Kutaisi",
+   "Samtredia"
+  ]
+ },
+ "off_limits": {
+  "blue": [
+   "Sochi",
+   "Adler"
+  ]
+ },
+ "axes": {
+  "sukhumi": "Гумиста - Сухуми",
+  "east": "Ткварчели - Очамчире - Гали"
+ },
+ "objectives": {
+  "red": {
+   "sukhumi": [
+    "Sukhumi",
+    "Kelasuri",
+    "Babushara"
+   ],
+   "east": [
+    "Ochamchire",
+    "Gali"
+   ]
+  },
+  "blue": []
+ },
+ "_about_objectives": "Оси абхазской стороны - по ходу наступления 16-30.09.1993 (Сухуми; Ткварчели - Очамчире - Гали), ОЦЕНКА.",
+ "depots": [
+  {
+   "id": "red_depot_gudauta",
+   "name": "Склад снабжения (Гудаута)",
+   "side": "red",
+   "place": "Gudauta"
+  },
+  {
+   "id": "red_depot_tkv",
+   "name": "Склад гарнизона (Ткварчели)",
+   "side": "red",
+   "place": "Tkvarcheli"
+  },
+  {
+   "id": "blue_depot_sukhumi",
+   "name": "Склад снабжения (Сухуми)",
+   "side": "blue",
+   "place": "Sukhumi"
+  },
+  {
+   "id": "blue_depot_zugdidi",
+   "name": "Склад снабжения (Зугдиди)",
+   "side": "blue",
+   "place": "Zugdidi"
+  },
+  {
+   "id": "blue_depot_senaki",
+   "name": "Склад снабжения (Сенаки)",
+   "side": "blue",
+   "place": "Senaki"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_gumista",
+   "name": "Мост через Гумисту (Сухуми)",
+   "lat": 43.03,
+   "lon": 40.975,
+   "links": [
+    [
+     "Eshera",
+     "Sukhumi"
+    ]
+   ],
+   "source": "по памяти - проверить (зонд карты)"
+  },
+  {
+   "id": "br_inguri",
+   "name": "Мост через Ингури (Рухи)",
+   "lat": 42.565,
+   "lon": 41.79,
+   "links": [
+    [
+     "Gali",
+     "Zugdidi"
+    ]
+   ],
+   "source": "по памяти - проверить (зонд карты)"
+  }
+ ],
+ "ad_sites": [
+  {
+   "id": "red_ad_af_gudauta",
+   "name": "ПВО аэродрома Gudauta",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_gudauta",
+   "lat": 43.1106,
+   "lon": 40.5874,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_kobuleti",
+   "name": "ПВО аэродрома Kobuleti",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_kobuleti",
+   "lat": 41.943,
+   "lon": 41.8589,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_kutaisi",
+   "name": "ПВО аэродрома Kutaisi",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_kutaisi",
+   "lat": 42.1867,
+   "lon": 42.4678,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_senaki_kolkhi",
+   "name": "ПВО аэродрома Senaki-Kolkhi",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_senaki_kolkhi",
+   "lat": 42.2522,
+   "lon": 42.0381,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_sochi_adler",
+   "name": "ПВО аэродрома Sochi-Adler",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_sochi_adler",
+   "lat": 43.4378,
+   "lon": 39.9573,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_sukhumi_babushara",
+   "name": "ПВО аэродрома Sukhumi-Babushara",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_sukhumi_babushara",
+   "lat": 42.8723,
+   "lon": 41.1147,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  }
+ ],
+ "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил."
+}

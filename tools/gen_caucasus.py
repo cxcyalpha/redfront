@@ -191,6 +191,35 @@ def dist_km(a, b):
     return math.hypot((a[0] - b[0]) * 111.32, (a[1] - b[1]) * 111.32 * k)
 
 
+SSM = [   # (id, имя, сторона, ракета, пусковых, широта, долгота, источник)
+    ("r_tochka_58a", "Дивизион ОТР Точка-У 58-й армии (Джава)", "red", "tochka", 4, 42.40, 43.93,
+     "HRW 'Up in Flames' (2009): применение Россией ракет Точка-У по целям в Грузии; место и число - ОЦЕНКА"),
+    ("r_iskander_58a", "Дивизион ОТРК Искандер (Алагир)", "red", "iskander", 4, 43.04, 44.21,
+     "применение Искандера в 2008 - спорно (сообщения о ударе по Гори, Россия отрицала); оставлен как возможность, ОЦЕНКА"),
+]
+
+
+# сценарий (переопределяет gen_abkhazia.py и др. генераторы карты Caucasus)
+NAME = "caucasus"
+ROOT = "Tbilisi"                                   # пункт для проверки связности графа
+SECTOR_ABOUT = ("Театр Кавказ, война августа 2008 г. Генерирован tools/gen_caucasus.py. Координаты пунктов - ОЦЕНКИ "
+                "(+-2 км); дороги - вручную (через Большой Кавказ - только Рокский тоннель и Военно-Грузинская "
+                "дорога, в Абхазию - побережье и мост через Ингури). Стороны - утро 8.08.2008.")
+OBJ_ABOUT = ("Оси красных - ОЦЕНКА по ходу войны (Цхинвали - Гори; Абхазия - Зугдиди, Сенаки, Поти; Кодори), не документ.")
+OOB_ABOUT = ("Состав сил войны 8-12 августа 2008 г. (Россия, Южная Осетия, Абхазия - Грузия). Генерирован "
+             "tools/gen_caucasus.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.")
+TITLE, YEAR, DATE = "Август 2008: Южная Осетия и Абхазия", 2008, "2008-08-08"
+COUNTRIES = {"red": "Russia", "blue": "Georgia"}
+# ракеты ОТР: ограниченный запас - политически ограниченная война (ОЦЕНКА); у Грузии ОТР в 2008 не было
+STRATEGIC = {"red": {"tochka": 16, "iskander": 6}}
+TASK_RULES = {"blue": {"strike_airfield": {"off": True, "why": "у ВВС Грузии нет средств для ударов по аэродромам России"}}}
+NOT_INCLUDED = ("Черноморский флот (бой у Очамчире 10.08), спецназ ГРУ, батальоны 'Восток' и 'Запад', "
+                "российские миротворцы в Цхинвали, ВМС Грузии.")
+EXTRA_VARIANT: dict = {}
+EXTERNAL_SUPPLY: set = set()                       # аэродромы со снабжением извне (не со складов стороны)
+DOCTRINE: dict | None = None                       # пакеты доктрины сторон (нет - по умолчанию)
+
+
 def main() -> None:
     from dcs.terrain import Caucasus
     terrain = Caucasus()
@@ -199,7 +228,7 @@ def main() -> None:
     for a, b in LINKS:
         assert a in places and b in places, (a, b)
         adj[a].add(b); adj[b].add(a)
-    seen, todo = set(), ["Tbilisi"]
+    seen, todo = set(), [ROOT]
     while todo:
         x = todo.pop()
         if x not in seen:
@@ -209,7 +238,8 @@ def main() -> None:
     for side, names in AIRBASES.items():
         for n in names:
             bid = n.lower().replace(" ", "_").replace("-", "_")
-            airbases[bid] = {"name": n, "airport": n, "side": side, "military": True}
+            airbases[bid] = {"name": n, "airport": n, "side": side, "military": True,
+                             **({"supply_external": True} if n in EXTERNAL_SUPPLY else {})}
             ll = terrain.airports[n].position.latlng()
             af_pos[bid] = (ll.lat, ll.lng, side, n)
     border = [((places[a]["lat"] + places[b]["lat"]) / 2, (places[a]["lon"] + places[b]["lon"]) / 2)
@@ -223,9 +253,7 @@ def main() -> None:
                       "covers": f"af_{bid}", "lat": round(la + (q[0] - la) * f, 4), "lon": round(lo + (q[1] - lo) * f, 4),
                       "variant": 0, "rule": "ПВО объекта: у каждого военного аэродрома"})
     sector = {
-        "_about": "Театр Кавказ, война августа 2008 г. Генерирован tools/gen_caucasus.py. Координаты пунктов - ОЦЕНКИ "
-                  "(+-2 км); дороги - вручную (через Большой Кавказ - только Рокский тоннель и Военно-Грузинская "
-                  "дорога, в Абхазию - побережье и мост через Ингури). Стороны - утро 8.08.2008.",
+        "_about": SECTOR_ABOUT,
         "theatre": "caucasus",
         "places": places,
         "airbases": airbases,
@@ -234,14 +262,13 @@ def main() -> None:
         "off_limits": OFF_LIMITS,
         "axes": {k: v["title"] for k, v in AXES.items()},
         "objectives": {"red": {k: v["objectives"] for k, v in AXES.items()}, "blue": []},
-        "_about_objectives": "Оси красных - ОЦЕНКА по ходу войны (Цхинвали - Гори; Абхазия - Зугдиди, Сенаки, Поти; "
-                             "Кодори), не документ.",
+        "_about_objectives": OBJ_ABOUT,
         "depots": [{"id": i, "name": n, "side": s, "place": p} for i, n, s, p in DEPOTS],
         "bridges": BRIDGES,
         "ad_sites": sites,
         "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил.",
     }
-    (DATA / "sector_caucasus.json").write_text(json.dumps(sector, ensure_ascii=False, indent=1), encoding="utf-8")
+    (DATA / f"sector_{NAME}.json").write_text(json.dumps(sector, ensure_ascii=False, indent=1), encoding="utf-8")
 
     units = []
     for uid, name, side, place, cmp_, ad, day, axis, note in GROUND:
@@ -265,6 +292,10 @@ def main() -> None:
                       "pos": {"lat": la, "lon": lo},
                       "composition": [{"type": t, "count": c, "role": r} for t, r, c in cmp_],
                       "source": SRC + "; место - ОЦЕНКА", "estimate": True})
+    for sid, name, side, missile, n, la, lo, src in SSM:   # пусковые ОТР (strategic.py): модель DCS - по ракете
+        units.append({"id": sid, "name": name, "side": side, "role": "ssm", "state": "deployed", "missile": missile,
+                      "pos": {"lat": la, "lon": lo}, "composition": [{"type": "Scud_B", "count": n, "role": "launcher"}],
+                      "source": src, "estimate": True})
     for uid, name, side, role, typ, base, count, radius, note in AIR:
         bid = base.lower().replace(" ", "_").replace("-", "_")
         assert bid in airbases, (uid, base)
@@ -272,23 +303,22 @@ def main() -> None:
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
                       "estimate": True})
     oob = {
-        "_about": "Состав сил войны 8-12 августа 2008 г. (Россия, Южная Осетия, Абхазия - Грузия). Генерирован "
-                  "tools/gen_caucasus.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+        "_about": OOB_ABOUT,
         "theatre": "caucasus",
-        "preset": {"title": "Август 2008: Южная Осетия и Абхазия", "year": 2008, "date": "2008-08-08"},
-        "date": "2008-08-08",
-        "countries": {"red": "Russia", "blue": "Georgia"},
+        "preset": {"title": TITLE, "year": YEAR, "date": DATE},
+        "date": DATE,
+        "countries": COUNTRIES,
+        **({"doctrine": DOCTRINE} if DOCTRINE else {}),
         "units": units,
-        "variants": [{"name": "base", "title": "Август 2008: Южная Осетия и Абхазия",
-                      "task_rules": {"blue": {"strike_airfield": {"off": True, "why": "у ВВС Грузии нет средств для ударов по аэродромам России"}}}}],
+        "strategic_stock": STRATEGIC,
+        "variants": [{"name": "base", "title": TITLE, "task_rules": TASK_RULES, **EXTRA_VARIANT}],
         "replacements": {"air_per_day": 1, "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]}
                                        for v in vs] for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
-        "_not_included": "Черноморский флот (бой у Очамчире 10.08), спецназ ГРУ, батальоны 'Восток' и 'Запад', "
-                         "российские миротворцы в Цхинвали, ВМС Грузии.",
+        "_not_included": NOT_INCLUDED,
     }
-    (DATA / "oob_caucasus.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
+    (DATA / f"oob_{NAME}.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"пунктов {len(places)}, связей {len(LINKS)}, аэродромов {len(airbases)}, частей {len(GROUND)}, "
           f"ЗРК {len(SAMS)}, авиачастей {len(AIR)}")
 
