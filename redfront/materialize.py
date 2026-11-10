@@ -289,12 +289,11 @@ def gci_site(state: dict, unit: dict) -> dict:
 
 
 def ssm_site(state: dict, unit: dict) -> dict:
-    """Пусковые ОТР (Скад, Точка, Искандер) на позиции: модель - по ракете части (мод - если включён)."""
+    """Пусковые ОТР (Скад, Точка, Искандер) на позиции: модель - по ракете части (strategic.MISSILES dcs)."""
     from . import strategic
     p = model.unit_pos(state, unit)
     m = strategic.MISSILES.get(unit.get("missile", "scud"), {})
-    mods = set((state.get("settings") or {}).get("mods") or [])
-    dcs_type = next((t for k, t in (m.get("mod_dcs") or {}).items() if k in mods), None)
+    dcs_type = m.get("dcs")                      # модель пусковой - по ракете (Точка - модель Скада, Искандер - CHAP_9K720_HE)
     vehicles = []
     for c in unit["composition"]:
         for i in range(int(round(model.alive_by_type(unit)[c["type"]]))):

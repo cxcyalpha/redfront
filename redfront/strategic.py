@@ -24,8 +24,7 @@ MISSILES = {
                "dcs": "Scud_B", "stand_in": "в DCS Точки нет - модель Скада, дальность и точность - Точки-У",
                "source": "Точка-У (1989): 120 км, КВО ~50-150 м; темп - ОЦЕНКА"},
     "iskander": {"title": "9К720 Искандер-М", "range_km": 500, "cep_m": 10, "warhead_kg": 480, "per_day": 2.0,
-                 "dcs": "Scud_B", "mod_dcs": {"currenthill": "CHAP_9K720_HE"},
-                 "stand_in": "модель - мод CurrentHill (CHAP_9K720_HE), без мода - модель Скада",
+                 "dcs": "CHAP_9K720_HE",       # CurrentHill - встроен в DCS (есть в pydcs)
                  "source": "Искандер-М: до 500 км, КВО 5-30 м (открытые оценки); темп - ОЦЕНКА"},
     "tlam": {"title": "BGM-109 Томагавк", "range_km": 1300, "cep_m": 10, "warhead_kg": 450, "per_day": 4.0,
              "source": "TLAM-C: ~1250-1600 км, КВО ~10 м; пуски с кораблей с бронированными пусковыми (ABL) или УВП"},
