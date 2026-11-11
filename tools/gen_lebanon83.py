@@ -31,6 +31,10 @@ PLACES = {
     "Dhour": (33.900, 35.760, "red"), "Chtaura": (33.818, 35.854, "red"), "Zahle": (33.847, 35.902, "red"),
     "Baalbek": (34.006, 36.211, "red"), "Masnaa": (33.700, 36.070, "red"), "Damascus": (33.513, 36.292, "red"),
     "Homs": (34.730, 36.710, "red"),
+    # север Ливана и Сирия - глубина театра (пути резервов, аэродромы, порты)
+    "Byblos": (34.120, 35.650, "blue"), "Tripoli": (34.430, 35.840, "red"), "Hermel": (34.390, 36.390, "red"),
+    "Qusayr": (34.510, 36.580, "red"), "Tartus": (34.890, 35.890, "red"), "Hama": (35.130, 36.750, "red"),
+    "Latakia": (35.520, 35.780, "red"), "Nabk": (34.020, 36.730, "red"),
     # юг: зона Израиля
     "Sidon": (33.561, 35.371, "blue"), "Jezzine": (33.544, 35.584, "blue"),
 }
@@ -42,12 +46,20 @@ LINKS = [
     ("AinZhalta", "Sofar"), ("Dhour", "Zahle"), ("Chtaura", "Zahle"), ("Chtaura", "Masnaa"), ("Zahle", "Baalbek"),
     ("Baalbek", "Homs"), ("Masnaa", "Damascus"), ("Damascus", "Homs"), ("Damour", "Sidon"), ("Sidon", "Jezzine"),
     ("Jezzine", "BeitEdDine"),
+    ("Jounieh", "Byblos"), ("Byblos", "Tripoli"), ("Tripoli", "Tartus"), ("Tartus", "Homs"), ("Tartus", "Latakia"),
+    ("Latakia", "Hama"), ("Hama", "Homs"), ("Baalbek", "Hermel"), ("Hermel", "Qusayr"), ("Qusayr", "Homs"),
+    ("Damascus", "Nabk"), ("Nabk", "Homs"), ("Tripoli", "Hermel"),
 ]
-SUPPLY_ENTRY = {"red": ["Damascus", "Homs"], "blue": ["Jounieh"]}
-OFF_LIMITS = {"blue": ["Damascus", "Homs", "Masnaa", "Baalbek"], "red": ["Sidon", "Jezzine"]}
+SUPPLY_ENTRY = {"red": ["Damascus", "Homs", "Hama"], "blue": ["Jounieh"]}
+OFF_LIMITS = {"blue": ["Damascus", "Homs", "Masnaa", "Baalbek", "Tripoli", "Hermel", "Qusayr", "Tartus", "Hama", "Latakia",
+                       "Nabk"], "red": ["Sidon", "Jezzine"]}
 # политика: США не наступают на суше за пределы Бейрута (только авиация); зона Израиля закрыта для Сирии
 
-AIRBASES = {"red": ["Damascus", "Mezzeh", "Al-Dumayr", "Khalkhalah", "Marj Ruhayyil", "Shayrat", "Rayak"], "blue": []}
+AIRBASES = {"red": ["Damascus", "Mezzeh", "Al-Dumayr", "Khalkhalah", "Marj Ruhayyil", "Shayrat", "Rayak", "Hama", "Tiyas"],
+            # гипотетически: США получают наземные базы - Инджирлик (Турция, НАТО; в 1983 - ротации ВВС США в Европе) и
+            # Акротири (Кипр, Великобритания; осенью 1983 оттуда летали над Бейрутом 'Буканиры' RAF). Снабжение - извне
+            "blue": ["Incirlik", "Akrotiri"]}
+EXTERNAL = {"Incirlik", "Akrotiri"}
 CARRIERS = {   # авианосцы - реальные корабли DCS (имя, класс pydcs, широта, долгота, TACAN, позывной, ICLS, МГц, группа флота);
     # исторически у Ливана в декабре 1983 г. - Independence (CV-62) и John F. Kennedy (CV-67): в DCS их нет, вместо них -
     # Forrestal (CV-59, однотипный с Forrestal) и Carl Vinson (CVN-70) - ДОПУЩЕНИЕ. Позиции - ОЦЕНКА.
@@ -126,10 +138,19 @@ AIR = [   # (id, имя, сторона, роль, тип, база, число,
     ("us_va75", "VA-75, VA-85 (A-6E, Carl Vinson)", "blue", "fighter_bomber", "A6E", "cv67", 20, 600, ""),
     ("us_e2_jfk", "VAW-126 (E-2C)", "blue", "awacs", "E_2C", "cv67", 4, 1000, ""),
     ("us_hmm", "HMM-162 (CH-46/AH-1T, Тарава)", "blue", "attack_helo", "AH_1W", "lha1", 4, 120, "AH-1T - AH-1W"),
+    # наземные базы (гипотетически): ротации ВВС США из Европы
+    ("us_f4_incirlik", "Ротация F-4E ВВС США в Европе (Инджирлик)", "blue", "fighter_bomber", "F_4E_45MC", "Incirlik", 18, 700,
+     "ОЦЕНКА: эскадрилья F-4E на ротации (в 1983 - учебные ротации в Инджирлике)"),
+    ("us_f15_incirlik", "Ротация F-15C (36-е крыло, Битбург; Инджирлик)", "blue", "fighter", "F_15C", "Incirlik", 18, 800,
+     "гипотетически: прикрытие ударов от истребителей Сирии"),
+    ("us_kc135_akrotiri", "Заправщики KC-135A (Акротири)", "blue", "tanker", "KC_135", "Akrotiri", 4, 1500, "ОЦЕНКА"),
     ("s_mig21", "Истребительные эскадрильи (МиГ-21)", "red", "fighter", "MiG_21Bis", "Al-Dumayr", 24, 250, ""),
     ("s_mig23", "Истребительные эскадрильи (МиГ-23МЛ)", "red", "fighter", "MiG_23MLD", "Shayrat", 24, 300, ""),
     ("s_su22", "Истребительно-бомбардировочные эскадрильи (Су-22)", "red", "fighter_bomber", "Su_17M4", "Marj Ruhayyil", 18, 300, ""),
     ("s_gazelle", "Вертолёты 'Газель'", "red", "attack_helo", "SA342M", "Rayak", 10, 120, ""),
+    ("s_mig23bn", "Истребительно-бомбардировочные эскадрильи (МиГ-23БН; в DCS - МиГ-23МЛД)", "red", "fighter_bomber",
+     "MiG_23MLD", "Hama", 12, 300, "МиГ-23БН в DCS нет"),
+    ("s_mig25", "Эскадрилья МиГ-25ПД (Тияс)", "red", "interceptor", "MiG_25PD", "Tiyas", 8, 400, ""),
 ]
 AD_TEMPLATES = {"red": {"short": [{"name": "Стрела-1, ЗСУ-23-4", "composition": [("Strela_1_9P31", "launcher", 2), ("ZSU_23_4_Shilka", "launcher", 2)]}]}}
 
@@ -148,12 +169,15 @@ def main() -> None:
     for side, names in AIRBASES.items():
         for n in names:
             assert n in terrain.airports, n
-            airbases[bid_of(n)] = {"name": n, "airport": n, "side": side, "military": True}
+            airbases[bid_of(n)] = {"name": n, "airport": n, "side": side, "military": True,
+                                   **({"supply_external": True} if n in EXTERNAL else {})}
     carriers = {cid: {"name": n, "side": "blue", "ship": t, "lat": la, "lon": lo, "tacan": tc, "tacan_id": tid,
                       "icls": icls or None, "freq": f, "naval": nv, "estimate": True}
                 for cid, (n, t, la, lo, tc, tid, icls, f, nv) in CARRIERS.items()}
     sector = {
-        "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ.",
+        "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ. "
+                  "Театр - Ливан и запад Сирии до Латакии и Хамы; у США - авианосцы и наземные базы (Инджирлик, Акротири).",
+        "air_limits": {"blue": ["Latakia", "Hama", "Tartus"]},
         "theatre": "syria", "places": places, "airbases": airbases, "carriers": carriers,
         "links": [list(l) for l in LINKS], "supply_entry": SUPPLY_ENTRY, "off_limits": OFF_LIMITS,
         "axes": {k: v["title"] for k, v in AXES.items()},
@@ -196,13 +220,13 @@ def main() -> None:
         assert b in airbases or b in carriers, (uid, base)
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": b, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
-                      "estimate": True})
+                      "estimate": True, **({"tasks_not": ["fleet_cap"]} if b in airbases and side == "blue" else {})})   # прикрытие флота - палубные
     oob = {
         "_about": "Ливан, декабрь 1983: палубная авиация США против Сирии (гипотетическая кампания). tools/gen_lebanon83.py.",
         "theatre": "syria",
-        "preset": {"title": "Декабрь 1983: Ливан, авианосцы США", "year": 1983, "date": "1983-12-04"},
+        "preset": {"title": "Декабрь 1983: Ливан, авианосцы и базы США", "year": 1983, "date": "1983-12-04"},
         "date": "1983-12-04", "doctrine": {"red": "arab"}, "countries": {"red": "Syria", "blue": "USA"}, "units": units,
-        "variants": [{"name": "base", "title": "Декабрь 1983: Ливан, авианосцы США",
+        "variants": [{"name": "base", "title": "Декабрь 1983: Ливан, авианосцы и базы США",
                       "posture": {"red": "offense", "blue": "defense"},
                       "task_rules": {"blue": {"strike_factory": {"off": True, "why": "удары - только по войскам и ПВО в Ливане"}},
                                      "red": {"strike_ship": {"off": True, "why": "Сирия в 1983 г. по кораблям 6-го флота не била (огонь ЗРК - только по самолётам)"}}}}],
@@ -211,7 +235,8 @@ def main() -> None:
                                                                            for t, r, c in v["composition"]]} for v in vs]
                                 for tier, vs in tiers.items()} for side, tiers in AD_TEMPLATES.items()},
         "_not_included": "A-7E (нет в DCS - F/A-18C), линкор New Jersey, многонациональные силы "
-                         "(Франция, Италия, Великобритания), Израиль.",
+                         "(Франция - 'Супер Этандары' с 'Клемансо', Великобритания - 'Буканиры' из Акротири: в DCS их нет), "
+                         "F-111 (нет в DCS), Израиль.",
     }
     (DATA / "oob_lebanon83.json").write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"пунктов {len(places)}, авианосцев {len(carriers)}, частей {len(GROUND)}, ЗРК {len(SAMS)}, авиачастей {len(AIR)}")

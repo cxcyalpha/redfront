@@ -4125,6 +4125,20 @@ def theatres_section(tmp: Path) -> None:
     mzm = mza.read("mission").decode("utf-8")
     check("ext awacs blue" in mzm and "E-3A" in mzm and "ДРЛО НАТО E-3A" in dct and "player awacs" not in mzm,
           "ДРЛО НАТО: E-3A вне театра в миссии, строка в брифинге; допущение E-2C игрока не нужно")
+    # сценарии с авианосцами - не только с палубы: у США и наземные базы (Ливан-83, Танкерная война); прикрытие флота -
+    # палубные истребители
+    for sc_, base_ in (("lebanon83", "incirlik"), ("tankerwar88", "al_dhafra_afb")):
+        sl = model.new_campaign("cv", sector=f"sector_{sc_}.json", oob=f"oob_{sc_}.json", seed=1, player_side="blue")
+        planner.plan(sl)
+        land = [t_ for t_ in sl["tasks"] if t_["side"] == "blue" and t_.get("package")
+                and sl["units"][t_["package"][0]["performer"]]["base"] == base_]
+        fcap = [t_ for t_ in sl["tasks"] if t_["kind"] == "fleet_cap" and t_.get("package")
+                and sl["units"][t_["package"][0]["performer"]]["base"] == base_]
+        if land:
+            build.build(sl, tmp / f"{sc_}_land.miz", task_no=sl["tasks"].index(land[0]) + 1)
+        check(land and not fcap and (tmp / f"{sc_}_land.miz").exists(),
+              f"{sc_}: задач с наземной базы {base_} - {len(land)} ({sorted({t_['kind'] for t_ in land})}), миссия собрана; "
+              f"прикрытие флота с неё - {len(fcap)}")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
     sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
     planner.plan(sh)

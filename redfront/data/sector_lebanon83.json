@@ -1,5 +1,12 @@
 {
- "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ.",
+ "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ. Театр - Ливан и запад Сирии до Латакии и Хамы; у США - авианосцы и наземные базы (Инджирлик, Акротири).",
+ "air_limits": {
+  "blue": [
+   "Latakia",
+   "Hama",
+   "Tartus"
+  ]
+ },
  "theatre": "syria",
  "places": {
   "BeirutAirport": {
@@ -122,6 +129,54 @@
    "estimate": true,
    "side": "red"
   },
+  "Byblos": {
+   "lat": 34.12,
+   "lon": 35.65,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tripoli": {
+   "lat": 34.43,
+   "lon": 35.84,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hermel": {
+   "lat": 34.39,
+   "lon": 36.39,
+   "estimate": true,
+   "side": "red"
+  },
+  "Qusayr": {
+   "lat": 34.51,
+   "lon": 36.58,
+   "estimate": true,
+   "side": "red"
+  },
+  "Tartus": {
+   "lat": 34.89,
+   "lon": 35.89,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hama": {
+   "lat": 35.13,
+   "lon": 36.75,
+   "estimate": true,
+   "side": "red"
+  },
+  "Latakia": {
+   "lat": 35.52,
+   "lon": 35.78,
+   "estimate": true,
+   "side": "red"
+  },
+  "Nabk": {
+   "lat": 34.02,
+   "lon": 36.73,
+   "estimate": true,
+   "side": "red"
+  },
   "Sidon": {
    "lat": 33.561,
    "lon": 35.371,
@@ -177,6 +232,32 @@
    "airport": "Rayak",
    "side": "red",
    "military": true
+  },
+  "hama": {
+   "name": "Hama",
+   "airport": "Hama",
+   "side": "red",
+   "military": true
+  },
+  "tiyas": {
+   "name": "Tiyas",
+   "airport": "Tiyas",
+   "side": "red",
+   "military": true
+  },
+  "incirlik": {
+   "name": "Incirlik",
+   "airport": "Incirlik",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "akrotiri": {
+   "name": "Akrotiri",
+   "airport": "Akrotiri",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
   }
  },
  "carriers": {
@@ -332,12 +413,65 @@
   [
    "Jezzine",
    "BeitEdDine"
+  ],
+  [
+   "Jounieh",
+   "Byblos"
+  ],
+  [
+   "Byblos",
+   "Tripoli"
+  ],
+  [
+   "Tripoli",
+   "Tartus"
+  ],
+  [
+   "Tartus",
+   "Homs"
+  ],
+  [
+   "Tartus",
+   "Latakia"
+  ],
+  [
+   "Latakia",
+   "Hama"
+  ],
+  [
+   "Hama",
+   "Homs"
+  ],
+  [
+   "Baalbek",
+   "Hermel"
+  ],
+  [
+   "Hermel",
+   "Qusayr"
+  ],
+  [
+   "Qusayr",
+   "Homs"
+  ],
+  [
+   "Damascus",
+   "Nabk"
+  ],
+  [
+   "Nabk",
+   "Homs"
+  ],
+  [
+   "Tripoli",
+   "Hermel"
   ]
  ],
  "supply_entry": {
   "red": [
    "Damascus",
-   "Homs"
+   "Homs",
+   "Hama"
   ],
   "blue": [
    "Jounieh"
@@ -348,7 +482,14 @@
    "Damascus",
    "Homs",
    "Masnaa",
-   "Baalbek"
+   "Baalbek",
+   "Tripoli",
+   "Hermel",
+   "Qusayr",
+   "Tartus",
+   "Hama",
+   "Latakia",
+   "Nabk"
   ],
   "red": [
    "Sidon",

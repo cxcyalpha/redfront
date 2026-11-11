@@ -35,7 +35,7 @@ THEATRES = [   # (id, сектор, состав сил, название)
     ("kyiv22", "sector_kyiv22.json", "oob_kyiv22.json", "Киев: февраль 2022 (первые недели, реальная география в масштабе на карте Германии)"),
     ("kharkiv22", "sector_kharkiv22.json", "oob_kharkiv22.json", "Харьков: сентябрь 2022 (контрнаступление ВСУ, реальная география в масштабе на карте Германии)"),
     ("syria", "sector_syria.json", "oob_syria.json", "Сирия - Ливан: июнь 1982 (долина Бекаа)"),
-    ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы США, гипотетическая)"),
+    ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы и базы США, гипотетическая)"),
     ("vietnam72", "sector_vietnam72.json", "oob_vietnam72.json", "Вьетнам: апрель 1972 (условная география на карте Кавказа, авианосцы)"),
     ("vietnam72_lb2", "sector_vietnam72_lb2.json", "oob_vietnam72_lb2.json", "Вьетнам: декабрь 1972, Лайнбэкер-2 (условная география на карте Кавказа)"),
     ("golan73", "sector_golan73.json", "oob_golan73.json", "Голаны: октябрь 1973 (Война Судного дня)"),
