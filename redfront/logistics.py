@@ -453,6 +453,8 @@ def available(state: dict, unit: dict) -> int:
         return 0
     af = state["units"].get(f"af_{unit.get('base')}")
     dmg = af.get("damage", 0.0) if af else 0.0
+    from . import dispersal
+    dmg = dispersal.sortie_damage(state, unit, dmg)   # рассредоточение: вылеты с запасных площадок
     sup = base.get("supply")                     # аэродром без снабжения (supply) - меньше самолётов к вылету
     k = 1.0 if sup is None else _sim(state, unit["side"])["unsupplied"] + (1.0 - _sim(state, unit["side"])["unsupplied"]) * sup
     n = int(unit.get("count", 0) * (1.0 - dmg) * k + 1e-9)

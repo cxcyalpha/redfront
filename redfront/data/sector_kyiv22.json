@@ -1,0 +1,507 @@
+{
+ "_about": "Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Условная география на карте Cold War Germany (Гамбург - Шлезвиг-Гольштейн); координаты - точки карты, имена - украинские и белорусские.",
+ "theatre": "germany",
+ "places": {
+  "Mozyr": {
+   "lat": 54.32,
+   "lon": 10.13,
+   "estimate": true,
+   "side": "red"
+  },
+  "Khoiniki": {
+   "lat": 54.07,
+   "lon": 9.98,
+   "estimate": true,
+   "side": "red"
+  },
+  "Gomel": {
+   "lat": 53.87,
+   "lon": 10.69,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sumy": {
+   "lat": 53.85,
+   "lon": 10.93,
+   "estimate": true,
+   "side": "red"
+  },
+  "Chernobyl": {
+   "lat": 53.92,
+   "lon": 9.88,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Ivankiv": {
+   "lat": 53.83,
+   "lon": 9.96,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hostomel": {
+   "lat": 53.647,
+   "lon": 9.704,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Bucha": {
+   "lat": 53.66,
+   "lon": 9.8,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Irpin": {
+   "lat": 53.63,
+   "lon": 9.86,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Makariv": {
+   "lat": 53.75,
+   "lon": 9.65,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Vyshhorod": {
+   "lat": 53.7,
+   "lon": 10.01,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Kyiv": {
+   "lat": 53.55,
+   "lon": 9.99,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Chernihiv": {
+   "lat": 53.81,
+   "lon": 10.37,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Konotop": {
+   "lat": 53.7,
+   "lon": 10.76,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Nizhyn": {
+   "lat": 53.63,
+   "lon": 10.69,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Brovary": {
+   "lat": 53.67,
+   "lon": 10.24,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Boryspil": {
+   "lat": 53.51,
+   "lon": 10.25,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Zhytomyr": {
+   "lat": 53.6,
+   "lon": 9.48,
+   "estimate": true,
+   "side": "blue"
+  },
+  "BilaTserkva": {
+   "lat": 53.48,
+   "lon": 9.7,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Obukhiv": {
+   "lat": 53.36,
+   "lon": 10.21,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Lviv": {
+   "lat": 53.08,
+   "lon": 8.8,
+   "estimate": true,
+   "side": "blue"
+  }
+ },
+ "airbases": {
+  "kiel": {
+   "name": "Kiel",
+   "airport": "Kiel",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "lubeck": {
+   "name": "Lubeck",
+   "airport": "Lubeck",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "pinnow": {
+   "name": "Pinnow",
+   "airport": "Pinnow",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "hamburg_finkenwerder": {
+   "name": "Hamburg Finkenwerder",
+   "airport": "Hamburg Finkenwerder",
+   "side": "blue",
+   "military": true
+  },
+  "celle": {
+   "name": "Celle",
+   "airport": "Celle",
+   "side": "blue",
+   "military": true
+  },
+  "wunstorf": {
+   "name": "Wunstorf",
+   "airport": "Wunstorf",
+   "side": "blue",
+   "military": true
+  },
+  "hannover": {
+   "name": "Hannover",
+   "airport": "Hannover",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "links": [
+  [
+   "Mozyr",
+   "Khoiniki"
+  ],
+  [
+   "Khoiniki",
+   "Chernobyl"
+  ],
+  [
+   "Chernobyl",
+   "Ivankiv"
+  ],
+  [
+   "Ivankiv",
+   "Hostomel"
+  ],
+  [
+   "Ivankiv",
+   "Vyshhorod"
+  ],
+  [
+   "Ivankiv",
+   "Makariv"
+  ],
+  [
+   "Hostomel",
+   "Bucha"
+  ],
+  [
+   "Bucha",
+   "Irpin"
+  ],
+  [
+   "Irpin",
+   "Kyiv"
+  ],
+  [
+   "Hostomel",
+   "Makariv"
+  ],
+  [
+   "Makariv",
+   "Zhytomyr"
+  ],
+  [
+   "Vyshhorod",
+   "Kyiv"
+  ],
+  [
+   "Gomel",
+   "Chernihiv"
+  ],
+  [
+   "Chernihiv",
+   "Brovary"
+  ],
+  [
+   "Chernihiv",
+   "Nizhyn"
+  ],
+  [
+   "Sumy",
+   "Konotop"
+  ],
+  [
+   "Konotop",
+   "Nizhyn"
+  ],
+  [
+   "Nizhyn",
+   "Brovary"
+  ],
+  [
+   "Brovary",
+   "Kyiv"
+  ],
+  [
+   "Brovary",
+   "Boryspil"
+  ],
+  [
+   "Boryspil",
+   "Kyiv"
+  ],
+  [
+   "Boryspil",
+   "Obukhiv"
+  ],
+  [
+   "Obukhiv",
+   "Kyiv"
+  ],
+  [
+   "Kyiv",
+   "BilaTserkva"
+  ],
+  [
+   "BilaTserkva",
+   "Zhytomyr"
+  ],
+  [
+   "Zhytomyr",
+   "Lviv"
+  ],
+  [
+   "BilaTserkva",
+   "Lviv"
+  ],
+  [
+   "BilaTserkva",
+   "Obukhiv"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Mozyr",
+   "Gomel",
+   "Sumy"
+  ],
+  "blue": [
+   "Lviv"
+  ]
+ },
+ "off_limits": {
+  "blue": [
+   "Mozyr",
+   "Khoiniki",
+   "Gomel",
+   "Sumy"
+  ]
+ },
+ "axes": {
+  "west": "Правый берег: Гостомель - Буча - Ирпень - Киев",
+  "makariv": "Макаров - Житомир",
+  "chernihiv": "Чернигов",
+  "east": "Сумы - Конотоп - Нежин - Бровары"
+ },
+ "objectives": {
+  "red": {
+   "west": [
+    "Hostomel",
+    "Bucha",
+    "Irpin",
+    "Kyiv"
+   ],
+   "makariv": [
+    "Makariv",
+    "Zhytomyr"
+   ],
+   "chernihiv": [
+    "Chernihiv"
+   ],
+   "east": [
+    "Konotop",
+    "Nizhyn",
+    "Brovary",
+    "Kyiv"
+   ]
+  },
+  "blue": []
+ },
+ "_about_objectives": "Оси наступления: правый берег (Гостомель - Буча - Ирпень - Киев; Макаров - Житомир), Чернигов, Сумы - Бровары.",
+ "depots": [
+  {
+   "id": "red_depot_khoiniki",
+   "name": "Склад снабжения (Хойники)",
+   "side": "red",
+   "place": "Khoiniki"
+  },
+  {
+   "id": "red_depot_gomel",
+   "name": "Склад снабжения (Гомель)",
+   "side": "red",
+   "place": "Gomel"
+  },
+  {
+   "id": "red_depot_sumy",
+   "name": "Склад снабжения (Сумы)",
+   "side": "red",
+   "place": "Sumy"
+  },
+  {
+   "id": "blue_depot_kyiv",
+   "name": "Склады Киева",
+   "side": "blue",
+   "place": "Kyiv"
+  },
+  {
+   "id": "blue_depot_zhytomyr",
+   "name": "Склад снабжения (Житомир)",
+   "side": "blue",
+   "place": "Zhytomyr"
+  },
+  {
+   "id": "blue_depot_chernihiv",
+   "name": "Склад снабжения (Чернигов)",
+   "side": "blue",
+   "place": "Chernihiv"
+  },
+  {
+   "id": "blue_depot_bila",
+   "name": "Склад снабжения (Белая Церковь)",
+   "side": "blue",
+   "place": "BilaTserkva"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_irpin",
+   "name": "Мост через Ирпень (Романовка)",
+   "links": [
+    [
+     "Irpin",
+     "Kyiv"
+    ]
+   ],
+   "source": "условно: середина участка Ирпень - Киев (взорван 25.02)",
+   "lat": 53.59,
+   "lon": 9.925
+  },
+  {
+   "id": "br_teteriv",
+   "name": "Мост через Тетерев (Иванков)",
+   "links": [
+    [
+     "Chernobyl",
+     "Ivankiv"
+    ]
+   ],
+   "source": "условно: середина участка Чернобыль - Иванков",
+   "lat": 53.875,
+   "lon": 9.92
+  },
+  {
+   "id": "br_desna",
+   "name": "Мост через Десну (Чернигов)",
+   "links": [
+    [
+     "Chernihiv",
+     "Brovary"
+    ]
+   ],
+   "source": "условно: середина участка Чернигов - Бровары",
+   "lat": 53.74,
+   "lon": 10.305
+  }
+ ],
+ "ad_sites": [
+  {
+   "id": "blue_ad_af_celle",
+   "name": "ПВО аэродрома Celle",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_celle",
+   "lat": 52.6039,
+   "lon": 10.0329,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_hamburg_finkenwerder",
+   "name": "ПВО аэродрома Hamburg Finkenwerder",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_hamburg_finkenwerder",
+   "lat": 53.5475,
+   "lon": 9.8357,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_hannover",
+   "name": "ПВО аэродрома Hannover",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_hannover",
+   "lat": 52.4671,
+   "lon": 9.7014,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_kiel",
+   "name": "ПВО аэродрома Kiel",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_kiel",
+   "lat": 54.3667,
+   "lon": 10.1375,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_lubeck",
+   "name": "ПВО аэродрома Lubeck",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_lubeck",
+   "lat": 53.7999,
+   "lon": 10.7381,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_pinnow",
+   "name": "ПВО аэродрома Pinnow",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_pinnow",
+   "lat": 53.6212,
+   "lon": 11.5418,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_wunstorf",
+   "name": "ПВО аэродрома Wunstorf",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_wunstorf",
+   "lat": 52.4695,
+   "lon": 9.4368,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  }
+ ],
+ "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил."
+}

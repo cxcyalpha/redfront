@@ -37,7 +37,12 @@ def power(state: dict, unit: dict) -> float:
     # в пользу Израиля - ОЦЕНКА), по умолчанию 1
     # night_power - ночной бой стороны относительно дня (доктрина: армии арабских стран 1973 ночью слабее - ОЦЕНКА)
     night = sim.get("night_power", 1.0) if state.get("_night_now") else 1.0
-    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * unit.get("quality", 1.0) * night
+    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0) * night
+
+
+def _art_bde(state: dict, unit: dict) -> float:
+    from . import artillery                      # артбригады в досягаемости (artillery.py)
+    return artillery.support_k(state, unit)
 
 
 def artillery_k(state: dict, unit: dict) -> float:
@@ -182,6 +187,8 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
                 budget[u["id"]] = ((u.get("daily_advance_km") or sm["daily_advance_km"]) * model.strength(u)
                                    * u.get("supply", 1.0) * frac_day)         # без снабжения - медленнее
             budget[u["id"]] *= u.get("speed_k", 1.0)        # передовой отряд, ОМГ - быстрее (ops.py)
+            from . import ew
+            budget[u["id"]] *= ew.tempo_factor(state, u)    # РЭБ противника: подавление связи - темп ниже
             cl = current_link(state, u)
             if cl and logistics.link_detour(state, *cl):                       # разрушен малый мост - объезд
                 budget[u["id"]] *= _sim(state, u["side"]).get("bridge_detour_slow", 1.0)
@@ -360,6 +367,8 @@ def end_day(state: dict) -> list[str]:
     lines += naval.daily(state)                  # флот: потопленные группы, авианосцы-базы
     from . import strategic
     lines += strategic.daily(state)              # удары ракетами (ОТР, Томагавк): исход суток и план следующих
+    from . import artillery
+    lines += artillery.daily(state)              # артбригады: контрбатарейная борьба, смена позиций
     lines += logistics.repairs(state)
     for u in state["units"].values():            # артиллерия частей: орудие в сутки из ремонта и пополнения (ОЦЕНКА)
         if u.get("art_lost"):
@@ -371,6 +380,8 @@ def end_day(state: dict) -> list[str]:
     intel.ensure(state)                         # новые ЗРК противника (из глубины) - в разведку
     lines += logistics.airfields(state)
     from . import command
+    from . import dispersal
+    lines += dispersal.daily(state)              # рассредоточение: перебазирование по доктрине стороны (приказ - на сутки)
     lines += command.apply_rebases(state)       # перебазирование по приказу командующего
     lines += farp.daily(state)                  # вертолётные части - на передовые площадки и с них
     lines += logistics.replacements(state)

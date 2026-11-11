@@ -1,0 +1,1254 @@
+{
+ "_about": "Состав сил 27.09.2020 (Азербайджан - Армения и Нагорный Карабах). Генерирован tools/gen_karabakh.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+ "theatre": "caucasus",
+ "preset": {
+  "title": "Карабах, сентябрь 2020: 44-дневная война",
+  "year": 2020,
+  "date": "2020-09-27"
+ },
+ "date": "2020-09-27",
+ "countries": {
+  "red": "Azerbaijan",
+  "blue": "Armenia"
+ },
+ "doctrine": {
+  "red": "wp",
+  "blue": "wp"
+ },
+ "units": [
+  {
+   "id": "red_az_1",
+   "name": "1-й армейский корпус ВС Азербайджана (бригады)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Tartar"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "T_90",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "north"
+  },
+  {
+   "id": "red_az_1_pvo",
+   "name": "Войсковая ПВО: 1-й армейский корпус ВС Азербайджана (бригады)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_az_1",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_az_2",
+   "name": "2-й армейский корпус (юг)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Horadiz"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "T_90",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south",
+   "note": "главный удар на юге"
+  },
+  {
+   "id": "red_az_2_pvo",
+   "name": "Войсковая ПВО: 2-й армейский корпус (юг)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_az_2",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_az_2b",
+   "name": "2-й армейский корпус (Бейлаган)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Beylagan"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "T_90",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south"
+  },
+  {
+   "id": "red_az_2b_pvo",
+   "name": "Войсковая ПВО: 2-й армейский корпус (Бейлаган)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_az_2b",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_az_3",
+   "name": "3-й армейский корпус (Барда)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Barda"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "T_90",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "north"
+  },
+  {
+   "id": "red_az_3_pvo",
+   "name": "Войсковая ПВО: 3-й армейский корпус (Барда)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_az_3",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_az_sf",
+   "name": "Силы специальных операций Азербайджана",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Horadiz"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_82A",
+     "count": 12,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 5,
+   "arrives_jitter": 0,
+   "axis": "south",
+   "note": "лесом к Шуше (начало ноября)"
+  },
+  {
+   "id": "red_az_sf_pvo",
+   "name": "Войсковая ПВО: Силы специальных операций Азербайджана",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_az_sf",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_az_res",
+   "name": "Резерв (бригады из Гянджи)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Ganja"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "T_90",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 8,
+   "arrives_jitter": 0,
+   "axis": "lachin"
+  },
+  {
+   "id": "red_az_res_pvo",
+   "name": "Войсковая ПВО: Резерв (бригады из Гянджи)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_az_res",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZU_23_Emplacement",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_martakert",
+   "name": "Армия обороны НКР (Мартакертский район)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Martakert"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_martakert_pvo",
+   "name": "Войсковая ПВО: Армия обороны НКР (Мартакертский район)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ar_martakert",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_agdam",
+   "name": "Армия обороны НКР (Агдамский район)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Agdam"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_agdam_pvo",
+   "name": "Войсковая ПВО: Армия обороны НКР (Агдамский район)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ar_agdam",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_fuzuli",
+   "name": "Армия обороны НКР (Физулинский район)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Fuzuli"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 25,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 20,
+     "role": "IFV"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_fuzuli_pvo",
+   "name": "Войсковая ПВО: Армия обороны НКР (Физулинский район)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ar_fuzuli",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_jabrayil",
+   "name": "Армия обороны НКР (Джебраильский район)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Jabrayil"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_jabrayil_pvo",
+   "name": "Войсковая ПВО: Армия обороны НКР (Джебраильский район)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ar_jabrayil",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_hadrut",
+   "name": "Армия обороны НКР (Гадрутский район)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hadrut"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_hadrut_pvo",
+   "name": "Войсковая ПВО: Армия обороны НКР (Гадрутский район)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ar_hadrut",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_shusha",
+   "name": "Гарнизон Шуши",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Shusha"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_shusha_pvo",
+   "name": "Войсковая ПВО: Гарнизон Шуши",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ar_shusha",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ar_reserve",
+   "name": "Резерв ВС Армении (из Армении)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Goris"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 25,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 20,
+     "role": "IFV"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_70",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 0,
+   "note": "подход через Лачин"
+  },
+  {
+   "id": "blue_ar_reserve_pvo",
+   "name": "Войсковая ПВО: Резерв ВС Армении (из Армении)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ar_reserve",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_s300_karabakh",
+   "name": "Дивизион С-300ПС (Карабах)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 41.64,
+    "lon": 44.18
+   },
+   "composition": [
+    {
+     "type": "S-300PS 64H6E sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 40B6M tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 54K6 cp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "S-300PS 5P85C ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_kub_stepanakert",
+   "name": "Батарея Куб (Степанакерт)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 41.72,
+    "lon": 44.3
+   },
+   "composition": [
+    {
+     "type": "Kub 1S91 str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub 2P25 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tor_lachin",
+   "name": "Батарея Тор-М2КМ (Лачин)",
+   "side": "blue",
+   "role": "sam_short",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 41.61,
+    "lon": 44.03
+   },
+   "composition": [
+    {
+     "type": "CHAP_TorM2",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_osa_shusha",
+   "name": "Батарея Оса (Шуша)",
+   "side": "blue",
+   "role": "sam_short",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 41.56,
+    "lon": 44.31
+   },
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 3,
+     "role": "launcher"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s300_ganja",
+   "name": "Дивизион С-300ПМУ2 (Гянджа; в DCS - С-300ПС)",
+   "side": "red",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 41.76,
+    "lon": 44.84
+   },
+   "composition": [
+    {
+     "type": "S-300PS 64H6E sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 40B6M tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 54K6 cp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "S-300PS 5P85C ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_buk_barda",
+   "name": "Дивизион Бук-МБ (Барда)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 41.56,
+    "lon": 44.94
+   },
+   "composition": [
+    {
+     "type": "SA-11 Buk SR 9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA-11 Buk CC 9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA-11 Buk LN 9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tochka",
+   "name": "Дивизион ОТР Точка-У ВС Армении",
+   "side": "blue",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "tochka",
+   "pos": {
+    "lat": 41.48,
+    "lon": 43.7
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "удары по Гяндже и Барде (HRW) - ОЦЕНКА числа",
+   "estimate": true
+  },
+  {
+   "id": "blue_scud",
+   "name": "Бригада ОТР Р-17 'Эльбрус' ВС Армении",
+   "side": "blue",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "scud",
+   "pos": {
+    "lat": 41.45,
+    "lon": 43.6
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "",
+   "estimate": true
+  },
+  {
+   "id": "blue_iskander",
+   "name": "Дивизион ОТРК Искандер ВС Армении",
+   "side": "blue",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "iskander",
+   "pos": {
+    "lat": 41.4,
+    "lon": 43.55
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "применение - спорно (заявления сторон 2021); ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_tochka",
+   "name": "Дивизион ОТР Точка-У ВС Азербайджана",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "tochka",
+   "pos": {
+    "lat": 41.7,
+    "lon": 44.9
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "az_tb2",
+   "name": "Ударные беспилотники Bayraktar TB2 (в DCS - MQ-9)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "vaziani",
+   "type": "MQ_9_Reaper",
+   "count": 12,
+   "strike_radius_km": 250,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА; TB2 в DCS нет - MQ-9 Reaper; число - ОЦЕНКА (поставки 2020)",
+   "estimate": true
+  },
+  {
+   "id": "az_su25",
+   "name": "Штурмовая эскадрилья ВВС Азербайджана (Су-25)",
+   "side": "red",
+   "role": "attack",
+   "base": "vaziani",
+   "type": "Su_25",
+   "count": 10,
+   "strike_radius_km": 250,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА; Кюрдамир - Вазиани",
+   "estimate": true
+  },
+  {
+   "id": "az_mig29",
+   "name": "Истребительная эскадрилья ВВС Азербайджана (МиГ-29)",
+   "side": "red",
+   "role": "fighter",
+   "base": "tbilisi_lochini",
+   "type": "MiG_29A",
+   "count": 10,
+   "strike_radius_km": 300,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "az_mi24",
+   "name": "Вертолёты ВВС Азербайджана (Ми-35М; в DCS - Ми-24П)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "soganlug",
+   "type": "Mi_24P",
+   "count": 10,
+   "strike_radius_km": 150,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "az_mi17",
+   "name": "Вертолёты ВВС Азербайджана (Ми-17)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "soganlug",
+   "type": "Mi_8MT",
+   "count": 8,
+   "strike_radius_km": 200,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ar_su25",
+   "name": "Штурмовая эскадрилья ВВС Армении (Су-25)",
+   "side": "blue",
+   "role": "attack",
+   "base": "kutaisi",
+   "type": "Su_25",
+   "count": 8,
+   "strike_radius_km": 250,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА; Ереван (Эребуни) - Кутаиси",
+   "estimate": true
+  },
+  {
+   "id": "ar_su30",
+   "name": "Истребители ВВС Армении (Су-30СМ)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "kutaisi",
+   "type": "Su_30SM",
+   "count": 4,
+   "strike_radius_km": 400,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-30: без мода части в кампании нет (у Армении нет замены); в войне почти не применялись",
+   "estimate": true,
+   "mod": "su30"
+  },
+  {
+   "id": "ar_mi24",
+   "name": "Вертолёты ВВС Армении (Ми-24П)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "kutaisi",
+   "type": "Mi_24P",
+   "count": 8,
+   "strike_radius_km": 150,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ar_mi8",
+   "name": "Вертолёты ВВС Армении (Ми-8)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "kutaisi",
+   "type": "Mi_8MT",
+   "count": 6,
+   "strike_radius_km": 200,
+   "source": "Kofman (CNA) / Oryx / HRW (2020-21), по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "strategic_stock": {
+  "blue": {
+   "tochka": 12,
+   "scud": 6,
+   "iskander": 2
+  },
+  "red": {
+   "tochka": 6
+  }
+ },
+ "variants": [
+  {
+   "name": "base",
+   "title": "Карабах, сентябрь 2020: 44-дневная война",
+   "task_rules": {
+    "red": {
+     "strike_airfield": {
+      "off": true,
+      "why": "аэродромы Армении - вне войны (удары по Армении не наносились)"
+     }
+    }
+   },
+   "posture": {
+    "red": "offense",
+    "blue": "defense"
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 1,
+  "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "Тор, ЗУ-23",
+     "composition": [
+      {
+       "type": "Tor_9A331",
+       "role": "launcher",
+       "count": 1
+      },
+      {
+       "type": "ZU_23_Emplacement",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Оса, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Osa_9A33_ln",
+       "role": "launcher",
+       "count": 1
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "барражирующие боеприпасы (Харопа, Скайстрайкер - в DCS нет), РСЗО (Смерч, Полонез), Ан-2 - ложные цели, сирийские наёмники, удары по городам (в модели цели - склады и аэродромы)."
+}

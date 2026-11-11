@@ -74,7 +74,7 @@ TITLES = {
 }
 
 
-WAYPOINTS = {"Взлёт": "Takeoff", "Посадка": "Landing", "Демонстрация": "Feint", "Зона дежурства": "Station", "Зона прикрытия": "Escort zone", "Зона расчистки": "Sweep zone", "Зона постановки помех": "Jamming orbit",
+WAYPOINTS = {"Взлёт": "Takeoff", "Посадка": "Landing", "Демонстрация": "Feint", "Зона дежурства": "Station", "Зона прикрытия": "Escort zone", "Зона расчистки": "Sweep zone", "Зона постановки помех": "Jamming orbit", "Домой": "Home",
              "ИПМ": "IP", "Маршрут": "Route", "Отход": "Egress", "Площадка": "LZ", "Площадка (прикрытие)": "LZ (escort)",
              "Подход": "Approach", "Район поиска": "Search area", "Рубеж атаки": "Attack line", "Рубеж пуска": "Launch line",
              "Сбор": "Rendezvous", "Снижение": "Descent", "Уход": "Egress", "Цель": "Target", "Экипаж": "Crew",

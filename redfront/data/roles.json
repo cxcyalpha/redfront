@@ -120,6 +120,18 @@
    "category": "ssm",
    "strike_radius_km": null,
    "note": "пусковые баллистических ракет (Скад, Точка, Искандер): удары по аэродромам и складам (strategic.py), стрельба с переездом"
+  },
+  "ew_site": {
+   "title": "станции РЭБ (наземные)",
+   "category": "ew_site",
+   "strike_radius_km": null,
+   "note": "подавление ГНСС, беспилотников, связи (ew.py); цель разведки и ударов (strike_ew)"
+  },
+  "art_bde": {
+   "title": "артиллерийские бригады и полки",
+   "category": "art_site",
+   "strike_radius_km": null,
+   "note": "огонь по бою своих частей в досягаемости, контрбатарейная борьба (artillery.py); цель разведки и ударов (strike_art)"
   }
  },
  "elements": {

@@ -1,0 +1,487 @@
+{
+ "_about": "Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Условная география на карте Cold War Germany (Альтмарк - Бранденбург); координаты - точки карты, имена - украинские и российские.",
+ "theatre": "germany",
+ "places": {
+  "Belgorod": {
+   "lat": 53.15,
+   "lon": 12.18,
+   "estimate": true,
+   "side": "red"
+  },
+  "Valuyki": {
+   "lat": 53.185,
+   "lon": 13.145,
+   "estimate": true,
+   "side": "red"
+  },
+  "Lyptsi": {
+   "lat": 52.825,
+   "lon": 12.075,
+   "estimate": true,
+   "side": "red"
+  },
+  "Vovchansk": {
+   "lat": 52.942,
+   "lon": 12.395,
+   "estimate": true,
+   "side": "red"
+  },
+  "Balakliia": {
+   "lat": 52.737,
+   "lon": 12.58,
+   "estimate": true,
+   "side": "red"
+  },
+  "Shevchenkove": {
+   "lat": 52.762,
+   "lon": 13.027,
+   "estimate": true,
+   "side": "red"
+  },
+  "Kupiansk": {
+   "lat": 52.755,
+   "lon": 13.237,
+   "estimate": true,
+   "side": "red"
+  },
+  "Borova": {
+   "lat": 52.605,
+   "lon": 12.877,
+   "estimate": true,
+   "side": "red"
+  },
+  "Izium": {
+   "lat": 52.412,
+   "lon": 12.556,
+   "estimate": true,
+   "side": "red"
+  },
+  "Lyman": {
+   "lat": 52.238,
+   "lon": 12.971,
+   "estimate": true,
+   "side": "red"
+  },
+  "Svatove": {
+   "lat": 52.68,
+   "lon": 13.588,
+   "estimate": true,
+   "side": "red"
+  },
+  "Kharkiv": {
+   "lat": 52.605,
+   "lon": 11.858,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Chuhuiv": {
+   "lat": 52.605,
+   "lon": 12.337,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Zmiiv": {
+   "lat": 52.405,
+   "lon": 12.16,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Sloviansk": {
+   "lat": 52.142,
+   "lon": 12.592,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Poltava": {
+   "lat": 52.85,
+   "lon": 11.15,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Dnipro": {
+   "lat": 52.272,
+   "lon": 11.855,
+   "estimate": true,
+   "side": "blue"
+  }
+ },
+ "airbases": {
+  "wittstock": {
+   "name": "Wittstock",
+   "airport": "Wittstock",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "templin": {
+   "name": "Templin",
+   "airport": "Templin",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "finow": {
+   "name": "Finow",
+   "airport": "Finow",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "braunschweig": {
+   "name": "Braunschweig",
+   "airport": "Braunschweig",
+   "side": "blue",
+   "military": true
+  },
+  "hannover": {
+   "name": "Hannover",
+   "airport": "Hannover",
+   "side": "blue",
+   "military": true
+  },
+  "celle": {
+   "name": "Celle",
+   "airport": "Celle",
+   "side": "blue",
+   "military": true
+  },
+  "gardelegen": {
+   "name": "Gardelegen",
+   "airport": "Gardelegen",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "links": [
+  [
+   "Belgorod",
+   "Lyptsi"
+  ],
+  [
+   "Lyptsi",
+   "Kharkiv"
+  ],
+  [
+   "Belgorod",
+   "Vovchansk"
+  ],
+  [
+   "Vovchansk",
+   "Chuhuiv"
+  ],
+  [
+   "Vovchansk",
+   "Kupiansk"
+  ],
+  [
+   "Valuyki",
+   "Kupiansk"
+  ],
+  [
+   "Valuyki",
+   "Vovchansk"
+  ],
+  [
+   "Kharkiv",
+   "Chuhuiv"
+  ],
+  [
+   "Kharkiv",
+   "Zmiiv"
+  ],
+  [
+   "Chuhuiv",
+   "Balakliia"
+  ],
+  [
+   "Zmiiv",
+   "Balakliia"
+  ],
+  [
+   "Balakliia",
+   "Shevchenkove"
+  ],
+  [
+   "Shevchenkove",
+   "Kupiansk"
+  ],
+  [
+   "Balakliia",
+   "Izium"
+  ],
+  [
+   "Izium",
+   "Borova"
+  ],
+  [
+   "Borova",
+   "Kupiansk"
+  ],
+  [
+   "Kupiansk",
+   "Svatove"
+  ],
+  [
+   "Borova",
+   "Svatove"
+  ],
+  [
+   "Izium",
+   "Lyman"
+  ],
+  [
+   "Lyman",
+   "Svatove"
+  ],
+  [
+   "Izium",
+   "Sloviansk"
+  ],
+  [
+   "Sloviansk",
+   "Lyman"
+  ],
+  [
+   "Kharkiv",
+   "Poltava"
+  ],
+  [
+   "Zmiiv",
+   "Dnipro"
+  ],
+  [
+   "Dnipro",
+   "Sloviansk"
+  ],
+  [
+   "Poltava",
+   "Dnipro"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Belgorod",
+   "Valuyki",
+   "Svatove"
+  ],
+  "blue": [
+   "Poltava",
+   "Dnipro"
+  ]
+ },
+ "off_limits": {
+  "blue": [
+   "Belgorod",
+   "Valuyki"
+  ]
+ },
+ "axes": {
+  "kupiansk": "Балаклея - Шевченково - Купянск",
+  "izium": "Балаклея - Изюм - Боровая",
+  "lyman": "Славянск - Лиман",
+  "north": "Север: Липцы - Волчанск"
+ },
+ "objectives": {
+  "red": {
+   "kupiansk": [
+    "Balakliia",
+    "Shevchenkove",
+    "Kupiansk"
+   ],
+   "izium": [
+    "Balakliia",
+    "Izium",
+    "Borova"
+   ],
+   "lyman": [
+    "Lyman"
+   ],
+   "north": [
+    "Lyptsi",
+    "Vovchansk"
+   ]
+  },
+  "blue": []
+ },
+ "_about_objectives": "Оси ВСУ: Балаклея - Шевченково - Купянск; Балаклея - Изюм; Славянск - Лиман; север - Волчанск.",
+ "depots": [
+  {
+   "id": "red_depot_izium",
+   "name": "Склады изюмской группировки",
+   "side": "red",
+   "place": "Izium"
+  },
+  {
+   "id": "red_depot_kupiansk",
+   "name": "Железнодорожный узел и склады Купянска",
+   "side": "red",
+   "place": "Kupiansk"
+  },
+  {
+   "id": "red_depot_balakliia",
+   "name": "Арсенал в Балаклее (склады)",
+   "side": "red",
+   "place": "Balakliia"
+  },
+  {
+   "id": "red_depot_svatove",
+   "name": "Склад снабжения (Сватово)",
+   "side": "red",
+   "place": "Svatove"
+  },
+  {
+   "id": "red_depot_belgorod",
+   "name": "Склады Белгорода",
+   "side": "red",
+   "place": "Belgorod"
+  },
+  {
+   "id": "blue_depot_kharkiv",
+   "name": "Склады Харькова",
+   "side": "blue",
+   "place": "Kharkiv"
+  },
+  {
+   "id": "blue_depot_chuhuiv",
+   "name": "Склад снабжения (Чугуев)",
+   "side": "blue",
+   "place": "Chuhuiv"
+  },
+  {
+   "id": "blue_depot_sloviansk",
+   "name": "Склад снабжения (Славянск)",
+   "side": "blue",
+   "place": "Sloviansk"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_oskil_kupiansk",
+   "name": "Мост через Оскол (Купянск)",
+   "links": [
+    [
+     "Kupiansk",
+     "Svatove"
+    ]
+   ],
+   "source": "условно: Оскол между Купянском и Купянском-Узловым",
+   "lat": 52.718,
+   "lon": 13.412
+  },
+  {
+   "id": "br_donets_izium",
+   "name": "Мост через Северский Донец (Изюм)",
+   "links": [
+    [
+     "Balakliia",
+     "Izium"
+    ]
+   ],
+   "source": "условно: середина участка",
+   "lat": 52.575,
+   "lon": 12.568
+  },
+  {
+   "id": "br_oskil_borova",
+   "name": "Мост через Оскол (Боровая)",
+   "links": [
+    [
+     "Borova",
+     "Svatove"
+    ]
+   ],
+   "source": "условно: середина участка",
+   "lat": 52.642,
+   "lon": 13.232
+  }
+ ],
+ "ad_sites": [
+  {
+   "id": "blue_ad_af_braunschweig",
+   "name": "ПВО аэродрома Braunschweig",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_braunschweig",
+   "lat": 52.3247,
+   "lon": 10.574,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_celle",
+   "name": "ПВО аэродрома Celle",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_celle",
+   "lat": 52.5928,
+   "lon": 10.0464,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_finow",
+   "name": "ПВО аэродрома Finow",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_finow",
+   "lat": 52.8244,
+   "lon": 13.6723,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_gardelegen",
+   "name": "ПВО аэродрома Gardelegen",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_gardelegen",
+   "lat": 52.5355,
+   "lon": 11.37,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_hannover",
+   "name": "ПВО аэродрома Hannover",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_hannover",
+   "lat": 52.457,
+   "lon": 9.7155,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_templin",
+   "name": "ПВО аэродрома Templin",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_templin",
+   "lat": 53.0255,
+   "lon": 13.523,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_wittstock",
+   "name": "ПВО аэродрома Wittstock",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_wittstock",
+   "lat": 53.1892,
+   "lon": 12.5182,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  }
+ ],
+ "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил.",
+ "air_limits": {
+  "blue": [
+   "Belgorod",
+   "Valuyki",
+   "af_wittstock",
+   "af_templin",
+   "af_finow"
+  ]
+ }
+}

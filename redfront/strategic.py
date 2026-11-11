@@ -1,4 +1,5 @@
-"""Стратегический уровень: удары баллистическими (Скад-Б, Точка-У, Искандер) и крылатыми (Томагавк с кораблей) ракетами.
+"""Стратегический уровень: удары баллистическими (Скад-Б, Точка-У, Искандер) и крылатыми ракетами (Томагавк с кораблей,
+ракеты воздушного базирования с бомбардировщиков: Х-555, Х-101, Х-55/Х-65, Х-22, AGM-86C, КД-20).
 
 Сутки: сторона с пусковыми и запасом ракет планирует пуски на следующие сутки (ssm_plan) - по аэродромам и складам
 противника в досягаемости, ценные цели первыми; конец суток - исход: перехват ПРО (Patriot, С-300 у цели), попадание
@@ -26,9 +27,31 @@ MISSILES = {
     "iskander": {"title": "9К720 Искандер-М", "range_km": 500, "cep_m": 10, "warhead_kg": 480, "per_day": 2.0,
                  "dcs": "CHAP_9K720_HE",       # CurrentHill - встроен в DCS (есть в pydcs)
                  "source": "Искандер-М: до 500 км, КВО 5-30 м (открытые оценки); темп - ОЦЕНКА"},
-    "tlam": {"title": "BGM-109 Томагавк", "range_km": 1300, "cep_m": 10, "warhead_kg": 450, "per_day": 4.0,
+    "gmlrs": {"title": "M31 GMLRS (HIMARS)", "range_km": 80, "cep_m": 10, "warhead_kg": 90, "per_day": 2.0,
+              "dcs": "CHAP_M142_GMLRS_M31",    # CurrentHill M142 HIMARS (есть в pydcs)
+              "source": "GMLRS M31: ~70-84 км, КВО <10 м, БЧ ~90 кг; темп - ОЦЕНКА (2 ракеты на пусковую в сутки)"},
+    "tlam": {"title": "BGM-109 Томагавк", "range_km": 1300, "cep_m": 10, "warhead_kg": 450, "per_day": 4.0, "cruise": True,
              "source": "TLAM-C: ~1250-1600 км, КВО ~10 м; пуски с кораблей с бронированными пусковыми (ABL) или УВП"},
+    # крылатые ракеты воздушного базирования (обычное снаряжение): pylon - часть имени подвески pydcs, from - год
+    "kh555": {"title": "Х-555", "range_km": 2000, "cep_m": 20, "warhead_kg": 400, "cruise": True, "from": 2000,
+              "pylon": "Kh-555", "source": "Х-555: обычная БЧ, ~2000 км (открытые оценки); Сирия 2015 - Ту-95МС"},
+    "kh101": {"title": "Х-101", "range_km": 2500, "cep_m": 10, "warhead_kg": 450, "cruise": True, "from": 2012,
+              "pylon": "Kh-101", "source": "Х-101: ~2500-4500 км (оценки), Сирия 2015 - Ту-160 и Ту-95МС"},
+    "kh65": {"title": "Х-55СМ / Х-65 (обычная БЧ)", "range_km": 2500, "cep_m": 25, "warhead_kg": 410, "cruise": True,
+             "from": 2000, "pylon": "Kh-65", "source": "в DCS - Kh-65 (AS-15B); обычные Х-55 - ОЦЕНКА года"},
+    "kh22": {"title": "Х-22 (по наземным целям)", "range_km": 500, "cep_m": 300, "warhead_kg": 950, "cruise": True,
+             "from": 1967, "pylon": "Kh-22", "source": "Х-22: противокорабельная, по крупным наземным целям - с большим "
+                                                       "промахом (КВО - ОЦЕНКА)"},
+    "agm86c": {"title": "AGM-86C CALCM", "range_km": 1100, "cep_m": 10, "warhead_kg": 450, "cruise": True, "from": 1991,
+               "pylon": "AGM-86C", "source": "CALCM: обычная БЧ, первые пуски - 17.01.1991 (Secret Squirrel)"},
+    "kd20": {"title": "КД-20 (CJ-10A)", "range_km": 1500, "cep_m": 10, "warhead_kg": 500, "cruise": True, "from": 2010,
+             "pylon": "KD-20", "source": "КД-20: открытые оценки дальности ~1500-2000 км"},
 }
+# бомбардировщики - носители: тип -> (ракета по умолчанию, ракет на борт); часть может задать свою (поле alcm)
+ALCM_CARRIERS = {"Tu_95MS": ("kh555", 6), "Tu_160": ("kh65", 12), "B_52H": ("agm86c", 8), "H_6J": ("kd20", 6),
+                 "Tu_22M3": ("kh22", 1)}
+ALCM_SORTIES = 4       # ОЦЕНКА: бомбардировщиков части в налёте за сутки - не больше
+LAUNCH_KM = 400        # ОЦЕНКА: рубеж пуска - не дальше от цели (в миссии - на карте, вне зон ЗРК противника)
 # доля повреждения объекта от одного попадания (ОЦЕНКА): аэродром - полосы и стоянки большие, одна ракета - немного
 HIT_DAMAGE = {"airfield": 0.06, "depot": 0.10, "factory": 0.08}
 LETHAL_R_M = {"airfield": 400, "depot": 150, "factory": 150}   # ОЦЕНКА: промах больше - урона нет
@@ -63,6 +86,17 @@ def launchers(state: dict, side: str) -> list[dict]:
             n = sum(1 for _t, nm in naval.ship_names(u) if any(re.search(rx, nm) for rx, _k in TLAM_SHIPS))
             if n:
                 out.append({"unit": u["id"], "missile": "tlam", "n": n, "pos": model.unit_pos(state, u)})
+        elif u.get("type") in ALCM_CARRIERS or u.get("alcm"):   # бомбардировщики с крылатыми ракетами
+            from . import logistics
+            missile, load = ALCM_CARRIERS.get(u.get("type"), (None, 1))
+            missile = u.get("alcm") or missile
+            if int(str(state.get("date", "2000"))[:4]) < MISSILES[missile].get("from", 0):
+                continue                         # ракеты (обычной) ещё нет
+            n = min(ALCM_SORTIES, logistics.available(state, u))
+            base = state["airbases"].get(u.get("base"), {})
+            if n > 0 and "lat" in base:
+                out.append({"unit": u["id"], "missile": missile, "n": n * load, "pos": {"lat": base["lat"], "lon": base["lon"]},
+                            "air": True, "aircraft": n})
     return out
 
 
@@ -91,9 +125,10 @@ def plan(state: dict) -> list[str]:
         per_day = (state.get("strategic_per_day") or {}).get(side) or {}
         left = {k: min(v, per_day.get(k, max(1, math.ceil(v * DAILY_SHARE)) if v > 0 else 0)) for k, v in left.items()}
         tg = _targets(state, side)
+        raid_t: dict = {}                        # налёт бомбардировщиков: ракеты по одной цели - одним залпом
         for ln in launchers(state, side):
             m = MISSILES[ln["missile"]]
-            shots = min(int(ln["n"] * m["per_day"]), int(left.get(ln["missile"], 0)))
+            shots = min(int(ln["n"] * (1 if ln.get("air") else m["per_day"])), int(left.get(ln["missile"], 0)))
             if shots <= 0:
                 continue
             reach = [t for t in tg if model.dist_km(ln["pos"], model.unit_pos(state, t)) <= m["range_km"]]
@@ -103,7 +138,8 @@ def plan(state: dict) -> list[str]:
             for k in range(shots):
                 t = reach[k % min(len(reach), 3)]          # не больше трёх целей на пусковую: удары сосредоточены
                 plan_.append({"side": side, "unit": ln["unit"], "missile": ln["missile"], "target": t["id"],
-                              "t_s": int(rng.uniform(5, 20) * 3600)})
+                              "t_s": raid_t.setdefault((ln["unit"], t["id"]), int(rng.uniform(5, 20) * 3600))
+                              if ln.get("air") else int(rng.uniform(5, 20) * 3600), **({"air": True} if ln.get("air") else {})})
                 left[ln["missile"]] = left.get(ln["missile"], 0) - 1
     state["ssm_plan"] = plan_
     return [f"План пусков ракет на сутки - {sum(1 for p in plan_ if p['side'] == s)} ({s})." for s in model.SIDES
@@ -113,7 +149,7 @@ def plan(state: dict) -> list[str]:
 def _abm(state: dict, side_def: str, pos: dict, missile: str) -> float:
     year = int(str(state.get("date", "2000"))[:4])
     p_miss = 1.0
-    if missile == "tlam":
+    if MISSILES.get(missile, {}).get("cruise"):
         n = sum(1 for u in state["units"].values() if u.get("side") == side_def and u["role"] in ("sam_long", "sam_medium")
                 and u["state"] not in ("destroyed", "pending") and model.dist_km(model.unit_pos(state, u), pos) <= 30)
         return min(CM_MAX, n * CM_INTERCEPT)
@@ -141,8 +177,10 @@ def resolve(state: dict) -> list[str]:
     for p in state.get("ssm_plan") or []:
         u = state["units"].get(p["unit"])
         t = state["units"].get(p["target"])
-        if not u or not t or u["state"] in ("destroyed", "sunk") or (model.category(u) == "ssm" and model.strength(u) <= 0):
+        if not u or not t or u.get("state") in ("destroyed", "sunk") or (model.category(u) == "ssm" and model.strength(u) <= 0):
             continue
+        if p.get("air") and (u.get("count", 0) <= 0 or p.get("aborted")):
+            continue                             # бомбардировщиков нет или налёт сорван (сбиты до рубежа пуска в миссии)
         s = stock.setdefault(p["side"], {})
         if s.get(p["missile"], 0) <= 0:
             continue
@@ -154,9 +192,15 @@ def resolve(state: dict) -> list[str]:
         if rng.random() < _abm(state, t["side"], model.unit_pos(state, t), p["missile"]):
             r["int"] += 1
             continue
-        if rng.random() < _p_hit(m["cep_m"], LETHAL_R_M[t["role"]]):
+        from . import ew
+        cep = m["cep_m"] * ew.cep_factor(state, t["side"], model.unit_pos(state, t), p["missile"])   # РЭБ: подавление ГНСС
+        if rng.random() < _p_hit(cep, LETHAL_R_M[t["role"]]):
             r["hit"] += 1
-            t["damage"] = min(1.0, t.get("damage", 0.0) + HIT_DAMAGE[t["role"]] * m["warhead_kg"] / 500.0)
+            d0 = t.get("damage", 0.0)
+            t["damage"] = min(1.0, d0 + HIT_DAMAGE[t["role"]] * m["warhead_kg"] / 500.0)
+            if t["role"] == "airfield":          # самолёты на стоянках (рассредоточение - меньше, dispersal.py)
+                from . import dispersal
+                lines += dispersal.ground_losses(state, t, t["damage"] - d0, "ракетный удар")
         if model.category(u) == "ssm" and u["id"] not in moved:
             moved.add(u["id"])
             home = u.setdefault("home_pos", dict(u["pos"]))
@@ -176,6 +220,17 @@ def resolve(state: dict) -> list[str]:
 def daily(state: dict) -> list[str]:
     """Конец суток: исход пусков суток, затем план на следующие."""
     return resolve(state) + plan(state)
+
+
+def mission_raids(state: dict, start_s: int, dur_s: int) -> list[dict]:
+    """Налёты бомбардировщиков суток во время миссии: (часть, цель, ракет, время от начала миссии) - по одной
+    группе на часть и цель."""
+    raids: dict = {}
+    for p in state.get("ssm_plan") or []:
+        if p.get("air") and start_s <= p["t_s"] <= start_s + dur_s:
+            r = raids.setdefault((p["unit"], p["target"]), {**p, "n": 0, "at_s": p["t_s"] - start_s})
+            r["n"] += 1
+    return list(raids.values())
 
 
 def mission_launches(state: dict, start_s: int, dur_s: int) -> list[dict]:

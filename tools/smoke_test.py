@@ -4016,6 +4016,123 @@ def theatres_section(tmp: Path) -> None:
           and sum(stc["strategic_stock"]["red"].values()) == stock0 - n_plan,
           f"ОТР: план суток {n_plan} пусков (предел - доля запаса), пуски в миссии (ssm.lua), исход - повреждение "
           f"{dmg:.2f}, расход ракет; {res[0] if res else ''}")
+    # налёт бомбардировщиков с крылатыми ракетами: план (носитель - Ту-95МС, Х-555), группа в миссии с ракетами, исход
+    stb = model.new_campaign("alcm", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1, player_side="blue")
+    stb["units"]["r52tbap"]["type"] = "Tu_95MS"
+    stb["strategic_stock"]["red"] = {"kh555": 12}
+    stb.pop("ssm_plan", None)
+    planner.plan(stb)
+    raids = [p_ for p_ in stb["ssm_plan"] if p_.get("air")]
+    for p_ in raids:
+        p_["t_s"] = int(8.75 * 3600)
+    build.build(stb, tmp / "alcm.miz", task_no=1)
+    mzb = zipfile.ZipFile(tmp / "alcm.miz").read("mission").decode("utf-8")
+    resb = [x for x in strategic.resolve(stb) if "Х-555" in x]
+    check(raids and "r52tbap raid" in mzb and "{Kh-555}" in mzb and "Bombing" in mzb and resb
+          and stb["strategic_stock"]["red"]["kh555"] == 12 - len(raids),
+          f"налёт Ту-95МС: {len(raids)} ракет Х-555 по плану, группа в миссии с ракетами и пуском по цели, исход - {resb[:1]}")
+    # РЭБ (ew.py): зоны станций, эффекты с пределами; удар по станции РЭБ и охота за пусковыми - миссия собирается
+    from redfront import ew
+    stk = model.new_campaign("ew", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=2, player_side="blue")
+    hos = model.offset(stk["units"]["red_ew_leer_west"]["pos"], 180.0, 15000)   # 15 км от Леер-3 (зона 20 км), вне Красухи-4
+    tb2 = stk["units"]["ua_tb2"]
+    uk, ul = ew.uav_factors(stk, tb2, hos)
+    cepk = ew.cep_factor(stk, "blue", stk["places"]["Kyiv"], "kh101")   # Киев под Буковелем: ГНСС - промах Х-101 больше
+    cept = ew.cep_factor(stk, "blue", stk["places"]["Kyiv"], "tochka")  # инерциальная Точка-У - нет
+    gn = ew.covered(stk, "red", stk["units"]["red_ew_pole21"]["pos"], "gnss")
+    stk["units"]["red_ew_leer_west"]["lost"] = {"SKP_11": 1, "Ural_4320_31": 2}   # станция разбита - зоны нет
+    uk2, _ = ew.uav_factors(stk, tb2, hos)
+    planner.plan(stk)
+    kinds = [t_["kind"] for t_ in stk["tasks"]]
+    built = False
+    if "strike_ew" in kinds:
+        build.build(stk, tmp / "ew.miz", task_no=kinds.index("strike_ew") + 1)
+        built = True
+    check(uk == ew.UAV_HIT_K and ul == ew.UAV_LOSS_ADD and gn and uk2 == 1.0 and cepk == 1.5 and cept == 1.0 and built,
+          f"РЭБ: TB2 в 15 км от Леер-3 - успех x{uk}, потери +{ul}; станция разбита - x{uk2}; ГНСС-зона Поле-21 - {gn}; КВО Х-101 у Киева x{cepk}, Точки-У x{cept}; "
+          f"удар по станции РЭБ - миссия собрана ({built})")
+    # Харьков 2022: ВСУ наступают; HIMARS бьёт по складам фронта, не по России; путь наступления - в обход России
+    skh = model.new_campaign("kh", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    planner.plan(skh)
+    gm = [p_["target"] for p_ in skh["ssm_plan"] if p_["missile"] == "gmlrs"]
+    from redfront import ops
+    pth = ops.path(skh, "Lyptsi", "Vovchansk", avoid={"Belgorod", "Valuyki"})
+    took = []
+    for _ in range(8):                       # бои идут с переменным успехом: засчитывается любой взятый пункт
+        sim.end_day(skh)
+        planner.plan(skh)
+        took += [n for n in ("Balakliia", "Izium", "Shevchenkove", "Kupiansk", "Lyman") if ops.owner(skh, n) == "blue" and n not in took]
+    build.build(skh, tmp / "kh.miz", task_no=1)
+    check(skh["posture"]["blue"] == "offense" and gm and all("belgorod" not in t_ for t_ in gm) and "Belgorod" not in (pth or [])
+          and took and (tmp / "kh.miz").exists(),
+          f"Харьков-22: HIMARS по {sorted(set(gm))}; путь Липцы - Волчанск {pth}; за 8 дней ВСУ брали {took}; миссия собрана")
+    # артиллерия (artillery.py): поддержка боя в досягаемости с пределом; контрбатарейная борьба; в миссии - огонь
+    from redfront import artillery
+    sa = model.new_campaign("ka", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    u92 = sa["units"]["blue_92mb"]
+    k0 = artillery.support_k(sa, u92)
+    u92["engaged"] = ["red_rg_balakliia"]
+    k1 = artillery.support_k(sa, u92)
+    for a_ in sa["units"].values():
+        if artillery.is_art(a_) and a_["side"] == "blue":
+            a_["pos"] = dict(model.unit_pos(sa, u92))
+    k2 = artillery.support_k(sa, u92)
+    gr = materialize.art_site(sa, sa["units"]["red_art_izium"])
+    check(k0 == 1.0 and 1.0 < k1 <= 1.0 + artillery.MAX_K and k2 <= 1.0 + artillery.MAX_K and len(gr["vehicles"]) == 16,
+          f"артиллерия: вне боя x{k0}, в бою x{k1:.2f}, все бригады рядом x{k2:.2f} (предел {1 + artillery.MAX_K}); "
+          f"бригада в миссии - {len(gr['vehicles'])} орудий, огонь по {'точке' if gr.get('fire_at') else 'нет цели'}")
+    # рассредоточение ВВС Украины (dispersal.py): посадка на другом аэродроме и перебазирование по доктрине
+    from redfront import command, dispersal
+    sd = model.new_campaign("kd", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    mig = sd["units"]["ua_mig29s"]
+    lands = [dispersal.land_other(sd, mig, f"t{k}") for k in range(40)]
+    other = [b_ for b_ in lands if b_]
+    home0 = mig["base"]
+    reb = []
+    for _ in range(5):
+        reb += dispersal.daily(sd)
+        command.apply_rebases(sd)
+        sd["day"] += 1
+    red_none = dispersal.land_other(sd, sd["units"]["ru_su34"], "x") is None
+    check(5 <= len(other) <= 25 and all(b_ != home0 and sd["airbases"][b_]["side"] == "blue" for b_ in other)
+          and reb and red_none,
+          f"рассредоточение ВСУ: посадка не дома в {len(other)} из 40 вылетов, перебазирований за 5 суток {len(reb)}; у России нет")
+    # защита рассредоточением: самолёты на земле под ударом по аэродрому - меньше; без сценария с рассредоточением - нет
+    sg = model.new_campaign("kg", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    af_ = sg["units"]["af_hannover"]
+    n0 = sum(u_["count"] for u_ in sg["units"].values() if u_.get("base") == "hannover" and model.category(u_) == "air")
+    for k in range(10):
+        af_["damage"] = 0.01 * k
+        dispersal.ground_losses(sg, af_, 0.5, f"t{k}")
+    n_prot = n0 - sum(u_["count"] for u_ in sg["units"].values() if u_.get("base") == "hannover" and model.category(u_) == "air")
+    sg2 = model.new_campaign("kg", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    sg2["dispersal"]["blue"]["protect"] = 0.0
+    for k in range(10):
+        sg2["units"]["af_hannover"]["damage"] = 0.01 * k
+        dispersal.ground_losses(sg2, sg2["units"]["af_hannover"], 0.5, f"t{k}")
+    n_open = n0 - sum(u_["count"] for u_ in sg2["units"].values() if u_.get("base") == "hannover" and model.category(u_) == "air")
+    sgd = model.new_campaign("kgd")                # сценарий без рассредоточения - потерь на земле нет
+    afd = next(u_ for u_ in sgd["units"].values() if u_.get("role") == "airfield")
+    nod = dispersal.ground_losses(sgd, afd, 0.5, "t")
+    k_dmg = dispersal.sortie_damage(sg, sg["units"]["ua_su25"], 0.4)
+    check(n_prot < n_open and not nod and abs(k_dmg - 0.4 * (1 - dispersal.SORTIE_PROTECT * dispersal.PROTECT)) < 1e-9,
+          f"рассредоточение защищает: 10 ударов по Hannover - на земле погибло {n_prot} (без защиты {n_open}); "
+          f"повреждение аэродрома для вылетов 40% -> {k_dmg:.0%}; в сценарии без рассредоточения потерь на земле нет")
+    # ДРЛО НАТО вне театра: E-3A в воздухе с начала миссии, бессмертный и невидимый, строка в брифинге
+    mza = zipfile.ZipFile(tmp / "kh.miz")
+    dct = mza.read("l10n/DEFAULT/dictionary").decode("utf-8")
+    mzm = mza.read("mission").decode("utf-8")
+    check("ext awacs blue" in mzm and "E-3A" in mzm and "ДРЛО НАТО E-3A" in dct and "player awacs" not in mzm,
+          "ДРЛО НАТО: E-3A вне театра в миссии, строка в брифинге; допущение E-2C игрока не нужно")
+    # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
+    sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    planner.plan(sh)
+    ti = next(i for i, t_ in enumerate(sh["tasks"]) if t_["kind"] == "strike_sam_site")
+    seadp = [g_["performer"] for g_ in sh["tasks"][ti]["package"] if g_["group"].startswith("sead")]
+    build.build(sh, tmp / "harm.miz", task_no=ti + 1)
+    mzh = zipfile.ZipFile(tmp / "harm.miz").read("mission").decode("utf-8")
+    check(bool(seadp) and bool(sh["units"][seadp[0]].get("arm_pylons")) and mzh.count("B06DD79A-F21E-4EB9-BD9D-AB3844618C93") >= 2,
+          f"HARM ВСУ: подавление ПВО - {seadp}, ракет HARM в миссии {mzh.count('B06DD79A-F21E-4EB9-BD9D-AB3844618C93')}")
     # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
     sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
     sp_src = sp_src.replace("@SPECS@", '{ group = "F1", sams = { "SAM_A" } }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")

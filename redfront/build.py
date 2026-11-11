@@ -106,6 +106,50 @@ def _country(m: Mission, state: dict, side: str):
     return m.coalition[side].country(name)
 
 
+RAID_KMH = 800           # ОЦЕНКА: крейсерская скорость налёта бомбардировщиков
+RAID_ALT_M = 9000        # ОЦЕНКА: высота налёта
+RAID_LEAD_KM = 250       # ОЦЕНКА: группа появляется не дальше этого от рубежа пуска (успеть перехватить)
+
+
+def raid_group(m: Mission, state: dict, r: dict):
+    """Налёт бомбардировщиков (strategic.mission_raids): группа ИИ в воздухе идёт к рубежу пуска (на линии цель -
+    аэродром части, не дальше LAUNCH_KM от цели), пускает крылатые ракеты по цели (Bombing, тип - крылатые ракеты)
+    и уходит домой. Появляется так, чтобы выйти на рубеж ко времени пуска; перехватить её - задача ПВО противника."""
+    from . import strategic
+    u = state["units"][r["unit"]]
+    t = state["units"][r["target"]]
+    ms = strategic.MISSILES[r["missile"]]
+    base = state["airbases"][u["base"]]
+    tpos = model.unit_pos(state, t)
+    d_bt = model.dist_km(base, tpos)
+    launch = model.lerp(tpos, base, min(1.0, min(strategic.LAUNCH_KM, ms["range_km"] * 0.8, max(30.0, d_bt - 30)) / d_bt))
+    lead = min(RAID_LEAD_KM, RAID_KMH * max(60, r["at_s"]) / 3600, model.dist_km(launch, base))
+    start = model.lerp(launch, base, lead / max(1.0, model.dist_km(launch, base)))
+    load = strategic.ALCM_CARRIERS.get(u.get("type"), (None, 1))[1]
+    n_ac = max(1, min(4, -(-r["n"] // max(1, load))))
+    ac = dcstypes.flying(u["type"])
+    fg = m.flight_group_inflight(_country(m, state, u["side"]), f"{u['id']} raid {r['target']}", ac, _pt(m, start),
+                                 RAID_ALT_M, speed=RAID_KMH, maintask=task.GroundAttack, group_size=n_ac)
+    prefix = ms.get("pylon", "")
+    for unit in fg.units:                        # подвеска: ракеты на все пилоны, где они вешаются
+        unit.pylons.clear()
+        for n in range(1, 30):
+            py = getattr(ac, f"Pylon{n}", None)
+            if not py:
+                continue
+            for v in vars(py).values():
+                if isinstance(v, tuple) and len(v) == 2 and isinstance(v[1], dict) and prefix and prefix in v[1].get("name", ""):
+                    unit.pylons[n] = {"CLSID": v[1]["clsid"]}
+                    break
+    fg.points[0].tasks.append(task.OptROE(task.OptROE.Values.OpenFire))
+    w = fg.add_waypoint(_pt(m, launch), RAID_ALT_M, RAID_KMH, name="Рубеж пуска")
+    c = _pt(m, tpos)
+    w.tasks.append(task.Bombing(Vector2(c.x, c.y), weapon_type=task.WeaponType.CruiseMissile, expend=task.Expend.All,
+                                attack_qty=1, group_attack=True))
+    fg.add_waypoint(_pt(m, base), RAID_ALT_M, RAID_KMH, name="Домой")
+    return fg
+
+
 def _set_script(act, src: str) -> None:
     """Текст DoScript: и поле text (редактор, trigrules), и params - из них pydcs собирает строку, которую исполняет
     DCS (trig.actions: a_do_script(...)); замена только text оставляла в игре прежний скрипт."""
@@ -993,6 +1037,21 @@ def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
     return k, pyl
 
 
+def _arm_pylons(fg, ac, perf: dict, g: dict, state: dict) -> str | None:
+    """ПРР на истребителе, у которого подвески ПРР в DCS нет (arm_pylons части: МиГ-29 и Су-27 ВСУ с AGM-88 с
+    августа 2022, как F-4E с HARM на пилонах Shrike - weapons.SWAPS): группа подавления ПВО - подвеска прикрытия
+    (ракеты воздух-воздух), на пилонах arm_pylons - HARM."""
+    from . import weapons
+    arm = perf.get("arm_pylons")
+    if not arm or not (set(GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], [])) & {"sead"}):
+        return None
+    _apply_loadout(fg, ac, perf["type"], ["cap"], state)
+    for u in fg.units:
+        for n in arm["pylons"]:
+            u.pylons[int(n)] = {"CLSID": weapons.HARM}
+    return "SEAD (AGM-88 HARM)"
+
+
 def _weapons_not(fg, perf: dict) -> None:
     """Вариант модели (F-16A на модели F-16C): оружие, которого у варианта не было (weapons_not - части имён
     оружия pydcs), снимается с пилонов."""
@@ -1545,6 +1604,38 @@ def player_variant(state: dict, type_name: str) -> str | None:
     return pv
 
 
+def external_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> list[str]:
+    """ДРЛО извне театра (сценарий: external_awacs стороны): самолёт третьей стороны, не с аэродрома театра - в
+    воздухе с начала миссии на standoff_km за фронтом своей стороны (ДРЛО НАТО E-3A над Польшей и Румынией - для ВСУ;
+    на условной карте - за тылом своей стороны).
+    Сбить его противник не может (вне театра, политически), поэтому бессмертный и невидимый; не часть модели - не
+    цель, не потеря, не исполнитель задач. Картину ИИ своей стороны DCS видит, игроку - по радио (меню AWACS)."""
+    out = []
+    from dcs import planes as _planes
+    for side, c in sorted((state.get("external_awacs") or {}).items()):
+        pos = planner.orbit_point(state, side, c.get("standoff_km", 250))
+        if pos is None:
+            continue
+        ac = getattr(_planes, c.get("type", "E_3A"))
+        alt, spd = int(c.get("alt_m", 9000)), 600
+        p = _pt(m, pos)
+        fg = m.flight_group_inflight(_country(m, state, side), f"ext awacs {side} {sortie}", ac, p, alt,
+                                     speed=spd, maintask=task.AWACS, group_size=1)
+        w = fg.points[0]
+        if not any(isinstance(t_, task.AWACSTaskAction) for t_ in w.tasks):
+            w.tasks.append(task.AWACSTaskAction())
+        w.tasks += [task.SetImmortalCommand(True), task.SetInvisibleCommand(True)]
+        w.tasks.append(task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.RaceTrack)))
+        fg.add_waypoint(Point(p.x, p.y + 60_000, m.terrain), alt, speed=spd)
+        if side == tk["side"]:
+            t = c.get("title", "ДРЛО извне театра")
+            out.append(i18n.L(i18n.lang(state), f"{t}: вне театра, в воздухе с начала миссии - картина по радио (AWACS); "
+                                                  "противник его не атакует",
+                              f"{i18n.tr(t, 'en')}: outside the theatre, airborne from mission start - picture by radio "
+                              "(AWACS); the enemy does not attack it"))
+    return out
+
+
 def player_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> str | None:
     """Игровое допущение: у стороны игрока нет ДРЛО в миссии (Израиль 1973, ВВС ДРВ...) - E-2C над своей территорией
     до конца миссии, бессмертный и невидимый для противника (его нет в истории: не цель, не потеря). Через него игрок
@@ -1975,6 +2066,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 vg_by_unit[g["unit"]] = evac_groups[g["unit"]][0]
                 continue
             vg_by_unit[g["unit"]] = _ground_group(m, state, g, shift_of(g))
+            if g["kind"] == "art_site" and g.get("fire_at"):   # артбригада: налёты по ближней части противника
+                c = _pt(m, g["fire_at"])
+                for k in range(ART_MISSIONS):
+                    vg_by_unit[g["unit"]].points[0].tasks.append(task.FireAtPoint(
+                        Vector2(c.x + (k - 1.5) * 200, c.y), rounds=ART_ROUNDS, radius=ART_RADIUS_M * 2))
             if g["kind"] == "gci_site":          # КРУ: наведение включено с начала миссии
                 vg = vg_by_unit[g["unit"]]
                 vg.points[0].tasks.append(ActivateGCI(g["channel"], vg.units[0].id, int(g["radius_km"] * 1000)))
@@ -2151,6 +2247,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
+        cat = _arm_pylons(fg, ac, perf, g, state) or cat
         tune_arm(state, fg, g)                   # головки ПРР (Shrike) - под РЛС ЗРК своей цели
         needs_mod = False
         for u in fg.units[:hum] if is_player else []:
@@ -2537,6 +2634,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 land = m.terrain.airports[b["airport"]]
                 g["_reach_note"] = i18n.L(i18n.lang(state), f"посадка на запасном: {b['name']} (топлива домой не хватает)",
                                           f"recovery at {b['name']} (not enough fuel to return home)")
+        if land is airport and not rc:           # рассредоточение (dispersal.py): посадка на другом своём аэродроме
+            from . import dispersal
+            ob = dispersal.land_other(state, perf, f"{perf['id']}-{g['group']}-{sortie}")
+            b = state["airbases"].get(ob or "")
+            if b and b.get("airport") in m.terrain.airports:
+                land = m.terrain.airports[b["airport"]]
+                g["_reach_note"] = i18n.L(i18n.lang(state), f"посадка на {b['name']} (рассредоточение)",
+                                          f"landing at {b['name']} (dispersal)")
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)
@@ -2671,6 +2776,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "ssm.lua").read_text(encoding="utf-8")
                                         .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(int(state["sortie"])))
                                         .replace("@SPECS@", ", ".join(items)))))
+    for r in strategic.mission_raids(state, int(m0), ato.MISSION_LEN_S):   # налёты бомбардировщиков с крылатыми ракетами
+        raid_group(m, state, r)
     if sead_prio:                                # самооборона групп подавления: стреляющий по звену ЗРК - вне очереди
         q_ = lambda x: '"' + str(x).replace('"', "'") + '"'
         items = ", ".join("{ group = " + q_(s_["group"]) + ", sams = { " + ", ".join(q_(n) for n in s_["sams"]) + " } }"
@@ -2744,8 +2851,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                 "(тип полка только для ИИ); ИИ и потери - по типу полка",
                                 f"gameplay concession: your flight flies {g['_variant']} instead of "
                                 f"{state['units'][g['performer']]['type']} (AI-only type); AI and losses use the unit type"))
+    ext_aw = external_awacs(m, state, tk, sortie)   # ДРЛО третьей стороны вне театра (НАТО для ВСУ)
     pa = player_awacs(m, state, tk, sortie) if player and player_air else None   # игроку - картина ДРЛО
     comm_lines = radio_setup(m, state, tk, pkg, sortie, player_air)
+    comm_lines += ext_aw
     if pa:
         comm_lines.append(pa)
     order_lines = package_order(pkg, times, i18n.lang(state))

@@ -201,6 +201,7 @@ SSM = [   # (id, имя, сторона, ракета, пусковых, шир�
 
 # сценарий (переопределяет gen_abkhazia.py и др. генераторы карты Caucasus)
 NAME = "caucasus"
+THEATRE = "caucasus"                               # карта DCS (model.THEATRE_INFO): caucasus, germany, ...
 ROOT = "Tbilisi"                                   # пункт для проверки связности графа
 SECTOR_ABOUT = ("Театр Кавказ, война августа 2008 г. Генерирован tools/gen_caucasus.py. Координаты пунктов - ОЦЕНКИ "
                 "(+-2 км); дороги - вручную (через Большой Кавказ - только Рокский тоннель и Военно-Грузинская "
@@ -217,12 +218,18 @@ NOT_INCLUDED = ("Черноморский флот (бой у Очамчире 1
                 "российские миротворцы в Цхинвали, ВМС Грузии.")
 EXTRA_VARIANT: dict = {}
 EXTERNAL_SUPPLY: set = set()                       # аэродромы со снабжением извне (не со складов стороны)
-DOCTRINE: dict | None = None                       # пакеты доктрины сторон (нет - по умолчанию)
+DOCTRINE: dict | None = None
+SAM_FIXED = False
+AIR_ASSAULT: list = []
+EW: list = []                                      # станции РЭБ (ew.py): (id, имя, сторона, станция, {тип: число}, шир, долг, источник)                             # аэромобильные роты: (id, имя, сторона, пункт, {тип: число}, человек, источник)                                  # позиции ЗРК известны (объектовая ПВО) - цели ударов по позициям                       # пакеты доктрины сторон (нет - по умолчанию)
 
 
 def main() -> None:
-    from dcs.terrain import Caucasus
-    terrain = Caucasus()
+    if THEATRE == "germany":
+        from dcs.terrain.germany import Germany as _T
+    else:
+        from dcs.terrain import Caucasus as _T
+    terrain = _T()
     places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s} for n, (la, lo, s) in PLACES.items()}
     adj = {n: set() for n in places}
     for a, b in LINKS:
@@ -254,7 +261,7 @@ def main() -> None:
                       "variant": 0, "rule": "ПВО объекта: у каждого военного аэродрома"})
     sector = {
         "_about": SECTOR_ABOUT,
-        "theatre": "caucasus",
+        "theatre": THEATRE,
         "places": places,
         "airbases": airbases,
         "links": [list(l) for l in LINKS],
@@ -289,22 +296,33 @@ def main() -> None:
                           "source": "ОЦЕНКА", "estimate": True})
     for sid, name, side, role, cmp_, la, lo in SAMS:
         units.append({"id": sid, "name": name, "side": side, "role": role, "state": "deployed",
-                      "pos": {"lat": la, "lon": lo},
+                      **({"fixed": True} if SAM_FIXED else {}), "pos": {"lat": la, "lon": lo},
                       "composition": [{"type": t, "count": c, "role": r} for t, r, c in cmp_],
                       "source": SRC + "; место - ОЦЕНКА", "estimate": True})
+    for uid, name, side, place, cmp_, men, src in AIR_ASSAULT:   # вертолётный десант (assault.py), как в gen_germany
+        units.append({"id": uid, "name": name, "side": side, "role": "air_assault", "state": "defend", "order": "reserve",
+                      "air_mobile": True, "home": place, "men": men, "route": [place], "progress_km": 0.0,
+                      "march_kmh": 5, "daily_advance_km": 10,
+                      "composition": [{"type": t, "count": c, "role": "infantry"} for t, c in cmp_.items()],
+                      "source": src, "estimate": True})
+    for sid, name, side, station, cmp_, la, lo, src in EW:
+        units.append({"id": sid, "name": name, "side": side, "role": "ew_site", "state": "deployed", "station": station,
+                      "pos": {"lat": la, "lon": lo}, "composition": [{"type": t, "count": c, "role": "ew"} for t, c in cmp_.items()],
+                      "source": src, "estimate": True})
     for sid, name, side, missile, n, la, lo, src in SSM:   # пусковые ОТР (strategic.py): модель DCS - по ракете
         units.append({"id": sid, "name": name, "side": side, "role": "ssm", "state": "deployed", "missile": missile,
                       "pos": {"lat": la, "lon": lo}, "composition": [{"type": "Scud_B", "count": n, "role": "launcher"}],
                       "source": src, "estimate": True})
-    for uid, name, side, role, typ, base, count, radius, note in AIR:
+    for row in AIR:                                   # (id, имя, сторона, роль, тип, аэродром, число, радиус, примечание[, доп.])
+        uid, name, side, role, typ, base, count, radius, note = row[:9]
         bid = base.lower().replace(" ", "_").replace("-", "_")
         assert bid in airbases, (uid, base)
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": bid, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
-                      "estimate": True})
+                      "estimate": True, **(row[9] if len(row) > 9 else {})})   # mod_alt: тип мода, если он включён
     oob = {
         "_about": OOB_ABOUT,
-        "theatre": "caucasus",
+        "theatre": THEATRE,
         "preset": {"title": TITLE, "year": YEAR, "date": DATE},
         "date": DATE,
         "countries": COUNTRIES,

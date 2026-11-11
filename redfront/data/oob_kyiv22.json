@@ -1,0 +1,1759 @@
+{
+ "_about": "Состав сил 24.02.2022 (направление на Киев). Генерирован tools/gen_kyiv22.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+ "theatre": "germany",
+ "preset": {
+  "title": "Киев, февраль 2022: наступление на Киев (первые недели)",
+  "year": 2022,
+  "date": "2022-02-24"
+ },
+ "date": "2022-02-24",
+ "countries": {
+  "red": "Russia",
+  "blue": "Ukraine"
+ },
+ "doctrine": {
+  "red": "wp",
+  "blue": "wp"
+ },
+ "units": [
+  {
+   "id": "red_35caa",
+   "name": "35-я общевойсковая армия (Беларусь - правый берег)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Khoiniki"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "west"
+  },
+  {
+   "id": "red_35caa_pvo",
+   "name": "Войсковая ПВО: 35-я общевойсковая армия (Беларусь - правый берег)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_35caa",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_36caa",
+   "name": "36-я общевойсковая армия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Khoiniki"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "makariv"
+  },
+  {
+   "id": "red_36caa_pvo",
+   "name": "Войсковая ПВО: 36-я общевойсковая армия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_36caa",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_vdv_76",
+   "name": "76-я десантно-штурмовая дивизия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Khoiniki"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMD_1",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_D",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "west",
+   "note": "Буча, Ирпень"
+  },
+  {
+   "id": "red_vdv_76_pvo",
+   "name": "Войсковая ПВО: 76-я десантно-штурмовая дивизия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_vdv_76",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_vdv_98",
+   "name": "98-я воздушно-десантная дивизия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Mozyr"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMD_1",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_D",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "west",
+   "note": "Гостомель (после захвата аэродрома)"
+  },
+  {
+   "id": "red_vdv_98_pvo",
+   "name": "Войсковая ПВО: 98-я воздушно-десантная дивизия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_vdv_98",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5caa",
+   "name": "5-я общевойсковая армия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Mozyr"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "west"
+  },
+  {
+   "id": "red_5caa_pvo",
+   "name": "Войсковая ПВО: 5-я общевойсковая армия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_5caa",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_41caa",
+   "name": "41-я общевойсковая армия (Чернигов)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Gomel"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "chernihiv"
+  },
+  {
+   "id": "red_41caa_pvo",
+   "name": "Войсковая ПВО: 41-я общевойсковая армия (Чернигов)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_41caa",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_2gta",
+   "name": "2-я гв. танковая армия (Сумы - Конотоп)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sumy"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "CHAP_T90M",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 15,
+     "role": "IFV"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "east"
+  },
+  {
+   "id": "red_2gta_pvo",
+   "name": "Войсковая ПВО: 2-я гв. танковая армия (Сумы - Конотоп)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_2gta",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_90td",
+   "name": "90-я гв. танковая дивизия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Sumy"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "CHAP_T90M",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 15,
+     "role": "IFV"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "east"
+  },
+  {
+   "id": "red_90td_pvo",
+   "name": "Войсковая ПВО: 90-я гв. танковая дивизия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_90td",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_72mb",
+   "name": "72-я механизированная бригада (Киев)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Irpin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_72mb_pvo",
+   "name": "Войсковая ПВО: 72-я механизированная бригада (Киев)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_72mb",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_4ngu",
+   "name": "4-я бригада быстрого реагирования НГУ",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kyiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "контратака на аэродром Гостомель 24.02"
+  },
+  {
+   "id": "blue_4ngu_pvo",
+   "name": "Войсковая ПВО: 4-я бригада быстрого реагирования НГУ",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_4ngu",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tro_kyiv",
+   "name": "Территориальная оборона и НГУ Киева",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kyiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tro_kyiv_pvo",
+   "name": "Войсковая ПВО: Территориальная оборона и НГУ Киева",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_tro_kyiv",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tro_bucha",
+   "name": "Территориальная оборона (Буча, Ирпень)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Bucha"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tro_bucha_pvo",
+   "name": "Войсковая ПВО: Территориальная оборона (Буча, Ирпень)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_tro_bucha",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_1tb",
+   "name": "1-я танковая бригада (Чернигов)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Chernihiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 60,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 10,
+     "role": "IFV"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "оборона Чернигова"
+  },
+  {
+   "id": "blue_1tb_pvo",
+   "name": "Войсковая ПВО: 1-я танковая бригада (Чернигов)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_1tb",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_58mb",
+   "name": "58-я мотопехотная бригада (Конотоп - Нежин)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Nizhyn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_58mb_pvo",
+   "name": "Войсковая ПВО: 58-я мотопехотная бригада (Конотоп - Нежин)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_58mb",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_95daab",
+   "name": "95-я десантно-штурмовая бригада (Житомир)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Zhytomyr"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0
+  },
+  {
+   "id": "blue_95daab_pvo",
+   "name": "Войсковая ПВО: 95-я десантно-штурмовая бригада (Житомир)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_95daab",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_14mb",
+   "name": "14-я механизированная бригада (с запада)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Lviv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 5,
+   "arrives_jitter": 0,
+   "note": "ОЦЕНКА"
+  },
+  {
+   "id": "blue_14mb_pvo",
+   "name": "Войсковая ПВО: 14-я механизированная бригада (с запада)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_14mb",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_brovary",
+   "name": "Части обороны Броваров",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Brovary"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "засада у Скибина 10.03"
+  },
+  {
+   "id": "blue_brovary_pvo",
+   "name": "Войсковая ПВО: Части обороны Броваров",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_brovary",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_s300_kyiv_n",
+   "name": "Дивизион С-300ПС (Киев, север)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.68,
+    "lon": 9.95
+   },
+   "composition": [
+    {
+     "type": "S-300PS 64H6E sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 40B6M tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 54K6 cp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "S-300PS 5P85C ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_s300_kyiv_s",
+   "name": "Дивизион С-300ПС (Киев, юг)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.46,
+    "lon": 10.05
+   },
+   "composition": [
+    {
+     "type": "S-300PS 64H6E sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 40B6M tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 54K6 cp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "S-300PS 5P85C ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_buk_kyiv",
+   "name": "Дивизион Бук-М1 (Киев)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.56,
+    "lon": 9.82
+   },
+   "composition": [
+    {
+     "type": "SA-11 Buk SR 9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA-11 Buk CC 9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA-11 Buk LN 9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_buk_chernihiv",
+   "name": "Дивизион Бук-М1 (Чернигов)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.78,
+    "lon": 10.33
+   },
+   "composition": [
+    {
+     "type": "SA-11 Buk SR 9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA-11 Buk CC 9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA-11 Buk LN 9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_osa_brovary",
+   "name": "Батарея Оса-АКМ (Бровары)",
+   "side": "blue",
+   "role": "sam_short",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.66,
+    "lon": 10.2
+   },
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s400_belarus",
+   "name": "Дивизион С-400 (Беларусь; в DCS - С-300ПС)",
+   "side": "red",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.2,
+    "lon": 10.05
+   },
+   "composition": [
+    {
+     "type": "S-300PS 64H6E sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 40B6M tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 54K6 cp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "S-300PS 5P85C ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_buk_35caa",
+   "name": "Зенитная ракетная бригада 35-й армии (Бук)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.98,
+    "lon": 9.93
+   },
+   "composition": [
+    {
+     "type": "SA-11 Buk SR 9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA-11 Buk CC 9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA-11 Buk LN 9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_tor_west",
+   "name": "Батарея Тор-М2 (правый берег)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.88,
+    "lon": 9.9
+   },
+   "composition": [
+    {
+     "type": "CHAP_TorM2",
+     "count": 3,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_pantsir_gomel",
+   "name": "Батарея Панцирь-С1 (Гомель)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.86,
+    "lon": 10.65
+   },
+   "composition": [
+    {
+     "type": "CHAP_PantsirS1",
+     "count": 3,
+     "role": "launcher"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_vdv_hostomel1",
+   "name": "Рота 31-й одшбр (десант на Гостомель)",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Khoiniki",
+   "men": 100,
+   "route": [
+    "Khoiniki"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "по разным оценкам - до 200-300 человек в первой волне",
+   "estimate": true
+  },
+  {
+   "id": "red_vdv_hostomel2",
+   "name": "Рота 45-й бригады спецназа ВДВ",
+   "side": "red",
+   "role": "air_assault",
+   "state": "defend",
+   "order": "reserve",
+   "air_mobile": true,
+   "home": "Khoiniki",
+   "men": 100,
+   "route": [
+    "Khoiniki"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 5,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Paratrooper_AKS_74",
+     "count": 20,
+     "role": "infantry"
+    },
+    {
+     "type": "Paratrooper_RPG_16",
+     "count": 4,
+     "role": "infantry"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_leer_west",
+   "name": "Комплекс Леер-3 (правый берег; в DCS - КП СКП-11)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "leer3",
+   "pos": {
+    "lat": 53.9,
+    "lon": 9.92
+   },
+   "composition": [
+    {
+     "type": "SKP_11",
+     "count": 1,
+     "role": "ew"
+    },
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "Леер-3 с Орлан-10 - ОЦЕНКА размещения",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_krasukha_by",
+   "name": "Станция Красуха-4 (Беларусь; в DCS - КП СКП-11)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "krasukha",
+   "pos": {
+    "lat": 54.15,
+    "lon": 10.02
+   },
+   "composition": [
+    {
+     "type": "SKP_11",
+     "count": 1,
+     "role": "ew"
+    },
+    {
+     "type": "Ural_375_PBU",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_zhitel_east",
+   "name": "Станция Р-330Ж Житель (восток; в DCS - Урал)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "zhitel",
+   "pos": {
+    "lat": 53.82,
+    "lon": 10.6
+   },
+   "composition": [
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_pole21",
+   "name": "Поле-21 (подавление ГНСС; в DCS - Урал)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "pole21",
+   "pos": {
+    "lat": 54.0,
+    "lon": 10.3
+   },
+   "composition": [
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ew_bukovel",
+   "name": "Буковель-АД (Киев; в DCS - КрАЗ)",
+   "side": "blue",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "bukovel",
+   "pos": {
+    "lat": 53.6,
+    "lon": 9.9
+   },
+   "composition": [
+    {
+     "type": "KrAZ6322",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "в начале 2022 - немного; ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ew_notch",
+   "name": "Нота (Чернигов; в DCS - КрАЗ)",
+   "side": "blue",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "notch",
+   "pos": {
+    "lat": 53.79,
+    "lon": 10.35
+   },
+   "composition": [
+    {
+     "type": "KrAZ6322",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_iskander_by",
+   "name": "Ракетная бригада Искандер-М (Беларусь)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "iskander",
+   "pos": {
+    "lat": 54.25,
+    "lon": 10.0
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "удары по аэродромам и ПВО 24.02 - ОЦЕНКА числа",
+   "estimate": true
+  },
+  {
+   "id": "red_iskander_ru",
+   "name": "Ракетная бригада Искандер-М (Россия)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "iskander",
+   "pos": {
+    "lat": 53.9,
+    "lon": 10.85
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tochka",
+   "name": "Ракетная бригада Точка-У ВС Украины",
+   "side": "blue",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "tochka",
+   "pos": {
+    "lat": 53.4,
+    "lon": 9.6
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su34",
+   "name": "Бомбардировочный полк (Су-34)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "kiel",
+   "type": "Su_34",
+   "count": 16,
+   "strike_radius_km": 450,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su25",
+   "name": "Штурмовой полк (Су-25СМ3; в DCS - Су-25)",
+   "side": "red",
+   "role": "attack",
+   "base": "lubeck",
+   "type": "Su_25",
+   "count": 16,
+   "strike_radius_km": 250,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su35",
+   "name": "Истребительный полк (Су-35С; в DCS - Су-27)",
+   "side": "red",
+   "role": "fighter",
+   "base": "kiel",
+   "type": "Su_27",
+   "count": 16,
+   "strike_radius_km": 500,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-35С включён - Су-35С, иначе - Су-27",
+   "estimate": true,
+   "mod_alt": {
+    "mod": "su35s",
+    "type": "Su_35S",
+    "name": "Истребительный полк (Су-35С)"
+   }
+  },
+  {
+   "id": "ru_su30",
+   "name": "Полк Су-30СМ (в DCS - Су-27)",
+   "side": "red",
+   "role": "fighter",
+   "base": "lubeck",
+   "type": "Su_27",
+   "count": 12,
+   "strike_radius_km": 500,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-30 включён - Су-30СМ, иначе - Су-27",
+   "estimate": true,
+   "mod_alt": {
+    "mod": "su30",
+    "type": "Su_30SM",
+    "name": "Полк Су-30СМ"
+   }
+  },
+  {
+   "id": "ru_su24",
+   "name": "Бомбардировщики Су-24М",
+   "side": "red",
+   "role": "bomber",
+   "base": "pinnow",
+   "type": "Su_24M",
+   "count": 12,
+   "strike_radius_km": 400,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_ka52",
+   "name": "Вертолёты Ка-52 (в DCS - Ка-50)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "kiel",
+   "type": "Ka_50",
+   "count": 12,
+   "strike_radius_km": 150,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Ка-52 в pydcs нет",
+   "estimate": true
+  },
+  {
+   "id": "ru_mi28",
+   "name": "Вертолёты Ми-28Н",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "lubeck",
+   "type": "Mi_28N",
+   "count": 10,
+   "strike_radius_km": 150,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_mi8",
+   "name": "Вертолёты Ми-8АМТШ (десант)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "kiel",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 200,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_a50",
+   "name": "Самолёт ДРЛО А-50",
+   "side": "red",
+   "role": "awacs",
+   "base": "pinnow",
+   "type": "A_50",
+   "count": 1,
+   "strike_radius_km": 1500,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_tu95",
+   "name": "Ту-95МС (удары крылатыми ракетами)",
+   "side": "red",
+   "role": "bomber",
+   "base": "pinnow",
+   "type": "Tu_95MS",
+   "count": 6,
+   "strike_radius_km": 3000,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; дальняя авиация; базы - вне сектора, здесь - Пиннов",
+   "estimate": true
+  },
+  {
+   "id": "ru_tu22",
+   "name": "Ту-22М3",
+   "side": "red",
+   "role": "bomber",
+   "base": "pinnow",
+   "type": "Tu_22M3",
+   "count": 6,
+   "strike_radius_km": 1500,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_mig29",
+   "name": "40-я бригада тактической авиации (МиГ-29, Васильков)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "hamburg_finkenwerder",
+   "type": "MiG_29A",
+   "count": 12,
+   "strike_radius_km": 300,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_su27",
+   "name": "39-я бригада тактической авиации (Су-27, Озёрное)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "celle",
+   "type": "Su_27",
+   "count": 12,
+   "strike_radius_km": 500,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_su24",
+   "name": "7-я бригада тактической авиации (Су-24М, Староконстантинов)",
+   "side": "blue",
+   "role": "bomber",
+   "base": "wunstorf",
+   "type": "Su_24M",
+   "count": 10,
+   "strike_radius_km": 400,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_su25",
+   "name": "299-я бригада тактической авиации (Су-25)",
+   "side": "blue",
+   "role": "attack",
+   "base": "hannover",
+   "type": "Su_25",
+   "count": 12,
+   "strike_radius_km": 250,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Канатово - Ганновер",
+   "estimate": true
+  },
+  {
+   "id": "ua_tb2",
+   "name": "Беспилотники Bayraktar TB2 (в DCS - MQ-9)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "celle",
+   "type": "MQ_9_Reaper",
+   "count": 6,
+   "strike_radius_km": 250,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_mi24",
+   "name": "Армейская авиация (Ми-24)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "hannover",
+   "type": "Mi_24P",
+   "count": 10,
+   "strike_radius_km": 150,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_mi8",
+   "name": "Армейская авиация (Ми-8)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "hannover",
+   "type": "Mi_8MT",
+   "count": 10,
+   "strike_radius_km": 200,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "strategic_stock": {
+  "red": {
+   "iskander": 24,
+   "kh101": 12,
+   "kh555": 12
+  },
+  "blue": {
+   "tochka": 8
+  }
+ },
+ "variants": [
+  {
+   "name": "base",
+   "title": "Киев, февраль 2022: наступление на Киев (первые недели)",
+   "task_rules": {
+    "blue": {
+     "strike_airfield": {
+      "off": true,
+      "why": "аэродромы в Беларуси и России - вне ударов Украины в эти недели"
+     }
+    }
+   },
+   "posture": {
+    "red": "offense",
+    "blue": "defense"
+   },
+   "task_params": {
+    "red": {
+     "air_assault": {
+      "assault_max_km": 110,
+      "max_threats": 3,
+      "per_day": 2
+     }
+    }
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 1,
+  "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "Тор-М2, Панцирь",
+     "composition": [
+      {
+       "type": "CHAP_TorM2",
+       "role": "launcher",
+       "count": 1
+      },
+      {
+       "type": "CHAP_PantsirS1",
+       "role": "launcher",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Оса, ЗУ-23",
+     "composition": [
+      {
+       "type": "Osa_9A33_ln",
+       "role": "launcher",
+       "count": 1
+      },
+      {
+       "type": "ZU_23_Emplacement",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "Калибры с Черноморского флота (флота на карте нет - их удары в модели вместо Х-101/Х-555 не считаются), Байрактары в засадах на колонны (в модели - удары MQ-9), артиллерия как отдельный род войск, минирование, массовая РЭБ, сбор тероборонами, юг (Херсон, Мариуполь) и восток (Харьков) - вне сектора.",
+ "dispersal": {
+  "blue": {
+   "land_other_p": 0.3,
+   "rebase_p": 0.2,
+   "max_km": 300
+  }
+ },
+ "external_awacs": {
+  "blue": {
+   "type": "E_3A",
+   "standoff_km": 250,
+   "title": "ДРЛО НАТО E-3A (за тылом Украины)"
+  }
+ }
+}
