@@ -18,6 +18,7 @@ from . import model
 STRIKE_P = 0.7
 PER_THREAT = 0.1
 LOSS = {"column": 0.04, "site": 0.25, "ship": 0.15}   # доля исправной техники (кораблей) цели на пару ударной группы
+ART_SITE_LOSS = 0.06   # ОЦЕНКА: артбригада - батареи рассредоточены на километры: удар пары накрывает часть орудий
 DAMAGE = {"depot": 0.35, "factory": 0.25, "airfield": 0.3, "bridge": 0.5}
 LOSS_PER_THREAT = 0.03                             # вероятность потерять борт на ЗРК коридора
 EJECT_P = 0.7
@@ -136,7 +137,7 @@ def _strike(state: dict, e: dict) -> list[str]:
         from . import naval
         lines += [f"ИИ, {e['title']}: {x}" for x in naval.air_strike(state, tgt, size_k, "удар с воздуха" if asm_frac >= 1.0 else "удар с воздуха, бомбы", asm_frac)]
     elif obj["kind"] in LOSS:
-        frac = min(0.5, LOSS[obj["kind"]] * size_k)
+        frac = min(0.5, (ART_SITE_LOSS if model.category(tgt) == "art_site" else LOSS[obj["kind"]]) * size_k)
         s0 = model.strength(tgt)
         sim._take_losses(tgt, frac)
         lines.append(f"ИИ, {e['title']}: боеспособность цели {s0:.0%} -> {model.strength(tgt):.0%}.")

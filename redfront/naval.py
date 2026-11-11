@@ -491,3 +491,26 @@ def sea_supply(state: dict, side: str) -> dict[str, float]:
             cv["ships_state"] = {}
             cv["state"] = "deployed"
     return out
+
+
+SEALIFT_KM = 40          # ОЦЕНКА: высадка - если корабли не дальше от района высадки; иначе - на сутки позже
+SEALIFT_LATE_DAYS = 3    # ОЦЕНКА: не дошли за столько суток после срока - высадка отменена (часть не доставлена)
+
+
+def sealift(state: dict, unit: dict) -> tuple[float, str]:
+    """Доля части, доставленной морем (морской десант, подкрепления на транспортах): sealift части - {group: id
+    корабельной группы, kinds: виды кораблей-перевозчиков (LS - десантные, AK - транспорты)}. Доля - уцелевшие
+    перевозчики группы к дню высадки; группа потоплена или перевозчиков нет - 0 (часть не доставлена)."""
+    sl = unit.get("sealift") or {}
+    g = state["units"].get(sl.get("group", ""))
+    if not g or g.get("state") in ("destroyed", "sunk") or model.strength(g) <= 0:
+        return 0.0, "корабли потоплены"
+    place = state["places"].get(unit["route"][0])
+    if place and model.dist_km(g["pos"], place) > SEALIFT_KM:
+        return -1.0, f"корабли в {model.dist_km(g['pos'], place):.0f} км от района высадки"
+    kinds = set(sl.get("kinds") or ["LS", "AK"])
+    tot = sum(c["count"] for c in g["composition"] if info(c["type"]).get("kind") in kinds)
+    if not tot:
+        return model.strength(g), "по уцелевшим кораблям группы"
+    alive = sum(n for t, n in model.alive_by_type(g).items() if info(t).get("kind") in kinds)
+    return max(0.0, min(1.0, alive / tot)), f"уцелело перевозчиков {alive:.0f} из {tot}"

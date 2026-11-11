@@ -1716,7 +1716,7 @@
    "role": "maneuver",
    "state": "defend",
    "route": [
-    "BadSegeberg"
+    "Neustadt"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -3659,7 +3659,7 @@
    "role": "maneuver",
    "state": "defend",
    "route": [
-    "Bremen"
+    "Bremerhaven"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -4093,7 +4093,7 @@
    "role": "maneuver",
    "state": "pending",
    "route": [
-    "Bremen"
+    "Bremerhaven"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -4112,9 +4112,9 @@
    ],
    "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
    "estimate": true,
-   "arrives_day": 7,
+   "arrives_day": 6,
    "arrives_jitter": 1,
-   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+   "note": "подкрепление морем (REFORGER): сила - по уцелевшим транспортам"
   },
   {
    "id": "blue_us2ad1_pvo",
@@ -4145,7 +4145,7 @@
    "role": "maneuver",
    "state": "pending",
    "route": [
-    "Bremen"
+    "Bremerhaven"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -4164,9 +4164,9 @@
    ],
    "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
    "estimate": true,
-   "arrives_day": 8,
+   "arrives_day": 7,
    "arrives_jitter": 1,
-   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+   "note": "подкрепление морем (REFORGER): сила - по уцелевшим транспортам"
   },
   {
    "id": "blue_us2ad2_pvo",

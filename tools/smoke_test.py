@@ -1646,7 +1646,8 @@ def air_defence_section(tmp: Path) -> None:
     print("\n== объектовая ПВО ==")
     st = model.new_campaign("ad", sector="sector_germany.json", oob="oob_germany.json", seed=3)
     sec = model.load_json("sector_germany.json")
-    ad = [u for u in st["units"].values() if u.get("fixed") and not u.get("point")]   # point - ПВО складов и мостов
+    ad = [u for u in st["units"].values() if u.get("fixed") and not u.get("point")   # point - ПВО складов и мостов
+          and model.category(u) not in ("naval",) and u.get("role") not in ("art_bde",)]   # корабли - тоже fixed
     pt = [u for u in st["units"].values() if u.get("point")]
     check(pt and all(st["units"][u["covers"]]["role"] in ("depot", "bridge") for u in pt) and len(pt) < 40,
           f"ПВО объектов тыла - только склады и большие мосты: {len(pt)} позиций (заводы и малые мосты - без неё)")
@@ -1960,8 +1961,9 @@ def supply_section(tmp: Path) -> None:
     for i in range(1, len(st["tasks"]) + 1):
         man = build.build(st, tmp / "lift.miz", task_no=i)
         st["manifest"] = None
-        lf = [f for f in man["flights"] if "_lift" in f["group"]]
-        if lf:
+        lf = [f for f in man["flights"] if "_lift" in f["group"]
+              and "airbase" in next((e for e in st["ato"]["entries"] if e["id"] == f["ato"]), {}).get("task", {}).get("package", [{}])[0].get("objective", {})]
+        if lf:                                   # рейс на аэродром (не к части - unitlift)
             found = (i, lf[0])
             break
     ok = False
@@ -2533,6 +2535,19 @@ def ctld_section(tmp: Path) -> None:
     for k in sorted(need):
         st = copy.deepcopy(st0)
         built[k] = (st, build.build(st, tmp / f"ctld_{k}.miz", task_no=kinds[k]))
+    # удар по войскам в соприкосновении: первая задача, у цели которой в бою есть свой взвод (авианаводчик) - целей
+    # стало больше (морские десанты, артбригады), первая по списку может быть без своих рядом
+    # (бой у цели к времени вылета может уже кончиться - тогда авианаводчика нет, это верно): ближе к началу суток
+    cas = sorted((t.get("tot_s") or 0, i) for i, t in enumerate(st0["tasks"], 1) if t["kind"] == "cas_contact")
+    for tot, i in cas:
+        if built["cas_contact"][1]["ctld"]["jtacs"]:
+            break
+        st = copy.deepcopy(st0)
+        for e in st.get("ato", {}).get("entries", []):   # вылет - в начале суток, пока бой у цели идёт
+            if e.get("task_no") == i or e.get("task", {}).get("target") == st["tasks"][i - 1]["target"]:
+                e["tot_s"] = min(e.get("tot_s") or 0, (st.get("clock_s") or 0) + 1800)
+        st["tasks"][i - 1]["tot_s"] = min(tot, (st.get("clock_s") or 0) + 1800)
+        built["cas_contact"] = (st, build.build(st, tmp / "ctld_cas_contact.miz", task_no=i))
     z = zipfile.ZipFile(tmp / "ctld_airlift.miz")
     ctld_src = z.read(next(n for n in z.namelist() if n.endswith("/CTLD.lua"))).decode("utf-8")
     check(any(n.endswith("/mist.lua") for n in z.namelist()) and "ctld.dontInitialize = true" in ctld_src
@@ -2850,7 +2865,9 @@ def fog_section(tmp: Path) -> None:
                   for u in free if "anchor" in u)
     check(0 < moves < len(free) * 6 * 0.3 and roam_ok,
           f"за 6 суток {moves} смен позиций у {len(free)} самостоятельных ЗРК - не перетасовка, каждый в своём районе")
-    moved = [u for u in far if model.dist_km(u["pos"], start[u["id"]]) > 0.5]
+    navy = [s_ for s_ in st["units"].values() if model.category(s_) == "naval" and s_["side"] != "blue"]
+    moved = [u for u in far if model.dist_km(u["pos"], start[u["id"]]) > 0.5   # вдали от кораблей игрока (они видят берег)
+             and all(model.dist_km(u["pos"], s_["pos"]) > 150 for s_ in navy)]
     if moved:
         u = moved[0]
         check(model.dist_km(intel.known_pos(st, u), start[u["id"]]) < 0.1,
@@ -4153,6 +4170,24 @@ def theatres_section(tmp: Path) -> None:
           and len(il_air) >= 6 and "ramat_david" in s83i["airbases"],
           f"Ливан-83: все {len(common)} пунктов 1982 на карте, нейтральных {len(neu)} (без дорог); вариант с Израилем - "
           f"{len(il_air)} авиачастей ВВС Израиля, аэродромов {len(s83i['airbases'])}")
+    # Германия: флот на Балтике и в Северном море, морской десант ОВД (sealift: сила - по уцелевшим десантным кораблям,
+    # корабли далеко - высадка позже, потоплены - не доставлен), артбригады
+    from redfront import naval
+    sde = model.new_campaign("sea", sector="sector_germany.json", oob="oob_germany.json", seed=1, player_side="blue")
+    nav = [u_ for u_ in sde["units"].values() if model.category(u_) == "naval"]
+    artb = [u_ for u_ in sde["units"].values() if u_.get("role") == "art_bde"]
+    lnd = sde["units"]["red_land_7ddm"]
+    grp = sde["units"]["red_land_pl"]
+    k_far, _w = naval.sealift(sde, lnd)                      # корабли у базы - далеко от Ольденбурга
+    grp["pos"] = dict(sde["places"]["OldenburgH"])
+    k_full, _w = naval.sealift(sde, lnd)
+    grp["lost"] = {"BDK_775": 2.0}
+    k_half, _w = naval.sealift(sde, lnd)
+    grp["lost"] = {"BDK_775": 4.0}
+    k_none, _w = naval.sealift(sde, lnd)
+    check(len(nav) >= 10 and len(artb) >= 12 and k_far < 0 and k_full == 1.0 and abs(k_half - 0.5) < 1e-9 and k_none == 0.0,
+          f"Германия: корабельных групп {len(nav)}, артбригад {len(artb)}; морской десант - далеко {k_far}, у берега {k_full}, "
+          f"половина кораблей {k_half}, все потоплены {k_none}")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
     sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
     planner.plan(sh)
