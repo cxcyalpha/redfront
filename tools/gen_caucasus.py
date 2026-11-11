@@ -220,7 +220,8 @@ EXTRA_VARIANT: dict = {}
 EXTERNAL_SUPPLY: set = set()                       # аэродромы со снабжением извне (не со складов стороны)
 DOCTRINE: dict | None = None
 SAM_FIXED = False
-AIR_ASSAULT: list = []                             # аэромобильные роты: (id, имя, сторона, пункт, {тип: число}, человек, источник)                                  # позиции ЗРК известны (объектовая ПВО) - цели ударов по позициям                       # пакеты доктрины сторон (нет - по умолчанию)
+AIR_ASSAULT: list = []
+EW: list = []                                      # станции РЭБ (ew.py): (id, имя, сторона, станция, {тип: число}, шир, долг, источник)                             # аэромобильные роты: (id, имя, сторона, пункт, {тип: число}, человек, источник)                                  # позиции ЗРК известны (объектовая ПВО) - цели ударов по позициям                       # пакеты доктрины сторон (нет - по умолчанию)
 
 
 def main() -> None:
@@ -304,16 +305,21 @@ def main() -> None:
                       "march_kmh": 5, "daily_advance_km": 10,
                       "composition": [{"type": t, "count": c, "role": "infantry"} for t, c in cmp_.items()],
                       "source": src, "estimate": True})
+    for sid, name, side, station, cmp_, la, lo, src in EW:
+        units.append({"id": sid, "name": name, "side": side, "role": "ew_site", "state": "deployed", "station": station,
+                      "pos": {"lat": la, "lon": lo}, "composition": [{"type": t, "count": c, "role": "ew"} for t, c in cmp_.items()],
+                      "source": src, "estimate": True})
     for sid, name, side, missile, n, la, lo, src in SSM:   # пусковые ОТР (strategic.py): модель DCS - по ракете
         units.append({"id": sid, "name": name, "side": side, "role": "ssm", "state": "deployed", "missile": missile,
                       "pos": {"lat": la, "lon": lo}, "composition": [{"type": "Scud_B", "count": n, "role": "launcher"}],
                       "source": src, "estimate": True})
-    for uid, name, side, role, typ, base, count, radius, note in AIR:
+    for row in AIR:                                   # (id, имя, сторона, роль, тип, аэродром, число, радиус, примечание[, доп.])
+        uid, name, side, role, typ, base, count, radius, note = row[:9]
         bid = base.lower().replace(" ", "_").replace("-", "_")
         assert bid in airbases, (uid, base)
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": bid, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
-                      "estimate": True})
+                      "estimate": True, **(row[9] if len(row) > 9 else {})})   # mod_alt: тип мода, если он включён
     oob = {
         "_about": OOB_ABOUT,
         "theatre": THEATRE,

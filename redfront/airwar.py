@@ -91,7 +91,9 @@ def _strike(state: dict, e: dict) -> list[str]:
     perf = state["units"].get(g["performer"])
     qra = alerts_near(state, model.enemy(e["side"]), obj["pos"], _tot(e))
     # потери группы от ЗРК коридора и дежурных пар ПВО противника
-    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) + QRA_LOSS * qra)
+    from . import ew
+    uav_k, uav_loss = ew.uav_factors(state, perf, obj["pos"])   # беспилотник в зоне подавления РЭБ противника
+    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) + QRA_LOSS * qra + uav_loss)
     asm_frac = 1.0
     if obj["kind"] == "ship":                    # ПКР стороны: нет - бомбы с малой высоты над ордером, потери выше
         from . import naval
@@ -116,7 +118,7 @@ def _strike(state: dict, e: dict) -> list[str]:
         lines.append(f"ИИ, {e['title']}: цель не найдена ({why}).")
         return lines
     fk *= ff
-    p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk))
+    p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk * uav_k))
     if not ((r.random() < p) if r else p >= 0.5):
         lines.append(f"ИИ, {e['title']}: цель не поражена.")
         return lines

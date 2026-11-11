@@ -67,6 +67,14 @@ PLACES = {
 
 NAMES = {
     # Киев, 2022
+    "Удар по станции РЭБ": "EW station strike", "станции РЭБ (наземные)": "EW stations (ground)",
+    "Комплекс Леер-3 (правый берег; в DCS - КП СКП-11)": "Leer-3 system (right bank; SKP-11 CP in DCS)",
+    "Станция Красуха-4 (Беларусь; в DCS - КП СКП-11)": "Krasukha-4 station (Belarus; SKP-11 CP in DCS)",
+    "Станция Р-330Ж Житель (восток; в DCS - Урал)": "R-330Zh Zhitel station (east; Ural in DCS)",
+    "Поле-21 (подавление ГНСС; в DCS - Урал)": "Pole-21 (GNSS jamming; Ural in DCS)",
+    "Буковель-АД (Киев; в DCS - КрАЗ)": "Bukovel-AD (Kyiv; KrAZ in DCS)", "Нота (Чернигов; в DCS - КрАЗ)": "Nota (Chernihiv; KrAZ in DCS)",
+    "Истребительный полк (Су-35С)": "Fighter regiment (Su-35S)", "Полк Су-30СМ": "Su-30SM regiment",
+    "Полк Су-30СМ (в DCS - Су-27)": "Su-30SM regiment (Su-27 in DCS)", "Истребители ВВС Армении (Су-30СМ)": "Armenian Air Force fighters (Su-30SM)",
     "Киев, февраль 2022: наступление на Киев (первые недели)": "Kyiv, February 2022: the offensive on Kyiv (first weeks)",
     "Киев: февраль 2022 (первые недели, условная география на карте Германии)": "Kyiv: February 2022 (first weeks, notional geography on the Germany map)",
     "1-я танковая бригада (Чернигов)": "1st Tank Brigade (Chernihiv)", "14-я механизированная бригада (с запада)": "14th Mechanized Brigade (from the west)",
@@ -777,6 +785,7 @@ MSGS += [
     ("Погода: отменён вылет «{t}» - {r}.", "Weather: sortie «{t|tr}» cancelled - {r|tr}."),
     ("{t}, передовая группа", "{t|tr}, forward group"),
     ("туман, видимость {d} м, верхняя граница {k} м", "fog, visibility {d} m, top {k} m"),
+    ("{t}: без мода - замена ({w}).", "{t|tr}: no mod - stand-in ({w})."), ("{t}: мод {m} ({w}).", "{t|tr}: mod {m|tr} ({w})."),
     ("Груз: {n} x {t} по ~{k} т = ~{d} т на склад за рейс.", "Cargo: {n} x {t} at ~{k} t = ~{d} t to the depot per trip."), ("облачность {c}", "cloud {c}"),
     # подвеска, план
     ("{a} -> снято", "{a} -> removed"), ("в плане дня задач {n}", "{n} tasks in the daily plan"), ("номер {n} вне списка (сначала plan)", "number {n} is out of range (plan first)"),

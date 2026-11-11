@@ -1235,6 +1235,142 @@
    "estimate": true
   },
   {
+   "id": "red_ew_leer_west",
+   "name": "Комплекс Леер-3 (правый берег; в DCS - КП СКП-11)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "leer3",
+   "pos": {
+    "lat": 53.9,
+    "lon": 9.92
+   },
+   "composition": [
+    {
+     "type": "SKP_11",
+     "count": 1,
+     "role": "ew"
+    },
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "Леер-3 с Орлан-10 - ОЦЕНКА размещения",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_krasukha_by",
+   "name": "Станция Красуха-4 (Беларусь; в DCS - КП СКП-11)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "krasukha",
+   "pos": {
+    "lat": 54.15,
+    "lon": 10.02
+   },
+   "composition": [
+    {
+     "type": "SKP_11",
+     "count": 1,
+     "role": "ew"
+    },
+    {
+     "type": "Ural_375_PBU",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_zhitel_east",
+   "name": "Станция Р-330Ж Житель (восток; в DCS - Урал)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "zhitel",
+   "pos": {
+    "lat": 53.82,
+    "lon": 10.6
+   },
+   "composition": [
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_pole21",
+   "name": "Поле-21 (подавление ГНСС; в DCS - Урал)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "pole21",
+   "pos": {
+    "lat": 54.0,
+    "lon": 10.3
+   },
+   "composition": [
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ew_bukovel",
+   "name": "Буковель-АД (Киев; в DCS - КрАЗ)",
+   "side": "blue",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "bukovel",
+   "pos": {
+    "lat": 53.6,
+    "lon": 9.9
+   },
+   "composition": [
+    {
+     "type": "KrAZ6322",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "в начале 2022 - немного; ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ew_notch",
+   "name": "Нота (Чернигов; в DCS - КрАЗ)",
+   "side": "blue",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "notch",
+   "pos": {
+    "lat": 53.79,
+    "lon": 10.35
+   },
+   "composition": [
+    {
+     "type": "KrAZ6322",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
    "id": "red_iskander_by",
    "name": "Ракетная бригада Искандер-М (Беларусь)",
    "side": "red",
@@ -1330,8 +1466,30 @@
    "type": "Su_27",
    "count": 16,
    "strike_radius_km": 500,
-   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-35С - не включён по умолчанию",
-   "estimate": true
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-35С включён - Су-35С, иначе - Су-27",
+   "estimate": true,
+   "mod_alt": {
+    "mod": "su35s",
+    "type": "Su_35S",
+    "name": "Истребительный полк (Су-35С)"
+   }
+  },
+  {
+   "id": "ru_su30",
+   "name": "Полк Су-30СМ (в DCS - Су-27)",
+   "side": "red",
+   "role": "fighter",
+   "base": "lubeck",
+   "type": "Su_27",
+   "count": 12,
+   "strike_radius_km": 500,
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-30 включён - Су-30СМ, иначе - Су-27",
+   "estimate": true,
+   "mod_alt": {
+    "mod": "su30",
+    "type": "Su_30SM",
+    "name": "Полк Су-30СМ"
+   }
   },
   {
    "id": "ru_su24",

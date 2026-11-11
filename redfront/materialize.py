@@ -563,8 +563,11 @@ def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
         groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
         groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
         return [g for g in groups if g["vehicles"]]
-    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam", "naval"):   # объект тыла, корабли - сами в миссии
-        groups = [sam_site(state, target)] if model.category(target) == "sam" else []   # позиция ЗРК - сама цель
+    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam", "naval", "ssm", "ew_site"):
+        # объект тыла, корабли - сами в миссии; позиция ЗРК, пусковая ОТР, станция РЭБ - сама цель
+        cat = model.category(target)
+        groups = ([sam_site(state, target)] if cat == "sam" else [ssm_site(state, target)] if cat == "ssm"
+                  else [dict(gci_site(state, target), kind="ew_site", channel=None, radius_km=None)] if cat == "ew_site" else [])
         placed = set()
         for sid in task["threats"]:
             if sid == target["id"] or sid in placed:
@@ -693,6 +696,13 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
     for u in units.values():                     # КРУ - все исправные (по одной машине; наведение - на 250 км)
         if model.category(u) == "gci" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0:
             groups.append(gci_site(state, u))
+    for u in units.values():                     # станции РЭБ: рядом с объектом задачи или цель задачи (ew.py)
+        if (model.category(u) == "ew_site" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
+                and u["id"] not in placed and (u["id"] == task.get("target")
+                                               or model.dist_km(model.unit_pos(state, u), center) <= DETAIL_KM)):
+            g_ = gci_site(state, u)
+            g_.update(kind="ew_site", channel=None, radius_km=None)
+            groups.append(g_)
     fire = {pl["unit"] for pl in state.get("ssm_plan") or []}
     tgt_id = task.get("target")
     for u in units.values():                     # пусковые ОТР: с пусками суток, рядом с объектом задачи или цель задачи

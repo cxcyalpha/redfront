@@ -38,7 +38,7 @@ def now(state: dict) -> float:
 
 
 def tracked_sam(state: dict, u: dict) -> bool:
-    return (u["side"] != state["player_side"] and model.category(u) in ("sam", "gci", "ssm") and not u.get("attached_to")
+    return (u["side"] != state["player_side"] and model.category(u) in ("sam", "gci", "ssm", "ew_site") and not u.get("attached_to")
             and not u.get("fixed") and "pos" in u)
 
 

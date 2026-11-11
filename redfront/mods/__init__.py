@@ -79,6 +79,16 @@ def apply(state: dict) -> list[str]:
     on = {m for m in ((state.get("settings") or {}).get("mods") or []) if load(m)}
     lines = []
     for u in state.get("units", {}).values():
+        alt = u.get("mod_alt")                   # часть на замене: мод включён - тип и имя мода, выключен - замена
+        if alt:
+            u.setdefault("base_type", u.get("type"))
+            u.setdefault("base_name", u.get("name"))
+            use = alt["mod"] in on
+            want_t, want_n = (alt["type"], alt.get("name") or u["base_name"]) if use else (u["base_type"], u["base_name"])
+            if u.get("type") != want_t:
+                u["type"], u["name"] = want_t, want_n
+                lines.append(f"{u['name']}: {'мод ' + MODS.get(alt['mod'], {}).get('title', alt['mod']) if use else 'без мода - замена'} ({want_t}).")
+            continue
         mid = u.get("mod")
         if not mid:
             continue

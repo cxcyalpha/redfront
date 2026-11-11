@@ -4031,6 +4031,26 @@ def theatres_section(tmp: Path) -> None:
     check(raids and "r52tbap raid" in mzb and "{Kh-555}" in mzb and "Bombing" in mzb and resb
           and stb["strategic_stock"]["red"]["kh555"] == 12 - len(raids),
           f"налёт Ту-95МС: {len(raids)} ракет Х-555 по плану, группа в миссии с ракетами и пуском по цели, исход - {resb[:1]}")
+    # РЭБ (ew.py): зоны станций, эффекты с пределами; удар по станции РЭБ и охота за пусковыми - миссия собирается
+    from redfront import ew
+    stk = model.new_campaign("ew", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=2, player_side="blue")
+    hos = model.offset(stk["units"]["red_ew_leer_west"]["pos"], 180.0, 15000)   # 15 км от Леер-3 (зона 20 км), вне Красухи-4
+    tb2 = stk["units"]["ua_tb2"]
+    uk, ul = ew.uav_factors(stk, tb2, hos)
+    cepk = ew.cep_factor(stk, "blue", stk["places"]["Kyiv"], "kh101")   # Киев под Буковелем: ГНСС - промах Х-101 больше
+    cept = ew.cep_factor(stk, "blue", stk["places"]["Kyiv"], "tochka")  # инерциальная Точка-У - нет
+    gn = ew.covered(stk, "red", stk["units"]["red_ew_pole21"]["pos"], "gnss")
+    stk["units"]["red_ew_leer_west"]["lost"] = {"SKP_11": 1, "Ural_4320_31": 2}   # станция разбита - зоны нет
+    uk2, _ = ew.uav_factors(stk, tb2, hos)
+    planner.plan(stk)
+    kinds = [t_["kind"] for t_ in stk["tasks"]]
+    built = False
+    if "strike_ew" in kinds:
+        build.build(stk, tmp / "ew.miz", task_no=kinds.index("strike_ew") + 1)
+        built = True
+    check(uk == ew.UAV_HIT_K and ul == ew.UAV_LOSS_ADD and gn and uk2 == 1.0 and cepk == 1.5 and cept == 1.0 and built,
+          f"РЭБ: TB2 в 15 км от Леер-3 - успех x{uk}, потери +{ul}; станция разбита - x{uk2}; ГНСС-зона Поле-21 - {gn}; КВО Х-101 у Киева x{cepk}, Точки-У x{cept}; "
+          f"удар по станции РЭБ - миссия собрана ({built})")
     # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
     sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
     sp_src = sp_src.replace("@SPECS@", '{ group = "F1", sams = { "SAM_A" } }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")

@@ -1163,7 +1163,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     if s.get("mode") == "cap_zone":              # прикрытие района (истребители): зона над своими войсками
         cz = clear_point(state, perf["side"], tpos, state["airbases"][perf["base"]])   # над своими войсками, но вне ЗРК противника
         route, objective = [cz], {"kind": "cap_zone", "unit": tgt["id"], "pos": cz}
-    elif model.category(tgt) in ("sam", "ssm"):  # позиция ЗРК или пусковой ОТР: атака группы на позиции
+    elif model.category(tgt) in ("sam", "ssm", "ew_site"):   # ЗРК, пусковая ОТР, станция РЭБ: атака группы на позиции
         route, objective = [ip, tpos], {"kind": "site", "unit": tgt["id"], "pos": tpos}
     elif model.category(tgt) == "naval":         # корабельная группа: атака группы кораблей (ПКР, бомбы)
         route, objective = [ip, tpos], {"kind": "ship", "unit": tgt["id"], "pos": tpos}

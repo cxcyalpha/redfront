@@ -182,6 +182,8 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
                 budget[u["id"]] = ((u.get("daily_advance_km") or sm["daily_advance_km"]) * model.strength(u)
                                    * u.get("supply", 1.0) * frac_day)         # без снабжения - медленнее
             budget[u["id"]] *= u.get("speed_k", 1.0)        # передовой отряд, ОМГ - быстрее (ops.py)
+            from . import ew
+            budget[u["id"]] *= ew.tempo_factor(state, u)    # РЭБ противника: подавление связи - темп ниже
             cl = current_link(state, u)
             if cl and logistics.link_detour(state, *cl):                       # разрушен малый мост - объезд
                 budget[u["id"]] *= _sim(state, u["side"]).get("bridge_detour_slow", 1.0)

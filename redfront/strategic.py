@@ -189,7 +189,9 @@ def resolve(state: dict) -> list[str]:
         if rng.random() < _abm(state, t["side"], model.unit_pos(state, t), p["missile"]):
             r["int"] += 1
             continue
-        if rng.random() < _p_hit(m["cep_m"], LETHAL_R_M[t["role"]]):
+        from . import ew
+        cep = m["cep_m"] * ew.cep_factor(state, t["side"], model.unit_pos(state, t), p["missile"])   # РЭБ: подавление ГНСС
+        if rng.random() < _p_hit(cep, LETHAL_R_M[t["role"]]):
             r["hit"] += 1
             t["damage"] = min(1.0, t.get("damage", 0.0) + HIT_DAMAGE[t["role"]] * m["warhead_kg"] / 500.0)
         if model.category(u) == "ssm" and u["id"] not in moved:
