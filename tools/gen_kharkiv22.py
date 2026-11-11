@@ -15,7 +15,8 @@
 
 Данные о составах и потерях неполны и спорны. Источники (по памяти - проверять): ISW (сводки 09.2022), RUSI
 (Watling, Reynolds, 'Stormbreak', 2023), Oryx. Составы и числа - ОЦЕНКИ по порядку величины. Типы DCS: Т-64БВ -
-CHAP_T64BV, Т-90М - CHAP_T90M, Тор-М2, Панцирь, HIMARS - CurrentHill; Ка-52 - Ка-50; Су-35С, Су-30СМ - моды
+CHAP_T64BV, Т-90М - CHAP_T90M, Тор-М2, Панцирь, HIMARS - CurrentHill; Ка-52 - Ка-50; МиГ-29МУ1 - МиГ-29С; AGM-88 на МиГ-29 и Су-27 - подвеска вне списка DCS (на внутренних
+крыльевых пилонах, как HARM на F-4E); Су-35С, Су-30СМ - моды
 (без них - Су-27); С-400 - С-300ПС; Т-72М1 (Польша) - Т-72Б; M113 - есть.
 """
 from __future__ import annotations
@@ -38,9 +39,8 @@ G.OOB_ABOUT = ("Состав сил 06.09.2022 (Харьковщина). Ген�
                "Числа - ОЦЕНКИ по порядку величины.")
 G.STRATEGIC = {"red": {"iskander": 16}, "blue": {"gmlrs": 120, "tochka": 6}}
 G.TASK_RULES = {"blue": {"strike_airfield": {"off": True, "why": "аэродромы в России - вне ударов Украины в 2022 году"}}}
-G.NOT_INCLUDED = ("Ствольная и реактивная артиллерия как род войск (кроме HIMARS - в стратегическом слое), "
-                  "минирование, FPV и малые беспилотники (в лётном симуляторе нет), AGM-88 HARM на МиГ-29 (в DCS такой "
-                  "подвески нет), удары Калибрами и Х-101 по энергосистеме, юг (Херсон) - вне сектора.")
+G.NOT_INCLUDED = ("Минирование, "
+                  "FPV и малые беспилотники (в лётном симуляторе нет), удары Калибрами и Х-101 по энергосистеме, юг (Херсон) - вне сектора.")
 G.EXTRA_VARIANT = {
     "posture": {"blue": "offense", "red": "defense"},
     "objectives": {"blue": {"kupiansk": ["Balakliia", "Shevchenkove", "Kupiansk"],
@@ -166,9 +166,10 @@ G.AIR = [
     ("ru_ka52", "Вертолёты Ка-52 (в DCS - Ка-50)", "red", "attack_helo", "Ka_50", "Templin", 10, 150, "Ка-52 в pydcs нет"),
     ("ru_mi28", "Вертолёты Ми-28Н", "red", "attack_helo", "Mi_28N", "Templin", 8, 150, ""),
     ("ru_mi8", "Вертолёты Ми-8АМТШ", "red", "transport_helo", "Mi_8MT", "Templin", 12, 200, ""),
-    ("ua_mig29", "114-я бригада тактической авиации (МиГ-29)", "blue", "fighter", "MiG_29A", "Braunschweig", 10, 300,
-     "AGM-88 на МиГ-29 в DCS не подвесить"),
-    ("ua_su27", "831-я бригада тактической авиации (Су-27)", "blue", "fighter", "Su_27", "Hannover", 8, 500, ""),
+    ("ua_mig29", "114-я бригада тактической авиации (МиГ-29С)", "blue", "fighter", "MiG_29S", "Braunschweig", 10, 300,
+     "AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 5), как HARM на F-4E", {"arm_pylons": {"pylons": [3, 5]}}),
+    ("ua_su27", "831-я бригада тактической авиации (Су-27)", "blue", "fighter", "Su_27", "Hannover", 8, 500,
+     "AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 8)", {"arm_pylons": {"pylons": [3, 8]}}),
     ("ua_su25", "299-я бригада тактической авиации (Су-25)", "blue", "attack", "Su_25", "Hannover", 10, 250, ""),
     ("ua_su24", "7-я бригада тактической авиации (Су-24М)", "blue", "bomber", "Su_24M", "Celle", 8, 400, ""),
     ("ua_mi24", "Армейская авиация (Ми-24)", "blue", "attack_helo", "Mi_24P", "Gardelegen", 8, 150, ""),
@@ -196,6 +197,25 @@ G.SSM = [
     ("blue_tochka", "Ракетная бригада Точка-У ВС Украины", "blue", "tochka", 3, 52.400, 11.700, "ОЦЕНКА"),
 ]
 
+# артиллерия (artillery.py): (id, имя, сторона, {тип DCS: число}, поддерживает, пункт, ammo_k, cb_k, источник)
+# Россия - перевес в стволах и снарядах (RUSI: ~20 000 выстрелов в сутки летом 2022 против ~6 000 у ВСУ), но на
+# Харьковщине к сентябрю ослаблена: резервы и артиллерия ушли под Херсон (ammo_k 0.6-0.8); ВСУ -
+# снарядный голод (ammo_k), но западные контрбатарейные РЛС AN/TPQ-36/37 и точные M777 (cb_k). ОЦЕНКИ.
+ART = [
+    ("red_art_izium", "Артбригада изюмской группировки (Мста-С, Ураган)", "red", {"SAU_Msta": 12, "Uragan_BM_27": 4},
+     "red_izium_3mrd", "Izium", 0.6, 1.0, "к сентябрю - часть стволов и снарядов ушла на херсонское направление; ОЦЕНКА"),
+    ("red_art_kup", "Артиллерия 1-й гв. танковой армии (Мста-С, Град)", "red", {"SAU_Msta": 8, "Grad_URAL": 6},
+     "red_1gta_kup", "Kupiansk", 0.6, 1.0, "ОЦЕНКА"),
+    ("red_art_lyman", "Артиллерия у Лимана (Акация, Град)", "red", {"SAU_Akatsia": 8, "Grad_URAL": 4},
+     "red_lyman", "Lyman", 0.8, 1.0, "ОЦЕНКА"),
+    ("red_art_north", "Артиллерия 11-го АК (Акация, Смерч)", "red", {"SAU_Akatsia": 8, "Smerch_HE": 2},
+     "red_11ac", "Lyptsi", 1.0, 1.0, "ОЦЕНКА"),
+    ("blue_art_44", "44-я артиллерийская бригада (M777 и Акация; M777 в DCS - M109)", "blue", {"M_109": 8, "SAU_Akatsia": 6},
+     "blue_92mb", "Chuhuiv", 0.8, 1.3, "M777 в DCS нет - M109; ОЦЕНКА"),
+    ("blue_art_south", "Артиллерия у Славянска (Гвоздика, Град)", "blue", {"SAU_Gvozdika": 8, "Grad_URAL": 4},
+     "blue_93mb", "Sloviansk", 0.8, 1.3, "ОЦЕНКА"),
+]
+
 if __name__ == "__main__":
     G.main()
     # HIMARS и Точка-У не бьют по аэродромам и складам в России (air_limits: пункты и объекты)
@@ -205,5 +225,16 @@ if __name__ == "__main__":
     sp.write_text(json.dumps(sec, ensure_ascii=False, indent=1), encoding="utf-8")
     op = G.DATA / "oob_kharkiv22.json"
     oob = json.loads(op.read_text(encoding="utf-8"))
+    import math
+    for aid, name, side, cmp_, sup, place, ammo, cb, src in ART:
+        la, lo, _s = G.PLACES[place]
+        ent = min((G.PLACES[e] for e in G.SUPPLY_ENTRY[side]), key=lambda e: math.hypot(e[0] - la, (e[1] - lo) * 0.6))
+        d_km = math.hypot(ent[0] - la, (ent[1] - lo) * 0.6) * 111.0
+        f = min(1.0, 10.0 / d_km) if d_km else 0.0
+        oob["units"].append({"id": aid, "name": name, "side": side, "role": "art_bde", "state": "deployed", "supports": sup,
+                             "pos": {"lat": round(la + (ent[0] - la) * f, 4), "lon": round(lo + (ent[1] - lo) * f, 4)},
+                             "ammo_k": ammo, "cb_k": cb,
+                             "composition": [{"type": t, "count": n, "role": "artillery"} for t, n in cmp_.items()],
+                             "source": src, "estimate": True})
     oob["strategic_per_day"] = {"blue": {"gmlrs": 8, "tochka": 1}, "red": {"iskander": 2}}
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")

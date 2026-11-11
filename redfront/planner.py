@@ -291,10 +291,12 @@ SWING_AIR_MIN = 0.8   # ОЦЕНКА: истребитель-бомбардир�
                       # истребительные задачи (F-4E 1973 - прикрытие и сопровождение наравне с 'Миражами')
 
 
-def role_ok(state: dict, u: dict, performers: list[str]) -> bool:
+def role_ok(state: dict, u: dict, performers: list[str], loadout: list | None = None) -> bool:
     """Часть подходит по роли: роль в списке исполнителей; истребительные задачи - и многоцелевой тип (F-4E, F-16),
     если он хорош в бою в воздухе (fitness air)."""
     if u["role"] in performers:
+        return True
+    if u.get("arm_pylons") and "sead" in (loadout or []):   # истребитель с ПРР (build._arm_pylons) - в группу подавления ПВО
         return True
     return (u["role"] == "fighter_bomber" and "fighter" in performers
             and fitness.relative(state, u.get("type", ""), "air") >= SWING_AIR_MIN)
@@ -1163,7 +1165,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     if s.get("mode") == "cap_zone":              # прикрытие района (истребители): зона над своими войсками
         cz = clear_point(state, perf["side"], tpos, state["airbases"][perf["base"]])   # над своими войсками, но вне ЗРК противника
         route, objective = [cz], {"kind": "cap_zone", "unit": tgt["id"], "pos": cz}
-    elif model.category(tgt) in ("sam", "ssm", "ew_site"):   # ЗРК, пусковая ОТР, станция РЭБ: атака группы на позиции
+    elif model.category(tgt) in ("sam", "ssm", "ew_site", "art_site"):   # ЗРК, пусковая ОТР, станция РЭБ: атака группы на позиции
         route, objective = [ip, tpos], {"kind": "site", "unit": tgt["id"], "pos": tpos}
     elif model.category(tgt) == "naval":         # корабельная группа: атака группы кораблей (ПКР, бомбы)
         route, objective = [ip, tpos], {"kind": "ship", "unit": tgt["id"], "pos": tpos}
@@ -1228,7 +1230,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         need = g["size"] * flights
         from . import pilots
         cands = [u for u in units.values()
-                 if u["side"] == perf["side"] and role_ok(state, u, g["performers"]) and avail.get(u["id"], 0) >= need
+                 if u["side"] == perf["side"] and role_ok(state, u, g["performers"], g.get("loadout")) and avail.get(u["id"], 0) >= need
                  and g["id"] not in model.tasks_not(u)   # вариант модели (F-16A на F-16C): без подавления ПВО
                  and not u.get("mod_off")
                  and nation_ok(state, u, g) and (not g.get("types") or u.get("type") in g["types"])          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
@@ -1241,7 +1243,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
         # (killer - сначала с аэродрома своего hunter: смешанные пары одного крыла)
         gcls = fitness.group_class(g["maintask"], None)   # подавление ПВО - sead, прикрытие - air
         sea = lambda x: state["airbases"][x["base"]].get("kind") == "carrier"
+        arm_first = "sead" in (g.get("loadout") or [])   # носители HARM (arm_pylons) - в подавление ПВО первыми
         cands.sort(key=lambda u: (pref.index(u["id"]) if u["id"] in pref else len(pref),
+                                  not (arm_first and u.get("arm_pylons")),
                                   bool(tdef.get("same_service")) and sea(u) != sea(perf),   # пакет одной службы (флот / ВВС)
                                   bool(mate) and bool(g.get("prefer_other_type")) and u["type"] == mate["type"],
                                   bool(mate) and u["base"] != mate["base"], not _can(u, g["maintask"][0]),

@@ -1037,6 +1037,21 @@ def _payload(ac, cat: str, year: int | None = None) -> tuple[str, dict] | None:
     return k, pyl
 
 
+def _arm_pylons(fg, ac, perf: dict, g: dict, state: dict) -> str | None:
+    """ПРР на истребителе, у которого подвески ПРР в DCS нет (arm_pylons части: МиГ-29 и Су-27 ВСУ с AGM-88 с
+    августа 2022, как F-4E с HARM на пилонах Shrike - weapons.SWAPS): группа подавления ПВО - подвеска прикрытия
+    (ракеты воздух-воздух), на пилонах arm_pylons - HARM."""
+    from . import weapons
+    arm = perf.get("arm_pylons")
+    if not arm or not (set(GROUP_CATS.get(re.sub(r"\d+$", "", g.get("group", "")).split("_")[0], [])) & {"sead"}):
+        return None
+    _apply_loadout(fg, ac, perf["type"], ["cap"], state)
+    for u in fg.units:
+        for n in arm["pylons"]:
+            u.pylons[int(n)] = {"CLSID": weapons.HARM}
+    return "SEAD (AGM-88 HARM)"
+
+
 def _weapons_not(fg, perf: dict) -> None:
     """Вариант модели (F-16A на модели F-16C): оружие, которого у варианта не было (weapons_not - части имён
     оружия pydcs), снимается с пилонов."""
@@ -2019,6 +2034,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 vg_by_unit[g["unit"]] = evac_groups[g["unit"]][0]
                 continue
             vg_by_unit[g["unit"]] = _ground_group(m, state, g, shift_of(g))
+            if g["kind"] == "art_site" and g.get("fire_at"):   # артбригада: налёты по ближней части противника
+                c = _pt(m, g["fire_at"])
+                for k in range(ART_MISSIONS):
+                    vg_by_unit[g["unit"]].points[0].tasks.append(task.FireAtPoint(
+                        Vector2(c.x + (k - 1.5) * 200, c.y), rounds=ART_ROUNDS, radius=ART_RADIUS_M * 2))
             if g["kind"] == "gci_site":          # КРУ: наведение включено с начала миссии
                 vg = vg_by_unit[g["unit"]]
                 vg.points[0].tasks.append(ActivateGCI(g["channel"], vg.units[0].id, int(g["radius_km"] * 1000)))
@@ -2195,6 +2215,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             times[g["group"]]["start_s"] = st_s
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
+        cat = _arm_pylons(fg, ac, perf, g, state) or cat
         tune_arm(state, fg, g)                   # головки ПРР (Shrike) - под РЛС ЗРК своей цели
         needs_mod = False
         for u in fg.units[:hum] if is_player else []:

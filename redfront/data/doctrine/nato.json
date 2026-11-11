@@ -3479,6 +3479,250 @@
    "bomb_alt_m": 1000,
    "egress_alt_m_agl": 150,
    "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
+  },
+  "strike_art": {
+   "title": "Удар по артиллерии",
+   "performers": [
+    "bomber",
+    "fighter_bomber"
+   ],
+   "target": {
+    "category": "art_site",
+    "state": "deployed"
+   },
+   "method": "on_call",
+   "method_source": "ОЦЕНКА: огневые позиции артиллерии - цели разведки и ударов (Украина 2022)",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 150,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 4,
+    "maintask": [
+     "SEAD",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "anti_armor",
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true
+    },
+    "size_source": "ОЦЕНКА: удар по объекту и BAI/FOFA - звено (4), вооружённая разведка путей - пара, CAS (A-10 в Европе) - пара; прикрытие ударов в глубину (аэродромы, FOFA) - звено"
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО (hunter)",
+     "when": "threats",
+     "required": false,
+     "required_note": "у НАТО пакет без группы подавления ПВО допустим (союзники прорываются на малой высоте); группа ставится, если есть часть США, которая может её дать",
+     "performers": [
+      "fighter_bomber",
+      "fighter",
+      "attack"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 4,
+     "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 5,
+     "launch_alt_m": 4500,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "nations": {
+      "us": 0,
+      "frg": 1990,
+      "uk": 1990
+     },
+     "min_fit": 0.5,
+     "prefer_units": [
+      "b_52tfw",
+      "b_52tfw_f16"
+     ],
+     "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+     "medium_alt_m": 4500,
+     "from_year": 1965,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    },
+    {
+     "id": "kill",
+     "title": "группа добивания ЗРК (killer)",
+     "when": "threats",
+     "required": false,
+     "performers": [
+      "fighter_bomber",
+      "fighter",
+      "attack"
+     ],
+     "size": 2,
+     "maintask": [
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "dead",
+      "anti_armor"
+     ],
+     "lead_min": 2,
+     "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. 46-49: в НАТО SEAD - обеспечивающее действие (ATP-33(A), ATP-27(B)); выделенные средства подавления ПВО в начале 80-х - только у ВВС США, их вероятное применение - 'открывать коридоры' для авиации НАТО; союзники (Великобритания, Бельгия, Нидерланды) - 'быстрее и ниже'",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "Auto",
+       "expend": "All",
+       "group_attack": true
+      }
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "nations": [
+      "us"
+     ],
+     "min_fit": 0,
+     "prefer_units": [
+      "b_52tfw_f16",
+      "b_52tfw"
+     ],
+     "hk_source": "52nd TFW USAFE: смешанные эскадрильи F-4G + F-4E (с 1987 F-16C), пары hunter/killer; Wild Weasel - 'первыми пришли, последними ушли' (окно уязвимости ударной группы); Tornado ECR (JaboG 32/38) и ALARM (RAF) - с 1990",
+     "mode": "kill",
+     "pair_with": "sead",
+     "pair_nations": [
+      "us"
+     ],
+     "kill_note": "за парой поиска (2 мин после неё) на её рубеж, оттуда атака найденных ЗРК кассетами/Maverick; ставится, только если назначена пара поиска",
+     "from_year": 1965,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    },
+    {
+     "id": "cover",
+     "title": "группа прикрытия",
+     "when": "enemy_fighters",
+     "required": false,
+     "required_note": "необязательная: без неё удар ставится, о незакрытом воздухе - замечание планировщика",
+     "performers": [
+      "fighter",
+      "interceptor"
+     ],
+     "size": 2,
+     "maintask": [
+      "CAP",
+      "Escort"
+     ],
+     "loadout": [
+      "cap"
+     ],
+     "lead_min": 3,
+     "mode": "cover_zone",
+     "alt_m": 5000,
+     "zone_km": 40,
+     "hold_after_min": 5,
+     "source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii: ВВС США первым приоритетом ставят завоевание господства в воздухе - истребители прикрытия ударных групп",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "alt_m",
+      "zone_km",
+      "hold_after_min"
+     ]
+    },
+    {
+     "id": "jam",
+     "title": "постановщик помех",
+     "when": "threats",
+     "mode": "jam_orbit",
+     "required": false,
+     "performers": [
+      "ew"
+     ],
+     "size": 1,
+     "maintask": [
+      "Escort"
+     ],
+     "loadout": [],
+     "lead_min": 6,
+     "standoff_km": 20,
+     "alt_m": 6000,
+     "hold_after_min": 5,
+     "source": "ОЦЕНКА: постановка помех из-за зоны ПВО (EA-6B / EF-111A в пакетах ВМС и ВВС США 1980-х; Ми-8ППА / Ан-12ПП у ОВД); на круге за зоной ближнего к цели ЗРК, на линии ЗРК - база",
+     "estimate_fields": [
+      "size",
+      "lead_min",
+      "standoff_km",
+      "alt_m",
+      "hold_after_min"
+     ]
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 50,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000,
+   "egress_alt_m_agl": 150,
+   "transit_alt_source": "FM 100-103 Army Airspace Command and Control in a Combat Zone (1987), 2-12...2-13, рис. 2-5: маршрут пролёта на малой высоте (LLTR, у ВВС США - MRR) от тыла корпуса до FSCL - к цели на 100 футов, возвращающиеся - выше 500 футов; ПВО в коридоре - 'огонь запрещён'. ИИ DCS - не ниже 100 м (build.AI_LOW_MIN_M)"
   }
  },
  "march": {
@@ -3617,7 +3861,8 @@
     "strike_bridge",
     "strike_depot",
     "strike_factory",
-    "strike_ship"
+    "strike_ship",
+    "strike_art"
    ]
   },
   "shares": [

@@ -4057,14 +4057,39 @@ def theatres_section(tmp: Path) -> None:
     gm = [p_["target"] for p_ in skh["ssm_plan"] if p_["missile"] == "gmlrs"]
     from redfront import ops
     pth = ops.path(skh, "Lyptsi", "Vovchansk", avoid={"Belgorod", "Valuyki"})
-    for _ in range(6):
+    took = []
+    for _ in range(8):                       # бои идут с переменным успехом: засчитывается любой взятый пункт
         sim.end_day(skh)
         planner.plan(skh)
-    took = [n for n in ("Balakliia", "Izium", "Shevchenkove", "Kupiansk") if ops.owner(skh, n) == "blue"]
+        took += [n for n in ("Balakliia", "Izium", "Shevchenkove", "Kupiansk", "Lyman") if ops.owner(skh, n) == "blue" and n not in took]
     build.build(skh, tmp / "kh.miz", task_no=1)
     check(skh["posture"]["blue"] == "offense" and gm and all("belgorod" not in t_ for t_ in gm) and "Belgorod" not in (pth or [])
           and took and (tmp / "kh.miz").exists(),
-          f"Харьков-22: HIMARS по {sorted(set(gm))}; путь Липцы - Волчанск {pth}; за 6 дней ВСУ взяли {took}; миссия собрана")
+          f"Харьков-22: HIMARS по {sorted(set(gm))}; путь Липцы - Волчанск {pth}; за 8 дней ВСУ брали {took}; миссия собрана")
+    # артиллерия (artillery.py): поддержка боя в досягаемости с пределом; контрбатарейная борьба; в миссии - огонь
+    from redfront import artillery
+    sa = model.new_campaign("ka", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    u92 = sa["units"]["blue_92mb"]
+    k0 = artillery.support_k(sa, u92)
+    u92["engaged"] = ["red_rg_balakliia"]
+    k1 = artillery.support_k(sa, u92)
+    for a_ in sa["units"].values():
+        if artillery.is_art(a_) and a_["side"] == "blue":
+            a_["pos"] = dict(model.unit_pos(sa, u92))
+    k2 = artillery.support_k(sa, u92)
+    gr = materialize.art_site(sa, sa["units"]["red_art_izium"])
+    check(k0 == 1.0 and 1.0 < k1 <= 1.0 + artillery.MAX_K and k2 <= 1.0 + artillery.MAX_K and len(gr["vehicles"]) == 16,
+          f"артиллерия: вне боя x{k0}, в бою x{k1:.2f}, все бригады рядом x{k2:.2f} (предел {1 + artillery.MAX_K}); "
+          f"бригада в миссии - {len(gr['vehicles'])} орудий, огонь по {'точке' if gr.get('fire_at') else 'нет цели'}")
+    # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
+    sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    planner.plan(sh)
+    ti = next(i for i, t_ in enumerate(sh["tasks"]) if t_["kind"] == "strike_sam_site")
+    seadp = [g_["performer"] for g_ in sh["tasks"][ti]["package"] if g_["group"].startswith("sead")]
+    build.build(sh, tmp / "harm.miz", task_no=ti + 1)
+    mzh = zipfile.ZipFile(tmp / "harm.miz").read("mission").decode("utf-8")
+    check(seadp[:1] == ["ua_mig29"] and mzh.count("B06DD79A-F21E-4EB9-BD9D-AB3844618C93") >= 2,
+          f"HARM ВСУ: подавление ПВО - {seadp}, ракет HARM в миссии {mzh.count('B06DD79A-F21E-4EB9-BD9D-AB3844618C93')}")
     # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
     sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
     sp_src = sp_src.replace("@SPECS@", '{ group = "F1", sams = { "SAM_A" } }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")

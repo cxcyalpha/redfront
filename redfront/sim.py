@@ -37,7 +37,12 @@ def power(state: dict, unit: dict) -> float:
     # в пользу Израиля - ОЦЕНКА), по умолчанию 1
     # night_power - ночной бой стороны относительно дня (доктрина: армии арабских стран 1973 ночью слабее - ОЦЕНКА)
     night = sim.get("night_power", 1.0) if state.get("_night_now") else 1.0
-    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * unit.get("quality", 1.0) * night
+    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0) * night
+
+
+def _art_bde(state: dict, unit: dict) -> float:
+    from . import artillery                      # артбригады в досягаемости (artillery.py)
+    return artillery.support_k(state, unit)
 
 
 def artillery_k(state: dict, unit: dict) -> float:
@@ -362,6 +367,8 @@ def end_day(state: dict) -> list[str]:
     lines += naval.daily(state)                  # флот: потопленные группы, авианосцы-базы
     from . import strategic
     lines += strategic.daily(state)              # удары ракетами (ОТР, Томагавк): исход суток и план следующих
+    from . import artillery
+    lines += artillery.daily(state)              # артбригады: контрбатарейная борьба, смена позиций
     lines += logistics.repairs(state)
     for u in state["units"].values():            # артиллерия частей: орудие в сутки из ремонта и пополнения (ОЦЕНКА)
         if u.get("art_lost"):

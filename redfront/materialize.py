@@ -304,6 +304,25 @@ def ssm_site(state: dict, unit: dict) -> dict:
             "waypoints": [], "speed_kmh": 0, "core": True}
 
 
+def art_site(state: dict, unit: dict) -> dict:
+    """Артбригада на огневых позициях (artillery.py): орудия в линию; огонь - по ближней части противника в
+    досягаемости (fire_at, build)."""
+    from . import artillery
+    p = model.unit_pos(state, unit)
+    vehicles = []
+    for t, n in model.alive_by_type(unit).items():
+        for _ in range(int(round(n))):
+            k = len(vehicles)
+            vehicles.append({"name": f"{unit['id']}#{k + 1:02d}", "type": t, "lat": p["lat"] + (k % 6) * 0.0012,
+                             "lon": p["lon"] + (k // 6) * 0.002, "weight": 1.0})
+    g = {"unit": unit["id"], "side": unit["side"], "kind": "art_site", "name": unit["id"], "vehicles": vehicles,
+         "waypoints": [], "speed_kmh": 0, "core": True}
+    tgt = artillery.fire_target(state, unit)
+    if tgt:
+        g["fire_at"] = tgt
+    return g
+
+
 def _on_foot(t: str) -> bool:
     """Пеший тип (расчёт ПЗРК, пехотинец) - на марше едет в машине, отдельно в колонне не ставится."""
     tl = t.lower()
@@ -563,11 +582,12 @@ def window(state: dict, task: dict, density: float = 1.0) -> list[dict]:
         groups += [sam_site(state, units[sid]) for sid in task["threats"] if not units[sid].get("attached_to")]
         groups += [sam_site(state, units[sid]) for sid in background_sams(state, task)]
         return [g for g in groups if g["vehicles"]]
-    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam", "naval", "ssm", "ew_site"):
+    if model.category(target) in ("depot", "bridge", "airfield", "factory", "sam", "naval", "ssm", "ew_site", "art_site"):
         # объект тыла, корабли - сами в миссии; позиция ЗРК, пусковая ОТР, станция РЭБ - сама цель
         cat = model.category(target)
         groups = ([sam_site(state, target)] if cat == "sam" else [ssm_site(state, target)] if cat == "ssm"
-                  else [dict(gci_site(state, target), kind="ew_site", channel=None, radius_km=None)] if cat == "ew_site" else [])
+                  else [dict(gci_site(state, target), kind="ew_site", channel=None, radius_km=None)] if cat == "ew_site"
+                  else [art_site(state, target)] if cat == "art_site" else [])
         placed = set()
         for sid in task["threats"]:
             if sid == target["id"] or sid in placed:
@@ -703,6 +723,11 @@ def theatre(state: dict, task: dict, density: float = 1.0) -> list[dict]:
             g_ = gci_site(state, u)
             g_.update(kind="ew_site", channel=None, radius_km=None)
             groups.append(g_)
+    for u in units.values():                     # артбригады: рядом с объектом задачи или цель задачи (artillery.py)
+        if (model.category(u) == "art_site" and u["state"] not in ("destroyed", "pending") and model.strength(u) > 0
+                and u["id"] not in placed and (u["id"] == task.get("target")
+                                               or model.dist_km(model.unit_pos(state, u), center) <= DETAIL_KM)):
+            groups.append(art_site(state, u))
     fire = {pl["unit"] for pl in state.get("ssm_plan") or []}
     tgt_id = task.get("target")
     for u in units.values():                     # пусковые ОТР: с пусками суток, рядом с объектом задачи или цель задачи
