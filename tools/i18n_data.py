@@ -126,7 +126,7 @@ NAMES = {
     "AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 5), как HARM на F-4E": "AGM-88 HARM from August 2022, on the inner wing pylons (3, 5), like HARM on the F-4E",
     "AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 8)": "AGM-88 HARM from August 2022, on the inner wing pylons (3, 8)",
     "Удар по артиллерии": "Artillery strike", "артиллерийские бригады и полки": "artillery brigades and regiments",
-    "SEAD (AGM-88 HARM)": "SEAD (AGM-88 HARM)", "ДРЛО НАТО E-3A (над Польшей)": "NATO E-3A AWACS (over Poland)",
+    "SEAD (AGM-88 HARM)": "SEAD (AGM-88 HARM)", "ДРЛО НАТО E-3A (за тылом Украины)": "NATO E-3A AWACS (beyond the Ukrainian rear)",
     "HARM - только на МиГ-29С (на МиГ-29А пуск невозможен)": "HARM only on the MiG-29S (the MiG-29A cannot launch it)",
     "дальняя авиация": "long-range aviation", "базы": "bases", "вне сектора": "outside the sector", "Пиннов": "Pinnow",
     "условно: середина участка": "notional: middle of the segment", "M31 GMLRS (HIMARS)": "M31 GMLRS (HIMARS)",

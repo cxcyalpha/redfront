@@ -212,6 +212,7 @@ if __name__ == "__main__":
     oob = json.loads(op.read_text(encoding="utf-8"))
     oob["dispersal"] = {"blue": {"land_other_p": 0.3, "rebase_p": 0.2, "max_km": 300}}
     # ДРЛО НАТО (E-3A над Польшей и Румынией): своих самолётов ДРЛО у ВСУ нет, данные - от союзников; в миссии -
-    # E-3A вне театра, в воздухе с начала миссии (не часть модели, не цель)
-    oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (над Польшей)"}}
+    # E-3A вне театра, в воздухе с начала миссии (не часть модели, не цель). На условной карте - за тылом Украины
+    # (на западе карты), а не над настоящей Польшей (она на востоке карты, на стороне России)
+    oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (за тылом Украины)"}}
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
