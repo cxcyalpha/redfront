@@ -115,6 +115,7 @@ NAMES = {
     "переброска 8-9.09 - ОЦЕНКА": "moved in on 8-9 Sept; ESTIMATE",
     "условно: Оскол между Купянском и Купянском-Узловым": "notional: Oskil between Kupiansk and Kupiansk-Vuzlovyi",
     "114-я бригада тактической авиации (МиГ-29С)": "114th Tactical Aviation Brigade (MiG-29S)",
+    "114-я бригада тактической авиации (МиГ-29А)": "114th Tactical Aviation Brigade (MiG-29A)",
     "44-я артиллерийская бригада (M777 и Акация; M777 в DCS - M109)": "44th Artillery Brigade (M777 and Akatsiya; M109 in DCS for the M777)",
     "Артбригада изюмской группировки (Мста-С, Ураган)": "Izium group artillery brigade (Msta-S, Uragan)",
     "Артиллерия 1-й гв. танковой армии (Мста-С, Град)": "1st Guards Tank Army artillery (Msta-S, Grad)",

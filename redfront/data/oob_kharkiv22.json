@@ -1567,13 +1567,31 @@
    "estimate": true
   },
   {
-   "id": "ua_mig29",
+   "id": "ua_mig29a",
+   "name": "114-я бригада тактической авиации (МиГ-29А)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "braunschweig",
+   "type": "MiG_29_Fulcrum",
+   "count": 5,
+   "strike_radius_km": 300,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 5), как HARM на F-4E",
+   "estimate": true,
+   "arm_pylons": {
+    "pylons": [
+     3,
+     5
+    ]
+   }
+  },
+  {
+   "id": "ua_mig29s",
    "name": "114-я бригада тактической авиации (МиГ-29С)",
    "side": "blue",
    "role": "fighter",
    "base": "braunschweig",
    "type": "MiG_29S",
-   "count": 10,
+   "count": 5,
    "strike_radius_km": 300,
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 5), как HARM на F-4E",
    "estimate": true,

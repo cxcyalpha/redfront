@@ -4088,7 +4088,7 @@ def theatres_section(tmp: Path) -> None:
     seadp = [g_["performer"] for g_ in sh["tasks"][ti]["package"] if g_["group"].startswith("sead")]
     build.build(sh, tmp / "harm.miz", task_no=ti + 1)
     mzh = zipfile.ZipFile(tmp / "harm.miz").read("mission").decode("utf-8")
-    check(seadp[:1] == ["ua_mig29"] and mzh.count("B06DD79A-F21E-4EB9-BD9D-AB3844618C93") >= 2,
+    check(bool(seadp) and bool(sh["units"][seadp[0]].get("arm_pylons")) and mzh.count("B06DD79A-F21E-4EB9-BD9D-AB3844618C93") >= 2,
           f"HARM ВСУ: подавление ПВО - {seadp}, ракет HARM в миссии {mzh.count('B06DD79A-F21E-4EB9-BD9D-AB3844618C93')}")
     # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
     sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
