@@ -21,6 +21,9 @@ MEMORY = "по памяти - проверить"
 
 # ---------------------------------------------------------------- пункты графа (ОЦЕНКА координат, кроме сектора Гамбурга)
 PLACES_B = {   # ФРГ
+    # побережье: районы высадки морских десантов ОВД (Фемарн, Ольденбург, Нойштадт, Эккернфёрде) и порт REFORGER
+    "Fehmarn": (54.437, 11.190), "OldenburgH": (54.292, 10.883), "Neustadt": (54.108, 10.813),
+    "Eckernforde": (54.470, 9.838), "Bremerhaven": (53.550, 8.580),
     "Kiel": (54.323, 10.135), "Neumunster": (54.074, 9.982), "Rendsburg": (54.304, 9.663), "Itzehoe": (53.925, 9.516),
     "BadSegeberg": (53.936, 10.309), "Lubeck": (53.866, 10.687), "BadOldesloe": (53.810, 10.374), "Ratzeburg": (53.700, 10.758),
     "Molln": (53.627, 10.687), "Hamburg": (53.551, 9.994), "Stade": (53.600, 9.476), "Buxtehude": (53.477, 9.701),
@@ -756,7 +759,98 @@ DEPOTS = [  # (id, имя, сторона, пункт)
     ("blue_depot_ful", "Склад снабжения (Фульда)", "blue", "Fulda"),
     ("blue_depot_wue", "Склад снабжения (Вюрцбург)", "blue", "Wurzburg"),
     ("blue_depot_nue", "Склад снабжения (Нюрнберг)", "blue", "Nurnberg"),
+    ("blue_depot_brhv", "Порт и склады (Бремерхафен)", "blue", "Bremerhaven"),
 ]
+
+# ---------------------------------------------------------------- флот (redfront.naval): Балтика и Северное море
+# Классы DCS - ближайшие (ДОПУЩЕНИЯ): Кривак - REZKY; Тарантул - MOLNIYA; Пархим (МПК ННА) - ALBATROS (Гриша); Оса -
+# Type 021-1; десантные корабли Фрош, Ропуча, Польноцны - BDK-775; эсминцы Гамбург (тип 101) и корветы Нильс Юэль -
+# Leander (Sea Wolf/Exocet); катера тип 148 - La Combattante II (тот же тип), тип 143 - тоже. Имена - по памяти,
+# проверить; места и приказы - ОЦЕНКА.
+NAVAL = [   # (id, имя, сторона, широта, долгота, [(класс, роль, имя)], приказы [{day, to, until_day}])
+    ("red_bf_sag", "Отряд кораблей Балтийского флота", "red", 54.95, 13.60,
+     [("REZKY", "frigate", "Неукротимый"), ("REZKY", "frigate", "Пылкий"), ("REZKY", "frigate", "Дружный")],
+     [{"day": 1, "to": {"lat": 54.60, "lon": 11.90}, "until_day": 8}]),
+    ("red_vm_rk", "6-я флотилия ННА: ракетные катера", "red", 54.28, 12.05,
+     [("MOLNIYA", "boat", "Rudolf Egelhofer"), ("MOLNIYA", "boat", "Fritz Globig"),
+      ("MOLNIYA", "boat", "Paul Eisenschneider"), ("Type_021_1", "boat", "Max Reichpietsch"),
+      ("Type_021_1", "boat", "Richard Sorge")],
+     [{"day": 1, "to": {"lat": 54.50, "lon": 11.45}, "until_day": 6}]),
+    ("red_vm_mpk", "1-я флотилия ННА: малые противолодочные корабли (Пархим)", "red", 54.30, 13.95,
+     [("ALBATROS", "corvette", "Parchim"), ("ALBATROS", "corvette", "Perleberg"), ("ALBATROS", "corvette", "Wismar")],
+     [{"day": 1, "to": {"lat": 54.45, "lon": 12.40}, "until_day": 8}]),
+    # десантные отряды: идут к району высадки, высадка - в день landing части (sealift)
+    ("red_land_nva", "Десантный отряд ННА (корабли Фрош I)", "red", 54.25, 12.20,
+     [("BDK_775", "landing", "Hoyerswerda"), ("BDK_775", "landing", "Hagenow"), ("BDK_775", "landing", "Frankfurt (Oder)"),
+      ("ALBATROS", "corvette", "Bad Doberan")],
+     [{"day": 2, "to": {"lat": 54.50, "lon": 11.30}, "until_day": 6}]),
+    ("red_land_pl", "Десантный отряд ВМФ Польши (Польноцны)", "red", 54.80, 14.00,
+     [("BDK_775", "landing", "ORP Grunwald"), ("BDK_775", "landing", "ORP Brda"), ("BDK_775", "landing", "ORP Narew"),
+      ("BDK_775", "landing", "ORP Warta")],
+     [{"day": 2, "to": {"lat": 54.25, "lon": 11.05}, "until_day": 7}]),
+    ("blue_bm_s148", "3. Schnellbootgeschwader (тип 148)", "blue", 54.52, 10.45,
+     [("La_Combattante_II", "boat", "S41 Tiger"), ("La_Combattante_II", "boat", "S42 Iltis"),
+      ("La_Combattante_II", "boat", "S43 Luchs"), ("La_Combattante_II", "boat", "S44 Marder")],
+     [{"day": 1, "to": {"lat": 54.48, "lon": 11.40}, "until_day": 8}]),
+    ("blue_bm_s143", "7. Schnellbootgeschwader (тип 143)", "blue", 54.62, 10.30,
+     [("La_Combattante_II", "boat", "S61 Albatros"), ("La_Combattante_II", "boat", "S62 Falke"),
+      ("La_Combattante_II", "boat", "S63 Geier"), ("La_Combattante_II", "boat", "S64 Bussard")],
+     [{"day": 2, "to": {"lat": 54.55, "lon": 11.20}, "until_day": 8}]),
+    ("blue_bm_dd", "Эсминцы бундесмарине (тип 101)", "blue", 54.55, 10.25,
+     [("Leander_gun_andromeda", "destroyer", "Hamburg D181"), ("Leander_gun_andromeda", "destroyer", "Schleswig-Holstein D182")],
+     [{"day": 1, "to": {"lat": 54.55, "lon": 10.90}, "until_day": 8}]),
+    ("blue_dk_corv", "Корветы ВМС Дании (Нильс Юэль)", "blue", 54.57, 11.35,
+     [("Leander_gun_andromeda", "corvette", "Niels Juel F354"), ("Leander_gun_andromeda", "corvette", "Olfert Fischer F355"),
+      ("La_Combattante_II", "boat", "Willemoes P540")], None),
+    # Северное море: подкрепления REFORGER морем (2-я бронетанковая дивизия США, III АК) и ежедневный подвоз
+    ("blue_reforger", "Транспорты REFORGER (Северное море)", "blue", 54.10, 7.20,
+     [("Dry_cargo_ship_1", "transport", "USNS Algol"), ("Dry_cargo_ship_1", "transport", "USNS Bellatrix"),
+      ("HandyWind", "transport", "USNS Denebola"), ("PERRY", "frigate", "USS Halyburton FFG-40")],
+     [{"day": 4, "to": {"lat": 53.75, "lon": 8.30}, "until_day": 12}]),
+    ("blue_convoy_nordsee", "Конвой снабжения (Бремерхафен)", "blue", 53.80, 8.20,
+     [("Dry_cargo_ship_2", "transport", "Транспорт №1"), ("Ship_Tilde_Supply", "transport", "Транспорт №2")], None),
+]
+NAVAL_BASES = {"red": [{"name": "Росток-Варнемюнде", "lat": 54.18, "lon": 12.09},
+                       {"name": "Пенемюнде", "lat": 54.14, "lon": 13.77}],
+               "blue": [{"name": "Киль", "lat": 54.36, "lon": 10.16}, {"name": "Ольпениц", "lat": 54.67, "lon": 10.04},
+                        {"name": "Вильгельмсхафен", "lat": 53.52, "lon": 8.15}]}
+SEA_LANES = [("lane_bremerhaven", "blue", "Bremerhaven", "blue_convoy_nordsee", 1500)]   # т/сутки - ОЦЕНКА
+ASM_STOCK = {"blue": {"count": 32, "per_day": 2, "type": "AS.34 Kormoran (Tornado MFG)", "note": "ОЦЕНКА"},
+             "red": {"count": 24, "per_day": 2, "type": "Х-25 / Х-29 (Су-17М4 MFG-28, Су-24)", "note": "ОЦЕНКА"}}
+# морские десанты ОВД (планы - Ютландия и датские острова; на этой карте - побережье Шлезвиг-Гольштейна у Фемарнского
+# пролива, обход LANDJUT с моря): (id, имя, район высадки, день, корабли, состав, ПВО)
+LANDINGS = [
+    ("red_land_mschr29", "Мотострелковый полк 29 ННА 'Эрнст Шнеллер' (морской десант)", "Fehmarn", 3, "red_land_nva",
+     [("BTR_70", 30, "APC"), ("PT_76", 10, "MBT")], {"Strela_10M3": 2}),
+    ("red_land_7ddm", "7-я Лужицкая дивизия морского десанта (Польша)", "OldenburgH", 4, "red_land_pl",
+     [("BTR_60", 40, "APC"), ("PT_76", 20, "MBT"), ("T_55", 10, "MBT")], {"ZSU_23_4_Shilka": 4}),
+]
+SEALIFT_REINF = {"us2ad1": ("Bremerhaven", 6), "us2ad2": ("Bremerhaven", 7)}   # подкрепления морем (REFORGER)
+
+# ---------------------------------------------------------------- артиллерия как род войск (redfront.artillery)
+# ОВД - артиллерия армий и фронта (34-я гв. артдивизия, Потсдам; армейские артбригады), НАТО - корпусная артиллерия
+# (американские FA Brigades, немецкие артиллерийские командования, британская 1-я артбригада). Составы - ОЦЕНКИ
+# порядка величины (в модели - часть бригады); 2С7 и M110 в DCS нет - Мста-С / Акация и M109. Мста-С - с 1989.
+ART = [   # (id, имя, сторона, {тип: число}, поддерживает, снаряды ammo_k, контрбатарейная cb_k)
+    ("red_art_34ad", "34-я гв. артиллерийская дивизия (Потсдам)", "red", {"SAU_Msta": 12, "Uragan_BM_27": 8}, "red_47gtd", 1.0, 1.0),
+    ("red_art_2gta", "Артбригада 2-й гв. танковой армии", "red", {"SAU_Akatsia": 12, "Grad_URAL": 6}, "red_94gmsd", 1.0, 1.0),
+    ("red_art_3ua", "Артбригада 3-й ударной армии", "red", {"SAU_Akatsia": 12, "Uragan_BM_27": 6}, "red_10gtd", 1.0, 1.0),
+    ("red_art_8gva", "Артбригада 8-й гв. армии", "red", {"SAU_Msta": 12, "Uragan_BM_27": 6}, "red_39gmsd", 1.0, 1.0),
+    ("red_art_1gta", "Артбригада 1-й гв. танковой армии", "red", {"SAU_Akatsia": 12, "Grad_URAL": 6}, "red_20gmsd", 1.0, 1.0),
+    ("red_art_20gva", "Артбригада 20-й гв. армии", "red", {"SAU_Akatsia": 12, "Grad_URAL": 6}, "red_35msd", 1.0, 1.0),
+    ("red_art_nva5", "Артиллерийский полк 5 ННА", "red", {"SAU_Akatsia": 10, "Grad_URAL": 6}, "red_nva8msd", 1.0, 0.9),
+    ("red_art_nva3", "Артиллерийский полк 3 ННА", "red", {"SAU_Akatsia": 10, "Grad_URAL": 6}, "red_nva4msd", 1.0, 0.9),
+    ("blue_art_vii", "Артиллерия VII корпуса США (72-я и 210-я FA Bde)", "blue", {"M_109": 12, "MLRS": 6}, "blue_us1ad1", 1.0, 1.2),
+    ("blue_art_v", "Артиллерия V корпуса США (41-я и 42-я FA Bde)", "blue", {"M_109": 12, "MLRS": 6}, "blue_us3ad1", 1.0, 1.2),
+    ("blue_art_uk", "1-я артиллерийская бригада (Великобритания)", "blue", {"M_109": 12}, "blue_uk7", 1.0, 1.1),
+    ("blue_art_artkdo1", "Artilleriekommando 1 (I нем. АК)", "blue", {"M_109": 12}, "blue_pzb2", 1.0, 1.1),
+    ("blue_art_artkdo3", "Artilleriekommando 3 (III нем. АК)", "blue", {"M_109": 12}, "blue_pzgb4", 1.0, 1.1),
+    ("blue_art_landjut", "Артиллерия LANDJUT (6-я панцергренадерская дивизия)", "blue", {"M_109": 10}, "blue_pzgb18", 1.0, 1.1),
+]
+ART_BEHIND_DEG = 0.13   # ОЦЕНКА: огневые позиции - ~9 км в тыл от поддерживаемой части (ОВД - восток, НАТО - запад)
+# морская авиация НАТО (MFG 1, MFG 2 - Ягель, Эггебек; на карте этих аэродромов нет - Киль): удары по кораблям
+NAVAL_AIR = [("mfg1", "MFG 1 и MFG 2 бундесмарине (Tornado IDS; базы Ягель и Эггебек - вне карты, в сценарии - Киль)",
+              "blue", "fighter_bomber", "Tornado_IDS", "Kiel", 16, 450, 1982)]
 
 
 def dist_km(a, b):
@@ -807,6 +901,18 @@ NATO_ATTACK = {
 }
 
 
+# Сценарий учений ОВД ("Щит", "Семь дней до Рейна", 1979): войну начинает НАТО, ОВД отражает удар и на 3-и сутки
+# переходит во встречное наступление к Рейну. Политически доктрина ОВД - оборонительная, военно-технически -
+# наступательная: отражение агрессии - разгромом противника на его территории. Без ядерной фазы (её в модели нет).
+WP_EXERCISE_PRESET = 1985
+WP_EXERCISE = {
+    "title": "1985: сценарий учений ОВД (удар НАТО, на 3-и сутки - контрнаступление ОВД)",
+    "posture": {"blue": "offense", "red": "defense"},
+    "posture_days": [{"from_day": 3, "red": "offense", "blue": "defense"}],
+    "_about_posture": "НАТО наступает 1-2 сутки (как в учениях ОВД), с 3-х - контрнаступление ОВД по осям фронта",
+}
+
+
 def main() -> None:
     ham = json.loads((DATA / "sector_hamburg.json").read_text(encoding="utf-8"))
     places = {}
@@ -838,7 +944,7 @@ def main() -> None:
     terrain = Germany()
     RELOC.update(relocate(terrain))
     air = air_all()
-    based = {base for *_x, base, _n, _r, _s in air}
+    based = {base for *_x, base, _n, _r, _s in air} | {a[5] for a in NAVAL_AIR}
     airbases = {}
     for side, names in AIRBASES.items():
         for n in names + [x for x in EXTRA_AIRFIELDS[side] if x in based]:
@@ -865,6 +971,9 @@ def main() -> None:
         "depots": [{"id": i, "name": n, "side": s, "place": p} for i, n, s, p in DEPOTS],
         "bridges": ham["bridges"],
         "_about_targets": "Склады - в пунктах (уточняются зондом карты), мосты через Эльбу - из сектора Гамбурга.",
+        "naval_bases": NAVAL_BASES,
+        "sea_lanes": [{"id": i, "side": sd, "port": pt, "convoy": cv, "t_per_day": t} for i, sd, pt, cv, t in SEA_LANES],
+        "asm_stock": ASM_STOCK,
         "ad_sites": sites,
         "_about_ad_sites": "Позиции объектовой ПВО по ярусам (long / medium / short) - ОЦЕНКА по правилам "
                            "tools/gen_germany.py (ad_sites), не документ: у аэродромов, покрытие красных аэродромов и "
@@ -916,8 +1025,34 @@ def main() -> None:
                near(la, lo, "blue"), day, None, note, MISSION + "; состав бригады - ОЦЕНКА")
     for uid, name, corps, tpl, place, day in REINF:
         comp, ad = NATO[tpl]
-        ground(f"blue_{uid}", f"{name} ({corps})", "blue", [(t, c, ROLE_OF[t]) for t, c in comp.items()], ad, place, day,
-               None, "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА", MISSION + " (вне карты); состав - ОЦЕНКА")
+        sea = SEALIFT_REINF.get(uid)
+        ground(f"blue_{uid}", f"{name} ({corps})", "blue", [(t, c, ROLE_OF[t]) for t, c in comp.items()], ad,
+               sea[0] if sea else place, sea[1] if sea else day, None,
+               "подкрепление морем (REFORGER): сила - по уцелевшим транспортам" if sea else
+               "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА", MISSION + " (вне карты); состав - ОЦЕНКА")
+        if sea:
+            units[-2 if ad else -1]["sealift"] = {"group": "blue_reforger", "kinds": ["AK"]}
+    # флот
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from naval_common import group as _ngroup
+    for uid, name, side, la, lo, ships, orders in NAVAL:
+        units.append(_ngroup(uid, name, side, la, lo, ships, source=MEMORY + "; состав и место - ОЦЕНКА",
+                             orders=orders, **({"quality": 1.1} if side == "blue" else {})))
+    for uid, name, place, day, grp, comp, ad in LANDINGS:   # морские десанты (sim.arrivals, naval.sealift)
+        ground(uid, name, "red", comp, ad, place, day, "north", "морской десант: сила - по уцелевшим десантным кораблям",
+               MEMORY + "; состав - ОЦЕНКА")
+        units[-2 if ad else -1]["sealift"] = {"group": grp, "kinds": ["LS"]}
+        units[-2 if ad else -1]["arrives_jitter"] = 0
+    # артиллерия как род войск
+    for aid, name, side, comp, sup, ammo, cb in ART:
+        su = next(u for u in units if u["id"] == sup)
+        p_ = places[su["route"][0]]
+        units.append({"id": aid, "name": name, "side": side, "role": "art_bde", "state": "deployed", "supports": sup,
+                      "pos": {"lat": p_["lat"], "lon": round(p_["lon"] + (ART_BEHIND_DEG if side == "red" else -ART_BEHIND_DEG), 4)},
+                      "ammo_k": ammo, "cb_k": cb,
+                      "composition": [{"type": t, "count": n, "role": "artillery"} for t, n in comp.items()],
+                      "source": MEMORY + "; состав - ОЦЕНКА", "estimate": True})
     for sid, name, kind, la, lo in BLUE_SAMS + RED_SAMS:
         tpl = {"hawk": HAWK, "patriot": PATRIOT, "kub": KUB}[kind]
         side = "red" if (sid, name, kind, la, lo) in RED_SAMS else "blue"
@@ -943,6 +1078,14 @@ def main() -> None:
             units.append({"id": uid, "name": name, "side": side, "role": role, "base": base.lower().replace(" ", "_"),
                           "type": typ, "count": count, "strike_radius_km": radius,
                           "source": src + "; число и радиус действия - ОЦЕНКА", "estimate": True})
+        for uid, name, side, role, typ, base, count, radius, since in NAVAL_AIR:
+            if year >= since:
+                units.append({"id": uid, "name": name, "side": side, "role": role, "base": base.lower(), "type": typ,
+                              "count": count, "strike_radius_km": radius, "source": MEMORY + "; число - ОЦЕНКА",
+                              "estimate": True, "tasks_only": ["strike_ship"]})
+        if year < 1989:                          # Мста-С в ГСВГ - с 1989; раньше - Акация
+            units = [dict(u, composition=[dict(c, type="SAU_Akatsia") if c["type"] == "SAU_Msta" else c for c in u["composition"]])
+                     if u.get("role") == "art_bde" else u for u in units]
         for u in units:
             if u.get("base"):
                 assert u["base"] in airbases, u
@@ -980,6 +1123,12 @@ def main() -> None:
             oob_n["preset"] = {"title": NATO_ATTACK["title"], "year": year, "date": date}
             oob_n["variants"] = [dict(NATO_ATTACK, name="nato_attack", assembly=["red", "blue"])]
             (DATA / f"oob_germany_{year}_nato.json").write_text(json.dumps(oob_n, ensure_ascii=False, indent=1), encoding="utf-8")
+        if year == WP_EXERCISE_PRESET:          # сценарий учений ОВД: удар НАТО, затем встречное наступление ОВД
+            oob_w = json.loads(text)
+            oob_w["preset"] = {"title": WP_EXERCISE["title"], "year": year, "date": date}
+            oob_w["variants"] = [dict(WP_EXERCISE, name="wp_exercise", assembly=["red", "blue"],
+                                      objectives={"blue": NATO_ATTACK["objectives"]["blue"]})]
+            (DATA / f"oob_germany_{year}_wp.json").write_text(json.dumps(oob_w, ensure_ascii=False, indent=1), encoding="utf-8")
         n_air = sum(1 for u in units if u.get("count") is not None and u.get("type"))
         print(f"пресет {year} ({date}): авиачастей {n_air}")
     n_g = sum(1 for u in units if u["role"] == "maneuver")

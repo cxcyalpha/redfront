@@ -1716,7 +1716,7 @@
    "role": "maneuver",
    "state": "defend",
    "route": [
-    "BadSegeberg"
+    "Neustadt"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -3699,7 +3699,7 @@
    "role": "maneuver",
    "state": "defend",
    "route": [
-    "Bremen"
+    "Bremerhaven"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -4138,7 +4138,7 @@
    "role": "maneuver",
    "state": "pending",
    "route": [
-    "Bremen"
+    "Bremerhaven"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -4157,9 +4157,15 @@
    ],
    "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
    "estimate": true,
-   "arrives_day": 7,
+   "arrives_day": 6,
    "arrives_jitter": 1,
-   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+   "note": "подкрепление морем (REFORGER): сила - по уцелевшим транспортам",
+   "sealift": {
+    "group": "blue_reforger",
+    "kinds": [
+     "AK"
+    ]
+   }
   },
   {
    "id": "blue_us2ad1_pvo",
@@ -4190,7 +4196,7 @@
    "role": "maneuver",
    "state": "pending",
    "route": [
-    "Bremen"
+    "Bremerhaven"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -4209,9 +4215,15 @@
    ],
    "source": "OOB-миссия Germany_OOB_1989 (метка) (вне карты); состав - ОЦЕНКА",
    "estimate": true,
-   "arrives_day": 8,
+   "arrives_day": 7,
    "arrives_jitter": 1,
-   "note": "подкрепление из-за пределов карты; срок ввода - ОЦЕНКА"
+   "note": "подкрепление морем (REFORGER): сила - по уцелевшим транспортам",
+   "sealift": {
+    "group": "blue_reforger",
+    "kinds": [
+     "AK"
+    ]
+   }
   },
   {
    "id": "blue_us2ad2_pvo",
@@ -4389,6 +4401,931 @@
     }
    ],
    "source": "состав ПВО - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bf_sag",
+   "name": "Отряд кораблей Балтийского флота",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.95,
+    "lon": 13.6
+   },
+   "composition": [
+    {
+     "type": "REZKY",
+     "count": 3,
+     "role": "frigate",
+     "names": [
+      "Неукротимый",
+      "Пылкий",
+      "Дружный"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 54.6,
+      "lon": 11.9
+     },
+     "until_day": 8
+    }
+   ]
+  },
+  {
+   "id": "red_vm_rk",
+   "name": "6-я флотилия ННА: ракетные катера",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.28,
+    "lon": 12.05
+   },
+   "composition": [
+    {
+     "type": "MOLNIYA",
+     "count": 3,
+     "role": "boat",
+     "names": [
+      "Rudolf Egelhofer",
+      "Fritz Globig",
+      "Paul Eisenschneider"
+     ]
+    },
+    {
+     "type": "Type_021_1",
+     "count": 2,
+     "role": "boat",
+     "names": [
+      "Max Reichpietsch",
+      "Richard Sorge"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 54.5,
+      "lon": 11.45
+     },
+     "until_day": 6
+    }
+   ]
+  },
+  {
+   "id": "red_vm_mpk",
+   "name": "1-я флотилия ННА: малые противолодочные корабли (Пархим)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.3,
+    "lon": 13.95
+   },
+   "composition": [
+    {
+     "type": "ALBATROS",
+     "count": 3,
+     "role": "corvette",
+     "names": [
+      "Parchim",
+      "Perleberg",
+      "Wismar"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 54.45,
+      "lon": 12.4
+     },
+     "until_day": 8
+    }
+   ]
+  },
+  {
+   "id": "red_land_nva",
+   "name": "Десантный отряд ННА (корабли Фрош I)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.25,
+    "lon": 12.2
+   },
+   "composition": [
+    {
+     "type": "BDK_775",
+     "count": 3,
+     "role": "landing",
+     "names": [
+      "Hoyerswerda",
+      "Hagenow",
+      "Frankfurt (Oder)"
+     ]
+    },
+    {
+     "type": "ALBATROS",
+     "count": 1,
+     "role": "corvette",
+     "names": [
+      "Bad Doberan"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 2,
+     "to": {
+      "lat": 54.5,
+      "lon": 11.3
+     },
+     "until_day": 6
+    }
+   ]
+  },
+  {
+   "id": "red_land_pl",
+   "name": "Десантный отряд ВМФ Польши (Польноцны)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.8,
+    "lon": 14.0
+   },
+   "composition": [
+    {
+     "type": "BDK_775",
+     "count": 4,
+     "role": "landing",
+     "names": [
+      "ORP Grunwald",
+      "ORP Brda",
+      "ORP Narew",
+      "ORP Warta"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 2,
+     "to": {
+      "lat": 54.25,
+      "lon": 11.05
+     },
+     "until_day": 7
+    }
+   ]
+  },
+  {
+   "id": "blue_bm_s148",
+   "name": "3. Schnellbootgeschwader (тип 148)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.52,
+    "lon": 10.45
+   },
+   "composition": [
+    {
+     "type": "La_Combattante_II",
+     "count": 4,
+     "role": "boat",
+     "names": [
+      "S41 Tiger",
+      "S42 Iltis",
+      "S43 Luchs",
+      "S44 Marder"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 54.48,
+      "lon": 11.4
+     },
+     "until_day": 8
+    }
+   ],
+   "quality": 1.1
+  },
+  {
+   "id": "blue_bm_s143",
+   "name": "7. Schnellbootgeschwader (тип 143)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.62,
+    "lon": 10.3
+   },
+   "composition": [
+    {
+     "type": "La_Combattante_II",
+     "count": 4,
+     "role": "boat",
+     "names": [
+      "S61 Albatros",
+      "S62 Falke",
+      "S63 Geier",
+      "S64 Bussard"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 2,
+     "to": {
+      "lat": 54.55,
+      "lon": 11.2
+     },
+     "until_day": 8
+    }
+   ],
+   "quality": 1.1
+  },
+  {
+   "id": "blue_bm_dd",
+   "name": "Эсминцы бундесмарине (тип 101)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.55,
+    "lon": 10.25
+   },
+   "composition": [
+    {
+     "type": "Leander_gun_andromeda",
+     "count": 2,
+     "role": "destroyer",
+     "names": [
+      "Hamburg D181",
+      "Schleswig-Holstein D182"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 1,
+     "to": {
+      "lat": 54.55,
+      "lon": 10.9
+     },
+     "until_day": 8
+    }
+   ],
+   "quality": 1.1
+  },
+  {
+   "id": "blue_dk_corv",
+   "name": "Корветы ВМС Дании (Нильс Юэль)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.57,
+    "lon": 11.35
+   },
+   "composition": [
+    {
+     "type": "Leander_gun_andromeda",
+     "count": 2,
+     "role": "corvette",
+     "names": [
+      "Niels Juel F354",
+      "Olfert Fischer F355"
+     ]
+    },
+    {
+     "type": "La_Combattante_II",
+     "count": 1,
+     "role": "boat",
+     "names": [
+      "Willemoes P540"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 1.1
+  },
+  {
+   "id": "blue_reforger",
+   "name": "Транспорты REFORGER (Северное море)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 54.1,
+    "lon": 7.2
+   },
+   "composition": [
+    {
+     "type": "Dry_cargo_ship_1",
+     "count": 2,
+     "role": "transport",
+     "names": [
+      "USNS Algol",
+      "USNS Bellatrix"
+     ]
+    },
+    {
+     "type": "HandyWind",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "USNS Denebola"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 1,
+     "role": "frigate",
+     "names": [
+      "USS Halyburton FFG-40"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "orders": [
+    {
+     "day": 4,
+     "to": {
+      "lat": 53.75,
+      "lon": 8.3
+     },
+     "until_day": 12
+    }
+   ],
+   "quality": 1.1
+  },
+  {
+   "id": "blue_convoy_nordsee",
+   "name": "Конвой снабжения (Бремерхафен)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 53.8,
+    "lon": 8.2
+   },
+   "composition": [
+    {
+     "type": "Dry_cargo_ship_2",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №1"
+     ]
+    },
+    {
+     "type": "Ship_Tilde_Supply",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №2"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true,
+   "quality": 1.1
+  },
+  {
+   "id": "red_land_mschr29",
+   "name": "Мотострелковый полк 29 ННА 'Эрнст Шнеллер' (морской десант)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Fehmarn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_70",
+     "count": 30,
+     "role": "APC"
+    },
+    {
+     "type": "PT_76",
+     "count": 10,
+     "role": "MBT"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "north",
+   "note": "морской десант: сила - по уцелевшим десантным кораблям",
+   "sealift": {
+    "group": "red_land_nva",
+    "kinds": [
+     "LS"
+    ]
+   }
+  },
+  {
+   "id": "red_land_mschr29_pvo",
+   "name": "Войсковая ПВО: Мотострелковый полк 29 ННА 'Эрнст Шнеллер' (морской десант)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_land_mschr29",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_land_7ddm",
+   "name": "7-я Лужицкая дивизия морского десанта (Польша)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "OldenburgH"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_60",
+     "count": 40,
+     "role": "APC"
+    },
+    {
+     "type": "PT_76",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "T_55",
+     "count": 10,
+     "role": "MBT"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 0,
+   "axis": "north",
+   "note": "морской десант: сила - по уцелевшим десантным кораблям",
+   "sealift": {
+    "group": "red_land_pl",
+    "kinds": [
+     "LS"
+    ]
+   }
+  },
+  {
+   "id": "red_land_7ddm_pvo",
+   "name": "Войсковая ПВО: 7-я Лужицкая дивизия морского десанта (Польша)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_land_7ddm",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "состав ПВО - OOB-миссия (сумма ПВО полков)",
+   "estimate": true
+  },
+  {
+   "id": "red_art_34ad",
+   "name": "34-я гв. артиллерийская дивизия (Потсдам)",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_47gtd",
+   "pos": {
+    "lat": 52.29,
+    "lon": 11.538
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.0,
+   "composition": [
+    {
+     "type": "SAU_Msta",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "Uragan_BM_27",
+     "count": 8,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_art_2gta",
+   "name": "Артбригада 2-й гв. танковой армии",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_94gmsd",
+   "pos": {
+    "lat": 53.635,
+    "lon": 11.531
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.0,
+   "composition": [
+    {
+     "type": "SAU_Akatsia",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "Grad_URAL",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_art_3ua",
+   "name": "Артбригада 3-й ударной армии",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_10gtd",
+   "pos": {
+    "lat": 52.272,
+    "lon": 11.985
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.0,
+   "composition": [
+    {
+     "type": "SAU_Akatsia",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "Uragan_BM_27",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_art_8gva",
+   "name": "Артбригада 8-й гв. армии",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_39gmsd",
+   "pos": {
+    "lat": 50.947,
+    "lon": 10.831
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.0,
+   "composition": [
+    {
+     "type": "SAU_Msta",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "Uragan_BM_27",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_art_1gta",
+   "name": "Артбригада 1-й гв. танковой армии",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_20gmsd",
+   "pos": {
+    "lat": 51.34,
+    "lon": 12.505
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.0,
+   "composition": [
+    {
+     "type": "SAU_Akatsia",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "Grad_URAL",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_art_20gva",
+   "name": "Артбригада 20-й гв. армии",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_35msd",
+   "pos": {
+    "lat": 52.924,
+    "lon": 12.934
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.0,
+   "composition": [
+    {
+     "type": "SAU_Akatsia",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "Grad_URAL",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_art_nva5",
+   "name": "Артиллерийский полк 5 ННА",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_nva8msd",
+   "pos": {
+    "lat": 53.43,
+    "lon": 11.321
+   },
+   "ammo_k": 1.0,
+   "cb_k": 0.9,
+   "composition": [
+    {
+     "type": "SAU_Akatsia",
+     "count": 10,
+     "role": "artillery"
+    },
+    {
+     "type": "Grad_URAL",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_art_nva3",
+   "name": "Артиллерийский полк 3 ННА",
+   "side": "red",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "red_nva4msd",
+   "pos": {
+    "lat": 50.978,
+    "lon": 11.159
+   },
+   "ammo_k": 1.0,
+   "cb_k": 0.9,
+   "composition": [
+    {
+     "type": "SAU_Akatsia",
+     "count": 10,
+     "role": "artillery"
+    },
+    {
+     "type": "Grad_URAL",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_art_vii",
+   "name": "Артиллерия VII корпуса США (72-я и 210-я FA Bde)",
+   "side": "blue",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "blue_us1ad1",
+   "pos": {
+    "lat": 49.677,
+    "lon": 12.026
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.2,
+   "composition": [
+    {
+     "type": "M_109",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "MLRS",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_art_v",
+   "name": "Артиллерия V корпуса США (41-я и 42-я FA Bde)",
+   "side": "blue",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "blue_us3ad1",
+   "pos": {
+    "lat": 50.751,
+    "lon": 9.141
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.2,
+   "composition": [
+    {
+     "type": "M_109",
+     "count": 12,
+     "role": "artillery"
+    },
+    {
+     "type": "MLRS",
+     "count": 6,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_art_uk",
+   "name": "1-я артиллерийская бригада (Великобритания)",
+   "side": "blue",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "blue_uk7",
+   "pos": {
+    "lat": 53.111,
+    "lon": 9.28
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.1,
+   "composition": [
+    {
+     "type": "M_109",
+     "count": 12,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_art_artkdo1",
+   "name": "Artilleriekommando 1 (I нем. АК)",
+   "side": "blue",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "blue_pzb2",
+   "pos": {
+    "lat": 52.269,
+    "lon": 10.391
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.1,
+   "composition": [
+    {
+     "type": "M_109",
+     "count": 12,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_art_artkdo3",
+   "name": "Artilleriekommando 3 (III нем. АК)",
+   "side": "blue",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "blue_pzgb4",
+   "pos": {
+    "lat": 51.541,
+    "lon": 9.785
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.1,
+   "composition": [
+    {
+     "type": "M_109",
+     "count": 12,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_art_landjut",
+   "name": "Артиллерия LANDJUT (6-я панцергренадерская дивизия)",
+   "side": "blue",
+   "role": "art_bde",
+   "state": "deployed",
+   "supports": "blue_pzgb18",
+   "pos": {
+    "lat": 54.074,
+    "lon": 9.852
+   },
+   "ammo_k": 1.0,
+   "cb_k": 1.1,
+   "composition": [
+    {
+     "type": "M_109",
+     "count": 10,
+     "role": "artillery"
+    }
+   ],
+   "source": "по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true
   },
   {
@@ -6258,6 +7195,21 @@
    "strike_radius_km": 300,
    "source": "по памяти - проверить; часть - ОЦЕНКА; число и радиус действия - ОЦЕНКА",
    "estimate": true
+  },
+  {
+   "id": "mfg1",
+   "name": "MFG 1 и MFG 2 бундесмарине (Tornado IDS; базы Ягель и Эггебек - вне карты, в сценарии - Киль)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "kiel",
+   "type": "Tornado_IDS",
+   "count": 16,
+   "strike_radius_km": 450,
+   "source": "по памяти - проверить; число - ОЦЕНКА",
+   "estimate": true,
+   "tasks_only": [
+    "strike_ship"
+   ]
   }
  ],
  "variants": [

@@ -105,6 +105,25 @@
    "airport": "Bandar Lengeh",
    "side": "red",
    "military": true
+  },
+  "kish_intl": {
+   "name": "Kish Intl",
+   "airport": "Kish Intl",
+   "side": "red",
+   "military": true
+  },
+  "kerman": {
+   "name": "Kerman",
+   "airport": "Kerman",
+   "side": "red",
+   "military": true
+  },
+  "al_dhafra_afb": {
+   "name": "Al Dhafra AFB",
+   "airport": "Al Dhafra AFB",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
   }
  },
  "carriers": {

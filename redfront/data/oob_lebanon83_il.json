@@ -1,0 +1,1904 @@
+{
+ "_about": "Ливан, декабрь 1983: палубная авиация США против Сирии (гипотетическая кампания). tools/gen_lebanon83.py.",
+ "theatre": "syria",
+ "preset": {
+  "title": "Декабрь 1983: Ливан, США и Израиль против Сирии (гипотетически)",
+  "year": 1983,
+  "date": "1983-12-04"
+ },
+ "date": "1983-12-04",
+ "doctrine": {
+  "red": "arab"
+ },
+ "countries": {
+  "red": "Syria",
+  "blue": "USA"
+ },
+ "units": [
+  {
+   "id": "blue_usmc",
+   "name": "24-й экспедиционный отряд МП США (аэропорт)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "BeirutAirport"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 5,
+     "role": "MBT"
+    },
+    {
+     "type": "AAV7",
+     "count": 12,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_usmc_pvo",
+   "name": "Войсковая ПВО: 24-й экспедиционный отряд МП США (аэропорт)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_usmc",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Soldier stinger",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_laf8",
+   "name": "8-я бригада ливанской армии (Сук-эль-Гарб)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "SoukElGharb"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 60,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_laf4",
+   "name": "4-я бригада ливанской армии (Баабда)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Baabda"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 60,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_laf5",
+   "name": "5-я бригада ливанской армии (Хальде)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Khalde"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 60,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_psp",
+   "name": "Ополчение ПСП (друзы, Алей)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Aley"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 8,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "shouf"
+  },
+  {
+   "id": "red_psp_pvo",
+   "name": "Войсковая ПВО: Ополчение ПСП (друзы, Алей)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_psp",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_psp2",
+   "name": "Ополчение ПСП (друзы, Бейт-эд-Дин)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "BeitEdDine"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 8,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "coast"
+  },
+  {
+   "id": "red_psp2_pvo",
+   "name": "Войсковая ПВО: Ополчение ПСП (друзы, Бейт-эд-Дин)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_psp2",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_amal",
+   "name": "Ополчение 'Амаль' (Западный Бейрут)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "WestBeirut"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 8,
+     "role": "MBT"
+    },
+    {
+     "type": "BTR-60",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_amal_pvo",
+   "name": "Войсковая ПВО: Ополчение 'Амаль' (Западный Бейрут)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_amal",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Ural_375_ZU_23",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_sy_bhamdoun",
+   "name": "Сирийская бригада (Бхамдун)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Bhamdoun"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "shouf"
+  },
+  {
+   "id": "red_sy_bhamdoun_pvo",
+   "name": "Войсковая ПВО: Сирийская бригада (Бхамдун)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_sy_bhamdoun",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_sy_sofar",
+   "name": "Сирийская бригада (Софар)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Sofar"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "shouf"
+  },
+  {
+   "id": "red_sy_sofar_pvo",
+   "name": "Войсковая ПВО: Сирийская бригада (Софар)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_sy_sofar",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_sy_chtaura",
+   "name": "Сирийская бригада (Штора)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Chtaura"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_sy_chtaura_pvo",
+   "name": "Войсковая ПВО: Сирийская бригада (Штора)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_sy_chtaura",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_sy_reserve",
+   "name": "Сирийская бронетанковая бригада (резерв)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Damascus"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 20,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 0,
+   "axis": "coast"
+  },
+  {
+   "id": "red_sy_reserve_pvo",
+   "name": "Войсковая ПВО: Сирийская бронетанковая бригада (резерв)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_sy_reserve",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7div",
+   "name": "7-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Quneitra"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7div_pvo",
+   "name": "Войсковая ПВО: 7-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5div",
+   "name": "5-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sanamayn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5div_pvo",
+   "name": "Войсковая ПВО: 5-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_5div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_9div",
+   "name": "9-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kiswah"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_9div_pvo",
+   "name": "Войсковая ПВО: 9-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_9div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_idf_awali",
+   "name": "Группа ЦАХАЛ на реке Авали (Сидон)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sidon"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_idf_awali_pvo",
+   "name": "Войсковая ПВО: Группа ЦАХАЛ на реке Авали (Сидон)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_idf_awali",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_idf_bekaa",
+   "name": "Группа ЦАХАЛ в Южной Бекаа (Хасбайя)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Hasbaya"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_idf_bekaa_pvo",
+   "name": "Войсковая ПВО: Группа ЦАХАЛ в Южной Бекаа (Хасбайя)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_idf_bekaa",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_idf_golan",
+   "name": "Дивизия ЦАХАЛ на Голанах",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Katzrin"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "Merkava_Mk4",
+     "count": 80,
+     "role": "MBT"
+    },
+    {
+     "type": "M-60",
+     "count": 110,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 160,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_idf_golan_pvo",
+   "name": "Войсковая ПВО: Дивизия ЦАХАЛ на Голанах",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_idf_golan",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "M48 Chaparral",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "red_metn_kub_1",
+   "name": "Батарея Куб (Метн)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.86,
+    "lon": 35.8
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_kub_1",
+   "name": "Батарея Куб (Бекаа)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.8,
+    "lon": 35.86
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_bekaa_s75",
+   "name": "Дивизион С-75 (Бекаа)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.84,
+    "lon": 35.92
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_shouf_osa",
+   "name": "Батарея Оса (Софар)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.8,
+    "lon": 35.72
+   },
+   "composition": [
+    {
+     "type": "Osa 9A33 ln",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s200_dumayr",
+   "name": "Дивизион С-200 (Думайр)",
+   "side": "red",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.62,
+    "lon": 36.7
+   },
+   "composition": [
+    {
+     "type": "RLS_19J6",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "RPC_5N62V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-200_Launcher",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s200_shinshar",
+   "name": "Дивизион С-200 (Шиншар)",
+   "side": "red",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.62,
+    "lon": 36.72
+   },
+   "composition": [
+    {
+     "type": "RLS_19J6",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "RPC_5N62V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-200_Launcher",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s75_1",
+   "name": "Дивизион С-75 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.6,
+    "lon": 36.2
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s75_2",
+   "name": "Дивизион С-75 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.42,
+    "lon": 36.35
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s125_1",
+   "name": "Дивизион С-125 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.48,
+    "lon": 36.15
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_kub_1",
+   "name": "Батарея Куб (Катана)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.4,
+    "lon": 36.05
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s200_dumayr2",
+   "name": "Дивизион С-200 (Дамаск)",
+   "side": "red",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.45,
+    "lon": 36.45
+   },
+   "composition": [
+    {
+     "type": "RLS_19J6",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "RPC_5N62V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-200_Launcher",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_haifa",
+   "name": "Батарея HAWK (Хайфа)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.82,
+    "lon": 35.05
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_hawk_galil",
+   "name": "Батарея HAWK (Верхняя Галилея)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.0,
+    "lon": 35.55
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_hawk_golan",
+   "name": "Батарея HAWK (Голаны)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.05,
+    "lon": 35.72
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_hawk_ramat",
+   "name": "Батарея HAWK (Рамат-Давид)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 32.68,
+    "lon": 35.2
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true,
+   "nation": "il"
+  },
+  {
+   "id": "blue_csg_forrestal",
+   "name": "Авианосная ударная группа USS Forrestal",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.95,
+    "lon": 35.2
+   },
+   "composition": [
+    {
+     "type": "Forrestal",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Forrestal (CV-59)"
+     ]
+    },
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Ticonderoga (CG-47)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Clark (FFG-11)",
+      "USS John A. Moore (FFG-19)"
+     ]
+    }
+   ],
+   "abbr": "CSG 59",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_csg_vinson",
+   "name": "Авианосная ударная группа USS Carl Vinson",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.72,
+    "lon": 35.1
+   },
+   "composition": [
+    {
+     "type": "VINSON",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Carl Vinson (CVN-70)"
+     ]
+    },
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Belknap (CG-26)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Aubrey Fitch (FFG-34)",
+      "USS Clifton Sprague (FFG-16)"
+     ]
+    }
+   ],
+   "abbr": "CSG 70",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_arg_tarawa",
+   "name": "Десантная группа USS Tarawa",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.83,
+    "lon": 35.36
+   },
+   "composition": [
+    {
+     "type": "LHA_Tarawa",
+     "count": 1,
+     "role": "carrier",
+     "names": [
+      "USS Tarawa (LHA-1)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 2,
+     "role": "frigate",
+     "names": [
+      "USS Estocin (FFG-15)",
+      "USS Wadsworth (FFG-9)"
+     ]
+    }
+   ],
+   "abbr": "ARG",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_fac_tartus",
+   "name": "Ракетные катера ВМС Сирии (Тартус)",
+   "side": "red",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.95,
+    "lon": 35.8
+   },
+   "composition": [
+    {
+     "type": "Type_021_1",
+     "count": 3,
+     "role": "boat",
+     "names": [
+      "Катер пр. 205 №1",
+      "Катер пр. 205 №2",
+      "Катер пр. 205 №3"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА; пр. 205 'Оса' - в DCS Type 021-1 (китайская копия 'Осы')",
+   "estimate": true
+  },
+  {
+   "id": "blue_convoy_jounieh",
+   "name": "Транспорты снабжения (Джуния)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 34.05,
+    "lon": 35.45
+   },
+   "composition": [
+    {
+     "type": "Dry_cargo_ship_1",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №1"
+     ]
+    },
+    {
+     "type": "Ship_Tilde_Supply",
+     "count": 1,
+     "role": "transport",
+     "names": [
+      "Транспорт №2"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_vf14",
+   "name": "VF-14, VF-32 (F-14A, Forrestal)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "cv62",
+   "type": "F_14A_135_GR",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_va_ind",
+   "name": "VA-15, VA-87 (A-7E, Forrestal)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv62",
+   "type": "FA_18C_hornet",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; A-7E в DCS нет - F/A-18C (допущение)",
+   "estimate": true
+  },
+  {
+   "id": "us_va176",
+   "name": "VA-176 (A-6E, Forrestal)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv62",
+   "type": "A6E",
+   "count": 10,
+   "strike_radius_km": 600,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_e2_ind",
+   "name": "VAW-122 (E-2C)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "cv62",
+   "type": "E_2C",
+   "count": 4,
+   "strike_radius_km": 1000,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_s3_ind",
+   "name": "VS-28 (S-3A, заправщик)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "cv62",
+   "type": "S_3B_Tanker",
+   "count": 4,
+   "strike_radius_km": 800,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; S-3A - S-3B Tanker",
+   "estimate": true
+  },
+  {
+   "id": "us_vf11",
+   "name": "VF-11, VF-31 (F-14A, Carl Vinson)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "cv67",
+   "type": "F_14A_135_GR",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_va_jfk",
+   "name": "VA-15 (A-7E, Carl Vinson)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv67",
+   "type": "FA_18C_hornet",
+   "count": 12,
+   "strike_radius_km": 500,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; A-7E в DCS нет - F/A-18C (допущение)",
+   "estimate": true
+  },
+  {
+   "id": "us_va75",
+   "name": "VA-75, VA-85 (A-6E, Carl Vinson)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "cv67",
+   "type": "A6E",
+   "count": 20,
+   "strike_radius_km": 600,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_e2_jfk",
+   "name": "VAW-126 (E-2C)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "cv67",
+   "type": "E_2C",
+   "count": 4,
+   "strike_radius_km": 1000,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "us_hmm",
+   "name": "HMM-162 (CH-46/AH-1T, Тарава)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "lha1",
+   "type": "AH_1W",
+   "count": 4,
+   "strike_radius_km": 120,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; AH-1T - AH-1W",
+   "estimate": true
+  },
+  {
+   "id": "us_f4_incirlik",
+   "name": "Ротация F-4E ВВС США в Европе (Инджирлик)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "incirlik",
+   "type": "F_4E_45MC",
+   "count": 18,
+   "strike_radius_km": 700,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; ОЦЕНКА: эскадрилья F-4E на ротации (в 1983 - учебные ротации в Инджирлике)",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ]
+  },
+  {
+   "id": "us_f15_incirlik",
+   "name": "Ротация F-15C (36-е крыло, Битбург; Инджирлик)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "incirlik",
+   "type": "F_15C",
+   "count": 18,
+   "strike_radius_km": 800,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; гипотетически: прикрытие ударов от истребителей Сирии",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ]
+  },
+  {
+   "id": "us_kc135_akrotiri",
+   "name": "Заправщики KC-135A (Акротири)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "akrotiri",
+   "type": "KC_135",
+   "count": 4,
+   "strike_radius_km": 1500,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; ОЦЕНКА",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ]
+  },
+  {
+   "id": "s_mig21",
+   "name": "Истребительные эскадрильи (МиГ-21)",
+   "side": "red",
+   "role": "fighter",
+   "base": "al_dumayr",
+   "type": "MiG_21Bis",
+   "count": 24,
+   "strike_radius_km": 250,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig23",
+   "name": "Истребительные эскадрильи (МиГ-23МЛ)",
+   "side": "red",
+   "role": "fighter",
+   "base": "shayrat",
+   "type": "MiG_23MLD",
+   "count": 24,
+   "strike_radius_km": 300,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_su22",
+   "name": "Истребительно-бомбардировочные эскадрильи (Су-22)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "marj_ruhayyil",
+   "type": "Su_17M4",
+   "count": 18,
+   "strike_radius_km": 300,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_gazelle",
+   "name": "Вертолёты 'Газель'",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "rayak",
+   "type": "SA342M",
+   "count": 10,
+   "strike_radius_km": 120,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "s_mig23bn",
+   "name": "Истребительно-бомбардировочные эскадрильи (МиГ-23БН; в DCS - МиГ-23МЛД)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "hama",
+   "type": "MiG_23MLD",
+   "count": 12,
+   "strike_radius_km": 300,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-23БН в DCS нет",
+   "estimate": true
+  },
+  {
+   "id": "s_mig25",
+   "name": "Эскадрилья МиГ-25ПД (Тияс)",
+   "side": "red",
+   "role": "interceptor",
+   "base": "tiyas",
+   "type": "MiG_25PD",
+   "count": 8,
+   "strike_radius_km": 400,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f15",
+   "name": "106-я и 133-я эскадрильи (F-15A)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "tel_nof",
+   "type": "F_15C",
+   "count": 30,
+   "strike_radius_km": 600,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; F-15A - F-15C",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "nation": "il"
+  },
+  {
+   "id": "i_f16",
+   "name": "110-я и 117-я эскадрильи (F-16A)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "ramat_david",
+   "type": "F_16C_50",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "nation": "il"
+  },
+  {
+   "id": "i_f4",
+   "name": "69-я, 119-я, 201-я эскадрильи (F-4E 'Курнас')",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzor",
+   "type": "F_4E_45MC",
+   "count": 40,
+   "strike_radius_km": 500,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "nation": "il"
+  },
+  {
+   "id": "i_a4",
+   "name": "Эскадрильи A-4N/H 'Скайхок' (102, 109, 115, 116, 140)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzerim",
+   "type": "A_4E_C",
+   "count": 40,
+   "strike_radius_km": 400,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; мод A-4E-C: без мода части в кампании нет",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "mod": "a4ec",
+   "nation": "il"
+  },
+  {
+   "id": "i_e2c",
+   "name": "192-я эскадрилья (E-2C)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "palmachim",
+   "type": "E_2C",
+   "count": 2,
+   "strike_radius_km": 1000,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "nation": "il"
+  },
+  {
+   "id": "i_tank",
+   "name": "120-я эскадрилья (Боинг 707 - заправщик)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "ben_gurion",
+   "type": "KC_135",
+   "count": 2,
+   "strike_radius_km": 2000,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; 707 - KC-135",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "nation": "il"
+  },
+  {
+   "id": "i_ah1",
+   "name": "160-я и 161-я эскадрильи (AH-1S)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "megiddo",
+   "type": "AH_1W",
+   "count": 16,
+   "strike_radius_km": 150,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА; AH-1S - AH-1W",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "nation": "il"
+  },
+  {
+   "id": "i_uh1",
+   "name": "Вертолётная эскадрилья (UH-1/Белл 212)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "rosh_pina",
+   "type": "UH_1H",
+   "count": 12,
+   "strike_radius_km": 150,
+   "source": "Hammel / Lehman, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ],
+   "nation": "il"
+  }
+ ],
+ "variants": [
+  {
+   "name": "base",
+   "title": "Декабрь 1983: Ливан, США и Израиль против Сирии (гипотетически)",
+   "posture": {
+    "red": "offense",
+    "blue": "defense"
+   },
+   "task_rules": {
+    "blue": {
+     "strike_factory": {
+      "off": true,
+      "why": "удары - только по войскам и ПВО в Ливане"
+     }
+    },
+    "red": {
+     "strike_ship": {
+      "off": true,
+      "why": "Сирия в 1983 г. по кораблям 6-го флота не била (огонь ЗРК - только по самолётам)"
+     }
+    }
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 1,
+  "note": "ОЦЕНКА"
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "Стрела-1, ЗСУ-23-4",
+     "composition": [
+      {
+       "type": "Strela_1_9P31",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "ZSU_23_4_Shilka",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "A-7E (нет в DCS - F/A-18C), линкор New Jersey, многонациональные силы (Франция - 'Супер Этандары' с 'Клемансо', Великобритания - 'Буканиры' из Акротири: в DCS их нет), F-111 (нет в DCS)."
+}

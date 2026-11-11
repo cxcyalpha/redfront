@@ -6,7 +6,8 @@ data/oob_tankerwar88.json.
 кораблей (SAG Bravo, Charlie, Delta) уничтожили иранские нефтяные платформы Сассан и Сирри (базы КСИР), в бою
 потоплены фрегат Sahand, катер Joshan и катера КСИР, повреждён фрегат Sabalan; иранские F-4 атаковали корабли США;
 палубная авиация (USS Enterprise, CVW-11: A-6E с Harpoon, A-7E) - удары по кораблям. Удары по территории Ирана
-(материк) - запрещены политикой; ОАЭ и Оман - нейтральны.
+(материк) - запрещены политикой; ОАЭ и Оман - нейтральны. Гипотетически: у ВВС США - аэродром Аль-Дафра в ОАЭ
+(кампания не только с палубы).
 
 Источники (общие, по памяти - проверять): D. Crist, "The Twilight War" (2012); B. Wise / H. Peniston, отчёты ВМС
 о Praying Mantis; L. Zatarain, "Tanker War" (2008). Координаты, составы и числа - ОЦЕНКИ. Типы DCS - замены:
@@ -42,7 +43,11 @@ SUPPLY_ENTRY = {"red": ["BandarAbbas"], "blue": ["Fujairah"]}
 OFF_LIMITS = {"blue": ["BandarAbbas", "BandarLengeh", "Jask", "Qeshm", "Kish"],   # материк и крупные острова Ирана - нет
               "red": ["Fujairah", "Khasab", "RasAlKhaimah", "Dubai", "AbuDhabi"]}  # нейтральные - нет
 
-AIRBASES = {"red": ["Bandar Abbas Intl", "Havadarya", "Shiraz Intl", "Bandar Lengeh"], "blue": []}
+AIRBASES = {"red": ["Bandar Abbas Intl", "Havadarya", "Shiraz Intl", "Bandar Lengeh", "Kish Intl", "Kerman"],
+            # гипотетически: ОАЭ дают ВВС США аэродром Аль-Дафра (в 1988 нейтральны; ВВС США там - с 1990-х). E-3A
+            # и заправщики ВВС США над заливом в 1987-88 летали из Саудовской Аравии (ELF-One) - за краем карты
+            "blue": ["Al Dhafra AFB"]}
+EXTERNAL = {"Al Dhafra AFB"}
 CARRIERS = {   # (имя, класс pydcs, широта, долгота, TACAN, позывной, ICLS, МГц, группа флота)
     "cvn65": ("USS Enterprise (CVN-65)", "VINSON", 25.10, 57.40, 65, "ENT", 5, 127.5, "blue_csg_enterprise"),
 }
@@ -100,6 +105,14 @@ AIR = [   # (id, имя, сторона, роль, тип, база, число,
     ("us_vaw117", "VAW-117 (E-2C)", "blue", "awacs", "E_2C", "cvn65", 4, 1000, ""),
     ("us_vaq135", "VAQ-135 (EA-6B, Enterprise)", "blue", "ew", "A6E", "cvn65", 4, 600, "EA-6B Prowler - в DCS нет, модель A-6E; постановщик помех вне зоны ПВО"),
     ("us_ka6", "VA-95 (KA-6D, заправщик)", "blue", "tanker", "S_3B_Tanker", "cvn65", 4, 800, "KA-6D - S-3B Tanker"),
+    ("us_f15_dhafra", "Эскадрилья F-15C ВВС США (Аль-Дафра)", "blue", "fighter", "F_15C", "Al Dhafra AFB", 12, 800,
+     "гипотетически: прикрытие конвоев и групп кораблей"),
+    ("us_f4_dhafra", "Эскадрилья F-4E ВВС США (Аль-Дафра)", "blue", "fighter_bomber", "F_4E_45MC", "Al Dhafra AFB", 12, 700,
+     "гипотетически"),
+    ("us_e3_dhafra", "E-3A ВВС США (ELF-One; в сценарии - Аль-Дафра)", "blue", "awacs", "E_3A", "Al Dhafra AFB", 2, 1500,
+     "реально - из Саудовской Аравии"),
+    ("us_kc135_dhafra", "Заправщики KC-135A (Аль-Дафра)", "blue", "tanker", "KC_135", "Al Dhafra AFB", 4, 1500, "ОЦЕНКА"),
+    ("ir_f4_kerman", "Эскадрилья F-4D (Керман)", "red", "fighter_bomber", "F_4E_45MC", "Kerman", 6, 500, "F-4D - F-4E"),
     ("ir_tfb9_f4", "91-я тактическая эскадрилья (F-4E, Бандар-Аббас)", "red", "fighter_bomber", "F_4E_45MC",
      "Bandar Abbas Intl", 12, 400, "в строю - часть машин (эмбарго)"),
     ("ir_f14", "Эскадрилья F-14A (Шираз)", "red", "fighter", "F_14A_95_GR", "Shiraz Intl", 6, 500,
@@ -124,7 +137,8 @@ def main() -> None:
     for side, names in AIRBASES.items():
         for n in names:
             assert n in terrain.airports, n
-            airbases[bid_of(n)] = {"name": n, "airport": n, "side": side, "military": True}
+            airbases[bid_of(n)] = {"name": n, "airport": n, "side": side, "military": True,
+                                   **({"supply_external": True} if n in EXTERNAL else {})}
     carriers = {cid: {"name": n, "side": "blue", "ship": t, "lat": la, "lon": lo, "tacan": tc, "tacan_id": tid,
                       "icls": icls or None, "freq": f, "naval": nv, "estimate": True}
                 for cid, (n, t, la, lo, tc, tid, icls, f, nv) in CARRIERS.items()}
@@ -155,7 +169,8 @@ def main() -> None:
         assert b in airbases or b in carriers, (uid, base)
         units.append({"id": uid, "name": name, "side": side, "role": role, "base": b, "type": typ, "count": count,
                       "strike_radius_km": radius, "source": SRC + "; число и радиус - ОЦЕНКА" + (f"; {note}" if note else ""),
-                      "estimate": True, **({"quality": 0.8} if side == "red" else {})})
+                      "estimate": True, **({"quality": 0.8} if side == "red" else {}),
+                      **({"tasks_not": ["fleet_cap"]} if b in airbases and side == "blue" else {})})   # прикрытие флота - палубные
     oob = {
         "_about": "Танкерная война, апрель 1988: ВМС США против ВМС Ирана и КСИР (Praying Mantis). tools/gen_tankerwar88.py.",
         "theatre": "persiangulf",

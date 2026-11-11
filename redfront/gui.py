@@ -28,14 +28,15 @@ WEB = Path(__file__).parent / "web"
 CTYPES = {".js": "application/javascript", ".css": "text/css", ".png": "image/png", ".txt": "text/plain; charset=utf-8"}
 SECTOR = "sector_hamburg.json"     # кампании без поля sector (созданы до театра всей карты)
 THEATRES = [   # (id, сектор, состав сил, название)
-    ("germany", "sector_germany.json", "oob_germany.json", "Вся карта: фронт от Балтики до Хофа (1989)"),
+    ("germany", "sector_germany.json", "oob_germany.json", "Германия: Холодная война (фронт от Балтики до Хофа)"),
     ("caucasus", "sector_caucasus.json", "oob_caucasus.json", "Кавказ: август 2008 (Южная Осетия и Абхазия)"),
     ("abkhazia", "sector_abkhazia.json", "oob_abkhazia.json", "Абхазия: сентябрь 1993 (штурм Сухуми)"),
     ("karabakh", "sector_karabakh.json", "oob_karabakh.json", "Карабах: сентябрь 2020 (44-дневная война, условная география)"),
-    ("kyiv22", "sector_kyiv22.json", "oob_kyiv22.json", "Киев: февраль 2022 (первые недели, условная география на карте Германии)"),
-    ("kharkiv22", "sector_kharkiv22.json", "oob_kharkiv22.json", "Харьков: сентябрь 2022 (контрнаступление ВСУ, условная география на карте Германии)"),
+    ("kyiv22", "sector_kyiv22.json", "oob_kyiv22.json", "Киев: февраль 2022 (первые недели, реальная география в масштабе на карте Германии)"),
+    ("kharkiv22", "sector_kharkiv22.json", "oob_kharkiv22.json", "Харьков: сентябрь 2022 (контрнаступление ВСУ, реальная география в масштабе на карте Германии)"),
     ("syria", "sector_syria.json", "oob_syria.json", "Сирия - Ливан: июнь 1982 (долина Бекаа)"),
-    ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы США, гипотетическая)"),
+    ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы и базы США, гипотетическая)"),
+    ("lebanon83_il", "sector_lebanon83_il.json", "oob_lebanon83_il.json", "Ливан: декабрь 1983 (США и Израиль против Сирии, гипотетическая)"),
     ("vietnam72", "sector_vietnam72.json", "oob_vietnam72.json", "Вьетнам: апрель 1972 (условная география на карте Кавказа, авианосцы)"),
     ("vietnam72_lb2", "sector_vietnam72_lb2.json", "oob_vietnam72_lb2.json", "Вьетнам: декабрь 1972, Лайнбэкер-2 (условная география на карте Кавказа)"),
     ("golan73", "sector_golan73.json", "oob_golan73.json", "Голаны: октябрь 1973 (Война Судного дня)"),
@@ -367,7 +368,7 @@ def _tokens(text: str) -> set[str]:
 
 # страна части -> короткие имена стран DCS (Livery.countries) и слова страны в имени ливреи (ливреи без списка стран)
 NATION_CC = {"su": ["SUN", "RUS"], "gdr": ["GDR"], "frg": ["GER"], "uk": ["UK"], "be": ["BEL"], "nl": ["NETH"],
-             "ca": ["CAN"], "us": ["USA"]}
+             "ca": ["CAN"], "us": ["USA"], "il": ["ISR"]}
 CC_WORDS = {"SYR": ["syria", "saaf"], "ISR": ["israel", "iaf", "idf"], "IRN": ["iran", "iriaf"], "IRQ": ["iraq"],
             "VNM": ["vietnam", "vpaf"], "SUN": ["ussr", "soviet", "vvs", "cccp"], "RUS": ["russia", "vvs", "vks"],
             "GDR": ["nva", "gdr", "ddr", "lsk"], "GER": ["luftwaffe", "germany", "bundes"], "USA": ["usaf", "usn", "usmc", "ang"],

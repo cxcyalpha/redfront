@@ -1111,8 +1111,8 @@
    "role": "sam_long",
    "state": "deployed",
    "pos": {
-    "lat": 52.56,
-    "lon": 11.78
+    "lat": 51.6793,
+    "lon": 10.1076
    },
    "composition": [
     {
@@ -1146,8 +1146,8 @@
    "role": "sam_medium",
    "state": "deployed",
    "pos": {
-    "lat": 52.57,
-    "lon": 12.25
+    "lat": 51.6575,
+    "lon": 10.7991
    },
    "composition": [
     {
@@ -1176,8 +1176,8 @@
    "role": "sam_short",
    "state": "deployed",
    "pos": {
-    "lat": 52.42,
-    "lon": 12.1
+    "lat": 51.4469,
+    "lon": 10.5778
    },
    "composition": [
     {
@@ -1196,8 +1196,8 @@
    "role": "sam_long",
    "state": "deployed",
    "pos": {
-    "lat": 53.12,
-    "lon": 12.3
+    "lat": 52.469,
+    "lon": 10.8749
    },
    "composition": [
     {
@@ -1231,8 +1231,8 @@
    "role": "sam_medium",
    "state": "deployed",
    "pos": {
-    "lat": 52.45,
-    "lon": 12.68
+    "lat": 51.4462,
+    "lon": 11.4312
    },
    "composition": [
     {
@@ -1261,8 +1261,8 @@
    "role": "sam_short",
    "state": "deployed",
    "pos": {
-    "lat": 52.77,
-    "lon": 13.3
+    "lat": 51.8723,
+    "lon": 12.3446
    },
    "composition": [
     {
@@ -1281,8 +1281,8 @@
    "role": "sam_short",
    "state": "deployed",
    "pos": {
-    "lat": 53.13,
-    "lon": 12.2
+    "lat": 52.4916,
+    "lon": 10.7278
    },
    "composition": [
     {
@@ -1302,8 +1302,8 @@
    "state": "deployed",
    "station": "leer3",
    "pos": {
-    "lat": 52.45,
-    "lon": 12.62
+    "lat": 51.4509,
+    "lon": 11.3429
    },
    "composition": [
     {
@@ -1328,8 +1328,8 @@
    "state": "deployed",
    "station": "zhitel",
    "pos": {
-    "lat": 52.76,
-    "lon": 13.18
+    "lat": 51.8668,
+    "lon": 12.168
    },
    "composition": [
     {
@@ -1349,8 +1349,8 @@
    "state": "deployed",
    "station": "krasukha",
    "pos": {
-    "lat": 53.1,
-    "lon": 12.25
+    "lat": 52.4432,
+    "lon": 10.8013
    },
    "composition": [
     {
@@ -1375,8 +1375,8 @@
    "state": "deployed",
    "station": "bukovel",
    "pos": {
-    "lat": 52.62,
-    "lon": 11.95
+    "lat": 51.755,
+    "lon": 10.3579
    },
    "composition": [
     {
@@ -1396,8 +1396,8 @@
    "state": "deployed",
    "station": "notch",
    "pos": {
-    "lat": 52.59,
-    "lon": 12.3
+    "lat": 51.6833,
+    "lon": 10.8727
    },
    "composition": [
     {
@@ -1417,8 +1417,8 @@
    "state": "deployed",
    "missile": "iskander",
    "pos": {
-    "lat": 53.2,
-    "lon": 12.1
+    "lat": 52.6031,
+    "lon": 10.581
    },
    "composition": [
     {
@@ -1438,8 +1438,8 @@
    "state": "deployed",
    "missile": "gmlrs",
    "pos": {
-    "lat": 52.55,
-    "lon": 12.15
+    "lat": 51.6357,
+    "lon": 10.6519
    },
    "composition": [
     {
@@ -1459,8 +1459,8 @@
    "state": "deployed",
    "missile": "tochka",
    "pos": {
-    "lat": 52.4,
-    "lon": 11.7
+    "lat": 51.4483,
+    "lon": 9.9892
    },
    "composition": [
     {
@@ -1477,7 +1477,7 @@
    "name": "Бомбардировочный полк (Су-34)",
    "side": "red",
    "role": "fighter_bomber",
-   "base": "wittstock",
+   "base": "ummern",
    "type": "Su_34",
    "count": 12,
    "strike_radius_km": 400,
@@ -1489,7 +1489,7 @@
    "name": "Штурмовой полк (Су-25СМ3; в DCS - Су-25)",
    "side": "red",
    "role": "attack",
-   "base": "finow",
+   "base": "falkenberg",
    "type": "Su_25",
    "count": 12,
    "strike_radius_km": 250,
@@ -1501,7 +1501,7 @@
    "name": "Истребительный полк (Су-35С; в DCS - Су-27)",
    "side": "red",
    "role": "fighter",
-   "base": "wittstock",
+   "base": "ummern",
    "type": "Su_27",
    "count": 12,
    "strike_radius_km": 500,
@@ -1518,7 +1518,7 @@
    "name": "Полк Су-30СМ (в DCS - Су-27)",
    "side": "red",
    "role": "fighter",
-   "base": "finow",
+   "base": "falkenberg",
    "type": "Su_27",
    "count": 8,
    "strike_radius_km": 500,
@@ -1535,7 +1535,7 @@
    "name": "Вертолёты Ка-52 (в DCS - Ка-50)",
    "side": "red",
    "role": "attack_helo",
-   "base": "templin",
+   "base": "schonefeld",
    "type": "Ka_50",
    "count": 10,
    "strike_radius_km": 150,
@@ -1547,7 +1547,7 @@
    "name": "Вертолёты Ми-28Н",
    "side": "red",
    "role": "attack_helo",
-   "base": "templin",
+   "base": "schonefeld",
    "type": "Mi_28N",
    "count": 8,
    "strike_radius_km": 150,
@@ -1559,7 +1559,7 @@
    "name": "Вертолёты Ми-8АМТШ",
    "side": "red",
    "role": "transport_helo",
-   "base": "templin",
+   "base": "schonefeld",
    "type": "Mi_8MT",
    "count": 12,
    "strike_radius_km": 200,
@@ -1571,7 +1571,7 @@
    "name": "114-я бригада тактической авиации (МиГ-29А)",
    "side": "blue",
    "role": "fighter",
-   "base": "braunschweig",
+   "base": "gutersloh",
    "type": "MiG_29_Fulcrum",
    "count": 5,
    "strike_radius_km": 300,
@@ -1583,7 +1583,7 @@
    "name": "114-я бригада тактической авиации (МиГ-29С)",
    "side": "blue",
    "role": "fighter",
-   "base": "braunschweig",
+   "base": "gutersloh",
    "type": "MiG_29S",
    "count": 5,
    "strike_radius_km": 300,
@@ -1601,7 +1601,7 @@
    "name": "831-я бригада тактической авиации (Су-27)",
    "side": "blue",
    "role": "fighter",
-   "base": "hannover",
+   "base": "norvenich",
    "type": "Su_27",
    "count": 8,
    "strike_radius_km": 500,
@@ -1619,7 +1619,7 @@
    "name": "299-я бригада тактической авиации (Су-25)",
    "side": "blue",
    "role": "attack",
-   "base": "hannover",
+   "base": "norvenich",
    "type": "Su_25",
    "count": 10,
    "strike_radius_km": 250,
@@ -1631,7 +1631,7 @@
    "name": "7-я бригада тактической авиации (Су-24М)",
    "side": "blue",
    "role": "bomber",
-   "base": "celle",
+   "base": "dusseldorf",
    "type": "Su_24M",
    "count": 8,
    "strike_radius_km": 400,
@@ -1643,7 +1643,7 @@
    "name": "Армейская авиация (Ми-24)",
    "side": "blue",
    "role": "attack_helo",
-   "base": "gardelegen",
+   "base": "rinteln",
    "type": "Mi_24P",
    "count": 8,
    "strike_radius_km": 150,
@@ -1655,7 +1655,7 @@
    "name": "Армейская авиация (Ми-8)",
    "side": "blue",
    "role": "transport_helo",
-   "base": "gardelegen",
+   "base": "rinteln",
    "type": "Mi_8MT",
    "count": 8,
    "strike_radius_km": 200,
@@ -1670,8 +1670,8 @@
    "state": "deployed",
    "supports": "red_izium_3mrd",
    "pos": {
-    "lat": 52.4478,
-    "lon": 12.6938
+    "lat": 51.414,
+    "lon": 11.6778
    },
    "ammo_k": 0.6,
    "cb_k": 1.0,
@@ -1698,8 +1698,8 @@
    "state": "deployed",
    "supports": "red_1gta_kup",
    "pos": {
-    "lat": 52.7248,
-    "lon": 13.3784
+    "lat": 51.7882,
+    "lon": 12.0035
    },
    "ammo_k": 0.6,
    "cb_k": 1.0,
@@ -1726,8 +1726,8 @@
    "state": "deployed",
    "supports": "red_lyman",
    "pos": {
-    "lat": 52.3071,
-    "lon": 13.0674
+    "lat": 51.2591,
+    "lon": 12.1359
    },
    "ammo_k": 0.8,
    "cb_k": 1.0,
@@ -1754,8 +1754,8 @@
    "state": "deployed",
    "supports": "red_11ac",
    "pos": {
-    "lat": 52.9134,
-    "lon": 12.1036
+    "lat": 52.392,
+    "lon": 10.7695
    },
    "ammo_k": 1.0,
    "cb_k": 1.0,
@@ -1782,8 +1782,8 @@
    "state": "deployed",
    "supports": "blue_92mb",
    "pos": {
-    "lat": 52.537,
-    "lon": 12.2385
+    "lat": 51.9533,
+    "lon": 10.8382
    },
    "ammo_k": 0.8,
    "cb_k": 1.3,
@@ -1810,8 +1810,8 @@
    "state": "deployed",
    "supports": "blue_93mb",
    "pos": {
-    "lat": 52.1674,
-    "lon": 12.4479
+    "lat": 51.0275,
+    "lon": 11.7256
    },
    "ammo_k": 0.8,
    "cb_k": 1.3,

@@ -1,177 +1,177 @@
 {
- "_about": "Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Условная география на карте Cold War Germany (Гамбург - Шлезвиг-Гольштейн); координаты - точки карты, имена - украинские и белорусские.",
+ "_about": "Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.84 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Nordholz, Luneburg, Chojna, Rinteln, Gutersloh, Dusseldorf, Giebelstadt. Рельеф и реки (Днепр) - карты, не Украины.",
  "theatre": "germany",
  "places": {
   "Mozyr": {
-   "lat": 54.32,
-   "lon": 10.13,
+   "lat": 53.0086,
+   "lon": 8.3731,
    "estimate": true,
    "side": "red"
   },
   "Khoiniki": {
-   "lat": 54.07,
-   "lon": 9.98,
+   "lat": 52.874,
+   "lon": 9.0053,
    "estimate": true,
    "side": "red"
   },
   "Gomel": {
-   "lat": 53.87,
-   "lon": 10.69,
+   "lat": 53.3368,
+   "lon": 9.8932,
    "estimate": true,
    "side": "red"
   },
   "Sumy": {
-   "lat": 53.85,
-   "lon": 10.93,
+   "lat": 52.0492,
+   "lon": 13.2131,
    "estimate": true,
    "side": "red"
   },
   "Chernobyl": {
-   "lat": 53.92,
-   "lon": 9.88,
+   "lat": 52.3522,
+   "lon": 9.2396,
    "estimate": true,
    "side": "blue"
   },
   "Ivankiv": {
-   "lat": 53.83,
-   "lon": 9.96,
+   "lat": 52.0745,
+   "lon": 8.9659,
    "estimate": true,
    "side": "blue"
   },
   "Hostomel": {
-   "lat": 53.647,
-   "lon": 9.704,
+   "lat": 51.7715,
+   "lon": 9.23,
    "estimate": true,
    "side": "blue"
   },
   "Bucha": {
-   "lat": 53.66,
-   "lon": 9.8,
+   "lat": 51.7463,
+   "lon": 9.2476,
    "estimate": true,
    "side": "blue"
   },
   "Irpin": {
-   "lat": 53.63,
-   "lon": 9.86,
+   "lat": 51.721,
+   "lon": 9.2738,
    "estimate": true,
    "side": "blue"
   },
   "Makariv": {
-   "lat": 53.75,
-   "lon": 9.65,
+   "lat": 51.6705,
+   "lon": 8.8945,
    "estimate": true,
    "side": "blue"
   },
   "Vyshhorod": {
-   "lat": 53.7,
-   "lon": 10.01,
+   "lat": 51.7715,
+   "lon": 9.4806,
    "estimate": true,
    "side": "blue"
   },
   "Kyiv": {
-   "lat": 53.55,
-   "lon": 9.99,
+   "lat": 51.6621,
+   "lon": 9.5077,
    "estimate": true,
    "side": "blue"
   },
   "Chernihiv": {
-   "lat": 53.81,
-   "lon": 10.37,
+   "lat": 52.5458,
+   "lon": 10.1689,
    "estimate": true,
    "side": "blue"
   },
   "Konotop": {
-   "lat": 53.7,
-   "lon": 10.76,
+   "lat": 52.327,
+   "lon": 11.8297,
    "estimate": true,
    "side": "blue"
   },
   "Nizhyn": {
-   "lat": 53.63,
-   "lon": 10.69,
+   "lat": 52.1671,
+   "lon": 10.6911,
    "estimate": true,
    "side": "blue"
   },
   "Brovary": {
-   "lat": 53.67,
-   "lon": 10.24,
+   "lat": 51.7126,
+   "lon": 9.7404,
    "estimate": true,
    "side": "blue"
   },
   "Boryspil": {
-   "lat": 53.51,
-   "lon": 10.25,
+   "lat": 51.578,
+   "lon": 9.8796,
    "estimate": true,
    "side": "blue"
   },
   "Zhytomyr": {
-   "lat": 53.6,
-   "lon": 9.48,
+   "lat": 51.4938,
+   "lon": 7.9059,
    "estimate": true,
    "side": "blue"
   },
   "BilaTserkva": {
-   "lat": 53.48,
-   "lon": 9.7,
+   "lat": 51.1151,
+   "lon": 9.1697,
    "estimate": true,
    "side": "blue"
   },
   "Obukhiv": {
-   "lat": 53.36,
-   "lon": 10.21,
+   "lat": 51.376,
+   "lon": 9.5968,
    "estimate": true,
    "side": "blue"
   },
   "Lviv": {
-   "lat": 53.08,
-   "lon": 8.8,
+   "lat": 51.1488,
+   "lon": 6.7,
    "estimate": true,
    "side": "blue"
   }
  },
  "airbases": {
-  "kiel": {
-   "name": "Kiel",
-   "airport": "Kiel",
+  "nordholz": {
+   "name": "Nordholz",
+   "airport": "Nordholz",
    "side": "red",
    "military": true,
    "supply_external": true
   },
-  "lubeck": {
-   "name": "Lubeck",
-   "airport": "Lubeck",
+  "luneburg": {
+   "name": "Luneburg",
+   "airport": "Luneburg",
    "side": "red",
    "military": true,
    "supply_external": true
   },
-  "pinnow": {
-   "name": "Pinnow",
-   "airport": "Pinnow",
+  "chojna": {
+   "name": "Chojna",
+   "airport": "Chojna",
    "side": "red",
    "military": true,
    "supply_external": true
   },
-  "hamburg_finkenwerder": {
-   "name": "Hamburg Finkenwerder",
-   "airport": "Hamburg Finkenwerder",
+  "rinteln": {
+   "name": "Rinteln",
+   "airport": "Rinteln",
    "side": "blue",
    "military": true
   },
-  "celle": {
-   "name": "Celle",
-   "airport": "Celle",
+  "gutersloh": {
+   "name": "Gutersloh",
+   "airport": "Gutersloh",
    "side": "blue",
    "military": true
   },
-  "wunstorf": {
-   "name": "Wunstorf",
-   "airport": "Wunstorf",
+  "dusseldorf": {
+   "name": "Dusseldorf",
+   "airport": "Dusseldorf",
    "side": "blue",
    "military": true
   },
-  "hannover": {
-   "name": "Hannover",
-   "airport": "Hannover",
+  "giebelstadt": {
+   "name": "Giebelstadt",
+   "airport": "Giebelstadt",
    "side": "blue",
    "military": true
   }
@@ -394,8 +394,8 @@
     ]
    ],
    "source": "условно: середина участка Ирпень - Киев (взорван 25.02)",
-   "lat": 53.59,
-   "lon": 9.925
+   "lat": 51.6915,
+   "lon": 9.3908
   },
   {
    "id": "br_teteriv",
@@ -407,8 +407,8 @@
     ]
    ],
    "source": "условно: середина участка Чернобыль - Иванков",
-   "lat": 53.875,
-   "lon": 9.92
+   "lat": 52.2134,
+   "lon": 9.1028
   },
   {
    "id": "br_desna",
@@ -420,85 +420,85 @@
     ]
    ],
    "source": "условно: середина участка Чернигов - Бровары",
-   "lat": 53.74,
-   "lon": 10.305
+   "lat": 52.1292,
+   "lon": 9.9547
   }
  ],
  "ad_sites": [
   {
-   "id": "blue_ad_af_celle",
-   "name": "ПВО аэродрома Celle",
-   "side": "blue",
-   "tier": "short",
-   "covers": "af_celle",
-   "lat": 52.6039,
-   "lon": 10.0329,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "blue_ad_af_hamburg_finkenwerder",
-   "name": "ПВО аэродрома Hamburg Finkenwerder",
-   "side": "blue",
-   "tier": "short",
-   "covers": "af_hamburg_finkenwerder",
-   "lat": 53.5475,
-   "lon": 9.8357,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "blue_ad_af_hannover",
-   "name": "ПВО аэродрома Hannover",
-   "side": "blue",
-   "tier": "short",
-   "covers": "af_hannover",
-   "lat": 52.4671,
-   "lon": 9.7014,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "red_ad_af_kiel",
-   "name": "ПВО аэродрома Kiel",
+   "id": "red_ad_af_chojna",
+   "name": "ПВО аэродрома Chojna",
    "side": "red",
    "tier": "short",
-   "covers": "af_kiel",
-   "lat": 54.3667,
-   "lon": 10.1375,
+   "covers": "af_chojna",
+   "lat": 52.9322,
+   "lon": 14.4034,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "red_ad_af_lubeck",
-   "name": "ПВО аэродрома Lubeck",
-   "side": "red",
-   "tier": "short",
-   "covers": "af_lubeck",
-   "lat": 53.7999,
-   "lon": 10.7381,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "red_ad_af_pinnow",
-   "name": "ПВО аэродрома Pinnow",
-   "side": "red",
-   "tier": "short",
-   "covers": "af_pinnow",
-   "lat": 53.6212,
-   "lon": 11.5418,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "blue_ad_af_wunstorf",
-   "name": "ПВО аэродрома Wunstorf",
+   "id": "blue_ad_af_dusseldorf",
+   "name": "ПВО аэродрома Dusseldorf",
    "side": "blue",
    "tier": "short",
-   "covers": "af_wunstorf",
-   "lat": 52.4695,
-   "lon": 9.4368,
+   "covers": "af_dusseldorf",
+   "lat": 51.296,
+   "lon": 6.7838,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_giebelstadt",
+   "name": "ПВО аэродрома Giebelstadt",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_giebelstadt",
+   "lat": 49.6593,
+   "lon": 9.9762,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_gutersloh",
+   "name": "ПВО аэродрома Gutersloh",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_gutersloh",
+   "lat": 51.9337,
+   "lon": 8.317,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_luneburg",
+   "name": "ПВО аэродрома Luneburg",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_luneburg",
+   "lat": 53.2382,
+   "lon": 10.4451,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_nordholz",
+   "name": "ПВО аэродрома Nordholz",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_nordholz",
+   "lat": 53.758,
+   "lon": 8.6744,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_rinteln",
+   "name": "ПВО аэродрома Rinteln",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_rinteln",
+   "lat": 52.1881,
+   "lon": 9.055,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   }

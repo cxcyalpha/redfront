@@ -62,6 +62,12 @@ def main() -> None:
     units = []
     mig21 = 0
     for u in oob["units"]:
+        # флота, артбригад и морских десантов 1980-х в 1961 году нет (корабли DCS - 1968+; ОЦЕНКА: не моделируем)
+        if u.get("role") in ("naval", "art_bde") or u["id"].startswith("red_land") or u["id"] == "mfg1" \
+                or (u.get("attached_to") or "").startswith("red_land"):
+            continue
+        if u.get("sealift"):
+            u = {k: v for k, v in u.items() if k != "sealift"}
         if u.get("type"):                                 # авиачасть
             if u["role"] in DROP_ROLES:
                 continue

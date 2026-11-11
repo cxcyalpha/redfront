@@ -233,6 +233,33 @@ def arrivals(state: dict) -> list[str]:
     used: dict[str, int] = {}                    # полосы успеха, куда уже вводятся части этих суток
     for u in state["units"].values():
         if u.get("state") == "pending" and "route" in u and state["day"] >= u.get("arrives_day", 0):
+            if u.get("sealift"):                 # морем (десант, подкрепления): сила - по уцелевшим кораблям (naval.sealift)
+                from . import naval
+                k, why = naval.sealift(state, u)
+                if k < 0:                        # корабли ещё не дошли - высадка позже (не дольше SEALIFT_LATE_DAYS)
+                    u.setdefault("sealift_due", u.get("arrives_day", state["day"]))
+                    if state["day"] - u["sealift_due"] < naval.SEALIFT_LATE_DAYS:
+                        u["arrives_day"] = state["day"] + 1
+                        lines.append(f"{u['name']}: высадка откладывается - {why}.")
+                        continue
+                    k, why = 0.0, why + ", высадка отменена"
+                if k <= 0:
+                    u["state"] = "destroyed"
+                    for a in _attached(state, u):
+                        a["state"] = "destroyed"
+                    lines.append(f"{u['name']}: не доставлен - {why}.")
+                    continue
+                if k < 1.0:
+                    for c in u["composition"]:
+                        u["lost"][c["type"]] = max(u["lost"].get(c["type"], 0.0), c["count"] * (1.0 - k))
+                    lines.append(f"{u['name']}: доставлен морем частично ({k:.0%}) - {why}.")
+                u["state"] = "defend"
+                u["route"] = [u["route"][0]]
+                u["progress_km"] = 0.0
+                for a in _attached(state, u):
+                    a["state"] = "defend"
+                lines.append(f"{u['name']}: высадился в районе {u['route'][0]}.")
+                continue
             u["state"] = "defend"
             entry = ops.success_entry(state, u, used) if _sim(state, u["side"]).get("commit_in_success") else None
             if entry and entry != u["route"][0]:   # второй эшелон - в полосе успеха, а не в назначенном заранее районе

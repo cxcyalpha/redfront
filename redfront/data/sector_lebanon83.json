@@ -1,5 +1,31 @@
 {
- "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ.",
+ "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ. Театр - Ливан и запад Сирии до Латакии и Хамы; у США - авианосцы и наземные базы (Инджирлик, Акротири).",
+ "air_limits": {
+  "blue": [
+   "Latakia",
+   "Hama",
+   "Tartus"
+  ],
+  "red": [
+   "Adana",
+   "Cyprus",
+   "Haifa",
+   "Nahariya",
+   "Safed",
+   "Tiberias",
+   "KiryatShmona",
+   "Metula",
+   "Katzrin",
+   "Masada",
+   "Naqoura",
+   "Marjayoun",
+   "Tyre",
+   "Nabatieh",
+   "Hasbaya",
+   "Sidon",
+   "Jezzine"
+  ]
+ },
  "theatre": "syria",
  "places": {
   "BeirutAirport": {
@@ -122,17 +148,208 @@
    "estimate": true,
    "side": "red"
   },
+  "Byblos": {
+   "lat": 34.12,
+   "lon": 35.65,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tripoli": {
+   "lat": 34.43,
+   "lon": 35.84,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hermel": {
+   "lat": 34.39,
+   "lon": 36.39,
+   "estimate": true,
+   "side": "red"
+  },
+  "Qusayr": {
+   "lat": 34.51,
+   "lon": 36.58,
+   "estimate": true,
+   "side": "red"
+  },
+  "Tartus": {
+   "lat": 34.89,
+   "lon": 35.89,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hama": {
+   "lat": 35.13,
+   "lon": 36.75,
+   "estimate": true,
+   "side": "red"
+  },
+  "Latakia": {
+   "lat": 35.52,
+   "lon": 35.78,
+   "estimate": true,
+   "side": "red"
+  },
+  "Nabk": {
+   "lat": 34.02,
+   "lon": 36.73,
+   "estimate": true,
+   "side": "red"
+  },
   "Sidon": {
    "lat": 33.561,
    "lon": 35.371,
    "estimate": true,
-   "side": "blue"
+   "side": null,
+   "neutral": true
   },
   "Jezzine": {
    "lat": 33.544,
    "lon": 35.584,
    "estimate": true,
-   "side": "blue"
+   "side": null,
+   "neutral": true
+  },
+  "Haifa": {
+   "lat": 32.794,
+   "lon": 34.989,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Nahariya": {
+   "lat": 33.006,
+   "lon": 35.095,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Safed": {
+   "lat": 32.965,
+   "lon": 35.496,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Tiberias": {
+   "lat": 32.795,
+   "lon": 35.531,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "KiryatShmona": {
+   "lat": 33.207,
+   "lon": 35.57,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Metula": {
+   "lat": 33.278,
+   "lon": 35.578,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Katzrin": {
+   "lat": 32.993,
+   "lon": 35.693,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Masada": {
+   "lat": 33.233,
+   "lon": 35.753,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Naqoura": {
+   "lat": 33.118,
+   "lon": 35.14,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Marjayoun": {
+   "lat": 33.36,
+   "lon": 35.592,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Tyre": {
+   "lat": 33.271,
+   "lon": 35.196,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Nabatieh": {
+   "lat": 33.378,
+   "lon": 35.484,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Hasbaya": {
+   "lat": 33.398,
+   "lon": 35.685,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Rashaya": {
+   "lat": 33.501,
+   "lon": 35.843,
+   "estimate": true,
+   "side": "red"
+  },
+  "JoubJannine": {
+   "lat": 33.63,
+   "lon": 35.785,
+   "estimate": true,
+   "side": "red"
+  },
+  "Quneitra": {
+   "lat": 33.126,
+   "lon": 35.824,
+   "estimate": true,
+   "side": "red"
+  },
+  "Qatana": {
+   "lat": 33.437,
+   "lon": 36.08,
+   "estimate": true,
+   "side": "red"
+  },
+  "Kiswah": {
+   "lat": 33.36,
+   "lon": 36.24,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sanamayn": {
+   "lat": 33.07,
+   "lon": 36.18,
+   "estimate": true,
+   "side": "red"
+  },
+  "Adana": {
+   "lat": 37.0,
+   "lon": 35.33,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Cyprus": {
+   "lat": 34.67,
+   "lon": 33.04,
+   "estimate": true,
+   "side": null,
+   "neutral": true
   }
  },
  "airbases": {
@@ -177,6 +394,32 @@
    "airport": "Rayak",
    "side": "red",
    "military": true
+  },
+  "hama": {
+   "name": "Hama",
+   "airport": "Hama",
+   "side": "red",
+   "military": true
+  },
+  "tiyas": {
+   "name": "Tiyas",
+   "airport": "Tiyas",
+   "side": "red",
+   "military": true
+  },
+  "incirlik": {
+   "name": "Incirlik",
+   "airport": "Incirlik",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "akrotiri": {
+   "name": "Akrotiri",
+   "airport": "Akrotiri",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
   }
  },
  "carriers": {
@@ -322,22 +565,115 @@
    "Homs"
   ],
   [
+   "Jounieh",
+   "Byblos"
+  ],
+  [
+   "Byblos",
+   "Tripoli"
+  ],
+  [
+   "Tripoli",
+   "Tartus"
+  ],
+  [
+   "Tartus",
+   "Homs"
+  ],
+  [
+   "Tartus",
+   "Latakia"
+  ],
+  [
+   "Latakia",
+   "Hama"
+  ],
+  [
+   "Hama",
+   "Homs"
+  ],
+  [
+   "Baalbek",
+   "Hermel"
+  ],
+  [
+   "Hermel",
+   "Qusayr"
+  ],
+  [
+   "Qusayr",
+   "Homs"
+  ],
+  [
+   "Damascus",
+   "Nabk"
+  ],
+  [
+   "Nabk",
+   "Homs"
+  ],
+  [
+   "Tripoli",
+   "Hermel"
+  ],
+  [
    "Damour",
-   "Sidon"
+   "WestBeirut"
   ],
   [
-   "Sidon",
-   "Jezzine"
+   "BeitEdDine",
+   "Aley"
   ],
   [
-   "Jezzine",
-   "BeitEdDine"
+   "WestBeirut",
+   "Aley"
+  ],
+  [
+   "Aley",
+   "AinZhalta"
+  ],
+  [
+   "AinZhalta",
+   "Chtaura"
+  ],
+  [
+   "Rashaya",
+   "JoubJannine"
+  ],
+  [
+   "Rashaya",
+   "Qatana"
+  ],
+  [
+   "JoubJannine",
+   "Chtaura"
+  ],
+  [
+   "Quneitra",
+   "Qatana"
+  ],
+  [
+   "Quneitra",
+   "Sanamayn"
+  ],
+  [
+   "Qatana",
+   "Damascus"
+  ],
+  [
+   "Damascus",
+   "Kiswah"
+  ],
+  [
+   "Kiswah",
+   "Sanamayn"
   ]
  ],
  "supply_entry": {
   "red": [
    "Damascus",
-   "Homs"
+   "Homs",
+   "Hama"
   ],
   "blue": [
    "Jounieh"
@@ -348,9 +684,35 @@
    "Damascus",
    "Homs",
    "Masnaa",
-   "Baalbek"
+   "Baalbek",
+   "Tripoli",
+   "Hermel",
+   "Qusayr",
+   "Tartus",
+   "Hama",
+   "Latakia",
+   "Nabk",
+   "Rashaya",
+   "JoubJannine",
+   "Quneitra",
+   "Qatana",
+   "Kiswah",
+   "Sanamayn"
   ],
   "red": [
+   "Haifa",
+   "Nahariya",
+   "Safed",
+   "Tiberias",
+   "KiryatShmona",
+   "Metula",
+   "Katzrin",
+   "Masada",
+   "Naqoura",
+   "Marjayoun",
+   "Tyre",
+   "Nabatieh",
+   "Hasbaya",
    "Sidon",
    "Jezzine"
   ]
@@ -392,6 +754,12 @@
    "name": "Склады ПСП (Алей)",
    "side": "red",
    "place": "Aley"
+  },
+  {
+   "id": "red_depot_damascus",
+   "name": "Склад снабжения (Дамаск)",
+   "side": "red",
+   "place": "Damascus"
   }
  ],
  "bridges": [],

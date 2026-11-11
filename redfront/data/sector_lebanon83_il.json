@@ -1,0 +1,956 @@
+{
+ "_about": "Ливан, декабрь 1983 (гипотетическая эскалация). Генерирован tools/gen_lebanon83.py. Координаты - ОЦЕНКИ. Театр - Ливан и запад Сирии до Латакии и Хамы; у США - авианосцы и наземные базы (Инджирлик, Акротири).",
+ "air_limits": {
+  "blue": [
+   "Latakia",
+   "Hama",
+   "Tartus"
+  ],
+  "red": [
+   "Adana",
+   "Cyprus"
+  ]
+ },
+ "theatre": "syria",
+ "places": {
+  "BeirutAirport": {
+   "lat": 33.821,
+   "lon": 35.488,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Khalde": {
+   "lat": 33.784,
+   "lon": 35.476,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Baabda": {
+   "lat": 33.834,
+   "lon": 35.544,
+   "estimate": true,
+   "side": "blue"
+  },
+  "EastBeirut": {
+   "lat": 33.89,
+   "lon": 35.53,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Jounieh": {
+   "lat": 33.98,
+   "lon": 35.618,
+   "estimate": true,
+   "side": "blue"
+  },
+  "SoukElGharb": {
+   "lat": 33.806,
+   "lon": 35.578,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Damour": {
+   "lat": 33.729,
+   "lon": 35.456,
+   "estimate": true,
+   "side": "blue"
+  },
+  "WestBeirut": {
+   "lat": 33.88,
+   "lon": 35.49,
+   "estimate": true,
+   "side": "red"
+  },
+  "Aley": {
+   "lat": 33.808,
+   "lon": 35.6,
+   "estimate": true,
+   "side": "red"
+  },
+  "Bhamdoun": {
+   "lat": 33.808,
+   "lon": 35.65,
+   "estimate": true,
+   "side": "red"
+  },
+  "BeitEdDine": {
+   "lat": 33.695,
+   "lon": 35.58,
+   "estimate": true,
+   "side": "red"
+  },
+  "AinZhalta": {
+   "lat": 33.745,
+   "lon": 35.69,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sofar": {
+   "lat": 33.81,
+   "lon": 35.705,
+   "estimate": true,
+   "side": "red"
+  },
+  "Dhour": {
+   "lat": 33.9,
+   "lon": 35.76,
+   "estimate": true,
+   "side": "red"
+  },
+  "Chtaura": {
+   "lat": 33.818,
+   "lon": 35.854,
+   "estimate": true,
+   "side": "red"
+  },
+  "Zahle": {
+   "lat": 33.847,
+   "lon": 35.902,
+   "estimate": true,
+   "side": "red"
+  },
+  "Baalbek": {
+   "lat": 34.006,
+   "lon": 36.211,
+   "estimate": true,
+   "side": "red"
+  },
+  "Masnaa": {
+   "lat": 33.7,
+   "lon": 36.07,
+   "estimate": true,
+   "side": "red"
+  },
+  "Damascus": {
+   "lat": 33.513,
+   "lon": 36.292,
+   "estimate": true,
+   "side": "red"
+  },
+  "Homs": {
+   "lat": 34.73,
+   "lon": 36.71,
+   "estimate": true,
+   "side": "red"
+  },
+  "Byblos": {
+   "lat": 34.12,
+   "lon": 35.65,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tripoli": {
+   "lat": 34.43,
+   "lon": 35.84,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hermel": {
+   "lat": 34.39,
+   "lon": 36.39,
+   "estimate": true,
+   "side": "red"
+  },
+  "Qusayr": {
+   "lat": 34.51,
+   "lon": 36.58,
+   "estimate": true,
+   "side": "red"
+  },
+  "Tartus": {
+   "lat": 34.89,
+   "lon": 35.89,
+   "estimate": true,
+   "side": "red"
+  },
+  "Hama": {
+   "lat": 35.13,
+   "lon": 36.75,
+   "estimate": true,
+   "side": "red"
+  },
+  "Latakia": {
+   "lat": 35.52,
+   "lon": 35.78,
+   "estimate": true,
+   "side": "red"
+  },
+  "Nabk": {
+   "lat": 34.02,
+   "lon": 36.73,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sidon": {
+   "lat": 33.561,
+   "lon": 35.371,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Jezzine": {
+   "lat": 33.544,
+   "lon": 35.584,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Haifa": {
+   "lat": 32.794,
+   "lon": 34.989,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Nahariya": {
+   "lat": 33.006,
+   "lon": 35.095,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Safed": {
+   "lat": 32.965,
+   "lon": 35.496,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tiberias": {
+   "lat": 32.795,
+   "lon": 35.531,
+   "estimate": true,
+   "side": "blue"
+  },
+  "KiryatShmona": {
+   "lat": 33.207,
+   "lon": 35.57,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Metula": {
+   "lat": 33.278,
+   "lon": 35.578,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Katzrin": {
+   "lat": 32.993,
+   "lon": 35.693,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Masada": {
+   "lat": 33.233,
+   "lon": 35.753,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Naqoura": {
+   "lat": 33.118,
+   "lon": 35.14,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Marjayoun": {
+   "lat": 33.36,
+   "lon": 35.592,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tyre": {
+   "lat": 33.271,
+   "lon": 35.196,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Nabatieh": {
+   "lat": 33.378,
+   "lon": 35.484,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Hasbaya": {
+   "lat": 33.398,
+   "lon": 35.685,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Rashaya": {
+   "lat": 33.501,
+   "lon": 35.843,
+   "estimate": true,
+   "side": "red"
+  },
+  "JoubJannine": {
+   "lat": 33.63,
+   "lon": 35.785,
+   "estimate": true,
+   "side": "red"
+  },
+  "Quneitra": {
+   "lat": 33.126,
+   "lon": 35.824,
+   "estimate": true,
+   "side": "red"
+  },
+  "Qatana": {
+   "lat": 33.437,
+   "lon": 36.08,
+   "estimate": true,
+   "side": "red"
+  },
+  "Kiswah": {
+   "lat": 33.36,
+   "lon": 36.24,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sanamayn": {
+   "lat": 33.07,
+   "lon": 36.18,
+   "estimate": true,
+   "side": "red"
+  },
+  "Adana": {
+   "lat": 37.0,
+   "lon": 35.33,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  },
+  "Cyprus": {
+   "lat": 34.67,
+   "lon": 33.04,
+   "estimate": true,
+   "side": null,
+   "neutral": true
+  }
+ },
+ "airbases": {
+  "damascus": {
+   "name": "Damascus",
+   "airport": "Damascus",
+   "side": "red",
+   "military": true
+  },
+  "mezzeh": {
+   "name": "Mezzeh",
+   "airport": "Mezzeh",
+   "side": "red",
+   "military": true
+  },
+  "al_dumayr": {
+   "name": "Al-Dumayr",
+   "airport": "Al-Dumayr",
+   "side": "red",
+   "military": true
+  },
+  "khalkhalah": {
+   "name": "Khalkhalah",
+   "airport": "Khalkhalah",
+   "side": "red",
+   "military": true
+  },
+  "marj_ruhayyil": {
+   "name": "Marj Ruhayyil",
+   "airport": "Marj Ruhayyil",
+   "side": "red",
+   "military": true
+  },
+  "shayrat": {
+   "name": "Shayrat",
+   "airport": "Shayrat",
+   "side": "red",
+   "military": true
+  },
+  "rayak": {
+   "name": "Rayak",
+   "airport": "Rayak",
+   "side": "red",
+   "military": true
+  },
+  "hama": {
+   "name": "Hama",
+   "airport": "Hama",
+   "side": "red",
+   "military": true
+  },
+  "tiyas": {
+   "name": "Tiyas",
+   "airport": "Tiyas",
+   "side": "red",
+   "military": true
+  },
+  "incirlik": {
+   "name": "Incirlik",
+   "airport": "Incirlik",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "akrotiri": {
+   "name": "Akrotiri",
+   "airport": "Akrotiri",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "ramat_david": {
+   "name": "Ramat David",
+   "airport": "Ramat David",
+   "side": "blue",
+   "military": true
+  },
+  "megiddo": {
+   "name": "Megiddo",
+   "airport": "Megiddo",
+   "side": "blue",
+   "military": true
+  },
+  "haifa": {
+   "name": "Haifa",
+   "airport": "Haifa",
+   "side": "blue",
+   "military": true
+  },
+  "rosh_pina": {
+   "name": "Rosh Pina",
+   "airport": "Rosh Pina",
+   "side": "blue",
+   "military": true
+  },
+  "kiryat_shmona": {
+   "name": "Kiryat Shmona",
+   "airport": "Kiryat Shmona",
+   "side": "blue",
+   "military": true
+  },
+  "eyn_shemer": {
+   "name": "Eyn Shemer",
+   "airport": "Eyn Shemer",
+   "side": "blue",
+   "military": true
+  },
+  "tel_nof": {
+   "name": "Tel Nof",
+   "airport": "Tel Nof",
+   "side": "blue",
+   "military": true
+  },
+  "hatzor": {
+   "name": "Hatzor",
+   "airport": "Hatzor",
+   "side": "blue",
+   "military": true
+  },
+  "palmachim": {
+   "name": "Palmachim",
+   "airport": "Palmachim",
+   "side": "blue",
+   "military": true
+  },
+  "ben_gurion": {
+   "name": "Ben Gurion",
+   "airport": "Ben Gurion",
+   "side": "blue",
+   "military": true
+  },
+  "hatzerim": {
+   "name": "Hatzerim",
+   "airport": "Hatzerim",
+   "side": "blue",
+   "military": true
+  }
+ },
+ "carriers": {
+  "cv62": {
+   "name": "USS Forrestal (CV-59)",
+   "side": "blue",
+   "ship": "Forrestal",
+   "lat": 33.95,
+   "lon": 35.2,
+   "tacan": 59,
+   "tacan_id": "FOR",
+   "icls": 2,
+   "freq": 127.5,
+   "naval": "blue_csg_forrestal",
+   "estimate": true
+  },
+  "cv67": {
+   "name": "USS Carl Vinson (CVN-70)",
+   "side": "blue",
+   "ship": "VINSON",
+   "lat": 33.72,
+   "lon": 35.1,
+   "tacan": 70,
+   "tacan_id": "VIN",
+   "icls": 7,
+   "freq": 128.5,
+   "naval": "blue_csg_vinson",
+   "estimate": true
+  },
+  "lha1": {
+   "name": "USS Tarawa (LHA-1)",
+   "side": "blue",
+   "ship": "LHA_Tarawa",
+   "lat": 33.83,
+   "lon": 35.36,
+   "tacan": 1,
+   "tacan_id": "TAR",
+   "icls": null,
+   "freq": 129.5,
+   "naval": "blue_arg_tarawa",
+   "estimate": true
+  }
+ },
+ "links": [
+  [
+   "BeirutAirport",
+   "Khalde"
+  ],
+  [
+   "BeirutAirport",
+   "Baabda"
+  ],
+  [
+   "BeirutAirport",
+   "WestBeirut"
+  ],
+  [
+   "Khalde",
+   "Damour"
+  ],
+  [
+   "Khalde",
+   "SoukElGharb"
+  ],
+  [
+   "Baabda",
+   "EastBeirut"
+  ],
+  [
+   "Baabda",
+   "SoukElGharb"
+  ],
+  [
+   "EastBeirut",
+   "Jounieh"
+  ],
+  [
+   "EastBeirut",
+   "WestBeirut"
+  ],
+  [
+   "Jounieh",
+   "Dhour"
+  ],
+  [
+   "SoukElGharb",
+   "Aley"
+  ],
+  [
+   "Aley",
+   "Bhamdoun"
+  ],
+  [
+   "Bhamdoun",
+   "Sofar"
+  ],
+  [
+   "Sofar",
+   "Chtaura"
+  ],
+  [
+   "Sofar",
+   "Dhour"
+  ],
+  [
+   "Damour",
+   "BeitEdDine"
+  ],
+  [
+   "BeitEdDine",
+   "AinZhalta"
+  ],
+  [
+   "AinZhalta",
+   "Sofar"
+  ],
+  [
+   "Dhour",
+   "Zahle"
+  ],
+  [
+   "Chtaura",
+   "Zahle"
+  ],
+  [
+   "Chtaura",
+   "Masnaa"
+  ],
+  [
+   "Zahle",
+   "Baalbek"
+  ],
+  [
+   "Baalbek",
+   "Homs"
+  ],
+  [
+   "Masnaa",
+   "Damascus"
+  ],
+  [
+   "Damascus",
+   "Homs"
+  ],
+  [
+   "Damour",
+   "Sidon"
+  ],
+  [
+   "Sidon",
+   "Jezzine"
+  ],
+  [
+   "Jezzine",
+   "BeitEdDine"
+  ],
+  [
+   "Jounieh",
+   "Byblos"
+  ],
+  [
+   "Byblos",
+   "Tripoli"
+  ],
+  [
+   "Tripoli",
+   "Tartus"
+  ],
+  [
+   "Tartus",
+   "Homs"
+  ],
+  [
+   "Tartus",
+   "Latakia"
+  ],
+  [
+   "Latakia",
+   "Hama"
+  ],
+  [
+   "Hama",
+   "Homs"
+  ],
+  [
+   "Baalbek",
+   "Hermel"
+  ],
+  [
+   "Hermel",
+   "Qusayr"
+  ],
+  [
+   "Qusayr",
+   "Homs"
+  ],
+  [
+   "Damascus",
+   "Nabk"
+  ],
+  [
+   "Nabk",
+   "Homs"
+  ],
+  [
+   "Tripoli",
+   "Hermel"
+  ],
+  [
+   "Haifa",
+   "Nahariya"
+  ],
+  [
+   "Haifa",
+   "Tiberias"
+  ],
+  [
+   "Nahariya",
+   "Naqoura"
+  ],
+  [
+   "Nahariya",
+   "Safed"
+  ],
+  [
+   "Safed",
+   "Tiberias"
+  ],
+  [
+   "Safed",
+   "KiryatShmona"
+  ],
+  [
+   "KiryatShmona",
+   "Metula"
+  ],
+  [
+   "Tiberias",
+   "Katzrin"
+  ],
+  [
+   "Katzrin",
+   "Masada"
+  ],
+  [
+   "KiryatShmona",
+   "Masada"
+  ],
+  [
+   "Metula",
+   "Marjayoun"
+  ],
+  [
+   "Naqoura",
+   "Tyre"
+  ],
+  [
+   "Tyre",
+   "Sidon"
+  ],
+  [
+   "Tyre",
+   "Nabatieh"
+  ],
+  [
+   "Marjayoun",
+   "Nabatieh"
+  ],
+  [
+   "Marjayoun",
+   "Hasbaya"
+  ],
+  [
+   "Nabatieh",
+   "Sidon"
+  ],
+  [
+   "Nabatieh",
+   "Jezzine"
+  ],
+  [
+   "Damour",
+   "WestBeirut"
+  ],
+  [
+   "BeitEdDine",
+   "Aley"
+  ],
+  [
+   "Jezzine",
+   "JoubJannine"
+  ],
+  [
+   "WestBeirut",
+   "Aley"
+  ],
+  [
+   "Aley",
+   "AinZhalta"
+  ],
+  [
+   "AinZhalta",
+   "Chtaura"
+  ],
+  [
+   "Masada",
+   "Hasbaya"
+  ],
+  [
+   "Masada",
+   "Quneitra"
+  ],
+  [
+   "Hasbaya",
+   "Rashaya"
+  ],
+  [
+   "Hasbaya",
+   "JoubJannine"
+  ],
+  [
+   "Rashaya",
+   "JoubJannine"
+  ],
+  [
+   "Rashaya",
+   "Qatana"
+  ],
+  [
+   "JoubJannine",
+   "Chtaura"
+  ],
+  [
+   "Quneitra",
+   "Qatana"
+  ],
+  [
+   "Quneitra",
+   "Sanamayn"
+  ],
+  [
+   "Qatana",
+   "Damascus"
+  ],
+  [
+   "Damascus",
+   "Kiswah"
+  ],
+  [
+   "Kiswah",
+   "Sanamayn"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Damascus",
+   "Homs",
+   "Hama"
+  ],
+  "blue": [
+   "Jounieh"
+  ]
+ },
+ "off_limits": {
+  "blue": [
+   "Damascus",
+   "Homs",
+   "Masnaa",
+   "Baalbek",
+   "Tripoli",
+   "Hermel",
+   "Qusayr",
+   "Tartus",
+   "Hama",
+   "Latakia",
+   "Nabk",
+   "Rashaya",
+   "JoubJannine",
+   "Quneitra",
+   "Qatana",
+   "Kiswah",
+   "Sanamayn"
+  ],
+  "red": [
+   "Haifa",
+   "Nahariya",
+   "Safed",
+   "Tiberias",
+   "KiryatShmona",
+   "Metula",
+   "Katzrin",
+   "Masada",
+   "Naqoura",
+   "Marjayoun",
+   "Tyre",
+   "Nabatieh",
+   "Hasbaya",
+   "Sidon",
+   "Jezzine"
+  ]
+ },
+ "axes": {
+  "shouf": "Шуф: Алей - Сук-эль-Гарб - аэропорт",
+  "coast": "Побережье: Дамур - Хальде"
+ },
+ "objectives": {
+  "red": {
+   "shouf": [
+    "SoukElGharb",
+    "Baabda",
+    "BeirutAirport"
+   ],
+   "coast": [
+    "Damour",
+    "Khalde",
+    "BeirutAirport"
+   ]
+  },
+  "blue": []
+ },
+ "depots": [
+  {
+   "id": "blue_depot_jounieh",
+   "name": "Склад снабжения (Джуния)",
+   "side": "blue",
+   "place": "Jounieh"
+  },
+  {
+   "id": "red_depot_chtaura",
+   "name": "Склад снабжения сирийских войск (Штора)",
+   "side": "red",
+   "place": "Chtaura"
+  },
+  {
+   "id": "red_depot_aley",
+   "name": "Склады ПСП (Алей)",
+   "side": "red",
+   "place": "Aley"
+  },
+  {
+   "id": "red_depot_damascus",
+   "name": "Склад снабжения (Дамаск)",
+   "side": "red",
+   "place": "Damascus"
+  },
+  {
+   "id": "blue_depot_kiryat",
+   "name": "Склад снабжения (Кирьят-Шмона)",
+   "side": "blue",
+   "place": "KiryatShmona"
+  },
+  {
+   "id": "blue_depot_nahariya",
+   "name": "Склад снабжения (Нахария)",
+   "side": "blue",
+   "place": "Nahariya"
+  },
+  {
+   "id": "blue_depot_golan",
+   "name": "Склад снабжения (Кацрин)",
+   "side": "blue",
+   "place": "Katzrin"
+  }
+ ],
+ "bridges": [],
+ "ad_sites": [],
+ "sea_lanes": [
+  {
+   "id": "lane_jounieh",
+   "side": "blue",
+   "port": "Jounieh",
+   "convoy": "blue_convoy_jounieh",
+   "t_per_day": 250
+  }
+ ],
+ "naval_bases": {
+  "red": [
+   {
+    "name": "Тартус",
+    "lat": 34.9,
+    "lon": 35.86
+   }
+  ]
+ },
+ "asm_stock": {
+  "blue": {
+   "count": 24,
+   "per_day": 2,
+   "type": "AGM-84 Harpoon (A-6E)",
+   "note": "ОЦЕНКА: запас на 2 авианосцах, пополнение с транспорта боеприпасов"
+  },
+  "red": {
+   "count": 0,
+   "per_day": 0,
+   "note": "у ВВС Сирии 1983 г. авиационных ПКР нет - только бомбы"
+  }
+ }
+}

@@ -491,6 +491,79 @@
    "estimate": true
   },
   {
+   "id": "us_f15_dhafra",
+   "name": "Эскадрилья F-15C ВВС США (Аль-Дафра)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "al_dhafra_afb",
+   "type": "F_15C",
+   "count": 12,
+   "strike_radius_km": 800,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; гипотетически: прикрытие конвоев и групп кораблей",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ]
+  },
+  {
+   "id": "us_f4_dhafra",
+   "name": "Эскадрилья F-4E ВВС США (Аль-Дафра)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "al_dhafra_afb",
+   "type": "F_4E_45MC",
+   "count": 12,
+   "strike_radius_km": 700,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; гипотетически",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ]
+  },
+  {
+   "id": "us_e3_dhafra",
+   "name": "E-3A ВВС США (ELF-One; в сценарии - Аль-Дафра)",
+   "side": "blue",
+   "role": "awacs",
+   "base": "al_dhafra_afb",
+   "type": "E_3A",
+   "count": 2,
+   "strike_radius_km": 1500,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; реально - из Саудовской Аравии",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ]
+  },
+  {
+   "id": "us_kc135_dhafra",
+   "name": "Заправщики KC-135A (Аль-Дафра)",
+   "side": "blue",
+   "role": "tanker",
+   "base": "al_dhafra_afb",
+   "type": "KC_135",
+   "count": 4,
+   "strike_radius_km": 1500,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; ОЦЕНКА",
+   "estimate": true,
+   "tasks_not": [
+    "fleet_cap"
+   ]
+  },
+  {
+   "id": "ir_f4_kerman",
+   "name": "Эскадрилья F-4D (Керман)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "kerman",
+   "type": "F_4E_45MC",
+   "count": 6,
+   "strike_radius_km": 500,
+   "source": "Crist 'Twilight War' / Zatarain 'Tanker War', по памяти - проверить; число и радиус - ОЦЕНКА; F-4D - F-4E",
+   "estimate": true,
+   "quality": 0.8
+  },
+  {
    "id": "ir_tfb9_f4",
    "name": "91-я тактическая эскадрилья (F-4E, Бандар-Аббас)",
    "side": "red",

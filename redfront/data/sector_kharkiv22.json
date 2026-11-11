@@ -1,153 +1,153 @@
 {
- "_about": "Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Условная география на карте Cold War Germany (Альтмарк - Бранденбург); координаты - точки карты, имена - украинские и российские.",
+ "_about": "Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.93 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Ummern, Schonefeld, Falkenberg, Gutersloh, Norvenich, Dusseldorf, Rinteln. Рельеф и реки - карты, не Украины.",
  "theatre": "germany",
  "places": {
   "Belgorod": {
-   "lat": 53.15,
-   "lon": 12.18,
+   "lat": 52.6768,
+   "lon": 10.8905,
    "estimate": true,
    "side": "red"
   },
   "Valuyki": {
-   "lat": 53.185,
-   "lon": 13.145,
+   "lat": 52.314,
+   "lon": 12.3699,
    "estimate": true,
    "side": "red"
   },
   "Lyptsi": {
-   "lat": 52.825,
-   "lon": 12.075,
+   "lat": 52.3047,
+   "lon": 10.7324,
    "estimate": true,
    "side": "red"
   },
   "Vovchansk": {
-   "lat": 52.942,
-   "lon": 12.395,
+   "lat": 52.3884,
+   "lon": 11.233,
    "estimate": true,
    "side": "red"
   },
   "Balakliia": {
-   "lat": 52.737,
-   "lon": 12.58,
+   "lat": 51.6163,
+   "lon": 11.1497,
    "estimate": true,
    "side": "red"
   },
   "Shevchenkove": {
-   "lat": 52.762,
-   "lon": 13.027,
+   "lat": 51.8395,
+   "lon": 11.4534,
    "estimate": true,
    "side": "red"
   },
   "Kupiansk": {
-   "lat": 52.755,
-   "lon": 13.237,
+   "lat": 51.8488,
+   "lon": 11.8924,
    "estimate": true,
    "side": "red"
   },
   "Borova": {
-   "lat": 52.605,
-   "lon": 12.877,
+   "lat": 51.5419,
+   "lon": 11.888,
    "estimate": true,
    "side": "red"
   },
   "Izium": {
-   "lat": 52.412,
-   "lon": 12.556,
+   "lat": 51.3837,
+   "lon": 11.5364,
    "estimate": true,
    "side": "red"
   },
   "Lyman": {
-   "lat": 52.238,
-   "lon": 12.971,
+   "lat": 51.1791,
+   "lon": 12.0669,
    "estimate": true,
    "side": "red"
   },
   "Svatove": {
-   "lat": 52.68,
-   "lon": 13.588,
+   "lat": 51.5698,
+   "lon": 12.4038,
    "estimate": true,
    "side": "red"
   },
   "Kharkiv": {
-   "lat": 52.605,
-   "lon": 11.858,
+   "lat": 52.1093,
+   "lon": 10.5364,
    "estimate": true,
    "side": "blue"
   },
   "Chuhuiv": {
-   "lat": 52.605,
-   "lon": 12.337,
+   "lat": 51.9698,
+   "lon": 10.9858,
    "estimate": true,
    "side": "blue"
   },
   "Zmiiv": {
-   "lat": 52.405,
-   "lon": 12.16,
+   "lat": 51.8209,
+   "lon": 10.6634,
    "estimate": true,
    "side": "blue"
   },
   "Sloviansk": {
-   "lat": 52.142,
-   "lon": 12.592,
+   "lat": 51.0488,
+   "lon": 11.8715,
    "estimate": true,
    "side": "blue"
   },
   "Poltava": {
-   "lat": 52.85,
-   "lon": 11.15,
+   "lat": 51.7372,
+   "lon": 8.9,
    "estimate": true,
    "side": "blue"
   },
   "Dnipro": {
-   "lat": 52.272,
-   "lon": 11.855,
+   "lat": 50.686,
+   "lon": 9.3912,
    "estimate": true,
    "side": "blue"
   }
  },
  "airbases": {
-  "wittstock": {
-   "name": "Wittstock",
-   "airport": "Wittstock",
+  "ummern": {
+   "name": "Ummern",
+   "airport": "Ummern",
    "side": "red",
    "military": true,
    "supply_external": true
   },
-  "templin": {
-   "name": "Templin",
-   "airport": "Templin",
+  "schonefeld": {
+   "name": "Schonefeld",
+   "airport": "Schonefeld",
    "side": "red",
    "military": true,
    "supply_external": true
   },
-  "finow": {
-   "name": "Finow",
-   "airport": "Finow",
+  "falkenberg": {
+   "name": "Falkenberg",
+   "airport": "Falkenberg",
    "side": "red",
    "military": true,
    "supply_external": true
   },
-  "braunschweig": {
-   "name": "Braunschweig",
-   "airport": "Braunschweig",
+  "gutersloh": {
+   "name": "Gutersloh",
+   "airport": "Gutersloh",
    "side": "blue",
    "military": true
   },
-  "hannover": {
-   "name": "Hannover",
-   "airport": "Hannover",
+  "norvenich": {
+   "name": "Norvenich",
+   "airport": "Norvenich",
    "side": "blue",
    "military": true
   },
-  "celle": {
-   "name": "Celle",
-   "airport": "Celle",
+  "dusseldorf": {
+   "name": "Dusseldorf",
+   "airport": "Dusseldorf",
    "side": "blue",
    "military": true
   },
-  "gardelegen": {
-   "name": "Gardelegen",
-   "airport": "Gardelegen",
+  "rinteln": {
+   "name": "Rinteln",
+   "airport": "Rinteln",
    "side": "blue",
    "military": true
   }
@@ -365,8 +365,8 @@
     ]
    ],
    "source": "условно: Оскол между Купянском и Купянском-Узловым",
-   "lat": 52.718,
-   "lon": 13.412
+   "lat": 51.7093,
+   "lon": 12.1481
   },
   {
    "id": "br_donets_izium",
@@ -378,8 +378,8 @@
     ]
    ],
    "source": "условно: середина участка",
-   "lat": 52.575,
-   "lon": 12.568
+   "lat": 51.5,
+   "lon": 11.343
   },
   {
    "id": "br_oskil_borova",
@@ -391,85 +391,85 @@
     ]
    ],
    "source": "условно: середина участка",
-   "lat": 52.642,
-   "lon": 13.232
+   "lat": 51.5558,
+   "lon": 12.1459
   }
  ],
  "ad_sites": [
   {
-   "id": "blue_ad_af_braunschweig",
-   "name": "ПВО аэродрома Braunschweig",
+   "id": "blue_ad_af_dusseldorf",
+   "name": "ПВО аэродрома Dusseldorf",
    "side": "blue",
    "tier": "short",
-   "covers": "af_braunschweig",
-   "lat": 52.3247,
-   "lon": 10.574,
+   "covers": "af_dusseldorf",
+   "lat": 51.2918,
+   "lon": 6.788,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "blue_ad_af_celle",
-   "name": "ПВО аэродрома Celle",
-   "side": "blue",
-   "tier": "short",
-   "covers": "af_celle",
-   "lat": 52.5928,
-   "lon": 10.0464,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "red_ad_af_finow",
-   "name": "ПВО аэродрома Finow",
+   "id": "red_ad_af_falkenberg",
+   "name": "ПВО аэродрома Falkenberg",
    "side": "red",
    "tier": "short",
-   "covers": "af_finow",
-   "lat": 52.8244,
-   "lon": 13.6723,
+   "covers": "af_falkenberg",
+   "lat": 51.5399,
+   "lon": 13.1973,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "blue_ad_af_gardelegen",
-   "name": "ПВО аэродрома Gardelegen",
+   "id": "blue_ad_af_gutersloh",
+   "name": "ПВО аэродрома Gutersloh",
    "side": "blue",
    "tier": "short",
-   "covers": "af_gardelegen",
-   "lat": 52.5355,
-   "lon": 11.37,
+   "covers": "af_gutersloh",
+   "lat": 51.9254,
+   "lon": 8.3256,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "blue_ad_af_hannover",
-   "name": "ПВО аэродрома Hannover",
+   "id": "blue_ad_af_norvenich",
+   "name": "ПВО аэродрома Norvenich",
    "side": "blue",
    "tier": "short",
-   "covers": "af_hannover",
-   "lat": 52.457,
-   "lon": 9.7155,
+   "covers": "af_norvenich",
+   "lat": 50.8355,
+   "lon": 6.6791,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "red_ad_af_templin",
-   "name": "ПВО аэродрома Templin",
-   "side": "red",
+   "id": "blue_ad_af_rinteln",
+   "name": "ПВО аэродрома Rinteln",
+   "side": "blue",
    "tier": "short",
-   "covers": "af_templin",
-   "lat": 53.0255,
-   "lon": 13.523,
+   "covers": "af_rinteln",
+   "lat": 52.1751,
+   "lon": 9.0749,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "red_ad_af_wittstock",
-   "name": "ПВО аэродрома Wittstock",
+   "id": "red_ad_af_schonefeld",
+   "name": "ПВО аэродрома Schonefeld",
    "side": "red",
    "tier": "short",
-   "covers": "af_wittstock",
-   "lat": 53.1892,
-   "lon": 12.5182,
+   "covers": "af_schonefeld",
+   "lat": 52.3824,
+   "lon": 13.5125,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_ummern",
+   "name": "ПВО аэродрома Ummern",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_ummern",
+   "lat": 52.6077,
+   "lon": 10.4179,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   }
@@ -479,9 +479,9 @@
   "blue": [
    "Belgorod",
    "Valuyki",
-   "af_wittstock",
-   "af_templin",
-   "af_finow"
+   "af_ummern",
+   "af_schonefeld",
+   "af_falkenberg"
   ]
  }
 }

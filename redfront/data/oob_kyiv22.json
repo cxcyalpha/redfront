@@ -916,8 +916,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.68,
-    "lon": 9.95
+    "lat": 51.9181,
+    "lon": 9.277
    },
    "composition": [
     {
@@ -952,8 +952,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.46,
-    "lon": 10.05
+    "lat": 51.577,
+    "lon": 9.7497
    },
    "composition": [
     {
@@ -988,8 +988,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.56,
-    "lon": 9.82
+    "lat": 51.6782,
+    "lon": 9.0561
    },
    "composition": [
     {
@@ -1019,8 +1019,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.78,
-    "lon": 10.33
+    "lat": 52.1972,
+    "lon": 10.1658
    },
    "composition": [
     {
@@ -1050,8 +1050,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.66,
-    "lon": 10.2
+    "lat": 51.9573,
+    "lon": 9.9449
    },
    "composition": [
     {
@@ -1071,8 +1071,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 54.2,
-    "lon": 10.05
+    "lat": 52.8224,
+    "lon": 9.0323
    },
    "composition": [
     {
@@ -1107,8 +1107,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.98,
-    "lon": 9.93
+    "lat": 52.4171,
+    "lon": 8.9343
    },
    "composition": [
     {
@@ -1138,8 +1138,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.88,
-    "lon": 9.9
+    "lat": 52.2401,
+    "lon": 8.9534
    },
    "composition": [
     {
@@ -1159,8 +1159,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 53.86,
-    "lon": 10.65
+    "lat": 52.4252,
+    "lon": 10.9183
    },
    "composition": [
     {
@@ -1242,8 +1242,8 @@
    "state": "deployed",
    "station": "leer3",
    "pos": {
-    "lat": 53.9,
-    "lon": 9.92
+    "lat": 52.2796,
+    "lon": 8.9859
    },
    "composition": [
     {
@@ -1268,8 +1268,8 @@
    "state": "deployed",
    "station": "krasukha",
    "pos": {
-    "lat": 54.15,
-    "lon": 10.02
+    "lat": 52.7295,
+    "lon": 9.0029
    },
    "composition": [
     {
@@ -1294,8 +1294,8 @@
    "state": "deployed",
    "station": "zhitel",
    "pos": {
-    "lat": 53.82,
-    "lon": 10.6
+    "lat": 52.3433,
+    "lon": 10.8274
    },
    "composition": [
     {
@@ -1315,8 +1315,8 @@
    "state": "deployed",
    "station": "pole21",
    "pos": {
-    "lat": 54.0,
-    "lon": 10.3
+    "lat": 52.5587,
+    "lon": 9.8747
    },
    "composition": [
     {
@@ -1336,8 +1336,8 @@
    "state": "deployed",
    "station": "bukovel",
    "pos": {
-    "lat": 53.6,
-    "lon": 9.9
+    "lat": 51.6921,
+    "lon": 9.4777
    },
    "composition": [
     {
@@ -1357,8 +1357,8 @@
    "state": "deployed",
    "station": "notch",
    "pos": {
-    "lat": 53.79,
-    "lon": 10.35
+    "lat": 52.2199,
+    "lon": 10.208
    },
    "composition": [
     {
@@ -1378,8 +1378,8 @@
    "state": "deployed",
    "missile": "iskander",
    "pos": {
-    "lat": 54.25,
-    "lon": 10.0
+    "lat": 52.8919,
+    "lon": 8.8541
    },
    "composition": [
     {
@@ -1399,8 +1399,8 @@
    "state": "deployed",
    "missile": "iskander",
    "pos": {
-    "lat": 53.9,
-    "lon": 10.85
+    "lat": 52.5508,
+    "lon": 11.3983
    },
    "composition": [
     {
@@ -1420,8 +1420,8 @@
    "state": "deployed",
    "missile": "tochka",
    "pos": {
-    "lat": 53.4,
-    "lon": 9.6
+    "lat": 51.3447,
+    "lon": 8.6406
    },
    "composition": [
     {
@@ -1438,7 +1438,7 @@
    "name": "Бомбардировочный полк (Су-34)",
    "side": "red",
    "role": "fighter_bomber",
-   "base": "kiel",
+   "base": "nordholz",
    "type": "Su_34",
    "count": 16,
    "strike_radius_km": 450,
@@ -1450,7 +1450,7 @@
    "name": "Штурмовой полк (Су-25СМ3; в DCS - Су-25)",
    "side": "red",
    "role": "attack",
-   "base": "lubeck",
+   "base": "luneburg",
    "type": "Su_25",
    "count": 16,
    "strike_radius_km": 250,
@@ -1462,7 +1462,7 @@
    "name": "Истребительный полк (Су-35С; в DCS - Су-27)",
    "side": "red",
    "role": "fighter",
-   "base": "kiel",
+   "base": "nordholz",
    "type": "Su_27",
    "count": 16,
    "strike_radius_km": 500,
@@ -1479,7 +1479,7 @@
    "name": "Полк Су-30СМ (в DCS - Су-27)",
    "side": "red",
    "role": "fighter",
-   "base": "lubeck",
+   "base": "luneburg",
    "type": "Su_27",
    "count": 12,
    "strike_radius_km": 500,
@@ -1496,7 +1496,7 @@
    "name": "Бомбардировщики Су-24М",
    "side": "red",
    "role": "bomber",
-   "base": "pinnow",
+   "base": "chojna",
    "type": "Su_24M",
    "count": 12,
    "strike_radius_km": 400,
@@ -1508,7 +1508,7 @@
    "name": "Вертолёты Ка-52 (в DCS - Ка-50)",
    "side": "red",
    "role": "attack_helo",
-   "base": "kiel",
+   "base": "nordholz",
    "type": "Ka_50",
    "count": 12,
    "strike_radius_km": 150,
@@ -1520,7 +1520,7 @@
    "name": "Вертолёты Ми-28Н",
    "side": "red",
    "role": "attack_helo",
-   "base": "lubeck",
+   "base": "luneburg",
    "type": "Mi_28N",
    "count": 10,
    "strike_radius_km": 150,
@@ -1532,7 +1532,7 @@
    "name": "Вертолёты Ми-8АМТШ (десант)",
    "side": "red",
    "role": "transport_helo",
-   "base": "kiel",
+   "base": "nordholz",
    "type": "Mi_8MT",
    "count": 20,
    "strike_radius_km": 200,
@@ -1544,7 +1544,7 @@
    "name": "Самолёт ДРЛО А-50",
    "side": "red",
    "role": "awacs",
-   "base": "pinnow",
+   "base": "chojna",
    "type": "A_50",
    "count": 1,
    "strike_radius_km": 1500,
@@ -1556,7 +1556,7 @@
    "name": "Ту-95МС (удары крылатыми ракетами)",
    "side": "red",
    "role": "bomber",
-   "base": "pinnow",
+   "base": "chojna",
    "type": "Tu_95MS",
    "count": 6,
    "strike_radius_km": 3000,
@@ -1568,7 +1568,7 @@
    "name": "Ту-22М3",
    "side": "red",
    "role": "bomber",
-   "base": "pinnow",
+   "base": "chojna",
    "type": "Tu_22M3",
    "count": 6,
    "strike_radius_km": 1500,
@@ -1580,7 +1580,7 @@
    "name": "40-я бригада тактической авиации (МиГ-29, Васильков)",
    "side": "blue",
    "role": "fighter",
-   "base": "hamburg_finkenwerder",
+   "base": "rinteln",
    "type": "MiG_29A",
    "count": 12,
    "strike_radius_km": 300,
@@ -1592,7 +1592,7 @@
    "name": "39-я бригада тактической авиации (Су-27, Озёрное)",
    "side": "blue",
    "role": "fighter",
-   "base": "celle",
+   "base": "gutersloh",
    "type": "Su_27",
    "count": 12,
    "strike_radius_km": 500,
@@ -1604,7 +1604,7 @@
    "name": "7-я бригада тактической авиации (Су-24М, Староконстантинов)",
    "side": "blue",
    "role": "bomber",
-   "base": "wunstorf",
+   "base": "dusseldorf",
    "type": "Su_24M",
    "count": 10,
    "strike_radius_km": 400,
@@ -1616,7 +1616,7 @@
    "name": "299-я бригада тактической авиации (Су-25)",
    "side": "blue",
    "role": "attack",
-   "base": "hannover",
+   "base": "giebelstadt",
    "type": "Su_25",
    "count": 12,
    "strike_radius_km": 250,
@@ -1628,7 +1628,7 @@
    "name": "Беспилотники Bayraktar TB2 (в DCS - MQ-9)",
    "side": "blue",
    "role": "fighter_bomber",
-   "base": "celle",
+   "base": "gutersloh",
    "type": "MQ_9_Reaper",
    "count": 6,
    "strike_radius_km": 250,
@@ -1640,7 +1640,7 @@
    "name": "Армейская авиация (Ми-24)",
    "side": "blue",
    "role": "attack_helo",
-   "base": "hannover",
+   "base": "giebelstadt",
    "type": "Mi_24P",
    "count": 10,
    "strike_radius_km": 150,
@@ -1652,7 +1652,7 @@
    "name": "Армейская авиация (Ми-8)",
    "side": "blue",
    "role": "transport_helo",
-   "base": "hannover",
+   "base": "giebelstadt",
    "type": "Mi_8MT",
    "count": 10,
    "strike_radius_km": 200,
@@ -1689,7 +1689,7 @@
    "task_params": {
     "red": {
      "air_assault": {
-      "assault_max_km": 110,
+      "assault_max_km": 140,
       "max_threats": 3,
       "per_day": 2
      }

@@ -86,6 +86,36 @@
    "estimate": true,
    "side": "blue"
   },
+  "Fehmarn": {
+   "lat": 54.437,
+   "lon": 11.19,
+   "estimate": true,
+   "side": "blue"
+  },
+  "OldenburgH": {
+   "lat": 54.292,
+   "lon": 10.883,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Neustadt": {
+   "lat": 54.108,
+   "lon": 10.813,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Eckernforde": {
+   "lat": 54.47,
+   "lon": 9.838,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Bremerhaven": {
+   "lat": 53.55,
+   "lon": 8.58,
+   "estimate": true,
+   "side": "blue"
+  },
   "Kiel": {
    "lat": 54.323,
    "lon": 10.135,
@@ -1097,6 +1127,10 @@
    "Neumunster"
   ],
   [
+   "BadSegeberg",
+   "Neustadt"
+  ],
+  [
    "Bamberg",
    "Bayreuth"
   ],
@@ -1202,11 +1236,19 @@
   ],
   [
    "Bremen",
+   "Bremerhaven"
+  ],
+  [
+   "Bremen",
    "Rotenburg"
   ],
   [
    "Bremen",
    "Verden"
+  ],
+  [
+   "Bremerhaven",
+   "Stade"
   ],
   [
    "Burg",
@@ -1329,6 +1371,14 @@
    "Osterode"
   ],
   [
+   "Eckernforde",
+   "Kiel"
+  ],
+  [
+   "Eckernforde",
+   "Rendsburg"
+  ],
+  [
    "Eisenach",
    "Eschwege"
   ],
@@ -1371,6 +1421,14 @@
   [
    "Eschwege",
    "Witzenhausen"
+  ],
+  [
+   "Fehmarn",
+   "OldenburgH"
+  ],
+  [
+   "Fehmarn",
+   "Wismar"
   ],
   [
    "Frankfurt",
@@ -1666,6 +1724,14 @@
   ],
   [
    "Kiel",
+   "Neustadt"
+  ],
+  [
+   "Kiel",
+   "OldenburgH"
+  ],
+  [
+   "Kiel",
    "Rendsburg"
   ],
   [
@@ -1695,6 +1761,10 @@
   [
    "Lauenburg",
    "Winsen"
+  ],
+  [
+   "Lubeck",
+   "Neustadt"
   ],
   [
    "Lubeck",
@@ -1771,6 +1841,14 @@
   [
    "Neuruppin",
    "Neustrelitz"
+  ],
+  [
+   "Neustadt",
+   "OldenburgH"
+  ],
+  [
+   "Neustadt",
+   "Schonberg"
   ],
   [
    "Nienburg",
@@ -2020,6 +2098,12 @@
    "name": "Склад снабжения (Нюрнберг)",
    "side": "blue",
    "place": "Nurnberg"
+  },
+  {
+   "id": "blue_depot_brhv",
+   "name": "Порт и склады (Бремерхафен)",
+   "side": "blue",
+   "place": "Bremerhaven"
   }
  ],
  "bridges": [
@@ -2057,6 +2141,60 @@
   }
  ],
  "_about_targets": "Склады - в пунктах (уточняются зондом карты), мосты через Эльбу - из сектора Гамбурга.",
+ "naval_bases": {
+  "red": [
+   {
+    "name": "Росток-Варнемюнде",
+    "lat": 54.18,
+    "lon": 12.09
+   },
+   {
+    "name": "Пенемюнде",
+    "lat": 54.14,
+    "lon": 13.77
+   }
+  ],
+  "blue": [
+   {
+    "name": "Киль",
+    "lat": 54.36,
+    "lon": 10.16
+   },
+   {
+    "name": "Ольпениц",
+    "lat": 54.67,
+    "lon": 10.04
+   },
+   {
+    "name": "Вильгельмсхафен",
+    "lat": 53.52,
+    "lon": 8.15
+   }
+  ]
+ },
+ "sea_lanes": [
+  {
+   "id": "lane_bremerhaven",
+   "side": "blue",
+   "port": "Bremerhaven",
+   "convoy": "blue_convoy_nordsee",
+   "t_per_day": 1500
+  }
+ ],
+ "asm_stock": {
+  "blue": {
+   "count": 32,
+   "per_day": 2,
+   "type": "AS.34 Kormoran (Tornado MFG)",
+   "note": "ОЦЕНКА"
+  },
+  "red": {
+   "count": 24,
+   "per_day": 2,
+   "type": "Х-25 / Х-29 (Су-17М4 MFG-28, Су-24)",
+   "note": "ОЦЕНКА"
+  }
+ },
  "ad_sites": [
   {
    "id": "red_ad_af_allstedt",
@@ -2174,8 +2312,8 @@
    "side": "red",
    "tier": "short",
    "covers": "af_damgarten",
-   "lat": 54.2588,
-   "lon": 12.4231,
+   "lat": 54.262,
+   "lon": 12.4214,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2295,8 +2433,8 @@
    "side": "blue",
    "tier": "short",
    "covers": "af_kiel",
-   "lat": 54.3687,
-   "lon": 10.1585,
+   "lat": 54.3703,
+   "lon": 10.1615,
    "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2317,8 +2455,8 @@
    "side": "red",
    "tier": "short",
    "covers": "af_laage",
-   "lat": 53.9145,
-   "lon": 12.2574,
+   "lat": 53.9235,
+   "lon": 12.2584,
    "variant": 1,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2460,8 +2598,8 @@
    "side": "red",
    "tier": "short",
    "covers": "af_peenemunde",
-   "lat": 54.1551,
-   "lon": 13.7515,
+   "lat": 54.1588,
+   "lon": 13.7506,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2548,8 +2686,8 @@
    "side": "red",
    "tier": "short",
    "covers": "af_tutow",
-   "lat": 53.9147,
-   "lon": 13.1998,
+   "lat": 53.9247,
+   "lon": 13.1966,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -2715,8 +2853,8 @@
    "name": "ЗРК средней дальности (Rostock)",
    "side": "red",
    "tier": "medium",
-   "lat": 54.0697,
-   "lon": 12.0327,
+   "lat": 54.0992,
+   "lon": 12.0232,
    "variant": 1,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
@@ -2845,8 +2983,8 @@
    "name": "ЗРК средней дальности (Tutow)",
    "side": "red",
    "tier": "medium",
-   "lat": 53.8981,
-   "lon": 13.1547,
+   "lat": 53.9314,
+   "lon": 13.1442,
    "variant": 0,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
@@ -2855,8 +2993,8 @@
    "name": "ЗРК средней дальности (Peenemunde)",
    "side": "red",
    "tier": "medium",
-   "lat": 54.1468,
-   "lon": 13.6999,
+   "lat": 54.1589,
+   "lon": 13.6968,
    "variant": 1,
    "rule": "средний ярус: покрытие аэродромов и пунктов"
   },
