@@ -211,4 +211,7 @@ if __name__ == "__main__":
     op = G.DATA / "oob_kyiv22.json"
     oob = json.loads(op.read_text(encoding="utf-8"))
     oob["dispersal"] = {"blue": {"land_other_p": 0.3, "rebase_p": 0.2, "max_km": 300}}
+    # ДРЛО НАТО (E-3A над Польшей и Румынией): своих самолётов ДРЛО у ВСУ нет, данные - от союзников; в миссии -
+    # E-3A вне театра, в воздухе с начала миссии (не часть модели, не цель)
+    oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (над Польшей)"}}
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")

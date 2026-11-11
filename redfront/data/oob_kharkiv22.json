@@ -1932,6 +1932,13 @@
    "max_km": 300
   }
  },
+ "external_awacs": {
+  "blue": {
+   "type": "E_3A",
+   "standoff_km": 250,
+   "title": "ДРЛО НАТО E-3A (над Польшей)"
+  }
+ },
  "strategic_per_day": {
   "blue": {
    "gmlrs": 8,

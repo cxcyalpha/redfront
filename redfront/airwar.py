@@ -129,6 +129,9 @@ def _strike(state: dict, e: dict) -> list[str]:
         tgt["damage"] = min(1.0, before + DAMAGE.get(role, 0.3) * size_k)
         from . import explain
         lines.append(f"ИИ, {e['title']}: повреждение {before:.0%} -> {tgt['damage']:.0%}." + explain.damage_effect(state, tgt, before))
+        if role == "airfield":                   # самолёты на стоянках (рассредоточение - меньше, dispersal.py)
+            from . import dispersal
+            lines += [f"ИИ, {e['title']}: {x}" for x in dispersal.ground_losses(state, tgt, tgt["damage"] - before, "удар авиации")]
     elif obj["kind"] == "ship":                 # корабли: попадания по кораблям группы (naval.air_strike, авианосец - с пределом)
         from . import naval
         lines += [f"ИИ, {e['title']}: {x}" for x in naval.air_strike(state, tgt, size_k, "удар с воздуха" if asm_frac >= 1.0 else "удар с воздуха, бомбы", asm_frac)]

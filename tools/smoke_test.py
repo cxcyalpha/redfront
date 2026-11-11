@@ -4097,6 +4097,33 @@ def theatres_section(tmp: Path) -> None:
     check(5 <= len(other) <= 25 and all(b_ != home0 and sd["airbases"][b_]["side"] == "blue" for b_ in other)
           and reb and red_none,
           f"рассредоточение ВСУ: посадка не дома в {len(other)} из 40 вылетов, перебазирований за 5 суток {len(reb)}; у России нет")
+    # защита рассредоточением: самолёты на земле под ударом по аэродрому - меньше; без сценария с рассредоточением - нет
+    sg = model.new_campaign("kg", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    af_ = sg["units"]["af_hannover"]
+    n0 = sum(u_["count"] for u_ in sg["units"].values() if u_.get("base") == "hannover" and model.category(u_) == "air")
+    for k in range(10):
+        af_["damage"] = 0.01 * k
+        dispersal.ground_losses(sg, af_, 0.5, f"t{k}")
+    n_prot = n0 - sum(u_["count"] for u_ in sg["units"].values() if u_.get("base") == "hannover" and model.category(u_) == "air")
+    sg2 = model.new_campaign("kg", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    sg2["dispersal"]["blue"]["protect"] = 0.0
+    for k in range(10):
+        sg2["units"]["af_hannover"]["damage"] = 0.01 * k
+        dispersal.ground_losses(sg2, sg2["units"]["af_hannover"], 0.5, f"t{k}")
+    n_open = n0 - sum(u_["count"] for u_ in sg2["units"].values() if u_.get("base") == "hannover" and model.category(u_) == "air")
+    sgd = model.new_campaign("kgd")                # сценарий без рассредоточения - потерь на земле нет
+    afd = next(u_ for u_ in sgd["units"].values() if u_.get("role") == "airfield")
+    nod = dispersal.ground_losses(sgd, afd, 0.5, "t")
+    k_dmg = dispersal.sortie_damage(sg, sg["units"]["ua_su25"], 0.4)
+    check(n_prot < n_open and not nod and abs(k_dmg - 0.4 * (1 - dispersal.SORTIE_PROTECT * dispersal.PROTECT)) < 1e-9,
+          f"рассредоточение защищает: 10 ударов по Hannover - на земле погибло {n_prot} (без защиты {n_open}); "
+          f"повреждение аэродрома для вылетов 40% -> {k_dmg:.0%}; в сценарии без рассредоточения потерь на земле нет")
+    # ДРЛО НАТО вне театра: E-3A в воздухе с начала миссии, бессмертный и невидимый, строка в брифинге
+    mza = zipfile.ZipFile(tmp / "kh.miz")
+    dct = mza.read("l10n/DEFAULT/dictionary").decode("utf-8")
+    mzm = mza.read("mission").decode("utf-8")
+    check("ext awacs blue" in mzm and "E-3A" in mzm and "ДРЛО НАТО E-3A" in dct and "player awacs" not in mzm,
+          "ДРЛО НАТО: E-3A вне театра в миссии, строка в брифинге; допущение E-2C игрока не нужно")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
     sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
     planner.plan(sh)

@@ -1604,6 +1604,37 @@ def player_variant(state: dict, type_name: str) -> str | None:
     return pv
 
 
+def external_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> list[str]:
+    """ДРЛО извне театра (сценарий: external_awacs стороны): самолёт третьей стороны, не с аэродрома театра - в
+    воздухе с начала миссии на standoff_km за фронтом своей стороны (ДРЛО НАТО E-3A над Польшей и Румынией - для ВСУ).
+    Сбить его противник не может (вне театра, политически), поэтому бессмертный и невидимый; не часть модели - не
+    цель, не потеря, не исполнитель задач. Картину ИИ своей стороны DCS видит, игроку - по радио (меню AWACS)."""
+    out = []
+    from dcs import planes as _planes
+    for side, c in sorted((state.get("external_awacs") or {}).items()):
+        pos = planner.orbit_point(state, side, c.get("standoff_km", 250))
+        if pos is None:
+            continue
+        ac = getattr(_planes, c.get("type", "E_3A"))
+        alt, spd = int(c.get("alt_m", 9000)), 600
+        p = _pt(m, pos)
+        fg = m.flight_group_inflight(_country(m, state, side), f"ext awacs {side} {sortie}", ac, p, alt,
+                                     speed=spd, maintask=task.AWACS, group_size=1)
+        w = fg.points[0]
+        if not any(isinstance(t_, task.AWACSTaskAction) for t_ in w.tasks):
+            w.tasks.append(task.AWACSTaskAction())
+        w.tasks += [task.SetImmortalCommand(True), task.SetInvisibleCommand(True)]
+        w.tasks.append(task.ControlledTask(task.OrbitAction(altitude=alt, speed=spd, pattern=task.OrbitAction.OrbitPattern.RaceTrack)))
+        fg.add_waypoint(Point(p.x, p.y + 60_000, m.terrain), alt, speed=spd)
+        if side == tk["side"]:
+            t = c.get("title", "ДРЛО извне театра")
+            out.append(i18n.L(i18n.lang(state), f"{t}: вне театра, в воздухе с начала миссии - картина по радио (AWACS); "
+                                                  "противник его не атакует",
+                              f"{i18n.tr(t, 'en')}: outside the theatre, airborne from mission start - picture by radio "
+                              "(AWACS); the enemy does not attack it"))
+    return out
+
+
 def player_awacs(m: Mission, state: dict, tk: dict, sortie: int) -> str | None:
     """Игровое допущение: у стороны игрока нет ДРЛО в миссии (Израиль 1973, ВВС ДРВ...) - E-2C над своей территорией
     до конца миссии, бессмертный и невидимый для противника (его нет в истории: не цель, не потеря). Через него игрок
@@ -2819,8 +2850,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                 "(тип полка только для ИИ); ИИ и потери - по типу полка",
                                 f"gameplay concession: your flight flies {g['_variant']} instead of "
                                 f"{state['units'][g['performer']]['type']} (AI-only type); AI and losses use the unit type"))
+    ext_aw = external_awacs(m, state, tk, sortie)   # ДРЛО третьей стороны вне театра (НАТО для ВСУ)
     pa = player_awacs(m, state, tk, sortie) if player and player_air else None   # игроку - картина ДРЛО
     comm_lines = radio_setup(m, state, tk, pkg, sortie, player_air)
+    comm_lines += ext_aw
     if pa:
         comm_lines.append(pa)
     order_lines = package_order(pkg, times, i18n.lang(state))

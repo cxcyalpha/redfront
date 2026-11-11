@@ -244,5 +244,8 @@ if __name__ == "__main__":
     # рассредоточение ВВС Украины (dispersal.py): посадка на другом аэродроме - часто, но не в каждом вылете (интервью
     # лётчиков), перебазирование - раз в несколько суток. ОЦЕНКИ
     oob["dispersal"] = {"blue": {"land_other_p": 0.3, "rebase_p": 0.2, "max_km": 300}}
+    # ДРЛО НАТО (E-3A над Польшей и Румынией): своих самолётов ДРЛО у ВСУ нет, данные - от союзников; в миссии -
+    # E-3A вне театра, в воздухе с начала миссии (не часть модели, не цель)
+    oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (над Польшей)"}}
     oob["strategic_per_day"] = {"blue": {"gmlrs": 8, "tochka": 1}, "red": {"iskander": 2}}
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
