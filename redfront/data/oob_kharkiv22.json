@@ -1,0 +1,1745 @@
+{
+ "_about": "Состав сил 06.09.2022 (Харьковщина). Генерирован tools/gen_kharkiv22.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+ "theatre": "germany",
+ "preset": {
+  "title": "Харьков, сентябрь 2022: контрнаступление ВСУ",
+  "year": 2022,
+  "date": "2022-09-06"
+ },
+ "date": "2022-09-06",
+ "countries": {
+  "red": "Russia",
+  "blue": "Ukraine"
+ },
+ "doctrine": {
+  "red": "wp",
+  "blue": "wp"
+ },
+ "units": [
+  {
+   "id": "red_rg_balakliia",
+   "name": "Росгвардия и отряды БАРС (Балаклея)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Balakliia"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 6,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "оборона Балаклеи слабая - прорыв 6.09"
+  },
+  {
+   "id": "red_rg_balakliia_pvo",
+   "name": "Войсковая ПВО: Росгвардия и отряды БАРС (Балаклея)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_rg_balakliia",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_lnr_2ac",
+   "name": "Части 2-го АК ЛНР (Шевченково)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Shevchenkove"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_lnr_2ac_pvo",
+   "name": "Войсковая ПВО: Части 2-го АК ЛНР (Шевченково)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_lnr_2ac",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 2,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_1gta_kup",
+   "name": "Части 1-й гв. танковой армии (Купянск)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kupiansk"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "CHAP_T90M",
+     "count": 4,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 10,
+     "role": "IFV"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_1gta_kup_pvo",
+   "name": "Войсковая ПВО: Части 1-й гв. танковой армии (Купянск)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_1gta_kup",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_izium_3mrd",
+   "name": "3-я мотострелковая дивизия (Изюм)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Izium"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 20,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_izium_3mrd_pvo",
+   "name": "Войсковая ПВО: 3-я мотострелковая дивизия (Изюм)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_izium_3mrd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_izium_144mrd",
+   "name": "144-я мотострелковая дивизия (Изюм)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Izium"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 20,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_izium_144mrd_pvo",
+   "name": "Войсковая ПВО: 144-я мотострелковая дивизия (Изюм)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_izium_144mrd",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_lyman",
+   "name": "Части 20-й ОА и БАРС (Лиман)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Lyman"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 20,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_lyman_pvo",
+   "name": "Войсковая ПВО: Части 20-й ОА и БАРС (Лиман)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_lyman",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_11ac",
+   "name": "11-й армейский корпус (Липцы)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Lyptsi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 20,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_11ac_pvo",
+   "name": "Войсковая ПВО: 11-й армейский корпус (Липцы)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_11ac",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_6caa",
+   "name": "Части 6-й ОА (Волчанск)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Vovchansk"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B",
+     "count": 6,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_6caa_pvo",
+   "name": "Войсковая ПВО: Части 6-й ОА (Волчанск)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_6caa",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_vdv_kup",
+   "name": "Части ВДВ (переброска к Купянску)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Valuyki"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMD_1",
+     "count": 25,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_D",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "note": "переброска 8-9.09 - ОЦЕНКА"
+  },
+  {
+   "id": "red_vdv_kup_pvo",
+   "name": "Войсковая ПВО: Части ВДВ (переброска к Купянску)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_vdv_kup",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_reserve_svatove",
+   "name": "Резерв (Сватово)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Svatove"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_72B3",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 20,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_82A",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 4,
+   "arrives_jitter": 0,
+   "note": "ОЦЕНКА"
+  },
+  {
+   "id": "red_reserve_svatove_pvo",
+   "name": "Войсковая ПВО: Резерв (Сватово)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_reserve_svatove",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_92mb",
+   "name": "92-я механизированная бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Chuhuiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 25,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 25,
+     "role": "IFV"
+    },
+    {
+     "type": "M_113",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "kupiansk"
+  },
+  {
+   "id": "blue_92mb_pvo",
+   "name": "Войсковая ПВО: 92-я механизированная бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_92mb",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_25aab",
+   "name": "25-я десантная бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Zmiiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMP_2",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "M_113",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "izium"
+  },
+  {
+   "id": "blue_25aab_pvo",
+   "name": "Войсковая ПВО: 25-я десантная бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_25aab",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_80aab",
+   "name": "80-я десантно-штурмовая бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Chuhuiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMP_2",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "M_113",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "kupiansk"
+  },
+  {
+   "id": "blue_80aab_pvo",
+   "name": "Войсковая ПВО: 80-я десантно-штурмовая бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_80aab",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_3tb",
+   "name": "3-я танковая бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Zmiiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 10,
+     "role": "IFV"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "izium"
+  },
+  {
+   "id": "blue_3tb_pvo",
+   "name": "Войсковая ПВО: 3-я танковая бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_3tb",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_4tb",
+   "name": "4-я танковая бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Kharkiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 20,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_2",
+     "count": 10,
+     "role": "IFV"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "kupiansk",
+   "note": "ОЦЕНКА"
+  },
+  {
+   "id": "blue_4tb_pvo",
+   "name": "Войсковая ПВО: 4-я танковая бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_4tb",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_14mb",
+   "name": "14-я механизированная бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kharkiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 25,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 25,
+     "role": "IFV"
+    },
+    {
+     "type": "M_113",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "north"
+  },
+  {
+   "id": "blue_14mb_pvo",
+   "name": "Войсковая ПВО: 14-я механизированная бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_14mb",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_93mb",
+   "name": "93-я механизированная бригада (от Славянска)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sloviansk"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "CHAP_T64BV",
+     "count": 25,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 10,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 25,
+     "role": "IFV"
+    },
+    {
+     "type": "M_113",
+     "count": 15,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "izium"
+  },
+  {
+   "id": "blue_93mb_pvo",
+   "name": "Войсковая ПВО: 93-я механизированная бригада (от Славянска)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_93mb",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_95aab",
+   "name": "95-я десантно-штурмовая бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sloviansk"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMP_2",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "M_113",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "lyman"
+  },
+  {
+   "id": "blue_95aab_pvo",
+   "name": "Войсковая ПВО: 95-я десантно-штурмовая бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_95aab",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_81amb",
+   "name": "81-я аэромобильная бригада",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Sloviansk"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BMP_2",
+     "count": 15,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "M_113",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "axis": "lyman"
+  },
+  {
+   "id": "blue_81amb_pvo",
+   "name": "Войсковая ПВО: 81-я аэромобильная бригада",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_81amb",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ngu_kharkiv",
+   "name": "НГУ и территориальная оборона Харькова",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kharkiv"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 10,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ngu_kharkiv_pvo",
+   "name": "Войсковая ПВО: НГУ и территориальная оборона Харькова",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_ngu_kharkiv",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_s300_kharkiv",
+   "name": "Дивизион С-300ПС (Харьков)",
+   "side": "blue",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 52.56,
+    "lon": 11.78
+   },
+   "composition": [
+    {
+     "type": "S-300PS 64H6E sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 40B6M tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 54K6 cp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "S-300PS 5P85C ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_buk_chuhuiv",
+   "name": "Дивизион Бук-М1 (Чугуев)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 52.57,
+    "lon": 12.25
+   },
+   "composition": [
+    {
+     "type": "SA-11 Buk SR 9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA-11 Buk CC 9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA-11 Buk LN 9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_osa_zmiiv",
+   "name": "Батарея Оса-АКМ (Змиев)",
+   "side": "blue",
+   "role": "sam_short",
+   "state": "deployed",
+   "pos": {
+    "lat": 52.42,
+    "lon": 12.1
+   },
+   "composition": [
+    {
+     "type": "Osa_9A33_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s400_belgorod",
+   "name": "Дивизион С-400 (Белгород; в DCS - С-300ПС)",
+   "side": "red",
+   "role": "sam_long",
+   "state": "deployed",
+   "pos": {
+    "lat": 53.12,
+    "lon": 12.3
+   },
+   "composition": [
+    {
+     "type": "S-300PS 64H6E sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 40B6M tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-300PS 54K6 cp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "S-300PS 5P85C ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_buk_izium",
+   "name": "Дивизион Бук-М2 (Изюм; в DCS - Бук-М1)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "pos": {
+    "lat": 52.45,
+    "lon": 12.68
+   },
+   "composition": [
+    {
+     "type": "SA-11 Buk SR 9S18M1",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SA-11 Buk CC 9S470M1",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "SA-11 Buk LN 9A310M1",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_tor_kup",
+   "name": "Батарея Тор-М2 (Купянск)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "pos": {
+    "lat": 52.77,
+    "lon": 13.3
+   },
+   "composition": [
+    {
+     "type": "CHAP_TorM2",
+     "count": 3,
+     "role": "launcher"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_pantsir_belgorod",
+   "name": "Батарея Панцирь-С1 (Белгород)",
+   "side": "red",
+   "role": "sam_short",
+   "state": "deployed",
+   "pos": {
+    "lat": 53.13,
+    "lon": 12.2
+   },
+   "composition": [
+    {
+     "type": "CHAP_PantsirS1",
+     "count": 3,
+     "role": "launcher"
+    }
+   ],
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_leer_izium",
+   "name": "Комплекс Леер-3 (Изюм; в DCS - КП СКП-11)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "leer3",
+   "pos": {
+    "lat": 52.45,
+    "lon": 12.62
+   },
+   "composition": [
+    {
+     "type": "SKP_11",
+     "count": 1,
+     "role": "ew"
+    },
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_zhitel_kup",
+   "name": "Станция Р-330Ж Житель (Купянск; в DCS - Урал)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "zhitel",
+   "pos": {
+    "lat": 52.76,
+    "lon": 13.18
+   },
+   "composition": [
+    {
+     "type": "Ural_4320_31",
+     "count": 2,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ew_krasukha",
+   "name": "Станция Красуха-4 (Белгород; в DCS - КП СКП-11)",
+   "side": "red",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "krasukha",
+   "pos": {
+    "lat": 53.1,
+    "lon": 12.25
+   },
+   "composition": [
+    {
+     "type": "SKP_11",
+     "count": 1,
+     "role": "ew"
+    },
+    {
+     "type": "Ural_375_PBU",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ew_bukovel",
+   "name": "Буковель-АД (Харьков; в DCS - КрАЗ)",
+   "side": "blue",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "bukovel",
+   "pos": {
+    "lat": 52.62,
+    "lon": 11.95
+   },
+   "composition": [
+    {
+     "type": "KrAZ6322",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_ew_notch",
+   "name": "Нота (Чугуев; в DCS - КрАЗ)",
+   "side": "blue",
+   "role": "ew_site",
+   "state": "deployed",
+   "station": "notch",
+   "pos": {
+    "lat": 52.59,
+    "lon": 12.3
+   },
+   "composition": [
+    {
+     "type": "KrAZ6322",
+     "count": 1,
+     "role": "ew"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_iskander",
+   "name": "Ракетная бригада Искандер-М (Белгород)",
+   "side": "red",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "iskander",
+   "pos": {
+    "lat": 53.2,
+    "lon": 12.1
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_himars",
+   "name": "Батарея HIMARS ВСУ",
+   "side": "blue",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "gmlrs",
+   "pos": {
+    "lat": 52.55,
+    "lon": 12.15
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "к сентябрю 2022 у Украины 16 HIMARS (все фронты) - на направлении ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tochka",
+   "name": "Ракетная бригада Точка-У ВС Украины",
+   "side": "blue",
+   "role": "ssm",
+   "state": "deployed",
+   "missile": "tochka",
+   "pos": {
+    "lat": 52.4,
+    "lon": 11.7
+   },
+   "composition": [
+    {
+     "type": "Scud_B",
+     "count": 3,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su34",
+   "name": "Бомбардировочный полк (Су-34)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "wittstock",
+   "type": "Su_34",
+   "count": 12,
+   "strike_radius_km": 400,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su25",
+   "name": "Штурмовой полк (Су-25СМ3; в DCS - Су-25)",
+   "side": "red",
+   "role": "attack",
+   "base": "finow",
+   "type": "Su_25",
+   "count": 12,
+   "strike_radius_km": 250,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_su35",
+   "name": "Истребительный полк (Су-35С; в DCS - Су-27)",
+   "side": "red",
+   "role": "fighter",
+   "base": "wittstock",
+   "type": "Su_27",
+   "count": 12,
+   "strike_radius_km": 500,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-35С включён - Су-35С, иначе - Су-27",
+   "estimate": true,
+   "mod_alt": {
+    "mod": "su35s",
+    "type": "Su_35S",
+    "name": "Истребительный полк (Су-35С)"
+   }
+  },
+  {
+   "id": "ru_su30",
+   "name": "Полк Су-30СМ (в DCS - Су-27)",
+   "side": "red",
+   "role": "fighter",
+   "base": "finow",
+   "type": "Su_27",
+   "count": 8,
+   "strike_radius_km": 500,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; мод Су-30 включён - Су-30СМ, иначе - Су-27",
+   "estimate": true,
+   "mod_alt": {
+    "mod": "su30",
+    "type": "Su_30SM",
+    "name": "Полк Су-30СМ"
+   }
+  },
+  {
+   "id": "ru_ka52",
+   "name": "Вертолёты Ка-52 (в DCS - Ка-50)",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "templin",
+   "type": "Ka_50",
+   "count": 10,
+   "strike_radius_km": 150,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Ка-52 в pydcs нет",
+   "estimate": true
+  },
+  {
+   "id": "ru_mi28",
+   "name": "Вертолёты Ми-28Н",
+   "side": "red",
+   "role": "attack_helo",
+   "base": "templin",
+   "type": "Mi_28N",
+   "count": 8,
+   "strike_radius_km": 150,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ru_mi8",
+   "name": "Вертолёты Ми-8АМТШ",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "templin",
+   "type": "Mi_8MT",
+   "count": 12,
+   "strike_radius_km": 200,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_mig29",
+   "name": "114-я бригада тактической авиации (МиГ-29)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "braunschweig",
+   "type": "MiG_29A",
+   "count": 10,
+   "strike_radius_km": 300,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; AGM-88 на МиГ-29 в DCS не подвесить",
+   "estimate": true
+  },
+  {
+   "id": "ua_su27",
+   "name": "831-я бригада тактической авиации (Су-27)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "hannover",
+   "type": "Su_27",
+   "count": 8,
+   "strike_radius_km": 500,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_su25",
+   "name": "299-я бригада тактической авиации (Су-25)",
+   "side": "blue",
+   "role": "attack",
+   "base": "hannover",
+   "type": "Su_25",
+   "count": 10,
+   "strike_radius_km": 250,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_su24",
+   "name": "7-я бригада тактической авиации (Су-24М)",
+   "side": "blue",
+   "role": "bomber",
+   "base": "celle",
+   "type": "Su_24M",
+   "count": 8,
+   "strike_radius_km": 400,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_mi24",
+   "name": "Армейская авиация (Ми-24)",
+   "side": "blue",
+   "role": "attack_helo",
+   "base": "gardelegen",
+   "type": "Mi_24P",
+   "count": 8,
+   "strike_radius_km": 150,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "ua_mi8",
+   "name": "Армейская авиация (Ми-8)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "gardelegen",
+   "type": "Mi_8MT",
+   "count": 8,
+   "strike_radius_km": 200,
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "strategic_stock": {
+  "red": {
+   "iskander": 16
+  },
+  "blue": {
+   "gmlrs": 120,
+   "tochka": 6
+  }
+ },
+ "variants": [
+  {
+   "name": "base",
+   "title": "Харьков, сентябрь 2022: контрнаступление ВСУ",
+   "task_rules": {
+    "blue": {
+     "strike_airfield": {
+      "off": true,
+      "why": "аэродромы в России - вне ударов Украины в 2022 году"
+     }
+    }
+   },
+   "posture": {
+    "blue": "offense",
+    "red": "defense"
+   },
+   "objectives": {
+    "blue": {
+     "kupiansk": [
+      "Balakliia",
+      "Shevchenkove",
+      "Kupiansk"
+     ],
+     "izium": [
+      "Balakliia",
+      "Izium",
+      "Borova"
+     ],
+     "lyman": [
+      "Lyman"
+     ],
+     "north": [
+      "Lyptsi",
+      "Vovchansk"
+     ]
+    },
+    "red": []
+   }
+  }
+ ],
+ "replacements": {
+  "air_per_day": 1,
+  "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "Тор-М2, Панцирь",
+     "composition": [
+      {
+       "type": "CHAP_TorM2",
+       "role": "launcher",
+       "count": 1
+      },
+      {
+       "type": "CHAP_PantsirS1",
+       "role": "launcher",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Оса, ЗУ-23",
+     "composition": [
+      {
+       "type": "Osa_9A33_ln",
+       "role": "launcher",
+       "count": 1
+      },
+      {
+       "type": "ZU_23_Emplacement",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "Ствольная и реактивная артиллерия как род войск (кроме HIMARS - в стратегическом слое), минирование, FPV и малые беспилотники (в лётном симуляторе нет), AGM-88 HARM на МиГ-29 (в DCS такой подвески нет), удары Калибрами и Х-101 по энергосистеме, юг (Херсон) - вне сектора.",
+ "strategic_per_day": {
+  "blue": {
+   "gmlrs": 8,
+   "tochka": 1
+  },
+  "red": {
+   "iskander": 2
+  }
+ }
+}

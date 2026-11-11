@@ -27,6 +27,9 @@ MISSILES = {
     "iskander": {"title": "9К720 Искандер-М", "range_km": 500, "cep_m": 10, "warhead_kg": 480, "per_day": 2.0,
                  "dcs": "CHAP_9K720_HE",       # CurrentHill - встроен в DCS (есть в pydcs)
                  "source": "Искандер-М: до 500 км, КВО 5-30 м (открытые оценки); темп - ОЦЕНКА"},
+    "gmlrs": {"title": "M31 GMLRS (HIMARS)", "range_km": 80, "cep_m": 10, "warhead_kg": 90, "per_day": 2.0,
+              "dcs": "CHAP_M142_GMLRS_M31",    # CurrentHill M142 HIMARS (есть в pydcs)
+              "source": "GMLRS M31: ~70-84 км, КВО <10 м, БЧ ~90 кг; темп - ОЦЕНКА (2 ракеты на пусковую в сутки)"},
     "tlam": {"title": "BGM-109 Томагавк", "range_km": 1300, "cep_m": 10, "warhead_kg": 450, "per_day": 4.0, "cruise": True,
              "source": "TLAM-C: ~1250-1600 км, КВО ~10 м; пуски с кораблей с бронированными пусковыми (ABL) или УВП"},
     # крылатые ракеты воздушного базирования (обычное снаряжение): pylon - часть имени подвески pydcs, from - год

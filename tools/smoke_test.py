@@ -4051,6 +4051,20 @@ def theatres_section(tmp: Path) -> None:
     check(uk == ew.UAV_HIT_K and ul == ew.UAV_LOSS_ADD and gn and uk2 == 1.0 and cepk == 1.5 and cept == 1.0 and built,
           f"РЭБ: TB2 в 15 км от Леер-3 - успех x{uk}, потери +{ul}; станция разбита - x{uk2}; ГНСС-зона Поле-21 - {gn}; КВО Х-101 у Киева x{cepk}, Точки-У x{cept}; "
           f"удар по станции РЭБ - миссия собрана ({built})")
+    # Харьков 2022: ВСУ наступают; HIMARS бьёт по складам фронта, не по России; путь наступления - в обход России
+    skh = model.new_campaign("kh", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    planner.plan(skh)
+    gm = [p_["target"] for p_ in skh["ssm_plan"] if p_["missile"] == "gmlrs"]
+    from redfront import ops
+    pth = ops.path(skh, "Lyptsi", "Vovchansk", avoid={"Belgorod", "Valuyki"})
+    for _ in range(6):
+        sim.end_day(skh)
+        planner.plan(skh)
+    took = [n for n in ("Balakliia", "Izium", "Shevchenkove", "Kupiansk") if ops.owner(skh, n) == "blue"]
+    build.build(skh, tmp / "kh.miz", task_no=1)
+    check(skh["posture"]["blue"] == "offense" and gm and all("belgorod" not in t_ for t_ in gm) and "Belgorod" not in (pth or [])
+          and took and (tmp / "kh.miz").exists(),
+          f"Харьков-22: HIMARS по {sorted(set(gm))}; путь Липцы - Волчанск {pth}; за 6 дней ВСУ взяли {took}; миссия собрана")
     # seadprio.lua: незапланированный ЗРК, стреляющий по звену подавления, - ответ вне очереди (один раз), запланированный - нет
     sp_src = (Path(build.__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
     sp_src = sp_src.replace("@SPECS@", '{ group = "F1", sams = { "SAM_A" } }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")

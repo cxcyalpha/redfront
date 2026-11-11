@@ -58,12 +58,14 @@ def graph(state: dict) -> dict[str, dict[str, float]]:
     return g
 
 
-def path(state: dict, a: str, b: str, side: str | None = None) -> list[str] | None:
+def path(state: dict, a: str, b: str, side: str | None = None, avoid: set | None = None) -> list[str] | None:
     """Кратчайший путь по графу пунктов (км по прямой между пунктами); side - только через пункты этой стороны
-    (кроме начального)."""
+    (кроме начального); avoid - в обход этих пунктов (политические ограничения сценария)."""
     g = graph(state)
     if side:
         g = {p: {q: w for q, w in nb.items() if owner(state, q) == side} for p, nb in g.items()}
+    if avoid:
+        g = {p: {q: w for q, w in nb.items() if q not in avoid or q == b} for p, nb in g.items()}
     dist, prev, q = {a: 0.0}, {}, [(0.0, a)]
     while q:
         d, u = heapq.heappop(q)
@@ -269,7 +271,7 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
                 t = r.choices(top, weights=w)[0]
             else:
                 t = min(top, key=lambda q: path_km(state, here, q))
-            p = path(state, here, t)
+            p = path(state, here, t, avoid=banned)
             if p and len(p) > 1:
                 set_route(state, u, p, "attack")
                 lines.append(f"{u['name']}: наступление на {t} ({' - '.join(p)}).")
