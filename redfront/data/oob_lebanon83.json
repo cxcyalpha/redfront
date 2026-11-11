@@ -498,6 +498,183 @@
    "estimate": true
   },
   {
+   "id": "red_7div",
+   "name": "7-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Quneitra"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7div_pvo",
+   "name": "Войсковая ПВО: 7-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5div",
+   "name": "5-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sanamayn"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_5div_pvo",
+   "name": "Войсковая ПВО: 5-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_5div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_9div",
+   "name": "9-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Kiswah"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 180,
+     "role": "MBT"
+    },
+    {
+     "type": "T_72B",
+     "count": 40,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 120,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 90,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_9div_pvo",
+   "name": "Войсковая ПВО: 9-я механизированная дивизия Сирии (Голаны)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_9div",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
    "id": "red_metn_kub_1",
    "name": "Батарея Куб (Метн)",
    "side": "red",
@@ -642,6 +819,156 @@
    "pos": {
     "lat": 34.62,
     "lon": 36.72
+   },
+   "composition": [
+    {
+     "type": "RLS_19J6",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "RPC_5N62V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S-200_Launcher",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s75_1",
+   "name": "Дивизион С-75 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.6,
+    "lon": 36.2
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s75_2",
+   "name": "Дивизион С-75 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.42,
+    "lon": 36.35
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_s125_1",
+   "name": "Дивизион С-125 (Дамаск)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.48,
+    "lon": 36.15
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_dam_kub_1",
+   "name": "Батарея Куб (Катана)",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.4,
+    "lon": 36.05
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s200_dumayr2",
+   "name": "Дивизион С-200 (Дамаск)",
+   "side": "red",
+   "role": "sam_long",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.45,
+    "lon": 36.45
    },
    "composition": [
     {
@@ -1128,5 +1455,5 @@
    ]
   }
  },
- "_not_included": "A-7E (нет в DCS - F/A-18C), линкор New Jersey, многонациональные силы (Франция - 'Супер Этандары' с 'Клемансо', Великобритания - 'Буканиры' из Акротири: в DCS их нет), F-111 (нет в DCS), Израиль."
+ "_not_included": "A-7E (нет в DCS - F/A-18C), линкор New Jersey, многонациональные силы (Франция - 'Супер Этандары' с 'Клемансо', Великобритания - 'Буканиры' из Акротири: в DCS их нет), F-111 (нет в DCS); Израиль и занятый им юг Ливана - нейтральны (на карте, вне боёв)."
 }

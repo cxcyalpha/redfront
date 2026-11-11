@@ -4139,6 +4139,20 @@ def theatres_section(tmp: Path) -> None:
         check(land and not fcap and (tmp / f"{sc_}_land.miz").exists(),
               f"{sc_}: задач с наземной базы {base_} - {len(land)} ({sorted({t_['kind'] for t_ in land})}), миссия собрана; "
               f"прикрытие флота с неё - {len(fcap)}")
+    # Ливан-83 на карте 1982: Израиль и занятый им юг Ливана - нейтральны (без стороны и дорог); вариант 'Израиль вступает'
+    import json as _json
+    s82 = _json.loads((Path(model.__file__).parent / "data" / "sector_syria.json").read_text(encoding="utf-8"))
+    s83 = _json.loads((Path(model.__file__).parent / "data" / "sector_lebanon83.json").read_text(encoding="utf-8"))
+    s83i = _json.loads((Path(model.__file__).parent / "data" / "sector_lebanon83_il.json").read_text(encoding="utf-8"))
+    o83i = _json.loads((Path(model.__file__).parent / "data" / "oob_lebanon83_il.json").read_text(encoding="utf-8"))
+    common = set(s82["places"]) - {"Beirut"}
+    neu = [n for n, p in s83["places"].items() if p.get("neutral")]
+    neu_links = [l for l in s83["links"] if set(l) & set(neu)]
+    il_air = [u_ for u_ in o83i["units"] if u_.get("nation") == "il" and u_.get("type")]
+    check(common <= set(s83["places"]) and "Haifa" in neu and not neu_links and s83i["places"]["Haifa"]["side"] == "blue"
+          and len(il_air) >= 6 and "ramat_david" in s83i["airbases"],
+          f"Ливан-83: все {len(common)} пунктов 1982 на карте, нейтральных {len(neu)} (без дорог); вариант с Израилем - "
+          f"{len(il_air)} авиачастей ВВС Израиля, аэродромов {len(s83i['airbases'])}")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
     sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
     planner.plan(sh)
