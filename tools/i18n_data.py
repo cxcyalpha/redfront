@@ -74,7 +74,7 @@ PLACES = {
 NAMES = {
     # Харьков, 2022
     "Харьков, сентябрь 2022: контрнаступление ВСУ": "Kharkiv, September 2022: Ukrainian counteroffensive",
-    "Харьков: сентябрь 2022 (контрнаступление ВСУ, условная география на карте Германии)": "Kharkiv: September 2022 (Ukrainian counteroffensive, notional geography on the Germany map)",
+    "Харьков: сентябрь 2022 (контрнаступление ВСУ, реальная география в масштабе на карте Германии)": "Kharkiv: September 2022 (Ukrainian counteroffensive, real geography to scale on the Germany map)",
     "11-й армейский корпус (Липцы)": "11th Army Corps (Lyptsi)", "114-я бригада тактической авиации (МиГ-29)": "114th Tactical Aviation Brigade (MiG-29)",
     "14-я механизированная бригада": "14th Mechanized Brigade", "144-я мотострелковая дивизия (Изюм)": "144th Motor Rifle Division (Izium)",
     "25-я десантная бригада": "25th Airborne Brigade", "3-я мотострелковая дивизия (Изюм)": "3rd Motor Rifle Division (Izium)",
@@ -145,7 +145,7 @@ NAMES = {
     "Истребительный полк (Су-35С)": "Fighter regiment (Su-35S)", "Полк Су-30СМ": "Su-30SM regiment",
     "Полк Су-30СМ (в DCS - Су-27)": "Su-30SM regiment (Su-27 in DCS)", "Истребители ВВС Армении (Су-30СМ)": "Armenian Air Force fighters (Su-30SM)",
     "Киев, февраль 2022: наступление на Киев (первые недели)": "Kyiv, February 2022: the offensive on Kyiv (first weeks)",
-    "Киев: февраль 2022 (первые недели, условная география на карте Германии)": "Kyiv: February 2022 (first weeks, notional geography on the Germany map)",
+    "Киев: февраль 2022 (первые недели, реальная география в масштабе на карте Германии)": "Kyiv: February 2022 (first weeks, real geography to scale on the Germany map)",
     "1-я танковая бригада (Чернигов)": "1st Tank Brigade (Chernihiv)", "14-я механизированная бригада (с запада)": "14th Mechanized Brigade (from the west)",
     "2-я гв. танковая армия (Сумы - Конотоп)": "2nd Guards Tank Army (Sumy - Konotop)", "299-я бригада тактической авиации (Су-25)": "299th Tactical Aviation Brigade (Su-25)",
     "35-я общевойсковая армия (Беларусь - правый берег)": "35th Combined Arms Army (Belarus - right bank)", "36-я общевойсковая армия": "36th Combined Arms Army",
@@ -854,7 +854,7 @@ MSGS += [
 MSGS += [
     # погода
     ("антициклон", "high pressure"), ("тыл циклона", "post-frontal"), ("прохождение фронта", "frontal passage"), ("ясно", "clear"),
-    ("ветер {d}° {v} м/с (на {h} м - {x})", "wind {d}° {v} m/s ({x} at {h} m)"), ("видимость {k} км", "visibility {k} km"),
+    ("ветер {d}° {v} м/с (на {h} м - {x})", "wind {d}° {v} m/s ({x} at {h} m)"), ("видимость {k} км", "visibility {k} km"), ("видимость {d} м (туман)", "visibility {d} m (fog)"),
     ("QNH {p} гПа", "QNH {p} hPa"), ("нижняя граница облаков {h} м", "cloud base {h} m"), ("нижняя граница {h} м", "cloud base {h} m"),
     ("Погода: отменён вылет «{t}» - нижняя граница облаков {h} м.", "Weather: sortie «{t|tr}» cancelled - cloud base {h} m."),
     ("Погода: отменён вылет «{t}» - {r}.", "Weather: sortie «{t|tr}» cancelled - {r|tr}."),
