@@ -4081,6 +4081,22 @@ def theatres_section(tmp: Path) -> None:
     check(k0 == 1.0 and 1.0 < k1 <= 1.0 + artillery.MAX_K and k2 <= 1.0 + artillery.MAX_K and len(gr["vehicles"]) == 16,
           f"артиллерия: вне боя x{k0}, в бою x{k1:.2f}, все бригады рядом x{k2:.2f} (предел {1 + artillery.MAX_K}); "
           f"бригада в миссии - {len(gr['vehicles'])} орудий, огонь по {'точке' if gr.get('fire_at') else 'нет цели'}")
+    # рассредоточение ВВС Украины (dispersal.py): посадка на другом аэродроме и перебазирование по доктрине
+    from redfront import command, dispersal
+    sd = model.new_campaign("kd", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    mig = sd["units"]["ua_mig29s"]
+    lands = [dispersal.land_other(sd, mig, f"t{k}") for k in range(40)]
+    other = [b_ for b_ in lands if b_]
+    home0 = mig["base"]
+    reb = []
+    for _ in range(5):
+        reb += dispersal.daily(sd)
+        command.apply_rebases(sd)
+        sd["day"] += 1
+    red_none = dispersal.land_other(sd, sd["units"]["ru_su34"], "x") is None
+    check(5 <= len(other) <= 25 and all(b_ != home0 and sd["airbases"][b_]["side"] == "blue" for b_ in other)
+          and reb and red_none,
+          f"рассредоточение ВСУ: посадка не дома в {len(other)} из 40 вылетов, перебазирований за 5 суток {len(reb)}; у России нет")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
     sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
     planner.plan(sh)

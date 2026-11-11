@@ -205,3 +205,10 @@ G.SSM = [
 
 if __name__ == "__main__":
     G.main()
+    import json
+    # рассредоточение ВВС Украины (dispersal.py): самолёты рассредоточены до ударов 24.02, затем - посадка на другом
+    # аэродроме часто, перебазирование раз в несколько суток (интервью лётчиков). ОЦЕНКИ
+    op = G.DATA / "oob_kyiv22.json"
+    oob = json.loads(op.read_text(encoding="utf-8"))
+    oob["dispersal"] = {"blue": {"land_other_p": 0.3, "rebase_p": 0.2, "max_km": 300}}
+    op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")

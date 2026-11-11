@@ -2602,6 +2602,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 land = m.terrain.airports[b["airport"]]
                 g["_reach_note"] = i18n.L(i18n.lang(state), f"посадка на запасном: {b['name']} (топлива домой не хватает)",
                                           f"recovery at {b['name']} (not enough fuel to return home)")
+        if land is airport and not rc:           # рассредоточение (dispersal.py): посадка на другом своём аэродроме
+            from . import dispersal
+            ob = dispersal.land_other(state, perf, f"{perf['id']}-{g['group']}-{sortie}")
+            b = state["airbases"].get(ob or "")
+            if b and b.get("airport") in m.terrain.airports:
+                land = m.terrain.airports[b["airport"]]
+                g["_reach_note"] = i18n.L(i18n.lang(state), f"посадка на {b['name']} (рассредоточение)",
+                                          f"landing at {b['name']} (dispersal)")
         _land(fg, land, spd)
         if is_player:
             player_air = (airport, land)

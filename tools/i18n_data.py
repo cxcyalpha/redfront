@@ -127,6 +127,7 @@ NAMES = {
     "AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 8)": "AGM-88 HARM from August 2022, on the inner wing pylons (3, 8)",
     "Удар по артиллерии": "Artillery strike", "артиллерийские бригады и полки": "artillery brigades and regiments",
     "SEAD (AGM-88 HARM)": "SEAD (AGM-88 HARM)",
+    "HARM - только на МиГ-29С (на МиГ-29А пуск невозможен)": "HARM only on the MiG-29S (the MiG-29A cannot launch it)",
     "дальняя авиация": "long-range aviation", "базы": "bases", "вне сектора": "outside the sector", "Пиннов": "Pinnow",
     "условно: середина участка": "notional: middle of the segment", "M31 GMLRS (HIMARS)": "M31 GMLRS (HIMARS)",
     "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, from memory - to be checked",
@@ -599,6 +600,8 @@ MSGS = [
     # бой и марш
     ("{u}: бои к {t} - боеспособность {a} -> {b}.", "{u}: fighting until {t} - strength {a} -> {b}."),
     ("{u}: потери от контрбатарейного огня {a}.", "{u}: counter-battery losses {a}."),
+    ("{u}: рассредоточение - перебазирование на {p}.", "{u}: dispersal - rebasing to {p}."),
+    ("посадка на {p} (рассредоточение)", "landing at {p} (dispersal)"),
     ("бои к {t} - боеспособность {a} -> {b}.", "fighting until {t} - strength {a} -> {b}."),
     ("продвинулся на {k} км.", "advanced {k} km."), ("прибыл в район {p}.", "arrived in the {p} area."),
     ("выдвигается на рубеж {p}.", "moving up to the {p} line."), ("наступление на {p}.", "attacking towards {p}."),

@@ -380,6 +380,8 @@ def end_day(state: dict) -> list[str]:
     intel.ensure(state)                         # новые ЗРК противника (из глубины) - в разведку
     lines += logistics.airfields(state)
     from . import command
+    from . import dispersal
+    lines += dispersal.daily(state)              # рассредоточение: перебазирование по доктрине стороны (приказ - на сутки)
     lines += command.apply_rebases(state)       # перебазирование по приказу командующего
     lines += farp.daily(state)                  # вертолётные части - на передовые площадки и с них
     lines += logistics.replacements(state)
