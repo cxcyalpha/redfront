@@ -24,7 +24,7 @@
    "lat": 52.0492,
    "lon": 13.2131,
    "estimate": true,
-   "side": "red"
+   "side": "blue"
   },
   "Chernobyl": {
    "lat": 52.3522,
@@ -127,6 +127,60 @@
    "lon": 6.7,
    "estimate": true,
    "side": "blue"
+  },
+  "Horodnia": {
+   "lat": 52.874,
+   "lon": 10.4383,
+   "estimate": true,
+   "side": "blue"
+  },
+  "NovhorodSiverskyi": {
+   "lat": 52.975,
+   "lon": 11.8902,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Shostka": {
+   "lat": 52.8487,
+   "lon": 12.0807,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Okhtyrka": {
+   "lat": 51.5443,
+   "lon": 13.2867,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Klintsy": {
+   "lat": 53.6061,
+   "lon": 11.0006,
+   "estimate": true,
+   "side": "red"
+  },
+  "Glushkovo": {
+   "lat": 52.4111,
+   "lon": 13.0832,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sudzha": {
+   "lat": 52.2849,
+   "lon": 13.6274,
+   "estimate": true,
+   "side": "red"
+  },
+  "Trubchevsk": {
+   "lat": 53.4547,
+   "lon": 12.345,
+   "estimate": true,
+   "side": "red"
+  },
+  "Sevsk": {
+   "lat": 53.0928,
+   "lon": 12.969,
+   "estimate": true,
+   "side": "red"
   }
  },
  "airbases": {
@@ -288,24 +342,94 @@
   [
    "BilaTserkva",
    "Obukhiv"
+  ],
+  [
+   "Gomel",
+   "Horodnia"
+  ],
+  [
+   "Horodnia",
+   "Chernihiv"
+  ],
+  [
+   "Klintsy",
+   "Horodnia"
+  ],
+  [
+   "Klintsy",
+   "NovhorodSiverskyi"
+  ],
+  [
+   "NovhorodSiverskyi",
+   "Shostka"
+  ],
+  [
+   "Shostka",
+   "Konotop"
+  ],
+  [
+   "Glushkovo",
+   "Shostka"
+  ],
+  [
+   "Glushkovo",
+   "Konotop"
+  ],
+  [
+   "Sudzha",
+   "Sumy"
+  ],
+  [
+   "Sumy",
+   "Okhtyrka"
+  ],
+  [
+   "Sudzha",
+   "Okhtyrka"
+  ],
+  [
+   "Klintsy",
+   "Trubchevsk"
+  ],
+  [
+   "Trubchevsk",
+   "NovhorodSiverskyi"
+  ],
+  [
+   "Trubchevsk",
+   "Sevsk"
+  ],
+  [
+   "Sevsk",
+   "Shostka"
+  ],
+  [
+   "Sevsk",
+   "Glushkovo"
   ]
  ],
  "supply_entry": {
   "red": [
    "Mozyr",
    "Gomel",
-   "Sumy"
+   "Sudzha",
+   "Klintsy"
   ],
   "blue": [
    "Lviv"
   ]
  },
+ "front_km": 120,
  "off_limits": {
   "blue": [
    "Mozyr",
    "Khoiniki",
    "Gomel",
-   "Sumy"
+   "Sudzha",
+   "Klintsy",
+   "Glushkovo",
+   "Trubchevsk",
+   "Sevsk"
   ]
  },
  "axes": {
@@ -354,9 +478,9 @@
   },
   {
    "id": "red_depot_sumy",
-   "name": "Склад снабжения (Сумы)",
+   "name": "Склад снабжения (Суджа)",
    "side": "red",
-   "place": "Sumy"
+   "place": "Sudzha"
   },
   {
    "id": "blue_depot_kyiv",
@@ -431,8 +555,8 @@
    "side": "red",
    "tier": "short",
    "covers": "af_chojna",
-   "lat": 52.9322,
-   "lon": 14.4034,
+   "lat": 52.929,
+   "lon": 14.4083,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -453,8 +577,8 @@
    "side": "blue",
    "tier": "short",
    "covers": "af_giebelstadt",
-   "lat": 49.6593,
-   "lon": 9.9762,
+   "lat": 49.6612,
+   "lon": 9.961,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -475,8 +599,8 @@
    "side": "red",
    "tier": "short",
    "covers": "af_luneburg",
-   "lat": 53.2382,
-   "lon": 10.4451,
+   "lat": 53.2478,
+   "lon": 10.482,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -486,8 +610,8 @@
    "side": "red",
    "tier": "short",
    "covers": "af_nordholz",
-   "lat": 53.758,
-   "lon": 8.6744,
+   "lat": 53.7596,
+   "lon": 8.6767,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },

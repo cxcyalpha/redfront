@@ -93,6 +93,7 @@ def apply(G, real_places: dict, real_airbases: dict, bbox_extra: tuple = (), far
     G.AIRBASES = {s: [names.get(n, n) for n in ns] for s, ns in G.AIRBASES.items()}
     G.AIR = [r[:5] + (names.get(r[5], r[5]),) + tuple(r[6:]) for r in G.AIR]
     G.EXTERNAL_SUPPLY = {names.get(n, n) for n in G.EXTERNAL_SUPPLY}
+    G.FRONT_KM = 120                             # пункты в реальном масштабе редкие - линия фронта рисуется дальше от них
     G.PROJ_NOTE = (f"масштаб {P.s:.2f} от реального (расстояния театра сохранены), аэродромы карты - ближайшие к "
                    "проекции реальных: " + ", ".join(f"{names[k]}" for k in real_airbases))
     return P
