@@ -145,10 +145,11 @@ def compute(state: dict, side: str) -> dict:
             lo = lon[i0] + (lon[min(COLS - 1, i0 + 1)] - lon[i0]) * (i - i0)
             return {"lat": la, "lon": lo}
         return [one(x, y) for x, y in line]
-    near_ok = lambda i, j: near[j][i] <= MAX_KM
+    mx = state.get("front_km") or MAX_KM         # сценарий с редкой сетью пунктов (реальный масштаб) - больше
+    near_ok = lambda i, j: near[j][i] <= mx
     iso = lambda lvl: [ll(_chaikin(_chaikin(l))) for l in _contour([[x - lvl for x in r] for r in f], near_ok)]
     sgn = 1 if side == "red" else -1             # своя сторона: внутри области - отрицательно (f < 0 - красные)
-    own = [[max(sgn * f[j][i], near[j][i] - MAX_KM) for i in range(COLS)] for j in range(rows)]
+    own = [[max(sgn * f[j][i], near[j][i] - mx) for i in range(COLS)] for j in range(rows)]
     terr = [ll(_chaikin(l, closed=True)) for l in _contour(own, lambda i, j: True) if len(l) >= 4]
     return {"red": iso(-GAP_KM), "blue": iso(GAP_KM), "own": terr}
 

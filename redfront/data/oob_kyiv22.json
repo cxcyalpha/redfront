@@ -339,7 +339,7 @@
    "role": "maneuver",
    "state": "defend",
    "route": [
-    "Sumy"
+    "Glushkovo"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -394,7 +394,7 @@
    "role": "maneuver",
    "state": "pending",
    "route": [
-    "Sumy"
+    "Sudzha"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -843,6 +843,56 @@
    "role": "sam_short",
    "attached_to": "blue_14mb",
    "state": "pending",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tro_sumy",
+   "name": "Территориальная оборона и 27-я реактивная артбригада (Сумы)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Sumy"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "Сумы не взяты: окружены и обойдены"
+  },
+  {
+   "id": "blue_tro_sumy_pvo",
+   "name": "Войсковая ПВО: Территориальная оборона и 27-я реактивная артбригада (Сумы)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_tro_sumy",
+   "state": "defend",
    "composition": [
     {
      "type": "Strela_10M3",

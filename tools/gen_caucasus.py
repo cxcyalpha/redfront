@@ -220,6 +220,7 @@ EXTRA_VARIANT: dict = {}
 EXTERNAL_SUPPLY: set = set()                       # аэродромы со снабжением извне (не со складов стороны)
 DOCTRINE: dict | None = None
 SAM_FIXED = False
+FRONT_KM = None   # линия фронта на карте - не дальше от пунктов (frontline; нет - 45 км); реальный масштаб - больше
 AIR_ASSAULT: list = []
 EW: list = []                                      # станции РЭБ (ew.py): (id, имя, сторона, станция, {тип: число}, шир, долг, источник)                             # аэромобильные роты: (id, имя, сторона, пункт, {тип: число}, человек, источник)                                  # позиции ЗРК известны (объектовая ПВО) - цели ударов по позициям                       # пакеты доктрины сторон (нет - по умолчанию)
 
@@ -266,6 +267,7 @@ def main() -> None:
         "airbases": airbases,
         "links": [list(l) for l in LINKS],
         "supply_entry": SUPPLY_ENTRY,
+        **({"front_km": FRONT_KM} if FRONT_KM else {}),
         "off_limits": OFF_LIMITS,
         "axes": {k: v["title"] for k, v in AXES.items()},
         "objectives": {"red": {k: v["objectives"] for k, v in AXES.items()}, "blue": []},

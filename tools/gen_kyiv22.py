@@ -48,7 +48,7 @@ G.SAM_FIXED = True       # стационарные позиции С-300 и Б�
 G.PLACES = {
     # Беларусь и Россия
     "Mozyr": (54.320, 10.130, "red"), "Khoiniki": (54.070, 9.980, "red"), "Gomel": (53.870, 10.690, "red"),
-    "Sumy": (53.850, 10.930, "red"),
+    "Sumy": (53.850, 10.930, "blue"),          # Сумы в 2022 не взяты: окружены, обойдены
     # Киевская область (север, правый берег)
     "Chernobyl": (53.920, 9.880, "blue"), "Ivankiv": (53.830, 9.960, "blue"), "Hostomel": (53.647, 9.704, "blue"),
     "Bucha": (53.660, 9.800, "blue"), "Irpin": (53.630, 9.860, "blue"), "Makariv": (53.750, 9.650, "blue"),
@@ -69,8 +69,8 @@ G.LINKS = [
     ("Kyiv", "BilaTserkva"), ("BilaTserkva", "Zhytomyr"), ("Zhytomyr", "Lviv"), ("BilaTserkva", "Lviv"),
     ("BilaTserkva", "Obukhiv"),
 ]
-G.SUPPLY_ENTRY = {"red": ["Mozyr", "Gomel", "Sumy"], "blue": ["Lviv"]}
-G.OFF_LIMITS = {"blue": ["Mozyr", "Khoiniki", "Gomel", "Sumy"]}   # Украина не наступает в Беларусь и Россию
+G.SUPPLY_ENTRY = {"red": ["Mozyr", "Gomel", "Sudzha", "Klintsy"], "blue": ["Lviv"]}
+G.OFF_LIMITS = {"blue": ["Mozyr", "Khoiniki", "Gomel", "Sudzha", "Klintsy", "Glushkovo", "Trubchevsk", "Sevsk"]}   # Украина не наступает в Беларусь и Россию
 G.AIRBASES = {"red": ["Kiel", "Lubeck", "Pinnow"],                  # Мачулищи / Зябровка / Курск - ОЦЕНКА
               "blue": ["Hamburg Finkenwerder", "Celle", "Wunstorf", "Hannover"]}   # Васильков, Озёрное, Староконстантинов, Канатово
 G.AXES = {
@@ -99,8 +99,8 @@ G.GROUND = [
      "Гостомель (после захвата аэродрома)"),
     ("red_5caa", "5-я общевойсковая армия", "red", "Mozyr", RU_BTG, RU_AD, 3, "west", ""),
     ("red_41caa", "41-я общевойсковая армия (Чернигов)", "red", "Gomel", RU_BTG, RU_AD, 1, "chernihiv", ""),
-    ("red_2gta", "2-я гв. танковая армия (Сумы - Конотоп)", "red", "Sumy", RU_TANK, RU_AD, 1, "east", ""),
-    ("red_90td", "90-я гв. танковая дивизия", "red", "Sumy", RU_TANK, RU_AD, 2, "east", ""),
+    ("red_2gta", "2-я гв. танковая армия (Сумы - Конотоп)", "red", "Glushkovo", RU_TANK, RU_AD, 1, "east", ""),
+    ("red_90td", "90-я гв. танковая дивизия", "red", "Sudzha", RU_TANK, RU_AD, 2, "east", ""),
     ("blue_72mb", "72-я механизированная бригада (Киев)", "blue", "Irpin", UA_MECH, UA_AD, 1, None, ""),
     ("blue_4ngu", "4-я бригада быстрого реагирования НГУ", "blue", "Kyiv", UA_LIGHT, UA_AD, 1, None,
      "контратака на аэродром Гостомель 24.02"),
@@ -110,6 +110,8 @@ G.GROUND = [
     ("blue_58mb", "58-я мотопехотная бригада (Конотоп - Нежин)", "blue", "Nizhyn", UA_MECH, UA_AD, 1, None, ""),
     ("blue_95daab", "95-я десантно-штурмовая бригада (Житомир)", "blue", "Zhytomyr", UA_LIGHT, UA_AD, 2, None, ""),
     ("blue_14mb", "14-я механизированная бригада (с запада)", "blue", "Lviv", UA_MECH, UA_AD, 5, None, "ОЦЕНКА"),
+    ("blue_tro_sumy", "Территориальная оборона и 27-я реактивная артбригада (Сумы)", "blue", "Sumy", UA_LIGHT, UA_AD, 1, None,
+     "Сумы не взяты: окружены и обойдены"),
     ("blue_brovary", "Части обороны Броваров", "blue", "Brovary", UA_LIGHT, UA_AD, 1, None, "засада у Скибина 10.03"),
 ]
 G.AIR_ASSAULT = [   # (id, имя, сторона, пункт, {тип: число}, человек, источник): десант на Гостомель 24.02 (Ми-8 + Ка-52)
@@ -136,7 +138,7 @@ G.SAMS = [
 G.DEPOTS = [
     ("red_depot_khoiniki", "Склад снабжения (Хойники)", "red", "Khoiniki"),
     ("red_depot_gomel", "Склад снабжения (Гомель)", "red", "Gomel"),
-    ("red_depot_sumy", "Склад снабжения (Сумы)", "red", "Sumy"),
+    ("red_depot_sumy", "Склад снабжения (Суджа)", "red", "Sudzha"),
     ("blue_depot_kyiv", "Склады Киева", "blue", "Kyiv"),
     ("blue_depot_zhytomyr", "Склад снабжения (Житомир)", "blue", "Zhytomyr"),
     ("blue_depot_chernihiv", "Склад снабжения (Чернигов)", "blue", "Chernihiv"),
@@ -224,6 +226,19 @@ REAL_AB = {   # прежнее имя аэродрома карты -> реал�
     "Hannover": (48.55, 32.29),               # Канатово (Кропивницкий)
 }
 PROJ = theatre_proj.apply(G, REAL, REAL_AB, far=("Lviv", "Kiel"))
+# граница 24.02: Беларусь и Россия - Украина (северо-восток: Черниговщина, Сумщина) - пункты по обе стороны, чтобы
+# фронт первого дня шёл по границе, а не обрывался; в старой условной схеме их не было - сразу в проекции
+BORDER = {   # имя: (широта, долгота, сторона)
+    "Horodnia": (51.89, 31.60, "blue"), "NovhorodSiverskyi": (52.01, 33.26, "blue"), "Shostka": (51.86, 33.48, "blue"),
+    "Okhtyrka": (50.31, 34.90, "blue"), "Klintsy": (52.76, 32.24, "red"), "Glushkovo": (51.34, 34.64, "red"),
+    "Sudzha": (51.19, 35.27, "red"), "Trubchevsk": (52.58, 33.77, "red"), "Sevsk": (52.15, 34.49, "red"),
+}
+for _n, (_la, _lo, _sd) in BORDER.items():
+    G.PLACES[_n] = (*PROJ(_la, _lo), _sd)
+G.LINKS += [("Gomel", "Horodnia"), ("Horodnia", "Chernihiv"), ("Klintsy", "Horodnia"), ("Klintsy", "NovhorodSiverskyi"),
+            ("NovhorodSiverskyi", "Shostka"), ("Shostka", "Konotop"), ("Glushkovo", "Shostka"), ("Glushkovo", "Konotop"),
+            ("Sudzha", "Sumy"), ("Sumy", "Okhtyrka"), ("Sudzha", "Okhtyrka"), ("Klintsy", "Trubchevsk"),
+            ("Trubchevsk", "NovhorodSiverskyi"), ("Trubchevsk", "Sevsk"), ("Sevsk", "Shostka"), ("Sevsk", "Glushkovo")]
 _kla, _klo, _s = G.PLACES["Kyiv"]               # Буковель-АД - прикрывает сам Киев (радиус 15 км)
 G.EW = [(r[:5] + (round(_kla + 0.03, 4), round(_klo - 0.03, 4)) + r[7:]) if r[0] == "blue_ew_bukovel" else r for r in G.EW]
 G.SECTOR_ABOUT = ("Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold "
