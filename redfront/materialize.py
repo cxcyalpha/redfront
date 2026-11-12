@@ -100,6 +100,18 @@ def _ad_share(ad: dict, parent: dict, shown: int, cap: int | None) -> int | None
     return n if cap is None else min(cap, n)
 
 
+MARCH_INTERVAL_M = 100   # ОЦЕНКА: дистанция между машинами на марше под угрозой ударов с воздуха (днём - 50-150 м)
+SUPPORT_K = 1.5          # ОЦЕНКА: машин тыла и обеспечения части на марше (в составе модели их нет) - к боевым
+COLUMN_MAX_KM = 25       # ОЦЕНКА: колонна части по одному маршруту не длиннее (дивизия идёт несколькими)
+PACKET_EVERY_KM = 3      # ОЦЕНКА: пакет машин (рота) в миссии - на каждые столько км колонны
+
+
+def march_length_km(unit: dict) -> float:
+    """Длина колонны части на марше: все её машины (с тылом) с маршевой дистанцией, не больше COLUMN_MAX_KM."""
+    n = sum(a for t, a in model.alive_by_type(unit).items() if not _on_foot(t))
+    return min(COLUMN_MAX_KM, n * SUPPORT_K * MARCH_INTERVAL_M / 1000.0)
+
+
 def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None) -> dict:
     """Колонна на марше. Порядок следования и дистанция - из пакета доктрины стороны, которой принадлежит часть
     (ОЦЕНКИ в data/doctrine/*.json, раздел march); бюджет машин - настройка кампании (settings.column_budget_units)."""
@@ -117,9 +129,15 @@ def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None
     order = sorted((t for t in counts if counts[t] > 0), key=lambda t: rank.get(roles[t], len(rank)))
     pts = model.route_points(state, unit)
     head_km = unit["progress_km"]
-    spacing_km = march["spacing_m"] / 1000.0
-    # разрыв за танками под приданную войсковую ПВО (она идёт отдельной группой, см. attached_column)
     shown = sum(counts.values())
+    # колонна настоящей длины (march_length_km), а машин в DCS - по бюджету: показанные машины - пакетами (роты,
+    # внутри - маршевая дистанция), пакеты - по всей длине колонны; пакет - отдельная группа DCS (build: держит разрыв)
+    spacing_km = max(march["spacing_m"], MARCH_INTERVAL_M) / 1000.0
+    length_km = march_length_km(unit)
+    n_pk = max(1, min(shown, round(length_km / PACKET_EVERY_KM)))
+    pk_size = math.ceil(shown / n_pk)
+    pk_gap_km = length_km / n_pk
+    # разрыв за танками под приданную войсковую ПВО (она идёт отдельной группой, см. attached_column)
     gap = sum(sum(_deploy_ad(model.alive_by_type(a), _ad_share(a, unit, shown, ad_cap))[0].values())
               for a in state["units"].values()
               if a.get("attached_to") == unit["id"] and a.get("state") != "destroyed")   # так же, как в attached_column
@@ -131,10 +149,11 @@ def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None
             gap_done = True
         w = weight[t]
         for _ in range(counts[t]):
-            km = head_km - slot * spacing_km
+            pk = min(n_pk - 1, i // pk_size)     # пакет машины: голова пакета - через pk_gap_km, внутри - маршевая дистанция
+            km = head_km - pk * pk_gap_km - (i - pk * pk_size) * spacing_km
             p, _seg = model.point_at_km(pts, km)
             vehicles.append({"name": f"{unit['id']}#{i + 1:02d}", "type": t, "lat": p["lat"], "lon": p["lon"], "weight": w,  # без округления: иначе сумма весов != модели
-                             "km": km})
+                             "km": km, "packet": pk})
             i += 1
             slot += 1
     # Путевые точки - оставшиеся пункты маршрута, спроецированные на его геометрию (с дорогами - точка на дороге),
@@ -149,6 +168,8 @@ def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None
         "waypoints": wps,
         "speed_kmh": unit["march_kmh"],
         "ad_cap": ad_cap,
+        "spacing_km": spacing_km,
+        "ad_start_km": head_km - min(pk_size, shown) * spacing_km,   # войсковая ПВО - сразу за головным пакетом
     }
 
 
@@ -335,11 +356,11 @@ def attached_column(state: dict, unit: dict, parent_group: dict, cap: int | None
     Веса - по правилу сохранения, как у колонны."""
     parent = state["units"][unit["attached_to"]]
     march = model.doctrine(state, parent["side"])["march"]
-    spacing_km = march["spacing_m"] / 1000.0
+    spacing_km = parent_group.get("spacing_km") or march["spacing_m"] / 1000.0   # как у колонны части
     pts = model.route_points(state, parent)
     roles = {c["type"]: c["role"] for c in parent["composition"]}
     n_ahead = sum(1 for v in parent_group["vehicles"] if roles.get(v["type"]) == "MBT")
-    start_km = parent["progress_km"] - n_ahead * spacing_km      # в разрыв, оставленный колонной за танками
+    start_km = parent_group.get("ad_start_km", parent["progress_km"] - n_ahead * spacing_km)   # за головным пакетом
     alive = {t: a for t, a in model.alive_by_type(unit).items() if not _on_foot(t)} or model.alive_by_type(unit)   # ПЗРК - в машинах
     counts, weight = _deploy_ad(alive, _ad_share(unit, parent, len(parent_group["vehicles"]),
                                                  cap if cap is not None else parent_group.get("ad_cap")))

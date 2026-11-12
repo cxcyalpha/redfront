@@ -46,6 +46,12 @@ IADS_NET_MIN_KM = 15     # ЗРК с зоной поражения не мень
 # вероятность распознать пуск ПРР и выключить РЛС (ОЦЕНКИ; идея - Skynet IADS): старые ЗРК замечают ПРР поздно
 ARM_P = [(r"Patriot", None), (r"Kub|S-?75|SNR|S-?125|Hawk|Rapier", 0.3), (r"Roland|Osa|Tor|Tunguska|Gepard|Shilka|ZSU", 0.5),
          (r"Strela|Chaparral|Vulcan|Igla|Stinger", 0.0)]
+# развёртывание ЗРК с марша, с (ОЦЕНКИ по открытым ТТХ: время перевода из походного в боевое, с остановкой):
+# с ходу ЗРК не стреляет, сразу после остановки - тоже; зенитные пушки (Шилка, Gepard, ЗУ) - с ходу, в таблице их нет
+SAM_DEPLOY_S = {"Strela_10M3": 60, "Strela_1_9P31": 60, "SA_18_Igla_manpad": 60, "SA-18 Igla manpad": 60,
+                "Soldier stinger": 60, "M1097 Avenger": 60, "Roland_ADS": 120, "Tor_9A331": 180, "CHAP_TorM2": 180,
+                "M48 Chaparral": 180, "Osa_9A33_ln": 300, "Osa 9A33 ln": 300, "CHAP_PantsirS1": 300, "Kub_2P25_ln": 300,
+                "SA-11 Buk LN 9A310M1": 300, "rapier_fsa_launcher": 600, "HQ-7_LN_SP": 180}
 ART_MISSIONS = 4         # ОЦЕНКА: огневых налётов батареи за миссию
 ART_ROUNDS = 24          # ОЦЕНКА: снарядов на налёт (батарея)
 ART_RADIUS_M = 150       # ОЦЕНКА: рассеивание по площади (точка - машина противника)
@@ -1995,6 +2001,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     carriers = carrier_groups(m, state, (wx_now.get("wind_dir") or 0) % 360)   # авианосные группы - базы на море
     groups = materialize.theatre(state, tk, density)
     vg_by_unit, platoons = {}, {}
+    col_parts: dict[int, list] = {}               # колонна ротами: id(группы модели) -> [(часть, группа DCS)]
     mrl_used: dict[str, bool] = {}              # РСЗО в миссии - одна на сторону (build, огонь батарей)
     rv_wait: list[dict] = []                     # точки сбора, где группы пакета ждут игрока (rv.lua)
     keys = sorted({g["cluster"] for g in groups if g.get("cluster")})        # бои (кластеры) - у каждого своё место
@@ -2064,6 +2071,13 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                     sub = dict(g, name=f"{g['name']} evac {k // cap + 1}", vehicles=g["vehicles"][k:k + cap])
                     evac_groups[g["unit"]].append(_ground_group(m, state, sub))
                 vg_by_unit[g["unit"]] = evac_groups[g["unit"]][0]
+                continue
+            pks = sorted({v.get("packet", 0) for v in g["vehicles"]}) if g["kind"] == "column" else []
+            if len(pks) > 1:                     # длинная колонна - пакетами (роты): отдельные группы держат разрывы
+                parts = [dict(g, name=f"{g['name']} c{k + 1}", vehicles=[v for v in g["vehicles"] if v.get("packet", 0) == k])
+                         for k in pks]
+                col_parts[id(g)] = [(p_, _ground_group(m, state, p_, shift_of(g))) for p_ in parts]
+                vg_by_unit[g["unit"]] = col_parts[id(g)][0][1]
                 continue
             vg_by_unit[g["unit"]] = _ground_group(m, state, g, shift_of(g))
             if g["kind"] == "art_site" and g.get("fire_at"):   # артбригада: налёты по ближней части противника
@@ -2690,7 +2704,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     state["sortie"] = sortie
     track = [v["name"] for g in groups if g["kind"] in ("column", "battle") for v in g["vehicles"]]
     trig = TriggerStart(comment="redfront debrief hook")
-    specs = [s for s in (column_spec(m, state, g, vg_by_unit[g["unit"]]) for g in groups if g["kind"] == "column") if s]
+    specs = [s for s in (column_spec(m, state, pg, vg) for g in groups if g["kind"] == "column"
+                         for pg, vg in (col_parts.get(id(g)) or [(g, vg_by_unit[g["unit"]])])) if s]
     if specs:                                    # сначала переложить колонну на дорогу, потом - хук (в одном триггере, по порядку)
         trig.add_action(DoScript(String(column_script(state["campaign_id"], state["sortie"], specs))))
     ads = []                                     # ПВО на позициях - на открытое место (battle_site.lua)
@@ -2789,6 +2804,22 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "seadprio.lua").read_text(encoding="utf-8")
                                         .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(int(state["sortie"])))
                                         .replace("@SPECS@", items))))
+    deploy = []                                  # ЗРК в колоннах: огонь - после остановки и развёртывания (samdeploy.lua)
+    for g in groups:
+        if g["kind"] != "column":
+            continue
+        dep = max((SAM_DEPLOY_S.get(v["type"], 0) for v in g["vehicles"]), default=0)
+        if not dep:
+            continue
+        for pg, vg in (col_parts.get(id(g)) or [(g, vg_by_unit.get(g["unit"]))]):
+            if vg is not None:
+                deploy.append((vg.name, dep))
+    if deploy:
+        q_ = lambda x: '"' + str(x).replace('"', "'") + '"'
+        trig.add_action(DoScript(String((Path(__file__).parent / "lua" / "samdeploy.lua").read_text(encoding="utf-8")
+                                        .replace("@CAMPAIGN@", state["campaign_id"]).replace("@SORTIE@", str(int(state["sortie"])))
+                                        .replace("@SPECS@", ", ".join("{ group = " + q_(n) + ", deploy = " + str(int(d)) + " }"
+                                                                      for n, d in deploy)))))
     specs_p = [sp for sp in push_specs.values() if sp["strikes"]]
     if specs_p:                                  # удар по готовности подавления ПВО
         trig.add_action(DoScript(String(push_script(state["campaign_id"], state["sortie"], specs_p, strict_abort(state)))))

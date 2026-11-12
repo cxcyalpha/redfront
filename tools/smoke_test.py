@@ -3944,7 +3944,8 @@ def theatres_section(tmp: Path) -> None:
     # samctl.lua: реакция расчёта и дальность пуска, ПЗРК - 2 пуска
     sc = build.samctl_script(st6, [{"group": "SAM1", "kind": "sam", "r": 20000, "k": 0.7, "delay": 25, "mobile": False},
                                    {"group": "MP1", "kind": "aaa", "r": 3000, "k": 0.7, "delay": 5, "mobile": False, "manpad": True}])
-    Ls = lupa.LuaRuntime()
+    import lupa as _lupa
+    Ls = _lupa.LuaRuntime()
     Ls.execute('''
       NOW = 0; ROE = {}; HANDLERS = {}
       timer = { getTime = function() return NOW end, scheduleFunction = function(f) CHECK = f end }
@@ -4214,6 +4215,39 @@ def theatres_section(tmp: Path) -> None:
                     dumb += bool(_re.search(r"FAB|OFAB|B-8|S-8", n_))
     check(not bad and arm and dumb, f"подвески ВКС 2022: ПРР у подавления ПВО ({arm}), неуправляемое у ударов ({dumb}), "
                                     f"лишнего нет ({bad[:3]})")
+    # колонна настоящей длины пакетами (materialize.column) и развёртывание ЗРК с марша (samdeploy.lua)
+    sc_ = model.new_campaign("col", sector="sector_germany.json", oob="oob_germany.json", seed=1, player_side="blue")
+    planner.plan(sc_)
+    sim.end_day(sc_)
+    mu = next(u_ for u_ in sc_["units"].values() if u_.get("state") == "march" and u_["side"] == "red")
+    cl = materialize.column(sc_, mu)
+    pkn = len({v_["packet"] for v_ in cl["vehicles"]})
+    span = cl["vehicles"][0]["km"] - cl["vehicles"][-1]["km"]
+    sd_src = (Path(build.__file__).parent / "lua" / "samdeploy.lua").read_text(encoding="utf-8")
+    sd_src = sd_src.replace("@SPECS@", '{ group = "AD", deploy = 60 }').replace("@CAMPAIGN@", "x").replace("@SORTIE@", "1")
+    import lupa as _lupa
+    Ls = _lupa.LuaRuntime()
+    Ls.execute('''
+      AI = { Option = { Ground = { id = { ROE = 0 }, val = { ROE = { WEAPON_HOLD = 4, OPEN_FIRE = 2 } } } } }
+      ROE_NOW = nil; SPEED = 10; TICK = nil
+      timer = { getTime = function() return 0 end, scheduleFunction = function(f, a, t) TICK = f end }
+      local u = { getVelocity = function() return { x = SPEED, y = 0, z = 0 } end }
+      G = { isExist = function() return true end, getUnits = function() return { u } end,
+            getController = function() return { setOption = function(_, k, v) ROE_NOW = v end } end }
+      Group = { getByName = function(n) return G end }
+    ''')
+    Ls.execute(sd_src)
+    tk_ = Ls.eval("TICK")
+    tk_(None, 10)
+    moving = Ls.eval("ROE_NOW")
+    Ls.execute("SPEED = 0")
+    tk_(None, 20)
+    just_stopped = Ls.eval("ROE_NOW")
+    tk_(None, 85)
+    deployed = Ls.eval("ROE_NOW")
+    check(pkn > 1 and span > 5 and moving == 4 and just_stopped == 4 and deployed == 2,
+          f"колонна {mu['id']}: {len(cl['vehicles'])} машин пакетами ({pkn}) на {span:.0f} км; ЗРК на ходу - огонь запрещён, "
+          f"сразу после остановки - запрещён, через время развёртывания - разрешён")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
     sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
     planner.plan(sh)
