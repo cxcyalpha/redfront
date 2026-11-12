@@ -430,6 +430,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "strategic_stock": copy.deepcopy(forces.get("strategic_stock") or sec.get("strategic_stock") or {}),
         "strategic_resupply": copy.deepcopy(forces.get("strategic_resupply") or sec.get("strategic_resupply") or {}),
         "dispersal": copy.deepcopy(forces.get("dispersal") or {}),
+        "loadout_policy": copy.deepcopy(forces.get("loadout_policy") or {}),   # правило подвесок стороны (weapons.policy)
         "external_awacs": copy.deepcopy(forces.get("external_awacs") or {}),   # ДРЛО извне театра (build.external_awacs)   # рассредоточение авиации сторон (dispersal.py)
         "strategic_per_day": copy.deepcopy(forces.get("strategic_per_day") or sec.get("strategic_per_day") or {}),   # запас авиационных ПКР сторон (naval.use_air_asm)
         "naval_bases": copy.deepcopy(sec.get("naval_bases") or {}),   # порты ремонта кораблей (naval.port_of); нет - за картой   # морской подвоз (naval.sea_supply)

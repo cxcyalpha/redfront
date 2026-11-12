@@ -4188,6 +4188,32 @@ def theatres_section(tmp: Path) -> None:
     check(len(nav) >= 10 and len(artb) >= 12 and k_far < 0 and k_full == 1.0 and abs(k_half - 0.5) < 1e-9 and k_none == 0.0,
           f"Германия: корабельных групп {len(nav)}, артбригад {len(artb)}; морской десант - далеко {k_far}, у берега {k_full}, "
           f"половина кораблей {k_half}, все потоплены {k_none}")
+    # подвески ВКС 2022 (weapons.policy): по земле - неуправляемое, кроме ПРР у подавления ПВО; Р-37М - только CAP;
+    # ракет модов, которых в строю не было (Р-77М, Р-77ПД, Р-27ЭА, Р-74М2), нет
+    import re as _re
+    from redfront import mods as _mods, weapons as _wp
+    sv = model.new_campaign("vks", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=1, player_side="red")
+    sv["settings"]["mods"] = ["su30", "su35s"]
+    _mods.apply(sv)
+    planner.plan(sv)
+    bad, arm, dumb = [], 0, 0
+    for i_, t_ in enumerate(sv["tasks"][:8], 1):
+        build.build(sv, tmp / "vks.miz", task_no=i_)
+        mv = dcs.Mission(Germany())
+        mv.load_file(str(tmp / "vks.miz"))
+        for c_ in mv.coalition["red"].countries.values():
+            for g_ in c_.plane_group:
+                cap_ = _re.search(r"qra|cap_own|fleet_cap", g_.name) or g_.name.split(" ")[1] == "strike" and t_["kind"] == "cap_own_troops"
+                for d_ in g_.units[0].pylons.values():
+                    n_ = _wp.name_of(d_.get("CLSID", ""))
+                    if _re.search(_wp.AA_NOT_YET_RX, n_) or (_re.search(r"R-37", n_) and not cap_):
+                        bad.append((g_.name, n_))
+                    if _re.search(r"KAB|Kh-29|Kh-59|Kh-38|Kh-31A|Kh-25ML", n_):
+                        bad.append((g_.name, n_))
+                    arm += bool(_re.search(_wp.ARM, n_))
+                    dumb += bool(_re.search(r"FAB|OFAB|B-8|S-8", n_))
+    check(not bad and arm and dumb, f"подвески ВКС 2022: ПРР у подавления ПВО ({arm}), неуправляемое у ударов ({dumb}), "
+                                    f"лишнего нет ({bad[:3]})")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
     sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
     planner.plan(sh)

@@ -1787,6 +1787,12 @@
    "max_km": 300
   }
  },
+ "loadout_policy": {
+  "red": {
+   "ag_unguided": true,
+   "aa_long_cap_only": true
+  }
+ },
  "external_awacs": {
   "blue": {
    "type": "E_3A",

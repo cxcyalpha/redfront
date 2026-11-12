@@ -2190,6 +2190,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             _crew(state, fg, perf)
             fg.late_activation = True
             _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
+            from . import weapons as _w
+            _w.policy(fg, state, side_g, ["qra"])   # дежурная пара - CAP (правило подвесок сценария)
             for u in fg.units:
                 u.skill = Skill.High
             alt = int(g.get("alt_m") or tdg.get("cap_alt_m", 6000))
@@ -2248,6 +2250,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         fg.start_time = st_s
         cat = _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
         cat = _arm_pylons(fg, ac, perf, g, state) or cat
+        weapons_policy = __import__("redfront.weapons", fromlist=["x"]).policy   # правило подвесок сценария (ВКС 2022)
+        weapons_policy(fg, state, side_g, loadout_cats(g.get("_kind") or tk["kind"], g))
         tune_arm(state, fg, g)                   # головки ПРР (Shrike) - под РЛС ЗРК своей цели
         needs_mod = False
         for u in fg.units[:hum] if is_player else []:
