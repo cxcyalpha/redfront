@@ -277,7 +277,8 @@ def package_section(tmp: Path) -> None:
     def attack_ids(g, kind="AttackGroup"):
         return [t.params["groupId"] for p in g.points for t in p.tasks if getattr(t, "id", None) == kind]
     check(set(pg) == {"strike", "sead", "kill", "recon"}, "в .miz четыре группы тактической группы")
-    check(attack_ids(pg["strike"]) == [vgs["blue_pzgren_bn_1"].id], "ударная группа: AttackGroup по колонне")
+    bn_ids = {g.id for n, g in vgs.items() if n == "blue_pzgren_bn_1" or n.startswith("blue_pzgren_bn_1 c")}   # пакеты колонны
+    check(len(attack_ids(pg["strike"])) == 1 and attack_ids(pg["strike"])[0] in bn_ids, "ударная группа: AttackGroup по колонне")
     check(attack_ids(pg["sead"], "EngageGroup") == [vgs["blue_flak_1"].id] and attack_ids(pg["sead"]) == []
           and attack_ids(pg["kill"]) == [vgs["blue_flak_1"].id]
           and [p.name for p in pg["kill"].points[1:-1]] == ["Снижение", "Рубеж атаки", "Уход"],
@@ -999,7 +1000,7 @@ def column_road_section(tmp: Path) -> None:
     heads = [a.text.id.splitlines()[0].split(" | ")[0] for a in _do(m)]
     check(man["column_road"] == ["blue_pzgren_bn_1", "blue_flak_1"]
           and heads == ["-- redfront column-on-road", "-- redfront battle site", "-- redfront targets", "-- redfront airbases",
-                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront samctl", "-- redfront seadprio", "-- redfront timing", "-- redfront rv",
+                        "-- redfront lz", "-- redfront csar", "-- redfront iads", "-- redfront samctl", "-- redfront seadprio", "-- redfront samdeploy", "-- redfront timing", "-- redfront rv",
                         "-- redfront debrief hook"],
           "без известных дорог: в триггере старта скрипт перекладки колонны, ..., поиск и спасение, затем хук")
     if not have_lupa():
@@ -1073,11 +1074,9 @@ def column_road_section(tmp: Path) -> None:
     gaps = [math.hypot(units[i].x - units[i + 1].x, units[i].y - units[i + 1].y) for i in range(len(units) - 1)]
     flak = man["ground"][1]
     fu = [added[1].data.units[i] for i in range(1, len(added[1].data.units) + 1)]
-    n_gap = len(flak["vehicles"])
-    big = [g_ for g_ in gaps if g_ > 50.01]
-    check(worst < 1.0 and max(off_m(u.x, u.y) for u in fu) < 1.0 and all(45 < g_ <= 50.01 for g_ in gaps if g_ not in big)
-          and len(big) == 1 and abs(big[0] - 50 * (n_gap + 1)) < 1.0,
-          f"машины на дороге (худшая {worst:.2f} м), дистанция {min(gaps):.0f}-50 м, за танками разрыв {big[0]:.0f} м под ПВО")
+    iv = materialize.MARCH_INTERVAL_M            # маршевая дистанция; войсковая ПВО - за головным пакетом (короткая колонна - в хвосте)
+    check(worst < 1.0 and max(off_m(u.x, u.y) for u in fu) < 1.0 and all(iv - 5 < g_ <= iv + 0.01 for g_ in gaps),
+          f"машины на дороге (худшая {worst:.2f} м), дистанция {min(gaps):.0f}-{max(gaps):.0f} м (маршевая - {iv} м)")
     allu = units + fu
     near = min(math.hypot(p_.x - q_.x, p_.y - q_.y) for i, p_ in enumerate(allu) for q_ in allu[i + 1:])
     check(near > 45, f"ПВО встала в разрыв: ближайшие машины двух групп в {near:.0f} м, наложений нет")
@@ -1741,7 +1740,9 @@ def core_section(tmp: Path) -> None:
     m.load_file(str(tmp / "d1.miz"))
     vg = {g.name: g for c in m.coalition["blue"].countries.values() for g in c.vehicle_group}
     col = man["ground"][0]
-    check(len(vg[bn["id"]].units) == len(col["vehicles"]), f"колонна в .miz: {len(col['vehicles'])} машин")
+    col_vg = [g for n, g in vg.items() if n == bn["id"] or n.startswith(bn["id"] + " c")]   # колонна - пакетами
+    check(sum(len(g.units) for g in col_vg) == len(col["vehicles"]),
+          f"колонна в .miz: {len(col['vehicles'])} машин ({len(col_vg)} пакетов)")
     check(len(col["vehicles"]) == BASELINE["col_d1"], f"как в 0.1: {BASELINE['col_d1']} машин в колонне")
     check(abs(sum(v["weight"] for v in col["vehicles"]) - model.total(bn)) < 1e-6, "сумма весов колонны = исправной технике модели")
     fg = strike_group(m)
@@ -1764,20 +1765,21 @@ def core_section(tmp: Path) -> None:
     # огонь по ЛА: только ПВО; остальные наземные группы - только по наземным целям
     def restrict(g):
         return [t.params["action"]["params"] for t in g.points[0].tasks if type(t).__name__ == "OptRestrictTargets"]
-    check(restrict(vg[bn["id"]]) == [{"name": 28, "value": 2}] and restrict(vg["blue_flak_1"]) == [] and restrict(vg["blue_patriot_1"]) == [],
+    check(all(restrict(g_) == [{"name": 28, "value": 2}] for g_ in col_vg) and restrict(vg["blue_flak_1"]) == [] and restrict(vg["blue_patriot_1"]) == [],
           "батальон: OptRestrictTargets = только наземные цели; войсковая ПВО - без ограничения")
 
-    # войсковая ПВО идёт в колонне сразу за танками, в оставленном разрыве, без наложения машин
+    # войсковая ПВО идёт в колонне сразу за головным пакетом, без наложения машин; в пакете - маршевая дистанция
     win = materialize.window(st, tk)             # то же окно, что собрано в .miz (в манифесте km машин нет)
     colw, flak = win[0], win[1]
-    roles = {c["type"]: c["role"] for c in bn["composition"]}
-    n_mbt = sum(1 for v in colw["vehicles"] if roles[v["type"]] == "MBT")
+    head = [v for v in colw["vehicles"] if v["packet"] == 0]
+    rest = [v for v in colw["vehicles"] if v["packet"] > 0]
     kms = sorted([v["km"] for v in colw["vehicles"]] + [v["km"] for v in flak["vehicles"]], reverse=True)
     steps = [round((a - b) * 1000, 3) for a, b in zip(kms, kms[1:])]
+    iv = materialize.MARCH_INTERVAL_M
     check(flak["unit"] == "blue_flak_1" and len(flak["vehicles"]) == 4 and len(vg["blue_flak_1"].units) == 4
-          and all(abs(x - 50) < 0.01 for x in steps)
-          and all(colw["vehicles"][n_mbt - 1]["km"] > v["km"] > colw["vehicles"][n_mbt]["km"] for v in flak["vehicles"]),
-          f"войсковая ПВО: 4 машины между {n_mbt} танками и БМП, вся колонна через 50 м")
+          and all(x >= iv - 0.01 for x in steps)
+          and all(head[-1]["km"] > v["km"] > (rest[0]["km"] if rest else -1e9) for v in flak["vehicles"]),
+          f"войсковая ПВО: 4 машины за головным пакетом ({len(head)} машин), машины не ближе {iv} м")
     sam_o = json.loads(json.dumps(sam)); sam_o["heading_deg"] = 120
     check(all(v["heading"] == 120 for v in materialize.sam_site(st, sam_o)["vehicles"]), "heading_deg из состава сил имеет приоритет")
 

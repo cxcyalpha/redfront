@@ -208,7 +208,7 @@ def column_spec(m: Mission, state: dict, g: dict, vg) -> dict | None:
         "name": vg.name, "groupId": vg.id, "country": country.id,
         "places": [(n, *xy(state["places"][n])) for n in names],
         "head": xy(g["vehicles"][0]),
-        "spacing": march["spacing_m"], "speed": g["speed_kmh"] / 3.6,
+        "spacing": round((g.get("spacing_km") or march["spacing_m"] / 1000.0) * 1000), "speed": g["speed_kmh"] / 3.6,
         "units": [(v["name"], dcstypes.vehicle(v["type"]).id, (head_km - v.get("km", head_km)) * 1000) for v in g["vehicles"]],
         "route": [xy(w) for w in g["waypoints"]],
         "options": ground_options(state, g),          # после пересоздания группы опции ставятся заново (в .miz они теряются)

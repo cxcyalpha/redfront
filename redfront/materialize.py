@@ -104,6 +104,7 @@ MARCH_INTERVAL_M = 100   # ОЦЕНКА: дистанция между маши�
 SUPPORT_K = 1.5          # ОЦЕНКА: машин тыла и обеспечения части на марше (в составе модели их нет) - к боевым
 COLUMN_MAX_KM = 25       # ОЦЕНКА: колонна части по одному маршруту не длиннее (дивизия идёт несколькими)
 PACKET_EVERY_KM = 3      # ОЦЕНКА: пакет машин (рота) в миссии - на каждые столько км колонны
+PACKET_MIN_KM = 8        # колонна короче (батальон) - одним пакетом: одна группа DCS на марше держит её и так
 
 
 def march_length_km(unit: dict) -> float:
@@ -134,7 +135,7 @@ def column(state: dict, unit: dict, density: float = 1.0, cap: int | None = None
     # внутри - маршевая дистанция), пакеты - по всей длине колонны; пакет - отдельная группа DCS (build: держит разрыв)
     spacing_km = max(march["spacing_m"], MARCH_INTERVAL_M) / 1000.0
     length_km = march_length_km(unit)
-    n_pk = max(1, min(shown, round(length_km / PACKET_EVERY_KM)))
+    n_pk = 1 if length_km < PACKET_MIN_KM else max(1, min(shown, round(length_km / PACKET_EVERY_KM)))
     pk_size = math.ceil(shown / n_pk)
     pk_gap_km = length_km / n_pk
     # разрыв за танками под приданную войсковую ПВО (она идёт отдельной группой, см. attached_column)
