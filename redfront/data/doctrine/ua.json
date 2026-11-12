@@ -1,0 +1,2177 @@
+{
+ "_about": "Доктрина ВВС Украины 2022 (data/doctrine/ua.json) - из советской (wp.json) с поправками на войну 2022 г.\n\nОбщее прошлое, но другая тактика (ОЦЕНКИ по интервью лётчиков ВСУ и открытым обзорам, RUSI 'Preliminary Lessons in\nConventional Warfighting', 2022):\n  * плотная ПВО противника (С-300/С-400, Бук, Тор, Панцирь) и мало самолётов - ударные группы парами, а не звеньями;\n  * полёт на предельно малой высоте на всём маршруте (средняя высота - только вне досягаемости ЗРК, которой почти нет);\n  * ставка на скорость удара: без поочерёдных групп обеспечения (подавление, добивание, расчистка, демонстративная\n    группа) - на них нет ни самолётов, ни времени под ПВО; подавление ПВО (HARM с августа 2022) - одна пара вместе с\n    ударом, необязательная;\n  * нехватка типов: Су-25 летает и как бомбардировщик (склады, мосты, группировки, колонны, ЗРК), наравне с Су-24М.\nНаземная модель (sim, march, fires) - как у wp.json.\nЗапуск: python tools/gen_doctrine_ua.py\n",
+ "package": "ua",
+ "title": "ВВС Украины, 2022 (пары, предельно малая высота, удар без поочерёдных групп обеспечения)",
+ "joint_heli": {
+  "lead_min": 2,
+  "source": "ОЦЕНКА: совместные действия Ми-24 и Су-25 по одной цели - вертолёты выходят первыми по ПВО и головным машинам"
+ },
+ "size_note": "состав групп (size) - ОЦЕНКА по 'Тактика ВВС': удар по объекту и колонне - звено (4), свободная охота на путях подвоза - пара, НАП - звено штурмовиков, прикрытие удара по аэродрому - звено",
+ "tasks": {
+  "csar": {
+   "escort": {
+    "title": "группа прикрытия (Ми-24)",
+    "performers": [
+     "attack_helo"
+    ],
+    "size": 2,
+    "size_big": 4,
+    "big_from": 4,
+    "lead_min": 2,
+    "zone_km": 3,
+    "maintask": [
+     "CAS",
+     "GroundAttack"
+    ],
+    "loadout": [
+     "cas"
+    ],
+    "source": "ОЦЕНКА по открытым данным: десант и эвакуация Ми-8 - с прикрытием Ми-24 (пара на звено транспортных, звено - на большую группу), обработка площадки перед посадкой; поиск и спасение - с парой Ми-24"
+   },
+   "title": "Поиск и спасение",
+   "performers": [
+    "transport_helo",
+    "attack_helo"
+   ],
+   "target": {
+    "category": "downed"
+   },
+   "method": "csar",
+   "method_source": "толкование, не цитата: поисково-спасательное обеспечение - вертолёт подбирает сбитый экипаж на земле и доставляет на свой аэродром. Механика в миссии (маяк, дым, ракета, подбор посадкой или лебёдкой) - по мотивам DCS-CSAR (ciribob), код свой. ОЦЕНКА",
+   "speed_kmh": 220,
+   "transit_alt_m_agl": 50,
+   "attack_alt_m_agl": 30,
+   "ip_offset_km": 0,
+   "low_alt_m_agl": 50,
+   "land_s": 90,
+   "per_day": 2,
+   "ai_success": 0.7,
+   "ai_loss_per_threat": 0.15,
+   "estimate_fields": [
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "land_s",
+    "per_day",
+    "ai_success",
+    "ai_loss_per_threat"
+   ],
+   "csar_note": "Цель - свой сбитый экипаж не на своей территории (со своей выйдет сам), в радиусе вертолётной части; ближние первыми. Вылет ИИ вне миссии: спасён с вероятностью ai_success - ai_loss_per_threat на ЗРК в коридоре. ОЦЕНКИ.",
+   "strike": {
+    "title": "поисково-спасательная группа",
+    "group_name": "борт",
+    "size": 2,
+    "maintask": [
+     "Transport"
+    ],
+    "loadout": [],
+    "estimate_fields": [
+     "size"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "игрок может лететь сам (Ми-8, UH-1H): найти по маяку, сесть рядом или зависнуть, доставить на свой аэродром",
+    "estimate": true
+   }
+  },
+  "air_evac": {
+   "escort": {
+    "title": "группа прикрытия (Ми-24)",
+    "performers": [
+     "attack_helo"
+    ],
+    "size": 2,
+    "size_big": 4,
+    "big_from": 4,
+    "lead_min": 2,
+    "zone_km": 3,
+    "maintask": [
+     "CAS",
+     "GroundAttack"
+    ],
+    "loadout": [
+     "cas"
+    ],
+    "source": "ОЦЕНКА по открытым данным: десант и эвакуация Ми-8 - с прикрытием Ми-24 (пара на звено транспортных, звено - на большую группу), обработка площадки перед посадкой; поиск и спасение - с парой Ми-24"
+   },
+   "title": "Эвакуация десанта",
+   "performers": [
+    "transport_helo",
+    "attack_helo"
+   ],
+   "target": {
+    "category": "airhead"
+   },
+   "method": "air_evac",
+   "method_source": "толкование, не цитата: десант, не соединившийся со своими, вывозится вертолётами, если он обескровлен или держится дольше evac_days суток - ОЦЕНКА",
+   "speed_kmh": 220,
+   "transit_alt_m_agl": 50,
+   "attack_alt_m_agl": 30,
+   "ip_offset_km": 0,
+   "low_alt_m_agl": 50,
+   "lz_offset_km": 1,
+   "lz_radius_m": 800,
+   "land_s": 300,
+   "max_helos": 8,
+   "per_day": 1,
+   "max_threats": 1,
+   "ai_loss_per_threat": 0.15,
+   "evac_below": 0.5,
+   "evac_days": 3,
+   "estimate_fields": [
+    "speed_kmh",
+    "lz_offset_km",
+    "lz_radius_m",
+    "land_s",
+    "max_helos",
+    "per_day",
+    "max_threats",
+    "ai_loss_per_threat",
+    "evac_below",
+    "evac_days"
+   ],
+   "evac_note": "Десант в тылу противника (order airhead), не соединившийся со своими, вывозится, если боеспособность ниже evac_below или он держится evac_days суток и больше. Площадка - в lz_offset_km от пункта в сторону своих, рота выходит к ней. Бортов - сколько нужно поднять живых (troops в aircraft.json), не больше max_helos; посадка на land_s. В миссии борт ИИ забирает свою долю сам (lua/evac.lua), игрок - через меню CTLD (Unload / Extract Troops). Вывезенные - в резерв у своего аэродрома, оставшиеся - потеряны (плен). Вылет ИИ вне миссии: потери - ai_loss_per_threat на ЗРК в коридоре. ОЦЕНКИ.",
+   "strike": {
+    "title": "эвакуационная группа",
+    "group_name": "борт",
+    "size": 4,
+    "maintask": [
+     "Transport"
+    ],
+    "loadout": []
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "игрок может вести эвакуационную группу (Ми-8, UH-1H): сесть у роты и забрать её через меню CTLD",
+    "estimate": true
+   }
+  },
+  "cas_contact": {
+   "jtac": {
+    "code": 1688,
+    "note": "авианаводчик у своего взвода в бою цели (CTLD, build.py): подсветка лазером, дым, F10 - ОЦЕНКА, не цитата"
+   },
+   "title": "Удар по войскам в соприкосновении",
+   "performers": [
+    "attack"
+   ],
+   "target": {
+    "category": "ground",
+    "state": "battle"
+   },
+   "method": "on_call",
+   "method_source": "толкование, не цитата: удар по войскам противника, ведущим бой с нашими частями; цель - на линии соприкосновения, доразведка не нужна",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "medium_alt_m_agl"
+   ],
+   "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "CAS",
+     "GroundAttack"
+    ],
+    "loadout": [
+     "anti_armor"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "medium_alt_m_agl": 30,
+   "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+  },
+  "cas_helo": {
+   "jtac": {
+    "code": 1688,
+    "note": "авианаводчик у своего взвода в бою цели (CTLD, build.py): подсветка лазером, дым, F10 - ОЦЕНКА, не цитата"
+   },
+   "title": "Удар вертолётов по войскам в соприкосновении",
+   "performers": [
+    "attack_helo"
+   ],
+   "target": {
+    "category": "ground",
+    "state": "battle"
+   },
+   "method": "on_call",
+   "method_source": "толкование, не цитата: боевые вертолёты над полем боя - по войскам противника в соприкосновении, с малой дальности, на предельно малой высоте",
+   "speed_kmh": 220,
+   "transit_alt_m_agl": 60,
+   "attack_alt_m_agl": 30,
+   "ip_offset_km": 8,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl"
+   ],
+   "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
+   "strike": {
+    "title": "ударная группа вертолётов",
+    "group_name": "пара",
+    "size": 4,
+    "maintask": [
+     "CAS",
+     "GroundAttack"
+    ],
+    "loadout": [
+     "anti_armor"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+    }
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "ОЦЕНКА: вертолёты над полем боя - на предельно малой высоте, с использованием рельефа",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl"
+  },
+  "air_assault": {
+   "escort": {
+    "title": "группа прикрытия (Ми-24)",
+    "performers": [
+     "attack_helo"
+    ],
+    "size": 2,
+    "size_big": 4,
+    "big_from": 4,
+    "lead_min": 2,
+    "zone_km": 3,
+    "maintask": [
+     "CAS",
+     "GroundAttack"
+    ],
+    "loadout": [
+     "cas"
+    ],
+    "source": "ОЦЕНКА по открытым данным: десант и эвакуация Ми-8 - с прикрытием Ми-24 (пара на звено транспортных, звено - на большую группу), обработка площадки перед посадкой; поиск и спасение - с парой Ми-24"
+   },
+   "title": "Вертолётный десант",
+   "performers": [
+    "transport_helo",
+    "attack_helo"
+   ],
+   "target": {
+    "category": "place"
+   },
+   "method": "air_assault",
+   "method_source": "толкование, не цитата: тактический воздушный десант (рота) на вертолётах захватывает пункт в тылу противника - узел дорог, через который идёт его подвоз; удерживает до подхода своих - ОЦЕНКА",
+   "speed_kmh": 220,
+   "transit_alt_m_agl": 50,
+   "attack_alt_m_agl": 30,
+   "ip_offset_km": 0,
+   "low_alt_m_agl": 50,
+   "assault_min_km": 8,
+   "assault_max_km": 50,
+   "lz_clear_km": 10,
+   "lz_offset_km": 2,
+   "lz_radius_m": 800,
+   "land_s": 120,
+   "max_helos": 8,
+   "per_day": 1,
+   "fail_below": 0.4,
+   "ai_loss_per_threat": 0.15,
+   "estimate_fields": [
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "assault_min_km",
+    "assault_max_km",
+    "lz_clear_km",
+    "lz_offset_km",
+    "lz_radius_m",
+    "land_s",
+    "max_helos",
+    "per_day",
+    "fail_below",
+    "ai_loss_per_threat",
+    "max_threats"
+   ],
+   "assault_note": "Цель - пункт противника в assault_min_km..assault_max_km от своих пунктов, без частей противника ближе lz_clear_km; лучший - тот, после взятия которого больше складов противника отрезано от подвоза из тыла, затем ближний к цели своей оси. Площадка - в lz_offset_km от пункта в сторону своих. Подразделение (рота, men) поднимает группа транспортных вертолётов (troops борта в aircraft.json, не больше max_helos), садится на площадку на land_s, пехота выходит при посадке (в миссии - скрипт assault.lua). Долетело меньше fail_below подразделения - высадка сорвана. Вылет ИИ вне миссии: потери - ai_loss_per_threat на ЗРК в коридоре. Высадившиеся держат пункт (order airhead) до соединения со своими (снабжение со своих складов). ОЦЕНКИ. Площадка, к которой в коридоре (на малой высоте, с радиогоризонтом) больше max_threats ЗРК, не берётся.",
+   "strike": {
+    "title": "десантная группа",
+    "group_name": "борт",
+    "size": 4,
+    "maintask": [
+     "Transport"
+    ],
+    "loadout": [],
+    "estimate_fields": [
+     "size"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "игрок может вести десантную группу (Ми-8, UH-1H): посадить на площадку",
+    "estimate": true
+   },
+   "max_threats": 1
+  },
+  "strike_column_march": {
+   "title": "Удар по колонне на марше",
+   "performers": [
+    "attack"
+   ],
+   "target": {
+    "category": "ground",
+    "state": "march"
+   },
+   "method": "sequential_on_call",
+   "method_source": "3.3.3: удары по вызову применяются по вновь обнаруженным целям, в т.ч. войскам на марше",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "medium_alt_m_agl"
+   ],
+   "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "CAS",
+     "GroundAttack"
+    ],
+    "loadout": [
+     "anti_armor"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    },
+    {
+     "id": "recon",
+     "title": "группа доразведки, поиска и поражения",
+     "when": "moving_target",
+     "required": false,
+     "performers": [
+      "attack",
+      "fighter_bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "CAS",
+      "GroundAttack"
+     ],
+     "loadout": [
+      "anti_armor"
+     ],
+     "lead_min": 2,
+     "source": "3.3.3: группы обеспечения - доразведки, поиска и обозначения цели; самостоятельный поиск и поражение ('охота') - когда нет точных сведений о месте объекта",
+     "estimate_fields": [
+      "lead_min",
+      "search_alt_m",
+      "search_min",
+      "size",
+      "zone_margin_km"
+     ],
+     "mode": "search_zone",
+     "search_min": 10,
+     "zone_margin_km": 3,
+     "mode_note": "район - где по расчёту будет колонна к приходу группы (от текущей головы до расчётной + запас); в районе - поиск и поражение наземных целей, огонь разрешён. В DCS 'огонь только в ответ' понимается буквально - по ведомым не стреляют, а сами они не атакуют (проверено, Alex).",
+     "search_alt_m": 150,
+     "ai": {
+      "restrict_jettison": true,
+      "note": "ОЦЕНКА по вылету camp3 день 1: ведущий доразведки сбросил всю подвеску в момент пуска Roland"
+     }
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "medium_alt_m_agl": 30,
+   "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+  },
+  "strike_bridge": {
+   "title": "Удар по мосту",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "bridge",
+    "state": "active"
+   },
+   "method": "sequential_on_call",
+   "method_source": "толкование, не цитата: удары по объектам тыла (склады, мосты, аэродромы) - ОЦЕНКА постановки",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "medium_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "PinpointStrike",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "attack": {
+      "weapon": "Auto",
+      "expend": "All",
+      "group_attack": true
+     }
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000,
+   "medium_alt_m_agl": 30,
+   "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+  },
+  "strike_supply_route": {
+   "title": "Удар по путям подвоза",
+   "performers": [
+    "attack",
+    "fighter_bomber",
+    "bomber"
+   ],
+   "target": {
+    "category": "convoy"
+   },
+   "method": "interdiction",
+   "method_source": "толкование, не цитата: изоляция района боевых действий - удары по колоннам снабжения на путях подвоза противника (участок с наибольшим потоком в радиусе) - ОЦЕНКА",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "medium_alt_m_agl"
+   ],
+   "tactical_group_source": "3.3.3: подразделения БА (ША) следуют к целям в тактических группах - основная (ударная) группа и группы обеспечения",
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "CAS",
+     "GroundAttack"
+    ],
+    "loadout": [
+     "anti_armor"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "note": "ОЦЕНКА по вылету camp3 день 1: ведомый ударной группы сбросил всю подвеску в момент пуска Roland по нему"
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "medium_alt_m_agl": 30,
+   "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА",
+   "per_day": 2,
+   "interdiction_note": "Цель - участок пути подвоза противника (convoys.py) с наибольшим потоком в радиусе исполнителя; в миссии - колонна грузовиков на участке (по дороге, если известна). Сожжённые машины - недовезённые тонны. ОЦЕНКИ."
+  },
+  "strike_depot": {
+   "title": "Удар по складу",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "depot",
+    "state": "active"
+   },
+   "method": "sequential_on_call",
+   "method_source": "толкование, не цитата: удары по объектам тыла (склады, мосты, аэродромы) - ОЦЕНКА постановки",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "medium_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "PinpointStrike",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "attack": {
+      "weapon": "Bombs",
+      "expend": "All",
+      "group_attack": true
+     }
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000,
+   "medium_alt_m_agl": 30,
+   "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+  },
+  "strike_factory": {
+   "title": "Удар по заводу",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "factory",
+    "state": "active"
+   },
+   "method": "sequential_on_call",
+   "method_source": "толкование, не цитата: удары по объектам тыла (склады, мосты, аэродромы) - ОЦЕНКА постановки",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "medium_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "PinpointStrike",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "attack": {
+      "weapon": "Bombs",
+      "expend": "All",
+      "group_attack": true
+     }
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000,
+   "medium_alt_m_agl": 30,
+   "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+  },
+  "strike_airfield": {
+   "title": "Удар по аэродрому",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "airfield",
+    "state": "active"
+   },
+   "method": "sequential_on_call",
+   "method_source": "толкование, не цитата: удары по объектам тыла (склады, мосты, аэродромы) - ОЦЕНКА постановки",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "medium_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "PinpointStrike",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true,
+     "attack": {
+      "weapon": "Bombs",
+      "expend": "All",
+      "group_attack": true
+     }
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000,
+   "medium_alt_m_agl": 30,
+   "medium_alt_note": "угроз ЗРК в коридоре нет (с учётом радиогоризонта) - переход к ИПМ и отход на medium_alt_m_agl: выше МЗА и ПЗРК, меньше расход топлива. ОЦЕНКА"
+  },
+  "strike_sam_site": {
+   "title": "Удар по позиции ЗРК",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "sam",
+    "state": "deployed",
+    "fixed": true,
+    "min_strength": 0.5
+   },
+   "method": "sequential_on_call",
+   "method_source": "толкование, не цитата: уничтожение позиций объектовой ПВО противника, прикрывающих его аэродромы и тыл - ОЦЕНКА постановки; цель - позиция ЗРК (fixed), группы подавления - по ЗРК коридора, в т.ч. по ней самой",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "SEAD",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "sead",
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000
+  },
+  "cap_own_troops": {
+   "title": "Прикрытие войск",
+   "performers": [
+    "fighter",
+    "interceptor"
+   ],
+   "target": {
+    "category": "ground",
+    "state": [
+     "battle",
+     "march"
+    ],
+    "side": "own"
+   },
+   "method": "zone_patrol",
+   "method_source": "толкование, не цитата: прикрытие своих войск в соприкосновении от ударов авиации противника - дежурство в зоне над ними",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 3000,
+   "attack_alt_m_agl": 3000,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "attack_alt_m_agl",
+    "ip_offset_km"
+   ],
+   "strike": {
+    "title": "пара прикрытия",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "CAP",
+     "Fighter Sweep",
+     "Intercept"
+    ],
+    "loadout": [
+     "cap"
+    ],
+    "mode": "cap_zone",
+    "alt_m": 4000,
+    "zone_km": 40,
+    "cap_min": 25,
+    "estimate_fields": [
+     "size",
+     "alt_m",
+     "zone_km",
+     "cap_min"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   }
+  },
+  "awacs_orbit": {
+   "title": "Дежурство ДРЛО",
+   "performers": [
+    "awacs"
+   ],
+   "target": {
+    "category": "front"
+   },
+   "method": "orbit",
+   "ai_only": true,
+   "method_source": "толкование, не цитата: ДРЛО и управление над своей территорией за серединой линии фронта, в standoff_km от неё - ОЦЕНКА",
+   "speed_kmh": 750,
+   "transit_alt_m_agl": 9000,
+   "attack_alt_m_agl": 9000,
+   "ip_offset_km": 0,
+   "standoff_km": 150,
+   "estimate_fields": [
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "standoff_km"
+   ],
+   "strike": {
+    "title": "дежурство дрло",
+    "group_name": "самолёт",
+    "size": 1,
+    "maintask": [
+     "AWACS"
+    ],
+    "loadout": [],
+    "mode": "orbit",
+    "alt_m": 9000,
+    "estimate_fields": [
+     "size",
+     "alt_m"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "на дежурстве к началу миссии (в воздухе в зоне)",
+    "estimate": true
+   },
+   "from_year": 1985,
+   "from_year_source": "А-50 - в строю с 1984-1985 гг."
+  },
+  "airlift": {
+   "title": "Воздушная перевозка",
+   "performers": [
+    "transport",
+    "transport_helo"
+   ],
+   "target": {
+    "category": "depot",
+    "side": "own"
+   },
+   "method": "airlift",
+   "ai_only": true,
+   "method_source": "толкование, не цитата: транспортная авиация возит снабжение на склады, где его меньше всего (в первую очередь отрезанные от подвоза), на ближний к складу свой аэродром - ОЦЕНКА",
+   "speed_kmh": 400,
+   "transit_alt_m_agl": 3000,
+   "attack_alt_m_agl": 3000,
+   "helo_alt_m_agl": 150,
+   "ip_offset_km": 0,
+   "airlift_below": 0.9,
+   "airlift_depot_km": 40,
+   "airlift_max": 4,
+   "sorties_per_day": 2,
+   "estimate_fields": [
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "helo_alt_m_agl",
+    "airlift_below",
+    "airlift_depot_km",
+    "airlift_max",
+    "sorties_per_day"
+   ],
+   "airlift_note": "Склад с запасом ниже airlift_below ёмкости (отрезанный от подвоза - первым) получает до sorties_per_day рейсов группы транспорта на свой аэродром не дальше airlift_depot_km от склада; направлений в сутки - не больше airlift_max. Груз борта - cargo_t типа (aircraft.json). Сбитый в миссии борт груз не довозит. ОЦЕНКИ.",
+   "strike": {
+    "title": "транспортная группа",
+    "group_name": "борт",
+    "size": 2,
+    "maintask": [
+     "Transport"
+    ],
+    "loadout": [],
+    "estimate_fields": [
+     "size"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "только ИИ; рейс - взлёт со своей базы, посадка на аэродроме назначения",
+    "estimate": true
+   }
+  },
+  "recon": {
+   "title": "Воздушная разведка",
+   "performers": [
+    "recon"
+   ],
+   "target": {
+    "category": "front"
+   },
+   "method": "recon",
+   "ai_only": true,
+   "method_source": "толкование, не цитата: разведывательная авиация осматривает районы, где данные о противнике устарели, и пункты противника у линии фронта; вылеты на рассвете и к вечеру; данные - после посадки и обработки (recon.py) - ОЦЕНКА",
+   "speed_kmh": 850,
+   "transit_alt_m_agl": 300,
+   "attack_alt_m_agl": 300,
+   "low_alt_m_agl": 300,
+   "high_alt_m": 18000,
+   "ip_offset_km": 0,
+   "routes": 3,
+   "route_points": 4,
+   "leg_km": 60,
+   "sorties_per_day": 2,
+   "process_h": 1,
+   "estimate_fields": [
+    "speed_kmh",
+    "low_alt_m_agl",
+    "high_alt_m",
+    "routes",
+    "route_points",
+    "leg_km",
+    "sorties_per_day",
+    "process_h"
+   ],
+   "recon_note": "До routes маршрутов в сутки, по route_points точек интереса не дальше leg_km друг от друга; sorties_per_day вылетов на маршрут. Полоса датчиков - по типу ЛА (aircraft.json recon). Сбитый разведчик данных не привозит. ОЦЕНКИ.",
+   "strike": {
+    "title": "разведчик",
+    "group_name": "разведчик",
+    "size": 1,
+    "maintask": [
+     "Reconnaissance"
+    ],
+    "loadout": [],
+    "estimate_fields": [
+     "size"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "только ИИ; маршрут от базы по точкам интереса и обратно",
+    "estimate": true
+   }
+  },
+  "qra": {
+   "title": "Дежурство ПВО на аэродроме",
+   "performers": [
+    "interceptor",
+    "fighter"
+   ],
+   "target": {
+    "category": "front"
+   },
+   "method": "alert",
+   "ai_only": true,
+   "method_source": "толкование, не цитата: дежурные силы ПВО - пара истребителей в готовности на аэродроме у фронта, взлёт по обнаружению противника радиолокационными средствами своей стороны - ОЦЕНКА",
+   "speed_kmh": 850,
+   "transit_alt_m_agl": 6000,
+   "attack_alt_m_agl": 6000,
+   "ip_offset_km": 0,
+   "qra_bases": 5,
+   "qra_spacing_km": 80,
+   "min_fit_air": 0.5,
+   "shift_h": 4,
+   "cap_offset_km": 30,
+   "cap_alt_m": 6000,
+   "scramble_km": 200,
+   "engage_km": 80,
+   "cap_min": 40,
+   "mission_km": 300,
+   "estimate_fields": [
+    "qra_bases",
+    "shift_h",
+    "cap_offset_km",
+    "cap_alt_m",
+    "scramble_km",
+    "engage_km",
+    "cap_min",
+    "mission_km"
+   ],
+   "qra_note": "Пара дежурит на qra_bases аэродромах с истребителями, ближних к фронту, сменами shift_h весь лётный день (самолёты заняты в плане). В миссии (база ближе mission_km к цели задачи) - на стоянке с запущенными двигателями (поздняя активация); lua/qra.lua поднимает её, когда радары её стороны (РЛС, ЗРК, ДРЛО) видят противника ближе scramble_km к базе: зона в cap_offset_km к фронту, атака воздушных целей ближе engage_km, cap_min минут, посадка. Вне миссии дежурные пары рядом с целью удара ИИ снижают его успех и повышают потери (airwar.py). ОЦЕНКИ.",
+   "strike": {
+    "title": "дежурная пара",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "Intercept",
+     "CAP"
+    ],
+    "loadout": [
+     "cap"
+    ],
+    "estimate_fields": [
+     "size"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "только ИИ",
+    "estimate": true
+   },
+   "per_flight": 4,
+   "max_per_raid": 3,
+   "reserve": 1,
+   "base_km": 60,
+   "qra_scramble_note": "Подъём по налёту (qra.lua): на налёт из n самолётов, идущих к своим объектам, - ceil(n / per_flight) групп (не больше max_per_raid); reserve групп на земле, кроме налёта на их базу ближе base_km; вертолёты и уходящие цели тревоги не поднимают. дежурная пара (готовность №1) - ОЦЕНКА подъёма по налёту"
+  },
+  "strike_ship": {
+   "title": "Удар по кораблям",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "naval",
+    "state": "deployed"
+   },
+   "method": "sequential_on_call",
+   "method_source": "удар по корабельной группе противника на море (ПКР, бомбы с малой высоты); числа пакета - как у удара по ЗРК (ОЦЕНКА)",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 40,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "AntishipStrike",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "antiship",
+     "strike"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000
+  },
+  "fleet_cap": {
+   "title": "Прикрытие соединения",
+   "performers": [
+    "fighter",
+    "interceptor"
+   ],
+   "target": {
+    "category": "naval",
+    "state": "deployed",
+    "side": "own",
+    "kinds": [
+     "CSG",
+     "ARG",
+     "CONVOY",
+     "SAG"
+    ]
+   },
+   "method": "zone_patrol",
+   "method_source": "дежурство истребителей над своей корабельной группой (CAP над соединением) - ОЦЕНКА",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 3000,
+   "attack_alt_m_agl": 3000,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "speed_kmh",
+    "transit_alt_m_agl",
+    "attack_alt_m_agl",
+    "ip_offset_km"
+   ],
+   "strike": {
+    "title": "пара CAP над соединением",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "CAP",
+     "Fighter Sweep",
+     "Intercept"
+    ],
+    "loadout": [
+     "cap"
+    ],
+    "mode": "cap_zone",
+    "alt_m": 4000,
+    "zone_km": 40,
+    "cap_min": 25,
+    "estimate_fields": [
+     "size",
+     "alt_m",
+     "zone_km",
+     "cap_min"
+    ]
+   },
+   "support": [],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   }
+  },
+  "strike_ssm": {
+   "title": "Охота за пусковыми ОТР",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "ssm",
+    "state": "deployed",
+    "min_strength": 0.3
+   },
+   "method": "sequential_on_call",
+   "method_source": "ОЦЕНКА: охота за пусковыми Скад (Ирак 1991, 'Scud hunt') - удары по районам пусков по данным разведки; пусковые меняют позицию после пусков",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "SEAD",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "sead",
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000
+  },
+  "strike_ew": {
+   "title": "Удар по станции РЭБ",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "ew_site",
+    "state": "deployed"
+   },
+   "method": "sequential_on_call",
+   "method_source": "ОЦЕНКА: станции РЭБ - приоритетные цели разведки и ударов (Украина 2022-2024)",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "SEAD",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "sead",
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000
+  },
+  "strike_art": {
+   "title": "Удар по артиллерии",
+   "performers": [
+    "bomber",
+    "fighter_bomber",
+    "attack"
+   ],
+   "target": {
+    "category": "art_site",
+    "state": "deployed"
+   },
+   "method": "sequential_on_call",
+   "method_source": "ОЦЕНКА: огневые позиции артиллерии - цели разведки и ударов (Украина 2022)",
+   "speed_kmh": 800,
+   "transit_alt_m_agl": 30,
+   "attack_alt_m_agl": 50,
+   "ip_offset_km": 20,
+   "estimate_fields": [
+    "attack_alt_m_agl",
+    "bomb_alt_m",
+    "ip_offset_km",
+    "low_alt_m_agl",
+    "speed_kmh",
+    "transit_alt_m_agl"
+   ],
+   "strike": {
+    "title": "ударная группа",
+    "group_name": "пара",
+    "size": 2,
+    "maintask": [
+     "SEAD",
+     "GroundAttack",
+     "CAS"
+    ],
+    "loadout": [
+     "anti_armor",
+     "bombs"
+    ],
+    "estimate_fields": [
+     "size"
+    ],
+    "ai": {
+     "restrict_jettison": true
+    }
+   },
+   "support": [
+    {
+     "id": "sead",
+     "title": "группа подавления ПВО",
+     "when": "threats",
+     "required": false,
+     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
+     "performers": [
+      "attack",
+      "fighter_bomber",
+      "bomber"
+     ],
+     "size": 2,
+     "maintask": [
+      "SEAD",
+      "GroundAttack",
+      "CAS"
+     ],
+     "loadout": [
+      "sead",
+      "anti_armor"
+     ],
+     "lead_min": 0,
+     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
+     "estimate_fields": [
+      "detect_margin_km",
+      "flights",
+      "hold_after_min",
+      "launch_alt_m",
+      "lead_min",
+      "orbit_radius_km",
+      "size",
+      "standoff_km"
+     ],
+     "ai": {
+      "react_on_threat": "EvadeFire",
+      "restrict_jettison": true,
+      "attack": {
+       "weapon": "ARM",
+       "expend": "All",
+       "group_attack": true
+      },
+      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
+     },
+     "flights": 1,
+     "standoff_km": 40,
+     "detect_margin_km": 2,
+     "orbit_radius_km": 3,
+     "hold_after_min": 0,
+     "launch_alt_m": 1000,
+     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
+     "from_year": 1973,
+     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
+    }
+   ],
+   "timing": {
+    "player_cold_start_min": 5,
+    "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
+    "estimate": true
+   },
+   "low_alt_m_agl": 30,
+   "low_alt_source": "РЛЭ Су-25, 1.2.4: малые и предельно малые высоты - для скрытности, внезапности и уменьшения эффективности ПВО; ниже 100 м радиолокационное наблюдение не обеспечивается. 50 м - ОЦЕНКА (высота ввода в фигуры в той же главе)",
+   "low_alt_note": "точки маршрута внутри известных зон ЗРК - на low_alt_m_agl; вне зон - transit_alt_m_agl",
+   "bomb_alt_m": 1000
+  }
+ },
+ "march": {
+  "order": [
+   "MBT",
+   "IFV",
+   "APC",
+   "truck"
+  ],
+  "spacing_m": 50,
+  "estimate": true
+ },
+ "apportionment": {
+  "source": "ОЦЕНКА по смыслу советской теории воздушной операции фронта (первые массированные удары - по авиации и ПВО противника, затем - поддержка войск): доли задач плана по категориям; фазы по обстановке - planner.phase",
+  "classes": {
+   "DCA": [
+    "cap_own_troops",
+    "fleet_cap"
+   ],
+   "OCA": [
+    "strike_airfield"
+   ],
+   "SEAD": [
+    "strike_sam_site",
+    "strike_ssm",
+    "strike_ew"
+   ],
+   "APCLO": [
+    "cas_contact",
+    "cas_helo",
+    "strike_column_march",
+    "strike_supply_route",
+    "strike_bridge",
+    "strike_depot",
+    "strike_factory",
+    "strike_ship",
+    "strike_art"
+   ]
+  },
+  "shares": [
+   {
+    "from_day": 1,
+    "DCA": 0.15,
+    "OCA": 0.3,
+    "SEAD": 0.2,
+    "APCLO": 0.35
+   },
+   {
+    "from_day": 3,
+    "DCA": 0.15,
+    "OCA": 0.15,
+    "SEAD": 0.15,
+    "APCLO": 0.55
+   }
+  ],
+  "estimate": true
+ },
+ "fires": {
+  "missions": 6,
+  "rounds": 36,
+  "mrl": {
+   "type": "Grad-URAL",
+   "n": 6,
+   "rounds": 240,
+   "missions": 1,
+   "target": "depth",
+   "depth_km": 3,
+   "behind_m": 9000,
+   "sim_k": 0.15
+  },
+  "note": "Огневое поражение ОВД (ОЦЕНКИ по смыслу: Г.А. Ионин, Тактика, 1987; FM 100-2-1 The Soviet Army: Operations and Tactics, 1984): массированный огонь - артподготовка атаки налётами по переднему краю (6 налётов по 36 снарядов батареи), реактивная артиллерия дивизии (дивизион БМ-21 'Град', в миссии - батарея 6 машин, полный залп 240 ракет) - по глубине обороны (второй эшелон, резервы, в depth_km за передним краем). sim_k - прибавка силы части в бою от РСЗО."
+ },
+ "sim": {
+  "combat_ineffective_below": 0.5,
+  "estimate": true,
+  "contact_km": 5,
+  "battle_loss_k": 0.15,
+  "loss_cap": 0.5,
+  "defend_factor": 0.6,
+  "step_km": 1.0,
+  "line_offset_km": 1.5,
+  "role_weight": {
+   "MBT": 1.0,
+   "IFV": 0.5,
+   "APC": 0.25,
+   "truck": 0.0,
+   "infantry": 0.04
+  },
+  "sim_note": "Абстрактный бой за сутки (ОЦЕНКИ, не из документа): части противоположных сторон ближе contact_km - в соприкосновении (battle). Потери за сутки = battle_loss_k * (сила противника / своя сила), не больше loss_cap; у обороняющегося x defend_factor. Сила - сумма исправной техники с весами role_weight. Ниже combat_ineffective_below часть выходит из боя (halted). Марш - шагами step_km, до соприкосновения. В миссии части в бою стоят линиями в line_offset_km от середины между ними.",
+  "posture": "offense",
+  "ground_ops_note": "Оперативные приёмы ОВД (ОЦЕНКИ по смыслу: Г.А. Ионин 'Тактика' 1987, В.Е. Савкин 'Основные принципы оперативного искусства и тактики' 1972, Ч. Доннелли 'Red Banner' 1988): передовой отряд - сильнейшая часть с приказом выйти на рубеж в глубине (forward_depth пунктов за фронтом) со скоростью x forward_speed; второй эшелон вводится в полосе успеха (commit_in_success); после прорыва (пункт противника без его частей ближе breakthrough_km) - оперативная маневренная группа (omg) на склады и мосты в тылу противника, скорость x omg_speed; форсирование рек с ходу - разрушенный большой мост не тупик: путь длиннее на crossing_km, марш на связи x crossing_slow. Артиллерия: сила части x (1 + artillery_factor x доля орудий батареи); подготовленная оборона (prepared_h ч в обороне без боя) - потери x prepared_factor. Темп - норма наступления tempo_km в сутки (для сводки).",
+  "artillery_factor": 0.35,
+  "prepared_h": 12,
+  "prepared_factor": 0.75,
+  "forward_detachment": true,
+  "forward_speed": 1.5,
+  "forward_depth": 2,
+  "commit_in_success": true,
+  "omg": true,
+  "omg_speed": 1.3,
+  "omg_from_day": 2,
+  "breakthrough_km": 15,
+  "crossing_km": 30,
+  "crossing_slow": 0.35,
+  "tempo_km": 40,
+  "attack_min_strength": 0.7,
+  "withdraw_below": 0.6,
+  "refit_rate": 0.15,
+  "refit_ready": 0.8,
+  "capture_km": 3,
+  "ops_note": "Оперативный уровень (ОЦЕНКИ, не из документа): posture offense - наступление на objectives сектора через соседние пункты противника; defense - удержание пунктов на линии фронта и возврат пустых. Ниже withdraw_below часть выходит из боя и отходит в тыл; в тылу восстанавливает refit_rate потерь в сутки, с refit_ready - снова в строю. Пункт занят, если рядом (capture_km) часть стороны и нет противника. Не в бою на фронте - пополнение refit_in_line от тылового темпа. Отходящие разрывают соприкосновение.",
+  "refit_in_line": 0.33,
+  "daily_advance_km": 25,
+  "road_march_km": 150,
+  "road_clear_km": 15,
+  "road_march_note": "Марш вне соприкосновения (противник дальше road_clear_km - рубеж развёртывания в предбоевой порядок, 15-20 км): road_march_km в сутки вместо daily_advance_km (темп наступления в соприкосновении). ОЦЕНКА: суточный переход дивизии - 150-200 км (Г.А. Ионин, Тактика, 1987; FM 55-30 - средняя скорость колонны 25-40 км/ч).",
+  "battle_variance": 0.3,
+  "choice_width": 3,
+  "random_note": "Случайность (если включена в кампании): потери в бою за сутки x U(1-battle_variance, 1+battle_variance); направление наступления - из choice_width ближних к цели пунктов, с весом 1/расстояние. ОЦЕНКИ.",
+  "supply_km": 80,
+  "supply_min_stock": 0.3,
+  "unsupplied": 0.5,
+  "supply_power_factor": 0.8,
+  "airfield_threat_km": 30,
+  "airfield_lost_km": 3,
+  "repair_depot": 0.15,
+  "repair_bridge": 0.34,
+  "repair_airfield": 0.2,
+  "logistics_note": "Тыл (ОЦЕНКИ, не из документа): снабжение - путь по своей территории до своего склада с запасом от supply_min_stock не длиннее supply_km, иначе марш x unsupplied, сила x supply_power_factor, восстановление медленнее. Аэродром закрыт, если противник ближе airfield_threat_km; потерян - ближе airfield_lost_km. Восстановление повреждений в сутки: repair_depot/bridge/airfield (мост - 3 суток). Заводы (ОЦЕНКИ): среднее повреждение заводов стороны x industry_effect снижает её восстановление тыла (repair_*) и пополнение авиации; завод восстанавливается на repair_factory в сутки. Малые мосты (найдены зондом карты, не через Эльбу; ОЦЕНКИ): разрушенный связь не закрывает - объезд: путь снабжения по связи длиннее на bridge_detour_km, марш по ней x bridge_detour_slow.",
+  "repair_factory": 0.1,
+  "repair_sam": 0.25,
+  "sam_relocate_km": 5,
+  "sam_note": "ЗРК (ОЦЕНКИ, не из документа): потери восстанавливаются на repair_sam в сутки (x промышленность и снабжение; приданная ПВО части в бою - нет). ЗРК на позиции, понёсший потери, на следующие сутки меняет позицию - уходит на sam_relocate_km в сторону тыла.",
+  "industry_effect": 0.5,
+  "bridge_detour_km": 15,
+  "bridge_detour_slow": 0.5,
+  "consume_t": {
+   "battle": 1.0,
+   "march": 0.5,
+   "refit": 0.3,
+   "defend": 0.2,
+   "halted": 0.2
+  },
+  "depot_days": 10,
+  "supply_inflow": 2.5,
+  "sortie_t": {
+   "air": 4.0,
+   "heli": 1.5
+  },
+  "supply_t_note": "Снабжение в тоннах (ОЦЕНКИ, не из документа): расход части в сутки = исправные машины (с приданной ПВО) x consume_t по состоянию (бой, марш, восстановление, оборона); авиация - sortie_t на самолёто-вылет плана полётов. Ёмкость складов стороны - depot_days суток её расхода в обороне, поровну по складам. Подвоз из тыла в сутки - supply_inflow x расход стороны в обороне, на склады, до которых есть путь из тыла сектора по своей территории (по недостаче). Часть получила долю нормы - сила между supply_power_factor и 1, марш - между unsupplied и 1.",
+  "crew_ratio": 1.2,
+  "crews_per_day": 1,
+  "capture_per_day": 0.35,
+  "downed_max_days": 3,
+  "crews_note": "Экипажи (ОЦЕНКИ, не из документа): у полка crew_ratio экипажей на самолёт штата; к вылету - не больше экипажей. Сбит без катапультирования - экипаж погиб; катапультировался - на земле (downed), пока не спасён (CSAR), не вышел к своим (на своей территории - на следующие сутки) или не попал в плен (на территории противника - capture_per_day в сутки, через downed_max_days суток - пропал без вести). Пополнение - crews_per_day экипажей в сутки до штата.",
+  "night_march": 0.6,
+  "night_battle": 0.5,
+  "night_note": "Ночь - часы вне лётного дня (ato.FLYING_HOURS, 06-20). Ночью марш x night_march, потери в бою x night_battle (ОЦЕНКИ). Вылеты ночью - только типы с night в aircraft.json (ato.py)."
+ },
+ "task_priority_note": "Порядок задач = приоритет плана дня (ОЦЕНКА): войска в соприкосновении, затем колонны на марше.",
+ "gci": {
+  "channels": 8,
+  "commit_km": 120,
+  "leash_km": 40,
+  "odds": 1.5,
+  "hit_run": false,
+  "heli": true,
+  "bingo": 0.35,
+  "per_target": 2,
+  "source": "наведение с земли - основа советской ПВО; каналы - ОЦЕНКА"
+ },
+ "units": "metric"
+}

@@ -13,7 +13,7 @@
  },
  "doctrine": {
   "red": "wp",
-  "blue": "wp"
+  "blue": "ua"
  },
  "units": [
   {
@@ -1528,7 +1528,7 @@
    "id": "ru_su30",
    "name": "Полк Су-30СМ (в DCS - Су-27)",
    "side": "red",
-   "role": "fighter",
+   "role": "fighter_bomber",
    "base": "luneburg",
    "type": "Su_27",
    "count": 12,
@@ -1540,18 +1540,6 @@
     "type": "Su_30SM",
     "name": "Полк Су-30СМ"
    }
-  },
-  {
-   "id": "ru_su24",
-   "name": "Бомбардировщики Су-24М",
-   "side": "red",
-   "role": "bomber",
-   "base": "chojna",
-   "type": "Su_24M",
-   "count": 12,
-   "strike_radius_km": 400,
-   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
-   "estimate": true
   },
   {
    "id": "ru_ka52",
@@ -1666,11 +1654,11 @@
    "name": "299-я бригада тактической авиации (Су-25)",
    "side": "blue",
    "role": "attack",
-   "base": "giebelstadt",
+   "base": "gutersloh",
    "type": "Su_25",
    "count": 12,
    "strike_radius_km": 250,
-   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Канатово - Ганновер",
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Канатово - далеко от Киева: в первые недели Су-25 летали с аэродромов ближе к фронту (рассредоточение) - здесь Озёрное",
    "estimate": true
   },
   {

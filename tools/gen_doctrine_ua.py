@@ -1,0 +1,62 @@
+"""Доктрина ВВС Украины 2022 (data/doctrine/ua.json) - из советской (wp.json) с поправками на войну 2022 г.
+
+Общее прошлое, но другая тактика (ОЦЕНКИ по интервью лётчиков ВСУ и открытым обзорам, RUSI 'Preliminary Lessons in
+Conventional Warfighting', 2022):
+  * плотная ПВО противника (С-300/С-400, Бук, Тор, Панцирь) и мало самолётов - ударные группы парами, а не звеньями;
+  * полёт на предельно малой высоте на всём маршруте (средняя высота - только вне досягаемости ЗРК, которой почти нет);
+  * ставка на скорость удара: без поочерёдных групп обеспечения (подавление, добивание, расчистка, демонстративная
+    группа) - на них нет ни самолётов, ни времени под ПВО; подавление ПВО (HARM с августа 2022) - одна пара вместе с
+    ударом, необязательная;
+  * нехватка типов: Су-25 летает и как бомбардировщик (склады, мосты, группировки, колонны, ЗРК), наравне с Су-24М.
+Наземная модель (sim, march, fires) - как у wp.json.
+Запуск: python tools/gen_doctrine_ua.py
+"""
+from __future__ import annotations
+
+import copy
+import json
+from pathlib import Path
+
+DOC = Path(__file__).resolve().parent.parent / "redfront" / "data" / "doctrine"
+STRIKE_SIZE = 2           # ОЦЕНКА: пара
+LOW_M = 30                # ОЦЕНКА: предельно малая высота на маршруте
+DROP = {"kill", "sweep", "feint", "jam", "cover"}   # истребители ВСУ - на прикрытии войск и объектов, не в пакетах
+ATTACK_TOO = {"strike_sam_site", "strike_ew", "strike_art", "strike_ssm", "strike_airfield", "strike_ship"}
+
+
+def main() -> None:
+    d = copy.deepcopy(json.loads((DOC / "wp.json").read_text(encoding="utf-8")))
+    d["package"] = "ua"
+    d["title"] = "ВВС Украины, 2022 (пары, предельно малая высота, удар без поочерёдных групп обеспечения)"
+    d["_about"] = __doc__
+    for kind, t in d["tasks"].items():
+        s = t.get("strike") or {}
+        if not t.get("support") and kind not in ATTACK_TOO:
+            continue                             # дежурства, перевозки, вертолёты - как было
+        if s.get("size", 0) > STRIKE_SIZE:
+            s["size"] = STRIKE_SIZE
+            s["group_name"] = "пара"
+        for k in ("transit_alt_m_agl", "attack_alt_m_agl", "low_alt_m_agl"):
+            if t.get(k) is not None:
+                t[k] = min(t[k], LOW_M if k != "attack_alt_m_agl" else 50)
+        if t.get("medium_alt_m_agl") is not None:
+            t["medium_alt_m_agl"] = LOW_M        # средней высоты нет - и вне зон ЗРК низко (ОЦЕНКА)
+        sup = []
+        for g in t.get("support") or []:
+            if g.get("id") in DROP:
+                continue
+            g = dict(g, required=False, size=min(g.get("size", 2), 2))
+            if g.get("id") == "sead":            # одна пара с ПРР вместе с ударом, а не заранее
+                g["lead_min"] = 0
+                g["hold_after_min"] = 0
+                g["required_note"] = "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)"
+            sup.append(g)
+        t["support"] = sup
+        if kind in ATTACK_TOO and "attack" not in t.get("performers", []):
+            t["performers"] = list(t["performers"]) + ["attack"]   # Су-25 - вместо недостающих бомбардировщиков
+    (DOC / "ua.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+    print("ua.json:", ", ".join(f"{k}:{(t.get('strike') or {}).get('size')}" for k, t in d["tasks"].items() if t.get("strike")))
+
+
+if __name__ == "__main__":
+    main()
