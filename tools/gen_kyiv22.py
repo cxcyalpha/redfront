@@ -71,7 +71,7 @@ G.LINKS = [
 ]
 G.SUPPLY_ENTRY = {"red": ["Mozyr", "Gomel", "Sudzha", "Klintsy"], "blue": ["Lviv"]}
 G.OFF_LIMITS = {"blue": ["Mozyr", "Khoiniki", "Gomel", "Sudzha", "Klintsy", "Glushkovo", "Trubchevsk", "Sevsk"]}   # Украина не наступает в Беларусь и Россию
-G.AIRBASES = {"red": ["Kiel", "Lubeck", "Pinnow"],                  # Мачулищи / Зябровка / Курск - ОЦЕНКА
+G.AIRBASES = {"red": ["Kiel", "Lubeck", "Pinnow", "HeliMozyr"],                  # Мачулищи / Зябровка / Курск - ОЦЕНКА
               "blue": ["Hamburg Finkenwerder", "Celle", "Wunstorf", "Hannover"]}   # Васильков, Озёрное, Староконстантинов, Канатово
 G.AXES = {
     "west": {"title": "Правый берег: Гостомель - Буча - Ирпень - Киев", "objectives": ["Hostomel", "Bucha", "Irpin", "Kyiv"]},
@@ -164,9 +164,10 @@ G.AIR = [
     ("ru_su30", "Полк Су-30СМ (в DCS - Су-27)", "red", "fighter_bomber", "Su_27", "Lubeck", 12, 500,
      "мод Су-30 включён - Су-30СМ, иначе - Су-27", {"mod_alt": {"mod": "su30", "type": "Su_30SM", "name": "Полк Су-30СМ"}}),
     # Су-24М у ВКС в 2022 почти не летали: удары по земле - Су-34, затем Су-30СМ (Су-24 - у Украины)
-    ("ru_ka52", "Вертолёты Ка-52 (в DCS - Ка-50)", "red", "attack_helo", "Ka_50", "Kiel", 12, 150, "Ка-52 в pydcs нет"),
-    ("ru_mi28", "Вертолёты Ми-28Н", "red", "attack_helo", "Mi_28N", "Lubeck", 10, 150, ""),
-    ("ru_mi8", "Вертолёты Ми-8АМТШ (десант)", "red", "transport_helo", "Mi_8MT", "Kiel", 20, 200, ""),
+    # вертолёты 24.02 - с площадок в Беларуси у границы (Мозырь, Хойники): десант на Гостомель, Ка-52 - сопровождение
+    ("ru_ka52", "Вертолёты Ка-52 (в DCS - Ка-50)", "red", "attack_helo", "Ka_50", "HeliMozyr", 12, 150, "Ка-52 в pydcs нет"),
+    ("ru_mi28", "Вертолёты Ми-28Н", "red", "attack_helo", "Mi_28N", "HeliMozyr", 10, 150, ""),
+    ("ru_mi8", "Вертолёты Ми-8АМТШ (десант)", "red", "transport_helo", "Mi_8MT", "HeliMozyr", 20, 200, ""),
     ("ru_a50", "Самолёт ДРЛО А-50", "red", "awacs", "A_50", "Pinnow", 1, 1500, ""),
     ("ru_tu95", "Ту-95МС (удары крылатыми ракетами)", "red", "bomber", "Tu_95MS", "Pinnow", 6, 3000,
      "дальняя авиация; базы - вне сектора, здесь - Пиннов"),
@@ -185,7 +186,7 @@ G.AD_TEMPLATES = {
     "red": {"short": [{"name": "Тор-М2, Панцирь", "composition": [("CHAP_TorM2", "launcher", 1), ("CHAP_PantsirS1", "launcher", 1)]}]},
     "blue": {"short": [{"name": "Оса, ЗУ-23", "composition": [("Osa_9A33_ln", "launcher", 1), ("ZU_23_Emplacement", "launcher", 2)]}]},
 }
-G.EXTERNAL_SUPPLY = {"Kiel", "Lubeck", "Pinnow"}   # аэродромы в Беларуси и России - снабжение не со складов фронта
+G.EXTERNAL_SUPPLY = {"Kiel", "Lubeck", "Pinnow", "HeliMozyr"}   # аэродромы в Беларуси и России - снабжение не со складов фронта
 G.EW = [   # станции РЭБ (ew.py); моделей в DCS нет - грузовики и КП (замена в имени); места и состав - ОЦЕНКА
     ("red_ew_leer_west", "Комплекс Леер-3 (правый берег; в DCS - КП СКП-11)", "red", "leer3", {"SKP_11": 1, "Ural_4320_31": 2},
      53.900, 9.920, "Леер-3 с Орлан-10 - ОЦЕНКА размещения"),
@@ -219,6 +220,7 @@ REAL = {   # широта, долгота (по памяти, +-2 км)
 }
 REAL_AB = {   # прежнее имя аэродрома карты -> реальный аэродром
     "Kiel": (53.77, 27.58),                   # Мачулищи (Минск) - у края карты
+    "HeliMozyr": (52.05, 29.25),              # вертолётные площадки у Мозыря (Беларусь)
     "Lubeck": (52.30, 31.17),                 # Зябровка (Гомель)
     "Pinnow": (51.75, 36.30),                 # Курск (Халино)
     "Hamburg Finkenwerder": (50.23, 30.30),   # Васильков

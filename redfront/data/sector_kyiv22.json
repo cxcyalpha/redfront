@@ -1,5 +1,5 @@
 {
- "_about": "Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.84 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Nordholz, Luneburg, Chojna, Rinteln, Gutersloh, Dusseldorf, Giebelstadt. Рельеф и реки (Днепр) - карты, не Украины.",
+ "_about": "Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.84 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Nordholz, Bremen, Luneburg, Chojna, Rinteln, Gutersloh, Dusseldorf, Giebelstadt. Рельеф и реки (Днепр) - карты, не Украины.",
  "theatre": "germany",
  "places": {
   "Mozyr": {
@@ -201,6 +201,13 @@
   "chojna": {
    "name": "Chojna",
    "airport": "Chojna",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "bremen": {
+   "name": "Bremen",
+   "airport": "Bremen",
    "side": "red",
    "military": true,
    "supply_external": true
@@ -549,6 +556,17 @@
   }
  ],
  "ad_sites": [
+  {
+   "id": "red_ad_af_bremen",
+   "name": "ПВО аэродрома Bremen",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_bremen",
+   "lat": 53.0347,
+   "lon": 8.7977,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
   {
    "id": "red_ad_af_chojna",
    "name": "ПВО аэродрома Chojna",

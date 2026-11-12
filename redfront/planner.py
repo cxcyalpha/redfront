@@ -1191,7 +1191,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                **{k: s[k] for k in ZONE_KEYS if k in s}}]
     notes = []
     chosen_by: dict[str, dict] = {}
-    for g in tdef.get("support", []):
+    from . import ew as _ew
+    uav = _ew.is_uav(perf)                       # беспилотник: без групп обеспечения (сопровождение ему не нужно)
+    for g in ([] if uav else tdef.get("support", [])):
         if g.get("from_year") and int(str(state.get("date", "2000"))[:4]) < g["from_year"]:
             continue                             # группы ещё нет на год кампании (подавление ПВО ракетами - с ПРР)
         if g["when"] == "threats" and not threats:
