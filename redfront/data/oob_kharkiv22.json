@@ -42,7 +42,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "оборона Балаклеи слабая - прорыв 6.09"
+   "note": "оборона Балаклеи слабая - прорыв 6.09",
+   "quality": 0.6
   },
   {
    "id": "red_rg_balakliia_pvo",
@@ -91,7 +92,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_lnr_2ac_pvo",
@@ -140,7 +142,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_1gta_kup_pvo",
@@ -194,7 +197,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_izium_3mrd_pvo",
@@ -248,7 +252,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_izium_144mrd_pvo",
@@ -302,7 +307,9 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 1.0,
+   "order": "garrison"
   },
   {
    "id": "red_lyman_pvo",
@@ -356,7 +363,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_11ac_pvo",
@@ -410,7 +418,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_6caa_pvo",
@@ -462,7 +471,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "note": "переброска 8-9.09 - ОЦЕНКА"
+   "note": "переброска 8-9.09 - ОЦЕНКА",
+   "quality": 0.9
   },
   {
    "id": "red_vdv_kup_pvo",
@@ -514,7 +524,9 @@
    "estimate": true,
    "arrives_day": 4,
    "arrives_jitter": 0,
-   "note": "ОЦЕНКА"
+   "note": "ОЦЕНКА",
+   "quality": 0.8,
+   "order": "garrison"
   },
   {
    "id": "red_reserve_svatove_pvo",
@@ -574,7 +586,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "kupiansk"
+   "axis": "kupiansk",
+   "unopposed_km": 50
   },
   {
    "id": "blue_92mb_pvo",
@@ -629,7 +642,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "izium"
+   "axis": "izium",
+   "unopposed_km": 50
   },
   {
    "id": "blue_25aab_pvo",
@@ -684,7 +698,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "kupiansk"
+   "axis": "kupiansk",
+   "unopposed_km": 50
   },
   {
    "id": "blue_80aab_pvo",
@@ -741,7 +756,8 @@
    "estimate": true,
    "arrives_day": 2,
    "arrives_jitter": 0,
-   "axis": "izium"
+   "axis": "izium",
+   "unopposed_km": 50
   },
   {
    "id": "blue_3tb_pvo",
@@ -799,7 +815,8 @@
    "arrives_day": 3,
    "arrives_jitter": 0,
    "axis": "kupiansk",
-   "note": "ОЦЕНКА"
+   "note": "ОЦЕНКА",
+   "unopposed_km": 50
   },
   {
    "id": "blue_4tb_pvo",
@@ -859,7 +876,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "north"
+   "axis": "north",
+   "unopposed_km": 50
   },
   {
    "id": "blue_14mb_pvo",
@@ -919,7 +937,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "izium"
+   "axis": "izium",
+   "unopposed_km": 50
   },
   {
    "id": "blue_93mb_pvo",
@@ -974,7 +993,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "lyman"
+   "axis": "lyman",
+   "unopposed_km": 50
   },
   {
    "id": "blue_95aab_pvo",
@@ -1031,7 +1051,8 @@
    "estimate": true,
    "arrives_day": 2,
    "arrives_jitter": 0,
-   "axis": "lyman"
+   "axis": "lyman",
+   "unopposed_km": 50
   },
   {
    "id": "blue_81amb_pvo",
@@ -1080,7 +1101,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "unopposed_km": 50
   },
   {
    "id": "blue_ngu_kharkiv_pvo",

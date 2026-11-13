@@ -17,6 +17,7 @@ import heapq
 
 from . import model
 
+GARRISON_CUT_DAYS = 4   # ОЦЕНКА: гарнизон без подвоза держится столько суток, затем прорывается к своим
 GARRISON_HOLD = 0.5   # ОЦЕНКА: гарнизон города отходит при вдвое меньшей боеспособности, чем полевая часть
 HOLD_KM = 2.0     # ОЦЕНКА: часть "стоит в пункте", если ближе этого
 
@@ -210,6 +211,25 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     own = _maneuver(state, side)
     front = set(front_nodes(state, side))
     rear = [p for p in state["places"] if owner(state, p) == side and p not in front]
+    # 0. гарнизон без подвоза (окружён, logistics.supply) дольше GARRISON_CUT_DAYS - прорыв к своим, если путь по своей
+    # земле есть (Лиман, 1.10.2022 - ОЦЕНКА срока); пути нет - держится до конца
+    for u in own:
+        if u.get("order") != "garrison":
+            continue
+        if u.get("supply_frac", 1.0 if u.get("supply", 1.0) >= 1.0 else 0.0) > 0:
+            u.pop("cut_since", None)
+            continue
+        u.setdefault("cut_since", state["day"])
+        if state["day"] - u["cut_since"] < GARRISON_CUT_DAYS:
+            continue
+        here = node_of(state, u)
+        rear_ = [p for p in (rear or [q for q in state["places"] if owner(state, q) == side]) if p != here]
+        # путь по своей земле, нет - напрямую (прорыв через кольцо)
+        if rear_:
+            dest = min(rear_, key=lambda p: path_km(state, here, p))
+            _disengage(state, u)
+            set_route(state, u, path(state, here, dest, side=side) or path(state, here, dest), "withdraw")
+            lines.append(f"{u['name']}: гарнизон в окружении {state['day'] - u['cut_since']} сут. - прорыв к своим, отход в {dest}.")
     # 1. отход: в бою ниже withdraw_below или небоеспособна
     for u in own:
         weak = model.strength(u) < sim["withdraw_below"] * (GARRISON_HOLD if u.get("order") == "garrison" else 1.0)
@@ -225,7 +245,7 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
                 lines.append(f"{u['name']}: в тылу ({here}), восстановление.")
                 continue
             _disengage(state, u)
-            set_route(state, u, path(state, here, dest), "withdraw")
+            set_route(state, u, path(state, here, dest, side=side) or path(state, here, dest), "withdraw")   # по своей земле
             lines.append(f"{u['name']}: ({model.strength(u):.0%}) выходит из боя, отходит в {dest}.")
     # 2. тыл: дошедшие до места отхода - восстановление; восстановившиеся - в строй
     for u in own:
@@ -247,10 +267,7 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     # десант в резерве и высаженный (держит пункт до подхода своих) - не в распоряжении командования фронта (assault.py)
     # гарнизон (order garrison, сценарий) держит свой пункт: не выдвигается и не наступает
     free = [u for u in free if u.get("order") not in ("reserve", "airhead", "garrison")]
-    posture = (state.get("posture") or {}).get(side) or sim.get("posture") or "defense"   # сценарий может переопределить
-    for row in sorted(state.get("posture_days") or [], key=lambda r: r.get("from_day", 0)):   # смена позы по дням сценария
-        if state["day"] >= row.get("from_day", 0) and row.get(side):
-            posture = row[side]
+    posture = posture_of(state, side)
     if posture == "offense" and not any(objective(state, side, u) for u in free):
         posture = "defense"                                       # цели операции достигнуты - удерживать
     g = graph(state)
@@ -314,6 +331,15 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
                 set_route(state, u, [here, t], "attack")
                 lines.append(f"{u['name']}: контратака - вернуть {t}.")
     return lines
+
+
+def posture_of(state: dict, side: str) -> str:
+    """Поза стороны: сценарий (posture, смена по дням posture_days) сильнее доктрины."""
+    posture = (state.get("posture") or {}).get(side) or _sim(state, side).get("posture") or "defense"
+    for row in sorted(state.get("posture_days") or [], key=lambda r: r.get("from_day", 0)):
+        if state["day"] >= row.get("from_day", 0) and row.get(side):
+            posture = row[side]
+    return posture
 
 
 def bypass_path(state: dict, side: str, a: str, b: str) -> list[str] | None:
@@ -445,7 +471,7 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
                 u["op_role"] = "counter"
                 free.remove(u)
                 lines.append(f"{u['name']}: контрудар по вклинившейся {e['name']} ({p[-1]}).")
-    if sim.get("posture") != "offense":
+    if posture_of(state, side) != "offense":     # поза сценария (оборона), а не доктрины: в обороне - без ОМГ
         return lines
     # передовой отряд (ОВД): сильнейшая часть - на рубеж в глубине за фронтом, быстрее главных сил
     if sim.get("forward_detachment") and not any(u.get("op_role") == "forward" for u in own):

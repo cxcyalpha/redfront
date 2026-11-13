@@ -247,12 +247,22 @@ PROJ = theatre_proj.apply(G, REAL, REAL_AB, far=("Celle",))
 G.SECTOR_ABOUT = ("Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Реальная география, спроецированная на "
                   f"карту Cold War Germany: {G.PROJ_NOTE}. Рельеф и реки - карты, не Украины.")
 
+# ход 2022 (ISW, RUSI 'Stormbreak'): оборона РФ на Харьковщине - некомплектные части, Росгвардия, мобилизованные ЛНР;
+# после прорыва у Балаклеи 6.09 - отход ("перегруппировка") 10-11.09: Купянск и Изюм оставлены за 4-5 суток.
+# Лиман - узел обороны (до 5 тыс., БАРС, части 20-й ОА): полуокружён, оставлен 1.10. ОЦЕНКИ:
+RED_QUALITY = {"*": 0.6, "red_lyman": 1.0, "red_vdv_kup": 0.9, "red_reserve_svatove": 0.8}   # выучка и стойкость (sim.power)
+RED_GARRISON = {"red_lyman", "red_reserve_svatove"}   # держат Лиман и Сватово, не отходят (ops: order garrison)
+URBAN = {"Lyman": 2.0, "Kharkiv": 3.0, "Izium": 1.5, "Svatove": 2.0}   # Сватово не взято
+BLUE_UNOPPOSED_KM = 50             # темп ВСУ в бреши (6-10.09: Балаклея - Купянск ~70 км за 4 суток)
+
 if __name__ == "__main__":
     G.main()
     # HIMARS и Точка-У не бьют по аэродромам и складам в России (air_limits: пункты и объекты)
     sp = G.DATA / "sector_kharkiv22.json"
     sec = json.loads(sp.read_text(encoding="utf-8"))
     sec["air_limits"] = {"blue": G.OFF_LIMITS["blue"] + [f"af_{n.lower()}" for n in G.AIRBASES["red"]]}
+    for name, k in URBAN.items():
+        sec["places"][name]["urban"] = k
     sp.write_text(json.dumps(sec, ensure_ascii=False, indent=1), encoding="utf-8")
     op = G.DATA / "oob_kharkiv22.json"
     oob = json.loads(op.read_text(encoding="utf-8"))
@@ -280,4 +290,11 @@ if __name__ == "__main__":
     # (на западе карты), а не над настоящей Польшей (она на востоке карты, на стороне России)
     oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (за тылом Украины)"}}
     oob["strategic_per_day"] = {"blue": {"gmlrs": 8, "tochka": 1}, "red": {"iskander": 2}}
+    for u in oob["units"]:
+        if u["side"] == "red" and u["role"] == "maneuver":
+            u["quality"] = RED_QUALITY.get(u["id"], RED_QUALITY["*"])
+            if u["id"] in RED_GARRISON:
+                u["order"] = "garrison"
+        if u["side"] == "blue" and u["role"] == "maneuver":
+            u["unopposed_km"] = BLUE_UNOPPOSED_KM
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
