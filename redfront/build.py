@@ -1262,6 +1262,9 @@ def tune_arm(state: dict, fg, g: dict) -> list[str]:
             kits.append(k)
     if not kits:
         return []
+    shrike = any(_re.search(r"AGM-45|Shrike", weapons.name_of(d.get("CLSID", "")), _re.I) for u in fg.units for d in u.pylons.values())
+    if not shrike:                               # Shrike в подвеске нет - настраивать нечего (и в брифинг не писать)
+        return []
     for u in fg.units:
         j = 0
         for num, d in list(u.pylons.items()):
@@ -1757,10 +1760,9 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                 ref = (" AGL" if getattr(pt, "alt_type", "BARO") == "RADIO" else "") if pt.alt else ""
                 nm_ = pt.name or (L("Взлёт", "Takeoff") if i == 0 else
                                   L("Посадка", "Landing") if i == len(fg.points) - 1 else "")
-                route.append([("!" if key else "") + f"{i}", ("!" if key else "") + hhmm(t),
-                              (fmt_alt(state, side, pt.alt, lg).strip() + ref) if pt.alt else "-",
-                              fmt_spd(state, side, (pt.speed or 0) * 3.6, lg) if i > 0 and pt.speed else "-",
-                              ("!" if key else "") + nm_])
+                alt_ = (fmt_alt(state, side, pt.alt, lg, ut.id).strip() + ref) if pt.alt else ""
+                spd_ = fmt_spd(state, side, (pt.speed or 0) * 3.6, lg, ut.id) if i > 0 and pt.speed else ""
+                route.append(("!" if key else "") + "  ".join(x for x in (f"{i}. {nm_}", alt_, hhmm(t), spd_) if x))
             # ---- аэродромы и навигация ----
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
@@ -1792,7 +1794,7 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
             tgt = ["*" + i18n.tr(natonames.text(state, model.enemy(side), tk["title"], side), lg)]
             if tpos:
                 tgt.append(_dms(tpos["lat"], "NS") + "  " + _dms(tpos["lon"], "EW"))
-            tgt.append(L("Удаление ", "Distance ") + fmt_dist(state, side, tk["distance_km"], lg))
+            tgt.append(L("Удаление ", "Distance ") + fmt_dist(state, side, tk["distance_km"], lg, ut.id))
             def _short(n_: str) -> str:              # 'ЗРК средней дальности (Gotha): SA-2' -> 'SA-2 (Gotha)'
                 if ": " not in n_:
                     return n_
@@ -1816,10 +1818,7 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                     own_call.append(x)               # примечание (каналы вручную) - в рамку звена
             # ---- погода: METAR и главное ----
             wx = [x for x in wx_text.split("\n") if x.strip()]
-            parts_ = [p_.strip() for p_ in wx[1].split(";")] if len(wx) > 1 else []
-            rank_ = lambda p_: (0 if "QNH" in p_ else 1 if p_.startswith(("ветер", "wind")) else
-                                2 if p_.startswith(("облач", "cloud", "ясно", "clear")) else 3 if p_.startswith(("видим", "visib", "туман", "fog")) else 4)
-            wx_main = ((["*" + wx[0]] if wx else []) + sorted(parts_, key=rank_))[:5]   # давление - первым; всё - на последнем листе
+            wx_main = (["*" + wx[0]] if wx else []) + kb_weather(state, ut.id, lg, m.start_time.hour + m.start_time.minute / 60)
             # ---- время вылета ----
             cells = []
             if tp:
@@ -1839,9 +1838,7 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                     ("boxes", [(L("ПОГОДА", "WEATHER"), wx_main)]),
                 ]},
                 {"title": L("МАРШРУТ", "ROUTE"), "items": [
-                    ("table", L("Точки маршрута", "Waypoints"),
-                     [("#", 0.07), (L("время", "time"), 0.13), (L("высота", "alt"), 0.2), (L("скорость", "speed"), 0.18),
-                      (L("точка", "point"), 0.42)], route),
+                    ("boxes", [(L("ППМ: номер, точка, высота, время, скорость", "Waypoints: no., point, altitude, time, speed"), route)]),
                     ("boxes", [(L("ПОРЯДОК ДЕЙСТВИЙ ПАКЕТА", "PACKAGE SEQUENCE"), order_lines or ["-"])]),
                 ]},
                 {"title": L("ПАКЕТ И ОБСТАНОВКА", "PACKAGE AND SITUATION"), "items": [
@@ -1855,9 +1852,45 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
 
 
 FT, KT, NM = 0.3048, 1.852, 1.852   # м в футе, км/ч в узле, км в морской миле
+HPA_MMHG, HPA_INHG = 0.750062, 0.0295300   # гПа -> мм рт. ст., дюймы рт. ст.
 
 
-def imperial(state: dict, side: str) -> bool:
+def kb_weather(state: dict, ac: str, lg: str, hour: float) -> list[str]:
+    """Погода на планшет - в единицах кабины ЛА игрока: советские типы - давление в мм рт. ст., ветер м/с, облака в м;
+    западные - inHg, узлы, футы. Давление - первым (выставить высотомер)."""
+    from . import weather
+    w = weather.day(state)
+    h = weather.at_hour(w, hour)
+    base = weather.cloud_base(w)
+    L = lambda ru, en: i18n.L(lg, ru, en)
+    if imperial(state, "", ac):
+        out = [f"QNH {w['qnh_hpa'] * HPA_INHG:.2f} inHg ({w['qnh_hpa']} hPa)",
+               L(f"ветер {w['wind_dir']:03d}° {w['wind_mps'] * 1.944:.0f} уз (на 6500 фт - {w['wind_mps'] * 1.8 * 1.944:.0f})",
+                 f"wind {w['wind_dir']:03d}° {w['wind_mps'] * 1.944:.0f} kt (at 6500 ft - {w['wind_mps'] * 1.8 * 1.944:.0f})"),
+               (L(f"облачность {weather.cover(w)}, нижняя граница {round(base / FT, -2):.0f} фт", f"clouds {weather.cover(w)}, base {round(base / FT, -2):.0f} ft")
+                if base else L("ясно", "clear sky"))]
+    else:
+        out = [L(f"QNH {w['qnh_hpa'] * HPA_MMHG:.0f} мм рт. ст. ({w['qnh_hpa']} гПа)", f"QNH {w['qnh_hpa'] * HPA_MMHG:.0f} mmHg ({w['qnh_hpa']} hPa)"),
+               L(f"ветер {w['wind_dir']:03d}° {w['wind_mps']:.0f} м/с (на 2000 м - {w['wind_mps'] * 1.8:.0f})",
+                 f"wind {w['wind_dir']:03d}° {w['wind_mps']:.0f} m/s (at 2000 m - {w['wind_mps'] * 1.8:.0f})"),
+               (L(f"облачность {weather.cover(w)}, нижняя граница {base} м", f"clouds {weather.cover(w)}, base {base} m")
+                if base else L("ясно", "clear sky"))]
+    vis = (L(f"туман, видимость {w['fog_vis_m']} м", f"fog, visibility {w['fog_vis_m']} m") if h["fog"]
+           else L(f"видимость {w['vis_km']} км", f"visibility {w['vis_km']} km"))
+    return out + [vis + (L(", дождь", ", rain") if w["rain"] else "") + f", {h['temp_c']}°C"]
+
+
+METRIC_COCKPIT_RX = r"^(MiG|Su-|Mi-|Ka-|Yak|L-39|Tu-|Il-|An-)"   # советская школа: метры, км/ч, км, мм рт. ст.
+
+
+def imperial(state: dict, side: str, ac: str | None = None) -> bool:
+    """ac - тип ЛА игрока: единицы - по его кабине (советские типы - метрические, западные - футы, узлы, мили, inHg)."""
+    if ac:
+        return not re.match(METRIC_COCKPIT_RX, ac)
+    return _imperial_side(state, side)
+
+
+def _imperial_side(state: dict, side: str) -> bool:
     """Единицы стороны (доктрина units): imperial - футы, узлы, мили (НАТО, США, Израиль); metric - метры, км/ч (ОВД)."""
     return model.doctrine(state, side).get("units", "metric") == "imperial"
 
@@ -1882,20 +1915,20 @@ def q_spd(state: dict, side: str, kmh: float) -> float:
     return float(round(kmh / 50) * 50)
 
 
-def fmt_alt(state: dict, side: str, alt_m: float, lg: str) -> str:
-    if imperial(state, side):
+def fmt_alt(state: dict, side: str, alt_m: float, lg: str, ac: str | None = None) -> str:
+    if imperial(state, side, ac):
         return f"{alt_m / FT:>6.0f} " + i18n.L(lg, "фт", "ft")
     return f"{alt_m:>6.0f} " + i18n.L(lg, "м", "m")
 
 
-def fmt_dist(state: dict, side: str, km: float, lg: str) -> str:
-    if imperial(state, side):
+def fmt_dist(state: dict, side: str, km: float, lg: str, ac: str | None = None) -> str:
+    if imperial(state, side, ac):
         return f"{km / NM:.0f} " + i18n.L(lg, "миль", "NM")
     return f"{km:.0f} " + i18n.L(lg, "км", "km")
 
 
-def fmt_spd(state: dict, side: str, kmh: float, lg: str) -> str:
-    if imperial(state, side):
+def fmt_spd(state: dict, side: str, kmh: float, lg: str, ac: str | None = None) -> str:
+    if imperial(state, side, ac):
         return f"{kmh / KT:.0f} " + i18n.L(lg, "уз", "kt")
     return f"{kmh:.0f} " + i18n.L(lg, "км/ч", "km/h")
 
@@ -1908,20 +1941,22 @@ def _dms(v: float, hemi: str) -> str:
     return f"{h}{d:02d}°{mnt:06.3f}'"
 
 
-def package_order(pkg: list[dict], times: dict, lg: str = "ru") -> list[str]:
-    """Брифинг: сбор пакета (место, время каждой группы) и порядок выхода на объекты относительно удара (T)."""
+def package_order(pkg: list[dict], times: dict, lg: str = "ru", clk=None) -> list[str]:
+    """Брифинг: сбор пакета (место, время каждой группы) и порядок выхода на объекты - время и относительно удара
+    (T0 - время удара ударной группы). clk(с от начала миссии) -> 'ЧЧ:ММ'."""
     out = []
-    mn = i18n.L(lg, "мин", "min")
+    clk = clk or (lambda s_: f"+{int(s_) // 60}")
     rv = [g for g in pkg if g.get("rv") and g["group"] in times and times[g["group"]].get("rv_s") is not None]
     if rv:
         out.append(i18n.L(lg, "Сбор (точка маршрута \"Сбор\"): ", "Rendezvous (waypoint \"Rendezvous\"): ") + "; ".join(
-            f"{i18n.tr(g['title'], lg)} - ~{times[g['group']]['rv_s'] // 60} {mn}" for g in sorted(rv, key=lambda g: times[g["group"]]["rv_s"])))
+            f"{i18n.tr(g['title'], lg)} - {clk(times[g['group']]['rv_s'])}" for g in sorted(rv, key=lambda g: times[g["group"]]["rv_s"])))
     if len(pkg) > 1 and "strike" in times:
         t0 = times["strike"]["objective_s"]
         seq = sorted((g for g in pkg if g["group"] in times), key=lambda g: times[g["group"]]["objective_s"])
         out.append(i18n.L(lg, "Выход на объекты: ", "Push to objectives: ") + ", ".join(
-            f"{i18n.tr(g['title'], lg)} T{(times[g['group']]['objective_s'] - t0) // 60:+d} {mn}" for g in seq)
-            + i18n.L(lg, f" (T = ~{t0 // 60} мин от начала миссии)", f" (T = ~{t0 // 60} min after mission start)"))
+            f"{i18n.tr(g['title'], lg)} " + (f"T0{(times[g['group']]['objective_s'] - t0) // 60:+d}" if times[g['group']]['objective_s'] != t0 else "T0")
+            + f" ({clk(times[g['group']]['objective_s'])})" for g in seq)
+            + i18n.L(lg, f" - T0 = {clk(t0)}", f" - T0 = {clk(t0)}"))
     return out
 
 
@@ -2330,9 +2365,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             orbit_group(m, state, g, perf, ac, mt, side_g, sortie, spd, t_, airport)
             lg_ = i18n.lang(state)
             line = (f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, " + i18n.L(lg_, "в зоне ", "on station ")
-                    + (i18n.L(lg_, f"с ~{t_['start_s'] // 60} мин миссии", f"from ~{t_['start_s'] // 60} min") if t_["start_s"]
+                    + (i18n.L(lg_, "с " + (m.start_time + datetime.timedelta(seconds=int(t_['start_s']))).strftime("%H:%M"),
+                              "from " + (m.start_time + datetime.timedelta(seconds=int(t_['start_s']))).strftime("%H:%M")) if t_["start_s"]
                        else i18n.L(lg_, "с начала миссии", "from mission start"))
-                    + i18n.L(lg_, f" до ~{t_['until_s'] // 60} мин", f" until ~{t_['until_s'] // 60} min"))
+                    + i18n.L(lg_, " до ", " until ") + (m.start_time + datetime.timedelta(seconds=int(t_['until_s']))).strftime("%H:%M"))
             (enemy_lines if g.get("_enemy") else ai_lines).append(line)
             fl = m.find_group(f"{perf['id']} {g['group']} {sortie}")
             flights.append({"group": g["group"], "performer": perf["id"], "kind": g["objective"]["kind"], "units": [u.name for u in fl.units], "player": False,
@@ -2786,8 +2822,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             cap_specs.append({"group": fg.name, "size": g["size"], "zone": g.pop("_cap_zone_wp"), "home": len(fg.points) - 1,
                               "side": 1 if side_g == "red" else 2, "title": g.get("title", fg.name)})
         t = times[g["group"]]
-        when = (i18n.L(i18n.lang(state), f"посадка в {g['_dest']} ~{t['objective_s'] // 60} мин", f"landing at {g['_dest']} ~{t['objective_s'] // 60} min")
-                if g.get("_dest") else i18n.L(i18n.lang(state), f"в районе ~{t['objective_s'] // 60} мин", f"in the area ~{t['objective_s'] // 60} min"))
+        clk = lambda s_: (m.start_time + datetime.timedelta(seconds=int(s_))).strftime("%H:%M")   # время миссии
+        t0_ = times["strike"]["objective_s"] if "strike" in times else t["objective_s"]
+        tt = lambda s_: f"{clk(s_)} (T0{(int(s_) - int(t0_)) // 60:+d})" if int(s_) != int(t0_) else f"{clk(s_)} (T0)"
+        when = (i18n.L(i18n.lang(state), f"посадка в {g['_dest']} в {clk(t['objective_s'])}", f"landing at {g['_dest']} at {clk(t['objective_s'])}")
+                if g.get("_dest") else i18n.L(i18n.lang(state), f"в районе в {clk(t['objective_s'])}", f"in the area at {clk(t['objective_s'])}"))
         if g.get("_enemy"):                      # авиация противника - в разведсводку, не в состав группы
             enemy_lines.append(f"{g['title']}: {g['size']} x {perf['type']} ({perf['name']}), {base['name']}, {when}")
             flights.append({"group": g["group"], "performer": perf["id"], "kind": g["objective"]["kind"], "units": [u.name for u in fg.units], "player": False,
@@ -2798,20 +2837,20 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         (ai_lines if g.get("_ai") else lines).append(f"{i18n.tr(g['title'], lg)}: {g['size']} x {g.get('_variant') or perf['type']} ({perf['name']}), {base['name']}, "
                      + ((Lx("игрок, холодный старт", "player, cold start")
                          + (Lx(" (в базовом DCS тип только для ИИ - нужен мод)", " (AI-only type in base DCS - a mod is required)") if needs_mod else "")
-                         + (Lx(f", ВЗЛЁТ через ~{t['takeoff_s'] // 60} мин (время удара - по самой медленной группе; раньше - ждать в точке сбора)",
-                               f", TAKE OFF at ~{t['takeoff_s'] // 60} min (time on target is set by the slowest group; if early - hold at the rendezvous)")
+                         + (Lx(f", ВЗЛЁТ в {clk(t['takeoff_s'])} (время удара - по самой медленной группе; раньше - ждать в точке сбора)",
+                               f", TAKE OFF at {clk(t['takeoff_s'])} (time on target is set by the slowest group; if early - hold at the rendezvous)")
                             if t.get("takeoff_s") else ""))
                         if is_player else Lx("ИИ, к началу миссии уже в воздухе на маршруте", "AI, already airborne en route at mission start")
                         if g.get("_air_start") else
-                        Lx(f"ИИ, со стоянки (двигатели запущены), взлёт через ~{t['start_s'] // 60} мин",
-                           f"AI, from parking (engines running), takeoff at ~{t['start_s'] // 60} min") if g.get("_parked") else
-                        Lx(f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин", f"AI, runway takeoff at {t['start_s'] // 60} min"))
-                     + (f", {when}" if g.get("_dest") else Lx(f", на объекте через ~{t['objective_s'] // 60} мин", f", on objective at ~{t['objective_s'] // 60} min"))
+                        Lx(f"ИИ, со стоянки (двигатели запущены), взлёт в {clk(t['start_s'])}",
+                           f"AI, from parking (engines running), takeoff at {clk(t['start_s'])}") if g.get("_parked") else
+                        Lx(f"ИИ, взлёт с полосы в {clk(t['start_s'])}", f"AI, runway takeoff at {clk(t['start_s'])}"))
+                     + (f", {when}" if g.get("_dest") else Lx(f", на объекте в {tt(t['objective_s'])}", f", on objective at {tt(t['objective_s'])}"))
                      + (Lx(f", переход на {transit} м (угроз ЗРК в коридоре нет)", f", transit at {transit} m (no SAM threats in the corridor)")
                         if g.get("transit_alt_m_agl") else "")
                      + (Lx(f", ОПАЗДЫВАЕТ на {t['late_s'] // 60} мин", f", LATE by {t['late_s'] // 60} min") if t["late_s"] else "")
-                     + (Lx(f", ожидание на рубеже пуска ({g['hold']['launch_km']:.0f} км от ЗРК) на {g['hold']['alt_m']} м до ~{g['hold']['until_s'] // 60} мин",
-                           f", holding at the launch line ({g['hold']['launch_km']:.0f} km from the SAM) at {g['hold']['alt_m']} m until ~{g['hold']['until_s'] // 60} min")
+                     + (Lx(f", ожидание на рубеже пуска ({g['hold']['launch_km']:.0f} км от ЗРК) на {g['hold']['alt_m']} м до {clk(g['hold']['until_s'])}",
+                           f", holding at the launch line ({g['hold']['launch_km']:.0f} km from the SAM) at {g['hold']['alt_m']} m until {clk(g['hold']['until_s'])}")
                         if g.get("hold") else "")
                      + Lx(f"; задача DCS {mt.name}, подвеска {cat or 'DCS по умолчанию'}", f"; DCS task {mt.name}, loadout {cat or 'DCS default'}")
                      + (Lx(" (по году: ", " (by year: ") + f"{'; '.join(fg.__dict__.get('_rf_degraded', [])[:4])})" if fg.__dict__.get("_rf_degraded") else ""))
@@ -3011,7 +3050,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     comm_lines += ext_aw
     if pa:
         comm_lines.append(pa)
-    order_lines = package_order(pkg, times, i18n.lang(state))
+    order_lines = package_order(pkg, times, i18n.lang(state),
+                                lambda s_: (m.start_time + datetime.timedelta(seconds=int(s_))).strftime("%H:%M"))
     lg = i18n.lang(state)
     Lx = lambda ru, en: i18n.L(lg, ru, en)
     if lg == "en":                               # точки маршрута - на языке брифинга
