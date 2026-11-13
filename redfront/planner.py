@@ -1247,6 +1247,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                  if u["side"] == perf["side"] and role_ok(state, u, g["performers"], g.get("loadout")) and avail.get(u["id"], 0) >= need
                  and g["id"] not in model.tasks_not(u)   # вариант модели (F-16A на F-16C): без подавления ПВО
                  and not u.get("mod_off")
+                 and (not g.get("need_unit_field") or u.get(g["need_unit_field"]))   # ВСУ: подавление - только носители HARM
                  and nation_ok(state, u, g) and (not g.get("types") or u.get("type") in g["types"])          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
                  and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]
         mate = chosen_by.get(g.get("pair_with") or "")
