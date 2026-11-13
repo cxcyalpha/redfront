@@ -1205,7 +1205,8 @@ def _set_player(unit, client: bool = False) -> bool:
 
 
 SEARCH_ORBIT_ALT_M = 600   # ОЦЕНКА: высота круга над районом поиска, если в доктрине нет search_alt_m (абсолютная; рельеф ~0-100 м)
-RUNWAY_GAP_S = 30         # ОЦЕНКА: интервал взлёта групп ИИ с полосы одного аэродрома
+RUNWAY_GAP_S = 30         # ОЦЕНКА: интервал взлёта групп ИИ с полосы одного аэродрома (если стоянок нет)
+TAXI_S = 300              # ОЦЕНКА: с горячего старта на стоянке до взлёта (руление, выход на полосу)
 AIR_START_MIN_M = 500      # ОЦЕНКА: высота появления группы, которая к началу миссии уже в воздухе
 AI_LOW_MIN_M = 100         # ОЦЕНКА: точки маршрута групп ИИ не ниже этого (у игрока - как в доктрине, 50 м)
 LOW_ENTRY_KM = 20         # ОЦЕНКА: группа подавления ПВО снижается до предельно малой за столько км до зоны ЗРК
@@ -2175,6 +2176,22 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 if r:
                     sp["sams"][r[0]] = r[1]
     player_air = None
+    # старт с полосы - только у самой ранней группы ИИ на аэродроме; остальные - горячий старт на стоянке (за TAXI_S до
+    # взлёта по плану) или уже в воздухе по плану полётов. Решение - до создания групп, по всем группам миссии.
+    first_rw: dict[str, str] = {}
+    for g in pkg + enemy:
+        if g["objective"]["kind"] in ("alert", "orbit") or g.get("_air_start") or g["base"] in carriers:
+            continue
+        hum_ = 0 if g.get("_ai") or g.get("_enemy") else hum_of.get(g["group"], 0)
+        if player and hum_ > 0:
+            continue
+        if not g.get("_ai") and times[g["group"]].get("air_s") and _airborne(state, copy.deepcopy(g),
+                model.group_speed_kmh(state, g, g.get("_tdef") or tdef), times[g["group"]]["air_s"]):
+            continue                             # к началу миссии - уже в воздухе
+        ap_key = state["airbases"][g["base"]].get("airport") or g["base"]
+        cur = first_rw.get(ap_key)
+        if cur is None or times[g["group"]]["start_s"] < times[cur]["start_s"]:
+            first_rw[ap_key] = g["group"]
     for g in pkg + enemy:
         tdg = g.get("_tdef") or (model.doctrine(state, g.get("_side", tk["side"]))["tasks"].get(g["jaat_kind"]) if g.get("jaat_kind") else None) \
             or tdef                              # группы противника - по его пакету доктрины; вертолёты совместного удара - по своей
@@ -2245,18 +2262,29 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                          _pt(m, g["_air_start"]), max(int(transit), AIR_START_MIN_M), speed=int(spd),
                                          maintask=mt, group_size=g["size"])
         else:
+            ap_key = base.get("airport") or g["base"]
+            on_rw = not is_player and first_rw.get(ap_key) == g["group"]   # самая ранняя группа аэродрома - с полосы
+            parked = False
             try:
                 fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
-                                                 maintask=mt, start_type=StartType.Cold if is_player else StartType.Runway,
-                                                 group_size=g["size"])
-            except NoParkingSlotError:           # вертолётная площадка: стоянок мало - с площадки (взлёт с полосы)
+                                                 maintask=mt, start_type=StartType.Cold if is_player else
+                                                 (StartType.Runway if on_rw else StartType.Warm), group_size=g["size"])
+                parked = not is_player and not on_rw
+            except NoParkingSlotError:           # стоянок нет (вертолётная площадка) - с полосы
                 fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
                                                  maintask=mt, start_type=StartType.Runway, group_size=g["size"])
         _crew(state, fg, perf)
         if is_player:
             player_air = (airport, airport)          # аэродром посадки уточняется ниже (перевозка - другой)
         st_s = times[g["group"]]["start_s"]
-        if not is_player and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
+        if not g.get("_air_start") and not is_player and parked:   # горячий старт: появиться раньше на руление
+            rw_g = first_rw.get(ap_key)            # взлёт - не раньше группы с полосы этого аэродрома (+ интервал)
+            if rw_g and rw_g in times and rw_g != g["group"]:
+                st_s = max(st_s, times[rw_g]["start_s"] + RUNWAY_GAP_S * 2)
+            times[g["group"]]["start_s"] = st_s
+            g["_parked"] = True
+            st_s = max(0, st_s - TAXI_S)
+        elif not is_player and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
             while (base.get("airport") or g["base"], st_s) in runway_slots:
                 st_s += RUNWAY_GAP_S
             runway_slots.add((base.get("airport") or g["base"], st_s))
@@ -2686,7 +2714,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                f", TAKE OFF at ~{t['takeoff_s'] // 60} min (time on target is set by the slowest group; if early - hold at the rendezvous)")
                             if t.get("takeoff_s") else ""))
                         if is_player else Lx("ИИ, к началу миссии уже в воздухе на маршруте", "AI, already airborne en route at mission start")
-                        if g.get("_air_start") else Lx(f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин", f"AI, runway takeoff at {t['start_s'] // 60} min"))
+                        if g.get("_air_start") else
+                        Lx(f"ИИ, со стоянки (двигатели запущены), взлёт через ~{t['start_s'] // 60} мин",
+                           f"AI, from parking (engines running), takeoff at ~{t['start_s'] // 60} min") if g.get("_parked") else
+                        Lx(f"ИИ, взлёт с полосы через {t['start_s'] // 60} мин", f"AI, runway takeoff at {t['start_s'] // 60} min"))
                      + (f", {when}" if g.get("_dest") else Lx(f", на объекте через ~{t['objective_s'] // 60} мин", f", on objective at ~{t['objective_s'] // 60} min"))
                      + (Lx(f", переход на {transit} м (угроз ЗРК в коридоре нет)", f", transit at {transit} m (no SAM threats in the corridor)")
                         if g.get("transit_alt_m_agl") else "")
