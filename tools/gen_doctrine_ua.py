@@ -21,6 +21,10 @@ DOC = Path(__file__).resolve().parent.parent / "redfront" / "data" / "doctrine"
 STRIKE_SIZE = 2           # ОЦЕНКА: пара
 LOW_M = 30                # ОЦЕНКА: предельно малая высота на маршруте
 DROP = {"kill", "sweep", "feint", "jam", "cover"}   # истребители ВСУ - на прикрытии войск и объектов, не в пакетах
+PASSES = 1                # ОЦЕНКА: один заход - удар и уход (ПВО не даёт кружить)
+SPEED = 900               # ОЦЕНКА: км/ч на маршруте у земли
+SEAD_LEAD_MIN = 2         # ОЦЕНКА: пуск ПРР - за столько минут до удара (не одновременно)
+SINGLE = {"strike_column_march": 0.5, "strike_supply_route": 0.5, "strike_art": 0.4, "strike_ew": 0.4, "strike_ssm": 0.4}
 ATTACK_TOO = {"strike_sam_site", "strike_ew", "strike_art", "strike_ssm", "strike_airfield", "strike_ship"}
 
 
@@ -36,6 +40,13 @@ def main() -> None:
         if s.get("size", 0) > STRIKE_SIZE:
             s["size"] = STRIKE_SIZE
             s["group_name"] = "пара"
+        if kind in SINGLE:                       # часть таких ударов - одиночным самолётом (ОЦЕНКА доли)
+            s["single_p"] = SINGLE[kind]
+        if s.get("ai") is not None or t.get("support") is not None:
+            ai = s.setdefault("ai", {})
+            ai.setdefault("attack", {})["passes"] = PASSES
+        if t.get("speed_kmh"):
+            t["speed_kmh"] = max(t["speed_kmh"], SPEED)
         for k in ("transit_alt_m_agl", "attack_alt_m_agl", "low_alt_m_agl"):
             if t.get(k) is not None:
                 t[k] = min(t[k], LOW_M if k != "attack_alt_m_agl" else 50)
@@ -46,9 +57,10 @@ def main() -> None:
             if g.get("id") in DROP:
                 continue
             g = dict(g, required=False, size=min(g.get("size", 2), 2))
-            if g.get("id") == "sead":            # одна пара с ПРР вместе с ударом, а не заранее
-                g["lead_min"] = 0
+            if g.get("id") == "sead":            # одна пара с ПРР: пуск незадолго до удара, без долгого ожидания
+                g["lead_min"] = SEAD_LEAD_MIN
                 g["hold_after_min"] = 0
+                g.setdefault("ai", {}).setdefault("attack", {})["passes"] = PASSES
                 g["required_note"] = "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)"
             sup.append(g)
         t["support"] = sup
