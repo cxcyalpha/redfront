@@ -1723,65 +1723,134 @@ def radio_setup(m: Mission, state: dict, tk: dict, pkg: list[dict], sortie: int,
 
 def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines: list[str], comm_lines: list[str],
                wx_text: str, lg: str, times_player: dict | None = None) -> int:
-    """Наколенный планшет ЛА игрока (kneeboard.py): задание и маршрут со временем, связь, погода и аэродромы."""
-    from . import kneeboard
+    """Наколенный планшет ЛА игрока (kneeboard.py) - тактическая карточка вылета: главное крупно и в рамках (время,
+    цель и угрозы, звено, связь, погода, навигация), маршрут - таблицей, остальной пакет и подробности - в конце."""
+    from . import kneeboard, weapons
     L = lambda ru, en: i18n.L(lg, ru, en)
     hhmm = lambda s: (m.start_time + datetime.timedelta(seconds=int(s))).strftime("%H:%M")
+    side = tk["side"]
     groups, seen = [], set()
     for c in list(m.coalition["red"].countries.values()) + list(m.coalition["blue"].countries.values()):
         for fg in list(c.plane_group) + list(c.helicopter_group):
             if not any(u.skill in (Skill.Client, Skill.Player) for u in fg.units):
                 continue
             ut = fg.units[0].unit_type
-            t_off = float(times_player.get("takeoff_s", 0)) if times_player else 0.0   # взлёт игрока - после запуска
-            route, t, prev = [], max(float(getattr(fg.points[0], "ETA", 0) or 0), t_off), None
-            obj_done = False
-            for i, pt in enumerate(fg.points):     # время точек: заданное (ETA), иначе - по участкам и скорости точки
+            if (ut.id, fg.name) in seen:
+                continue
+            seen.add((ut.id, fg.name))
+            tp = times_player or {}
+            # ---- маршрут: время точек - заданное (ETA), иначе по участкам; опорные - по плану пакета ----
+            t_off = float(tp.get("takeoff_s", 0))
+            route, t, prev, obj_done = [], max(float(getattr(fg.points[0], "ETA", 0) or 0), t_off), None, False
+            for i, pt in enumerate(fg.points):
                 if prev is not None:
                     eta = float(getattr(pt, "ETA", 0) or 0)
                     t = eta if getattr(pt, "ETA_locked", False) and eta else t + prev.position.distance_to_point(pt.position) / max(pt.speed or 150.0, 30.0)
                 prev = pt
-                if times_player and i > 0:          # опорные точки - по плану пакета (сбор, цель), остальное - по участкам
-                    if pt.name in ("Сбор", "Rendezvous") and times_player.get("rv_s") is not None:
-                        t = float(times_player["rv_s"])
+                key = False
+                if tp and i > 0:
+                    if pt.name in ("Сбор", "Rendezvous") and tp.get("rv_s") is not None:
+                        t, key = float(tp["rv_s"]), True
                     elif (pt.name in ("Цель", "Target", "Рубеж атаки", "Attack line", "Рубеж пуска", "Launch line")
-                          and times_player.get("objective_s") and not obj_done):   # первая точка выхода на объект - TOT
-                        t, obj_done = float(times_player["objective_s"]), True
-                sp = f"  {fmt_spd(state, tk['side'], (pt.speed or 0) * 3.6, lg)}" if i > 0 and pt.speed else ""
-                ref = (" AGL" if getattr(pt, "alt_type", "BARO") == "RADIO" else " MSL") if pt.alt else "    "
-                route.append(f"{i:2d}  {hhmm(t)}  {fmt_alt(state, tk['side'], pt.alt, lg)}{ref}{sp}  {pt.name or ''}")
+                          and tp.get("objective_s") and not obj_done):
+                        t, obj_done, key = float(tp["objective_s"]), True, True
+                ref = (" AGL" if getattr(pt, "alt_type", "BARO") == "RADIO" else "") if pt.alt else ""
+                nm_ = pt.name or (L("Взлёт", "Takeoff") if i == 0 else
+                                  L("Посадка", "Landing") if i == len(fg.points) - 1 else "")
+                route.append([("!" if key else "") + f"{i}", ("!" if key else "") + hhmm(t),
+                              (fmt_alt(state, side, pt.alt, lg).strip() + ref) if pt.alt else "-",
+                              fmt_spd(state, side, (pt.speed or 0) * 3.6, lg) if i > 0 and pt.speed else "-",
+                              ("!" if key else "") + nm_])
+            # ---- аэродромы и навигация ----
             ab = [pt.airdrome_id for pt in fg.points if getattr(pt, "airdrome_id", None)]
             names = {a.id: a.name for a in m.terrain.airports.values()}
             by_id = {a.id: a for a in m.terrain.airports.values()}
-            fields = ([L("Взлёт: ", "Departure: ") + names.get(ab[0], "-")] + navaid_lines(m, by_id.get(ab[0]), lg)
-                      + ([L("Посадка: ", "Arrival: ") + names.get(ab[-1], "-")] + navaid_lines(m, by_id.get(ab[-1]), lg)
-                         if ab[-1] != ab[0] else [L("Посадка: там же", "Arrival: same")])
-                      if ab else [L("Взлёт и посадка: палуба", "Deck launch and recovery")])
-            fields += carrier_lines(state, fg.units[0].position)
-            sub = f"{fg.name} - {ut.id} x{len(fg.units)} - {L('день', 'day')} {state['day']}"
-            clock = []
-            if times_player:                       # часы вылета: запуск, взлёт, сбор, цель - как в плане пакета
-                tp = times_player
-                clock.append(L(f"Начало миссии {hhmm(0)} (запуск); взлёт не позже {hhmm(tp['takeoff_s'])}",
-                               f"Mission start {hhmm(0)} (start-up); take off by {hhmm(tp['takeoff_s'])}"))
+            nav = []
+            if ab:
+                nav += ["*" + L("ВЗЛЁТ: ", "DEP: ") + names.get(ab[0], "-")] + [x.strip() for x in navaid_lines(m, by_id.get(ab[0]), lg)]
+                if ab[-1] != ab[0]:
+                    nav += ["*" + L("ПОСАДКА: ", "ARR: ") + names.get(ab[-1], "-")] + [x.strip() for x in navaid_lines(m, by_id.get(ab[-1]), lg)]
+                else:
+                    nav.append(L("Посадка - там же", "Arrival - same field"))
+            else:
+                nav.append(L("Взлёт и посадка - палуба", "Deck launch and recovery"))
+            nav += carrier_lines(state, fg.units[0].position)
+            # ---- звено: позывной, тип, подвеска, старт ----
+            cs = _callsign(fg.units[0]) or fg.name
+            loads: dict[str, int] = {}
+            for d_ in fg.units[0].pylons.values():
+                n_ = weapons.name_of(d_.get("CLSID", "")).split(" - ")[0].strip()
+                if n_:
+                    loads[n_] = loads.get(n_, 0) + 1
+            start = {"cold": L("холодный на стоянке", "cold, ramp"), "hot": L("горячий на стоянке", "hot, ramp"),
+                     "runway": L("с полосы", "runway"), "air": L("в воздухе", "airborne")}[player_start(state)]
+            flight = ["*" + f"{cs}  {ut.id} x{len(fg.units)}", L("Старт: ", "Start: ") + start] + \
+                     [f"{v} x {k}" for k, v in sorted(loads.items(), key=lambda x: -x[1])]
+            own_call = []
+            # ---- цель и угрозы ----
+            tpos = tk.get("target_pos") or {}
+            tgt = ["*" + i18n.tr(natonames.text(state, model.enemy(side), tk["title"], side), lg)]
+            if tpos:
+                tgt.append(_dms(tpos["lat"], "NS") + "  " + _dms(tpos["lon"], "EW"))
+            tgt.append(L("Удаление ", "Distance ") + fmt_dist(state, side, tk["distance_km"], lg))
+            def _short(n_: str) -> str:              # 'ЗРК средней дальности (Gotha): SA-2' -> 'SA-2 (Gotha)'
+                if ": " not in n_:
+                    return n_
+                head_, tail_ = n_.rsplit(": ", 1)
+                pl_ = re.search(r"\(([^)]*)\)", head_)
+                if head_.startswith(("Войсковая ПВО", "Organic air defence")):
+                    return L("ПВО ", "AD ") + tail_
+                return f"{tail_} ({pl_.group(1)})" if pl_ else f"{tail_} - {head_}"
+            thr_all = [_short(natonames.name(state, state["units"][x], side)) for x in tk["threats"]]
+            thr = ["!" + x for x in thr_all[:6]] + ([L(f"и ещё {len(thr_all) - 6}", f"and {len(thr_all) - 6} more")]
+                                                    if len(thr_all) > 6 else []) or [L("не выявлены", "none detected")]
+            # ---- связь: каналы своего вылета; позывные остальных групп - на последний лист ----
+            comm_main = [x for x in comm_lines if " - позывной " not in x and " - callsign " not in x]
+            calls = [x for x in comm_lines if x not in comm_main]
+            comm_rows = []
+            for x in comm_main:
+                if ": " in x:
+                    k_, v_ = x.split(": ", 1)
+                    comm_rows.append(["*" + k_ if "тактич" in k_ or "package" in k_.lower() else k_, v_])
+                else:
+                    own_call.append(x)               # примечание (каналы вручную) - в рамку звена
+            # ---- погода: METAR и главное ----
+            wx = [x for x in wx_text.split("\n") if x.strip()]
+            parts_ = [p_.strip() for p_ in wx[1].split(";")] if len(wx) > 1 else []
+            rank_ = lambda p_: (0 if "QNH" in p_ else 1 if p_.startswith(("ветер", "wind")) else
+                                2 if p_.startswith(("облач", "cloud", "ясно", "clear")) else 3 if p_.startswith(("видим", "visib", "туман", "fog")) else 4)
+            wx_main = ((["*" + wx[0]] if wx else []) + sorted(parts_, key=rank_))[:5]   # давление - первым; всё - на последнем листе
+            # ---- время вылета ----
+            cells = []
+            if tp:
+                cells.append((L("ЗАПУСК", "START"), hhmm(0)))
+                cells.append((L("ВЗЛЁТ", "TAKEOFF"), hhmm(tp["takeoff_s"])))
                 if tp.get("rv_s") is not None:
-                    clock.append(L(f"Сбор {hhmm(tp['rv_s'])}", f"Rendezvous {hhmm(tp['rv_s'])}"))
-                clock.append(L(f"Время на цели (TOT) {hhmm(tp['objective_s'])}", f"Time on target (TOT) {hhmm(tp['objective_s'])}"))
-                tpos = tk.get("target_pos") or {}
-                if tpos:
-                    clock.append(L("Цель: ", "Target: ") + _dms(tpos["lat"], "NS") + " " + _dms(tpos["lon"], "EW"))
-            pages = [
-                (L("ЗАДАНИЕ", "MISSION"), [(i18n.tr(natonames.text(state, model.enemy(tk["side"]), tk["title"], tk["side"]), lg), clock + [L("Удаление цели ", "Target distance ") + fmt_dist(state, tk["side"], tk["distance_km"], lg),
-                                           L("Угрозы: ", "Threats: ") + (", ".join(natonames.name(state, state["units"][t], tk["side"]) for t in tk["threats"]) or L("не выявлены", "none detected"))]),
-                                          (L("Тактическая группа", "Package"), lines),
-                                          (L("Порядок действий", "Sequence"), order_lines),
-                                          (L("Маршрут (точка, время, высота, скорость)", "Route (point, time, altitude, speed)"), route)]),
-                (L("СВЯЗЬ", "COMMS"), [(L("Каналы и позывные", "Channels and callsigns"), comm_lines or ["-"])]),
-                (L("ПОГОДА", "WEATHER"), [(L("Погода", "Weather"), wx_text.split("\n")), (L("Аэродромы", "Airfields"), fields)]),
-            ]
-            if (ut.id, fg.name) not in seen:
-                seen.add((ut.id, fg.name))
-                groups.append({"type": ut, "sub": sub, "pages": pages})
+                    cells.append((L("СБОР", "PUSH/RV"), hhmm(tp["rv_s"])))
+                cells.append((L("НА ЦЕЛИ (TOT)", "TOT"), hhmm(tp["objective_s"])))
+            sub = f"{cs} | {ut.id} x{len(fg.units)} | {L('день', 'day')} {state['day']}, {m.start_time:%d.%m.%Y}"
+            p1 = L("КАРТОЧКА ВЫЛЕТА", "MISSION CARD")
+            card = {"lg": lg, "sub": sub, "pages": [
+                {"title": p1, "items": [
+                    ("times", cells),
+                    ("boxes", [(L("ЦЕЛЬ", "TARGET"), tgt), (L("УГРОЗЫ", "THREATS"), thr)], [0.55, 0.45]),
+                    ("table", L("СВЯЗЬ", "COMMS"), [(L("сеть", "net"), 0.42), (L("частоты", "frequencies"), 0.58)], comm_rows),
+                    ("boxes", [(L("ЗВЕНО", "FLIGHT"), flight + own_call), (L("НАВИГАЦИЯ", "NAVIGATION"), nav)]),
+                    ("boxes", [(L("ПОГОДА", "WEATHER"), wx_main)]),
+                ]},
+                {"title": L("МАРШРУТ", "ROUTE"), "items": [
+                    ("table", L("Точки маршрута", "Waypoints"),
+                     [("#", 0.07), (L("время", "time"), 0.13), (L("высота", "alt"), 0.2), (L("скорость", "speed"), 0.18),
+                      (L("точка", "point"), 0.42)], route),
+                    ("boxes", [(L("ПОРЯДОК ДЕЙСТВИЙ ПАКЕТА", "PACKAGE SEQUENCE"), order_lines or ["-"])]),
+                ]},
+                {"title": L("ПАКЕТ И ОБСТАНОВКА", "PACKAGE AND SITUATION"), "items": [
+                    ("boxes", [(L("Группы пакета", "Package flights"), lines or ["-"])]),
+                    ("boxes", [(L("Позывные групп", "Flight callsigns"), calls or ["-"])]),
+                    ("boxes", [(L("Погода полностью", "Full weather"), wx or ["-"])]),
+                ]},
+            ]}
+            groups.append({"type": ut, "card": card})
     return kneeboard.build(m, lg, groups)
 
 
