@@ -1173,10 +1173,6 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
     avail = {u["id"]: logistics.available(state, u) for u in units.values() if model.category(u) in ("air", "heli")}
     s = tdef["strike"]
     size = min(s["size"], avail[perf["id"]])
-    if s.get("single_p") and size > 1:           # доктрина: часть ударов - одиночным вылетом (ВСУ 2022, ОЦЕНКА)
-        r_ = model.rng(state, f"single-{perf['id']}-{tgt['id']}")
-        if (r_.random() if r_ else 1.0) < s["single_p"]:
-            size = 1
     avail[perf["id"]] -= size
     if s.get("mode") == "cap_zone":              # прикрытие района (истребители): зона над своими войсками
         cz = clear_point(state, perf["side"], tpos, state["airbases"][perf["base"]])   # над своими войсками, но вне ЗРК противника

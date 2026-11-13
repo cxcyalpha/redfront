@@ -24,7 +24,8 @@ DROP = {"kill", "sweep", "feint", "jam", "cover"}   # истребители В�
 PASSES = 1                # ОЦЕНКА: один заход - удар и уход (ПВО не даёт кружить)
 SPEED = 900               # ОЦЕНКА: км/ч на маршруте у земли
 SEAD_LEAD_MIN = 2         # ОЦЕНКА: пуск ПРР - за столько минут до удара (не одновременно)
-SINGLE = {"strike_column_march": 0.5, "strike_supply_route": 0.5, "strike_art": 0.4, "strike_ew": 0.4, "strike_ssm": 0.4}
+# удары одной парой, без пакета (без пары ПРР): цели с малой ПВО - колонны, пути подвоза, артиллерия, РЭБ, пусковые ОТР
+SINGLE = {"strike_column_march", "strike_supply_route", "strike_art", "strike_ew", "strike_ssm"}
 ATTACK_TOO = {"strike_sam_site", "strike_ew", "strike_art", "strike_ssm", "strike_airfield", "strike_ship"}
 
 
@@ -40,8 +41,6 @@ def main() -> None:
         if s.get("size", 0) > STRIKE_SIZE:
             s["size"] = STRIKE_SIZE
             s["group_name"] = "пара"
-        if kind in SINGLE:                       # часть таких ударов - одиночным самолётом (ОЦЕНКА доли)
-            s["single_p"] = SINGLE[kind]
         if s.get("ai") is not None or t.get("support") is not None:
             ai = s.setdefault("ai", {})
             ai.setdefault("attack", {})["passes"] = PASSES
@@ -63,7 +62,7 @@ def main() -> None:
                 g.setdefault("ai", {}).setdefault("attack", {})["passes"] = PASSES
                 g["required_note"] = "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)"
             sup.append(g)
-        t["support"] = sup
+        t["support"] = [] if kind in SINGLE else sup   # одна пара без пакета
         if kind in ATTACK_TOO and "attack" not in t.get("performers", []):
             t["performers"] = list(t["performers"]) + ["attack"]   # Су-25 - вместо недостающих бомбардировщиков
     (DOC / "ua.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")

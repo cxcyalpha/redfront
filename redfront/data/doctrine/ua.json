@@ -446,101 +446,9 @@
      "attack": {
       "passes": 1
      }
-    },
-    "single_p": 0.5
-   },
-   "support": [
-    {
-     "id": "sead",
-     "title": "группа подавления ПВО",
-     "when": "threats",
-     "required": false,
-     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
-     "performers": [
-      "attack",
-      "fighter_bomber",
-      "bomber"
-     ],
-     "size": 2,
-     "maintask": [
-      "SEAD",
-      "GroundAttack",
-      "CAS"
-     ],
-     "loadout": [
-      "sead",
-      "anti_armor"
-     ],
-     "lead_min": 2,
-     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
-     "estimate_fields": [
-      "detect_margin_km",
-      "flights",
-      "hold_after_min",
-      "launch_alt_m",
-      "lead_min",
-      "orbit_radius_km",
-      "size",
-      "standoff_km"
-     ],
-     "ai": {
-      "react_on_threat": "EvadeFire",
-      "restrict_jettison": true,
-      "attack": {
-       "weapon": "ARM",
-       "expend": "All",
-       "group_attack": true,
-       "passes": 1
-      },
-      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
-     },
-     "flights": 1,
-     "standoff_km": 40,
-     "detect_margin_km": 2,
-     "orbit_radius_km": 3,
-     "hold_after_min": 0,
-     "launch_alt_m": 1000,
-     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
-     "from_year": 1973,
-     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
-    },
-    {
-     "id": "recon",
-     "title": "группа доразведки, поиска и поражения",
-     "when": "moving_target",
-     "required": false,
-     "performers": [
-      "attack",
-      "fighter_bomber"
-     ],
-     "size": 2,
-     "maintask": [
-      "CAS",
-      "GroundAttack"
-     ],
-     "loadout": [
-      "anti_armor"
-     ],
-     "lead_min": 2,
-     "source": "3.3.3: группы обеспечения - доразведки, поиска и обозначения цели; самостоятельный поиск и поражение ('охота') - когда нет точных сведений о месте объекта",
-     "estimate_fields": [
-      "lead_min",
-      "search_alt_m",
-      "search_min",
-      "size",
-      "zone_margin_km"
-     ],
-     "mode": "search_zone",
-     "search_min": 10,
-     "zone_margin_km": 3,
-     "mode_note": "район - где по расчёту будет колонна к приходу группы (от текущей головы до расчётной + запас); в районе - поиск и поражение наземных целей, огонь разрешён. В DCS 'огонь только в ответ' понимается буквально - по ведомым не стреляют, а сами они не атакуют (проверено, Alex).",
-     "search_alt_m": 150,
-     "ai": {
-      "restrict_jettison": true,
-      "note": "ОЦЕНКА по вылету camp3 день 1: ведущий доразведки сбросил всю подвеску в момент пуска Roland"
-     }
     }
-   ],
+   },
+   "support": [],
    "timing": {
     "player_cold_start_min": 5,
     "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
@@ -716,65 +624,9 @@
      "attack": {
       "passes": 1
      }
-    },
-    "single_p": 0.5
-   },
-   "support": [
-    {
-     "id": "sead",
-     "title": "группа подавления ПВО",
-     "when": "threats",
-     "required": false,
-     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
-     "performers": [
-      "attack",
-      "fighter_bomber",
-      "bomber"
-     ],
-     "size": 2,
-     "maintask": [
-      "SEAD",
-      "GroundAttack",
-      "CAS"
-     ],
-     "loadout": [
-      "sead",
-      "anti_armor"
-     ],
-     "lead_min": 2,
-     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
-     "estimate_fields": [
-      "detect_margin_km",
-      "flights",
-      "hold_after_min",
-      "launch_alt_m",
-      "lead_min",
-      "orbit_radius_km",
-      "size",
-      "standoff_km"
-     ],
-     "ai": {
-      "react_on_threat": "EvadeFire",
-      "restrict_jettison": true,
-      "attack": {
-       "weapon": "ARM",
-       "expend": "All",
-       "group_attack": true,
-       "passes": 1
-      },
-      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
-     },
-     "flights": 1,
-     "standoff_km": 40,
-     "detect_margin_km": 2,
-     "orbit_radius_km": 3,
-     "hold_after_min": 0,
-     "launch_alt_m": 1000,
-     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
-     "from_year": 1973,
-     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
     }
-   ],
+   },
+   "support": [],
    "timing": {
     "player_cold_start_min": 5,
     "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
@@ -1752,65 +1604,9 @@
      "attack": {
       "passes": 1
      }
-    },
-    "single_p": 0.4
-   },
-   "support": [
-    {
-     "id": "sead",
-     "title": "группа подавления ПВО",
-     "when": "threats",
-     "required": false,
-     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
-     "performers": [
-      "attack",
-      "fighter_bomber",
-      "bomber"
-     ],
-     "size": 2,
-     "maintask": [
-      "SEAD",
-      "GroundAttack",
-      "CAS"
-     ],
-     "loadout": [
-      "sead",
-      "anti_armor"
-     ],
-     "lead_min": 2,
-     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
-     "estimate_fields": [
-      "detect_margin_km",
-      "flights",
-      "hold_after_min",
-      "launch_alt_m",
-      "lead_min",
-      "orbit_radius_km",
-      "size",
-      "standoff_km"
-     ],
-     "ai": {
-      "react_on_threat": "EvadeFire",
-      "restrict_jettison": true,
-      "attack": {
-       "weapon": "ARM",
-       "expend": "All",
-       "group_attack": true,
-       "passes": 1
-      },
-      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
-     },
-     "flights": 1,
-     "standoff_km": 40,
-     "detect_margin_km": 2,
-     "orbit_radius_km": 3,
-     "hold_after_min": 0,
-     "launch_alt_m": 1000,
-     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
-     "from_year": 1973,
-     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
     }
-   ],
+   },
+   "support": [],
    "timing": {
     "player_cold_start_min": 5,
     "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
@@ -1867,65 +1663,9 @@
      "attack": {
       "passes": 1
      }
-    },
-    "single_p": 0.4
-   },
-   "support": [
-    {
-     "id": "sead",
-     "title": "группа подавления ПВО",
-     "when": "threats",
-     "required": false,
-     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
-     "performers": [
-      "attack",
-      "fighter_bomber",
-      "bomber"
-     ],
-     "size": 2,
-     "maintask": [
-      "SEAD",
-      "GroundAttack",
-      "CAS"
-     ],
-     "loadout": [
-      "sead",
-      "anti_armor"
-     ],
-     "lead_min": 2,
-     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
-     "estimate_fields": [
-      "detect_margin_km",
-      "flights",
-      "hold_after_min",
-      "launch_alt_m",
-      "lead_min",
-      "orbit_radius_km",
-      "size",
-      "standoff_km"
-     ],
-     "ai": {
-      "react_on_threat": "EvadeFire",
-      "restrict_jettison": true,
-      "attack": {
-       "weapon": "ARM",
-       "expend": "All",
-       "group_attack": true,
-       "passes": 1
-      },
-      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
-     },
-     "flights": 1,
-     "standoff_km": 40,
-     "detect_margin_km": 2,
-     "orbit_radius_km": 3,
-     "hold_after_min": 0,
-     "launch_alt_m": 1000,
-     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
-     "from_year": 1973,
-     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
     }
-   ],
+   },
+   "support": [],
    "timing": {
     "player_cold_start_min": 5,
     "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
@@ -1982,65 +1722,9 @@
      "attack": {
       "passes": 1
      }
-    },
-    "single_p": 0.4
-   },
-   "support": [
-    {
-     "id": "sead",
-     "title": "группа подавления ПВО",
-     "when": "threats",
-     "required": false,
-     "required_note": "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)",
-     "performers": [
-      "attack",
-      "fighter_bomber",
-      "bomber"
-     ],
-     "size": 2,
-     "maintask": [
-      "SEAD",
-      "GroundAttack",
-      "CAS"
-     ],
-     "loadout": [
-      "sead",
-      "anti_armor"
-     ],
-     "lead_min": 2,
-     "source": "3.3.3: группы обеспечения - в т.ч. уничтожения (подавления) средств ПВО",
-     "estimate_fields": [
-      "detect_margin_km",
-      "flights",
-      "hold_after_min",
-      "launch_alt_m",
-      "lead_min",
-      "orbit_radius_km",
-      "size",
-      "standoff_km"
-     ],
-     "ai": {
-      "react_on_threat": "EvadeFire",
-      "restrict_jettison": true,
-      "attack": {
-       "weapon": "ARM",
-       "expend": "All",
-       "group_attack": true,
-       "passes": 1
-      },
-      "note": "ОЦЕНКА по первому вылету в DCS: пара Су-24М пустила одну ПРР (Patriot её сбил), под пусками ЗУР сбросила вооружение и ушла в оборону. Здесь: пуск ПРР всем запасом всей группой, запрет сброса; противоракетный манёвр (EvadeFire) - с пассивной защитой Су-24М шли под Roland по прямой и были сбиты (camp, Celle)."
-     },
-     "flights": 1,
-     "standoff_km": 40,
-     "detect_margin_km": 2,
-     "orbit_radius_km": 3,
-     "hold_after_min": 0,
-     "launch_alt_m": 1000,
-     "sead_note": "Рубеж пуска - на min(standoff_km, дальность обнаружения РЛС ЗРК - detect_margin_km) от места, где ЗРК будет к приходу группы: ПРР наводится на излучение, рубеж должен быть в зоне обнаружения РЛС (camp3, день 1: пары на 15 км от Gepard/Roland ушли без пуска). Подход на предельно малой высоте; на рубеже - ожидание по кругу (центр отодвинут к базе на orbit_radius_km) на высоте launch_alt_m (если рубеж внутри зоны поражения - на малой) до времени удара + hold_after_min, с задачей атаки на всё ожидание: РЛС войсковой ПВО включаются при подходе ударной группы. Затем уход. Две пары - отдельные группы со своей задачей. Всё - ОЦЕНКИ.",
-     "from_year": 1973,
-     "from_year_source": "ОЦЕНКА: подавление ПВО ракетами - с появления ПРР (США: Shrike, Iron Hand 1965; СССР: Х-28, 1973)"
     }
-   ],
+   },
+   "support": [],
    "timing": {
     "player_cold_start_min": 5,
     "note": "время от начала миссии до взлёта игрока с холодного старта; по нему рассчитываются задержки взлёта групп ИИ",
