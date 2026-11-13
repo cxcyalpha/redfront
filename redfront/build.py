@@ -2436,6 +2436,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         cat = _arm_pylons(fg, ac, perf, g, state) or cat
         weapons_policy = __import__("redfront.weapons", fromlist=["x"]).policy   # правило подвесок сценария (ВКС 2022)
         weapons_policy(fg, state, side_g, loadout_cats(g.get("_kind") or tk["kind"], g))
+        if g["group"].startswith(("sead", "kill")) or tk["kind"] == "strike_sam_site" and g["group"] == "strike":
+            obj_u = g["objective"].get("units") or ([g["objective"]["unit"]] if g["objective"].get("unit") else [])
+            munitions.choose_arm(fg, state, side_g, [state["units"][x] for x in obj_u if x in state["units"]], mun_spend)
         mun_notes = munitions.apply(fg, state, side_g, _mun_swap(state), mun_spend)   # запас управляемого оружия
         if mun_notes:
             fg.__dict__.setdefault("_rf_degraded", []).extend(mun_notes)

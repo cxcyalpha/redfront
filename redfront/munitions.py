@@ -149,3 +149,32 @@ def apply(fg, state: dict, side: str, swap, spend: dict | None = None) -> list[s
         else:
             take(state, side, c, k)
     return notes
+
+
+def choose_arm(fg, state: dict, side: str, targets: list[dict], spend: dict | None = None) -> list[str]:
+    """ПРР группы подавления - по опасности цели и запасу: по ЗРК большой и средней дальности - дальние (Х-58, Х-31П,
+    HARM), по ЗРК малой дальности - ближние (Х-25МП, Shrike); нужного класса нет в запасе - другой. Меняется только
+    ПРР на пилоне, если этот пилон несёт ПРР выбранного класса."""
+    from . import weapons
+    tiers = {(t.get("role") or "") for t in targets}
+    prefer = "arm_long" if tiers & {"sam_long", "sam_medium"} or not tiers else "arm_short"
+    held = (spend or {}).get(side, {})
+    n = sum(1 for u in fg.units for d in u.pylons.values() if (classify(weapons.name_of(d.get("CLSID", ""))) or "").startswith("arm"))
+    if not n:
+        return []
+    want = prefer if stock(state, side, prefer) - held.get(prefer, 0) >= n else \
+        ("arm_short" if prefer == "arm_long" else "arm_long")
+    notes = []
+    for u in fg.units:
+        for num, d in list(u.pylons.items()):
+            name = weapons.name_of(d.get("CLSID", ""))
+            c = classify(name)
+            if not c or not c.startswith("arm") or c == want:
+                continue
+            w = next((w for w in weapons._pylon_options(u.unit_type, int(num)) if classify(w["name"]) == want), None)
+            if w:
+                u.pylons[num] = {"CLSID": w["clsid"]}
+                note = f"{name.split(' - ')[0]} -> {w['name'].split(' - ')[0]} (цель, запас)"
+                if note not in notes:
+                    notes.append(note)
+    return notes
