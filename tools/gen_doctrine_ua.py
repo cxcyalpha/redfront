@@ -58,7 +58,7 @@ def main() -> None:
             g = dict(g, required=False, size=min(g.get("size", 2), 2))
             if g.get("id") == "sead":            # одна пара с ПРР: пуск незадолго до удара, без долгого ожидания
                 g["lead_min"] = SEAD_LEAD_MIN
-                g["need_unit_field"] = "arm_pylons"   # только носители HARM (с августа 2022); нет их (Киев) - без группы
+                g["need_unit_field"] = "arm_pylons|arm"   # только носители ПРР: HARM (с 08.2022), Х-58/Х-25 (Су-24М)
                 g["hold_after_min"] = 0
                 g.setdefault("ai", {}).setdefault("attack", {})["passes"] = PASSES
                 g["required_note"] = "ВСУ 2022: подавление ПВО - не обязательное и не поочерёдное (ОЦЕНКА)"

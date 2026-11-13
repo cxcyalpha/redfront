@@ -1646,8 +1646,9 @@
    "type": "Su_24M",
    "count": 10,
    "strike_radius_km": 400,
-   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
-   "estimate": true
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Х-58 и Х-25 в арсенале ВСУ - подавление ПВО Су-24М",
+   "estimate": true,
+   "arm": true
   },
   {
    "id": "ua_su25",

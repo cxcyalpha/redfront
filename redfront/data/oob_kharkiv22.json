@@ -1635,8 +1635,9 @@
    "type": "Su_24M",
    "count": 8,
    "strike_radius_km": 400,
-   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
-   "estimate": true
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Х-58 и Х-25 в арсенале ВСУ - подавление ПВО Су-24М",
+   "estimate": true,
+   "arm": true
   },
   {
    "id": "ua_mi24",
