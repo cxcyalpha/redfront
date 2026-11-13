@@ -82,6 +82,12 @@ def _attached(state: dict, unit: dict) -> list[dict]:
     return [a for a in state["units"].values() if a.get("attached_to") == unit["id"] and a["state"] != "destroyed"]
 
 
+def _share(units: dict, pw: dict, f: dict, u: dict) -> float:
+    """Доля огня части f, приходящаяся на u: по силе среди всех, с кем f в бою."""
+    tot = sum(pw.get(x, 0.0) for x in f.get("engaged", []) if x in units and units[x]["state"] in ACTIVE)
+    return pw.get(u["id"], 0.0) / tot if tot > 0 else 1.0
+
+
 def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
     """Бой за frac_day суток (шаг наземной модели): потери - суточная доля x frac_day (и потолок loss_cap x frac_day).
     Строки о потерях - только за целые сутки (frac_day = 1); по часам сводку пишет advance."""
@@ -89,9 +95,12 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
     units = state["units"]
     engaged = [u for u in _maneuver(state) if u["state"] == "battle"]
     pw = {u["id"]: power(state, u) for u in _maneuver(state)}    # сила на начало суток: потери сторон считаются одновременно
+    urb = {u["id"]: urban_k(state, u) for u in _maneuver(state)}   # оборона в городе (places.urban): сильнее и прочнее
     for u in engaged:
         foes = [units[f] for f in u.get("engaged", []) if f in units]
-        enemy = sum(pw.get(f["id"], 0.0) for f in foes if f["state"] in ACTIVE)
+        # огонь противника делится между всеми, с кем он в бою (по их силе): бригада против четырёх дивизий не бьёт
+        # каждую в полную силу (Ланчестер)
+        enemy = sum(pw.get(f["id"], 0.0) * urb.get(f["id"], 1.0) * _share(units, pw, f, u) for f in foes if f["state"] in ACTIVE)
         if enemy <= 0 or pw[u["id"]] <= 0:
             continue
         sim = _sim(state, u["side"])
@@ -103,6 +112,7 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
             frac *= sim["defend_factor"]
             if u.get("dig_h", 0) >= sim.get("prepared_h", 1e9):   # подготовленная оборона: окопы, заграждения, огневая система
                 frac *= sim.get("prepared_factor", 1.0)
+            frac /= urb.get(u["id"], 1.0)
         frac *= frac_day
         s0 = model.strength(u)
         n = _take_losses(u, frac)
@@ -181,8 +191,12 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
             cl = current_link(state, u)                # маршевый темп - только по своей территории: в тылу противника
             own = not cl or all(ops.owner(state, x) == u["side"] for x in cl)   # (прорыв, брешь) - темп наступления
             rear = road and own and all(model.dist_km(pos, f) > sm.get("road_clear_km", 15) for f in foes[u["side"]])
+            free_ = not rear and all(model.dist_km(pos, f) > sm.get("road_clear_km", 15) for f in foes[u["side"]])
+            unopp = u.get("unopposed_km", sm.get("unopposed_km"))
             if rear:                                 # марш по своему тылу - темпом колонны, а не наступления (ОЦЕНКА)
                 budget[u["id"]] = road * u.get("supply", 1.0) * frac_day
+            elif free_ and unopp:                    # по земле противника, где его частей нет: колонной по дорогам
+                budget[u["id"]] = unopp * u.get("supply", 1.0) * frac_day   # (2022: без разведки и охранения, ОЦЕНКА)
             else:
                 budget[u["id"]] = ((u.get("daily_advance_km") or sm["daily_advance_km"]) * model.strength(u)
                                    * u.get("supply", 1.0) * frac_day)         # без снабжения - медленнее
@@ -292,6 +306,22 @@ def _checks(state: dict) -> list[str]:
             u["state"] = "halted"
             lines.append(f"{u['name']}: потерял боеспособность ({model.strength(u):.0%}), остановился.")
     return lines
+
+
+def urban_k(state: dict, u: dict) -> float:
+    """Городская оборона (поле urban пункта сектора, ОЦЕНКА сценария): часть в обороне в пункте-городе теряет в urban
+    раз меньше, а наступающий на неё - как от силы в urban раз больше (застройка, подготовленные позиции, ополчение;
+    Киев, Чернигов, Сумы 2022 - окружены, не взяты). Не в обороне или не в городе - 1."""
+    if not u.get("defending") or not u.get("route"):
+        return 1.0
+    p = state["places"].get(u["route"][-1]) or {}
+    k = float(p.get("urban") or 1.0)
+    if k <= 1.0 or model.dist_km(model.unit_pos(state, u), p) > URBAN_KM:
+        return 1.0
+    return k
+
+
+URBAN_KM = 6.0           # ОЦЕНКА: часть ближе - обороняет город
 
 
 def advance(state: dict, to_s: float, ground: bool = True) -> list[str]:

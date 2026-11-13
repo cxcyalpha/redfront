@@ -24,7 +24,8 @@
    "lat": 52.0492,
    "lon": 13.2131,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Chernobyl": {
    "lat": 52.3522,
@@ -54,7 +55,8 @@
    "lat": 51.721,
    "lon": 9.2738,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 1.5
   },
   "Makariv": {
    "lat": 51.6705,
@@ -72,13 +74,15 @@
    "lat": 51.6621,
    "lon": 9.5077,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 4.0
   },
   "Chernihiv": {
    "lat": 52.5458,
    "lon": 10.1689,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Konotop": {
    "lat": 52.327,
@@ -90,13 +94,15 @@
    "lat": 52.1671,
    "lon": 10.6911,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Brovary": {
    "lat": 51.7126,
    "lon": 9.7404,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.5
   },
   "Boryspil": {
    "lat": 51.578,
@@ -108,7 +114,8 @@
    "lat": 51.4938,
    "lon": 7.9059,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "BilaTserkva": {
    "lat": 51.1151,
@@ -150,7 +157,8 @@
    "lat": 51.5443,
    "lon": 13.2867,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Klintsy": {
    "lat": 53.6061,
@@ -181,6 +189,18 @@
    "lon": 12.969,
    "estimate": true,
    "side": "red"
+  },
+  "Lebedyn": {
+   "lat": 51.7799,
+   "lon": 12.9297,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Romny": {
+   "lat": 51.9146,
+   "lon": 12.0585,
+   "estimate": true,
+   "side": "blue"
   }
  },
  "airbases": {
@@ -413,6 +433,30 @@
   [
    "Sevsk",
    "Glushkovo"
+  ],
+  [
+   "Sumy",
+   "Lebedyn"
+  ],
+  [
+   "Okhtyrka",
+   "Lebedyn"
+  ],
+  [
+   "Lebedyn",
+   "Romny"
+  ],
+  [
+   "Romny",
+   "Konotop"
+  ],
+  [
+   "Romny",
+   "Nizhyn"
+  ],
+  [
+   "Sudzha",
+   "Lebedyn"
   ]
  ],
  "supply_entry": {
@@ -441,7 +485,7 @@
  },
  "axes": {
   "west": "Правый берег: Гостомель - Буча - Ирпень - Киев",
-  "makariv": "Макаров - Житомир",
+  "makariv": "Макаров (обход Киева с запада, трасса на Житомир)",
   "chernihiv": "Чернигов",
   "east": "Сумы - Конотоп - Нежин - Бровары"
  },
@@ -454,8 +498,7 @@
     "Kyiv"
    ],
    "makariv": [
-    "Makariv",
-    "Zhytomyr"
+    "Makariv"
    ],
    "chernihiv": [
     "Chernihiv"

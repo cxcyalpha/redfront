@@ -497,7 +497,7 @@ def assembly_areas(state: dict, side: str) -> list[str]:
     lines = []
     own = sorted((u for u in state["units"].values() if u["side"] == side and role_info(u["role"])["category"] == "ground"
                   and u.get("role") == "maneuver" and u["state"] == "defend" and not u.get("attached_to")
-                  and u.get("order") not in ("reserve", "airhead") and len(u.get("route", [])) == 1), key=lambda u: u["id"])
+                  and u.get("order") not in ("reserve", "airhead", "garrison") and len(u.get("route", [])) == 1), key=lambda u: u["id"])
     for u in own:
         here = u["route"][0]
         free = [p for p in front if used.get(p, 0) < ASSEMBLY_PER_PLACE] or front

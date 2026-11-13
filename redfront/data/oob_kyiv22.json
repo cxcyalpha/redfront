@@ -31,23 +31,24 @@
    "composition": [
     {
      "type": "T_72B3",
-     "count": 20,
+     "count": 35,
      "role": "MBT"
     },
     {
      "type": "BMP_2",
-     "count": 30,
+     "count": 50,
      "role": "IFV"
     },
     {
      "type": "BTR_82A",
-     "count": 10,
+     "count": 15,
      "role": "APC"
     }
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "west"
+   "axis": "west",
+   "unopposed_km": 60
   },
   {
    "id": "red_35caa_pvo",
@@ -86,23 +87,24 @@
    "composition": [
     {
      "type": "T_72B3",
-     "count": 20,
+     "count": 35,
      "role": "MBT"
     },
     {
      "type": "BMP_2",
-     "count": 30,
+     "count": 50,
      "role": "IFV"
     },
     {
      "type": "BTR_82A",
-     "count": 10,
+     "count": 15,
      "role": "APC"
     }
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "makariv"
+   "axis": "makariv",
+   "unopposed_km": 60
   },
   {
    "id": "red_36caa_pvo",
@@ -153,7 +155,8 @@
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "axis": "west",
-   "note": "Буча, Ирпень"
+   "note": "Буча, Ирпень",
+   "unopposed_km": 60
   },
   {
    "id": "red_vdv_76_pvo",
@@ -201,7 +204,8 @@
    "arrives_day": 2,
    "arrives_jitter": 0,
    "axis": "west",
-   "note": "Гостомель (после захвата аэродрома)"
+   "note": "Гостомель (после захвата аэродрома)",
+   "unopposed_km": 60
   },
   {
    "id": "red_vdv_98_pvo",
@@ -235,17 +239,17 @@
    "composition": [
     {
      "type": "T_72B3",
-     "count": 20,
+     "count": 35,
      "role": "MBT"
     },
     {
      "type": "BMP_2",
-     "count": 30,
+     "count": 50,
      "role": "IFV"
     },
     {
      "type": "BTR_82A",
-     "count": 10,
+     "count": 15,
      "role": "APC"
     }
    ],
@@ -253,7 +257,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "axis": "west"
+   "axis": "west",
+   "unopposed_km": 60
   },
   {
    "id": "red_5caa_pvo",
@@ -292,23 +297,24 @@
    "composition": [
     {
      "type": "T_72B3",
-     "count": 20,
+     "count": 35,
      "role": "MBT"
     },
     {
      "type": "BMP_2",
-     "count": 30,
+     "count": 50,
      "role": "IFV"
     },
     {
      "type": "BTR_82A",
-     "count": 10,
+     "count": 15,
      "role": "APC"
     }
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "chernihiv"
+   "axis": "chernihiv",
+   "unopposed_km": 60
   },
   {
    "id": "red_41caa_pvo",
@@ -363,7 +369,8 @@
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "east"
+   "axis": "east",
+   "unopposed_km": 60
   },
   {
    "id": "red_2gta_pvo",
@@ -420,7 +427,8 @@
    "estimate": true,
    "arrives_day": 2,
    "arrives_jitter": 0,
-   "axis": "east"
+   "axis": "east",
+   "unopposed_km": 60
   },
   {
    "id": "red_90td_pvo",
@@ -474,7 +482,8 @@
     }
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison"
   },
   {
    "id": "blue_72mb_pvo",
@@ -524,7 +533,8 @@
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "контратака на аэродром Гостомель 24.02"
+   "note": "контратака на аэродром Гостомель 24.02",
+   "order": "garrison"
   },
   {
    "id": "blue_4ngu_pvo",
@@ -573,7 +583,8 @@
     }
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison"
   },
   {
    "id": "blue_tro_kyiv_pvo",
@@ -672,7 +683,8 @@
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "оборона Чернигова"
+   "note": "оборона Чернигова",
+   "order": "garrison"
   },
   {
    "id": "blue_1tb_pvo",
@@ -726,7 +738,8 @@
     }
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison"
   },
   {
    "id": "blue_58mb_pvo",
@@ -872,19 +885,25 @@
    "daily_advance_km": 25,
    "composition": [
     {
-     "type": "BTR_80",
-     "count": 15,
-     "role": "APC"
+     "type": "CHAP_T64BV",
+     "count": 30,
+     "role": "MBT"
     },
     {
-     "type": "MTLB",
-     "count": 10,
+     "type": "BMP_2",
+     "count": 40,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR_80",
+     "count": 15,
      "role": "APC"
     }
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "Сумы не взяты: окружены и обойдены"
+   "note": "Сумы не взяты: окружены и обойдены",
+   "order": "garrison"
   },
   {
    "id": "blue_tro_sumy_pvo",
@@ -934,7 +953,8 @@
    ],
    "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "засада у Скибина 10.03"
+   "note": "засада у Скибина 10.03",
+   "order": "garrison"
   },
   {
    "id": "blue_brovary_pvo",
@@ -942,6 +962,108 @@
    "side": "blue",
    "role": "sam_short",
    "attached_to": "blue_brovary",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_tro_zhytomyr",
+   "name": "Территориальная оборона Житомира",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Zhytomyr"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "до Житомира наземные части РФ не дошли - ОЦЕНКА состава",
+   "order": "garrison"
+  },
+  {
+   "id": "blue_tro_zhytomyr_pvo",
+   "name": "Войсковая ПВО: Территориальная оборона Житомира",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_tro_zhytomyr",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Strela_10M3",
+     "count": 2,
+     "role": "launcher"
+    },
+    {
+     "type": "SA_18_Igla_manpad",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_93mb_okhtyrka",
+   "name": "Части 93-й омбр и теробороны (Ахтырка)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Okhtyrka"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR_80",
+     "count": 15,
+     "role": "APC"
+    },
+    {
+     "type": "MTLB",
+     "count": 10,
+     "role": "APC"
+    }
+   ],
+   "source": "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "бои за Ахтырку 24.02-03.2022, город не взят",
+   "order": "garrison"
+  },
+  {
+   "id": "blue_93mb_okhtyrka_pvo",
+   "name": "Войсковая ПВО: Части 93-й омбр и теробороны (Ахтырка)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_93mb_okhtyrka",
    "state": "defend",
    "composition": [
     {
@@ -1730,7 +1852,10 @@
      "air_assault": {
       "assault_max_km": 140,
       "max_threats": 3,
-      "per_day": 2
+      "per_day": 2,
+      "lz_prefer": [
+       "Hostomel"
+      ]
      }
     }
    }

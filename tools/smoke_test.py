@@ -299,8 +299,15 @@ def package_section(tmp: Path) -> None:
     ipm = next(p for p in pg["strike"].points if p.name == "ИПМ")
     check(tgt.alt == 50 and ipm.alt == 300, "ударная группа: точка в зоне ЗРК - 50 м, вне зоны (ИПМ) - 300 м")
     check(attack_ids(pg["recon"]) == [], "доразведка: без AttackGroup по конкретной группе - цель ищет сама в районе")
-    check(pg["sead"].task == "SEAD" and pylons_match(pg["sead"].units[0], "Retribution SEAD"),
-          "Су-24М: задача DCS SEAD, подвеска 'Retribution SEAD' (Х-58У, Р-60М, Л-081 на пилоне 5)")
+    from redfront import munitions as _mn, weapons as _wp
+    _u0 = pg["sead"].units[0]
+    _want = model.load_json("payloads.json")["types"][_u0.unit_type.id]["Retribution SEAD"]["pylons"]
+    _arm = {int(k): _mn.classify(_wp.name_of(d.get("CLSID", ""))) for k, d in _u0.pylons.items()}
+    check(pg["sead"].task == "SEAD" and {int(k) for k in _u0.pylons} == {int(k) for k in _want}
+          and all(_arm[int(k)] == "arm_short" for k, d in _want.items()
+                  if (_mn.classify(_wp.name_of(d["CLSID"])) or "").startswith("arm")),
+          "Су-24М: задача DCS SEAD, подвеска 'Retribution SEAD'; цель - Роланд (малая дальность) - ПРР ближние "
+          "(Х-25МП вместо Х-58У, munitions.choose_arm)")
     roe = [t for p in pg["recon"].points for t in p.tasks if type(t).__name__ == "OptROE"]
     zone = [t for p in pg["recon"].points for t in p.tasks if getattr(t, "id", None) == "EngageTargetsInZone"]
     orbit = [t for p in pg["recon"].points if p.name != "Сбор" for t in p.tasks if getattr(t, "id", None) == "ControlledTask"

@@ -42,7 +42,8 @@ G.NOT_INCLUDED = ("Калибры с Черноморского флота (фл
                   "минирование, массовая РЭБ, сбор тероборонами, юг (Херсон, Мариуполь) и восток (Харьков) - вне сектора.")
 G.EXTRA_VARIANT = {"posture": {"red": "offense", "blue": "defense"},
                    # десант на Гостомель 24.02: ~100 км от границы Беларуси, вертолёты прошли через ПВО (ОЦЕНКА)
-                   "task_params": {"red": {"air_assault": {"assault_max_km": 140, "max_threats": 3, "per_day": 2}}}}
+                   "task_params": {"red": {"air_assault": {"assault_max_km": 140, "max_threats": 3, "per_day": 2,
+                                                           "lz_prefer": ["Hostomel"]}}}}
 G.SAM_FIXED = True       # стационарные позиции С-300 и Бук известны: по ним - первые удары 24.02
 
 G.PLACES = {
@@ -75,13 +76,14 @@ G.AIRBASES = {"red": ["Kiel", "Lubeck", "Pinnow", "HeliMozyr"],                 
               "blue": ["Hamburg Finkenwerder", "Celle", "Wunstorf", "Hannover"]}   # Васильков, Озёрное, Староконстантинов, Канатово
 G.AXES = {
     "west": {"title": "Правый берег: Гостомель - Буча - Ирпень - Киев", "objectives": ["Hostomel", "Bucha", "Irpin", "Kyiv"]},
-    "makariv": {"title": "Макаров - Житомир", "objectives": ["Makariv", "Zhytomyr"]},
+    "makariv": {"title": "Макаров (обход Киева с запада, трасса на Житомир)", "objectives": ["Makariv"]},
     "chernihiv": {"title": "Чернигов", "objectives": ["Chernihiv"]},
     "east": {"title": "Сумы - Конотоп - Нежин - Бровары", "objectives": ["Konotop", "Nizhyn", "Brovary", "Kyiv"]},
 }
 
 c = G.comp
-RU_BTG = c(("T_72B3", 20, "MBT"), ("BMP_2", 30, "IFV"), ("BTR_82A", 10, "APC"))           # 2-3 БТГ мсбр/мсп - ОЦЕНКА
+RU_BTG = c(("T_72B3", 35, "MBT"), ("BMP_2", 50, "IFV"), ("BTR_82A", 15, "APC"))
+# армия на направлении - 3-4 БТГ в одной части модели (всего на Киев - ~30-40 БТГ, RUSI 'Operation Z'). ОЦЕНКА
 RU_TANK = c(("T_72B3", 30, "MBT"), ("CHAP_T90M", 6, "MBT"), ("BMP_2", 15, "IFV"))
 RU_VDV = c(("BMD_1", 40, "IFV"), ("BTR_D", 15, "APC"))
 UA_MECH = c(("CHAP_T64BV", 30, "MBT"), ("BMP_2", 40, "IFV"), ("BTR_80", 15, "APC"))      # БТР-4 - БТР-80
@@ -110,9 +112,13 @@ G.GROUND = [
     ("blue_58mb", "58-я мотопехотная бригада (Конотоп - Нежин)", "blue", "Nizhyn", UA_MECH, UA_AD, 1, None, ""),
     ("blue_95daab", "95-я десантно-штурмовая бригада (Житомир)", "blue", "Zhytomyr", UA_LIGHT, UA_AD, 2, None, ""),
     ("blue_14mb", "14-я механизированная бригада (с запада)", "blue", "Lviv", UA_MECH, UA_AD, 5, None, "ОЦЕНКА"),
-    ("blue_tro_sumy", "Территориальная оборона и 27-я реактивная артбригада (Сумы)", "blue", "Sumy", UA_LIGHT, UA_AD, 1, None,
+    ("blue_tro_sumy", "Территориальная оборона и 27-я реактивная артбригада (Сумы)", "blue", "Sumy", UA_MECH, UA_AD, 1, None,
      "Сумы не взяты: окружены и обойдены"),
     ("blue_brovary", "Части обороны Броваров", "blue", "Brovary", UA_LIGHT, UA_AD, 1, None, "засада у Скибина 10.03"),
+    ("blue_tro_zhytomyr", "Территориальная оборона Житомира", "blue", "Zhytomyr", UA_LIGHT, UA_AD, 1, None,
+     "до Житомира наземные части РФ не дошли - ОЦЕНКА состава"),
+    ("blue_93mb_okhtyrka", "Части 93-й омбр и теробороны (Ахтырка)", "blue", "Okhtyrka", UA_LIGHT, UA_AD, 1, None,
+     "бои за Ахтырку 24.02-03.2022, город не взят"),
 ]
 G.AIR_ASSAULT = [   # (id, имя, сторона, пункт, {тип: число}, человек, источник): десант на Гостомель 24.02 (Ми-8 + Ка-52)
     ("red_vdv_hostomel1", "Рота 31-й одшбр (десант на Гостомель)", "red", "Khoiniki",
@@ -236,17 +242,31 @@ BORDER = {   # имя: (широта, долгота, сторона)
     "Horodnia": (51.89, 31.60, "blue"), "NovhorodSiverskyi": (52.01, 33.26, "blue"), "Shostka": (51.86, 33.48, "blue"),
     "Okhtyrka": (50.31, 34.90, "blue"), "Klintsy": (52.76, 32.24, "red"), "Glushkovo": (51.34, 34.64, "red"),
     "Sudzha": (51.19, 35.27, "red"), "Trubchevsk": (52.58, 33.77, "red"), "Sevsk": (52.15, 34.49, "red"),
+    # обход Сум с юга (2-я гв. ТА и 1-я ТА 02.2022: Лебедин - Ромны - на Прилуки и Бровары, Сумы и Ахтырка - не взяты)
+    "Lebedyn": (50.59, 34.48, "blue"), "Romny": (50.75, 33.47, "blue"),
 }
 for _n, (_la, _lo, _sd) in BORDER.items():
     G.PLACES[_n] = (*PROJ(_la, _lo), _sd)
 G.LINKS += [("Gomel", "Horodnia"), ("Horodnia", "Chernihiv"), ("Klintsy", "Horodnia"), ("Klintsy", "NovhorodSiverskyi"),
             ("NovhorodSiverskyi", "Shostka"), ("Shostka", "Konotop"), ("Glushkovo", "Shostka"), ("Glushkovo", "Konotop"),
             ("Sudzha", "Sumy"), ("Sumy", "Okhtyrka"), ("Sudzha", "Okhtyrka"), ("Klintsy", "Trubchevsk"),
-            ("Trubchevsk", "NovhorodSiverskyi"), ("Trubchevsk", "Sevsk"), ("Sevsk", "Shostka"), ("Sevsk", "Glushkovo")]
+            ("Trubchevsk", "NovhorodSiverskyi"), ("Trubchevsk", "Sevsk"), ("Sevsk", "Shostka"), ("Sevsk", "Glushkovo"),
+            ("Sumy", "Lebedyn"), ("Okhtyrka", "Lebedyn"), ("Lebedyn", "Romny"), ("Romny", "Konotop"), ("Romny", "Nizhyn"),
+            ("Sudzha", "Lebedyn")]
 _kla, _klo, _s = G.PLACES["Kyiv"]               # Буковель-АД - прикрывает сам Киев (радиус 15 км)
 G.EW = [(r[:5] + (round(_kla + 0.03, 4), round(_klo - 0.03, 4)) + r[7:]) if r[0] == "blue_ew_bukovel" else r for r in G.EW]
 G.SECTOR_ABOUT = ("Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold "
                   f"War Germany: {G.PROJ_NOTE}. Рельеф и реки (Днепр) - карты, не Украины.")
+
+# города (sim.urban_k): оборона в застройке, ОЦЕНКИ по итогу 2022 - Киев, Чернигов, Сумы, Нежин, Бровары не взяты
+# (Чернигов и Сумы - в окружении), Ирпень - взят частично, Буча, Гостомель, Иванков, Конотоп - взяты
+URBAN = {"Kyiv": 4.0, "Chernihiv": 3.0, "Sumy": 3.0, "Nizhyn": 2.0, "Brovary": 2.5, "Irpin": 1.5, "Zhytomyr": 2.0,
+         "Okhtyrka": 2.0}
+# темп колонн по земле Украины, где частей ВСУ нет (sim: unopposed_km): 24-25.02 колонны из Беларуси за двое суток -
+# от границы до Гостомеля и Иванкова (~100 км), 2-я гв. ТА - Конотоп 25.02 (~80 км). ОЦЕНКА
+UNOPPOSED_KM = 60
+GARRISON = {"blue_tro_kyiv", "blue_4ngu", "blue_72mb", "blue_1tb", "blue_tro_sumy", "blue_brovary", "blue_58mb",
+            "blue_tro_zhytomyr", "blue_93mb_okhtyrka"}
 
 if __name__ == "__main__":
     G.main()
@@ -265,4 +285,16 @@ if __name__ == "__main__":
     # E-3A вне театра, в воздухе с начала миссии (не часть модели, не цель). На условной карте - за тылом Украины
     # (на западе карты), а не над настоящей Польшей (она на востоке карты, на стороне России)
     oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (за тылом Украины)"}}
+    # гарнизоны (ops: order garrison - держат свой пункт, не выдвигаются и не бегут): Киев, Ирпень (72-я омбр -
+    # рубеж реки Ирпень), Чернигов (1-я отбр, окружён, не взят), Сумы, Бровары (засада у Скибина 10.03)
+    for u in oob["units"]:
+        if u["id"] in GARRISON:
+            u["order"] = "garrison"
+        if u["side"] == "red" and u["role"] == "maneuver":
+            u["unopposed_km"] = UNOPPOSED_KM
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
+    sp = G.DATA / "sector_kyiv22.json"
+    sec = json.loads(sp.read_text(encoding="utf-8"))
+    for name, k in URBAN.items():
+        sec["places"][name]["urban"] = k
+    sp.write_text(json.dumps(sec, ensure_ascii=False, indent=1), encoding="utf-8")
