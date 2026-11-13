@@ -9,6 +9,13 @@ farp_min_km - закрыта, ближе airfield_lost_km - потеряна. К
 farp_reach_km от него; одна часть - одна площадка. Площадка закрыта, потеряна или противник подошёл ближе farp_min_km - часть уходит на другую или домой.
 Снабжение площадки - как у аэродрома (logistics.supply: путь от площадки до своего склада).
 В миссии вертолёты взлетают с площадки (стоянки площадки; не хватило - взлёт в воздухе над ней), садятся на неё.
+
+Полевые площадки (field): готовой площадки карты в полосе нет (или доктрина их предпочитает - farp_field_prefer) -
+часть разворачивает площадку в поле: точка между своим пунктом на фронте и основным аэродромом, в farp_min_km..
+farp_max_km от противника, в стороне от населённого пункта (FIELD_OFFSET_KM). Площадка небольшая (farp_field_cap
+вертолётов), без стоянок: в миссии - невидимая площадка DCS (Invisible FARP), взлёт с грунта у неё (From Ground
+Area), посадка на неё. Доктрина может требовать частой смены площадок (farp_field_move_days, ВСУ 2022: малые
+скрытые площадки в поле, смена через 1-3 суток - ОЦЕНКА). Опустевшая полевая площадка снимается.
 """
 from __future__ import annotations
 
@@ -24,11 +31,73 @@ NAME = re.compile(r"^H (FRG|GDR) \d+$")
 FARP_PER_SLOT = 2         # ОЦЕНКА: вертолётов на стоянку площадки (остальные рассредоточены рядом, взлёт по очереди)
 FARP_MIN_HELOS = 4        # ОЦЕНКА: площадка принимает не меньше звена
 FARP_MAX_HELOS = 12       # ОЦЕНКА: и не больше эскадрильи - полк целиком на площадку не уходит
+FIELD_CAP = 8             # ОЦЕНКА: вертолётов на полевой площадке (подготовлена за часы: грунт, маскировка, ГСМ)
+FIELD_OFFSET_KM = 3.0     # ОЦЕНКА: в стороне от пункта (не в городе, у дороги подвоза)
+FIELD_STEP_KM = 4.0       # шаг поиска точки от фронта к основному аэродрому
+FIELD_SPACING_KM = 4.0    # ОЦЕНКА: полевые площадки стороны - не ближе друг к другу (рассредоточение)
 
 
 def capacity(b: dict) -> int:
-    """Сколько вертолётов примет площадка: по стоянкам, от звена до эскадрильи."""
+    """Сколько вертолётов примет площадка: полевая - по доктрине (cap); готовая - по стоянкам, от звена до эскадрильи."""
+    if b.get("field"):
+        return int(b.get("cap") or FIELD_CAP)
     return max(FARP_MIN_HELOS, min(FARP_MAX_HELOS, int(b.get("slots", 1)) * FARP_PER_SLOT))
+
+
+def field_site(state: dict, side: str, home: dict, lo: float, hi: float, salt: str = "") -> dict | None:
+    """Точка полевой площадки: от своего пункта на фронте (ближнего к основному аэродрому) - к аэродрому, пока до
+    противника не станет между lo и hi (ближе к середине), в стороне от дороги; на своей земле. Нет - None."""
+    from . import ops
+    front = [state["places"][p] for p in ops.front_nodes(state, side)]
+    if not front:
+        return None
+    want = (lo + hi) / 2
+    r = model.rng(state, f"field-{side}-{salt}")
+    foe = model.enemy(side)
+    for pl in sorted(front, key=lambda q: model.dist_km(q, home))[:3]:
+        brg = model.bearing_deg(pl, home)
+        total = model.dist_km(pl, home)
+        if front_km(state, side, pl) > want:     # противник далеко от своего пункта (первые сутки) - к нему, по своей земле
+            en = min((q for q in state["places"].values() if q.get("side") == foe), key=lambda q: model.dist_km(pl, q), default=None)
+            if en:
+                to = model.bearing_deg(pl, en)
+                k = 0.0
+                while k < model.dist_km(pl, en):
+                    q = model.offset(pl, to, (k + FIELD_STEP_KM) * 1000)
+                    if front_km(state, side, q) < want or owner(state, q) != side:
+                        break
+                    k += FIELD_STEP_KM
+                pl = model.offset(pl, to, k * 1000)
+                brg, total = to + 180, k + total
+        k = 0.0
+        while k <= total:
+            pos = model.offset(pl, brg, k * 1000)
+            d = front_km(state, side, pos)
+            if d >= want or (k + FIELD_STEP_KM > total and lo <= d <= hi):
+                first = 90 if (r.random() < 0.5 if r else len(salt) % 2) else -90
+                for off in (FIELD_OFFSET_KM, 2 * FIELD_OFFSET_KM, 3 * FIELD_OFFSET_KM):   # в стороне, не у соседней площадки
+                    for sb in (first, -first):
+                        q = model.offset(pos, brg + sb, off * 1000)
+                        d = front_km(state, side, q)
+                        if lo <= d <= hi and owner(state, q) == side and all(
+                                model.dist_km(q, b) >= FIELD_SPACING_KM for b in state["airbases"].values()
+                                if b.get("field") and b.get("side") == side):
+                            return {"lat": round(q["lat"], 5), "lon": round(q["lon"], 5), "front_km": round(d, 1)}
+                break
+            k += FIELD_STEP_KM
+    return None
+
+
+def add_field(state: dict, side: str, pos: dict, cap: int, near_unit: dict) -> str:
+    """Полевая площадка в state['airbases'] (kind farp, field): без аэродрома карты."""
+    n = state.setdefault("_field_n", 0) + 1
+    state["_field_n"] = n
+    near = min(state["places"], key=lambda q: model.dist_km(pos, state["places"][q]))
+    bid = f"fs_{side}_{n}"
+    state["airbases"][bid] = {"name": f"полевая площадка у {near}", "kind": "farp", "field": True, "military": True,
+                              "lat": pos["lat"], "lon": pos["lon"], "state": "open", "side": side, "cap": cap,
+                              "front_km": pos.get("front_km"), "day": state.get("day", 1), "slots": 0}
+    return bid
 
 
 def detach(state: dict, u: dict, bid: str) -> dict:
@@ -173,6 +242,26 @@ def daily(state: dict) -> list[str]:
         u.pop("base_fixed", None)                       # вынужденный уход - снова на усмотрение модели
         u["base"] = home
         lines.append(f"{u['name']}: уход с передовой площадки {b['name']} на {bases[home]['name']}.")
+    for u in helos:                                     # смена полевой площадки (доктрина: farp_field_move_days)
+        b = bases.get(u["base"])
+        if not is_farp(b) or not b.get("field") or u["id"] in left or u["id"] not in state["units"]:
+            continue
+        every = _sim(state, u["side"], "farp_field_move_days", 0)
+        lo = _sim(state, u["side"], "farp_min_km", FARP_MIN_KM)
+        hi = _sim(state, u["side"], "farp_max_km", FARP_MAX_KM)
+        behind = b.get("front_km", 0) > hi                # фронт ушёл вперёд - площадка следом
+        if not behind and (not every or state.get("day", 1) - b.get("day", 1) < every):
+            continue
+        home = bases.get(u.get("home") or "")
+        pos = field_site(state, u["side"], home or b, lo, hi, f"{u['id']}-{state.get('day')}") if home else None
+        if not pos:
+            continue
+        nb = add_field(state, u["side"], pos, capacity(b), u)
+        taken.discard(u["base"])
+        u["base"] = nb
+        taken.add(nb)
+        lines.append(f"{u['name']}: " + ("площадка - за фронтом" if behind else "смена полевой площадки")
+                     + f" - {bases[nb]['name']} ({pos['front_km']:.0f} км от противника).")
     for u in sorted(helos, key=lambda u: u["id"]):      # выдвижение на площадку ближе к фронту
         if is_farp(bases.get(u["base"])) or u["id"] in left or u.get("base_fixed") or u.get("parent") \
                 or u["id"] not in state["units"] or any(x.get("parent") == u["id"] for x in state["units"].values()):
@@ -188,6 +277,14 @@ def daily(state: dict) -> list[str]:
                  if is_farp(b) and b["side"] == u["side"] and b["state"] == "open" and bid not in taken
                  and lo <= b.get("front_km", 1e9) <= hi and b["front_km"] <= d_home - gain
                  and model.dist_km(home, b) <= _sim(state, u["side"], "farp_reach_km", FARP_REACH_KM)]
+        if _sim(state, u["side"], "farp_field_prefer", 0):
+            cands = []                                  # доктрина: малые скрытые площадки в поле, не готовые площадки карты
+        if not cands and _sim(state, u["side"], "farp_field", 1):   # готовой нет - полевая площадка
+            pos = field_site(state, u["side"], home, lo, hi, u["id"])
+            if pos and pos["front_km"] <= d_home - gain and model.dist_km(home, pos) <= \
+                    _sim(state, u["side"], "farp_reach_km", FARP_REACH_KM):
+                bid = add_field(state, u["side"], pos, int(_sim(state, u["side"], "farp_field_cap", FIELD_CAP)), u)
+                cands = [(model.dist_km(home, pos), bid, bases[bid])]
         if not cands:
             continue
         _d, bid, b = min(cands, key=lambda c: c[0])     # ближняя к своему аэродрому: часть работает на своём участке
@@ -195,4 +292,7 @@ def daily(state: dict) -> list[str]:
         taken.add(bid)
         lines.append(f"{x['name']}: выдвижение на передовую {b['name']} ({x['count']} вертолётов, площадка - до "
                      f"{capacity(b)}; {b['front_km']:.0f} км от противника; основной аэродром {home['name']} - {d_home:.0f} км).")
+    used = {u.get("base") for u in state["units"].values()}
+    for bid in [k for k, b in bases.items() if b.get("field") and k not in used]:   # опустевшие полевые - снимаются
+        del bases[bid]
     return lines

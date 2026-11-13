@@ -1898,7 +1898,13 @@
   "crews_note": "Экипажи (ОЦЕНКИ, не из документа): у полка crew_ratio экипажей на самолёт штата; к вылету - не больше экипажей. Сбит без катапультирования - экипаж погиб; катапультировался - на земле (downed), пока не спасён (CSAR), не вышел к своим (на своей территории - на следующие сутки) или не попал в плен (на территории противника - capture_per_day в сутки, через downed_max_days суток - пропал без вести). Пополнение - crews_per_day экипажей в сутки до штата.",
   "night_march": 0.6,
   "night_battle": 0.5,
-  "night_note": "Ночь - часы вне лётного дня (ato.FLYING_HOURS, 06-20). Ночью марш x night_march, потери в бою x night_battle (ОЦЕНКИ). Вылеты ночью - только типы с night в aircraft.json (ato.py)."
+  "night_note": "Ночь - часы вне лётного дня (ato.FLYING_HOURS, 06-20). Ночью марш x night_march, потери в бою x night_battle (ОЦЕНКИ). Вылеты ночью - только типы с night в aircraft.json (ato.py).",
+  "farp_field_prefer": 1,
+  "farp_field_cap": 4,
+  "farp_field_move_days": 2,
+  "farp_min_km": 12,
+  "farp_max_km": 40,
+  "farp_reach_km": 400
  },
  "task_priority_note": "Порядок задач = приоритет плана дня (ОЦЕНКА): войска в соприкосновении, затем колонны на марше.",
  "gci": {

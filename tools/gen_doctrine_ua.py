@@ -66,6 +66,10 @@ def main() -> None:
         t["support"] = [] if kind in SINGLE else sup   # одна пара без пакета
         if kind in ATTACK_TOO and "attack" not in t.get("performers", []):
             t["performers"] = list(t["performers"]) + ["attack"]   # Су-25 - вместо недостающих бомбардировщиков
+    # вертолёты ВСУ - с малых скрытых площадок в поле (пара-две), смена площадки через 1-3 суток; ближе к фронту, чем
+    # готовые площадки (farp.py). ОЦЕНКИ по открытым репортажам о работе армейской авиации ВСУ 2022
+    d["sim"].update({"farp_field_prefer": 1, "farp_field_cap": 4, "farp_field_move_days": 2, "farp_min_km": 12,
+                     "farp_max_km": 40, "farp_reach_km": 400})   # основные аэродромы далеко в тылу (рассредоточение)
     (DOC / "ua.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
     print("ua.json:", ", ".join(f"{k}:{(t.get('strike') or {}).get('size')}" for k, t in d["tasks"].items() if t.get("strike")))
 

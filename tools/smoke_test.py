@@ -2757,6 +2757,50 @@ def farp_section(tmp: Path) -> None:
     check(not farp.is_farp(st["airbases"][jet["base"]]), "самолёты с закрытого аэродрома на вертолётную площадку не уходят")
 
 
+def field_farp_section(tmp: Path) -> None:
+    """Полевые вертолётные площадки (farp.py field): готовой площадки нет (или доктрина ВСУ их не берёт) - площадка в
+    поле на своей земле в полосе farp_min_km..farp_max_km; ВСУ - малые (пара-две) и со сменой; в миссии - Invisible
+    FARP, взлёт с грунта, посадка на неё; планшет - координаты площадки."""
+    from redfront import farp
+    import dcs as _dcs
+    print("\n== полевые вертолётные площадки ==")
+    st = model.new_campaign("ff", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=1, player_side="red")
+    farp.daily(st)
+    fs = {k: b for k, b in st["airbases"].items() if b.get("field")}
+    on = [u for u in st["units"].values() if u.get("base") in fs]
+    ua = [u for u in on if u["side"] == "blue"]
+    ok_band = all(farp._sim(st, u["side"], "farp_min_km", 0) <= fs[u["base"]]["front_km"]
+                  <= farp._sim(st, u["side"], "farp_max_km", 99) and farp.owner(st, fs[u["base"]]) == u["side"] for u in on)
+    spread = all(model.dist_km(a, b) >= farp.FIELD_SPACING_KM - 0.01 for i, a in enumerate(fs.values())
+                 for b in list(fs.values())[i + 1:] if a["side"] == b["side"])
+    check(on and ua and ok_band and spread and all(u["count"] <= 4 for u in ua) and len(on) == len(fs),
+          f"полевые площадки: {len(fs)} (ВСУ - {len(ua)} по паре-две), в полосе от противника, на своей земле, "
+          f"не ближе {farp.FIELD_SPACING_KM:.0f} км друг к другу, одна часть - одна площадка")
+    b0 = fs[ua[0]["base"]]
+    st["day"] += farp._sim(st, "blue", "farp_field_move_days", 2)
+    lines = farp.daily(st)
+    check(ua[0]["base"] not in fs and st["airbases"][ua[0]["base"]].get("field") and b0 not in st["airbases"].values()
+          and any("смена полевой площадки" in ln for ln in lines),
+          f"ВСУ меняют площадку через {farp._sim(st, 'blue', 'farp_field_move_days', 2):.0f} сут.; старая снята")
+    st["day"] = 2
+    planner.plan(st)
+    n = next((i for i, t in enumerate(st["tasks"], 1) if t["package"][0]["base"] in st["airbases"]
+              and st["airbases"][t["package"][0]["base"]].get("field")), None)
+    check(n is not None, "в плане есть вылет вертолётов с полевой площадки")
+    if n is None:
+        return
+    build.build(st, tmp / "field.miz", task_no=n)
+    mz = _dcs.Mission()
+    mz.load_file(str(tmp / "field.miz"))
+    hg = [g for c in mz.coalition["red"].countries.values() for g in c.helicopter_group
+          if str(g.points[0].type).startswith("TakeOffGround")]
+    pads = {g.units[0].id for c in mz.coalition["red"].countries.values() for g in c.static_group
+            if g.units[0].type == "Invisible FARP"}
+    check(hg and all(getattr(g.points[-1], "helipad_id", None) in pads for g in hg)
+          and all(len({(u.position.x, u.position.y) for u in g.units}) == len(g.units) for g in hg),
+          f"миссия: {len(hg)} групп вертолётов взлетают с грунта у невидимой площадки и садятся на неё, борта - не друг на друге")
+
+
 def evac_section(tmp: Path) -> None:
     """Эвакуация десанта (assault.evac_*, lua/evac.lua): рота в тылу противника дольше evac_days - задача плана; в
     миссии рота у площадки группами по вместимости борта, борт ИИ забирает группу сам, игрок - меню CTLD; сбитый борт -
@@ -4372,7 +4416,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
+            command_section, farp_section, field_farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:

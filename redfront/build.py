@@ -756,6 +756,26 @@ class CarrierPad:
         self.atc_radio = type("R", (), {"vhf_high_hz": f, "uhf_hz": f})()
 
 
+class FieldPad(CarrierPad):
+    """Полевая вертолётная площадка (farp.py, field): невидимая площадка DCS (Invisible FARP) в поле - взлёт с грунта
+    у неё (From Ground Area), посадка на неё (как на палубу: helipad)."""
+
+
+FIELD_SPREAD_M = 40      # ОЦЕНКА: вертолёты на полевой площадке - в ряд через столько метров (рассредоточение)
+
+
+def field_pads(m: Mission, state: dict) -> dict[str, "FieldPad"]:
+    """Полевые площадки кампании (state airbases field) в миссии -> id базы: FieldPad."""
+    from dcs.unit import InvisibleFARP
+    out = {}
+    for bid, b in state["airbases"].items():
+        if not b.get("field") or b.get("state") == "lost" or b.get("side") not in model.SIDES:
+            continue
+        grp = m.farp(_country(m, state, b["side"]), f"FARP {bid}", _pt(m, b), farp_type=InvisibleFARP)
+        out[bid] = FieldPad(grp, {"name": b["name"], "freq": 127.5})
+    return out
+
+
 NAVAL_GROUPS: dict = {}   # группы кораблей этой миссии: id части флота -> группа pydcs (цели ударов, дебриф)
 NAVAL_SHIPS: dict = {}    # id части флота -> [(класс pydcs, имя корабля)]
 
@@ -899,7 +919,21 @@ CARRIER_LEG_M = 40_000  # ОЦЕНКА: длина галса
 
 
 def _from_base(m: Mission, country, name: str, ac, base_obj, maintask, start_type, group_size: int):
-    """Группа ЛА с аэродрома или с палубы авианосца (CarrierPad: старт с корабля; с полосы - с катапульты)."""
+    """Группа ЛА с аэродрома или с палубы авианосца (CarrierPad: старт с корабля; с полосы - с катапульты); с полевой
+    площадки (FieldPad) - с грунта у неё: холодный или горячий запуск, вертолёты в ряд."""
+    if isinstance(base_obj, FieldPad):
+        fg = m.flight_group_inflight(country, name, ac, base_obj.position, 0, speed=0, maintask=maintask,
+                                     group_size=group_size)
+        p0 = fg.points[0]
+        hot = start_type != StartType.Cold
+        p0.type = "TakeOffGroundHot" if hot else "TakeOffGround"
+        p0.action = PointAction.FromGroundAreaHot if hot else PointAction.FromGroundArea
+        p0.alt, p0.alt_type, p0.speed = 0, "RADIO", 0
+        for i, u in enumerate(fg.units):
+            u.position = base_obj.position.point_from_heading(90, FIELD_SPREAD_M * (i + 1))
+            u.alt, u.speed = 0, 0
+        p0.position = fg.units[0].position
+        return fg
     if isinstance(base_obj, CarrierPad):
         st_ = StartType.Warm if start_type == StartType.Runway else start_type
         return m.flight_group_from_unit(country, name, ac, base_obj.group, maintask=maintask, start_type=st_,
@@ -1789,6 +1823,13 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                     nav += ["*" + L("ПОСАДКА: ", "ARR: ") + names.get(ab[-1], "-")] + [x.strip() for x in navaid_lines(m, by_id.get(ab[-1]), lg)]
                 else:
                     nav.append(L("Посадка - там же", "Arrival - same field"))
+            elif str(fg.points[0].type).startswith("TakeOffGround"):   # полевая площадка (farp.py field)
+                ll_ = fg.points[0].position.latlng()
+                fb = min((b for b in state["airbases"].values() if b.get("field")),
+                         key=lambda b: model.dist_km(b, {"lat": ll_.lat, "lon": ll_.lng}), default=None)
+                nav += ["*" + L("ВЗЛЁТ И ПОСАДКА: ", "DEP/ARR: ") + (fb["name"] if fb else L("полевая площадка", "field site")),
+                        _dms(ll_.lat, "NS") + "  " + _dms(ll_.lng, "EW"),
+                        L("без радиосредств; посадка - на площадку (у грунта)", "no navaids; land at the site (ground)")]
             else:
                 nav.append(L("Взлёт и посадка - палуба", "Deck launch and recovery"))
             nav += carrier_lines(state, fg.units[0].position)
@@ -1801,6 +1842,10 @@ def _kneeboard(m: Mission, state: dict, tk: dict, lines: list[str], order_lines:
                     loads[n_] = loads.get(n_, 0) + 1
             start = {"cold": L("холодный на стоянке", "cold, ramp"), "hot": L("горячий на стоянке", "hot, ramp"),
                      "runway": L("с полосы", "runway"), "air": L("в воздухе", "airborne")}[player_start(state)]
+            if str(fg.points[0].type) == "TakeOffGround":
+                start = L("холодный, с грунта (полевая площадка)", "cold, from the ground (field site)")
+            elif str(fg.points[0].type) == "TakeOffGroundHot":
+                start = L("горячий, с грунта (полевая площадка)", "hot, from the ground (field site)")
             flight = ["*" + f"{cs}  {ut.id} x{len(fg.units)}", L("Старт: ", "Start: ") + start] + \
                      [f"{v} x {k}" for k, v in sorted(loads.items(), key=lambda x: -x[1])]
             own_call = []
@@ -2134,6 +2179,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
 
     # ---- весь театр: район задачи подробно, остальное - реже ----
     carriers = carrier_groups(m, state, (wx_now.get("wind_dir") or 0) % 360)   # авианосные группы - базы на море
+    carriers.update(field_pads(m, state))       # полевые вертолётные площадки - те же "базы-площадки"
     groups = materialize.theatre(state, tk, density)
     vg_by_unit, platoons = {}, {}
     col_parts: dict[int, list] = {}               # колонна ротами: id(группы модели) -> [(часть, группа DCS)]
@@ -2866,6 +2912,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                             if t.get("takeoff_s") else ""))
                         if is_player else Lx("ИИ, к началу миссии уже в воздухе на маршруте", "AI, already airborne en route at mission start")
                         if g.get("_air_start") else
+                        Lx(f"ИИ, с грунта полевой площадки (двигатели запущены), взлёт в {clk(t['start_s'])}",
+                           f"AI, from the ground at the field site (engines running), takeoff at {clk(t['start_s'])}")
+                        if g.get("_parked") and base.get("field") else
                         Lx(f"ИИ, со стоянки (двигатели запущены), взлёт в {clk(t['start_s'])}",
                            f"AI, from parking (engines running), takeoff at {clk(t['start_s'])}") if g.get("_parked") else
                         Lx(f"ИИ, взлёт с полосы в {clk(t['start_s'])}", f"AI, runway takeoff at {clk(t['start_s'])}"))
