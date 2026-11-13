@@ -450,6 +450,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "log": [],
     }
     init_crews(st)
+    from . import munitions as _mun              # запас управляемого оружия сторон (по самолётам и стране)
+    _mun.init(st, forces)
     from . import farp as _farp                  # передовые вертолётные площадки (готовые площадки карты)
     _farp.ensure(st)
     from . import intel as _intel                # туман войны: известные позиции ЗРК противника

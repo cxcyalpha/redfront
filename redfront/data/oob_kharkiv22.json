@@ -1939,6 +1939,27 @@
    "aa_long_cap_only": true
   }
  },
+ "munitions": {
+  "blue": {
+   "arm_long": [
+    30,
+    1.5,
+    40
+   ],
+   "arm_short": [
+    10,
+    0
+   ],
+   "agm": [
+    30,
+    0.3
+   ],
+   "gbu": [
+    0,
+    0
+   ]
+  }
+ },
  "external_awacs": {
   "blue": {
    "type": "E_3A",

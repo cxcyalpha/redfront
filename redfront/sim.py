@@ -394,6 +394,8 @@ def end_day(state: dict) -> list[str]:
     lines += naval.daily(state)                  # флот: потопленные группы, авианосцы-базы
     from . import strategic
     lines += strategic.daily(state)              # удары ракетами (ОТР, Томагавк): исход суток и план следующих
+    from . import munitions
+    lines += munitions.daily(state)              # пополнение управляемого оружия
     from . import artillery
     lines += artillery.daily(state)              # артбригады: контрбатарейная борьба, смена позиций
     lines += logistics.repairs(state)

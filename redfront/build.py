@@ -1058,6 +1058,21 @@ def _arm_pylons(fg, ac, perf: dict, g: dict, state: dict) -> str | None:
     return "SEAD (AGM-88 HARM)"
 
 
+def _mun_swap(state: dict):
+    """Замена управляемого оружия, которого нет в запасе (munitions.apply): по земле - неуправляемое того же пилона,
+    ракета воздух-воздух с радиолокационным наведением - тепловая этого пилона, иначе - снять."""
+    from . import munitions, weapons
+    year = weapons.campaign_year(state) or 9999
+
+    def swap(ac, num: int, name: str, cls: str):
+        if cls == "aam_r":
+            return next((w for w in weapons._pylon_options(ac, num) if munitions.classify(w["name"]) == "aam_ir"), None)
+        if cls == "aam_ir":
+            return None
+        return weapons.dumb_substitute(ac, num, name, year)
+    return swap
+
+
 def _weapons_not(fg, perf: dict) -> None:
     """Вариант модели (F-16A на модели F-16C): оружие, которого у варианта не было (weapons_not - части имён
     оружия pydcs), снимается с пилонов."""
@@ -2298,6 +2313,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     # старт с полосы - только у самой ранней группы ИИ на аэродроме; остальные - горячий старт на стоянке (за TAXI_S до
     # взлёта по плану) или уже в воздухе по плану полётов. Решение - до создания групп, по всем группам миссии.
     first_rw: dict[str, str] = {}
+    from . import munitions
+    mun_spend: dict = {}                         # управляемое оружие миссии - списывается после неё (debrief)
     for g in pkg + enemy:
         if g["objective"]["kind"] in ("alert", "orbit") or g.get("_air_start") or g["base"] in carriers:
             continue
@@ -2342,6 +2359,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
             from . import weapons as _w
             _w.policy(fg, state, side_g, ["qra"])   # дежурная пара - CAP (правило подвесок сценария)
+            munitions.apply(fg, state, side_g, _mun_swap(state), mun_spend)
             for u in fg.units:
                 u.skill = Skill.High
             alt = int(g.get("alt_m") or tdg.get("cap_alt_m", 6000))
@@ -2418,6 +2436,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         cat = _arm_pylons(fg, ac, perf, g, state) or cat
         weapons_policy = __import__("redfront.weapons", fromlist=["x"]).policy   # правило подвесок сценария (ВКС 2022)
         weapons_policy(fg, state, side_g, loadout_cats(g.get("_kind") or tk["kind"], g))
+        mun_notes = munitions.apply(fg, state, side_g, _mun_swap(state), mun_spend)   # запас управляемого оружия
+        if mun_notes:
+            fg.__dict__.setdefault("_rf_degraded", []).extend(mun_notes)
         tune_arm(state, fg, g)                   # головки ПРР (Shrike) - под РЛС ЗРК своей цели
         needs_mod = False
         for u in fg.units[:hum] if is_player else []:
@@ -3111,6 +3132,7 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         "ground_s": state.get("ground_s"),               # наземная модель - на это время суток (sim.advance)
         "pre_lines": pre_lines,                          # что изменилось к началу миссии (бой, марш, вылеты ИИ)
         "artillery": [{"unit": g["unit"], "vehicles": [v["name"] for v in g["vehicles"]], "mrl": bool(g.get("mrl"))} for g in arts],
+        "munitions": mun_spend,
         "ground": [{"unit": g["unit"], "kind": g["kind"], "cluster": g.get("cluster"), "vehicles": [{"name": v["name"], "type": v["type"], "weight": v["weight"]} for v in g["vehicles"]]}
                    for g in groups if g["kind"] not in ("downed", "convoy", "artillery")],   # экипажи, колонны снабжения, батареи - не части модели
         "convoys": [{"unit": g["unit"], "side": g["side"], "link": g["link"],      # колонны снабжения: потери - недовоз (convoys.py)

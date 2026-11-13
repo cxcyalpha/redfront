@@ -1794,6 +1794,26 @@
    "aa_long_cap_only": true
   }
  },
+ "munitions": {
+  "blue": {
+   "arm_long": [
+    20,
+    0
+   ],
+   "arm_short": [
+    30,
+    0
+   ],
+   "agm": [
+    40,
+    0
+   ],
+   "gbu": [
+    0,
+    0
+   ]
+  }
+ },
  "external_awacs": {
   "blue": {
    "type": "E_3A",
