@@ -1941,7 +1941,22 @@ def player_takeoff_s(state: dict, tdef: dict, groups: list[dict], fly: str, join
     mins = (state.get("settings") or {}).get("player_takeoff_min")
     if mins is None:
         mins = PLAYER_TAKEOFF_MIN
+    start = player_start(state)
+    if start != "cold":                          # горячий старт - руление; с полосы - сразу; в воздухе - уже взлетел
+        mins = min(float(mins), PLAYER_START_MIN[start])
     return int((float(mins) + (JOIN_MIN if join else 0)) * 60)
+
+
+PLAYER_STARTS = ("cold", "hot", "runway", "air")
+PLAYER_START_MIN = {"hot": 4, "runway": 1, "air": 0}   # ОЦЕНКА: минут до взлёта при старте не с холодной стоянки
+PLAYER_AIR_START_KM = 5                                # старт в воздухе - над аэродромом вылета, по пути к маршруту
+
+
+def player_start(state: dict) -> str:
+    """Старт игрока (настройка player_start): cold - холодный на стоянке, hot - горячий на стоянке, runway - с полосы,
+    air - в воздухе над аэродромом вылета."""
+    s = (state.get("settings") or {}).get("player_start", "cold")
+    return s if s in PLAYER_STARTS else "cold"
 
 
 def timeline(tdef: dict, state: dict, groups: list[dict], fly: str) -> dict[str, dict]:
@@ -2257,6 +2272,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
         if not is_player and not g.get("_ai") and times[g["group"]].get("air_s"):   # группа пакета игрока, взлетевшая раньше
             g = copy.deepcopy(g)                 # (маршрут в плане не трогаем)
             _airborne(state, g, spd, times[g["group"]]["air_s"])
+        if is_player and player_start(state) == "air" and g["base"] not in carriers:   # старт игрока в воздухе
+            first = g.get("rv") or (g["route"][0] if g.get("route") else base)
+            g = dict(g, _air_start=model.offset(base, model.bearing_deg(base, first), PLAYER_AIR_START_KM * 1000))
         if g.get("_air_start"):                  # по плану полётов к началу миссии уже в воздухе, на пути к объекту
             fg = m.flight_group_inflight(_country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                          _pt(m, g["_air_start"]), max(int(transit), AIR_START_MIN_M), speed=int(spd),
@@ -2267,8 +2285,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             parked = False
             try:
                 fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
-                                                 maintask=mt, start_type=StartType.Cold if is_player else
-                                                 (StartType.Runway if on_rw else StartType.Warm), group_size=g["size"])
+                                                 maintask=mt, start_type={"cold": StartType.Cold, "hot": StartType.Warm,
+                                                                          "runway": StartType.Runway}.get(player_start(state), StartType.Cold)
+                                                 if is_player else (StartType.Runway if on_rw else StartType.Warm), group_size=g["size"])
                 parked = not is_player and not on_rw
             except NoParkingSlotError:           # стоянок нет (вертолётная площадка) - с полосы
                 fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
