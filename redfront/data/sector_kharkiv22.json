@@ -54,25 +54,29 @@
    "lat": 51.3837,
    "lon": 11.5364,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 1.5
   },
   "Lyman": {
    "lat": 51.1791,
    "lon": 12.0669,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 2.0
   },
   "Svatove": {
    "lat": 51.5698,
    "lon": 12.4038,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 2.0
   },
   "Kharkiv": {
    "lat": 52.1093,
    "lon": 10.5364,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Chuhuiv": {
    "lat": 51.9698,

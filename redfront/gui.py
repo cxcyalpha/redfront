@@ -230,6 +230,7 @@ def view(st: dict, history: bool = True) -> dict:
         "budget": st["settings"].get("mission_budget", materialize.MISSION_BUDGET),
         "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
         "takeoff_min": st["settings"].get("player_takeoff_min", build_mod.PLAYER_TAKEOFF_MIN),
+        "player_start": st["settings"].get("player_start", "cold"),
         "weather": wx_lines[0], "weather_text": "\n".join(wx_lines[1:] + wx_cancel),
         "mods": [{"id": k, "title": v["title"], "url": v["url"], "on": k in (st["settings"].get("mods") or []),
                   "available": _mods_available(k)} for k, v in _mods_list().items()],
@@ -756,6 +757,8 @@ class App:
                 st["settings"]["mission_air"] = max(0, int(req["air"]))
             if req.get("strict") is not None:          # правила срыва удара и отхода групп (build.strict_abort)
                 st["settings"]["abort_mode"] = "strict" if str(req["strict"]) == "1" else "soft"
+            if req.get("start") in build_mod.PLAYER_STARTS:   # старт игрока: холодный, горячий, с полосы, в воздухе
+                st["settings"]["player_start"] = req["start"]
             if str(req.get("takeoff") or "").strip():   # минут от начала миссии до взлёта игрока
                 st["settings"]["player_takeoff_min"] = max(0, min(60, int(float(req["takeoff"]))))
             man = build_mod.build(st, out, fly=req.get("fly") or "strike", task_no=int(req.get("task") or 1),

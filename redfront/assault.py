@@ -62,8 +62,13 @@ def candidates(state: dict, side: str, tdef: dict) -> list[str]:
     obj = ops.objective(state, side)
     out = []
     banned = set((state.get("off_limits") or {}).get(side, []))   # куда сторона по сценарию не идёт - и десантом
+    prefer = list(tdef.get("lz_prefer") or [])   # площадки замысла сценария (Гостомель 24.02) - первыми, без ограничений
+    for name in prefer:                          # глубины и прикрытия (высадка - под огнём, как и было)
+        if name in pl and pl[name].get("side") == foe and name not in banned \
+                and not any(pl[q].get("side") == side for q in g[name]):
+            out.append(((-1e9, prefer.index(name), 0), name))
     for name, p in pl.items():
-        if name in banned:
+        if name in banned or name in prefer:
             continue
         if p.get("side") != foe or any(pl[q].get("side") == side for q in g[name]):
             continue                             # соседний со своими пункт - не десант, а наступление

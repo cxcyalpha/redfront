@@ -430,6 +430,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "strategic_stock": copy.deepcopy(forces.get("strategic_stock") or sec.get("strategic_stock") or {}),
         "strategic_resupply": copy.deepcopy(forces.get("strategic_resupply") or sec.get("strategic_resupply") or {}),
         "dispersal": copy.deepcopy(forces.get("dispersal") or {}),
+        "loadout_policy": copy.deepcopy(forces.get("loadout_policy") or {}),   # правило подвесок стороны (weapons.policy)
         "external_awacs": copy.deepcopy(forces.get("external_awacs") or {}),   # ДРЛО извне театра (build.external_awacs)   # рассредоточение авиации сторон (dispersal.py)
         "strategic_per_day": copy.deepcopy(forces.get("strategic_per_day") or sec.get("strategic_per_day") or {}),   # запас авиационных ПКР сторон (naval.use_air_asm)
         "naval_bases": copy.deepcopy(sec.get("naval_bases") or {}),   # порты ремонта кораблей (naval.port_of); нет - за картой   # морской подвоз (naval.sea_supply)
@@ -449,6 +450,8 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "log": [],
     }
     init_crews(st)
+    from . import munitions as _mun              # запас управляемого оружия сторон (по самолётам и стране)
+    _mun.init(st, forces)
     from . import farp as _farp                  # передовые вертолётные площадки (готовые площадки карты)
     _farp.ensure(st)
     from . import intel as _intel                # туман войны: известные позиции ЗРК противника
@@ -494,7 +497,7 @@ def assembly_areas(state: dict, side: str) -> list[str]:
     lines = []
     own = sorted((u for u in state["units"].values() if u["side"] == side and role_info(u["role"])["category"] == "ground"
                   and u.get("role") == "maneuver" and u["state"] == "defend" and not u.get("attached_to")
-                  and u.get("order") not in ("reserve", "airhead") and len(u.get("route", [])) == 1), key=lambda u: u["id"])
+                  and u.get("order") not in ("reserve", "airhead", "garrison") and len(u.get("route", [])) == 1), key=lambda u: u["id"])
     for u in own:
         here = u["route"][0]
         free = [p for p in front if used.get(p, 0) < ASSEMBLY_PER_PLACE] or front

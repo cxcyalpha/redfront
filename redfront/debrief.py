@@ -268,6 +268,10 @@ def apply(state: dict, data: dict) -> list[str]:
         lines.append("Изменений нет.")
     for ln in lines:
         model.note(state, ln)
+    from . import munitions
+    for side_, d_ in (man.get("munitions") or {}).items():   # управляемое оружие вылета - списано (миссия слетана)
+        for c_, n_ in d_.items():
+            munitions.take(state, side_, c_, n_)
     state["manifest"]["applied"] = True
     if man.get("end_s") is not None:            # часы кампании: следующий вылет игрока - после этой миссии (ato.py)
         state["clock_s"] = max(state.get("clock_s") or 0, man["end_s"])

@@ -31,7 +31,7 @@ G.ROOT = "Kharkiv"
 G.SRC = "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить"
 G.TITLE, G.YEAR, G.DATE = "Харьков, сентябрь 2022: контрнаступление ВСУ", 2022, "2022-09-06"
 G.COUNTRIES = {"red": "Russia", "blue": "Ukraine"}
-G.DOCTRINE = {"red": "wp", "blue": "wp"}
+G.DOCTRINE = {"red": "wp", "blue": "ua"}
 G.SECTOR_ABOUT = ("Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Условная география на карте Cold War "
                   "Germany (Альтмарк - Бранденбург); координаты - точки карты, имена - украинские и российские.")
 G.OBJ_ABOUT = "Оси ВСУ: Балаклея - Шевченково - Купянск; Балаклея - Изюм; Славянск - Лиман; север - Волчанск."
@@ -161,11 +161,11 @@ G.AIR = [
     ("ru_su25", "Штурмовой полк (Су-25СМ3; в DCS - Су-25)", "red", "attack", "Su_25", "Finow", 12, 250, ""),
     ("ru_su35", "Истребительный полк (Су-35С; в DCS - Су-27)", "red", "fighter", "Su_27", "Wittstock", 12, 500,
      "мод Су-35С включён - Су-35С, иначе - Су-27", {"mod_alt": {"mod": "su35s", "type": "Su_35S", "name": "Истребительный полк (Су-35С)"}}),
-    ("ru_su30", "Полк Су-30СМ (в DCS - Су-27)", "red", "fighter", "Su_27", "Finow", 8, 500,
+    ("ru_su30", "Полк Су-30СМ (в DCS - Су-27)", "red", "fighter_bomber", "Su_27", "Finow", 8, 500,
      "мод Су-30 включён - Су-30СМ, иначе - Су-27", {"mod_alt": {"mod": "su30", "type": "Su_30SM", "name": "Полк Су-30СМ"}}),
-    ("ru_ka52", "Вертолёты Ка-52 (в DCS - Ка-50)", "red", "attack_helo", "Ka_50", "Templin", 10, 150, "Ка-52 в pydcs нет"),
-    ("ru_mi28", "Вертолёты Ми-28Н", "red", "attack_helo", "Mi_28N", "Templin", 8, 150, ""),
-    ("ru_mi8", "Вертолёты Ми-8АМТШ", "red", "transport_helo", "Mi_8MT", "Templin", 12, 200, ""),
+    ("ru_ka52", "Вертолёты Ка-52 (в DCS - Ка-50)", "red", "attack_helo", "Ka_50", "Wittstock", 10, 150, "Ка-52 в pydcs нет"),
+    ("ru_mi28", "Вертолёты Ми-28Н", "red", "attack_helo", "Mi_28N", "Wittstock", 8, 150, ""),
+    ("ru_mi8", "Вертолёты Ми-8АМТШ", "red", "transport_helo", "Mi_8MT", "Wittstock", 12, 200, ""),
     # МиГ-29 ВСУ - смешанный парк: свои МиГ-29 и МиГ-29МУ1 (в DCS - МиГ-29С) и МиГ-29А, в т.ч. переданные Польшей и
     # Словакией (2023) - примерно поровну (ОЦЕНКА). МиГ-29А - модуль MiG-29A Fulcrum (ФФ), идёт первым: задачи без
     # предпочтения типа достаются ему; HARM - только у МиГ-29С
@@ -175,8 +175,10 @@ G.AIR = [
      "AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 5), как HARM на F-4E", {"arm_pylons": {"pylons": [3, 5]}}),
     ("ua_su27", "831-я бригада тактической авиации (Су-27)", "blue", "fighter", "Su_27", "Hannover", 8, 500,
      "AGM-88 HARM с августа 2022 - на внутренних крыльевых пилонах (3, 8)", {"arm_pylons": {"pylons": [3, 8]}}),
-    ("ua_su25", "299-я бригада тактической авиации (Су-25)", "blue", "attack", "Su_25", "Hannover", 10, 250, ""),
-    ("ua_su24", "7-я бригада тактической авиации (Су-24М)", "blue", "bomber", "Su_24M", "Celle", 8, 400, ""),
+    ("ua_su25", "299-я бригада тактической авиации (Су-25)", "blue", "attack", "Su_25", "Gardelegen", 10, 250,
+     "Канатово - далеко от фронта (300 км): в сентябре 2022 Су-25 летали с аэродромов ближе к фронту - здесь Полтава"),
+    ("ua_su24", "7-я бригада тактической авиации (Су-24М)", "blue", "bomber", "Su_24M", "Celle", 8, 400,
+     "Х-58 и Х-25 в арсенале ВСУ - подавление ПВО Су-24М", {"arm": True}),
     ("ua_mi24", "Армейская авиация (Ми-24)", "blue", "attack_helo", "Mi_24P", "Gardelegen", 8, 150, ""),
     ("ua_mi8", "Армейская авиация (Ми-8)", "blue", "transport_helo", "Mi_8MT", "Gardelegen", 8, 200, ""),
 ]
@@ -245,12 +247,22 @@ PROJ = theatre_proj.apply(G, REAL, REAL_AB, far=("Celle",))
 G.SECTOR_ABOUT = ("Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Реальная география, спроецированная на "
                   f"карту Cold War Germany: {G.PROJ_NOTE}. Рельеф и реки - карты, не Украины.")
 
+# ход 2022 (ISW, RUSI 'Stormbreak'): оборона РФ на Харьковщине - некомплектные части, Росгвардия, мобилизованные ЛНР;
+# после прорыва у Балаклеи 6.09 - отход ("перегруппировка") 10-11.09: Купянск и Изюм оставлены за 4-5 суток.
+# Лиман - узел обороны (до 5 тыс., БАРС, части 20-й ОА): полуокружён, оставлен 1.10. ОЦЕНКИ:
+RED_QUALITY = {"*": 0.6, "red_lyman": 1.0, "red_vdv_kup": 0.9, "red_reserve_svatove": 0.8}   # выучка и стойкость (sim.power)
+RED_GARRISON = {"red_lyman", "red_reserve_svatove"}   # держат Лиман и Сватово, не отходят (ops: order garrison)
+URBAN = {"Lyman": 2.0, "Kharkiv": 3.0, "Izium": 1.5, "Svatove": 2.0}   # Сватово не взято
+BLUE_UNOPPOSED_KM = 50             # темп ВСУ в бреши (6-10.09: Балаклея - Купянск ~70 км за 4 суток)
+
 if __name__ == "__main__":
     G.main()
     # HIMARS и Точка-У не бьют по аэродромам и складам в России (air_limits: пункты и объекты)
     sp = G.DATA / "sector_kharkiv22.json"
     sec = json.loads(sp.read_text(encoding="utf-8"))
     sec["air_limits"] = {"blue": G.OFF_LIMITS["blue"] + [f"af_{n.lower()}" for n in G.AIRBASES["red"]]}
+    for name, k in URBAN.items():
+        sec["places"][name]["urban"] = k
     sp.write_text(json.dumps(sec, ensure_ascii=False, indent=1), encoding="utf-8")
     op = G.DATA / "oob_kharkiv22.json"
     oob = json.loads(op.read_text(encoding="utf-8"))
@@ -268,9 +280,22 @@ if __name__ == "__main__":
     # рассредоточение ВВС Украины (dispersal.py): посадка на другом аэродроме - часто, но не в каждом вылете (интервью
     # лётчиков), перебазирование - раз в несколько суток. ОЦЕНКИ
     oob["dispersal"] = {"blue": {"land_other_p": 0.3, "rebase_p": 0.2, "max_km": 300}}
+    # подвески ВКС (weapons.policy): по земле - неуправляемое (кроме ПРР у групп подавления ПВО), Р-37М - только у CAP
+    oob["loadout_policy"] = {"red": {"ag_unguided": True, "aa_long_cap_only": True}}
+    # запас управляемого оружия ВСУ (munitions.py; [запас, в сутки, предел]) - ОЦЕНКА: советские Х-58/Х-25 - остатки
+    # арсенала без пополнения; HARM (Харьков) - поставки США с июля 2022 (десятки в месяц); КАБ у ВСУ нет
+    # ракеты воздух-поверхность (Х-25МЛ, Х-29) и воздух-воздух (Р-27) - своё производство ("Артём"), меньше расхода
+    oob["munitions"] = {"blue": {"arm_long": [30, 1.5, 40], "arm_short": [10, 0.2], "agm": [30, 0.8, 40], "gbu": [0, 0]}}
     # ДРЛО НАТО (E-3A над Польшей и Румынией): своих самолётов ДРЛО у ВСУ нет, данные - от союзников; в миссии -
     # E-3A вне театра, в воздухе с начала миссии (не часть модели, не цель). На условной карте - за тылом Украины
     # (на западе карты), а не над настоящей Польшей (она на востоке карты, на стороне России)
     oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (за тылом Украины)"}}
     oob["strategic_per_day"] = {"blue": {"gmlrs": 8, "tochka": 1}, "red": {"iskander": 2}}
+    for u in oob["units"]:
+        if u["side"] == "red" and u["role"] == "maneuver":
+            u["quality"] = RED_QUALITY.get(u["id"], RED_QUALITY["*"])
+            if u["id"] in RED_GARRISON:
+                u["order"] = "garrison"
+        if u["side"] == "blue" and u["role"] == "maneuver":
+            u["unopposed_km"] = BLUE_UNOPPOSED_KM
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")

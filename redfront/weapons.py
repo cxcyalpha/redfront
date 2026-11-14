@@ -247,3 +247,57 @@ def fixups(fg, year: int | None = None) -> None:
 def valid(pylons: dict, year: int | None) -> bool:
     """Всё оружие подвески есть на вооружении к году year."""
     return not year or all(year_of(name_of(d.get("CLSID", ""))) <= year for d in pylons.values())
+
+
+# ---- правило подвесок сценария (loadout_policy состава сил: {сторона: {...}}) ----
+# ВКС 2022 (ОЦЕНКА по фото и обломкам с первых дней): по земле - неуправляемые бомбы и НАР, управляемое - только ПРР
+# у групп подавления ПВО; Р-37М - только у групп CAP, остальным - Р-77-1 и Р-73; ракеты модов, которых на
+# вооружении не было (Р-77М, Р-77ПД), - Р-77-1.
+GUIDED_AG_RX = r"Kh-|KAB|AGM|GBU|UPAB|Vikhr|Ataka|9M1|S-25L|KD-|LS-6|Kopyo"
+CAP_KINDS = ("cap_own_troops", "qra", "fleet_cap", "cap")
+AA_LONG_RX = r"R-37"
+AA_NOT_YET_RX = r"R-77M|R-77PD|R-27EA|R-74M2"   # мод: ракеты, которых в строю ВКС 2022 не было (ОЦЕНКА)
+AA_OK_RX = (r"R-77-1 \(", r"R-77 ", r"R-27ER", r"R-27R", r"R-73")
+
+
+def _aa_swap(ac, num: int, ir: bool = False) -> dict | None:
+    opts = _pylon_options(ac, num)
+    for rx in ((r"R-73",) if ir else ()) + AA_OK_RX:   # ИК (Р-74М2) - на Р-73
+        w = next((w for w in opts if re.search(rx, w["name"])), None)
+        if w:
+            return w
+    return None
+
+
+def policy(fg, state: dict, side: str, cats: list[str]) -> list[str]:
+    """Правило подвесок стороны по сценарию: замены на пилонах группы, строки 'было -> стало'."""
+    pol = ((state or {}).get("loadout_policy") or {}).get(side) or {}
+    if not pol:
+        return []
+    year = campaign_year(state)
+    cap = any(c in CAP_KINDS for c in cats[:1]) or cats[:1] == ["cap"]
+    sead = any(c in ("sead", "dead") for c in cats)
+    notes = []
+    for u in fg.units:
+        ac = u.unit_type
+        for num, d in list(u.pylons.items()):
+            name = name_of(d.get("CLSID", ""))
+            if not name:
+                continue
+            w, swap = None, False
+            if pol.get("aa_long_cap_only") and (re.search(AA_NOT_YET_RX, name) or (re.search(AA_LONG_RX, name) and not cap)):
+                w, swap = _aa_swap(ac, int(num), ir=bool(re.search(r"R-74|R-73", name))), True
+            elif pol.get("ag_unguided") and re.search(GUIDED_AG_RX, name) and not (sead and re.search(ARM, name)):
+                w = dumb_substitute(ac, int(num), name, year or 9999,
+                                    float((by_clsid().get(d.get("CLSID", "")) or {}).get("weight") or 0))
+                swap = True
+            if not swap:
+                continue
+            if w:
+                u.pylons[num] = {"CLSID": w["clsid"]}
+            else:
+                del u.pylons[num]
+            note = f"{name} -> {w['name'] if w else 'снято'}"
+            if note not in notes:
+                notes.append(note)
+    return notes

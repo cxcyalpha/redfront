@@ -520,9 +520,12 @@
     "category": "ground",
     "state": [
      "battle",
-     "march"
+     "march",
+     "defend"
     ],
-    "side": "own"
+    "side": "own",
+    "front_km_max": 40,
+    "_about_front_km_max": "прикрытие - над своими частями не дальше от линии фронта (и до начала боёв: CAP с первого дня, в т.ч. для игрока). ОЦЕНКА"
    },
    "method": "zone_patrol",
    "method_source": "RAND R-3385-AF (D. Stein, The Development of NATO Tactical Air Doctrine 1970-1985, 1987), с. vii, 41: прикрытие войск - оборонительная борьба за господство в воздухе (DCA); у ФРГ - второй приоритет после боя с первым эшелоном",

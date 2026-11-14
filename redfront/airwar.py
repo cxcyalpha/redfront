@@ -119,6 +119,12 @@ def _strike(state: dict, e: dict) -> list[str]:
         lines.append(f"ИИ, {e['title']}: цель не найдена ({why}).")
         return lines
     fk *= ff
+    from . import munitions                      # управляемое оружие вылета - из запаса стороны (нет - бомбы, хуже)
+    share = munitions.model_use(state, e["side"], "strike", e["kind"], max(0, g["size"] - down))
+    for sg in e["task"]["package"][1:]:
+        if sg["group"].startswith(("sead", "kill")):
+            munitions.model_use(state, e["side"], sg["group"].rstrip("0123456789"), e["kind"], sg["size"])
+    fk *= 0.7 + 0.3 * share                      # ОЦЕНКА: без управляемого - удар менее точен
     p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk * uav_k))
     if not ((r.random() < p) if r else p >= 0.5):
         lines.append(f"ИИ, {e['title']}: цель не поражена.")

@@ -230,6 +230,9 @@ body.past #map { box-shadow: inset 0 0 0 3px #b8860b; filter: sepia(.25); }
     <input id="sBudget" type="number" min="0" step="50" data-t-title="budgetTip">
     <label data-t="airBudget"></label>
     <input id="sAir" type="number" min="0" step="10" data-t-title="airBudgetTip">
+    <label data-t="startType"></label>
+    <select id="sStart" data-t-title="startTip"><option value="cold" data-t="stCold"></option><option value="hot" data-t="stHot"></option>
+      <option value="runway" data-t="stRunway"></option><option value="air" data-t="stAir"></option></select>
     <label data-t="takeoffMin"></label>
     <input id="sTakeoff" type="number" min="0" max="60" step="1" data-t-title="takeoffTip">
     <label><input type="checkbox" id="sEnemy" style="width:auto"> <span data-t="enemyPlan"></span></label>
@@ -284,6 +287,8 @@ const I18N = {
     modsT: "Моды DCS (установлены у всех игроков миссии)", modsTip: "части на типах мода - в строю, только если мод включён",
     modNoDesc: "нет описания типа в программе", aiTest: "всё на ИИ", aiTestTip: "проверочная миссия: группа игрока тоже ИИ; в дебрифе - когда группы ИИ вышли на рубеж против плана",
     histNow: "обстановка: сейчас", histDay: "День", histTip: "хронология: обстановка на карте в прошлые дни (движение фронта)",
+    startType: "Старт игрока", startTip: "Холодный - запуск на стоянке (время - по полю ниже); горячий - двигатели запущены, только руление; с полосы - сразу взлёт; в воздухе - над аэродромом вылета. От старта считается время всего пакета.",
+    stCold: "холодный на стоянке", stHot: "горячий на стоянке", stRunway: "с полосы", stAir: "в воздухе",
     takeoffMin: "Минут до взлёта (запуск и руление)", takeoffTip: "От начала миссии до вашего взлёта: под это время считается весь пакет (сбор, выход на цель). Холодный старт F-4E/F-14 с выставкой ИНС - 12-15 мин, типы FC3 - 5-8.",
     budget: "Наземных машин в миссии, не больше", airBudget: "Самолётов и вертолётов в миссии, не больше",
     airBudgetTip: "Нагрузка на DCS: ваш пакет ставится всегда, вылеты ИИ подальше от него - нет (в модели они всё равно летают); 0 - без ограничения.",
@@ -385,6 +390,8 @@ const I18N = {
     modsT: "DCS mods (installed for every player of the mission)", modsTip: "units on mod types are active only with the mod enabled",
     modNoDesc: "no type description in the program", aiTest: "all AI", aiTestTip: "test mission: the player's group is AI too; the debrief shows when AI groups reached their entry points against the plan",
     histNow: "situation: now", histDay: "Day", histTip: "timeline: the map situation on past days (front movement)",
+    startType: "Player start", startTip: "Cold - start-up on the ramp (time - field below); hot - engines running, taxi only; runway - immediate take-off; air - airborne over the departure field. The whole package is timed from your start.",
+    stCold: "cold, on the ramp", stHot: "hot, on the ramp", stRunway: "from the runway", stAir: "in the air",
     takeoffMin: "Minutes to take-off (start-up and taxi)", takeoffTip: "From mission start to your take-off: the whole package (rendezvous, time on target) is timed to it. F-4E/F-14 cold start with INS alignment - 12-15 min, FC3 types - 5-8.",
     budget: "Max ground vehicles in the mission", airBudget: "Max aircraft and helicopters in the mission",
     airBudgetTip: "DCS performance: your package is always included, AI sorties farther away are left out (the model still flies them); 0 - unlimited.",
@@ -760,7 +767,7 @@ function renderInspector() {
   const go = box.querySelector(".go");
   if (go) go.onclick = e => act("build", {task: ti + 1, fly: box.querySelector(".fly").value, humans: box.querySelector(".hum").value,
     ai: box.querySelector(".aitest").checked,
-    budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", ""), strict: pref("rf_strict", "0")}, e.target);
+    budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", ""), start: pref("rf_start", ""), strict: pref("rf_strict", "0")}, e.target);
   const ed = box.querySelector(".atoEd"); if (ed) ed.onclick = () => atoEditor(box.querySelector(".item"));
   const rm = box.querySelector(".atoRm"); if (rm) rm.onclick = e => { if (confirm(T("removeQ"))) act("atoremove", {id: r.id}, e.target); };
 }
@@ -1114,7 +1121,7 @@ document.querySelectorAll("nav button").forEach(b => b.onclick = () => { TAB = b
 $("#bPlan").onclick = async e => { SEL = 0; TAB = "sorties"; SELID = null; await act("plan", {}, e.currentTarget);
   if (ST && ST.tasks.length && ST.tasks[0].ato_id) selectSortie(ST.tasks[0].ato_id); };
 $("#bBuild").onclick = e => { act("build", {task: SEL + 1, fly: ($("#insp .fly") || {}).value || "strike",
-  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", ""), strict: pref("rf_strict", "0")}, e.currentTarget); };
+  humans: ($("#insp .hum") || {}).value || 1, budget: pref("rf_budget", ""), air: pref("rf_air", ""), takeoff: pref("rf_takeoff", ""), start: pref("rf_start", ""), strict: pref("rf_strict", "0")}, e.currentTarget); };
 $("#bDebrief").onclick = e => act("debrief", {}, e.currentTarget);
 $("#bEnd").onclick = e => { if (confirm(T("endQ"))) act("endday", {}, e.currentTarget); };
 $("#bNew").onclick = () => $("#dNew").showModal();
@@ -1124,6 +1131,7 @@ $("#bSet").onclick = () => {
   $("#sBudget").value = pref("rf_budget", "") || (ST ? ST.budget : "");
   $("#sAir").value = pref("rf_air", "") || (ST ? ST.air_budget : "");
   $("#sTakeoff").value = pref("rf_takeoff", "") || (ST ? ST.takeoff_min : "");
+  $("#sStart").value = pref("rf_start", "") || (ST ? ST.player_start : "cold") || "cold";
   $("#sEnemy").checked = pref("rf_ato_enemy", "0") === "1";
   $("#sStrict").checked = pref("rf_strict", "0") === "1";
   const wx = (ST && ST.wx) || {};
@@ -1143,6 +1151,7 @@ $("#sLang").onchange = async e => {
 $("#sBudget").onchange = e => setPref("rf_budget", e.target.value);
 $("#sAir").onchange = e => setPref("rf_air", e.target.value);
 $("#sTakeoff").onchange = e => setPref("rf_takeoff", e.target.value);
+$("#sStart").onchange = e => setPref("rf_start", e.target.value);
 function wxShow() { $("#wxFixed").style.display = $("#sWxMode").value === "fixed" ? "" : "none"; }
 $("#sWxMode").onchange = wxShow;
 $("#bDate").onclick = e => act("setdate", {date: $("#sDate").value}, e.target);

@@ -320,7 +320,7 @@ def build(state: dict) -> dict:
             if after:                                # не раньше SAM_FIRST_MIN после удара по прикрывающему ЗРК
                 want = max(want, max(after) + SAM_FIRST_MIN * 60)
             tot = max(want, w0 - first)                  # взлёт - не раньше начала лётного дня
-            while tot + last <= w1 + 3600:               # посадка - не позже часа после конца лётного дня
+            while tot <= w1 and tot + last <= w1 + 3600:   # удар - в лётный день, посадка - не позже часа после
                 need = _need(t, rel, tot, turn_s)
                 times = {k: {kk: tot + vv for kk, vv in v.items()} for k, v in rel.items()}
                 why = weather.blocks(state, t, times)
@@ -343,7 +343,7 @@ def build(state: dict) -> dict:
             for k in range(1, int(tdef.get("reliefs", RELIEFS)) + 1):
                 tk_ = tot + k * (dwell - RELIEF_OVERLAP_S)
                 need_k = _need(t, rel, tk_, turn_s)
-                if tk_ + last > w1 + 3600 or not pool.fits(need_k):
+                if tk_ > w1 or tk_ + last > w1 + 3600 or not pool.fits(need_k):   # над зоной - в лётный день
                     break
                 pool.book(need_k)
                 entries.append({"id": f"{side}-{t['kind']}-{len(entries)}", "side": side, "kind": t["kind"],

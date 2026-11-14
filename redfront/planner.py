@@ -520,6 +520,18 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                        if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]
             if side == state.get("player_side") and tside == foe:   # туман войны: цели игрока - только известные
                 targets = [u for u in targets if intel.can_target(state, u)]
+            fkm = tdef["target"].get("front_km_max")
+            if fkm and tside == side:            # свои части у фронта (прикрытие войск - и до начала боёв)
+                fl = ops.front_links(state)
+                mids = [model.lerp(state["places"][a], state["places"][b], 0.5) for a, b in fl]
+                targets = [u for u in targets if mids and not u.get("attached_to")
+                           and min(model.dist_km(model.unit_pos(state, u), q) for q in mids) <= fkm]
+                gap = 1.5 * (tdef.get("strike") or {}).get("zone_km", 40)   # одна зона прикрытия на участок фронта
+                picked = []
+                for u in sorted(targets, key=lambda u: (u["state"] != "battle", u["id"])):   # сначала - над боем
+                    if all(model.dist_km(model.unit_pos(state, u), model.unit_pos(state, v)) > gap for v in picked):
+                        picked.append(u)
+                targets = picked
             depth = tdef["target"].get("depth_km")
             if depth and tside == foe:           # полоса глубины от своих войск (НАТО: BAI 15-50 км, FOFA - глубже)
                 from . import farp
@@ -991,8 +1003,8 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
             (_n, km), perf, need = best
             base = state["airbases"][perf["base"]]
             threats = corridor_threats(state, [(base, lz)], foe, tdef.get("low_alt_m_agl"))
-            if len(threats) > tdef.get("max_threats", 1):   # вертолёты через насыщенную ПВО не идут - другая площадка
-                continue
+            if len(threats) > tdef.get("max_threats", 1) and place not in (tdef.get("lz_prefer") or []):
+                continue                         # вертолёты через насыщенную ПВО не идут - другая площадка (кроме замысла)
             s = tdef["strike"]
             groups = []                          # группа ЛА в DCS - не больше 4 бортов: подъём - волнами по 4, через минуту
             for k in range(0, need, GROUP_MAX):
@@ -1179,7 +1191,9 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                **{k: s[k] for k in ZONE_KEYS if k in s}}]
     notes = []
     chosen_by: dict[str, dict] = {}
-    for g in tdef.get("support", []):
+    from . import ew as _ew
+    uav = _ew.is_uav(perf)                       # беспилотник: без групп обеспечения (сопровождение ему не нужно)
+    for g in ([] if uav else tdef.get("support", [])):
         if g.get("from_year") and int(str(state.get("date", "2000"))[:4]) < g["from_year"]:
             continue                             # группы ещё нет на год кампании (подавление ПВО ракетами - с ПРР)
         if g["when"] == "threats" and not threats:
@@ -1233,6 +1247,7 @@ def package(state: dict, tdef: dict, perf: dict, tgt: dict, tpos: dict, ip: dict
                  if u["side"] == perf["side"] and role_ok(state, u, g["performers"], g.get("loadout")) and avail.get(u["id"], 0) >= need
                  and g["id"] not in model.tasks_not(u)   # вариант модели (F-16A на F-16C): без подавления ПВО
                  and not u.get("mod_off")
+                 and (not g.get("need_unit_field") or any(u.get(f_) for f_ in str(g["need_unit_field"]).split("|")))   # ВСУ: подавление - только носители ПРР
                  and nation_ok(state, u, g) and (not g.get("types") or u.get("type") in g["types"])          # НАТО: средства SEAD - у США, у ФРГ и Великобритании - с 1990
                  and fitness.relative(state, u.get("type", ""), fitness.group_class(g["maintask"], None)) >= g.get("min_fit", 0)]
         mate = chosen_by.get(g.get("pair_with") or "")

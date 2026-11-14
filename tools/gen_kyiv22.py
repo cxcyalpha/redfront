@@ -29,7 +29,7 @@ G.ROOT = "Kyiv"
 G.SRC = "RUSI 'Operation Z' (2022) / ISW / Oryx, по памяти - проверить"
 G.TITLE, G.YEAR, G.DATE = "Киев, февраль 2022: наступление на Киев (первые недели)", 2022, "2022-02-24"
 G.COUNTRIES = {"red": "Russia", "blue": "Ukraine"}
-G.DOCTRINE = {"red": "wp", "blue": "wp"}
+G.DOCTRINE = {"red": "wp", "blue": "ua"}
 G.SECTOR_ABOUT = ("Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Условная география на карте Cold War Germany "
                   "(Гамбург - Шлезвиг-Гольштейн); координаты - точки карты, имена - украинские и белорусские.")
 G.OBJ_ABOUT = "Оси наступления: правый берег (Гостомель - Буча - Ирпень - Киев; Макаров - Житомир), Чернигов, Сумы - Бровары."
@@ -42,7 +42,8 @@ G.NOT_INCLUDED = ("Калибры с Черноморского флота (фл
                   "минирование, массовая РЭБ, сбор тероборонами, юг (Херсон, Мариуполь) и восток (Харьков) - вне сектора.")
 G.EXTRA_VARIANT = {"posture": {"red": "offense", "blue": "defense"},
                    # десант на Гостомель 24.02: ~100 км от границы Беларуси, вертолёты прошли через ПВО (ОЦЕНКА)
-                   "task_params": {"red": {"air_assault": {"assault_max_km": 140, "max_threats": 3, "per_day": 2}}}}
+                   "task_params": {"red": {"air_assault": {"assault_max_km": 140, "max_threats": 3, "per_day": 2,
+                                                           "lz_prefer": ["Hostomel"]}}}}
 G.SAM_FIXED = True       # стационарные позиции С-300 и Бук известны: по ним - первые удары 24.02
 
 G.PLACES = {
@@ -71,17 +72,18 @@ G.LINKS = [
 ]
 G.SUPPLY_ENTRY = {"red": ["Mozyr", "Gomel", "Sudzha", "Klintsy"], "blue": ["Lviv"]}
 G.OFF_LIMITS = {"blue": ["Mozyr", "Khoiniki", "Gomel", "Sudzha", "Klintsy", "Glushkovo", "Trubchevsk", "Sevsk"]}   # Украина не наступает в Беларусь и Россию
-G.AIRBASES = {"red": ["Kiel", "Lubeck", "Pinnow"],                  # Мачулищи / Зябровка / Курск - ОЦЕНКА
+G.AIRBASES = {"red": ["Kiel", "Lubeck", "Pinnow", "HeliMozyr"],                  # Мачулищи / Зябровка / Курск - ОЦЕНКА
               "blue": ["Hamburg Finkenwerder", "Celle", "Wunstorf", "Hannover"]}   # Васильков, Озёрное, Староконстантинов, Канатово
 G.AXES = {
     "west": {"title": "Правый берег: Гостомель - Буча - Ирпень - Киев", "objectives": ["Hostomel", "Bucha", "Irpin", "Kyiv"]},
-    "makariv": {"title": "Макаров - Житомир", "objectives": ["Makariv", "Zhytomyr"]},
+    "makariv": {"title": "Макаров (обход Киева с запада, трасса на Житомир)", "objectives": ["Makariv"]},
     "chernihiv": {"title": "Чернигов", "objectives": ["Chernihiv"]},
     "east": {"title": "Сумы - Конотоп - Нежин - Бровары", "objectives": ["Konotop", "Nizhyn", "Brovary", "Kyiv"]},
 }
 
 c = G.comp
-RU_BTG = c(("T_72B3", 20, "MBT"), ("BMP_2", 30, "IFV"), ("BTR_82A", 10, "APC"))           # 2-3 БТГ мсбр/мсп - ОЦЕНКА
+RU_BTG = c(("T_72B3", 35, "MBT"), ("BMP_2", 50, "IFV"), ("BTR_82A", 15, "APC"))
+# армия на направлении - 3-4 БТГ в одной части модели (всего на Киев - ~30-40 БТГ, RUSI 'Operation Z'). ОЦЕНКА
 RU_TANK = c(("T_72B3", 30, "MBT"), ("CHAP_T90M", 6, "MBT"), ("BMP_2", 15, "IFV"))
 RU_VDV = c(("BMD_1", 40, "IFV"), ("BTR_D", 15, "APC"))
 UA_MECH = c(("CHAP_T64BV", 30, "MBT"), ("BMP_2", 40, "IFV"), ("BTR_80", 15, "APC"))      # БТР-4 - БТР-80
@@ -110,9 +112,13 @@ G.GROUND = [
     ("blue_58mb", "58-я мотопехотная бригада (Конотоп - Нежин)", "blue", "Nizhyn", UA_MECH, UA_AD, 1, None, ""),
     ("blue_95daab", "95-я десантно-штурмовая бригада (Житомир)", "blue", "Zhytomyr", UA_LIGHT, UA_AD, 2, None, ""),
     ("blue_14mb", "14-я механизированная бригада (с запада)", "blue", "Lviv", UA_MECH, UA_AD, 5, None, "ОЦЕНКА"),
-    ("blue_tro_sumy", "Территориальная оборона и 27-я реактивная артбригада (Сумы)", "blue", "Sumy", UA_LIGHT, UA_AD, 1, None,
+    ("blue_tro_sumy", "Территориальная оборона и 27-я реактивная артбригада (Сумы)", "blue", "Sumy", UA_MECH, UA_AD, 1, None,
      "Сумы не взяты: окружены и обойдены"),
     ("blue_brovary", "Части обороны Броваров", "blue", "Brovary", UA_LIGHT, UA_AD, 1, None, "засада у Скибина 10.03"),
+    ("blue_tro_zhytomyr", "Территориальная оборона Житомира", "blue", "Zhytomyr", UA_LIGHT, UA_AD, 1, None,
+     "до Житомира наземные части РФ не дошли - ОЦЕНКА состава"),
+    ("blue_93mb_okhtyrka", "Части 93-й омбр и теробороны (Ахтырка)", "blue", "Okhtyrka", UA_LIGHT, UA_AD, 1, None,
+     "бои за Ахтырку 24.02-03.2022, город не взят"),
 ]
 G.AIR_ASSAULT = [   # (id, имя, сторона, пункт, {тип: число}, человек, источник): десант на Гостомель 24.02 (Ми-8 + Ка-52)
     ("red_vdv_hostomel1", "Рота 31-й одшбр (десант на Гостомель)", "red", "Khoiniki",
@@ -161,12 +167,13 @@ G.AIR = [
     ("ru_su25", "Штурмовой полк (Су-25СМ3; в DCS - Су-25)", "red", "attack", "Su_25", "Lubeck", 16, 250, ""),
     ("ru_su35", "Истребительный полк (Су-35С; в DCS - Су-27)", "red", "fighter", "Su_27", "Kiel", 16, 500,
      "мод Су-35С включён - Су-35С, иначе - Су-27", {"mod_alt": {"mod": "su35s", "type": "Su_35S", "name": "Истребительный полк (Су-35С)"}}),
-    ("ru_su30", "Полк Су-30СМ (в DCS - Су-27)", "red", "fighter", "Su_27", "Lubeck", 12, 500,
+    ("ru_su30", "Полк Су-30СМ (в DCS - Су-27)", "red", "fighter_bomber", "Su_27", "Lubeck", 12, 500,
      "мод Су-30 включён - Су-30СМ, иначе - Су-27", {"mod_alt": {"mod": "su30", "type": "Su_30SM", "name": "Полк Су-30СМ"}}),
-    ("ru_su24", "Бомбардировщики Су-24М", "red", "bomber", "Su_24M", "Pinnow", 12, 400, ""),
-    ("ru_ka52", "Вертолёты Ка-52 (в DCS - Ка-50)", "red", "attack_helo", "Ka_50", "Kiel", 12, 150, "Ка-52 в pydcs нет"),
-    ("ru_mi28", "Вертолёты Ми-28Н", "red", "attack_helo", "Mi_28N", "Lubeck", 10, 150, ""),
-    ("ru_mi8", "Вертолёты Ми-8АМТШ (десант)", "red", "transport_helo", "Mi_8MT", "Kiel", 20, 200, ""),
+    # Су-24М у ВКС в 2022 почти не летали: удары по земле - Су-34, затем Су-30СМ (Су-24 - у Украины)
+    # вертолёты 24.02 - с площадок в Беларуси у границы (Мозырь, Хойники): десант на Гостомель, Ка-52 - сопровождение
+    ("ru_ka52", "Вертолёты Ка-52 (в DCS - Ка-50)", "red", "attack_helo", "Ka_50", "HeliMozyr", 12, 150, "Ка-52 в pydcs нет"),
+    ("ru_mi28", "Вертолёты Ми-28Н", "red", "attack_helo", "Mi_28N", "HeliMozyr", 10, 150, ""),
+    ("ru_mi8", "Вертолёты Ми-8АМТШ (десант)", "red", "transport_helo", "Mi_8MT", "HeliMozyr", 20, 200, ""),
     ("ru_a50", "Самолёт ДРЛО А-50", "red", "awacs", "A_50", "Pinnow", 1, 1500, ""),
     ("ru_tu95", "Ту-95МС (удары крылатыми ракетами)", "red", "bomber", "Tu_95MS", "Pinnow", 6, 3000,
      "дальняя авиация; базы - вне сектора, здесь - Пиннов"),
@@ -174,8 +181,10 @@ G.AIR = [
     ("ua_mig29", "40-я бригада тактической авиации (МиГ-29, Васильков)", "blue", "fighter", "MiG_29A", "Hamburg Finkenwerder",
      12, 300, ""),
     ("ua_su27", "39-я бригада тактической авиации (Су-27, Озёрное)", "blue", "fighter", "Su_27", "Celle", 12, 500, ""),
-    ("ua_su24", "7-я бригада тактической авиации (Су-24М, Староконстантинов)", "blue", "bomber", "Su_24M", "Wunstorf", 10, 400, ""),
-    ("ua_su25", "299-я бригада тактической авиации (Су-25)", "blue", "attack", "Su_25", "Hannover", 12, 250, "Канатово - Ганновер"),
+    ("ua_su24", "7-я бригада тактической авиации (Су-24М, Староконстантинов)", "blue", "bomber", "Su_24M", "Wunstorf", 10, 400,
+     "Х-58 и Х-25 в арсенале ВСУ - подавление ПВО Су-24М", {"arm": True}),
+    ("ua_su25", "299-я бригада тактической авиации (Су-25)", "blue", "attack", "Su_25", "Celle", 12, 250,
+     "Канатово - далеко от Киева: в первые недели Су-25 летали с аэродромов ближе к фронту (рассредоточение) - здесь Озёрное"),
     ("ua_tb2", "Беспилотники Bayraktar TB2 (в DCS - MQ-9)", "blue", "fighter_bomber", "MQ_9_Reaper", "Celle", 6, 250, "ОЦЕНКА"),
     ("ua_mi24", "Армейская авиация (Ми-24)", "blue", "attack_helo", "Mi_24P", "Hannover", 10, 150, ""),
     ("ua_mi8", "Армейская авиация (Ми-8)", "blue", "transport_helo", "Mi_8MT", "Hannover", 10, 200, ""),
@@ -184,7 +193,7 @@ G.AD_TEMPLATES = {
     "red": {"short": [{"name": "Тор-М2, Панцирь", "composition": [("CHAP_TorM2", "launcher", 1), ("CHAP_PantsirS1", "launcher", 1)]}]},
     "blue": {"short": [{"name": "Оса, ЗУ-23", "composition": [("Osa_9A33_ln", "launcher", 1), ("ZU_23_Emplacement", "launcher", 2)]}]},
 }
-G.EXTERNAL_SUPPLY = {"Kiel", "Lubeck", "Pinnow"}   # аэродромы в Беларуси и России - снабжение не со складов фронта
+G.EXTERNAL_SUPPLY = {"Kiel", "Lubeck", "Pinnow", "HeliMozyr"}   # аэродромы в Беларуси и России - снабжение не со складов фронта
 G.EW = [   # станции РЭБ (ew.py); моделей в DCS нет - грузовики и КП (замена в имени); места и состав - ОЦЕНКА
     ("red_ew_leer_west", "Комплекс Леер-3 (правый берег; в DCS - КП СКП-11)", "red", "leer3", {"SKP_11": 1, "Ural_4320_31": 2},
      53.900, 9.920, "Леер-3 с Орлан-10 - ОЦЕНКА размещения"),
@@ -218,6 +227,7 @@ REAL = {   # широта, долгота (по памяти, +-2 км)
 }
 REAL_AB = {   # прежнее имя аэродрома карты -> реальный аэродром
     "Kiel": (53.77, 27.58),                   # Мачулищи (Минск) - у края карты
+    "HeliMozyr": (52.05, 29.25),              # вертолётные площадки у Мозыря (Беларусь)
     "Lubeck": (52.30, 31.17),                 # Зябровка (Гомель)
     "Pinnow": (51.75, 36.30),                 # Курск (Халино)
     "Hamburg Finkenwerder": (50.23, 30.30),   # Васильков
@@ -232,17 +242,31 @@ BORDER = {   # имя: (широта, долгота, сторона)
     "Horodnia": (51.89, 31.60, "blue"), "NovhorodSiverskyi": (52.01, 33.26, "blue"), "Shostka": (51.86, 33.48, "blue"),
     "Okhtyrka": (50.31, 34.90, "blue"), "Klintsy": (52.76, 32.24, "red"), "Glushkovo": (51.34, 34.64, "red"),
     "Sudzha": (51.19, 35.27, "red"), "Trubchevsk": (52.58, 33.77, "red"), "Sevsk": (52.15, 34.49, "red"),
+    # обход Сум с юга (2-я гв. ТА и 1-я ТА 02.2022: Лебедин - Ромны - на Прилуки и Бровары, Сумы и Ахтырка - не взяты)
+    "Lebedyn": (50.59, 34.48, "blue"), "Romny": (50.75, 33.47, "blue"),
 }
 for _n, (_la, _lo, _sd) in BORDER.items():
     G.PLACES[_n] = (*PROJ(_la, _lo), _sd)
 G.LINKS += [("Gomel", "Horodnia"), ("Horodnia", "Chernihiv"), ("Klintsy", "Horodnia"), ("Klintsy", "NovhorodSiverskyi"),
             ("NovhorodSiverskyi", "Shostka"), ("Shostka", "Konotop"), ("Glushkovo", "Shostka"), ("Glushkovo", "Konotop"),
             ("Sudzha", "Sumy"), ("Sumy", "Okhtyrka"), ("Sudzha", "Okhtyrka"), ("Klintsy", "Trubchevsk"),
-            ("Trubchevsk", "NovhorodSiverskyi"), ("Trubchevsk", "Sevsk"), ("Sevsk", "Shostka"), ("Sevsk", "Glushkovo")]
+            ("Trubchevsk", "NovhorodSiverskyi"), ("Trubchevsk", "Sevsk"), ("Sevsk", "Shostka"), ("Sevsk", "Glushkovo"),
+            ("Sumy", "Lebedyn"), ("Okhtyrka", "Lebedyn"), ("Lebedyn", "Romny"), ("Romny", "Konotop"), ("Romny", "Nizhyn"),
+            ("Sudzha", "Lebedyn")]
 _kla, _klo, _s = G.PLACES["Kyiv"]               # Буковель-АД - прикрывает сам Киев (радиус 15 км)
 G.EW = [(r[:5] + (round(_kla + 0.03, 4), round(_klo - 0.03, 4)) + r[7:]) if r[0] == "blue_ew_bukovel" else r for r in G.EW]
 G.SECTOR_ABOUT = ("Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold "
                   f"War Germany: {G.PROJ_NOTE}. Рельеф и реки (Днепр) - карты, не Украины.")
+
+# города (sim.urban_k): оборона в застройке, ОЦЕНКИ по итогу 2022 - Киев, Чернигов, Сумы, Нежин, Бровары не взяты
+# (Чернигов и Сумы - в окружении), Ирпень - взят частично, Буча, Гостомель, Иванков, Конотоп - взяты
+URBAN = {"Kyiv": 4.0, "Chernihiv": 3.0, "Sumy": 3.0, "Nizhyn": 2.0, "Brovary": 2.5, "Irpin": 1.5, "Zhytomyr": 2.0,
+         "Okhtyrka": 2.0}
+# темп колонн по земле Украины, где частей ВСУ нет (sim: unopposed_km): 24-25.02 колонны из Беларуси за двое суток -
+# от границы до Гостомеля и Иванкова (~100 км), 2-я гв. ТА - Конотоп 25.02 (~80 км). ОЦЕНКА
+UNOPPOSED_KM = 60
+GARRISON = {"blue_tro_kyiv", "blue_4ngu", "blue_72mb", "blue_1tb", "blue_tro_sumy", "blue_brovary", "blue_58mb",
+            "blue_tro_zhytomyr", "blue_93mb_okhtyrka"}
 
 if __name__ == "__main__":
     G.main()
@@ -252,8 +276,26 @@ if __name__ == "__main__":
     op = G.DATA / "oob_kyiv22.json"
     oob = json.loads(op.read_text(encoding="utf-8"))
     oob["dispersal"] = {"blue": {"land_other_p": 0.3, "rebase_p": 0.2, "max_km": 300}}
+    # подвески ВКС (weapons.policy): по земле - неуправляемое (кроме ПРР у групп подавления ПВО), Р-37М - только у CAP
+    oob["loadout_policy"] = {"red": {"ag_unguided": True, "aa_long_cap_only": True}}
+    # запас управляемого оружия ВСУ (munitions.py; [запас, в сутки, предел]) - ОЦЕНКА: советские Х-58/Х-25 - остатки
+    # арсенала без пополнения; HARM (Харьков) - поставки США с июля 2022 (десятки в месяц); КАБ у ВСУ нет
+    # ракеты воздух-поверхность (Х-25МЛ, Х-29) и воздух-воздух (Р-27) - своё производство ("Артём"), меньше расхода
+    oob["munitions"] = {"blue": {"arm_long": [20, 0], "arm_short": [30, 0.2], "agm": [40, 0.8], "gbu": [0, 0]}}
     # ДРЛО НАТО (E-3A над Польшей и Румынией): своих самолётов ДРЛО у ВСУ нет, данные - от союзников; в миссии -
     # E-3A вне театра, в воздухе с начала миссии (не часть модели, не цель). На условной карте - за тылом Украины
     # (на западе карты), а не над настоящей Польшей (она на востоке карты, на стороне России)
     oob["external_awacs"] = {"blue": {"type": "E_3A", "standoff_km": 250, "title": "ДРЛО НАТО E-3A (за тылом Украины)"}}
+    # гарнизоны (ops: order garrison - держат свой пункт, не выдвигаются и не бегут): Киев, Ирпень (72-я омбр -
+    # рубеж реки Ирпень), Чернигов (1-я отбр, окружён, не взят), Сумы, Бровары (засада у Скибина 10.03)
+    for u in oob["units"]:
+        if u["id"] in GARRISON:
+            u["order"] = "garrison"
+        if u["side"] == "red" and u["role"] == "maneuver":
+            u["unopposed_km"] = UNOPPOSED_KM
     op.write_text(json.dumps(oob, ensure_ascii=False, indent=1), encoding="utf-8")
+    sp = G.DATA / "sector_kyiv22.json"
+    sec = json.loads(sp.read_text(encoding="utf-8"))
+    for name, k in URBAN.items():
+        sec["places"][name]["urban"] = k
+    sp.write_text(json.dumps(sec, ensure_ascii=False, indent=1), encoding="utf-8")

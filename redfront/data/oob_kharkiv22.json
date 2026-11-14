@@ -13,7 +13,7 @@
  },
  "doctrine": {
   "red": "wp",
-  "blue": "wp"
+  "blue": "ua"
  },
  "units": [
   {
@@ -42,7 +42,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "оборона Балаклеи слабая - прорыв 6.09"
+   "note": "оборона Балаклеи слабая - прорыв 6.09",
+   "quality": 0.6
   },
   {
    "id": "red_rg_balakliia_pvo",
@@ -91,7 +92,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_lnr_2ac_pvo",
@@ -140,7 +142,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_1gta_kup_pvo",
@@ -194,7 +197,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_izium_3mrd_pvo",
@@ -248,7 +252,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_izium_144mrd_pvo",
@@ -302,7 +307,9 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 1.0,
+   "order": "garrison"
   },
   {
    "id": "red_lyman_pvo",
@@ -356,7 +363,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_11ac_pvo",
@@ -410,7 +418,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_6caa_pvo",
@@ -462,7 +471,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "note": "переброска 8-9.09 - ОЦЕНКА"
+   "note": "переброска 8-9.09 - ОЦЕНКА",
+   "quality": 0.9
   },
   {
    "id": "red_vdv_kup_pvo",
@@ -514,7 +524,9 @@
    "estimate": true,
    "arrives_day": 4,
    "arrives_jitter": 0,
-   "note": "ОЦЕНКА"
+   "note": "ОЦЕНКА",
+   "quality": 0.8,
+   "order": "garrison"
   },
   {
    "id": "red_reserve_svatove_pvo",
@@ -574,7 +586,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "kupiansk"
+   "axis": "kupiansk",
+   "unopposed_km": 50
   },
   {
    "id": "blue_92mb_pvo",
@@ -629,7 +642,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "izium"
+   "axis": "izium",
+   "unopposed_km": 50
   },
   {
    "id": "blue_25aab_pvo",
@@ -684,7 +698,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "kupiansk"
+   "axis": "kupiansk",
+   "unopposed_km": 50
   },
   {
    "id": "blue_80aab_pvo",
@@ -741,7 +756,8 @@
    "estimate": true,
    "arrives_day": 2,
    "arrives_jitter": 0,
-   "axis": "izium"
+   "axis": "izium",
+   "unopposed_km": 50
   },
   {
    "id": "blue_3tb_pvo",
@@ -799,7 +815,8 @@
    "arrives_day": 3,
    "arrives_jitter": 0,
    "axis": "kupiansk",
-   "note": "ОЦЕНКА"
+   "note": "ОЦЕНКА",
+   "unopposed_km": 50
   },
   {
    "id": "blue_4tb_pvo",
@@ -859,7 +876,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "north"
+   "axis": "north",
+   "unopposed_km": 50
   },
   {
    "id": "blue_14mb_pvo",
@@ -919,7 +937,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "izium"
+   "axis": "izium",
+   "unopposed_km": 50
   },
   {
    "id": "blue_93mb_pvo",
@@ -974,7 +993,8 @@
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "lyman"
+   "axis": "lyman",
+   "unopposed_km": 50
   },
   {
    "id": "blue_95aab_pvo",
@@ -1031,7 +1051,8 @@
    "estimate": true,
    "arrives_day": 2,
    "arrives_jitter": 0,
-   "axis": "lyman"
+   "axis": "lyman",
+   "unopposed_km": 50
   },
   {
    "id": "blue_81amb_pvo",
@@ -1080,7 +1101,8 @@
     }
    ],
    "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "unopposed_km": 50
   },
   {
    "id": "blue_ngu_kharkiv_pvo",
@@ -1517,7 +1539,7 @@
    "id": "ru_su30",
    "name": "Полк Су-30СМ (в DCS - Су-27)",
    "side": "red",
-   "role": "fighter",
+   "role": "fighter_bomber",
    "base": "falkenberg",
    "type": "Su_27",
    "count": 8,
@@ -1535,7 +1557,7 @@
    "name": "Вертолёты Ка-52 (в DCS - Ка-50)",
    "side": "red",
    "role": "attack_helo",
-   "base": "schonefeld",
+   "base": "ummern",
    "type": "Ka_50",
    "count": 10,
    "strike_radius_km": 150,
@@ -1547,7 +1569,7 @@
    "name": "Вертолёты Ми-28Н",
    "side": "red",
    "role": "attack_helo",
-   "base": "schonefeld",
+   "base": "ummern",
    "type": "Mi_28N",
    "count": 8,
    "strike_radius_km": 150,
@@ -1559,7 +1581,7 @@
    "name": "Вертолёты Ми-8АМТШ",
    "side": "red",
    "role": "transport_helo",
-   "base": "schonefeld",
+   "base": "ummern",
    "type": "Mi_8MT",
    "count": 12,
    "strike_radius_km": 200,
@@ -1619,11 +1641,11 @@
    "name": "299-я бригада тактической авиации (Су-25)",
    "side": "blue",
    "role": "attack",
-   "base": "norvenich",
+   "base": "rinteln",
    "type": "Su_25",
    "count": 10,
    "strike_radius_km": 250,
-   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Канатово - далеко от фронта (300 км): в сентябре 2022 Су-25 летали с аэродромов ближе к фронту - здесь Полтава",
    "estimate": true
   },
   {
@@ -1635,8 +1657,9 @@
    "type": "Su_24M",
    "count": 8,
    "strike_radius_km": 400,
-   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА",
-   "estimate": true
+   "source": "ISW (09.2022) / RUSI 'Stormbreak' (2023) / Oryx, по памяти - проверить; число и радиус - ОЦЕНКА; Х-58 и Х-25 в арсенале ВСУ - подавление ПВО Су-24М",
+   "estimate": true,
+   "arm": true
   },
   {
    "id": "ua_mi24",
@@ -1930,6 +1953,34 @@
    "land_other_p": 0.3,
    "rebase_p": 0.2,
    "max_km": 300
+  }
+ },
+ "loadout_policy": {
+  "red": {
+   "ag_unguided": true,
+   "aa_long_cap_only": true
+  }
+ },
+ "munitions": {
+  "blue": {
+   "arm_long": [
+    30,
+    1.5,
+    40
+   ],
+   "arm_short": [
+    10,
+    0.2
+   ],
+   "agm": [
+    30,
+    0.8,
+    40
+   ],
+   "gbu": [
+    0,
+    0
+   ]
   }
  },
  "external_awacs": {
