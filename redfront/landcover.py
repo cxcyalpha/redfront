@@ -74,15 +74,52 @@ def clear(state: dict, p: dict, max_m: float = SNAP_M, avoid=(FOREST, WATER), ta
     return p
 
 
-def snap_group(state: dict, grp: dict, avoid=(FOREST, WATER)) -> int:
-    """Машины группы (vehicles: lat, lon) - на открытую местность; возвращает, сколько сдвинуто."""
+def _shift(state: dict, chunk: list[dict], max_m: float, avoid, taken: list) -> tuple[float, float] | None:
+    """Сдвиг (на север м, на восток м) всего звена машин: ближайший, при котором ни одна машина не в avoid и не на
+    чужой; нет такого в max_m - тот, где плохих меньше всего (None - и так хорошо)."""
+    def bad_n(dn, de):
+        n = 0
+        for v in chunk:
+            q = model.offset(v, 0.0, dn) if dn else v
+            q = model.offset(q, 90.0, de) if de else q
+            if bad(state, q["lat"], q["lon"], avoid) or any(model.dist_km(q, t) * 1000 < MIN_GAP_M for t in taken):
+                n += 1
+        return n
+    best = (bad_n(0, 0), 0.0, 0.0)
+    if best[0] == 0:
+        return None
+    step = max(30.0, _grid(state)[0]["step_lat"] * 111_320 * 0.7)
+    r = step
+    while r <= max_m:
+        k = max(8, int(2 * math.pi * r / step))
+        for i in range(k):
+            a = 2 * math.pi * i / k
+            dn, de = r * math.cos(a), r * math.sin(a)
+            n = bad_n(dn, de)
+            if n < best[0]:
+                best = (n, dn, de)
+                if n == 0:
+                    return dn, de
+        r += step
+    return (best[1], best[2]) if best[1] or best[2] else None
+
+
+def snap_group(state: dict, grp: dict, avoid=(FOREST, WATER), chunk: int | None = None) -> int:
+    """Машины группы (vehicles: lat, lon) - на открытую местность звеньями по chunk машин (взвод боя - целиком, строй
+    сохраняется; ПВО, артиллерия - по одной: они и так рассредоточены). Возвращает, сколько машин сдвинуто."""
     if not _grid(state):
         return 0
+    vs = grp.get("vehicles") or []
+    if chunk is None:
+        chunk = 1 if grp.get("kind") in ("sam_site", "gci_site", "ssm_site", "art_site", "sam") else 4
     n, taken = 0, []
-    for v in grp.get("vehicles") or []:
-        q = clear(state, v, avoid=avoid, taken=taken)
-        if (q["lat"], q["lon"]) != (v["lat"], v["lon"]):
-            v["lat"], v["lon"] = q["lat"], q["lon"]
-            n += 1
-        taken.append({"lat": v["lat"], "lon": v["lon"]})
+    for k in range(0, len(vs), chunk):
+        part = vs[k:k + chunk]
+        sh = _shift(state, part, SNAP_M, avoid, taken)
+        for v in part:
+            if sh:
+                q = model.offset(model.offset(v, 0.0, sh[0]), 90.0, sh[1])
+                v["lat"], v["lon"] = q["lat"], q["lon"]
+                n += 1
+            taken.append({"lat": v["lat"], "lon": v["lon"]})
     return n

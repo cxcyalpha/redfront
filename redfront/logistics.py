@@ -434,15 +434,24 @@ def replacements(state: dict) -> list[str]:
                 u["crews"] += add
                 u["crews_acc"] -= add
                 lines.append(f"{u['name']}: пополнение +{add} экипаж(а), экипажей {u['crews']}.")
-    for u in state["units"].values():
-        if model.category(u) not in ("air", "heli") or u.get("count", 0) >= u.get("count0", 0) or u.get("mod_off"):
-            continue                             # часть на типе выключенного мода - вне кампании, пополнений нет
-        u["repl_acc"] = u.get("repl_acc", 0.0) + rate * industry(state, u["side"])
-        add = min(int(u["repl_acc"]), u["count0"] - u["count"])
-        if add > 0:
-            u["count"] += add
-            u["repl_acc"] -= add
-            lines.append(f"{u['name']}: пополнение +{add} ЛА, в строю {u['count']}.")
+    # air_per_day - самолётов в сутки на СТОРОНУ (число или {сторона: число}), а не на каждую часть: иначе два десятка
+    # полков получали по самолёту в сутки каждый и потери авиации ничего не значили. Сначала - самым потрёпанным.
+    acc = state.setdefault("repl_pool", {})
+    for side in model.SIDES:
+        r_ = rate.get(side, 0) if isinstance(rate, dict) else rate
+        short = sorted((u for u in state["units"].values() if u.get("side") == side and model.category(u) in ("air", "heli")
+                        and u.get("count", 0) < u.get("count0", 0) and not u.get("mod_off")),   # мод выключен - вне кампании
+                       key=lambda u: (u["count"] / max(1, u["count0"]), u["id"]))
+        if not short:
+            acc[side] = 0.0                      # некого пополнять - запас не копится
+            continue
+        acc[side] = acc.get(side, 0.0) + r_ * industry(state, side)
+        while acc[side] >= 1.0 and short:
+            u = short[0]
+            u["count"] += 1
+            acc[side] -= 1.0
+            lines.append(f"{u['name']}: пополнение +1 ЛА, в строю {u['count']}.")
+            short = sorted((x for x in short if x["count"] < x["count0"]), key=lambda x: (x["count"] / max(1, x["count0"]), x["id"]))
     return lines
 
 

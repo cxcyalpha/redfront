@@ -144,13 +144,28 @@ def _length(state: dict, u: dict) -> float:
 def _contacts(state: dict, units: list[dict]) -> list[tuple[dict, dict]]:
     out = []
     act = [u for u in units if u["state"] in ACTIVE and u.get("order") != "withdraw"]   # отходящие разрывают соприкосновение
+    ck = max(_sim(state, s)["contact_km"] for s in model.SIDES)
+    cell = max(0.05, ck / 111.0)                 # сетка ~ck по широте: пары - только из соседних клеток (не n^2)
+    pos = {id(u): model.unit_pos(state, u) for u in act}
+    grid: dict = {}
+    for i, u in enumerate(act):
+        p = pos[id(u)]
+        grid.setdefault((int(p["lat"] // cell), int(p["lon"] // (cell * 1.7))), []).append(i)
     for i, a in enumerate(act):
-        for b in act[i + 1:]:
-            if a["side"] == b["side"]:
-                continue
-            ck = max(_sim(state, a["side"])["contact_km"], _sim(state, b["side"])["contact_km"])
-            if model.dist_km(model.unit_pos(state, a), model.unit_pos(state, b)) <= ck:
-                out.append((a, b))
+        pa = pos[id(a)]
+        cy, cx = int(pa["lat"] // cell), int(pa["lon"] // (cell * 1.7))
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                for j in grid.get((cy + dy, cx + dx), ()):
+                    if j <= i:
+                        continue
+                    b = act[j]
+                    if a["side"] == b["side"]:
+                        continue
+                    k = max(_sim(state, a["side"])["contact_km"], _sim(state, b["side"])["contact_km"])
+                    if model.dist_km(pa, pos[id(b)]) <= k:
+                        out.append((a, b))
+    out.sort(key=lambda ab: (act.index(ab[0]), act.index(ab[1])))   # порядок - как у полного перебора
     return out
 
 
@@ -389,7 +404,7 @@ def tempo(state: dict) -> list[str]:
     owners = state.get("_day_owner") or {}
     for side in model.SIDES:
         sim = _sim(state, side)
-        if sim.get("posture") != "offense" or not prev:
+        if ops.posture_of(state, side) != "offense" or not prev:   # поза сценария, а не доктрины
             continue
         took = [p for p, o in owners.items() if o != side and state["places"].get(p, {}).get("side") == side]
         adv = max((model.dist_km({"lat": prev[u["id"]][0], "lon": prev[u["id"]][1]}, model.unit_pos(state, u))
