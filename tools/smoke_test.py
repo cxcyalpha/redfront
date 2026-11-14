@@ -4132,10 +4132,13 @@ def theatres_section(tmp: Path) -> None:
     cept = ew.cep_factor(stk, "blue", stk["places"]["Kyiv"], "tochka")  # инерциальная Точка-У - нет
     gn = ew.covered(stk, "red", stk["units"]["red_ew_pole21"]["pos"], "gnss")
     stk["units"]["red_ew_leer_west"]["lost"] = {"SKP_11": 1, "Ural_4320_31": 2}   # станция разбита - зоны нет
+    stk["units"]["red_ew_krasukha_by"]["lost"] = {"SKP_11": 1, "Ural_375_PBU": 1}   # (Красуха-4 - рядом, в Беларуси)
     uk2, _ = ew.uav_factors(stk, tb2, hos)
     # станции РЭБ 24.02 - в Беларуси и России (вне ударов Украины); удар - по станции, вышедшей за группировкой к Иванкову
     stk["places"]["Chernobyl"]["side"] = "red"
     stk["units"]["red_ew_zhitel_east"]["pos"] = model.offset(stk["places"]["Chernobyl"], 0.0, 3000)
+    from redfront import intel as _intel
+    _intel.seen(stk, "red_ew_zhitel_east", "test")   # разведка нашла станцию
     planner.plan(stk)
     kinds = [t_["kind"] for t_ in stk["tasks"]]
     built = False
