@@ -8,7 +8,8 @@
 --      исключены; не ближе min_gap к соседней;
 --   3. взводы пересоздаются (coalition.addGroup) с теми же именами, groupId и машинами; опции ставятся заново.
 -- Выбранный сдвиг пишется в REDFRONT_SITES - хук кладёт его в файл дебрифа, модель запоминает место боя.
--- Лес скрипту DCS не отдаёт (только тип поверхности и объекты карты) - от леса не уводим. Все веса - ОЦЕНКИ (build.py, SITE_CFG).
+-- Лес скрипту DCS не отдаёт (только тип поверхности и объекты карты): доля машин в лесу и в воде при каждом сдвиге
+-- считается генератором по растру театра (landcover.py) и приходит в b.cover - штраф w_cover. Все веса - ОЦЕНКИ (build.py, SITE_CFG).
 
 REDFRONT_SITES = REDFRONT_SITES or {}
 REDFRONT_SITE_LOG = REDFRONT_SITE_LOG or {}
@@ -80,7 +81,8 @@ local function siteScore(b, dx, dy)
       end
     end
   end
-  return total / math.max(1, n) - CFG.w_distance * math.sqrt(dx * dx + dy * dy) / 1000
+  local cov = (b.cover or {})[string.format("%d_%d", math.floor(dx / CFG.site_step + 0.5), math.floor(dy / CFG.site_step + 0.5))] or 0
+  return total / math.max(1, n) - CFG.w_distance * math.sqrt(dx * dx + dy * dy) / 1000 - (CFG.w_cover or 0) * cov
 end
 
 local function place(b)

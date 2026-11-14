@@ -78,6 +78,8 @@ def field_site(state: dict, side: str, home: dict, lo: float, hi: float, salt: s
                 for off in (FIELD_OFFSET_KM, 2 * FIELD_OFFSET_KM, 3 * FIELD_OFFSET_KM):   # в стороне, не у соседней площадки
                     for sb in (first, -first):
                         q = model.offset(pos, brg + sb, off * 1000)
+                        from . import landcover   # полевая площадка - на открытом месте, не в лесу и не в воде
+                        q = landcover.clear(state, q, max_m=800, avoid=(landcover.FOREST, landcover.WATER, landcover.BUILT))
                         d = front_km(state, side, q)
                         if lo <= d <= hi and owner(state, q) == side and all(
                                 model.dist_km(q, b) >= FIELD_SPACING_KM for b in state["airbases"].values()

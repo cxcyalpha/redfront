@@ -790,6 +790,9 @@ def battle_site_section(tmp: Path, m, man: dict, st: dict) -> None:
     import lupa, math, re
     acts = _do(m)
     script = next(a.text.id for a in acts if "redfront battle site" in a.text.id)
+    # местность здесь - заглушки (дорога, квартал, вода, склон); штраф за лес и воду реальной карты (b.cover из растра
+    # театра, landcover.py) к ним отношения не имеет - проверяется отдельно (landcover_section)
+    script = re.sub(r"cover = \{[^}]*\}, ", "", script)
     hook = next(a.text.id for a in acts if "redfront debrief hook" in a.text.id)
     in_cl = {g["unit"] for g in man["ground"] if g["kind"] == "battle" and g.get("cluster") == man["battle_key"]}
     names = {n for n in man["front"] if n.split("/")[0] in in_cl}          # взводы боя цели игрока
@@ -2757,6 +2760,23 @@ def farp_section(tmp: Path) -> None:
     check(not farp.is_farp(st["airbases"][jet["base"]]), "самолёты с закрытого аэродрома на вертолётную площадку не уходят")
 
 
+def landcover_section(tmp: Path) -> None:
+    """Тип поверхности (landcover.py, растр ESA WorldCover): машины позиций - не в лесу и не в воде, колонны - как были."""
+    from redfront import landcover, materialize
+    print("\n== тип поверхности: лес и вода ==")
+    st = model.new_campaign("lc", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=1, player_side="red")
+    planner.plan(st)
+    hh = landcover.kind(st, 53.55, 9.99), landcover.kind(st, 53.53, 10.35)   # Гамбург, лес Саксенвальд
+    groups = materialize.theatre(st, st["task"], 1.0)
+    stand = [g for g in groups if g.get("kind") not in ("column", "convoy", "downed")]
+    bad0 = sum(landcover.bad(st, v["lat"], v["lon"]) for g in stand for v in g["vehicles"])
+    moved = sum(landcover.snap_group(st, g) for g in stand)
+    bad1 = sum(landcover.bad(st, v["lat"], v["lon"]) for g in stand for v in g["vehicles"])
+    n = sum(len(g["vehicles"]) for g in stand)
+    check(hh[0] in (landcover.WATER, landcover.BUILT) and hh[1] == landcover.FOREST and bad0 > 0 and bad1 == 0 and moved >= bad0,
+          f"растр: Гамбург - {hh[0]}, Саксенвальд - лес; машин позиций в лесу и воде {bad0} из {n} -> {bad1} (сдвинуто {moved})")
+
+
 def field_farp_section(tmp: Path) -> None:
     """Полевые вертолётные площадки (farp.py field): готовой площадки нет (или доктрина ВСУ их не берёт) - площадка в
     поле на своей земле в полосе farp_min_km..farp_max_km; ВСУ - малые (пара-две) и со сменой; в миссии - Invisible
@@ -4112,7 +4132,13 @@ def theatres_section(tmp: Path) -> None:
     cept = ew.cep_factor(stk, "blue", stk["places"]["Kyiv"], "tochka")  # инерциальная Точка-У - нет
     gn = ew.covered(stk, "red", stk["units"]["red_ew_pole21"]["pos"], "gnss")
     stk["units"]["red_ew_leer_west"]["lost"] = {"SKP_11": 1, "Ural_4320_31": 2}   # станция разбита - зоны нет
+    stk["units"]["red_ew_krasukha_by"]["lost"] = {"SKP_11": 1, "Ural_375_PBU": 1}   # (Красуха-4 - рядом, в Беларуси)
     uk2, _ = ew.uav_factors(stk, tb2, hos)
+    # станции РЭБ 24.02 - в Беларуси и России (вне ударов Украины); удар - по станции, вышедшей за группировкой к Иванкову
+    stk["places"]["Chernobyl"]["side"] = "red"
+    stk["units"]["red_ew_zhitel_east"]["pos"] = model.offset(stk["places"]["Chernobyl"], 0.0, 3000)
+    from redfront import intel as _intel
+    _intel.seen(stk, "red_ew_zhitel_east", "test")   # разведка нашла станцию
     planner.plan(stk)
     kinds = [t_["kind"] for t_ in stk["tasks"]]
     built = False
@@ -4416,7 +4442,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, field_farp_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
+            command_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:

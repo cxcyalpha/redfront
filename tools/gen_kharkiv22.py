@@ -244,6 +244,21 @@ REAL_AB = {   # прежнее имя аэродрома карты -> реал�
     "Gardelegen": (49.63, 34.49),     # Полтава (вертолёты)
 }
 PROJ = theatre_proj.apply(G, REAL, REAL_AB, far=("Celle",))
+# позиции ЗРК, РЭБ и пусковых на 06.09 - реальные (по памяти, +-10 км, ОЦЕНКА), а не перенос условной схемы
+REAL_POS = {
+    "blue_s300_kharkiv": (50.05, 36.30), "blue_buk_chuhuiv": (49.85, 36.65), "blue_osa_zmiiv": (49.68, 36.35),
+    "red_s400_belgorod": (50.62, 36.55), "red_buk_izium": (49.25, 37.30), "red_tor_kup": (49.72, 37.70),
+    "red_pantsir_belgorod": (50.58, 36.62),
+    "red_ew_leer_izium": (49.22, 37.25), "red_ew_zhitel_kup": (49.70, 37.65), "red_ew_krasukha": (50.55, 36.70),
+    "blue_ew_bukovel": (49.99, 36.23), "blue_ew_notch": (49.83, 36.70),
+    "red_iskander": (50.70, 36.90), "blue_himars": (49.70, 36.40), "blue_tochka": (49.60, 35.90),
+}
+
+def _real_pos(rows: list, real: dict) -> list:
+    """ЗРК, станции РЭБ, пусковые - по реальным координатам (ОЦЕНКА размещения), спроецированным как пункты."""
+    return [(*r[:5], *(round(x, 4) for x in PROJ(*real[r[0]]))) + tuple(r[7:]) if r[0] in real else r for r in rows]
+
+G.SAMS, G.EW, G.SSM = _real_pos(G.SAMS, REAL_POS), _real_pos(G.EW, REAL_POS), _real_pos(G.SSM, REAL_POS)
 G.SECTOR_ABOUT = ("Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Реальная география, спроецированная на "
                   f"карту Cold War Germany: {G.PROJ_NOTE}. Рельеф и реки - карты, не Украины.")
 

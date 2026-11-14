@@ -293,7 +293,14 @@ SWING_AIR_MIN = 0.8   # ОЦЕНКА: истребитель-бомбардир�
 
 def role_ok(state: dict, u: dict, performers: list[str], loadout: list | None = None) -> bool:
     """Часть подходит по роли: роль в списке исполнителей; истребительные задачи - и многоцелевой тип (F-4E, F-16),
-    если он хорош в бою в воздухе (fitness air)."""
+    если он хорош в бою в воздухе (fitness air). Тип только для ударов издалека (aircraft.json standoff_only: Ту-95МС)
+    - ни в одну задачу плана; только по земле (ground_only: Су-34) - не в истребительные."""
+    info = model.aircraft_info(u.get("type"))
+    if info.get("standoff_only"):
+        return False
+    if info.get("ground_only") and set(performers) & {"fighter", "interceptor"} and not set(performers) & {
+            "fighter_bomber", "attack", "bomber"}:
+        return False
     if u["role"] in performers:
         return True
     if u.get("arm_pylons") and "sead" in (loadout or []):   # истребитель с ПРР (build._arm_pylons) - в группу подавления ПВО

@@ -1133,8 +1133,8 @@
    "role": "sam_long",
    "state": "deployed",
    "pos": {
-    "lat": 51.6793,
-    "lon": 10.1076
+    "lat": 52.1651,
+    "lon": 10.6049
    },
    "composition": [
     {
@@ -1168,8 +1168,8 @@
    "role": "sam_medium",
    "state": "deployed",
    "pos": {
-    "lat": 51.6575,
-    "lon": 10.7991
+    "lat": 51.9791,
+    "lon": 10.9468
    },
    "composition": [
     {
@@ -1198,8 +1198,8 @@
    "role": "sam_short",
    "state": "deployed",
    "pos": {
-    "lat": 51.4469,
-    "lon": 10.5778
+    "lat": 51.8209,
+    "lon": 10.6536
    },
    "composition": [
     {
@@ -1218,8 +1218,8 @@
    "role": "sam_long",
    "state": "deployed",
    "pos": {
-    "lat": 52.469,
-    "lon": 10.8749
+    "lat": 52.6954,
+    "lon": 10.8511
    },
    "composition": [
     {
@@ -1253,8 +1253,8 @@
    "role": "sam_medium",
    "state": "deployed",
    "pos": {
-    "lat": 51.4462,
-    "lon": 11.4312
+    "lat": 51.4209,
+    "lon": 11.5756
    },
    "composition": [
     {
@@ -1283,8 +1283,8 @@
    "role": "sam_short",
    "state": "deployed",
    "pos": {
-    "lat": 51.8723,
-    "lon": 12.3446
+    "lat": 51.8581,
+    "lon": 11.9706
    },
    "composition": [
     {
@@ -1303,8 +1303,8 @@
    "role": "sam_short",
    "state": "deployed",
    "pos": {
-    "lat": 52.4916,
-    "lon": 10.7278
+    "lat": 52.6582,
+    "lon": 10.9199
    },
    "composition": [
     {
@@ -1324,8 +1324,8 @@
    "state": "deployed",
    "station": "leer3",
    "pos": {
-    "lat": 51.4509,
-    "lon": 11.3429
+    "lat": 51.393,
+    "lon": 11.5268
    },
    "composition": [
     {
@@ -1350,8 +1350,8 @@
    "state": "deployed",
    "station": "zhitel",
    "pos": {
-    "lat": 51.8668,
-    "lon": 12.168
+    "lat": 51.8395,
+    "lon": 11.9215
    },
    "composition": [
     {
@@ -1371,8 +1371,8 @@
    "state": "deployed",
    "station": "krasukha",
    "pos": {
-    "lat": 52.4432,
-    "lon": 10.8013
+    "lat": 52.6302,
+    "lon": 10.9986
    },
    "composition": [
     {
@@ -1397,8 +1397,8 @@
    "state": "deployed",
    "station": "bukovel",
    "pos": {
-    "lat": 51.755,
-    "lon": 10.3579
+    "lat": 52.1093,
+    "lon": 10.5364
    },
    "composition": [
     {
@@ -1418,8 +1418,8 @@
    "state": "deployed",
    "station": "notch",
    "pos": {
-    "lat": 51.6833,
-    "lon": 10.8727
+    "lat": 51.9605,
+    "lon": 10.9955
    },
    "composition": [
     {
@@ -1439,8 +1439,8 @@
    "state": "deployed",
    "missile": "iskander",
    "pos": {
-    "lat": 52.6031,
-    "lon": 10.581
+    "lat": 52.7698,
+    "lon": 11.1964
    },
    "composition": [
     {
@@ -1460,8 +1460,8 @@
    "state": "deployed",
    "missile": "gmlrs",
    "pos": {
-    "lat": 51.6357,
-    "lon": 10.6519
+    "lat": 51.8395,
+    "lon": 10.7024
    },
    "composition": [
     {
@@ -1481,8 +1481,8 @@
    "state": "deployed",
    "missile": "tochka",
    "pos": {
-    "lat": 51.4483,
-    "lon": 9.9892
+    "lat": 51.7465,
+    "lon": 10.2152
    },
    "composition": [
     {
