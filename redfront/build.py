@@ -265,6 +265,7 @@ SITE_CFG = {
     "w_road": 3, "w_near_road": 2, "w_field": 1,            # оценка точки
     "w_building": 0.5, "building_r": 30, "building_cap": 6, # минус за строения (объекты карты) ближе building_r м
     "w_reject": -3,                                         # точка в воде или на склоне - при выборе места боя
+    "w_cover": 4,                                           # минус за долю машин в лесу или в воде (растр театра, landcover.py)
     "w_distance": 0.3, "w_snap": 0.3,                       # минус за удаление от расчётного места (на км) и машины от своей точки (на 100 м)
     # ПВО (ЗРК, ЗА): открытое место - поле, можно у дороги; не на дороге и не в застройке (со двора не видно и не найти)
     "ad_rings": "{ 0, 50, 100, 200, 300, 400 }", "ad_dirs": 12,   # куда можно сдвинуть машину ПВО, м
@@ -295,8 +296,9 @@ def site_script(campaign_id: str, sortie: int, battles: list[dict], ads: list[di
             opts = ", ".join(f"{{ {k}, {v} }}" for k, v in p["options"])
             pls.append(f'{{ name = {q(p["name"])}, groupId = {p["groupId"]}, country = {p["country"]}, speed = {p["speed"]:.2f}, '
                        f'units = {{ {units} }}, route = {{ {route} }}, options = {{ {opts} }} }}')
+        cover = ", ".join(f'["{k}"] = {v}' for k, v in (b.get("cover") or {}).items())
         items.append(f'{{ key = {q(b["key"])}, search_r = {b["search_r"]:.0f}, shift = {{ x = {b["shift"][0]:.1f}, y = {b["shift"][1]:.1f} }}, '
-                     f'platoons = {{ {", ".join(pls)} }} }}')
+                     f'cover = {{ {cover} }}, platoons = {{ {", ".join(pls)} }} }}')
     ad_items = []
     for a in ads or []:
         units = ", ".join(f'{{ name = {q(u["name"])}, type = {q(u["type"])}, x = {u["x"]:.1f}, y = {u["y"]:.1f}, heading = {u["heading"]:.4f}'
@@ -940,6 +942,21 @@ def _from_base(m: Mission, country, name: str, ac, base_obj, maintask, start_typ
                                         group_size=group_size)
     return m.flight_group_from_airport(country, name, ac, base_obj, maintask=maintask, start_type=start_type,
                                        group_size=group_size)
+
+
+AIR_NEAR_BASE_M = 4000   # ОЦЕНКА: появление в воздухе у аэродрома без стоянок, если полосу занимает другая группа
+AIR_NEAR_BASE_ALT = 800  # м
+
+
+def _air_near_base(m: Mission, country, name: str, ac, airport, maintask, group_size: int, toward, spd_kmh: float):
+    """Стоянок для типа на аэродроме нет, а полоса занята другой группой этой миссии: два старта с одной полосы
+    (и дежурная пара, поднятая по тревоге, на полосе со взлетающей группой) сталкиваются при появлении - группа
+    появляется в воздухе в AIR_NEAR_BASE_M от аэродрома в сторону маршрута."""
+    a = airport.position
+    hdg = a.heading_between_point(toward) if toward is not None else 0
+    pos = a.point_from_heading(hdg, AIR_NEAR_BASE_M)
+    return m.flight_group_inflight(country, name, ac, pos, AIR_NEAR_BASE_ALT, speed=int(spd_kmh), maintask=maintask,
+                                   group_size=group_size)
 
 
 def _land(fg, airport, spd_kmh: float):
@@ -2181,6 +2198,10 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     carriers = carrier_groups(m, state, (wx_now.get("wind_dir") or 0) % 360)   # авианосные группы - базы на море
     carriers.update(field_pads(m, state))       # полевые вертолётные площадки - те же "базы-площадки"
     groups = materialize.theatre(state, tk, density)
+    from . import landcover                      # позиции, огневые, ПВО, склады - не в лесу и не в воде (колонны - на дорогах)
+    for g_ in groups:
+        if g_.get("kind") not in ("column", "convoy", "downed"):
+            landcover.snap_group(state, g_)
     vg_by_unit, platoons = {}, {}
     col_parts: dict[int, list] = {}               # колонна ротами: id(группы модели) -> [(часть, группа DCS)]
     mrl_used: dict[str, bool] = {}              # РСЗО в миссии - одна на сторону (build, огонь батарей)
@@ -2361,6 +2382,11 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
     first_rw: dict[str, str] = {}
     from . import munitions
     mun_spend: dict = {}                         # управляемое оружие миссии - списывается после неё (debrief)
+    ap_groups: dict[str, int] = {}               # групп миссии на аэродроме (полоса - одна)
+    for g in pkg + enemy:
+        if g["objective"]["kind"] != "orbit" and not g.get("_air_start") and g["base"] not in carriers:
+            k_ = state["airbases"][g["base"]].get("airport") or g["base"]
+            ap_groups[k_] = ap_groups.get(k_, 0) + 1
     for g in pkg + enemy:
         if g["objective"]["kind"] in ("alert", "orbit") or g.get("_air_start") or g["base"] in carriers:
             continue
@@ -2398,8 +2424,12 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                 fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
                                                  airport, maintask=mt, start_type=StartType.Warm, group_size=g["size"])
             except NoParkingSlotError:
-                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
-                                                 airport, maintask=mt, start_type=StartType.Runway, group_size=g["size"])
+                if ap_groups.get(base.get("airport") or g["base"], 0) > 1:   # полосу делят другие группы - тревога в воздухе
+                    fg = _air_near_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                                        mt, g["size"], _pt(m, g["route"][0]) if g.get("route") else None, spd)
+                else:
+                    fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac,
+                                                     airport, maintask=mt, start_type=StartType.Runway, group_size=g["size"])
             _crew(state, fg, perf)
             fg.late_activation = True
             _apply_loadout(fg, ac, perf["type"], loadout_cats(g.get("_kind") or tk["kind"], g), state)
@@ -2459,8 +2489,14 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                                  if is_player else (StartType.Runway if on_rw else StartType.Warm), group_size=g["size"])
                 parked = not is_player and not on_rw
             except NoParkingSlotError:           # стоянок нет (вертолётная площадка) - с полосы
-                fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
-                                                 maintask=mt, start_type=StartType.Runway, group_size=g["size"])
+                if not is_player and not on_rw and ap_groups.get(ap_key, 0) > 1:   # полоса - у другой группы: в воздухе
+                    first_ = g.get("rv") or (g["route"][0] if g.get("route") else None)
+                    fg = _air_near_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                                        mt, g["size"], _pt(m, first_) if first_ else None, spd)
+                    g["_air_near"] = True
+                else:
+                    fg = _from_base(m, _country(m, state, side_g), f"{perf['id']} {g['group']} {sortie}", ac, airport,
+                                                     maintask=mt, start_type=StartType.Runway, group_size=g["size"])
         _crew(state, fg, perf)
         if is_player:
             player_air = (airport, airport)          # аэродром посадки уточняется ниже (перевозка - другой)
@@ -2472,6 +2508,8 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             times[g["group"]]["start_s"] = st_s
             g["_parked"] = True
             st_s = max(0, st_s - TAXI_S)
+        elif g.get("_air_near"):                 # появится в воздухе у аэродрома - ко времени взлёта
+            pass
         elif not is_player and not g.get("_air_start"):   # группы ИИ с полосы одного аэродрома - не в одну секунду (столкновение при появлении)
             while (base.get("airport") or g["base"], st_s) in runway_slots:
                 st_s += RUNWAY_GAP_S
@@ -2504,6 +2542,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
             alt = q_alt(state, side_g, alt)          # круглые высоты в единицах стороны (футы НАТО / метры ОВД)
             if not is_player and not helo and alt < AI_LOW_MIN_M:  # ИИ ниже этого бьётся о землю (Су-24М: 3 случая на 40-80 м)
                 alt = AI_LOW_MIN_M
+            floor_ = model.aircraft_info(perf.get("type")).get("min_alt_m")   # тяжёлый бомбардировщик - не на малой высоте
+            if floor_ and not keep_alt and alt < floor_:
+                alt = floor_
             w = fg.add_waypoint(_pt(m, p), alt, speed=q_spd(state, side_g, spd), name=name)
             # вертолёты и маловысотные - от земли (RADIO), эшелоны выше - от уровня моря (BARO)
             w.alt_type = "RADIO" if helo or alt < BARO_FROM_M else "BARO"
@@ -2912,6 +2953,9 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                             if t.get("takeoff_s") else ""))
                         if is_player else Lx("ИИ, к началу миссии уже в воздухе на маршруте", "AI, already airborne en route at mission start")
                         if g.get("_air_start") else
+                        Lx(f"ИИ, появляется в воздухе у аэродрома в {clk(t['start_s'])} (стоянок для типа нет, полоса занята)",
+                           f"AI, appears airborne near the airfield at {clk(t['start_s'])} (no parking for the type, runway busy)")
+                        if g.get("_air_near") else
                         Lx(f"ИИ, с грунта полевой площадки (двигатели запущены), взлёт в {clk(t['start_s'])}",
                            f"AI, from the ground at the field site (engines running), takeoff at {clk(t['start_s'])}")
                         if g.get("_parked") and base.get("field") else
@@ -2964,6 +3008,23 @@ def build(state: dict, out_path: Path, density: float = 1.0, player: bool = True
                                "heading": math.radians(u.heading)} for u in vg.units],
                     "route": [(p.position.x, p.position.y) for p in vg.points[1:]],
                     "options": [(0, 4)] + list(ground_options(state, g))})
+        from . import landcover                  # лес и вода (растр театра): скрипт их не видит - доля машин на них
+        for b in bats.values():                  # при каждом сдвиге сетки поиска - штраф места (w_cover)
+            if not b["platoons"] or not b["search_r"] or not landcover._grid(state):
+                continue
+            us = [u for p_ in b["platoons"] for u in p_["units"]][::SITE_CFG["sample"]]
+            steps = int(b["search_r"] // SITE_CFG["site_step"])
+            for i in range(-steps, steps + 1):
+                for j in range(-steps, steps + 1):
+                    dx, dy = i * SITE_CFG["site_step"], j * SITE_CFG["site_step"]
+                    if dx * dx + dy * dy > b["search_r"] ** 2:
+                        continue
+                    nb = 0
+                    for u in us:
+                        ll = Point(u["x"] + dx, u["y"] + dy, m.terrain).latlng()
+                        nb += landcover.bad(state, ll.lat, ll.lng)
+                    if nb:
+                        b.setdefault("cover", {})[f"{i}_{j}"] = round(nb / max(1, len(us)), 2)
         trig.add_action(DoScript(String(site_script(state["campaign_id"], state["sortie"],
                                                     [b for b in bats.values() if b["platoons"]], ads))))
     front = []

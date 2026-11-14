@@ -1,5 +1,5 @@
 {
-  "_about": "Данные типов ЛА для модели (ОЦЕНКИ): cargo_t - груз борта в перевозке, troops - десантников на борт, crew - экипаж, night - летает ночью. Скорость групп - из доктрины (speed_kmh задачи).",
+  "_about": "Данные типов ЛА для модели (ОЦЕНКИ): cargo_t - груз борта в перевозке, troops - десантников на борт, crew - экипаж, night - летает ночью; standoff_only - только удары крылатыми ракетами издалека (strategic.py), в план полётов не ставится (Ту-95МС, Ту-160); tasks_not - задачи и группы обеспечения, которых тип не выполняет (Ту-22М3 - только по складам, аэродромам, заводам и кораблям, без подавления ПВО и ударов по войскам); min_alt_m - не ниже этой высоты на маршруте (Ту-22М3 бомбит со средних высот); ground_only - истребитель-бомбардировщик только по земле, без истребительных задач (Су-34 ВКС 2022). Скорость групп - из доктрины (speed_kmh задачи).",
   "types": {
     "Su_17M4": {
       "recon": {"photo": 6, "ir": 3, "elint": 100, "profile": "low", "as": "Су-17М3Р/М4Р с контейнером ККР-1 (в DCS - Су-17М4)"},
@@ -231,7 +231,13 @@
       "night": false
     },
     "Su_25T": {"fit": {"cas": 0.9, "interdiction": 0.7, "strike": 0.6, "sead": 0.45, "air": 0.05}, "crew": 1, "night": false},
-    "Tu_22M3": {"fit": {"strike": 0.8, "interdiction": 0.5}, "crew": 4, "night": true},
+    "Tu_22M3": {"fit": {"strike": 0.8, "interdiction": 0.5}, "crew": 4, "night": true, "min_alt_m": 5000,
+                "tasks_not": ["sead", "sead2", "sead3", "kill", "recon", "feint", "jam", "cas_contact", "strike_column_march",
+                              "strike_sam_site", "strike_supply_route", "strike_bridge", "strike_art", "strike_ssm",
+                              "strike_ew"]},
+    "Tu_95MS": {"standoff_only": true, "crew": 7, "night": true},
+    "Tu_160": {"standoff_only": true, "crew": 4, "night": true},
+    "Su_34": {"ground_only": true, "crew": 2, "night": true},
     "Su_27": {"fit": {"air": 0.95}, "crew": 1, "night": true},
     "MiG_29S": {"fit": {"cas": 0.15, "interdiction": 0.2, "strike": 0.2, "air": 0.85}, "crew": 1, "night": false},
     "L_39C": {"fit": {"cas": 0.15, "air": 0.05}, "crew": 2, "night": false},

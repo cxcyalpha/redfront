@@ -670,4 +670,6 @@ def variant(unit: dict) -> dict:
 
 
 def tasks_not(unit: dict) -> list[str]:
-    return list(unit.get("tasks_not", [])) + variant(unit).get("tasks_not", [])
+    """Задачи и группы обеспечения, которых часть не выполняет: своё поле, вариант типа, тип ЛА (aircraft.json)."""
+    return (list(unit.get("tasks_not", [])) + variant(unit).get("tasks_not", [])
+            + list(aircraft_info(unit.get("type")).get("tasks_not", [])))

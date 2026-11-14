@@ -1088,8 +1088,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 51.9181,
-    "lon": 9.277
+    "lat": 51.8052,
+    "lon": 9.4716
    },
    "composition": [
     {
@@ -1124,8 +1124,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 51.577,
-    "lon": 9.7497
+    "lat": 51.5359,
+    "lon": 9.5349
    },
    "composition": [
     {
@@ -1160,8 +1160,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 51.6782,
-    "lon": 9.0561
+    "lat": 51.6369,
+    "lon": 9.2749
    },
    "composition": [
     {
@@ -1191,8 +1191,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 52.1972,
-    "lon": 10.1658
+    "lat": 52.5037,
+    "lon": 10.0907
    },
    "composition": [
     {
@@ -1222,8 +1222,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 51.9573,
-    "lon": 9.9449
+    "lat": 51.7042,
+    "lon": 9.7319
    },
    "composition": [
     {
@@ -1243,8 +1243,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 52.8224,
-    "lon": 9.0323
+    "lat": 52.9666,
+    "lon": 8.7764
    },
    "composition": [
     {
@@ -1279,8 +1279,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 52.4171,
-    "lon": 8.9343
+    "lat": 52.8403,
+    "lon": 8.9971
    },
    "composition": [
     {
@@ -1310,8 +1310,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 52.2401,
-    "lon": 8.9534
+    "lat": 52.7141,
+    "lon": 9.0864
    },
    "composition": [
     {
@@ -1331,8 +1331,8 @@
    "state": "deployed",
    "fixed": true,
    "pos": {
-    "lat": 52.4252,
-    "lon": 10.9183
+    "lat": 53.3032,
+    "lon": 9.911
    },
    "composition": [
     {
@@ -1414,8 +1414,8 @@
    "state": "deployed",
    "station": "leer3",
    "pos": {
-    "lat": 52.2796,
-    "lon": 8.9859
+    "lat": 52.7562,
+    "lon": 9.0421
    },
    "composition": [
     {
@@ -1440,8 +1440,8 @@
    "state": "deployed",
    "station": "krasukha",
    "pos": {
-    "lat": 52.7295,
-    "lon": 9.0029
+    "lat": 52.9666,
+    "lon": 8.9513
    },
    "composition": [
     {
@@ -1466,8 +1466,8 @@
    "state": "deployed",
    "station": "zhitel",
    "pos": {
-    "lat": 52.3433,
-    "lon": 10.8274
+    "lat": 52.3775,
+    "lon": 13.4823
    },
    "composition": [
     {
@@ -1487,8 +1487,8 @@
    "state": "deployed",
    "station": "pole21",
    "pos": {
-    "lat": 52.5587,
-    "lon": 9.8747
+    "lat": 53.3032,
+    "lon": 9.9549
    },
    "composition": [
     {
@@ -1529,8 +1529,8 @@
    "state": "deployed",
    "station": "notch",
    "pos": {
-    "lat": 52.2199,
-    "lon": 10.208
+    "lat": 52.5289,
+    "lon": 10.1341
    },
    "composition": [
     {
@@ -1550,8 +1550,8 @@
    "state": "deployed",
    "missile": "iskander",
    "pos": {
-    "lat": 52.8919,
-    "lon": 8.8541
+    "lat": 52.8403,
+    "lon": 8.3419
    },
    "composition": [
     {
@@ -1571,8 +1571,8 @@
    "state": "deployed",
    "missile": "iskander",
    "pos": {
-    "lat": 52.5508,
-    "lon": 11.3983
+    "lat": 53.1349,
+    "lon": 12.7159
    },
    "composition": [
     {
@@ -1592,8 +1592,8 @@
    "state": "deployed",
    "missile": "tochka",
    "pos": {
-    "lat": 51.3447,
-    "lon": 8.6406
+    "lat": 51.2413,
+    "lon": 9.0648
    },
    "composition": [
     {

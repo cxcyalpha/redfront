@@ -212,7 +212,10 @@ SITE_LAYOUT_RX = [
     (r"S_60|S-60|KS_19|KS-19|M1939|Bofors|bofors|[Ff]lak", ("hex", 70)),   # зенитная батарея - 6 орудий шестиугольником
     (r"ZU-23|ZU_23", ("hex", 90)),                                # ЗУ-23 - парами вокруг объекта
     (r"manpad|Stinger|stinger|Igla|SA-18", ("disp", 800, 2000, 360, "ring")),
-    (r"Osa|Roland|Gepard|Tor|Tunguska|Strela|Chaparral|ZSU_23_4|ZSU-23-4|Vulcan|rapier", ("disp", 500, 1500, 360, "ring")),
+    # ЗРК малой дальности со своей РЛС (Тор, Панцирь, Оса, Роланд): машины батареи прикрывают разные объекты района -
+    # 2,5-6 км друг от друга (ОЦЕНКА; не тремя пусковыми в одной точке); зенитные САУ и Стрела - у рот, 0,5-1,5 км
+    (r"Osa|Roland|TorM2|Tor_|Tor 9A331|Pantsir|rapier|Chaparral", ("disp", 2500, 6000, 360, "ring")),
+    (r"Gepard|Tunguska|Strela|ZSU_23_4|ZSU-23-4|Vulcan", ("disp", 500, 1500, 360, "ring")),
 ]
 SITE_RADAR_GAP_M = 120   # ОЦЕНКА: РЛС позиции - не в одной точке (обнаружения - в стороне от наведения)
 

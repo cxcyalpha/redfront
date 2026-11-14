@@ -1,0 +1,15 @@
+{
+ "_about": "Растр типа поверхности для театра (data/landcover/<театр>.png + .json): лес, вода, застройка - по ESA WorldCover 2021\n(10 м, CC BY 4.0, (c) ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by\nESA WorldCover consortium). Карта DCS Cold War Germany повторяет реальную местность, поэтому реальный покров - лучшая\nдоступная оценка леса и водоёмов карты (скриптам DCS лес не виден: land.getSurfaceType - только суша/дорога/вода).",
+ "north": 54.8,
+ "west": 6.4,
+ "step_lat": 0.0013333333333333333,
+ "step_lon": 0.0013333333333333333,
+ "w": 5625,
+ "h": 4200,
+ "classes": {
+  "0": "open",
+  "1": "forest",
+  "2": "water",
+  "3": "built"
+ }
+}
