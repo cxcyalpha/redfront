@@ -389,7 +389,7 @@ def tempo(state: dict) -> list[str]:
     owners = state.get("_day_owner") or {}
     for side in model.SIDES:
         sim = _sim(state, side)
-        if sim.get("posture") != "offense" or not prev:
+        if ops.posture_of(state, side) != "offense" or not prev:   # поза сценария, а не доктрины
             continue
         took = [p for p, o in owners.items() if o != side and state["places"].get(p, {}).get("side") == side]
         adv = max((model.dist_km({"lat": prev[u["id"]][0], "lon": prev[u["id"]][1]}, model.unit_pos(state, u))
