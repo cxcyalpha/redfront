@@ -11,6 +11,7 @@ from __future__ import annotations
 import bisect
 import copy
 import json
+import time
 import math
 import random
 import uuid
@@ -110,9 +111,16 @@ def role_info(role: str) -> dict:
         raise KeyError(f"роль '{role}' не описана в roles.json") from None
 
 
+_CAT: dict[str, str] = {}
+
+
 def category(unit: dict) -> str:
-    """air / heli / ground / sam - по роли части."""
-    return role_info(unit["role"])["category"]
+    """air / heli / ground / sam - по роли части (кэш: спрашивается миллионы раз за сутки)."""
+    r = unit["role"]
+    c = _CAT.get(r)
+    if c is None:
+        c = _CAT[r] = role_info(r)["category"]
+    return c
 
 
 def enemy(side: str) -> str:
@@ -125,12 +133,22 @@ _DOCTRINE: dict = {}
 def doctrine(state: dict, side: str) -> dict:
     """Пакет доктрины стороны (по state['doctrine'][side]). Кэш по файлу и времени изменения: на всём фронте
     доктрина спрашивается десятки тысяч раз за сутки. Результат только для чтения."""
-    name = Path("doctrine") / f"{state['doctrine'][side]}.json"
+    pkg = state["doctrine"][side]
+    now = time.monotonic()
+    hit = _DOC_FAST.get(pkg)
+    if hit and now - hit[0] < DOC_RECHECK_S:     # файл проверяется не чаще раза в DOC_RECHECK_S (stat - дорого)
+        return hit[1]
+    name = Path("doctrine") / f"{pkg}.json"
     p = name if name.is_file() else DATA / name
     key = (str(p), p.stat().st_mtime_ns)
     if key not in _DOCTRINE:
         _DOCTRINE[key] = json.loads(p.read_text(encoding="utf-8"))
+    _DOC_FAST[pkg] = (now, _DOCTRINE[key])
     return _DOCTRINE[key]
+
+
+_DOC_FAST: dict = {}
+DOC_RECHECK_S = 2.0
 
 
 # ---------- геометрия (широта/долгота, без проекции DCS) ----------

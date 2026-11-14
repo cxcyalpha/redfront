@@ -8,8 +8,9 @@
     STRIKE_P минус PER_THREAT на ЗРК в коридоре; потери цели - доля на пару самолётов (LOSS), объекту тыла -
     повреждение (DAMAGE); то и другое - с множителем пригодности типа (fitness.outcome_factor: лучший в кампании - 1.0). Сама группа теряет самолёты от ЗРК коридора (LOSS_PER_THREAT на борт); экипаж
     сбитого катапультируется (EJECT_P) - на земле у цели (csar.py), иначе погиб.
-Дежурные пары ПВО противника на смене рядом с целью (alerts_near) снижают успех удара (QRA_P на пару) и повышают
-потери (QRA_LOSS). Дежурства, перевозки, прикрытие своих войск - без итога здесь (перевозки - в снабжении, logistics.supply).
+Перехват у цели - воздушный бой (aircombat.py): дежурства в зоне и дежурные пары противника против прикрытия
+пакета и ударной группы, потери обеих сторон, сброс нагрузки перехваченными. (Разведка - пока поправками
+alerts_near: QRA_P, QRA_LOSS.) Дежурства, перевозки, прикрытие своих войск - без итога здесь (перевозки - в снабжении, logistics.supply).
 """
 from __future__ import annotations
 
@@ -90,11 +91,10 @@ def _strike(state: dict, e: dict) -> list[str]:
     r = model.rng(state, f"airwar-{e['id']}")
     lines = []
     perf = state["units"].get(g["performer"])
-    qra = alerts_near(state, model.enemy(e["side"]), obj["pos"], _tot(e))
     # потери группы от ЗРК коридора и дежурных пар ПВО противника
     from . import ew
     uav_k, uav_loss = ew.uav_factors(state, perf, obj["pos"])   # беспилотник в зоне подавления РЭБ противника
-    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) + QRA_LOSS * qra + uav_loss)
+    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) + uav_loss)   # перехват - воздушным боем ниже
     asm_frac = 1.0
     if obj["kind"] == "ship":                    # ПКР стороны: нет - бомбы с малой высоты над ордером, потери выше
         from . import naval
@@ -112,6 +112,10 @@ def _strike(state: dict, e: dict) -> list[str]:
                 pilots.killed(perf, pilots.take(perf), "погиб", state["day"])
                 perf["crews"] = max(0, perf["crews"] - 1)
         lines.append(f"ИИ, {e['title']}: потеряно {down} {perf['type']} ({perf['name']}).")
+    from . import aircombat                      # перехват у цели: дежурства в зоне и дежурные пары противника
+    air_down, air_k, air_lines = aircombat.engage(state, e, obj["pos"], _tot(e), max(0, g["size"] - down))
+    lines += air_lines
+    down += air_down
     from . import fitness                       # пригодность типа для задачи - относительно лучшего в кампании
     fk = fitness.outcome_factor(state, perf.get("type", "") if perf else "", fitness.task_class(e["kind"]))
     ff, why = _find(state, e, tgt, obj)          # туман войны: нашли ли цель там, куда летели
@@ -125,7 +129,12 @@ def _strike(state: dict, e: dict) -> list[str]:
         if sg["group"].startswith(("sead", "kill")):
             munitions.model_use(state, e["side"], sg["group"].rstrip("0123456789"), e["kind"], sg["size"])
     fk *= 0.7 + 0.3 * share                      # ОЦЕНКА: без управляемого - удар менее точен
-    p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk * uav_k))
+    fk *= air_k                                  # перехваченная группа - сброс нагрузки, срыв захода
+    if max(0, g["size"] - down) <= 0:
+        lines.append(f"ИИ, {e['title']}: ударная группа не дошла до цели.")
+        return lines
+    qra = alerts_near(state, model.enemy(e["side"]), obj["pos"], _tot(e))   # дежурные пары рядом: уклонение, срыв
+    p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk * uav_k))   # захода и без боя
     if not ((r.random() < p) if r else p >= 0.5):
         lines.append(f"ИИ, {e['title']}: цель не поражена.")
         return lines
