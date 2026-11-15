@@ -601,6 +601,7 @@ def logistics_section(tmp: Path) -> None:
     out = json.loads(next((outdir / "redfront").glob("debrief_*.json")).read_text(encoding="utf-8"))
     check(out["targets"][tid] == [10, 4] and "999999" not in out["dead"],
           f"хук: в районе склада 10 объектов карты, разрушено 4; посторонние объекты карты не в счёт")
+    st["scenario"]["historical"] = True          # точные числа 0.1 - исторический ход (вес вылета игрока 1.0)
     debrief.apply(st, out)
     check(abs(st["units"][tid]["damage"] - 0.8) < 1e-9, f"дебриф: склад повреждён на {st['units'][tid]['damage']:.0%} (4 из 10 при пороге 50%)")
     # цель, уточнённая зондом: объекты по именам; в DCS getName объекта карты - число, в зонде - строка
@@ -1341,6 +1342,76 @@ def mapobj_section(tmp: Path) -> None:
     check(st2["tasks"] is not None, "план дня с найденными целями строится")
 
 
+def own_control_section(tmp: Path) -> None:
+    """Свой вылет (command.create), время каждой группы и снятие группы (command.edit), ход кампании (model.influence),
+    управление наземными войсками (ops.give_order) - через окно кампании (App.do)."""
+    from redfront import ato, gui, ops
+    print("\n== свои вылеты, время групп, ход кампании, приказы войскам ==")
+    home, root = tmp / "own_home", tmp / "own_camps"
+    (home / "Saved Games" / "DCS" / "Missions").mkdir(parents=True, exist_ok=True)
+    root.mkdir(exist_ok=True)
+    app = gui.App(root, home)
+    app.do("new", {"file": "o1", "side": "red", "seed": "1", "theatre": "kyiv22"})
+    f = {"file": "o1.json"}
+    app.do("plan", f)
+    st = model.load(root / "o1.json")
+    st["ato"]["entries"] = [x for x in st["ato"]["entries"] if x["side"] != "red" or x["kind"] == "qra"]   # полки свободны
+    model.save(st, root / "o1.json")
+    kinds = [k["kind"] for k in app.do("ownkinds", f)["kinds"]]
+    o = app.do("owntargets", dict(f, kind="strike_sam_site"))
+    r = app.do("owncreate", dict(f, kind="strike_sam_site", target=o["targets"][0]["id"], performer="ru_su34", size=2,
+                                 support=["sead"], tot="16:00"))
+    st = model.load(root / "o1.json")
+    e = next(x for x in st["ato"]["entries"] if x.get("user"))
+    grp = [g["group"] for g in e["task"]["package"]]
+    check("strike_sam_site" in kinds and "qra" not in kinds and grp[:2] == ["strike", "sead"] and "cover" not in grp
+          and ato.hhmm(e["tot_s"]) == "16:00" and e["task"]["package"][0]["size"] == 2,
+          f"свой вылет: {r['lines'][0][:110]}...")
+    app.do("atoedit", dict(f, id=e["id"], groups={"sead": {"time": "15:50"}}))
+    st = model.load(root / "o1.json")
+    e = next(x for x in st["ato"]["entries"] if x.get("user"))
+    t_sead = ato.hhmm(e["times"]["sead"]["objective_s"])
+    t_task = next(t for t in st["tasks"] if t.get("ato_id") == e["id"])
+    app.do("atoedit", dict(f, id=e["id"], groups={"sead": {"remove": True}}))
+    st = model.load(root / "o1.json")
+    e2 = next(x for x in st["ato"]["entries"] if x.get("user"))
+    check(t_sead == "15:50" and next(g for g in t_task["package"] if g["group"] == "sead")["lead_min"] == 10
+          and [g["group"] for g in e2["task"]["package"]] == ["strike"],
+          f"время группы подавления - {t_sead} (за 10 мин до удара; в задаче игрока lead_min), группа снимается")
+    # ход кампании и влияние игрока
+    hist = model.historical(st), model.influence(st), model.player_k(st)
+    app.do("setrules", dict(f, influence="alternative", ground_control=True))
+    st = model.load(root / "o1.json")
+    alt = model.influence(st), model.player_k(st)
+    sg = model.new_campaign("hy", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    sg["settings"]["influence"] = "historical"
+    check(hist == (True, "historical", 1.0) and alt == ("alternative", model.PLAYER_K_ALT) and model.influence(sg) == "alternative",
+          f"ход: Киев-22 - исторический (вес вылета 1.0), по настройке - альтернативный ({model.PLAYER_K_ALT}); "
+          "гипотетическая Германия - всегда альтернативный")
+    st["settings"]["influence"] = "alternative"
+    st["posture_days"] = [{"from_day": 1, "blue": "offense"}]   # по дате - наступление ВСУ; силы ВСУ - вдвое меньше
+    for u_ in ops._maneuver(st, "blue"):
+        u_["lost"] = {c["type"]: c["count"] * 0.5 for c in u_["composition"]}
+    pw = ops._ground_power(st, "blue") / ops._ground_power(st, "red")
+    check(pw < ops.ALT_OFFENSE_RATIO and ops.posture_of(st, "blue") == "defense",
+          f"альтернативный ход: наступление по дате не начинается при соотношении сил {pw:.2f}")
+    # приказы войскам
+    r = app.do("groundorder", dict(f, id="red_41caa", order="attack", place="Nizhyn"))
+    r2 = app.do("groundorder", dict(f, id="red_2gta", order="hold"))
+    st = model.load(root / "o1.json")
+    st["ato"] = None
+    lines = ops.commander(st, "red", 0.25)
+    u = st["units"]["red_41caa"]
+    bad = None
+    try:
+        ops.give_order(st, "blue_72mb", "hold")
+    except ValueError as x:
+        bad = str(x)
+    check(u["route"][-1] == "Nizhyn" and "Chernihiv" not in u["route"] and st["units"]["red_2gta"]["route"] == ["Glushkovo"]
+          and u["player_order"]["done"] and bad and len(r2["state"]["ground_units"]) > 3,
+          f"приказы: {r['lines'][0]} -> {' - '.join(u['route'])} (в обход Чернигова); чужой части - нельзя")
+
+
 def gui_section(tmp: Path) -> None:
     """Окно кампании: весь цикл дня через App.do (то же, что кнопки страницы), без браузера."""
     from redfront import gui
@@ -1836,6 +1907,7 @@ def core_section(tmp: Path) -> None:
 
     s0, km0 = model.strength(bn), bn["progress_km"]
     data["time"] = 3000                          # миссия 50 мин: по ней дебриф считает среднюю скорость марша
+    st["scenario"]["historical"] = True          # точные числа 0.1 - исторический ход (без шока частей после вылета игрока)
     lines = debrief.apply(st, data)
     print("     " + "\n     ".join(lines))
     check(abs((s0 - model.strength(bn)) * model.total(bn) - 8.0) < 1e-6, "дебриф: батальон потерял ровно 8 машин (веса 1.0)")
@@ -4442,7 +4514,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
+            command_section, own_control_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:

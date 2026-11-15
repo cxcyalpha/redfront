@@ -231,6 +231,13 @@ def view(st: dict, history: bool = True) -> dict:
         "air_budget": st["settings"].get("mission_air", build_mod.MISSION_AIR),
         "takeoff_min": st["settings"].get("player_takeoff_min", build_mod.PLAYER_TAKEOFF_MIN),
         "player_start": st["settings"].get("player_start", "cold"),
+        "historical": model.historical(st), "influence": model.influence(st),   # ход: исторический / альтернативный
+        "ground_control": bool(st["settings"].get("ground_control")),        # управление наземными войсками
+        "ground_units": [{"id": u["id"], "name": u["name"], "state": u["state"], "at": ops.node_of(st, u),
+                          "strength": round(model.strength(u), 2), "route": u.get("route"), "order": u.get("order"),
+                          "player_order": u.get("player_order")}
+                         for u in ops._maneuver(st, st["player_side"]) if not u.get("attached_to")
+                         and u["state"] not in ("destroyed", "pending")] if st["settings"].get("ground_control") else [],
         "weather": wx_lines[0], "weather_text": "\n".join(wx_lines[1:] + wx_cancel),
         "mods": [{"id": k, "title": v["title"], "url": v["url"], "on": k in (st["settings"].get("mods") or []),
                   "available": _mods_available(k)} for k, v in _mods_list().items()],
@@ -669,6 +676,35 @@ class App:
             model.note(st, f"Погода: режим {mode}; {ln}.")
             model.save(st, p)
             return {"state": view(st), "lines": [ln]}
+        if action == "setrules":                     # ход кампании и управление наземными войсками
+            if req.get("influence") in ("historical", "alternative"):
+                st["settings"]["influence"] = req["influence"]
+            if req.get("ground_control") is not None:
+                st["settings"]["ground_control"] = bool(req["ground_control"])
+            ln = (f"Ход кампании: {'исторический' if model.influence(st) == 'historical' else 'альтернативный'}"
+                  + ("" if model.historical(st) else " (гипотетический сценарий - всегда альтернативный)")
+                  + f"; управление наземными войсками - {'включено' if st['settings'].get('ground_control') else 'выключено'}.")
+            model.note(st, ln)
+            model.save(st, p)
+            return {"state": view(st), "lines": [ln]}
+        if action == "groundorder":                  # приказ части (ops.give_order)
+            from . import ops as _ops
+            ln = _ops.give_order(st, req["id"], req.get("order") or "auto", req.get("place") or None)
+            model.note(st, ln)
+            model.save(st, p)
+            return {"state": view(st), "lines": [ln]}
+        if action == "ownkinds":                     # свой вылет: задачи
+            return {"kinds": command.kinds(st)}
+        if action == "owntargets":                   # свой вылет: цели задачи и части
+            return command.targets(st, req["kind"])
+        if action == "owncreate":
+            lines += command.create(st, req["kind"], req["target"], req.get("performer") or None, req.get("tot") or None,
+                                    req.get("support"), int(req["size"]) if req.get("size") else None)
+            for ln in lines:
+                model.note(st, ln)
+            planner.plan(st)
+            model.save(st, p)
+            return {"state": view(st), "lines": lines}
         if action == "history":                      # хронология карты: снимок обстановки (только чтение)
             h = st.get("history") or []
             i = int(req.get("i", -1))

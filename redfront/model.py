@@ -459,7 +459,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "posture": (chosen or {}).get("posture", {}),   # поза сторон по сценарию (наступает синяя - 1982), иначе доктрины
         "replacements": forces.get("replacements", {}),
         "objectives": objectives,                 # цели операции сторон (по порядку), с учётом варианта
-        "scenario": {"seed": seed, "variant": chosen["name"] if chosen else None,
+        "scenario": {"seed": seed, "variant": chosen["name"] if chosen else None, "historical": forces.get("historical"),
                      "title": chosen.get("title") if chosen else None},
         "airbases": bases,
         "units": units,
@@ -691,3 +691,32 @@ def tasks_not(unit: dict) -> list[str]:
     """Задачи и группы обеспечения, которых часть не выполняет: своё поле, вариант типа, тип ЛА (aircraft.json)."""
     return (list(unit.get("tasks_not", [])) + variant(unit).get("tasks_not", [])
             + list(aircraft_info(unit.get("type")).get("tasks_not", [])))
+
+
+# ---- влияние игрока на исход (настройка influence): исторический сценарий - исторический ход или альтернативный;
+# гипотетический сценарий (холодная война, вариант Ливана с Израилем) - всегда альтернативный (ОЦЕНКИ) ----
+HISTORICAL_OOBS = {"oob_kyiv22", "oob_kharkiv22", "oob_golan73", "oob_lebanon83", "oob_syria", "oob_vietnam72",
+                   "oob_vietnam72_lb2", "oob_tankerwar88", "oob_karabakh", "oob_abkhazia", "oob_caucasus"}
+PLAYER_K_ALT = 1.5        # ОЦЕНКА: вес вылета игрока в альтернативном ходе (повреждение объектов, шок частей)
+
+
+def historical(state: dict) -> bool:
+    """Сценарий по реальным событиям (поле historical состава сил, иначе - по списку HISTORICAL_OOBS)."""
+    sc = state.get("scenario") or {}
+    if sc.get("historical") is not None:
+        return bool(sc["historical"])
+    return Path(str(state.get("oob") or "")).stem in HISTORICAL_OOBS
+
+
+def influence(state: dict) -> str:
+    """'historical' - исторический ход (опоры сценария: смена поз по датам, гарнизоны; вылет игрока - как есть);
+    'alternative' - исход зависит от игрока сильнее (вес вылета PLAYER_K_ALT, поза - по соотношению сил).
+    Гипотетический сценарий - всегда 'alternative'; исторический - по настройке (по умолчанию исторический)."""
+    if not historical(state):
+        return "alternative"
+    v = (state.get("settings") or {}).get("influence")
+    return v if v in ("historical", "alternative") else "historical"
+
+
+def player_k(state: dict) -> float:
+    return PLAYER_K_ALT if influence(state) == "alternative" else 1.0

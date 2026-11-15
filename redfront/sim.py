@@ -37,7 +37,12 @@ def power(state: dict, unit: dict) -> float:
     # в пользу Израиля - ОЦЕНКА), по умолчанию 1
     # night_power - ночной бой стороны относительно дня (доктрина: армии арабских стран 1973 ночью слабее - ОЦЕНКА)
     night = sim.get("night_power", 1.0) if state.get("_night_now") else 1.0
-    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0) * night
+    shock = SHOCK_POWER if unit.get("shock_until", 0) >= state.get("day", 0) else 1.0   # после удара в вылете игрока
+    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0) * night * shock
+
+
+SHOCK_POWER = 0.7        # ОЦЕНКА: сила части в шоке после удара (альтернативный ход, debrief)
+SHOCK_SPEED = 0.5        # и темп марша
 
 
 def _art_bde(state: dict, unit: dict) -> float:
@@ -216,6 +221,8 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
                 budget[u["id"]] = ((u.get("daily_advance_km") or sm["daily_advance_km"]) * model.strength(u)
                                    * u.get("supply", 1.0) * frac_day)         # без снабжения - медленнее
             budget[u["id"]] *= u.get("speed_k", 1.0)        # передовой отряд, ОМГ - быстрее (ops.py)
+            if u.get("shock_until", 0) >= state.get("day", 0):
+                budget[u["id"]] *= SHOCK_SPEED              # часть в шоке после удара игрока
             from . import ew
             budget[u["id"]] *= ew.tempo_factor(state, u)    # РЭБ противника: подавление связи - темп ниже
             cl = current_link(state, u)
