@@ -49,7 +49,7 @@ G.EXTRA_VARIANT = {
                             "north": ["Lyptsi", "Vovchansk"]},
                    "red": []},
 }
-G.SAM_FIXED = False
+G.SAM_FIXED = True       # фронт стоял с весны 2022: позиции ЗРК у Изюма и Купянска разведаны (цели HARM и ударов)
 
 G.PLACES = {
     # Россия

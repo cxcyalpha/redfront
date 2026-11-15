@@ -1,5 +1,5 @@
 {
- "_about": "Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.93 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Ummern, Schonefeld, Falkenberg, Gutersloh, Norvenich, Dusseldorf, Rinteln. Рельеф и реки - карты, не Украины.",
+ "_about": "Харьковщина, 06.09.2022. Генерирован tools/gen_kharkiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.93 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Fassberg, Schonefeld, Brand, Gutersloh, Norvenich, Dusseldorf, Bremen. Рельеф и реки - карты, не Украины.",
  "theatre": "germany",
  "places": {
   "Belgorod": {
@@ -110,9 +110,9 @@
   }
  },
  "airbases": {
-  "ummern": {
-   "name": "Ummern",
-   "airport": "Ummern",
+  "fassberg": {
+   "name": "Fassberg",
+   "airport": "Fassberg",
    "side": "red",
    "military": true,
    "supply_external": true
@@ -124,9 +124,9 @@
    "military": true,
    "supply_external": true
   },
-  "falkenberg": {
-   "name": "Falkenberg",
-   "airport": "Falkenberg",
+  "brand": {
+   "name": "Brand",
+   "airport": "Brand",
    "side": "red",
    "military": true,
    "supply_external": true
@@ -149,9 +149,9 @@
    "side": "blue",
    "military": true
   },
-  "rinteln": {
-   "name": "Rinteln",
-   "airport": "Rinteln",
+  "bremen": {
+   "name": "Bremen",
+   "airport": "Bremen",
    "side": "blue",
    "military": true
   }
@@ -402,6 +402,28 @@
  ],
  "ad_sites": [
   {
+   "id": "red_ad_af_brand",
+   "name": "ПВО аэродрома Brand",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_brand",
+   "lat": 52.0282,
+   "lon": 13.7298,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_bremen",
+   "name": "ПВО аэродрома Bremen",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_bremen",
+   "lat": 53.0389,
+   "lon": 8.806,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
    "id": "blue_ad_af_dusseldorf",
    "name": "ПВО аэродрома Dusseldorf",
    "side": "blue",
@@ -413,13 +435,13 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "red_ad_af_falkenberg",
-   "name": "ПВО аэродрома Falkenberg",
+   "id": "red_ad_af_fassberg",
+   "name": "ПВО аэродрома Fassberg",
    "side": "red",
    "tier": "short",
-   "covers": "af_falkenberg",
-   "lat": 51.5399,
-   "lon": 13.1973,
+   "covers": "af_fassberg",
+   "lat": 52.9068,
+   "lon": 10.1928,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -446,17 +468,6 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "blue_ad_af_rinteln",
-   "name": "ПВО аэродрома Rinteln",
-   "side": "blue",
-   "tier": "short",
-   "covers": "af_rinteln",
-   "lat": 52.1751,
-   "lon": 9.0749,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
    "id": "red_ad_af_schonefeld",
    "name": "ПВО аэродрома Schonefeld",
    "side": "red",
@@ -466,17 +477,6 @@
    "lon": 13.5125,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "red_ad_af_ummern",
-   "name": "ПВО аэродрома Ummern",
-   "side": "red",
-   "tier": "short",
-   "covers": "af_ummern",
-   "lat": 52.6077,
-   "lon": 10.4179,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
   }
  ],
  "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил.",
@@ -484,9 +484,9 @@
   "blue": [
    "Belgorod",
    "Valuyki",
-   "af_ummern",
+   "af_fassberg",
    "af_schonefeld",
-   "af_falkenberg"
+   "af_brand"
   ]
  }
 }

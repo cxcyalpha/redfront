@@ -235,7 +235,14 @@ REAL_AB = {   # прежнее имя аэродрома карты -> реал�
     "Wunstorf": (49.75, 27.27),               # Староконстантинов
     "Hannover": (48.55, 32.29),               # Канатово (Кропивницкий)
 }
-PROJ = theatre_proj.apply(G, REAL, REAL_AB, far=("Lviv", "Kiel"))
+BORDER = {   # имя: (широта, долгота, сторона)
+    "Horodnia": (51.89, 31.60, "blue"), "NovhorodSiverskyi": (52.01, 33.26, "blue"), "Shostka": (51.86, 33.48, "blue"),
+    "Okhtyrka": (50.31, 34.90, "blue"), "Klintsy": (52.76, 32.24, "red"), "Glushkovo": (51.34, 34.64, "red"),
+    "Sudzha": (51.19, 35.27, "red"), "Trubchevsk": (52.58, 33.77, "red"), "Sevsk": (52.15, 34.49, "red"),
+    # обход Сум с юга (2-я гв. ТА и 1-я ТА 02.2022: Лебедин - Ромны - на Прилуки и Бровары, Сумы и Ахтырка - не взяты)
+    "Lebedyn": (50.59, 34.48, "blue"), "Romny": (50.75, 33.47, "blue"),
+}
+PROJ = theatre_proj.apply(G, REAL, REAL_AB, far=("Lviv", "Kiel"), extra_places=BORDER)
 # позиции ЗРК, РЭБ и пусковых - реальные (по памяти, +-10 км, ОЦЕНКА), а не перенос условной схемы: силы РФ на
 # 24.02 - в Беларуси и России у границы, ПВО Украины - у Киева и Чернигова
 REAL_POS = {
@@ -255,15 +262,6 @@ def _real_pos(rows: list, real: dict) -> list:
 G.SAMS, G.EW, G.SSM = _real_pos(G.SAMS, REAL_POS), _real_pos(G.EW, REAL_POS), _real_pos(G.SSM, REAL_POS)
 # граница 24.02: Беларусь и Россия - Украина (северо-восток: Черниговщина, Сумщина) - пункты по обе стороны, чтобы
 # фронт первого дня шёл по границе, а не обрывался; в старой условной схеме их не было - сразу в проекции
-BORDER = {   # имя: (широта, долгота, сторона)
-    "Horodnia": (51.89, 31.60, "blue"), "NovhorodSiverskyi": (52.01, 33.26, "blue"), "Shostka": (51.86, 33.48, "blue"),
-    "Okhtyrka": (50.31, 34.90, "blue"), "Klintsy": (52.76, 32.24, "red"), "Glushkovo": (51.34, 34.64, "red"),
-    "Sudzha": (51.19, 35.27, "red"), "Trubchevsk": (52.58, 33.77, "red"), "Sevsk": (52.15, 34.49, "red"),
-    # обход Сум с юга (2-я гв. ТА и 1-я ТА 02.2022: Лебедин - Ромны - на Прилуки и Бровары, Сумы и Ахтырка - не взяты)
-    "Lebedyn": (50.59, 34.48, "blue"), "Romny": (50.75, 33.47, "blue"),
-}
-for _n, (_la, _lo, _sd) in BORDER.items():
-    G.PLACES[_n] = (*PROJ(_la, _lo), _sd)
 G.LINKS += [("Gomel", "Horodnia"), ("Horodnia", "Chernihiv"), ("Klintsy", "Horodnia"), ("Klintsy", "NovhorodSiverskyi"),
             ("NovhorodSiverskyi", "Shostka"), ("Shostka", "Konotop"), ("Glushkovo", "Shostka"), ("Glushkovo", "Konotop"),
             ("Sudzha", "Sumy"), ("Sumy", "Okhtyrka"), ("Sudzha", "Okhtyrka"), ("Klintsy", "Trubchevsk"),
