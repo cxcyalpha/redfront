@@ -500,56 +500,8 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
                 reasons.append(f"{tdef['title']}: нет готовой десантной роты, площадки или вертолётов")
             tasks += t
             continue
-        tside = side if tdef["target"].get("side") == "own" else foe      # прикрытие своих войск - цель своя
+        targets = targets_for(state, side, kind, tdef, reasons, gate, gated, banned)
         cat = tdef["target"]["category"]
-        if cat in STRATEGIC:                     # объекты тыла противника: целы и не потеряны; мост - в тылу противника
-            targets = [u for u in state["units"].values() if model.category(u) == cat and u["state"] == "active"
-                       and u.get("damage", 0) < 0.95 and (cat != "depot" or logistics.supplies(u))
-                       and (logistics.bridge_side(state, u) if cat == "bridge" else u["side"]) == tside]
-            for t in [t for t in targets if t["id"] in gated]:   # за поясом ПВО - не сейчас
-                reasons.append(f"{tdef['title']}: {t['name']} - за поясом ПВО ({', '.join(state['units'][x]['name'] for x in gated[t['id']])}), "
-                               "сначала его подавление")
-            targets = [t for t in targets if t["id"] not in gated]
-        elif cat == "naval":                     # корабельные группы противника на море (вид - target.kinds: CSG, SAG, FAC...)
-            from . import naval
-            kinds = tdef["target"].get("kinds")
-            targets = [u for u in naval.ships(state, tside) if (not kinds or naval.kind(u) in kinds)
-                       and not (tside == foe and u.get("protected"))]   # суда, удары по которым запрещены (СССР у Хайфона)
-        elif cat == "sam":                       # позиции ЗРК противника (fixed - только объектовая ПВО): исправные
-            targets = [u for u in state["units"].values() if u["side"] == tside and model.category(u) == "sam"
-                       and not u.get("attached_to") and u["state"] not in ("destroyed", "pending")
-                       and model.strength(u) >= tdef["target"].get("min_strength", 0.5)
-                       and (u.get("fixed") or not tdef["target"].get("fixed"))
-                       and radar_ok(u)                  # РЛС уничтожены (в миссии или раньше) - не цель подавления
-                       and not u.get("point")]          # ПВО склада/моста (ЗУ, ПЗРК) - не цель отдельного удара
-        else:
-            targets = [u for u in state["units"].values()
-                       if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]
-            if side == state.get("player_side") and tside == foe:   # туман войны: цели игрока - только известные
-                targets = [u for u in targets if intel.can_target(state, u)]
-            fkm = tdef["target"].get("front_km_max")
-            if fkm and tside == side:            # свои части у фронта (прикрытие войск - и до начала боёв)
-                fl = ops.front_links(state)
-                mids = [model.lerp(state["places"][a], state["places"][b], 0.5) for a, b in fl]
-                targets = [u for u in targets if mids and not u.get("attached_to")
-                           and min(model.dist_km(model.unit_pos(state, u), q) for q in mids) <= fkm]
-                gap = 1.5 * (tdef.get("strike") or {}).get("zone_km", 40)   # одна зона прикрытия на участок фронта
-                picked = []
-                for u in sorted(targets, key=lambda u: (u["state"] != "battle", u["id"])):   # сначала - над боем
-                    if all(model.dist_km(model.unit_pos(state, u), model.unit_pos(state, v)) > gap for v in picked):
-                        picked.append(u)
-                targets = picked
-            depth = tdef["target"].get("depth_km")
-            if depth and tside == foe:           # полоса глубины от своих войск (НАТО: BAI 15-50 км, FOFA - глубже)
-                from . import farp
-                targets = [u for u in targets if depth[0] <= farp.front_km(state, foe, _aim(state, side, u)) <= depth[1]]
-        targets = [t for t in targets if _allowed_area(t)]
-        umb = doc.get("umbrella") or {}
-        if kind in umb.get("tasks", []):         # доктрина 'зонтика': задача - только под своими ЗРК (арабские ВВС 1973)
-            before = len(targets)
-            targets = [t for t in targets if under_umbrella(state, side, _aim(state, side, t), umb.get("km", 30))]
-            if before and not targets:
-                reasons.append(f"{tdef['title']}: цели вне зонтика своих ЗРК ({umb.get('km', 30)} км) - по доктрине не летаем")
         if not targets:
             continue
         found = False
@@ -562,59 +514,145 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         for tgt in targets:
             if n_kind >= per_kind:           # задач одного вида в плане дня - не больше (иначе план - 8 одинаковых)
                 break
-            tpos = _aim(state, side, tgt)
-            best = None
-            cls = fitness.task_class(kind, tdef)
-            for r in performers:
-                radius = strike_radius_km(r)
-                if radius is None:
-                    reasons.append(f"{r['name']}: не задан радиус (strike_radius_km у части или у роли {r['role']})")
-                    continue
-                if not fitness.fits(state, r, cls):   # тип для этой задачи слаб на фоне лучших в кампании (fitness.py)
-                    continue
-                d = model.dist_km(state["airbases"][r["base"]], tpos)
-                # сначала - пригодный тип (оценка относительно лучшего в кампании) с поправкой на загрузку: задачи
-                # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
-                key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls)
-                             + (r.get("task_penalty") or {}).get(kind, 0.0), 3), d)   # задача - не основная для части
-                how = reach(state, side, r, tpos, radius, d)   # радиус; дальше - дозаправка или посадка на запасном
-                if how is not None and (best is None or (how != "", key) < (best[2] != "", best[0])):
-                    best = (key, r, how)                  # в радиусе - первыми, затем с дозаправкой/запасным
-            if best is None:
-                reasons.append(f"{tdef['title']}: {tgt['name']} - нет исполнителей ({', '.join(tdef['performers'])}) в радиусе")
+            t = task_for(state, side, kind, tdef, tgt, performers, tasked, reasons)
+            if t is None:
                 continue
-            (_n, d), perf, how_reach = best
-            base = state["airbases"][perf["base"]]
-            ip = ip_point(base, tpos, tdef["ip_offset_km"])
-            threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe, tdef.get("low_alt_m_agl"))
-            groups, why = package(state, tdef, perf, tgt, tpos, ip, threats)
-            if groups is None:
-                reasons.append(f"{tdef['title']}: {tgt['name']} - {why}")
-                continue
-            if how_reach:                            # ударная группа за радиусом: дозаправка или посадка на запасном
-                for g in groups:
-                    if g["performer"] == perf["id"]:
-                        g["reach"] = how_reach
             found = True
             n_kind += 1
-            for g in groups:
-                _book(state, tasked, g["performer"])
-            med = medium_alt(state, side, tdef, threats, groups)
-            if med:                              # угроз нет или ЗРК средней дальности подавляются пакетом - средние высоты
-                for g in groups:
-                    g["transit_alt_m_agl"] = med
-            tasks.append({
-                "kind": kind, "side": side, "title": f"{tdef['title']}: {tgt['name']}",
-                "performer": perf["id"], "target": tgt["id"], "group_size": groups[0]["size"], "base": perf["base"],
-                "target_pos": tpos, "ip": ip, "distance_km": round(d, 1), "threats": threats,
-                "package": groups,          # тактическая группа: [ударная, обеспечения...] ('Тактика ВВС' 3.3.3)
-                "package_notes": why,
-            })
+            tasks.append(t)
         if not found and not targets:
             reasons.append(f"{tdef['title']}: целей нет")
     orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
     regular = apportion(state, doc, _interleave([t for t in tasks if not t.get("ai_only")]), max_tasks)   # доли - по кругу видов
     return joint_heli(state, side, _interleave(regular)[:max_tasks]) + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
+
+
+
+def targets_for(state: dict, side: str, kind: str, tdef: dict, reasons: list | None = None, gate: dict | None = None,
+                gated: dict | None = None, banned: set | None = None) -> list[dict]:
+    """Цели задачи kind стороны side (как в плане дня): категория цели доктрины, туман войны, пояса ПВО, зонтик,
+    районы сценария. Без лимитов плана (их ставит plan_side)."""
+    foe = model.enemy(side)
+    doc = model.doctrine(state, side)
+    reasons = reasons if reasons is not None else []
+    if gate is None or gated is None:
+        gate, gated = _gates(state, side)
+        if doc.get("roll_back") is False:
+            gated = {}
+    if banned is None:
+        banned = set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))
+    def _allowed_area(u):
+        if not banned:
+            return True
+        pos = _aim(state, side, u)
+        near = min(state["places"], key=lambda n: model.dist_km(state["places"][n], pos))
+        return near not in banned
+    tside = side if tdef["target"].get("side") == "own" else foe      # прикрытие своих войск - цель своя
+    cat = tdef["target"]["category"]
+    if cat in STRATEGIC:                     # объекты тыла противника: целы и не потеряны; мост - в тылу противника
+        targets = [u for u in state["units"].values() if model.category(u) == cat and u["state"] == "active"
+                   and u.get("damage", 0) < 0.95 and (cat != "depot" or logistics.supplies(u))
+                   and (logistics.bridge_side(state, u) if cat == "bridge" else u["side"]) == tside]
+        for t in [t for t in targets if t["id"] in gated]:   # за поясом ПВО - не сейчас
+            reasons.append(f"{tdef['title']}: {t['name']} - за поясом ПВО ({', '.join(state['units'][x]['name'] for x in gated[t['id']])}), "
+                           "сначала его подавление")
+        targets = [t for t in targets if t["id"] not in gated]
+    elif cat == "naval":                     # корабельные группы противника на море (вид - target.kinds: CSG, SAG, FAC...)
+        from . import naval
+        kinds = tdef["target"].get("kinds")
+        targets = [u for u in naval.ships(state, tside) if (not kinds or naval.kind(u) in kinds)
+                   and not (tside == foe and u.get("protected"))]   # суда, удары по которым запрещены (СССР у Хайфона)
+    elif cat == "sam":                       # позиции ЗРК противника (fixed - только объектовая ПВО): исправные
+        targets = [u for u in state["units"].values() if u["side"] == tside and model.category(u) == "sam"
+                   and not u.get("attached_to") and u["state"] not in ("destroyed", "pending")
+                   and model.strength(u) >= tdef["target"].get("min_strength", 0.5)
+                   and (u.get("fixed") or not tdef["target"].get("fixed"))
+                   and radar_ok(u)                  # РЛС уничтожены (в миссии или раньше) - не цель подавления
+                   and not u.get("point")]          # ПВО склада/моста (ЗУ, ПЗРК) - не цель отдельного удара
+    else:
+        targets = [u for u in state["units"].values()
+                   if u["side"] == tside and model.category(u) == cat and _state_ok(u, tdef["target"]["state"])]
+        if side == state.get("player_side") and tside == foe:   # туман войны: цели игрока - только известные
+            targets = [u for u in targets if intel.can_target(state, u)]
+        fkm = tdef["target"].get("front_km_max")
+        if fkm and tside == side:            # свои части у фронта (прикрытие войск - и до начала боёв)
+            fl = ops.front_links(state)
+            mids = [model.lerp(state["places"][a], state["places"][b], 0.5) for a, b in fl]
+            targets = [u for u in targets if mids and not u.get("attached_to")
+                       and min(model.dist_km(model.unit_pos(state, u), q) for q in mids) <= fkm]
+            gap = 1.5 * (tdef.get("strike") or {}).get("zone_km", 40)   # одна зона прикрытия на участок фронта
+            picked = []
+            for u in sorted(targets, key=lambda u: (u["state"] != "battle", u["id"])):   # сначала - над боем
+                if all(model.dist_km(model.unit_pos(state, u), model.unit_pos(state, v)) > gap for v in picked):
+                    picked.append(u)
+            targets = picked
+        depth = tdef["target"].get("depth_km")
+        if depth and tside == foe:           # полоса глубины от своих войск (НАТО: BAI 15-50 км, FOFA - глубже)
+            from . import farp
+            targets = [u for u in targets if depth[0] <= farp.front_km(state, foe, _aim(state, side, u)) <= depth[1]]
+    targets = [t for t in targets if _allowed_area(t)]
+    umb = doc.get("umbrella") or {}
+    if kind in umb.get("tasks", []):         # доктрина 'зонтика': задача - только под своими ЗРК (арабские ВВС 1973)
+        before = len(targets)
+        targets = [t for t in targets if under_umbrella(state, side, _aim(state, side, t), umb.get("km", 30))]
+        if before and not targets:
+            reasons.append(f"{tdef['title']}: цели вне зонтика своих ЗРК ({umb.get('km', 30)} км) - по доктрине не летаем")
+    return targets
+
+
+def task_for(state: dict, side: str, kind: str, tdef: dict, tgt: dict, performers: list[dict], tasked: dict,
+             reasons: list, perf_forced: dict | None = None) -> dict | None:
+    """Задача kind по цели tgt: лучший исполнитель (или perf_forced - выбор командующего), ИПМ, угрозы, пакет
+    доктрины. None - не собирается (причина - в reasons)."""
+    foe = model.enemy(side)
+    if perf_forced is not None:
+        performers = [perf_forced]
+    tpos = _aim(state, side, tgt)
+    best = None
+    cls = fitness.task_class(kind, tdef)
+    for r in performers:
+        radius = strike_radius_km(r)
+        if radius is None:
+            reasons.append(f"{r['name']}: не задан радиус (strike_radius_km у части или у роли {r['role']})")
+            continue
+        if perf_forced is None and not fitness.fits(state, r, cls):   # тип слаб на фоне лучших (fitness.py); выбор командующего - его
+            continue
+        d = model.dist_km(state["airbases"][r["base"]], tpos)
+        # сначала - пригодный тип (оценка относительно лучшего в кампании) с поправкой на загрузку: задачи
+        # расходятся по типам и полкам, но лучшему достаётся больше; затем ближние
+        key = (round(fitness.pick_key(state, r, cls, _load(tasked, r)) - nation_bonus(state, r, cls)
+                     + (r.get("task_penalty") or {}).get(kind, 0.0), 3), d)   # задача - не основная для части
+        how = reach(state, side, r, tpos, radius, d)   # радиус; дальше - дозаправка или посадка на запасном
+        if how is not None and (best is None or (how != "", key) < (best[2] != "", best[0])):
+            best = (key, r, how)                  # в радиусе - первыми, затем с дозаправкой/запасным
+    if best is None:
+        reasons.append(f"{tdef['title']}: {tgt['name']} - нет исполнителей ({', '.join(tdef['performers'])}) в радиусе")
+        return None
+    (_n, d), perf, how_reach = best
+    base = state["airbases"][perf["base"]]
+    ip = ip_point(base, tpos, tdef["ip_offset_km"])
+    threats = corridor_threats(state, [(base, ip), (ip, tpos)], foe, tdef.get("low_alt_m_agl"))
+    groups, why = package(state, tdef, perf, tgt, tpos, ip, threats)
+    if groups is None:
+        reasons.append(f"{tdef['title']}: {tgt['name']} - {why}")
+        return None
+    if how_reach:                            # ударная группа за радиусом: дозаправка или посадка на запасном
+        for g in groups:
+            if g["performer"] == perf["id"]:
+                g["reach"] = how_reach
+    for g in groups:
+        _book(state, tasked, g["performer"])
+    med = medium_alt(state, side, tdef, threats, groups)
+    if med:                              # угроз нет или ЗРК средней дальности подавляются пакетом - средние высоты
+        for g in groups:
+            g["transit_alt_m_agl"] = med
+    return {
+        "kind": kind, "side": side, "title": f"{tdef['title']}: {tgt['name']}",
+        "performer": perf["id"], "target": tgt["id"], "group_size": groups[0]["size"], "base": perf["base"],
+        "target_pos": tpos, "ip": ip, "distance_km": round(d, 1), "threats": threats,
+        "package": groups,          # тактическая группа: [ударная, обеспечения...] ('Тактика ВВС' 3.3.3)
+        "package_notes": why,
+    }
 
 
 def orbit_point(state: dict, side: str, standoff_km: float) -> dict | None:
