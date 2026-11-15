@@ -1378,6 +1378,21 @@ def own_control_section(tmp: Path) -> None:
     check(t_sead == "15:50" and next(g for g in t_task["package"] if g["group"] == "sead")["lead_min"] == 10
           and [g["group"] for g in e2["task"]["package"]] == ["strike"],
           f"время группы подавления - {t_sead} (за 10 мин до удара; в задаче игрока lead_min), группа снимается")
+    # добавить группу в пакет: прикрытие, затем добивание (только в паре с подавлением - сначала его)
+    ka = [k["kind"] for k in app.do("kindsfor", dict(f, target=o["targets"][0]["id"]))["kinds"]]
+    r1 = app.do("addgroup", dict(f, id=e2["id"], support="cover"))
+    err = None
+    try:
+        app.do("addgroup", dict(f, id=e2["id"], support="kill"))
+    except ValueError as x:
+        err = str(x)
+    app.do("addgroup", dict(f, id=e2["id"], support="sead"))
+    app.do("addgroup", dict(f, id=e2["id"], support="kill"))
+    st = model.load(root / "o1.json")
+    e3 = next(x for x in st["ato"]["entries"] if x.get("user"))
+    check(ka == ["strike_sam_site"] and [g["group"] for g in e3["task"]["package"]] == ["strike", "cover", "sead", "kill"]
+          and err and "сначала" in err and all(g["group"] in e3["times"] for g in e3["task"]["package"]),
+          f"добавление групп в пакет: {r1['lines'][0][:90]}...; добивание без подавления - {err}")
     # ход кампании и влияние игрока
     hist = model.historical(st), model.influence(st), model.player_k(st)
     app.do("setrules", dict(f, influence="alternative", ground_control=True))

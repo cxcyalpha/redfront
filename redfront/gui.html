@@ -309,6 +309,8 @@ const I18N = {
     noPlan: "Плана на сегодня ещё нет - нажмите «1. План дня».", noTasks: "Вылетов нет: ", fromBase: "км от", sam: "ПВО", none: "нет",
     fly: "моя группа", humans: "игроков", humansTip: "Сколько людей летит: первое место - в вашей группе, остальные - по группам пакета (места Client для мультиплеера).",
     buildBtn: "Собрать миссию", edit: "Изменить", remove: "Снять", addSortie: "+ вылет",
+    grpAdd: "добавить группу", grpAgain: "ещё одна", strikeIt: "Удар по этой цели", noStrikeHere: "Своим вылетом по этой цели не ударить (не разведана, вне района или нет задачи)",
+    pickOnMap: "пункт на карте", ordHere: "здесь", pickHint: "Кликните по карте у нужного пункта",
     ownBtn: "+ свой вылет", ownTip: "Свой вылет: задача, цель, ударная часть, состав пакета и время - на ваш выбор",
     ownT: "Свой вылет", ownKind: "Задача", ownTarget: "Цель (известная разведке)", ownPerf: "Ударная группа - часть",
     ownSupport: "Группы обеспечения (обязательные по доктрине - всегда)", ownNoTargets: "Целей для этой задачи нет",
@@ -424,6 +426,8 @@ const I18N = {
     noPlan: "No plan for today yet - press “1. Plan the day”.", noTasks: "No sorties: ", fromBase: "km from", sam: "Air defence", none: "none",
     fly: "my group", humans: "players", humansTip: "How many people fly: the first seat is in your group, the rest go to the other groups of the package (Client slots for multiplayer).",
     buildBtn: "Build mission", edit: "Edit", remove: "Remove", addSortie: "+ sortie",
+    grpAdd: "add group", grpAgain: "one more", strikeIt: "Strike this target", noStrikeHere: "No own sortie possible against this target (not located, out of area or no task)",
+    pickOnMap: "place on map", ordHere: "here", pickHint: "Click the map near the place",
     ownBtn: "+ own sortie", ownTip: "Your own sortie: task, target, strike unit, package and time of your choice",
     ownT: "Own sortie", ownKind: "Task", ownTarget: "Target (known to intelligence)", ownPerf: "Strike group - unit",
     ownSupport: "Support groups (required by doctrine - always)", ownNoTargets: "No targets for this task",
@@ -670,7 +674,7 @@ function drawMap() {
           dashArray: "3 5", interactive: false}).addTo(layers.sam);
       const itip = g.intel_day != null ? `<br><i>${T("samPos")} ${g.intel_day}${g.stale ? T("samStale") : ""}</i>` : "";
       L.marker(g.pos, {icon: icon(TAC.sam(Object.assign({}, g, {branch: g.cat === "gci" ? "gci" : "sam"}), nato, friend), 26, 26, g.stale ? "tac sam stale" : "tac sam")})
-        .bindTooltip(tip + itip).on("click", () => selectHtml(tip + itip)).addTo(layers.sam);
+        .bindTooltip(tip + itip).on("click", () => clickUnit(g, tip + itip)).addTo(layers.sam);
       continue;
     }
     if (g.route) {
@@ -684,13 +688,13 @@ function drawMap() {
     const dir = g.route && g.route.length > 1 ? TAC.bearing(g.route[0], g.route[1]) : null;
     const html = nato ? TAC.unitNATO(g, friend) : TAC.unitSU(g, TAC.bearingTo(g.pos, enemyOf(g.side)), dir);
     L.marker(g.pos, {icon: icon(html, 64, 64, "tac unit" + (g.intel && g.intel !== "exact" ? " fog-" + g.intel : "")), zIndexOffset: g.state === "battle" ? 500 : 0}).bindTooltip(tip)
-      .on("click", () => selectHtml(tip)).addTo(layers.ground);
+      .on("click", () => clickUnit(g, tip)).addTo(layers.ground);
   }
   for (const o of V.objects) {
     if (o.role === "airfield") continue;
     L.marker(o.pos, {icon: icon(TAC.target(o), 24, 24)})
       .bindTooltip(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`, {className: "wide"})
-      .on("click", () => selectHtml(`<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`)).addTo(layers.objects);
+      .on("click", () => clickUnit(o, `<b>${esc(o.name)}</b><br>${objState(o)}${stockTxt(o)}${o.checked ? "" : "<br>" + T("estCoords")}${infoTxt(o.info)}`)).addTo(layers.objects);
   }
   for (const r of (HIST ? [] : ST.supply_routes || []))
     L.polyline(r.pts, {color: "#7a5230", weight: 2 + Math.min(6, r.t / 150), opacity: .6, dashArray: "2 6"})
@@ -1001,6 +1005,52 @@ function groundOrders(p) {
     act("groundorder", {id: it.dataset.id, order: it.querySelector(".ok").value, place: it.querySelector(".op").value}, e.target); });
 }
 
+// ---------- клик по карте: цель противника - свой вылет по ней; своя часть - приказ (пункт - кликом по карте) ----------
+let PICK = null;                                        // ждём клика по карте: {id, order} - пункт приказа
+function clickUnit(g, tip) {
+  if (PICK) { pickAt(L.latLng(g.pos)); return; }   // выбор пункта приказа: клик по знаку у пункта - тоже выбор
+  selectHtml(tip);
+  if (HIST || !ST) return;
+  const box = $("#insp .ibox");
+  if (!box) return;
+  const div = document.createElement("div");
+  div.style.marginTop = "8px";
+  box.appendChild(div);
+  if (g.side && g.side !== ST.side) targetForm(div, g);
+  else if (g.side === ST.side && ST.ground_control && (ST.ground_units || []).some(u => u.id === g.id)) orderForm(div, g);
+}
+async function targetForm(div, g) {
+  let ks;
+  try { ks = (await api("kindsfor", {file: FILE, target: g.id})).kinds; } catch (e) { return; }
+  if (!ks.length) { div.innerHTML = `<p class="meta">${T("noStrikeHere")}</p>`; return; }
+  div.innerHTML = `<b>${T("strikeIt")}</b>
+    <div class="row"><select class="k" style="flex:1;min-width:0">${ks.map(k => `<option value="${esc(k.kind)}">${esc(k.title)}</option>`).join("")}</select></div>
+    <div class="row"><span class="meta" style="margin:0">${T("tot")}</span><input class="t" placeholder="${T("hhmm")}" style="width:70px">
+      <span class="meta" style="margin:0">${T("seats")}</span><input class="n" type="number" min="1" max="4" placeholder="${T("auto")}" style="width:56px"></div>
+    <div class="sup"></div><div class="row" style="margin-top:4px"><button class="main go">${T("put")}</button></div>`;
+  const sup = () => { const k = ks.find(x => x.kind === div.querySelector(".k").value);
+    div.querySelector(".sup").innerHTML = k.support.map(s => `<label class="meta"><input type="checkbox" class="s" value="${esc(s.id)}" ${s.required ? "checked disabled" : "checked"} style="width:auto"> ${esc(s.title)}</label>`).join("<br>"); };
+  div.querySelector(".k").onchange = sup; sup();
+  div.querySelector(".go").onclick = e => act("owncreate", {kind: div.querySelector(".k").value, target: g.id, tot: div.querySelector(".t").value.trim(),
+    size: div.querySelector(".n").value, support: [...div.querySelectorAll(".s:checked")].map(x => x.value)}, e.target);
+}
+function orderForm(div, g) {
+  const u = ST.ground_units.find(x => x.id === g.id);
+  div.innerHTML = `<b>${T("ordersT")}</b>
+    <div class="row"><select class="o">${["auto", "hold", "move", "attack", "withdraw"].map(k => `<option value="${k}" ${(u.player_order ? u.player_order.type : "auto") === k ? "selected" : ""}>${T("ord_" + k)}</option>`).join("")}</select>
+    <button class="pick">${T("pickOnMap")}</button><button class="here">${T("ordHere")}</button></div><p class="meta pm"></p>`;
+  div.querySelector(".pick").onclick = () => { PICK = {id: g.id, order: div.querySelector(".o").value};
+    div.querySelector(".pm").textContent = T("pickHint"); $("#map").style.cursor = "crosshair"; };
+  div.querySelector(".here").onclick = e => act("groundorder", {id: g.id, order: div.querySelector(".o").value, place: ""}, e.target);
+}
+map.on("click", ev => pickAt(ev.latlng));
+function pickAt(ll) {                                   // пункт приказа - ближайший к точке клика
+  if (!PICK || !ST) return;
+  const p = ST.places.reduce((a, b) => (a && map.distance(a.pos, ll) < map.distance(b.pos, ll)) ? a : b, null);
+  const o = PICK; PICK = null; $("#map").style.cursor = "";
+  if (p) act("groundorder", {id: o.id, order: o.order, place: p.name});
+}
+
 // ---------- свой вылет: задача, цель, ударная часть, состав пакета (command.create) ----------
 async function ownSortie() {
   const box = $("#atoCands");
@@ -1123,11 +1173,17 @@ async function atoEditor(it) {
       <div class="row"><span class="meta" style="margin:0">${T("grpTime")}</span><input class="gt" value="${esc(g.time || "")}" style="width:60px" title="${esc(T("grpTimeTip"))}">
       ${g.removable ? `<label class="meta"><input type="checkbox" class="grm" style="width:auto"> ${T("grpRemove")}</label>` : ""}</div>
       <div class="loForm"></div></div>`).join("") +
+    `<div class="row" style="margin-top:6px"><span class="meta" style="margin:0">${T("grpAdd")}</span><select class="ag" style="flex:1;min-width:0"></select>
+      <button class="agGo">+</button></div>` +
     `<div class="row" style="margin-top:6px"><button class="main save">${T("apply")}</button><button class="cancel">${T("cancel")}</button></div></div>`;
   f.querySelectorAll(".grp").forEach(el => { const g = o.groups.find(q => q.group === el.dataset.g);
     el.querySelector(".perf").onchange = e => { el.querySelector(".lo").innerHTML = loOpt(g, e.target.value, ""); };
     el.querySelector(".loEd").onclick = () => loEditor(el, g, loOpt); });
   f.querySelector(".cancel").onclick = () => { f.innerHTML = ""; };
+  api("addgroupoptions", {file: FILE, id: it.dataset.id}).then(r => {
+    f.querySelector(".ag").innerHTML = r.groups.map(g => `<option value="${esc(g.id)}">${esc(g.title)}${g.in ? " (" + T("grpAgain") + ")" : ""}</option>`).join("");
+  }).catch(() => {});
+  f.querySelector(".agGo").onclick = e => { const v = f.querySelector(".ag").value; if (v) act("addgroup", {id: it.dataset.id, support: v}, e.target); };
   f.querySelector(".save").onclick = e => {
     const groups = {};
     f.querySelectorAll(".grp").forEach(el => { const g0 = o.groups.find(q => q.group === el.dataset.g), rm = el.querySelector(".grm");

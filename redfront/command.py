@@ -568,3 +568,80 @@ def create(state: dict, kind: str, target: str, performer: str | None = None, to
     a["entries"].sort(key=lambda x: x["tot_s"])
     return [f"Свой вылет: {ato.hhmm(e['tot_s'])} {e['title']} - "
             + ", ".join(f"{g['title']} {g['size']} x {state['units'][g['performer']]['type']}" for g in t["package"]) + "."]
+
+
+def addable(state: dict, eid: str) -> list[dict]:
+    """Группы обеспечения доктрины, которые можно добавить в пакет вылета (ещё нет в пакете или можно ещё одну)."""
+    e = entry(state, eid)
+    tdef = _tdef(state, e["side"], e["kind"])
+    have = {g.get("support_id") or g["group"].rstrip("0123456789") for g in e["task"]["package"]}
+    return [{"id": g["id"], "title": g.get("title", g["id"]), "in": g["id"] in have} for g in tdef.get("support") or []]
+
+
+def add_group(state: dict, eid: str, support_id: str, performer: str | None = None) -> list[str]:
+    """Добавить в пакет вылета группу обеспечения support_id доктрины (подбор части - как в планировщике, или
+    performer). Условие доктрины 'когда' (истребители противника, цель на марше) - на решение командующего, кроме
+    подавления ПВО: без ЗРК с РЛС в коридоре ему нечего делать. Время - прежнее; самолётов не хватает - не добавляется."""
+    import copy
+    e = entry(state, eid)
+    _check(state, e)
+    if _is_duty(state, e):
+        raise ValueError(f"{e['title']}: в дежурство или перевозку группы не добавляются")
+    tdef = _tdef(state, e["side"], e["kind"])
+    sup = next((g for g in tdef.get("support") or [] if g["id"] == support_id), None)
+    if sup is None:
+        raise ValueError(f"в доктрине задачи нет группы {support_id}")
+    sup = dict(sup, required=True)
+    if sup.get("pair_with"):                     # добивание - в паре с группой поиска (подавления) этого же пакета
+        have = {g.get("support_id") or g["group"].rstrip("0123456789") for g in e["task"]["package"]}
+        if sup["pair_with"] not in have:
+            mate = next((g.get("title", g["id"]) for g in tdef.get("support") or [] if g["id"] == sup["pair_with"]), sup["pair_with"])
+            raise ValueError(f"{sup.get('title', support_id)} - только в паре: сначала добавьте '{mate}'")
+        sup.pop("pair_with")
+        sup.pop("pair_nations", None)
+    if sup.get("when") in ("enemy_fighters", "moving_target"):
+        sup["when"] = "always"
+    if performer:
+        u = state["units"].get(performer)
+        if not u or u["side"] != e["side"] or not planner.role_ok(state, u, sup["performers"], sup.get("loadout")):
+            raise ValueError("эта часть не может выполнять задачу группы")
+        sup["prefer_units"] = [performer]
+    t = e["task"]
+    perf = state["units"][t["package"][0]["performer"]]
+    tgt = state["units"].get(t.get("target") or "")
+    if tgt is None:
+        raise ValueError("у вылета нет цели модели - группы не добавляются")
+    td = {**tdef, "support": [sup], "strike": {**tdef["strike"], "size": 1}}
+    groups, why = planner.package(state, td, perf, tgt, t["target_pos"], t["ip"], t.get("threats") or [])
+    if groups is None or len(groups) < 2:
+        raise ValueError(f"группу не собрать: {why or 'нет условий для неё (например, ЗРК с РЛС в коридоре)'}")
+    new = copy.deepcopy(e)
+    names = {g["group"] for g in new["task"]["package"]}
+    added = []
+    for g in groups[1:]:
+        base_name, k = g["group"], 2
+        while g["group"] in names:               # вторая группа того же вида - с номером
+            g["group"] = f"{base_name.rstrip('0123456789')}{k}"
+            k += 1
+        names.add(g["group"])
+        g["support_id"] = support_id
+        new["task"]["package"].append(g)
+        added.append(g)
+    why = _place(state, new, new["tot_s"], _pool(state, skip=eid))
+    if why:
+        raise ValueError(f"{e['title']}: {why} - группа не добавлена")
+    e.clear()
+    e.update(new)
+    return [f"{e['title']}: добавлена " + ", ".join(f"{g['title']} {g['size']} x {state['units'][g['performer']]['type']} "
+                                                    f"({state['units'][g['performer']]['name']})" for g in added) + "."]
+
+
+def kinds_for(state: dict, target: str) -> list[dict]:
+    """Задачи своего вылета, для которых годится эта цель (клик по цели на карте)."""
+    side = state["player_side"]
+    out = []
+    for k in kinds(state):
+        tdef = _tdef(state, side, k["kind"])
+        if any(t["id"] == target for t in planner.targets_for(state, side, k["kind"], tdef)):
+            out.append(k)
+    return out

@@ -693,6 +693,17 @@ class App:
             model.note(st, ln)
             model.save(st, p)
             return {"state": view(st), "lines": [ln]}
+        if action == "kindsfor":                     # клик по цели на карте: задачи своего вылета по ней
+            return {"kinds": command.kinds_for(st, req["target"])}
+        if action == "addgroupoptions":              # группы доктрины, которые можно добавить в пакет вылета
+            return {"groups": command.addable(st, req["id"])}
+        if action == "addgroup":
+            lines += command.add_group(st, req["id"], req["support"], req.get("performer") or None)
+            for ln in lines:
+                model.note(st, ln)
+            planner.plan(st)
+            model.save(st, p)
+            return {"state": view(st), "lines": lines}
         if action == "ownkinds":                     # свой вылет: задачи
             return {"kinds": command.kinds(st)}
         if action == "owntargets":                   # свой вылет: цели задачи и части
