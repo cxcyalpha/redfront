@@ -12,6 +12,7 @@ from dcs.mapping import Point
 
 from . import explain, model, roads
 
+SHOCK_MIN_LOSS = 0.05    # ОЦЕНКА: потеря боеспособности в миссии игрока, после которой часть "в шоке" (альтернативный ход)
 FULL_DAMAGE = {"depot": 0.5, "airfield": 0.3, "bridge": 0.01, "factory": 0.5}   # ОЦЕНКА: доля разрушенных объектов карты = полное повреждение
 
 
@@ -131,7 +132,7 @@ def apply(state: dict, data: dict) -> list[str]:
                 lines.append(f"{o['name']}: объектов карты в районе не найдено - цель не засчитывается (проверить координаты).")
             continue
         before = o.get("damage", 0.0)
-        gain = 1.0 if o["role"] == "bridge" else min(1.0, (dead_n / n) / FULL_DAMAGE[o["role"]])
+        gain = 1.0 if o["role"] == "bridge" else min(1.0, (dead_n / n) / FULL_DAMAGE[o["role"]] * model.player_k(state))
         o["damage"] = min(1.0, before + gain)
         lines.append(f"{o['name']}: разрушено объектов {dead_n} из {n}, повреждение {before:.0%} -> {o['damage']:.0%}"
                      + ((" - объезд, марш и подвоз по этой связи медленнее." if o.get("minor", o.get("found")) else " - движение по мосту закрыто.")
@@ -155,6 +156,9 @@ def apply(state: dict, data: dict) -> list[str]:
                 cap = next(c["count"] for c in u["composition"] if c["type"] == v["type"])
                 u["lost"][v["type"]] = min(cap, u["lost"].get(v["type"], 0.0) + v["weight"])
         after = model.strength(u)
+        if model.player_k(state) > 1.0 and before - after >= SHOCK_MIN_LOSS:   # альтернативный ход: часть, побитая в
+            u["shock_until"] = state["day"] + 1                               # вылете игрока, - в шоке до конца завтра
+            lines.append(f"{u['name']}: потрясение после удара - сила и темп ниже до конца следующих суток.")
         n_dead = sum(1 for v in g["vehicles"] if v["name"] in lost)
         if n_dead:
             lines.append(f"{u['name']}: уничтожено {n_dead} из {len(g['vehicles'])} развёрнутых машин; "

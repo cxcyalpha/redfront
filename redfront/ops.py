@@ -267,6 +267,9 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     # десант в резерве и высаженный (держит пункт до подхода своих) - не в распоряжении командования фронта (assault.py)
     # гарнизон (order garrison, сценарий) держит свой пункт: не выдвигается и не наступает
     free = [u for u in free if u.get("order") not in ("reserve", "airhead", "garrison")]
+    if ground_control(state, side):              # части под приказом игрока - не в распоряжении командования стороны
+        lines += player_orders(state, side)
+        free = [u for u in free if not u.get("player_order")]
     posture = posture_of(state, side)
     if posture == "offense" and not any(objective(state, side, u) for u in free):
         posture = "defense"                                       # цели операции достигнуты - удерживать
@@ -333,12 +336,104 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     return lines
 
 
+ALT_OFFENSE_RATIO = 0.9   # ОЦЕНКА: альтернативный ход - переход в наступление по дате сценария, только если сила
+ALT_CULMINATE = 0.5       # стороны не меньше этой доли силы противника; наступление выдыхается ниже ALT_CULMINATE
+
+
+def _ground_power(state: dict, side: str) -> float:
+    from . import sim as _s
+    return sum(_s.power(state, u) for u in _maneuver(state, side) if _active(u))
+
+
+# ---- управление наземными войсками игроком (настройка ground_control) ----
+PLAYER_ORDERS = {"hold": "hold", "attack": "attack", "move": "hold", "withdraw": "withdraw"}   # приказ -> order модели
+
+
+def ground_control(state: dict, side: str) -> bool:
+    return side == state.get("player_side") and bool((state.get("settings") or {}).get("ground_control"))
+
+
+def give_order(state: dict, uid: str, kind: str, place: str | None = None) -> str:
+    """Приказ игрока части своей стороны: hold - держать пункт (где стоит или place), move - выйти в place и занять
+    оборону, attack - наступать на place (пункт противника или свой), withdraw - отойти в place; auto - снова на
+    усмотрение командования стороны. Выполняется командованием (player_orders) на ближайшем шаге модели."""
+    u = state["units"].get(uid)
+    side = state.get("player_side")
+    if not u or u["side"] != side or "route" not in u or model.category(u) != "ground" or u.get("attached_to"):
+        raise ValueError("приказ - только манёвренной части своей стороны")
+    if not ground_control(state, side):
+        raise ValueError("управление наземными войсками выключено в настройках кампании")
+    if u["state"] in ("destroyed", "pending"):
+        raise ValueError(f"{u['name']}: часть не в строю")
+    if kind == "auto":
+        u.pop("player_order", None)
+        return f"{u['name']}: снова на усмотрение командования."
+    if kind not in PLAYER_ORDERS:
+        raise ValueError(f"нет приказа '{kind}'")
+    if kind == "hold" and not place:
+        place = node_of(state, u)
+    if place not in state["places"]:
+        raise ValueError("укажите пункт")
+    if kind in ("move", "withdraw") and owner(state, place) != side:
+        raise ValueError(f"{place}: пункт противника - для него приказ 'наступать'")
+    if place in set((state.get("off_limits") or {}).get(side, [])):
+        raise ValueError(f"{place}: по сценарию сторона туда не идёт")
+    u["player_order"] = {"type": kind, "place": place, "day": state["day"], "done": False}
+    return f"{u['name']}: приказ - {dict(hold='держать', move='выйти в', attack='наступать на', withdraw='отойти в')[kind]} {place}."
+
+
+def player_orders(state: dict, side: str) -> list[str]:
+    """Выполнить приказы игрока: маршрут к пункту (наступление - в обход городов с гарнизоном, отход - по своей
+    земле). Часть в бою выходит из него (приказ отойти) или ведёт бой дальше (остальные приказы - после боя)."""
+    lines = []
+    for u in _maneuver(state, side):
+        o = u.get("player_order")
+        if not o or o.get("done") or u["state"] in ("destroyed", "pending", "halted"):
+            continue
+        if u["state"] == "battle" and o["type"] != "withdraw":
+            continue                             # сначала бой; приказ - когда выйдет из него
+        here = node_of(state, u)
+        t = o["place"]
+        if here == t and o["type"] in ("hold", "move"):
+            u["route"], u["progress_km"] = [here], 0.0
+            u["state"], u["order"], u["defending"] = "defend", "hold", True
+            o["done"] = True
+            lines.append(f"{u['name']}: по приказу держит {t}.")
+            continue
+        p = (path(state, here, t, side=side) if o["type"] == "withdraw" else None) or \
+            (bypass_path(state, side, here, t) if o["type"] == "attack" else path(state, here, t))
+        if not p or len(p) < 2:
+            lines.append(f"{u['name']}: приказ не выполнить - нет пути до {t}.")
+            o["done"] = True
+            continue
+        if u["state"] == "battle":
+            _disengage(state, u)
+        set_route(state, u, p, PLAYER_ORDERS[o["type"]])
+        o["done"] = True
+        lines.append(f"{u['name']}: по приказу - {' - '.join(p)}.")
+    return lines
+
+
 def posture_of(state: dict, side: str) -> str:
-    """Поза стороны: сценарий (posture, смена по дням posture_days) сильнее доктрины."""
+    """Поза стороны: сценарий (posture, смена по дням posture_days) сильнее доктрины. Альтернативный ход
+    (model.influence): смена позы по дате - только при достаточной силе, наступление выдыхается при её потере."""
     posture = (state.get("posture") or {}).get(side) or _sim(state, side).get("posture") or "defense"
+    alt = model.influence(state) == "alternative"
+    ratio = None
+    def r_():
+        own, foe = _ground_power(state, side), _ground_power(state, model.enemy(side))
+        return own / foe if foe > 0 else 9.0
     for row in sorted(state.get("posture_days") or [], key=lambda r: r.get("from_day", 0)):
         if state["day"] >= row.get("from_day", 0) and row.get(side):
+            if alt and row[side] == "offense":
+                ratio = r_() if ratio is None else ratio
+                if ratio < ALT_OFFENSE_RATIO:
+                    continue                     # по дате - да, а сил нет: ждёт
             posture = row[side]
+    if alt and posture == "offense":
+        ratio = r_() if ratio is None else ratio
+        if ratio < ALT_CULMINATE:
+            posture = "defense"                  # наступление выдохлось
     return posture
 
 
@@ -452,8 +547,9 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
             _disengage(state, u)
             set_route(state, u, [here, t], "delay")
             lines.append(f"{u['name']}: сдерживание - отходит на следующий рубеж {t}.")
+    pc = ground_control(state, side)             # части под приказом игрока - без приёмов командования стороны
     free = [u for u in own if u["state"] == "defend" and not u.get("engaged") and u.get("order") not in ("reserve", "airhead", "garrison")
-            and model.strength(u) >= sim.get("attack_min_strength", 0.7)]
+            and model.strength(u) >= sim.get("attack_min_strength", 0.7) and not (pc and u.get("player_order"))]
     # контрудар резервом (НАТО): по вклинившейся части противника, которая слабее
     if sim.get("counterattack"):
         for u in sorted(free, key=lambda x: -_s.power(state, x)):
@@ -476,7 +572,7 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
     # передовой отряд (ОВД): сильнейшая часть - на рубеж в глубине за фронтом, быстрее главных сил
     if sim.get("forward_detachment") and not any(u.get("op_role") == "forward" for u in own):
         cand = [u for u in own if u["state"] in ("defend", "march") and u.get("order") in (None, "attack", "hold")
-                and model.strength(u) >= 0.85 and not u.get("engaged")]
+                and model.strength(u) >= 0.85 and not u.get("engaged") and not (pc and u.get("player_order"))]
         if cand:
             u = max(cand, key=lambda x: _s.power(state, x))
             obj = objective(state, side, u)
@@ -500,7 +596,7 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
         targets |= {q for d in state["units"].values() if model.category(d) == "bridge"
                     for l in d.get("links", []) for q in l if owner(state, q) == foe}
         cand = [u for u in own if u["state"] in ("defend", "march") and not u.get("engaged") and model.strength(u) >= 0.8
-                and u.get("op_role") != "forward" and u.get("order") != "garrison"]
+                and u.get("op_role") != "forward" and u.get("order") != "garrison" and not (pc and u.get("player_order"))]
         if gap and targets and cand:
             u = max(cand, key=lambda x: _s.power(state, x))
             here = node_of(state, u)
