@@ -63,7 +63,10 @@ AXES = {   # оси наступления Сирии (6-9.10)
     "hermon": {"title": "Хермон", "objectives": ["Hermon", "MajdalShams"]},
 }
 BLUE_AXES = {   # контрнаступление Израиля (с 11.10)
-    "sasa": {"title": "Контрнаступление: Кунейтра - Хан-Арнаба - Тель-Шамс - Саса", "objectives": ["KhanArnabah", "TelShams", "Sasa", "Kanaker"]},
+    # 8-10.10 - контрудар резервов: возврат утраченного до "фиолетовой линии" (пункты, которые ещё у Сирии), затем Саса
+    "sasa": {"title": "Контрнаступление: Нафах - Кунейтра - Хан-Арнаба - Тель-Шамс - Саса",
+             "objectives": ["Nafah", "Booster", "Kuneitra", "KhanArnabah", "TelShams", "Sasa", "Kanaker"]},
+    "south": {"title": "Контрудар на юге: Хушния - Рафид", "objectives": ["ElAl", "Hushniya", "Rafid", "Kudne"]},
 }
 
 
@@ -254,6 +257,8 @@ def main() -> None:
             u["axis"] = axis
         if side == "blue":
             u["quality"] = QUALITY_BLUE
+        elif uid in ("red_iq3ad", "red_jo40"):   # иракская и иорданская части - с марша, без взаимодействия с сирийцами
+            u["quality"] = 0.7                   # (11-16.10: удары по флангу израильского выступа - разрозненно, Herzog)
         units.append(u)
         if ad:
             units.append({"id": f"{uid}_pvo", "name": f"Войсковая ПВО: {name}", "side": side, "role": "sam_short",
@@ -293,8 +298,9 @@ def main() -> None:
         "date": "1973-10-06", "doctrine": {"red": "arab", "blue": "iaf73"}, "countries": {"red": "Syria", "blue": "Israel"}, "units": units,
         "variants": [{"name": "base", "title": "Октябрь 1973: Голаны",
                       "posture": {"red": "offense", "blue": "defense"},
-                      "posture_days": [{"from_day": 6, "red": "defense", "blue": "offense"}],
-                      "_about_posture": "Сирия наступает 6-9.10; с 11.10 (6-й день) - контрнаступление Израиля на Сасу",
+                      "posture_days": [{"from_day": 3, "blue": "offense"}, {"from_day": 5, "red": "defense"}],
+                      "_about_posture": "Сирия наступает 6-9.10; с 8.10 (3-й день) - контрудар резервов Израиля, к 10.10 - "
+                                        "'фиолетовая линия', с 11.10 - на Сасу; Сирия с 10.10 - в обороне",
                       "task_rules": {"blue": {
                           "strike_factory": {"off": True, "why": "по промышленности Сирии в первые дни не били"},
                           "strike_airfield": {"from_day": 3, "why": "удары по аэродромам Сирии - с 8.10"}}}}],

@@ -487,7 +487,8 @@
    "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "arrives_day": 8,
-   "arrives_jitter": 0
+   "arrives_jitter": 0,
+   "quality": 0.7
   },
   {
    "id": "red_iq3ad_pvo",
@@ -543,7 +544,8 @@
    "source": "Herzog 'War of Atonement' / Rabinovich 'Yom Kippur War' / Asher / Pollack 'Arabs at War', по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "arrives_day": 11,
-   "arrives_jitter": 0
+   "arrives_jitter": 0,
+   "quality": 0.7
   },
   {
    "id": "blue_7bde",
@@ -2069,12 +2071,15 @@
    },
    "posture_days": [
     {
-     "from_day": 6,
-     "red": "defense",
+     "from_day": 3,
      "blue": "offense"
+    },
+    {
+     "from_day": 5,
+     "red": "defense"
     }
    ],
-   "_about_posture": "Сирия наступает 6-9.10; с 11.10 (6-й день) - контрнаступление Израиля на Сасу",
+   "_about_posture": "Сирия наступает 6-9.10; с 8.10 (3-й день) - контрудар резервов Израиля, к 10.10 - 'фиолетовая линия', с 11.10 - на Сасу; Сирия с 10.10 - в обороне",
    "task_rules": {
     "blue": {
      "strike_factory": {
