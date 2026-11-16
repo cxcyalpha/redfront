@@ -695,7 +695,7 @@ def tasks_not(unit: dict) -> list[str]:
 
 # ---- влияние игрока на исход (настройка influence): исторический сценарий - исторический ход или альтернативный;
 # гипотетический сценарий (холодная война, вариант Ливана с Израилем) - всегда альтернативный (ОЦЕНКИ) ----
-HISTORICAL_OOBS = {"oob_kyiv22", "oob_kharkiv22", "oob_golan73", "oob_lebanon83", "oob_syria", "oob_vietnam72",
+HISTORICAL_OOBS = {"oob_golan73", "oob_lebanon83", "oob_syria", "oob_vietnam72",
                    "oob_vietnam72_lb2", "oob_tankerwar88", "oob_karabakh", "oob_abkhazia", "oob_caucasus"}
 PLAYER_K_ALT = 1.5        # ОЦЕНКА: вес вылета игрока в альтернативном ходе (повреждение объектов, шок частей)
 
