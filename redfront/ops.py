@@ -271,7 +271,7 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
         lines += player_orders(state, side)
         free = [u for u in free if not u.get("player_order")]
     posture = posture_of(state, side)
-    if posture == "offense" and not any(objective(state, side, u) for u in free):
+    if posture == "offense" and not any(objective(state, side, u) for u in free) and not objective(state, side, None):
         posture = "defense"                                       # цели операции достигнуты - удерживать
     g = graph(state)
     if posture == "offense":
@@ -281,6 +281,8 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
         attackers = []
         for u in sorted(free, key=lambda u: -model.strength(u)):
             obj = objective(state, side, u)
+            if obj is None and u.get("axis"):   # своя ось выполнена - на ближнюю невыполненную (Сухуми взят - на Очамчиру)
+                obj = objective(state, side, {k: v for k, v in u.items() if k != "axis"})
             if model.strength(u) < sim["attack_min_strength"] or not all_targets or not obj:
                 if obj is None and model.strength(u) >= sim["attack_min_strength"]:
                     attackers.append(u)                           # ось выполнена - часть в оборону (ниже)

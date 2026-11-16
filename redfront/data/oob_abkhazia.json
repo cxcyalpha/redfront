@@ -263,7 +263,8 @@
    "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "axis": "east",
-   "note": "анклав в окружении; снабжение - вертолётами"
+   "note": "анклав в окружении; снабжение - вертолётами",
+   "quality": 0.8
   },
   {
    "id": "red_tkv_pvo",
@@ -323,7 +324,9 @@
    ],
    "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "оборона Сухуми"
+   "note": "оборона Сухуми",
+   "order": "garrison",
+   "quality": 0.45
   },
   {
    "id": "blue_ge_sukhumi_pvo",
@@ -387,7 +390,8 @@
     }
    ],
    "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.45
   },
   {
    "id": "blue_ge_kelasuri_pvo",
@@ -436,7 +440,8 @@
     }
    ],
    "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.7
   },
   {
    "id": "blue_ge_ochamchire_pvo",
@@ -485,7 +490,8 @@
     }
    ],
    "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.45
   },
   {
    "id": "blue_ge_reinf",
@@ -515,7 +521,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "note": "переброска самолётами 20-23.09 - ОЦЕНКА"
+   "note": "переброска самолётами 20-23.09 - ОЦЕНКА",
+   "quality": 0.45
   },
   {
    "id": "blue_ge_reinf_pvo",
@@ -559,7 +566,8 @@
     }
    ],
    "source": "Zürcher 'Post-Soviet Wars' (2007) / HRW (1995), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.45
   },
   {
    "id": "blue_s75_sukhumi",
