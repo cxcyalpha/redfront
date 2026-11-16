@@ -174,10 +174,23 @@ def dist_km(a, b):
     return math.hypot((a[0] - b[0]) * 111.32, (a[1] - b[1]) * 111.32 * k)
 
 
+# исторический ход 6-11.06.1982 (ОЦЕНКИ по Herzog, Schiff-Ya'ari): формирования ООП - лёгкая пехота, разбегаются при
+# подходе брони (выучка 0.5); сирийские части в Ливане - 0.8; колонны ЦАХАЛ по прибрежной дороге - без боя быстро
+# (Сидон 8.06, Дамур 9.06); прекращение огня с Сирией 11.06 - Израиль дальше не наступает; Бейрут - город
+URBAN = {"Beirut": 4.0, "Sidon": 1.5, "Tyre": 1.5, "Zahle": 2.0}
+QUALITY = {"*:red": 0.8, "red_plo_kastel": 0.5, "red_plo_karameh": 0.5, "red_plo_yarmouk": 0.5, "red_plo_sidon": 0.5}
+UNOPPOSED = {"blue": 60}
+POSTURE_DAYS = [{"from_day": 7, "blue": "defense"}]
+# сирийские части держали свои районы: 85-я бригада - Бейрут (осада), 1-я тд, 62-я и 91-я бр - Бекаа (Султан-Якуб,
+# Джуб-Джаннин), дивизии Голанского фронта - на линии разъединения; к Сидону и Дамуру не выходили
+GARRISON = {"red_85bde", "red_1ad", "red_62bde", "red_91tbde", "red_7div", "red_5div", "red_9div", "red_3ad"}
+
+
 def main() -> None:
     from dcs.terrain import Syria
     terrain = Syria()
-    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s} for n, (la, lo, s) in PLACES.items()}
+    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s, **({"urban": URBAN[n]} if n in URBAN else {})}
+              for n, (la, lo, s) in PLACES.items()}
     adj = {n: set() for n in places}
     for a, b in LINKS:
         assert a in places and b in places, (a, b)
@@ -235,6 +248,13 @@ def main() -> None:
             u["axis"] = axis
         if note:
             u["note"] = note
+        if uid in GARRISON:
+            u["order"] = "garrison"
+        q = QUALITY.get(uid, QUALITY.get(f"*:{side}"))
+        if q is not None:
+            u["quality"] = q
+        if side in UNOPPOSED:
+            u["unopposed_km"] = UNOPPOSED[side]
         units.append(u)
         if ad:
             units.append({"id": f"{uid}_pvo", "name": f"Войсковая ПВО: {name}", "side": side, "role": "sam_short",
@@ -261,12 +281,15 @@ def main() -> None:
         "countries": {"red": "Syria", "blue": "Israel"},
         "units": units,
         "variants": [{"name": "base", "title": "Июнь 1982: Ливан, долина Бекаа",
-                      "posture": {"blue": "offense", "red": "defense"},
+                      "posture": {"blue": "offense", "red": "defense"}, "posture_days": POSTURE_DAYS,
                       "task_rules": {"blue": {
                           "strike_sam_site": {"from_day": 4, "why": "удар по ЗРК в Бекаа ('Медведка 19') - 9 июня"},
                           "strike_airfield": {"off": True, "why": "по аэродромам Сирии Израиль не бил"},
                           "strike_factory": {"off": True, "why": "по промышленности не били"}}},
                       "_about_posture": "наступает Израиль; Сирия и ООП - в обороне (ops: поза по сценарию)"}],
+        # воздушная война 1982 (Lambeth, RAND 1984): E-2C и F-15/F-16 с AIM-9L против МиГ-21/23 - ~80:1 в воздушных боях;
+        # ЗРК Бекаа подавлены ("Медведка 19": ложные цели, РЭБ, БПЛА) - потери Израиля от ПВО единицы. ОЦЕНКИ
+        "air_war": {"air_skill": {"blue": 3.0, "red": 0.5}, "sam_loss_k": {"blue": 0.3}},
         "replacements": {"air_per_day": 1, "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]}

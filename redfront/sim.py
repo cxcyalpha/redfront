@@ -297,7 +297,8 @@ def arrivals(state: dict) -> list[str]:
                 lines.append(f"{u['name']}: высадился в районе {u['route'][0]}.")
                 continue
             u["state"] = "defend"
-            entry = ops.success_entry(state, u, used) if _sim(state, u["side"]).get("commit_in_success") else None
+            entry = (ops.success_entry(state, u, used) if _sim(state, u["side"]).get("commit_in_success")
+                     and u.get("order") != "garrison" else None)   # гарнизон - в своём районе
             if entry and entry != u["route"][0]:   # второй эшелон - в полосе успеха, а не в назначенном заранее районе
                 lines.append(f"{u['name']}: вводится в полосе успеха - район {entry} (вместо {u['route'][0]}).")
                 u["route"] = [entry]

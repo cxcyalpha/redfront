@@ -34,8 +34,8 @@ AIR_SKILL = {"Israel": 1.8, "USA": 1.2, "UK": 1.2, "Germany": 1.1, "France": 1.1
 def _quality(state: dict, side: str, type_name: str) -> float:
     from . import fitness
     a = fitness.absolute(type_name, "air")
-    sk = model.doctrine(state, side)["sim"].get(
-        "air_skill", AIR_SKILL.get((state.get("countries") or {}).get(side, ""), 1.0))
+    sk = ((state.get("air_war") or {}).get("air_skill") or {}).get(side) or model.doctrine(state, side)["sim"].get(
+        "air_skill", AIR_SKILL.get((state.get("countries") or {}).get(side, ""), 1.0))   # сценарий сильнее доктрины
     return max(0.05, (a if a is not None else 0.5)) * sk
 
 

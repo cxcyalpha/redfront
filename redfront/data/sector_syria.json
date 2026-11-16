@@ -66,7 +66,8 @@
    "lat": 33.271,
    "lon": 35.196,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 1.5
   },
   "Nabatieh": {
    "lat": 33.378,
@@ -78,7 +79,8 @@
    "lat": 33.561,
    "lon": 35.371,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 1.5
   },
   "Damour": {
    "lat": 33.729,
@@ -90,7 +92,8 @@
    "lat": 33.893,
    "lon": 35.501,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 4.0
   },
   "Aley": {
    "lat": 33.808,
@@ -144,7 +147,8 @@
    "lat": 33.847,
    "lon": 35.902,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 2.0
   },
   "Baalbek": {
    "lat": 34.006,

@@ -43,7 +43,8 @@
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "coast"
+   "axis": "coast",
+   "unopposed_km": 60
   },
   {
    "id": "blue_91div_pvo",
@@ -98,7 +99,8 @@
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "center"
+   "axis": "center",
+   "unopposed_km": 60
   },
   {
    "id": "blue_36div_pvo",
@@ -153,7 +155,8 @@
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "center"
+   "axis": "center",
+   "unopposed_km": 60
   },
   {
    "id": "blue_162div_pvo",
@@ -209,7 +212,8 @@
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "axis": "bekaa",
-   "note": "группа сил Бекаа (Бен-Галь)"
+   "note": "группа сил Бекаа (Бен-Галь)",
+   "unopposed_km": 60
   },
   {
    "id": "blue_252div_pvo",
@@ -264,7 +268,8 @@
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "bekaa"
+   "axis": "bekaa",
+   "unopposed_km": 60
   },
   {
    "id": "blue_90div_pvo",
@@ -321,7 +326,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "axis": "bekaa"
+   "axis": "bekaa",
+   "unopposed_km": 60
   },
   {
    "id": "blue_880div_pvo",
@@ -370,7 +376,8 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.5
   },
   {
    "id": "red_plo_kastel_pvo",
@@ -414,7 +421,8 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.5
   },
   {
    "id": "red_plo_karameh_pvo",
@@ -458,7 +466,8 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.5
   },
   {
    "id": "red_plo_yarmouk_pvo",
@@ -502,7 +511,8 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.5
   },
   {
    "id": "red_plo_sidon_pvo",
@@ -551,7 +561,9 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_85bde_pvo",
@@ -605,7 +617,9 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_62bde_pvo",
@@ -667,7 +681,9 @@
    "estimate": true,
    "arrives_day": 2,
    "arrives_jitter": 0,
-   "note": "введена в Бекаа 7-9.06"
+   "note": "введена в Бекаа 7-9.06",
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_1ad_pvo",
@@ -718,7 +734,9 @@
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "arrives_day": 2,
-   "arrives_jitter": 0
+   "arrives_jitter": 0,
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_91tbde_pvo",
@@ -764,7 +782,8 @@
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "arrives_day": 2,
-   "arrives_jitter": 0
+   "arrives_jitter": 0,
+   "quality": 0.8
   },
   {
    "id": "red_3ad",
@@ -804,7 +823,9 @@
    "estimate": true,
    "arrives_day": 4,
    "arrives_jitter": 0,
-   "note": "резерв, Т-72"
+   "note": "резерв, Т-72",
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_3ad_pvo",
@@ -863,7 +884,9 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_7div_pvo",
@@ -922,7 +945,9 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_5div_pvo",
@@ -981,7 +1006,9 @@
     }
    ],
    "source": "Herzog / Schiff-Ya'ari / Lambeth (RAND 1984), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.8
   },
   {
    "id": "red_9div_pvo",
@@ -1894,6 +1921,12 @@
     "blue": "offense",
     "red": "defense"
    },
+   "posture_days": [
+    {
+     "from_day": 7,
+     "blue": "defense"
+    }
+   ],
    "task_rules": {
     "blue": {
      "strike_sam_site": {
@@ -1913,6 +1946,15 @@
    "_about_posture": "наступает Израиль; Сирия и ООП - в обороне (ops: поза по сценарию)"
   }
  ],
+ "air_war": {
+  "air_skill": {
+   "blue": 3.0,
+   "red": 0.5
+  },
+  "sam_loss_k": {
+   "blue": 0.3
+  }
+ },
  "replacements": {
   "air_per_day": 1,
   "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
