@@ -320,7 +320,10 @@ def main() -> None:
                       "task_rules": {"blue": {
                           "_zones": ZONES,
                           "strike_airfield": {"from_day": 35, "why": "аэродромы МиГов - с 'Лайнбэкера' (10.05.1972)"},
-                          "air_assault": {"off": True, "why": "АРВН в апреле 1972 - в обороне: аэромобильные роты - резерв, в тыл ВНА не высаживались"}}}}],
+                          }},
+                      # АРВН в апреле 1972 - в обороне: аэромобильные роты - подкрепление угрожаемых рубежей, без
+                      # захвата пунктов ВНА с фланга
+                      "task_params": {"blue": {"air_assault": {"front_kinds": ["reinforce"]}}}}],
         "replacements": {"air_per_day": 2, "note": "ОЦЕНКА"},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]} for v in vs]

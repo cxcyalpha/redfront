@@ -4277,6 +4277,7 @@ def theatres_section(tmp: Path) -> None:
     # рассредоточение ВВС Украины (dispersal.py): посадка на другом аэродроме и перебазирование по доктрине
     from redfront import command, dispersal
     sd = model.new_campaign("kd", sector=FIX_KHARKIV[0], oob=FIX_KHARKIV[1], seed=1, player_side="blue")
+    sd["campaign_id"] = "disp-test"              # без случайности кампании разброс - по id кампании: для проверки - постоянный
     mig = sd["units"]["ua_mig29s"]
     lands = [dispersal.land_other(sd, mig, f"t{k}") for k in range(40)]
     other = [b_ for b_ in lands if b_]

@@ -1023,6 +1023,8 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
     out, used = [], set()
     front = tdef.get("mode") == "front"          # аэромобильные действия у фронта (армия США во Вьетнаме)
     places = assault.front_candidates(state, side, tdef) if front else [(p, "deep") for p in assault.candidates(state, side, tdef)]
+    if tdef.get("front_kinds"):                  # сценарий: только подкрепление угрожаемых участков (без захвата с фланга)
+        places = [(p, k) for p, k in places if k in tdef["front_kinds"]]
     for u in res:
         if len(out) >= tdef.get("per_day", 1):
             break
