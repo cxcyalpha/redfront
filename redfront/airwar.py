@@ -173,6 +173,8 @@ def resolve(state: dict, t0: float, t1: float) -> list[str]:
     from . import recon
     lines += recon.resolve(state, t1)            # разведывательные вылеты - в журнал разведки после обработки данных
     skip = set(a.get("done", [])) | set(a.get("played", []))
+    from . import aircombat                      # встречные бои истребителей сторон за шаг
+    lines += aircombat.clashes(state, t0, t1, skip)
     for e in a["entries"]:
         if e.get("ai_only") or e.get("resolved") or not (t0 < _tot(e) <= t1):
             continue
