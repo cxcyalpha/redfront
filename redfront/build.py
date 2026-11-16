@@ -816,6 +816,12 @@ def carrier_groups(m: Mission, state: dict, wind_from: float) -> dict[str, "Carr
             sg.add_waypoint(_pt(m, p_), kmh)
         NAVAL_GROUPS[u["id"]] = sg
         NAVAL_SHIPS[u["id"]] = lst
+        tgt = naval.fire_target(state, u)        # огневая поддержка с моря: налёты по противнику в бою у берега
+        if tgt:
+            c = _pt(m, tgt)
+            for k in range(ART_MISSIONS):
+                sg.points[0].tasks.append(task.FireAtPoint(Vector2(c.x + (k - 1.5) * 250, c.y), rounds=ART_ROUNDS,
+                                                           radius=ART_RADIUS_M * 2))
         if base:
             bid, b = base
             sg.points[0].tasks.append(task.ActivateBeaconCommand(channel=int(b.get("tacan", 70)), modechannel="X",

@@ -107,6 +107,9 @@ NAVAL = [   # корабельные группы (tools/naval_common.group): о
     ("red_fac_tartus", "Ракетные катера ВМС Сирии (Тартус)", "red", 34.95, 35.80,
      [("Type_021_1", "boat", "Катер пр. 205 №1"), ("Type_021_1", "boat", "Катер пр. 205 №2"), ("Type_021_1", "boat", "Катер пр. 205 №3")],
      "пр. 205 'Оса' - в DCS Type 021-1 (китайская копия 'Осы')"),
+    ("blue_nfs", "Группа огневой поддержки (USS New Jersey - в DCS нет; эсминцы и крейсер у Бейрута)", "blue", 33.80, 35.38,
+     [("TICONDEROG", "cruiser", "USS Ticonderoga (CG-47)"), ("PERRY", "frigate", "USS John Rodgers (DD-983; в DCS - Perry)")],
+     "New Jersey (BB-62) обстреливал Шуф 14.12.1983 и 8.02.1984 - огонь модели (nfs), в миссии - корабли группы"),
     ("blue_convoy_jounieh", "Транспорты снабжения (Джуния)", "blue", 34.05, 35.45,
      [("Dry_cargo_ship_1", "transport", "Транспорт №1"), ("Ship_Tilde_Supply", "transport", "Транспорт №2")], ""),
 ]
@@ -122,6 +125,7 @@ LAF = comp(("M-60", 30, "MBT"), ("M-113", 60, "APC"))            # бригад�
 USMC = comp(("M-60", 5, "MBT"), ("AAV7", 12, "APC"))             # 22-й/24-й экспедиционный отряд МП
 SY_BDE = comp(("T_55", 40, "MBT"), ("BMP_1", 30, "IFV"), ("BTR-60", 20, "APC"))
 MIL = comp(("T_55", 8, "MBT"), ("BTR-60", 15, "APC"))             # ополчение (друзы ПСП, Амаль)
+LF = comp(("T_55", 15, "MBT"), ("M-113", 40, "APC"))              # "Ливанские силы" (~10 тыс., трофейная и израильская техника)
 SY_ADD = {"ZSU_23_4_Shilka": 6, "Strela_1_9P31": 4}
 MIL_ADD = {"Ural_375_ZU_23": 6}
 GROUND = [   # (id, имя, сторона, пункт, состав, ПВО, день ввода, ось)
@@ -129,6 +133,9 @@ GROUND = [   # (id, имя, сторона, пункт, состав, ПВО, д
     ("blue_laf8", "8-я бригада ливанской армии (Сук-эль-Гарб)", "blue", "SoukElGharb", LAF, {}, 1, None),
     ("blue_laf4", "4-я бригада ливанской армии (Баабда)", "blue", "Baabda", LAF, {}, 1, None),
     ("blue_laf5", "5-я бригада ливанской армии (Хальде)", "blue", "Khalde", LAF, {}, 1, None),
+    ("blue_lf_beirut", "'Ливанские силы' (христианское ополчение, Восточный Бейрут)", "blue", "EastBeirut", LF, {}, 1, None),
+    ("blue_lf_jounieh", "'Ливанские силы' (Кесруан, Джуния)", "blue", "Jounieh", LF, {}, 1, None),
+    ("blue_laf10", "10-я бригада ливанской армии (Метн)", "blue", "Baabda", LAF, {}, 1, None),
     ("red_psp", "Ополчение ПСП (друзы, Алей)", "red", "Aley", MIL, MIL_ADD, 1, "shouf"),
     ("red_psp2", "Ополчение ПСП (друзы, Бейт-эд-Дин)", "red", "BeitEdDine", MIL, MIL_ADD, 1, "coast"),
     ("red_amal", "Ополчение 'Амаль' (Западный Бейрут)", "red", "WestBeirut", MIL, MIL_ADD, 1, None),
@@ -207,13 +214,24 @@ def bid_of(n):
     return n.lower().replace(" ", "_").replace("-", "_")
 
 
+# правдоподобный ход (сценарий гипотетический, но силы и позиции 1983 г. - реальные): Бейрут и аэропорт держат армия
+# Ливана и морская пехота США (позиции готовились месяцами: Сук-эль-Гарб выдержал штурм в сентябре 1983); ополчения -
+# лёгкая пехота; линкор New Jersey (в DCS его нет - огонь модели, в миссии стреляют корабли группы). ОЦЕНКИ
+URBAN = {"EastBeirut": 4.0, "WestBeirut": 3.0, "Baabda": 2.0, "BeirutAirport": 2.0, "Khalde": 1.5, "SoukElGharb": 2.5,
+         "Jounieh": 2.0}
+GARRISON = {"blue_usmc", "blue_laf8", "blue_laf4", "blue_laf5", "blue_lf_beirut", "blue_lf_jounieh"}
+QUALITY = {"red_psp": 0.6, "red_psp2": 0.6, "red_amal": 0.6}
+NFS = {"blue_nfs": {"km": 35, "k": 0.4, "title": "линкор New Jersey: 406-мм (ОЦЕНКА веса огня)"}}
+
+
 def main(il: bool = False) -> None:
     """il - вариант 'Израиль вступает' (sector/oob_lebanon83_il.json); иначе Израиль и занятый им юг Ливана -
     нейтральны: пункты на карте без стороны и без дорог в зону боёв (туда не наступают, по ним не бьют)."""
     scen = "lebanon83_il" if il else "lebanon83"
     from dcs.terrain import Syria
     terrain = Syria()
-    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s} for n, (la, lo, s) in PLACES.items()}
+    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s, **({"urban": URBAN[n]} if n in URBAN else {})}
+              for n, (la, lo, s) in PLACES.items()}
     for a, b in LINKS:
         assert a in places and b in places, (a, b)
     for n in NEUTRAL:
@@ -261,6 +279,10 @@ def main(il: bool = False) -> None:
             u["arrives_day"], u["arrives_jitter"] = day, 0
         if axis:
             u["axis"] = axis
+        if uid in GARRISON:
+            u["order"] = "garrison"
+        if uid in QUALITY:
+            u["quality"] = QUALITY[uid]
         units.append(u)
         if ad:
             units.append({"id": f"{uid}_pvo", "name": f"Войсковая ПВО: {name}", "side": side, "role": "sam_short",
@@ -276,6 +298,10 @@ def main(il: bool = False) -> None:
     from naval_common import group
     for row in NAVAL:
         uid, name, side, la, lo, ships, *rest = row
+        if uid in NFS:                           # группа огневой поддержки (naval.fire_support_k)
+            units.append(dict(group(uid, name, side, la, lo, ships, note=rest[0] if rest else "", source=SRC + "; ОЦЕНКА"),
+                              nfs=NFS[uid]))
+            continue
         units.append(group(uid, name, side, la, lo, ships, note=(rest[0] if rest and not rest[0].startswith(("CSG", "ARG")) else ""),
                            source=SRC + "; состав и место - ОЦЕНКА", abbr=(rest[0] if rest and rest[0].startswith(("CSG", "ARG")) else "")))
     il_ids = {r[0] for r in IL_AIR + IL_GROUND + IL_SAMS} | {r[0] for r in IL_DEPOTS}

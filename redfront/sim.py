@@ -38,7 +38,9 @@ def power(state: dict, unit: dict) -> float:
     # night_power - ночной бой стороны относительно дня (доктрина: армии арабских стран 1973 ночью слабее - ОЦЕНКА)
     night = sim.get("night_power", 1.0) if state.get("_night_now") else 1.0
     shock = SHOCK_POWER if unit.get("shock_until", 0) >= state.get("day", 0) else 1.0   # после удара в вылете игрока
-    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0) * night * shock
+    from . import naval                          # огонь кораблей по берегу (nfs корабельной группы)
+    return (p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0)
+            * night * shock * naval.fire_support_k(state, unit))
 
 
 SHOCK_POWER = 0.7        # ОЦЕНКА: сила части в шоке после удара (альтернативный ход, debrief)

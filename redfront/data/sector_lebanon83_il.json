@@ -17,37 +17,43 @@
    "lat": 33.821,
    "lon": 35.488,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Khalde": {
    "lat": 33.784,
    "lon": 35.476,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 1.5
   },
   "Baabda": {
    "lat": 33.834,
    "lon": 35.544,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "EastBeirut": {
    "lat": 33.89,
    "lon": 35.53,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 4.0
   },
   "Jounieh": {
    "lat": 33.98,
    "lon": 35.618,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "SoukElGharb": {
    "lat": 33.806,
    "lon": 35.578,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.5
   },
   "Damour": {
    "lat": 33.729,
@@ -59,7 +65,8 @@
    "lat": 33.88,
    "lon": 35.49,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 3.0
   },
   "Aley": {
    "lat": 33.808,
