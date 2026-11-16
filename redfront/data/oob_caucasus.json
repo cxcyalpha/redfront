@@ -44,7 +44,8 @@
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "axis": "south",
-   "note": "батальонные тактические группы прошли Рокский тоннель 8.08"
+   "note": "батальонные тактические группы прошли Рокский тоннель 8.08",
+   "unopposed_km": 50
   },
   {
    "id": "red_135mrr_pvo",
@@ -104,7 +105,8 @@
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "south"
+   "axis": "south",
+   "unopposed_km": 50
   },
   {
    "id": "red_693mrr_pvo",
@@ -164,7 +166,8 @@
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "south"
+   "axis": "south",
+   "unopposed_km": 50
   },
   {
    "id": "red_osset_pvo",
@@ -216,7 +219,8 @@
    "estimate": true,
    "arrives_day": 2,
    "arrives_jitter": 0,
-   "axis": "south"
+   "axis": "south",
+   "unopposed_km": 50
   },
   {
    "id": "red_503mrr_pvo",
@@ -274,7 +278,8 @@
    "arrives_day": 2,
    "arrives_jitter": 0,
    "axis": "south",
-   "note": "переброшен по воздуху в Беслан"
+   "note": "переброшен по воздуху в Беслан",
+   "unopposed_km": 50
   },
   {
    "id": "red_104vdv_pvo",
@@ -321,7 +326,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "axis": "south"
+   "axis": "south",
+   "unopposed_km": 50
   },
   {
    "id": "red_234vdv_pvo",
@@ -373,7 +379,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "axis": "south"
+   "axis": "south",
+   "unopposed_km": 50
   },
   {
    "id": "red_70mrr_pvo",
@@ -435,7 +442,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "axis": "south"
+   "axis": "south",
+   "unopposed_km": 50
   },
   {
    "id": "red_71mrr_pvo",
@@ -500,7 +508,8 @@
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "west"
+   "axis": "west",
+   "unopposed_km": 50
   },
   {
    "id": "red_abkhaz_pvo",
@@ -553,7 +562,8 @@
    "arrives_day": 2,
    "arrives_jitter": 0,
    "axis": "kodori",
-   "note": "наступление в Кодорское ущелье 9-12.08"
+   "note": "наступление в Кодорское ущелье 9-12.08",
+   "unopposed_km": 50
   },
   {
    "id": "red_abkhaz_k_pvo",
@@ -579,7 +589,7 @@
    "role": "maneuver",
    "state": "pending",
    "route": [
-    "Gudauta"
+    "Ochamchire"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -601,7 +611,8 @@
    "arrives_day": 2,
    "arrives_jitter": 0,
    "axis": "west",
-   "note": "через Сочи и по морю"
+   "note": "через Сочи и по морю",
+   "unopposed_km": 50
   },
   {
    "id": "red_7vdv_247_pvo",
@@ -627,7 +638,7 @@
    "role": "maneuver",
    "state": "pending",
    "route": [
-    "Sukhumi"
+    "Ochamchire"
    ],
    "progress_km": 0.0,
    "march_kmh": 30,
@@ -646,9 +657,10 @@
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "arrives_day": 3,
+   "arrives_day": 2,
    "arrives_jitter": 0,
-   "axis": "west"
+   "axis": "west",
+   "unopposed_km": 50
   },
   {
    "id": "red_7vdv_108_pvo",
@@ -703,7 +715,8 @@
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "в наступлении на Цхинвали с 7-8.08"
+   "note": "в наступлении на Цхинвали с 7-8.08",
+   "quality": 0.7
   },
   {
    "id": "blue_4bde_pvo",
@@ -763,7 +776,8 @@
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "note": "переброшена к Цхинвали 8.08"
+   "note": "переброшена к Цхинвали 8.08",
+   "quality": 0.7
   },
   {
    "id": "blue_3bde_pvo",
@@ -812,7 +826,8 @@
     }
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.7
   },
   {
    "id": "blue_mvd",
@@ -834,7 +849,8 @@
     }
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.7
   },
   {
    "id": "blue_2bde",
@@ -871,7 +887,8 @@
     }
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.7
   },
   {
    "id": "blue_2bde_pvo",
@@ -932,7 +949,8 @@
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "arrives_day": 2,
-   "arrives_jitter": 0
+   "arrives_jitter": 0,
+   "quality": 0.7
   },
   {
    "id": "blue_5bde_pvo",
@@ -994,7 +1012,8 @@
    "estimate": true,
    "arrives_day": 3,
    "arrives_jitter": 0,
-   "note": "переброшена самолётами ВВС США 10-11.08"
+   "note": "переброшена самолётами ВВС США 10-11.08",
+   "quality": 0.7
   },
   {
    "id": "blue_1bde_pvo",
@@ -1038,7 +1057,8 @@
     }
    ],
    "source": "Танки августа (ЦАСТ, 2009) / отчёт IIFFMCG (2009), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.7
   },
   {
    "id": "blue_buk_gori",
@@ -1484,7 +1504,13 @@
       "why": "у ВВС Грузии нет средств для ударов по аэродромам России"
      }
     }
-   }
+   },
+   "posture_days": [
+    {
+     "from_day": 7,
+     "red": "defense"
+    }
+   ]
   }
  ],
  "replacements": {
