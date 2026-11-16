@@ -236,11 +236,10 @@ EW: list = []                                      # станции РЭБ (ew.p
 
 
 def main() -> None:
-    if THEATRE == "germany":
-        from dcs.terrain.germany import Germany as _T
-    else:
-        from dcs.terrain import Caucasus as _T
-    terrain = _T()
+    import sys as _sys
+    _sys.path.insert(0, str(DATA.parent.parent))
+    from redfront import model as _model
+    terrain = _model.terrain_class(THEATRE)()
     places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s, **({"urban": URBAN[n]} if n in URBAN else {})}
               for n, (la, lo, s) in PLACES.items()}
     adj = {n: set() for n in places}
@@ -376,7 +375,7 @@ def caucasus_2008() -> None:
     QUALITY = {"*:blue": 0.7}
     UNOPPOSED = {"red": 50}
     # прекращение огня 12.08 (план Медведева - Саркози); 13-14.08 - выход к Гори и Поти, затем - оборона
-    POSTURE_DAYS = [{"from_day": 7, "red": "defense"}]
+    POSTURE_DAYS = [{"from_day": 7, "red": "defense", "halt": ["red"]}]
     # 7-я вдд - морем и по железной дороге через Сочи к Очамчире 9-10.08, 11.08 - Зугдиди и Сенаки
     global GROUND
     GROUND = [(r[0], r[1], r[2], "Ochamchire", r[4], r[5], 2) + tuple(r[7:]) if r[0] in ("red_7vdv_247", "red_7vdv_108")

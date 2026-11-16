@@ -29,6 +29,7 @@ THEATRE_INFO = {   # карта DCS: класс pydcs, центр (восход/
     "caucasus": {"cls": "Caucasus", "lat": 42.5, "lon": 43.5, "utc": 4, "climate": "tbilisi"},
     "syria": {"cls": "Syria", "lat": 33.5, "lon": 35.8, "utc": 3, "climate": "beirut"},
     "persiangulf": {"cls": "PersianGulf", "lat": 26.3, "lon": 55.5, "utc": 4, "climate": "dubai"},
+    "sinai": {"cls": "Sinai", "lat": 30.3, "lon": 32.8, "utc": 2, "climate": "ismailia"},
 }
 
 

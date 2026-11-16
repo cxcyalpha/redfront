@@ -120,6 +120,9 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
             if u.get("dig_h", 0) >= sim.get("prepared_h", 1e9):   # подготовленная оборона: окопы, заграждения, огневая система
                 frac *= sim.get("prepared_factor", 1.0)
             frac /= urb.get(u["id"], 1.0)
+        umb = model.doctrine(state, u["side"]).get("umbrella") or {}
+        if umb.get("ground") and not ops._under_sams(state, u["side"], model.unit_pos(state, u)):
+            frac *= umb.get("exposed_k", 1.0)    # вне зонтика своих ЗРК - под ударами авиации противника (14.10.1973)
         frac *= frac_day
         s0 = model.strength(u)
         n = _take_losses(u, frac)

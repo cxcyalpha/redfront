@@ -247,6 +247,13 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
             _disengage(state, u)
             set_route(state, u, path(state, here, dest, side=side) or path(state, here, dest), "withdraw")   # по своей земле
             lines.append(f"{u['name']}: ({model.strength(u):.0%}) выходит из боя, отходит в {dest}.")
+    # 1а. закрепление: часть дошла до своего рубежа (dig_in_at, сценарий: плацдармы 1973) - гарнизон, дальше не идёт
+    for u in own:
+        if u.get("dig_in_at") and u["state"] == "defend" and u.get("order") != "garrison" \
+                and node_of(state, u) in u["dig_in_at"] and owner(state, node_of(state, u)) == side:
+            u["order"] = "garrison"
+            u["route"], u["progress_km"] = [node_of(state, u)], 0.0
+            lines.append(f"{u['name']}: закрепилась на рубеже {node_of(state, u)}.")
     # 2. тыл: дошедшие до места отхода - восстановление; восстановившиеся - в строй
     for u in own:
         if u.get("order") == "withdraw" and u["state"] == "defend":
@@ -277,6 +284,9 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
     if posture == "offense":
         banned = set((state.get("off_limits") or {}).get(side, []))   # политические ограничения сценария
         all_targets = {q for p in front for q in g[p] if owner(state, q) != side and q not in banned}
+        if ground_umbrella(state, side):         # доктрина "зонтика" (Египет 1973): наступать - только под своими ЗРК
+            under = {q for q in all_targets if _under_sams(state, side, state["places"][q])}
+            all_targets = under
         held = held_cities(state, model.enemy(side))   # города с гарнизоном - обход, не штурм (кроме цели оси)
         attackers = []
         for u in sorted(free, key=lambda u: -model.strength(u)):
@@ -306,6 +316,20 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
             if p and len(p) > 1:
                 set_route(state, u, p, "attack")
                 lines.append(f"{u['name']}: наступление на {t} ({' - '.join(p)}).")
+    if posture != "offense" and halt_today(state, side):   # прекращение огня, срыв наступления (сценарий: halt) -
+        from . import sim as _s                  # наступление на марше прекращается, рубеж - ближний свой пункт участка
+        for u in free + [x for x in own if x["state"] == "march" and x.get("order") == "attack" and not x.get("engaged")
+                         and not (ground_control(state, side) and x.get("player_order"))]:
+            if u["state"] != "march" or u.get("order") != "attack":
+                continue
+            cl = _s.current_link(state, u)
+            if not cl:
+                continue
+            stop = cl[0] if owner(state, cl[1]) != side else cl[1]
+            if owner(state, stop) != side:
+                continue
+            set_route(state, u, [cl[0], cl[1]] if stop == cl[1] else [cl[1], cl[0]], "hold")
+            lines.append(f"{u['name']}: наступление прекращено - отход на рубеж {stop}.")
     if posture != "offense" or attackers:
         free = attackers if posture == "offense" else free      # в наступлении - только части с выполненной осью
         holding = {node_of(state, u) for u in own if u["state"] in ("defend", "battle") and
@@ -414,6 +438,37 @@ def player_orders(state: dict, side: str) -> list[str]:
         o["done"] = True
         lines.append(f"{u['name']}: по приказу - {' - '.join(p)}.")
     return lines
+
+
+def halt_today(state: dict, side: str) -> bool:
+    """Сегодня по сценарию наступление стороны прекращается (posture_days: "halt": [стороны] в день from_day)."""
+    return any(row.get("from_day") == state.get("day") and side in (row.get("halt") or [])
+               for row in state.get("posture_days") or [])
+
+
+def ground_umbrella(state: dict, side: str) -> bool:
+    """Наступление только под зонтиком своих ЗРК (doctrine umbrella.ground); сценарий может снять зонтик на сутки
+    (posture_days: "umbrella": {сторона: false} - 14.10.1973, наступление к перевалам)."""
+    umb = model.doctrine(state, side).get("umbrella") or {}
+    if not umb.get("ground"):
+        return False
+    on = True
+    for row in sorted(state.get("posture_days") or [], key=lambda r: r.get("from_day", 0)):
+        if state["day"] >= row.get("from_day", 0) and side in (row.get("umbrella") or {}):
+            on = bool(row["umbrella"][side])
+    return on
+
+
+def _under_sams(state: dict, side: str, pos: dict) -> bool:
+    """Пункт под зонтиком ЗРК средней и большой дальности стороны (не войсковая ПВО и не объектовая)."""
+    from . import planner
+    km = (model.doctrine(state, side).get("umbrella") or {}).get("ground_km", 10)
+    for u in state["units"].values():
+        if (u["side"] == side and u.get("role") in ("sam_medium", "sam_long") and not u.get("attached_to")
+                and not u.get("point") and u["state"] not in ("destroyed", "pending") and model.strength(u) >= 0.5):
+            if model.dist_km(model.unit_pos(state, u), pos) <= km + float(planner.threat_radius_km(u) or 0):
+                return True
+    return False
 
 
 def posture_of(state: dict, side: str) -> str:

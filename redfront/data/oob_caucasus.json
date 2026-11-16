@@ -1508,7 +1508,10 @@
    "posture_days": [
     {
      "from_day": 7,
-     "red": "defense"
+     "red": "defense",
+     "halt": [
+      "red"
+     ]
     }
    ]
   }
