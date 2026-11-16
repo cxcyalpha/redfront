@@ -770,7 +770,7 @@
    "estimate": true,
    "note": "сдан 9.10",
    "order": "garrison",
-   "quality": 2.0
+   "quality": 1.0
   },
   {
    "id": "blue_fort_firdan",
@@ -799,7 +799,7 @@
    "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "order": "garrison",
-   "quality": 2.0
+   "quality": 0.8
   },
   {
    "id": "blue_fort_matzmed",
@@ -1911,10 +1911,7 @@
      },
      "halt": [
       "red"
-     ]
-    },
-    {
-     "from_day": 11,
+     ],
      "blue": "offense"
     },
     {

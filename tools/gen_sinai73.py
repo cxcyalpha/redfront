@@ -192,14 +192,15 @@ G.EXTRA_VARIANT = {
                    "blue": {"gazelle": ["Matzmed", "Deversoir", "Fayed", "Geneifa", "Adabiya"]}},   # "Абирей-Лев": переправа
 }
 G.POSTURE_DAYS = [{"from_day": 5, "red": "defense"}, {"from_day": 9, "red": "offense", "umbrella": {"red": False}},
-                  {"from_day": 10, "red": "defense", "umbrella": {"red": True}, "halt": ["red"]},
-                  {"from_day": 11, "blue": "offense"},
+                  {"from_day": 10, "red": "defense", "umbrella": {"red": True}, "halt": ["red"], "blue": "offense"},
                   {"from_day": 18, "blue": "defense"}]
 G.URBAN = {"Suez": 3.0, "Ismailia": 3.0, "PortSaid": 2.5, "QantaraEast": 1.5, "PortTewfik": 3.0,
            "ChineseFarm": 1.5}   # Китайская ферма - оросительные каналы и позиции 16-й пд: обход к переправе южнее   # "Мезах" - неделя осады
 G.GARRISON = {"blue_fort_qantara", "blue_fort_firdan", "blue_fort_matzmed", "blue_fort_lakekan", "blue_fort_tewfik", "blue_401bde", "blue_460bde",
               "red_ismailia", "red_suez", "red_qantara_w"}   # перевалы держат, египетские города - гарнизоны
-G.QUALITY = {"*:blue": 2.0}      # потери танков ~3:1 в пользу Израиля в маневренных боях (Herzog); 8.10 - исключение
+# потери танков ~3:1 в пользу Израиля в маневренных боях (Herzog); опорные пункты линии Бар-Лева - малые
+# гарнизоны без танков (ОЦЕНКИ)
+G.QUALITY = {"*:blue": 2.0, "blue_fort_firdan": 0.8, "blue_fort_qantara": 1.0}
 G.HISTORICAL = True
 
 if __name__ == "__main__":
