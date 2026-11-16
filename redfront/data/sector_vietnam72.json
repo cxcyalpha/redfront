@@ -96,19 +96,22 @@
    "lat": 42.509,
    "lon": 41.871,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "QuangTri": {
    "lat": 42.315,
    "lon": 41.898,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Hue": {
    "lat": 42.146,
    "lon": 41.672,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Bastogne": {
    "lat": 42.27,

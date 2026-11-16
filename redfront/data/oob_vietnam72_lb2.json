@@ -510,7 +510,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_258",
@@ -542,7 +544,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_20tk",
@@ -569,7 +573,8 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.85
   },
   {
    "id": "blue_147",
@@ -601,7 +606,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_1div",
@@ -638,7 +645,8 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.85
   },
   {
    "id": "blue_369",
@@ -670,7 +678,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_1abde",
@@ -697,7 +707,8 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.85
   },
   {
    "id": "blue_abn",
@@ -729,7 +740,8 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.85
   },
   {
    "id": "blue_rgr21",
