@@ -31,7 +31,6 @@ THEATRES = [   # (id, сектор, состав сил, название)
     ("germany", "sector_germany.json", "oob_germany.json", "Германия: Холодная война (фронт от Балтики до Хофа)"),
     ("caucasus", "sector_caucasus.json", "oob_caucasus.json", "Кавказ: август 2008 (Южная Осетия и Абхазия)"),
     ("abkhazia", "sector_abkhazia.json", "oob_abkhazia.json", "Абхазия: сентябрь 1993 (штурм Сухуми)"),
-    ("karabakh", "sector_karabakh.json", "oob_karabakh.json", "Карабах: сентябрь 2020 (44-дневная война, условная география)"),
     ("syria", "sector_syria.json", "oob_syria.json", "Сирия - Ливан: июнь 1982 (долина Бекаа)"),
     ("lebanon83", "sector_lebanon83.json", "oob_lebanon83.json", "Ливан: декабрь 1983 (авианосцы и базы США, гипотетическая)"),
     ("lebanon83_il", "sector_lebanon83_il.json", "oob_lebanon83_il.json", "Ливан: декабрь 1983 (США и Израиль против Сирии, гипотетическая)"),
