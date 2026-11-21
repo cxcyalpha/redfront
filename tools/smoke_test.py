@@ -3729,8 +3729,12 @@ def campaign_end_section(tmp: Path) -> None:
     msg = campaign.resume(st)
     planner.plan(st)
     sim.end_day(st)
-    check(not st.get("ended") and model.influence(st) == "alternative" and campaign.phase(st) == "alternative",
-          f"продолжение после исторической фазы - альтернативный ход ({msg[:40]}...)")
+    check(not st.get("ended") and model.influence(st) == "alternative" and campaign.phase(st) == "alternative"
+          and st["objectives"]["red"] == ["Mtskheta", "Tbilisi"] and ops.posture_of(st, "red") == "offense"
+          and "Tbilisi" not in ops.banned(st, "red"),
+          f"продолжение после исторической фазы - альтернативный ход, новые цели красных: {st['objectives']['red']} ({msg[:40]}...)")
+    check(campaign.hold_done(st, "blue")[1] >= 2,
+          f"удержание синих в альтернативном ходе: {campaign.hold_list(st, 'blue')} (Тбилиси - теперь цель противника)")
     st = model.new_campaign("end2", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1)   # исторический ход
     st["settings"]["ground_control"] = True
     u = next(x for x in ops._maneuver(st, "red") if not x.get("attached_to") and x["state"] not in ("destroyed", "pending"))

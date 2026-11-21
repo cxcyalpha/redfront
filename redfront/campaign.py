@@ -36,21 +36,36 @@ MAX_DAYS = 30           # гипотетическая кампания - не �
 HISTORY = {
     "oob_caucasus": {"end_day": 9, "end_why": "16.08.2008 - план Медведева-Саркози подписан обеими сторонами",
                      "events": {5: "12.08: президент России объявил о завершении операции по принуждению к миру",
-                                6: "13.08: российские части выходят к Гори и Поти (буферная зона)"}},
+                                6: "13.08: российские части выходят к Гори и Поти (буферная зона)"},
+                     "hold": {"blue": ["Tbilisi", "Mtskheta", "Rustavi", "Kutaisi", "Batumi"]},
+                     "alt": {"objectives": {"red": ["Mtskheta", "Tbilisi"]},
+                             "why": "смена власти в Тбилиси - вариант, от которого Россия отказалась 12.08"}},
     "oob_abkhazia": {"end_day": 15, "end_why": "30.09.1993 - абхазские силы вышли на Ингури, война окончена",
-                     "events": {12: "27.09: пал Сухуми", 14: "29.09: оставлена Очамчира"}},
+                     "events": {12: "27.09: пал Сухуми", 14: "29.09: оставлена Очамчира"},
+                     "hold": {"blue": ["Zugdidi", "Senaki", "Poti"]}},
     "oob_golan73": {"end_day": 18, "end_why": "23.10.1973 - Сирия приняла резолюцию СБ ООН 338, прекращение огня",
                     "events": {2: "07.10: сирийцы у Нафаха, бои в 'Долине слёз'", 5: "10.10: Израиль на 'фиолетовой линии'",
                                6: "11.10: наступление Израиля к Сасе", 8: "13.10: разгром иракской дивизии у Тель-Шамса",
-                               17: "22.10: взят Хермон"}},
+                               17: "22.10: взят Хермон"},
+                    "hold": {"blue": ["BnotYaakov", "ArikBridge", "Tiberias", "Safed"], "red": ["Damascus", "Kanaker", "Katana"]},
+                    "alt": {"objectives": {"blue": ["Kanaker", "Katana"]},
+                            "why": "выход на ближние подступы к Дамаску - Израиль остановился в 40 км, у Сасы"}},
     "oob_sinai73": {"end_day": 19, "end_why": "24.10.1973 - окончательное прекращение огня, 3-я армия Египта окружена",
                     "events": {4: "09.10: оперативная пауза Египта на плацдармах", 9: "14.10: египетское наступление вне "
                                "зонтика ЗРК - разгром", 11: "16.10: Израиль на западном берегу у Девесуара",
-                               17: "22.10: первое прекращение огня (резолюция 338)"}},
+                               17: "22.10: первое прекращение огня (резолюция 338)"},
+                    "hold": {"blue": ["Tasa", "Refidim", "Mitla", "Giddi"], "red": ["Ismailia", "Suez", "Cairo"]},
+                    "alt": {"objectives": {"blue": ["Ismailia", "Suez"]},
+                            "why": "штурм Суэца 24.10 отбит, у Исмаилии остановились - что, если бы взяли"}},
     "oob_syria": {"end_day": 6, "end_why": "11.06.1982 12:00 - прекращение огня между Израилем и Сирией",
-                  "events": {4: "09.06: 'Медведка 19' - разгром ЗРК в Бекаа", 5: "10.06: бои у Султан-Якуба"}},
+                  "events": {4: "09.06: 'Медведка 19' - разгром ЗРК в Бекаа", 5: "10.06: бои у Султан-Якуба"},
+                  "hold": {"red": ["Beirut", "Chtaura", "Zahle"]},
+                  "alt": {"objectives": {"blue": ["Chtaura"]},
+                          "why": "перерезать шоссе Бейрут - Дамаск у Шторы: Израиль остановился в нескольких км"}},
     "oob_vietnam72": {"end_day": 26, "end_why": "01.05.1972 - пал Куангчи; фронт стабилизируется на р. Митян",
-                      "events": {3: "08.04: ВНА у Донгха", 23: "28.04: оставлен Донгха"}},
+                      "events": {3: "08.04: ВНА у Донгха", 23: "28.04: оставлен Донгха"},
+                      "hold": {"blue": ["Hue", "PhuBai", "DaNang"]},
+                      "alt": {"objectives": {"red": ["Hue"]}, "why": "Хюэ - цель ВНА в мае 1972, удержан на р. Митян"}},
     "oob_vietnam72_lb2": {"end_day": 12, "end_why": "29.12.1972 - конец 'Лайнбэкера-2', Ханой возвращается к переговорам",
                           "events": {1: "18.12: первый налёт B-52 на Ханой", 9: "26.12: крупнейший налёт (120 B-52)"}},
     "oob_tankerwar88": {"end_day": 1, "end_why": "18.04.1988 - операция 'Богомол' проведена за один день",
@@ -98,6 +113,31 @@ def objectives_done(state: dict, side: str) -> tuple[int, int]:
     return sum(1 for o in objs if state["places"][o].get("side") == side), len(objs)
 
 
+def hold_list(state: dict, side: str) -> list[str]:
+    """Что сторона должна удержать: сценарий (hold), иначе - у стороны без целей операции - цели противника
+    (оборона - не дать ему их взять). Без пунктов, куда противник по сценарию не идёт (off_limits)."""
+    from . import ops
+    off = ops.banned(state, model.enemy(side))  # куда противник по сценарию не идёт - удерживать не заслуга
+    h = (history(state).get("hold") or {}).get(side) or ((state.get("scenario") or {}).get("hold") or {}).get(side)
+    if h:
+        return [p for p in h if p in state["places"] and p not in off]
+    if not _objectives(state, side):
+        return [o for o in dict.fromkeys(_objectives(state, model.enemy(side))) if o in state["places"] and o not in off]
+    return []
+
+
+def hold_done(state: dict, side: str) -> tuple[int, int]:
+    """(удержано, всего) пунктов, которые сторона должна удержать."""
+    h = hold_list(state, side)
+    return sum(1 for p in h if state["places"][p].get("side") == side), len(h)
+
+
+def side_value(state: dict, side: str) -> float:
+    """Выполнение замысла стороны, 0..1: среднее долей взятых целей операции и удержанных пунктов (что есть)."""
+    parts = [d / t for d, t in (objectives_done(state, side), hold_done(state, side)) if t]
+    return sum(parts) / len(parts) if parts else 0.0
+
+
 def _power(state: dict, side: str) -> float:
     from . import ops
     return ops._ground_power(state, side)
@@ -128,9 +168,7 @@ def verdict(state: dict, reason: str, loser: str | None = None, day: int | None 
     foe = model.enemy(me)
     d_me, t_me = objectives_done(state, me)
     d_foe, t_foe = objectives_done(state, foe)
-    f_me = d_me / t_me if t_me else 0.0
-    f_foe = d_foe / t_foe if t_foe else 0.0
-    score = f_me - f_foe
+    score = side_value(state, me) - side_value(state, foe)   # цели операции и удержание - обеих сторон
     if loser == foe:
         score += 1.0
     elif loser == me:
@@ -140,6 +178,7 @@ def verdict(state: dict, reason: str, loser: str | None = None, day: int | None 
     day = state["day"] - 1 if day is None else day   # итог - по концу прошедших суток
     return {"day": state["day"], "last_day": day, "reason": reason, "verdict": word, "score": round(score, 2),
             "objectives": {me: [d_me, t_me], foe: [d_foe, t_foe]}, "loser": loser,
+            "hold": {me: list(hold_done(state, me)), foe: list(hold_done(state, foe))},
             "phase": "historical" if hist_end(state) and day <= hist_end(state) else "alternative"}
 
 
@@ -179,7 +218,8 @@ def daily(state: dict) -> list[str]:
     reason = None
     if loser:
         reason = (f"фронт {side_ru(loser)} развалился (осталось меньше {COLLAPSE_OWN:.0%} сил, вдвое слабее противника)")
-    elif winner:
+    elif winner and not (end is not None and prev == end and model.influence(state) == "alternative"
+                         and (history(state).get("alt") or {}).get("objectives", {}).get(winner)):
         reason = f"цели операции {side_ru(winner)} достигнуты"
     elif end is not None and prev >= end and model.influence(state) == "historical":
         reason = f"историческая фаза окончена: {h.get('end_why', 'дата сценария')}"
@@ -192,12 +232,41 @@ def daily(state: dict) -> list[str]:
     if end is not None and prev == end and model.influence(state) == "alternative" and not reason:
         lines.append(f"Историческая фаза окончена ({h.get('end_why', '')}). Дальше - альтернативный ход: "
                      "война продолжается, пока стороны не добьются целей, фронт не развалится или не наступит тупик.")
+        lines += start_alternative(state)
     if reason:
         state["ended"] = verdict(state, reason, loser, prev)
         e = state["ended"]
         lines.append(f"КАМПАНИЯ ЗАВЕРШЕНА (сутки {prev}): {reason}. Итог для игрока - {e['verdict']}; цели: "
-                     + ", ".join(f"{side_ru(s)} {d}/{t}" for s, (d, t) in e["objectives"].items()) + ".")
+                     + ", ".join(f"{side_ru(s)} {d}/{t}" for s, (d, t) in e["objectives"].items() if t)
+                     + ("; удержано: " + ", ".join(f"{side_ru(s)} {d}/{t}" for s, (d, t) in e["hold"].items() if t)
+                        if any(t for _d, t in e["hold"].values()) else "") + ".")
     return lines
+
+
+def start_alternative(state: dict) -> list[str]:
+    """Начало альтернативного хода: новые цели операции сторон (alt.objectives сценария) вместо выполненных или
+    невыполненных исторических, сторона с новыми целями - в наступление; эти пункты для неё - не запретные."""
+    if state.get("alt_started"):
+        return []
+    state["alt_started"] = state["day"]
+    alt = history(state).get("alt") or {}
+    lines = []
+    for side, objs in (alt.get("objectives") or {}).items():
+        objs = [o for o in objs if o in state["places"]]
+        if not objs:
+            continue
+        state.setdefault("objectives", {})[side] = objs
+        state.setdefault("posture_days", []).append({"from_day": state["day"], side: "offense"})
+        lines.append(f"Альтернативный ход - новые цели {'красных' if side == 'red' else 'синих'}: {', '.join(objs)}"
+                     + (f" ({alt['why']})" if alt.get("why") else "") + ".")
+    return lines
+
+
+def alt_targets(state: dict, side: str) -> set[str]:
+    """Пункты - цели альтернативного хода стороны (для неё не запретные)."""
+    if not state.get("alt_started"):
+        return set()
+    return set(((history(state).get("alt") or {}).get("objectives") or {}).get(side) or [])
 
 
 def resume(state: dict) -> str:
@@ -210,4 +279,5 @@ def resume(state: dict) -> str:
         raise ValueError(f"кампания завершена ({e['reason']}) - продолжить нельзя, только новая")
     state.setdefault("settings", {})["influence"] = "alternative"
     state.pop("ended")
-    return "Кампания продолжается в альтернативном ходе: что было бы дальше."
+    extra = start_alternative(state)
+    return "Кампания продолжается в альтернативном ходе: что было бы дальше." + (" " + " ".join(extra) if extra else "")

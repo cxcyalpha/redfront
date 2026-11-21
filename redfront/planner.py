@@ -536,7 +536,7 @@ def air_banned(state: dict, side: str) -> set[str]:
     from . import campaign
     if campaign.limits_lifted(state, side):
         return set()
-    return set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))
+    return set((state.get("air_limits", state.get("off_limits")) or {}).get(side, [])) - campaign.alt_targets(state, side)
 
 
 # ---- вертолёты: без самоубийственных вылетов (ОЦЕНКИ; доктрина может задать helo_max_risk / helo_max_depth_km задачи) ----

@@ -118,7 +118,7 @@ def banned(state: dict, side: str) -> set[str]:
     from . import campaign
     if campaign.limits_lifted(state, side):
         return set()
-    return set((state.get("off_limits") or {}).get(side, []))
+    return set((state.get("off_limits") or {}).get(side, [])) - campaign.alt_targets(state, side)   # новые цели - не запрет
 
 
 def own_path(state: dict, side: str, a: str, b: str) -> list[str] | None:
