@@ -512,6 +512,8 @@ def end_day(state: dict) -> list[str]:
     pilots.ensure_all(state)                    # пополнение экипажей - новые лётчики
     state["day"] += 1
     state["ground_s"] = 0
+    from . import campaign                       # ключевые даты, конец кампании и итог (campaign.py)
+    lines += campaign.daily(state)
     lines += arrivals(state)
     _day_snapshot(state)                         # для темпа следующих суток
     for ln in lines:

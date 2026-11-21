@@ -100,7 +100,8 @@ def launchers(state: dict, side: str) -> list[dict]:
 
 
 def _targets(state: dict, side: str) -> list[dict]:
-    lim = set((state.get("air_limits") or {}).get(side, []))
+    from . import planner
+    lim = planner.air_banned(state, side) if state.get("air_limits") else set()
     out = []
     for u in state["units"].values():
         if u.get("side") != model.enemy(side) or u.get("role") not in TARGET_VALUE or u.get("state") == "lost":

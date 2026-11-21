@@ -437,7 +437,7 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     if (doc.get("roll_back") is False or state["day"] < doc.get("roll_back_from_day", 0)):            # доктрина без roll-back (США 1972: пакет идёт сквозь пояс С-75 с
         gated = {}                               # подавлением в своём составе); пояс - лишь первым в очереди целей ЗРК
     rules = (state.get("task_rules") or {}).get(side) or {}   # правила задач сценария (с какого дня, запрет)
-    banned = set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))   # куда авиация не бьёт
+    banned = air_banned(state, side)             # куда авиация не бьёт
     for z in rules.get("_zones") or []:          # запретные для ударов районы сценария до дня until_day (правила применения:
         if state["day"] < z.get("until_day", 10**6):   # Ханой и Хайфон до "Лайнбэкера") - только авиация, не наземные войска
             banned |= set(z["places"])
@@ -530,6 +530,15 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
 
 
 
+def air_banned(state: dict, side: str) -> set[str]:
+    """Районы, по которым авиация стороны не бьёт (air_limits, иначе off_limits); альтернативный ход после
+    исторической фазы - у стороны с перевесом сняты (campaign.limits_lifted)."""
+    from . import campaign
+    if campaign.limits_lifted(state, side):
+        return set()
+    return set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))
+
+
 # ---- вертолёты: без самоубийственных вылетов (ОЦЕНКИ; доктрина может задать helo_max_risk / helo_max_depth_km задачи) ----
 HELO_RISK_W = {"sam_short": 0.5, "sam_medium": 1.5, "sam_long": 1.5, "naval": 1.0}   # вес угрозы для вертолёта на малой высоте
 HELO_RADAR_SHORT_W = 1.0     # ЗРК ближнего действия с РЛС (Оса, Тор, Роланд, Тунгуска) - опаснее ПЗРК и зениток
@@ -599,7 +608,7 @@ def targets_for(state: dict, side: str, kind: str, tdef: dict, reasons: list | N
         if (doc.get("roll_back") is False or state["day"] < doc.get("roll_back_from_day", 0)):
             gated = {}
     if banned is None:
-        banned = set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))
+        banned = air_banned(state, side)
     def _allowed_area(u):
         if not banned:
             return True

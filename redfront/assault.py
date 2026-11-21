@@ -66,7 +66,7 @@ def _candidates_keyed(state: dict, side: str, tdef: dict) -> list[tuple[tuple, s
     base_conn = logistics.road_connected(state, foe, g)
     obj = ops.objective(state, side)
     out = []
-    banned = set((state.get("off_limits") or {}).get(side, []))   # куда сторона по сценарию не идёт - и десантом
+    banned = ops.banned(state, side)             # куда сторона по сценарию не идёт - и десантом
     prefer = list(tdef.get("lz_prefer") or [])   # площадки замысла сценария (Гостомель 24.02) - первыми, без ограничений
     for name in prefer:                          # глубины и прикрытия (высадка - под огнём, как и было)
         if name in pl and pl[name].get("side") == foe and name not in banned \
@@ -114,7 +114,7 @@ def point_candidates(state: dict, side: str, tdef: dict) -> list[tuple[tuple, di
     own = [p for p in pl.values() if p.get("side") == side]
     if not own or not kinds:
         return []
-    banned = set((state.get("off_limits") or {}).get(side, []))
+    banned = ops.banned(state, side)
     out = []
     objs = []
     if "airfield" in kinds:
@@ -168,7 +168,7 @@ def front_candidates(state: dict, side: str, tdef: dict) -> list[tuple[str, str]
     near_km = tdef.get("threat_km", 15)
     power = lambda s_, place: sum(model.strength(u) for u in ops._units_near(state, place, s_, near_km))
     out = []
-    banned = set((state.get("off_limits") or {}).get(side, []))
+    banned = ops.banned(state, side)
     for name, p in pl.items():
         if name in banned:
             continue

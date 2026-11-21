@@ -113,7 +113,11 @@ def owner(state: dict, p: str) -> str | None:
 
 
 def banned(state: dict, side: str) -> set[str]:
-    """Пункты, куда сторона по сценарию не идёт (off_limits: политические ограничения) - ни целью, ни транзитом."""
+    """Пункты, куда сторона по сценарию не идёт (off_limits: политические ограничения) - ни целью, ни транзитом.
+    Альтернативный ход после исторической фазы: у стороны с перевесом - сняты (campaign.limits_lifted)."""
+    from . import campaign
+    if campaign.limits_lifted(state, side):
+        return set()
     return set((state.get("off_limits") or {}).get(side, []))
 
 
@@ -470,10 +474,11 @@ def give_order(state: dict, uid: str, kind: str, place: str | None = None) -> st
         raise ValueError("укажите пункт")
     if kind in ("move", "withdraw") and owner(state, place) != side:
         raise ValueError(f"{place}: пункт противника - для него приказ 'наступать'")
-    if place in set((state.get("off_limits") or {}).get(side, [])):
-        raise ValueError(f"{place}: по сценарию сторона туда не идёт")
+    warn = ""                                    # игрока сценарий не ограничивает: запретный район - предупреждение
+    if place in banned(state, side):
+        warn = " Внимание: по сценарию сторона туда не идёт - решение и последствия на вас."
     u["player_order"] = {"type": kind, "place": place, "day": state["day"], "done": False}
-    return f"{u['name']}: приказ - {dict(hold='держать', move='выйти в', attack='наступать на', withdraw='отойти в')[kind]} {place}."
+    return f"{u['name']}: приказ - {dict(hold='держать', move='выйти в', attack='наступать на', withdraw='отойти в')[kind]} {place}." + warn
 
 
 def player_orders(state: dict, side: str) -> list[str]:
@@ -768,11 +773,14 @@ def capture(state: dict) -> list[str]:
            for s in model.SIDES}                 # места частей - один раз на шаг (а не на каждый пункт)
     near = lambda p, s, km: any(model.dist_km(q, state["places"][p]) <= km for q in pos[s])
     ban = {s: banned(state, s) for s in model.SIDES}
+    by_player = [model.unit_pos(state, u) for u in _maneuver(state, state.get("player_side")) if _active(u)
+                 and u.get("player_order") and ground_control(state, state.get("player_side"))]   # приказ игрока - и туда
     for p in state["places"]:
         for side in model.SIDES:
             if owner(state, p) == side:
                 continue
-            if p in ban[side]:
+            if p in ban[side] and not (side == state.get("player_side") and any(
+                    model.dist_km(q, state["places"][p]) <= _sim(state, side)["capture_km"] for q in by_player)):
                 continue                         # куда сторона по сценарию не идёт - и не занимает (Беларусь, Россия)
             km = _sim(state, side)["capture_km"]
             if near(p, side, km) and not near(p, model.enemy(side), _sim(state, side)["contact_km"]):

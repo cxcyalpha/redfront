@@ -20,6 +20,7 @@ from urllib.parse import parse_qs, urlparse
 
 from . import i18n_en, build as build_mod, materialize
 from . import natonames
+from . import campaign as campaign_mod
 from . import ato, command, convoys, csar, dcstypes, debrief, explain, i18n, intel, logistics, mapobj, model, ops, planner, roads, sim, symbols
 from .menu import missions_dir
 
@@ -229,6 +230,7 @@ def view(st: dict, history: bool = True) -> dict:
         "takeoff_min": st["settings"].get("player_takeoff_min", build_mod.PLAYER_TAKEOFF_MIN),
         "player_start": st["settings"].get("player_start", "cold"),
         "historical": model.historical(st), "influence": model.influence(st),   # ход: исторический / альтернативный
+        "phase": campaign_mod.phase(st), "hist_end": campaign_mod.hist_end(st), "ended": st.get("ended"),   # конец кампании
         "ground_control": bool(st["settings"].get("ground_control")),        # управление наземными войсками
         "ground_units": [{"id": u["id"], "name": u["name"], "state": u["state"], "at": ops.node_of(st, u),
                           "strength": round(model.strength(u), 2), "route": u.get("route"), "order": u.get("order"),
@@ -821,12 +823,20 @@ class App:
             lines.append(i18n.L(i18n.lang(st), "Файл дебрифа: ", "Debrief file: ") + str(f))
             lines += debrief.apply(st, debrief.read(f))
         elif action == "endday":
+            if st.get("ended") and not req.get("force"):   # кампания завершена: итог, продолжение - только явно
+                e = st["ended"]
+                raise ValueError(i18n.L(i18n.lang(st), f"Кампания завершена (сутки {e['day'] - 1}): {e['reason']}. Итог - {e['verdict']}."
+                                        + (" Продолжить в альтернативном ходе - кнопка 'Продолжить'." if e["reason"].startswith("историческая") else ""),
+                                        f"The campaign is over (day {e['day'] - 1}): {e['reason']}. Result: {e['verdict']}."))
             if not st.get("history"):                # кампания старше хронологии - снимок текущих суток до конца дня
                 snapshot(st)
             lines += sim.end_day(st)
             snapshot(st)                             # и начало новых суток
             if not lines:
                 lines.append(i18n.L(i18n.lang(st), "День прошёл без событий.", "The day passed without events."))
+        elif action == "resume":                 # продолжить после исторической фазы - альтернативный ход
+            from . import campaign
+            lines.append(campaign.resume(st))
         elif action == "roadsapply":
             rf = saved_games_file(f"roads_{roads.sector_id(sector_of(st))}.json", self.home)
             if not rf:

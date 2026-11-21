@@ -3711,6 +3711,34 @@ def engine_rules_section(tmp: Path) -> None:
           f"мораль: потери 30% за сутки - мораль {m1:.0%}, сила ниже ({p1:.0f} против {p0:.0f}); сутки отдыха - {morale.get(u):.0%}")
 
 
+def campaign_end_section(tmp: Path) -> None:
+    """Конец кампании: историческая фаза по дате, события по датам, продолжение в альтернативном ходе, свобода игрока."""
+    from redfront import campaign, ops
+    print("\n== конец кампании ==")
+    st = model.new_campaign("end", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1)
+    log = []
+    for _ in range(12):
+        if st.get("ended"):
+            break
+        planner.plan(st)
+        log += sim.end_day(st)
+    e = st.get("ended") or {}
+    check(any(l.startswith("Событие: 12.08") for l in log) and e.get("last_day") == campaign.hist_end(st)
+          and e.get("reason", "").startswith("историческая фаза") and e.get("verdict"),
+          f"Кавказ-2008, исторический ход: события по датам, конец - {e.get('last_day')}-е сутки ({e.get('reason', '-')[:50]}...), итог - {e.get('verdict')}")
+    msg = campaign.resume(st)
+    planner.plan(st)
+    sim.end_day(st)
+    check(not st.get("ended") and model.influence(st) == "alternative" and campaign.phase(st) == "alternative",
+          f"продолжение после исторической фазы - альтернативный ход ({msg[:40]}...)")
+    st = model.new_campaign("end2", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1)   # исторический ход
+    st["settings"]["ground_control"] = True
+    u = next(x for x in ops._maneuver(st, "red") if not x.get("attached_to") and x["state"] not in ("destroyed", "pending"))
+    txt = ops.give_order(st, u["id"], "attack", "Tbilisi")
+    check("Внимание" in txt and u["player_order"]["place"] == "Tbilisi",
+          f"игрока сценарий не ограничивает: приказ на Тбилиси принят с предупреждением")
+
+
 def frontline_section(tmp: Path) -> None:
     """Линия соприкосновения, территории, пункты и цели операции на карте F10 (frontline.py, рисунки миссии)."""
     from redfront import frontline
@@ -4584,7 +4612,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, own_control_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, engine_rules_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
+            command_section, own_control_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, engine_rules_section, campaign_end_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:
