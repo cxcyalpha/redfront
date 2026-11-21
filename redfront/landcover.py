@@ -121,5 +121,10 @@ def snap_group(state: dict, grp: dict, avoid=(FOREST, WATER), chunk: int | None 
                 q = model.offset(model.offset(v, 0.0, sh[0]), 90.0, sh[1])
                 v["lat"], v["lon"] = q["lat"], q["lon"]
                 n += 1
+            if bad(state, v["lat"], v["lon"], avoid):   # звено целиком не уместилось (сплошной лес) - машину отдельно
+                q = clear(state, v, avoid=avoid, taken=taken)
+                if (q["lat"], q["lon"]) != (v["lat"], v["lon"]):
+                    v["lat"], v["lon"] = q["lat"], q["lon"]
+                    n += 0 if sh else 1
             taken.append({"lat": v["lat"], "lon": v["lon"]})
     return n

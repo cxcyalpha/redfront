@@ -38,7 +38,9 @@ def power(state: dict, unit: dict) -> float:
     # night_power - ночной бой стороны относительно дня (доктрина: армии арабских стран 1973 ночью слабее - ОЦЕНКА)
     night = sim.get("night_power", 1.0) if state.get("_night_now") else 1.0
     shock = SHOCK_POWER if unit.get("shock_until", 0) >= state.get("day", 0) else 1.0   # после удара в вылете игрока
-    return p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0) * night * shock
+    from . import naval                          # огонь кораблей по берегу (nfs корабельной группы)
+    return (p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0)
+            * night * shock * naval.fire_support_k(state, unit))
 
 
 SHOCK_POWER = 0.7        # ОЦЕНКА: сила части в шоке после удара (альтернативный ход, debrief)
@@ -118,6 +120,9 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
             if u.get("dig_h", 0) >= sim.get("prepared_h", 1e9):   # подготовленная оборона: окопы, заграждения, огневая система
                 frac *= sim.get("prepared_factor", 1.0)
             frac /= urb.get(u["id"], 1.0)
+        umb = model.doctrine(state, u["side"]).get("umbrella") or {}
+        if umb.get("ground") and not ops._under_sams(state, u["side"], model.unit_pos(state, u)):
+            frac *= umb.get("exposed_k", 1.0)    # вне зонтика своих ЗРК - под ударами авиации противника (14.10.1973)
         frac *= frac_day
         s0 = model.strength(u)
         n = _take_losses(u, frac)
@@ -297,7 +302,8 @@ def arrivals(state: dict) -> list[str]:
                 lines.append(f"{u['name']}: высадился в районе {u['route'][0]}.")
                 continue
             u["state"] = "defend"
-            entry = ops.success_entry(state, u, used) if _sim(state, u["side"]).get("commit_in_success") else None
+            entry = (ops.success_entry(state, u, used) if _sim(state, u["side"]).get("commit_in_success")
+                     and u.get("order") != "garrison" else None)   # гарнизон - в своём районе
             if entry and entry != u["route"][0]:   # второй эшелон - в полосе успеха, а не в назначенном заранее районе
                 lines.append(f"{u['name']}: вводится в полосе успеха - район {entry} (вместо {u['route'][0]}).")
                 u["route"] = [entry]

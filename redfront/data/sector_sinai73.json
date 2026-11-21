@@ -1,0 +1,813 @@
+{
+ "_about": "Синай, 06.10.1973. Генерирован tools/gen_sinai73.py. Реальная местность карты Sinai; координаты - ОЦЕНКИ.",
+ "theatre": "sinai",
+ "places": {
+  "Cairo": {
+   "lat": 30.05,
+   "lon": 31.24,
+   "estimate": true,
+   "side": "red"
+  },
+  "Bilbeis": {
+   "lat": 30.42,
+   "lon": 31.56,
+   "estimate": true,
+   "side": "red"
+  },
+  "TellElKebir": {
+   "lat": 30.55,
+   "lon": 31.78,
+   "estimate": true,
+   "side": "red"
+  },
+  "Ismailia": {
+   "lat": 30.6,
+   "lon": 32.27,
+   "estimate": true,
+   "side": "red",
+   "urban": 3.0
+  },
+  "QantaraWest": {
+   "lat": 30.86,
+   "lon": 32.31,
+   "estimate": true,
+   "side": "red"
+  },
+  "PortSaid": {
+   "lat": 31.26,
+   "lon": 32.3,
+   "estimate": true,
+   "side": "red",
+   "urban": 2.5
+  },
+  "Deversoir": {
+   "lat": 30.42,
+   "lon": 32.33,
+   "estimate": true,
+   "side": "red"
+  },
+  "Fayed": {
+   "lat": 30.32,
+   "lon": 32.3,
+   "estimate": true,
+   "side": "red"
+  },
+  "Geneifa": {
+   "lat": 30.2,
+   "lon": 32.43,
+   "estimate": true,
+   "side": "red"
+  },
+  "Suez": {
+   "lat": 29.97,
+   "lon": 32.53,
+   "estimate": true,
+   "side": "red",
+   "urban": 3.0
+  },
+  "Adabiya": {
+   "lat": 29.87,
+   "lon": 32.47,
+   "estimate": true,
+   "side": "red"
+  },
+  "Km101": {
+   "lat": 30.08,
+   "lon": 32.05,
+   "estimate": true,
+   "side": "red"
+  },
+  "QantaraEast": {
+   "lat": 30.85,
+   "lon": 32.34,
+   "estimate": true,
+   "side": "blue",
+   "urban": 1.5
+  },
+  "Firdan": {
+   "lat": 30.66,
+   "lon": 32.36,
+   "estimate": true,
+   "side": "blue"
+  },
+  "ChineseFarm": {
+   "lat": 30.46,
+   "lon": 32.42,
+   "estimate": true,
+   "side": "blue",
+   "urban": 1.5
+  },
+  "Matzmed": {
+   "lat": 30.4,
+   "lon": 32.38,
+   "estimate": true,
+   "side": "blue"
+  },
+  "PortTewfik": {
+   "lat": 29.95,
+   "lon": 32.56,
+   "estimate": true,
+   "side": "blue",
+   "urban": 3.0
+  },
+  "Baluza": {
+   "lat": 31.03,
+   "lon": 32.58,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Tasa": {
+   "lat": 30.5,
+   "lon": 32.87,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Refidim": {
+   "lat": 30.41,
+   "lon": 33.15,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Giddi": {
+   "lat": 30.21,
+   "lon": 32.98,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Mitla": {
+   "lat": 30.03,
+   "lon": 32.92,
+   "estimate": true,
+   "side": "blue"
+  },
+  "RasSudr": {
+   "lat": 29.59,
+   "lon": 32.71,
+   "estimate": true,
+   "side": "blue"
+  },
+  "AbuRudeis": {
+   "lat": 28.9,
+   "lon": 33.2,
+   "estimate": true,
+   "side": "blue"
+  },
+  "BirHasana": {
+   "lat": 30.2,
+   "lon": 33.42,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Nakhl": {
+   "lat": 29.92,
+   "lon": 33.75,
+   "estimate": true,
+   "side": "blue"
+  },
+  "ElArish": {
+   "lat": 31.13,
+   "lon": 33.8,
+   "estimate": true,
+   "side": "blue"
+  },
+  "Beersheba": {
+   "lat": 31.25,
+   "lon": 34.79,
+   "estimate": true,
+   "side": "blue"
+  }
+ },
+ "airbases": {
+  "inshas_airbase": {
+   "name": "Inshas Airbase",
+   "airport": "Inshas Airbase",
+   "side": "red",
+   "military": true
+  },
+  "bilbeis_air_base": {
+   "name": "Bilbeis Air Base",
+   "airport": "Bilbeis Air Base",
+   "side": "red",
+   "military": true
+  },
+  "abu_suwayr": {
+   "name": "Abu Suwayr",
+   "airport": "Abu Suwayr",
+   "side": "red",
+   "military": true
+  },
+  "as_salihiyah": {
+   "name": "As Salihiyah",
+   "airport": "As Salihiyah",
+   "side": "red",
+   "military": true
+  },
+  "fayed": {
+   "name": "Fayed",
+   "airport": "Fayed",
+   "side": "red",
+   "military": true
+  },
+  "al_mansurah": {
+   "name": "Al Mansurah",
+   "airport": "Al Mansurah",
+   "side": "red",
+   "military": true
+  },
+  "cairo_west": {
+   "name": "Cairo West",
+   "airport": "Cairo West",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "beni_suef": {
+   "name": "Beni Suef",
+   "airport": "Beni Suef",
+   "side": "red",
+   "military": true,
+   "supply_external": true
+  },
+  "azzaqaziq": {
+   "name": "AzZaqaziq",
+   "airport": "AzZaqaziq",
+   "side": "red",
+   "military": true
+  },
+  "wadi_al_jandali": {
+   "name": "Wadi al Jandali",
+   "airport": "Wadi al Jandali",
+   "side": "red",
+   "military": true
+  },
+  "melez": {
+   "name": "Melez",
+   "airport": "Melez",
+   "side": "blue",
+   "military": true
+  },
+  "bir_hasanah": {
+   "name": "Bir Hasanah",
+   "airport": "Bir Hasanah",
+   "side": "blue",
+   "military": true
+  },
+  "el_arish": {
+   "name": "El Arish",
+   "airport": "El Arish",
+   "side": "blue",
+   "military": true
+  },
+  "hatzerim": {
+   "name": "Hatzerim",
+   "airport": "Hatzerim",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "hatzor": {
+   "name": "Hatzor",
+   "airport": "Hatzor",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "tel_nof": {
+   "name": "Tel Nof",
+   "airport": "Tel Nof",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "nevatim": {
+   "name": "Nevatim",
+   "airport": "Nevatim",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  },
+  "ramon_airbase": {
+   "name": "Ramon Airbase",
+   "airport": "Ramon Airbase",
+   "side": "blue",
+   "military": true,
+   "supply_external": true
+  }
+ },
+ "links": [
+  [
+   "Cairo",
+   "Bilbeis"
+  ],
+  [
+   "Bilbeis",
+   "TellElKebir"
+  ],
+  [
+   "TellElKebir",
+   "Ismailia"
+  ],
+  [
+   "Ismailia",
+   "QantaraWest"
+  ],
+  [
+   "QantaraWest",
+   "PortSaid"
+  ],
+  [
+   "Ismailia",
+   "Deversoir"
+  ],
+  [
+   "Deversoir",
+   "Fayed"
+  ],
+  [
+   "Fayed",
+   "Geneifa"
+  ],
+  [
+   "Geneifa",
+   "Suez"
+  ],
+  [
+   "Suez",
+   "Adabiya"
+  ],
+  [
+   "Cairo",
+   "Km101"
+  ],
+  [
+   "Km101",
+   "Suez"
+  ],
+  [
+   "Km101",
+   "Fayed"
+  ],
+  [
+   "QantaraWest",
+   "QantaraEast"
+  ],
+  [
+   "Ismailia",
+   "Firdan"
+  ],
+  [
+   "Deversoir",
+   "ChineseFarm"
+  ],
+  [
+   "Suez",
+   "PortTewfik"
+  ],
+  [
+   "QantaraEast",
+   "Firdan"
+  ],
+  [
+   "Firdan",
+   "ChineseFarm"
+  ],
+  [
+   "QantaraEast",
+   "Baluza"
+  ],
+  [
+   "Firdan",
+   "Tasa"
+  ],
+  [
+   "ChineseFarm",
+   "Tasa"
+  ],
+  [
+   "ChineseFarm",
+   "Giddi"
+  ],
+  [
+   "Tasa",
+   "Matzmed"
+  ],
+  [
+   "Matzmed",
+   "ChineseFarm"
+  ],
+  [
+   "Matzmed",
+   "Deversoir"
+  ],
+  [
+   "PortTewfik",
+   "Mitla"
+  ],
+  [
+   "PortTewfik",
+   "RasSudr"
+  ],
+  [
+   "RasSudr",
+   "AbuRudeis"
+  ],
+  [
+   "Mitla",
+   "Giddi"
+  ],
+  [
+   "Giddi",
+   "Refidim"
+  ],
+  [
+   "Tasa",
+   "Refidim"
+  ],
+  [
+   "Mitla",
+   "Nakhl"
+  ],
+  [
+   "Refidim",
+   "BirHasana"
+  ],
+  [
+   "Nakhl",
+   "BirHasana"
+  ],
+  [
+   "Baluza",
+   "ElArish"
+  ],
+  [
+   "Refidim",
+   "ElArish"
+  ],
+  [
+   "ElArish",
+   "Beersheba"
+  ],
+  [
+   "BirHasana",
+   "Beersheba"
+  ]
+ ],
+ "supply_entry": {
+  "red": [
+   "Cairo"
+  ],
+  "blue": [
+   "Beersheba"
+  ]
+ },
+ "front_km": 30,
+ "off_limits": {
+  "blue": [
+   "Cairo",
+   "Bilbeis",
+   "PortSaid"
+  ],
+  "red": [
+   "Beersheba",
+   "ElArish",
+   "BirHasana",
+   "Nakhl",
+   "AbuRudeis"
+  ]
+ },
+ "axes": {
+  "qantara": "18-я пд: Кантара",
+  "firdan": "2-я пд: Фирдан - Таса",
+  "center": "16-я пд: Китайская ферма - Таса",
+  "south": "3-я армия: Порт-Тауфик - Митла - Гидди"
+ },
+ "objectives": {
+  "red": {
+   "qantara": [
+    "QantaraEast",
+    "Baluza"
+   ],
+   "firdan": [
+    "Firdan",
+    "Tasa"
+   ],
+   "center": [
+    "ChineseFarm",
+    "Tasa"
+   ],
+   "south": [
+    "PortTewfik",
+    "Mitla",
+    "Giddi"
+   ]
+  },
+  "blue": []
+ },
+ "_about_objectives": "Оси Египта: плацдармы у Кантары, Фирдана, Девесуара, Порт-Тауфика, затем - перевалы (14.10). Оси Израиля (с 15.10): Китайская ферма - Девесуар - Фаид - Генейфа (окружение 3-й армии).",
+ "depots": [
+  {
+   "id": "red_depot_ismailia",
+   "name": "Склады 2-й армии (Исмаилия)",
+   "side": "red",
+   "place": "Ismailia"
+  },
+  {
+   "id": "red_depot_suez",
+   "name": "Склады 3-й армии (Суэц)",
+   "side": "red",
+   "place": "Suez"
+  },
+  {
+   "id": "red_depot_tellelkebir",
+   "name": "Склады (Тель-эль-Кебир)",
+   "side": "red",
+   "place": "TellElKebir"
+  },
+  {
+   "id": "blue_depot_refidim",
+   "name": "Склады Южного округа (Рефидим)",
+   "side": "blue",
+   "place": "Refidim"
+  },
+  {
+   "id": "blue_depot_tasa",
+   "name": "Склад снабжения (Таса)",
+   "side": "blue",
+   "place": "Tasa"
+  },
+  {
+   "id": "blue_depot_elarish",
+   "name": "Склад снабжения (Эль-Ариш)",
+   "side": "blue",
+   "place": "ElArish"
+  }
+ ],
+ "bridges": [
+  {
+   "id": "br_qantara",
+   "name": "Переправа у Кантары",
+   "lat": 30.855,
+   "lon": 32.325,
+   "links": [
+    [
+     "QantaraWest",
+     "QantaraEast"
+    ]
+   ],
+   "source": "ОЦЕНКА места"
+  },
+  {
+   "id": "br_firdan",
+   "name": "Переправа у Фирдана (Исмаилия)",
+   "lat": 30.65,
+   "lon": 32.33,
+   "links": [
+    [
+     "Ismailia",
+     "Firdan"
+    ]
+   ],
+   "source": "ОЦЕНКА места"
+  },
+  {
+   "id": "br_deversoir",
+   "name": "Переправа у Девесуара (египетская)",
+   "lat": 30.44,
+   "lon": 32.37,
+   "links": [
+    [
+     "Deversoir",
+     "ChineseFarm"
+    ]
+   ],
+   "source": "ОЦЕНКА места"
+  },
+  {
+   "id": "br_matzmed",
+   "name": "Переправа у Мацмеда (израильская, 16-17.10)",
+   "lat": 30.41,
+   "lon": 32.355,
+   "links": [
+    [
+     "Matzmed",
+     "Deversoir"
+    ]
+   ],
+   "source": "ОЦЕНКА места"
+  },
+  {
+   "id": "br_suez",
+   "name": "Переправа у Суэца",
+   "lat": 29.96,
+   "lon": 32.55,
+   "links": [
+    [
+     "Suez",
+     "PortTewfik"
+    ]
+   ],
+   "source": "ОЦЕНКА места"
+  }
+ ],
+ "ad_sites": [
+  {
+   "id": "red_ad_af_abu_suwayr",
+   "name": "ПВО аэродрома Abu Suwayr",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_abu_suwayr",
+   "lat": 30.5791,
+   "lon": 32.1113,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_al_mansurah",
+   "name": "ПВО аэродрома Al Mansurah",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_al_mansurah",
+   "lat": 30.9633,
+   "lon": 31.4471,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_as_salihiyah",
+   "name": "ПВО аэродрома As Salihiyah",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_as_salihiyah",
+   "lat": 30.7983,
+   "lon": 32.0578,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_azzaqaziq",
+   "name": "ПВО аэродрома AzZaqaziq",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_azzaqaziq",
+   "lat": 30.5957,
+   "lon": 31.6802,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_beni_suef",
+   "name": "ПВО аэродрома Beni Suef",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_beni_suef",
+   "lat": 29.2046,
+   "lon": 31.0324,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_bilbeis_air_base",
+   "name": "ПВО аэродрома Bilbeis Air Base",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_bilbeis_air_base",
+   "lat": 30.3989,
+   "lon": 31.6229,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_bir_hasanah",
+   "name": "ПВО аэродрома Bir Hasanah",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_bir_hasanah",
+   "lat": 30.1906,
+   "lon": 33.398,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_cairo_west",
+   "name": "ПВО аэродрома Cairo West",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_cairo_west",
+   "lat": 30.1115,
+   "lon": 30.9108,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_el_arish",
+   "name": "ПВО аэродрома El Arish",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_el_arish",
+   "lat": 31.036,
+   "lon": 33.8035,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_fayed",
+   "name": "ПВО аэродрома Fayed",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_fayed",
+   "lat": 30.3389,
+   "lon": 32.2781,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_hatzerim",
+   "name": "ПВО аэродрома Hatzerim",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_hatzerim",
+   "lat": 31.2361,
+   "lon": 34.6431,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_hatzor",
+   "name": "ПВО аэродрома Hatzor",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_hatzor",
+   "lat": 31.755,
+   "lon": 34.7109,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_inshas_airbase",
+   "name": "ПВО аэродрома Inshas Airbase",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_inshas_airbase",
+   "lat": 30.3355,
+   "lon": 31.4621,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_melez",
+   "name": "ПВО аэродрома Melez",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_melez",
+   "lat": 30.4105,
+   "lon": 33.1341,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_nevatim",
+   "name": "ПВО аэродрома Nevatim",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_nevatim",
+   "lat": 31.2063,
+   "lon": 34.9965,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_ramon_airbase",
+   "name": "ПВО аэродрома Ramon Airbase",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_ramon_airbase",
+   "lat": 30.7753,
+   "lon": 34.6507,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "blue_ad_af_tel_nof",
+   "name": "ПВО аэродрома Tel Nof",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_tel_nof",
+   "lat": 31.8304,
+   "lon": 34.8035,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
+   "id": "red_ad_af_wadi_al_jandali",
+   "name": "ПВО аэродрома Wadi al Jandali",
+   "side": "red",
+   "tier": "short",
+   "covers": "af_wadi_al_jandali",
+   "lat": 30.0806,
+   "lon": 31.8458,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  }
+ ],
+ "_about_ad_sites": "ПВО аэродромов (ярус short) - шаблоны сторон; ЗРК средней дальности - части состава сил."
+}

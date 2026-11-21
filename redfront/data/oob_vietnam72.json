@@ -520,7 +520,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_258",
@@ -552,7 +554,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_20tk",
@@ -579,7 +583,8 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.85
   },
   {
    "id": "blue_147",
@@ -611,7 +616,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_1div",
@@ -648,7 +655,8 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.85
   },
   {
    "id": "blue_369",
@@ -680,7 +688,9 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.85
   },
   {
    "id": "blue_1abde",
@@ -707,7 +717,8 @@
     }
    ],
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.85
   },
   {
    "id": "blue_abn",
@@ -741,7 +752,8 @@
    "source": "Michel 'Clashes' / Andrade 'Trial by Fire' / Lavalle (USAF 1976), по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
    "arrives_day": 3,
-   "arrives_jitter": 0
+   "arrives_jitter": 0,
+   "quality": 0.85
   },
   {
    "id": "blue_rgr21",
@@ -1765,6 +1777,15 @@
      "strike_airfield": {
       "from_day": 35,
       "why": "аэродромы МиГов - с 'Лайнбэкера' (10.05.1972)"
+     }
+    }
+   },
+   "task_params": {
+    "blue": {
+     "air_assault": {
+      "front_kinds": [
+       "reinforce"
+      ]
      }
     }
    }

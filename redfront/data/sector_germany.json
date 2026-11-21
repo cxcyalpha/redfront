@@ -120,7 +120,8 @@
    "lat": 54.323,
    "lon": 10.135,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.5
   },
   "Neumunster": {
    "lat": 54.074,
@@ -150,7 +151,8 @@
    "lat": 53.866,
    "lon": 10.687,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "BadOldesloe": {
    "lat": 53.81,
@@ -174,7 +176,8 @@
    "lat": 53.551,
    "lon": 9.994,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 4.0
   },
   "Stade": {
    "lat": 53.6,
@@ -198,7 +201,8 @@
    "lat": 53.079,
    "lon": 8.802,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Verden": {
    "lat": 52.923,
@@ -234,19 +238,22 @@
    "lat": 52.423,
    "lon": 10.787,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 1.5
   },
   "Hannover": {
    "lat": 52.375,
    "lon": 9.732,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Braunschweig": {
    "lat": 52.269,
    "lon": 10.521,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.5
   },
   "Helmstedt": {
    "lat": 52.228,
@@ -258,13 +265,15 @@
    "lat": 52.15,
    "lon": 10.33,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 1.5
   },
   "Hildesheim": {
    "lat": 52.151,
    "lon": 9.951,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Goslar": {
    "lat": 51.906,
@@ -288,7 +297,8 @@
    "lat": 51.541,
    "lon": 9.915,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Duderstadt": {
    "lat": 51.512,
@@ -300,7 +310,8 @@
    "lat": 51.312,
    "lon": 9.48,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.5
   },
   "Witzenhausen": {
    "lat": 51.341,
@@ -330,7 +341,8 @@
    "lat": 50.551,
    "lon": 9.676,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 1.5
   },
   "Alsfeld": {
    "lat": 50.751,
@@ -348,7 +360,8 @@
    "lat": 50.11,
    "lon": 8.682,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.5
   },
   "Hanau": {
    "lat": 50.133,
@@ -384,7 +397,8 @@
    "lat": 49.791,
    "lon": 9.953,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Bamberg": {
    "lat": 49.898,
@@ -420,7 +434,8 @@
    "lat": 49.452,
    "lon": 11.077,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Weiden": {
    "lat": 49.677,
@@ -438,13 +453,15 @@
    "lat": 52.021,
    "lon": 8.532,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Osnabruck": {
    "lat": 52.279,
    "lon": 8.047,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Wismar": {
    "lat": 53.893,
@@ -474,7 +491,8 @@
    "lat": 53.635,
    "lon": 11.401,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 1.5
   },
   "Hagenow": {
    "lat": 53.43,
@@ -486,7 +504,8 @@
    "lat": 54.092,
    "lon": 12.099,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 2.0
   },
   "Gustrow": {
    "lat": 53.793,
@@ -564,7 +583,8 @@
    "lat": 52.131,
    "lon": 11.64,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 2.5
   },
   "Oschersleben": {
    "lat": 52.03,
@@ -606,13 +626,15 @@
    "lat": 51.483,
    "lon": 11.97,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 2.5
   },
   "Leipzig": {
    "lat": 51.34,
    "lon": 12.375,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 3.0
   },
   "Nordhausen": {
    "lat": 51.505,
@@ -654,7 +676,8 @@
    "lat": 50.978,
    "lon": 11.029,
    "estimate": true,
-   "side": "red"
+   "side": "red",
+   "urban": 2.0
   },
   "Weimar": {
    "lat": 50.98,

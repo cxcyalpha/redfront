@@ -1342,6 +1342,13 @@ def mapobj_section(tmp: Path) -> None:
     check(st2["tasks"] is not None, "план дня с найденными целями строится")
 
 
+# бывшие кампании Украины 2022 (из игры убраны) - стенд для проверки механик, которые на них отлажены: РЭБ, запас
+# управляемого оружия, рассредоточение, полевые площадки, подвески ВКС, HIMARS, артбригады, свои вылеты
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+FIX_KYIV = (str(FIXTURES / "sector_kyiv22.json"), str(FIXTURES / "oob_kyiv22.json"))
+FIX_KHARKIV = (str(FIXTURES / "sector_kharkiv22.json"), str(FIXTURES / "oob_kharkiv22.json"))
+
+
 def own_control_section(tmp: Path) -> None:
     """Свой вылет (command.create), время каждой группы и снятие группы (command.edit), ход кампании (model.influence),
     управление наземными войсками (ops.give_order) - через окно кампании (App.do)."""
@@ -1351,7 +1358,9 @@ def own_control_section(tmp: Path) -> None:
     (home / "Saved Games" / "DCS" / "Missions").mkdir(parents=True, exist_ok=True)
     root.mkdir(exist_ok=True)
     app = gui.App(root, home)
-    app.do("new", {"file": "o1", "side": "red", "seed": "1", "theatre": "kyiv22"})
+    st0 = model.new_campaign("o1", sector=FIX_KYIV[0], oob=FIX_KYIV[1], seed=1, player_side="red", randomness=False)
+    st0["scenario"]["historical"] = True         # стенд - исторический сценарий (ход по настройке)
+    model.save(st0, root / "o1.json")
     f = {"file": "o1.json"}
     app.do("plan", f)
     st = model.load(root / "o1.json")
@@ -2851,7 +2860,7 @@ def landcover_section(tmp: Path) -> None:
     """Тип поверхности (landcover.py, растр ESA WorldCover): машины позиций - не в лесу и не в воде, колонны - как были."""
     from redfront import landcover, materialize
     print("\n== тип поверхности: лес и вода ==")
-    st = model.new_campaign("lc", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=1, player_side="red")
+    st = model.new_campaign("lc", sector=FIX_KYIV[0], oob=FIX_KYIV[1], seed=1, player_side="red")
     planner.plan(st)
     hh = landcover.kind(st, 53.55, 9.99), landcover.kind(st, 53.53, 10.35)   # Гамбург, лес Саксенвальд
     groups = materialize.theatre(st, st["task"], 1.0)
@@ -2871,7 +2880,7 @@ def field_farp_section(tmp: Path) -> None:
     from redfront import farp
     import dcs as _dcs
     print("\n== полевые вертолётные площадки ==")
-    st = model.new_campaign("ff", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=1, player_side="red")
+    st = model.new_campaign("ff", sector=FIX_KYIV[0], oob=FIX_KYIV[1], seed=1, player_side="red")
     farp.daily(st)
     fs = {k: b for k, b in st["airbases"].items() if b.get("field")}
     on = [u for u in st["units"].values() if u.get("base") in fs]
@@ -4211,7 +4220,7 @@ def theatres_section(tmp: Path) -> None:
           f"налёт Ту-95МС: {len(raids)} ракет Х-555 по плану, группа в миссии с ракетами и пуском по цели, исход - {resb[:1]}")
     # РЭБ (ew.py): зоны станций, эффекты с пределами; удар по станции РЭБ и охота за пусковыми - миссия собирается
     from redfront import ew
-    stk = model.new_campaign("ew", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=2, player_side="blue")
+    stk = model.new_campaign("ew", sector=FIX_KYIV[0], oob=FIX_KYIV[1], seed=2, player_side="blue")
     hos = model.offset(stk["units"]["red_ew_leer_west"]["pos"], 180.0, 15000)   # 15 км от Леер-3 (зона 20 км), вне Красухи-4
     tb2 = stk["units"]["ua_tb2"]
     uk, ul = ew.uav_factors(stk, tb2, hos)
@@ -4236,7 +4245,7 @@ def theatres_section(tmp: Path) -> None:
           f"РЭБ: TB2 в 15 км от Леер-3 - успех x{uk}, потери +{ul}; станция разбита - x{uk2}; ГНСС-зона Поле-21 - {gn}; КВО Х-101 у Киева x{cepk}, Точки-У x{cept}; "
           f"удар по станции РЭБ - миссия собрана ({built})")
     # Харьков 2022: ВСУ наступают; HIMARS бьёт по складам фронта, не по России; путь наступления - в обход России
-    skh = model.new_campaign("kh", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    skh = model.new_campaign("kh", sector=FIX_KHARKIV[0], oob=FIX_KHARKIV[1], seed=1, player_side="blue")
     planner.plan(skh)
     gm = [p_["target"] for p_ in skh["ssm_plan"] if p_["missile"] == "gmlrs"]
     from redfront import ops
@@ -4252,7 +4261,7 @@ def theatres_section(tmp: Path) -> None:
           f"Харьков-22: HIMARS по {sorted(set(gm))}; путь Липцы - Волчанск {pth}; за 8 дней ВСУ брали {took}; миссия собрана")
     # артиллерия (artillery.py): поддержка боя в досягаемости с пределом; контрбатарейная борьба; в миссии - огонь
     from redfront import artillery
-    sa = model.new_campaign("ka", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    sa = model.new_campaign("ka", sector=FIX_KHARKIV[0], oob=FIX_KHARKIV[1], seed=1, player_side="blue")
     u92 = sa["units"]["blue_92mb"]
     k0 = artillery.support_k(sa, u92)
     u92["engaged"] = ["red_rg_balakliia"]
@@ -4267,7 +4276,8 @@ def theatres_section(tmp: Path) -> None:
           f"бригада в миссии - {len(gr['vehicles'])} орудий, огонь по {'точке' if gr.get('fire_at') else 'нет цели'}")
     # рассредоточение ВВС Украины (dispersal.py): посадка на другом аэродроме и перебазирование по доктрине
     from redfront import command, dispersal
-    sd = model.new_campaign("kd", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    sd = model.new_campaign("kd", sector=FIX_KHARKIV[0], oob=FIX_KHARKIV[1], seed=1, player_side="blue")
+    sd["campaign_id"] = "disp-test"              # без случайности кампании разброс - по id кампании: для проверки - постоянный
     mig = sd["units"]["ua_mig29s"]
     lands = [dispersal.land_other(sd, mig, f"t{k}") for k in range(40)]
     other = [b_ for b_ in lands if b_]
@@ -4282,7 +4292,7 @@ def theatres_section(tmp: Path) -> None:
           and reb and red_none,
           f"рассредоточение ВСУ: посадка не дома в {len(other)} из 40 вылетов, перебазирований за 5 суток {len(reb)}; у России нет")
     # защита рассредоточением: самолёты на земле под ударом по аэродрому - меньше; без сценария с рассредоточением - нет
-    sg = model.new_campaign("kg", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    sg = model.new_campaign("kg", sector=FIX_KHARKIV[0], oob=FIX_KHARKIV[1], seed=1, player_side="blue")
     hb = sg["units"]["ua_su25"]["base"]          # аэродром Су-25 (Канатово - по проекции театра)
     af_ = sg["units"][f"af_{hb}"]
     n0 = sum(u_["count"] for u_ in sg["units"].values() if u_.get("base") == hb and model.category(u_) == "air")
@@ -4290,7 +4300,7 @@ def theatres_section(tmp: Path) -> None:
         af_["damage"] = 0.01 * k
         dispersal.ground_losses(sg, af_, 0.5, f"t{k}")
     n_prot = n0 - sum(u_["count"] for u_ in sg["units"].values() if u_.get("base") == hb and model.category(u_) == "air")
-    sg2 = model.new_campaign("kg", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    sg2 = model.new_campaign("kg", sector=FIX_KHARKIV[0], oob=FIX_KHARKIV[1], seed=1, player_side="blue")
     sg2["dispersal"]["blue"]["protect"] = 0.0
     for k in range(10):
         sg2["units"][f"af_{hb}"]["damage"] = 0.01 * k
@@ -4359,7 +4369,7 @@ def theatres_section(tmp: Path) -> None:
     # ракет модов, которых в строю не было (Р-77М, Р-77ПД, Р-27ЭА, Р-74М2), нет
     import re as _re
     from redfront import mods as _mods, weapons as _wp
-    sv = model.new_campaign("vks", sector="sector_kyiv22.json", oob="oob_kyiv22.json", seed=1, player_side="red")
+    sv = model.new_campaign("vks", sector=FIX_KYIV[0], oob=FIX_KYIV[1], seed=1, player_side="red")
     sv["settings"]["mods"] = ["su30", "su35s"]
     _mods.apply(sv)
     planner.plan(sv)
@@ -4415,7 +4425,7 @@ def theatres_section(tmp: Path) -> None:
           f"колонна {mu['id']}: {len(cl['vehicles'])} машин пакетами ({pkn}) на {span:.0f} км; ЗРК на ходу - огонь запрещён, "
           f"сразу после остановки - запрещён, через время развёртывания - разрешён")
     # HARM на МиГ-29С ВСУ (arm_pylons): группа подавления ПВО - HARM на внутренних крыльевых пилонах
-    sh = model.new_campaign("kh2", sector="sector_kharkiv22.json", oob="oob_kharkiv22.json", seed=1, player_side="blue")
+    sh = model.new_campaign("kh2", sector=FIX_KHARKIV[0], oob=FIX_KHARKIV[1], seed=1, player_side="blue")
     planner.plan(sh)
     ti = next(i for i, t_ in enumerate(sh["tasks"]) if t_["kind"] == "strike_sam_site")
     seadp = [g_["performer"] for g_ in sh["tasks"][ti]["package"] if g_["group"].startswith("sead")]

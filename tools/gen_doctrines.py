@@ -78,7 +78,10 @@ PACKAGES = [
                "umbrella": {"km": 25, "tasks": ["cap_own_troops", "cas_contact", "cas_helo", "strike_column_march",
                                       "strike_supply_route", "strike_depot", "strike_bridge", "strike_factory"],
                             "source": "Pollack, Nordeen: 1973 - истребители и штурмовики над войсками только под "
-                                      "зонтиком своих ЗРК; 25 км за кромкой зоны поражения - ОЦЕНКА"}},
+                                      "зонтиком своих ЗРК; 25 км за кромкой зоны поражения - ОЦЕНКА",
+                            "ground": True, "ground_km": 10, "exposed_k": 1.8,
+                            "ground_source": "El Shazly: плацдармы 6-13.10 - в пределах зонтика ЗРК западного берега (10-15 км); "
+                                             "выход за него 14.10 - разгром. ОЦЕНКА 10 км за кромкой зоны"}},
     ),
     derive(
         "nato", "iaf73", "ВВС и армия Израиля, 1973",

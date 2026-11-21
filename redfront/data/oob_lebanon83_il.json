@@ -40,7 +40,8 @@
     }
    ],
    "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison"
   },
   {
    "id": "blue_usmc_pvo",
@@ -84,7 +85,8 @@
     }
    ],
    "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison"
   },
   {
    "id": "blue_laf4",
@@ -111,7 +113,8 @@
     }
    ],
    "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "order": "garrison"
   },
   {
    "id": "blue_laf5",
@@ -121,6 +124,90 @@
    "state": "defend",
    "route": [
     "Khalde"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 30,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 60,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "order": "garrison"
+  },
+  {
+   "id": "blue_lf_beirut",
+   "name": "'Ливанские силы' (христианское ополчение, Восточный Бейрут)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "EastBeirut"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "order": "garrison"
+  },
+  {
+   "id": "blue_lf_jounieh",
+   "name": "'Ливанские силы' (Кесруан, Джуния)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Jounieh"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 25,
+   "daily_advance_km": 10,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 15,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "order": "garrison"
+  },
+  {
+   "id": "blue_laf10",
+   "name": "10-я бригада ливанской армии (Метн)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Baabda"
    ],
    "progress_km": 0.0,
    "march_kmh": 25,
@@ -166,7 +253,8 @@
    ],
    "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "shouf"
+   "axis": "shouf",
+   "quality": 0.6
   },
   {
    "id": "red_psp_pvo",
@@ -211,7 +299,8 @@
    ],
    "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
    "estimate": true,
-   "axis": "coast"
+   "axis": "coast",
+   "quality": 0.6
   },
   {
    "id": "red_psp2_pvo",
@@ -255,7 +344,8 @@
     }
    ],
    "source": "Hammel / Lehman, по памяти - проверить; состав - ОЦЕНКА",
-   "estimate": true
+   "estimate": true,
+   "quality": 0.6
   },
   {
    "id": "red_amal_pvo",
@@ -1450,6 +1540,44 @@
    "abbr": "",
    "source": "Hammel / Lehman, по памяти - проверить; состав и место - ОЦЕНКА; пр. 205 'Оса' - в DCS Type 021-1 (китайская копия 'Осы')",
    "estimate": true
+  },
+  {
+   "id": "blue_nfs",
+   "name": "Группа огневой поддержки (USS New Jersey - в DCS нет; эсминцы и крейсер у Бейрута)",
+   "side": "blue",
+   "role": "naval",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 33.8,
+    "lon": 35.38
+   },
+   "composition": [
+    {
+     "type": "TICONDEROG",
+     "count": 1,
+     "role": "cruiser",
+     "names": [
+      "USS Ticonderoga (CG-47)"
+     ]
+    },
+    {
+     "type": "PERRY",
+     "count": 1,
+     "role": "frigate",
+     "names": [
+      "USS John Rodgers (DD-983; в DCS - Perry)"
+     ]
+    }
+   ],
+   "abbr": "",
+   "source": "Hammel / Lehman, по памяти - проверить; ОЦЕНКА; New Jersey (BB-62) обстреливал Шуф 14.12.1983 и 8.02.1984 - огонь модели (nfs), в миссии - корабли группы",
+   "estimate": true,
+   "nfs": {
+    "km": 35,
+    "k": 0.4,
+    "title": "линкор New Jersey: 406-мм (ОЦЕНКА веса огня)"
+   }
   },
   {
    "id": "blue_convoy_jounieh",

@@ -1,0 +1,2008 @@
+{
+ "_about": "Состав сил 06.10.1973 (Суэцкий фронт). Генерирован tools/gen_sinai73.py; источники - в поле source. Числа - ОЦЕНКИ по порядку величины.",
+ "theatre": "sinai",
+ "preset": {
+  "title": "Синай, октябрь 1973: Суэцкий канал",
+  "year": 1973,
+  "date": "1973-10-06"
+ },
+ "date": "1973-10-06",
+ "countries": {
+  "red": "Egypt",
+  "blue": "Israel"
+ },
+ "doctrine": {
+  "red": "arab",
+  "blue": "iaf73"
+ },
+ "units": [
+  {
+   "id": "red_18id",
+   "name": "18-я пехотная дивизия (Кантара)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "QantaraWest"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 120,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 80,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 250,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "qantara",
+   "note": "форсирование 6.10",
+   "dig_in_at": [
+    "QantaraEast"
+   ]
+  },
+  {
+   "id": "red_18id_pvo",
+   "name": "Войсковая ПВО: 18-я пехотная дивизия (Кантара)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_18id",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_2id",
+   "name": "2-я пехотная дивизия (Фирдан)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Ismailia"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 120,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 80,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 250,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "firdan",
+   "dig_in_at": [
+    "Firdan"
+   ]
+  },
+  {
+   "id": "red_2id_pvo",
+   "name": "Войсковая ПВО: 2-я пехотная дивизия (Фирдан)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_2id",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_16id",
+   "name": "16-я пехотная дивизия (Девесуар)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Deversoir"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 120,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 80,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 250,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "center",
+   "dig_in_at": [
+    "ChineseFarm"
+   ]
+  },
+  {
+   "id": "red_16id_pvo",
+   "name": "Войсковая ПВО: 16-я пехотная дивизия (Девесуар)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_16id",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_7id",
+   "name": "7-я пехотная дивизия (3-я армия)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Suez"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 120,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 80,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 250,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south",
+   "dig_in_at": [
+    "PortTewfik"
+   ]
+  },
+  {
+   "id": "red_7id_pvo",
+   "name": "Войсковая ПВО: 7-я пехотная дивизия (3-я армия)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_7id",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_19id",
+   "name": "19-я пехотная дивизия (3-я армия)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Geneifa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 120,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 30,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 80,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 250,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "axis": "south",
+   "dig_in_at": [
+    "PortTewfik"
+   ]
+  },
+  {
+   "id": "red_19id_pvo",
+   "name": "Войсковая ПВО: 19-я пехотная дивизия (3-я армия)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_19id",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_21ad",
+   "name": "21-я бронетанковая дивизия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "TellElKebir"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 250,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 50,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 7,
+   "arrives_jitter": 0,
+   "axis": "center",
+   "note": "переправа 13.10, удар 14.10"
+  },
+  {
+   "id": "red_21ad_pvo",
+   "name": "Войсковая ПВО: 21-я бронетанковая дивизия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_21ad",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_4ad",
+   "name": "4-я бронетанковая дивизия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Km101"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 250,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 50,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 40,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 7,
+   "arrives_jitter": 0,
+   "axis": "south",
+   "note": "переправа частью сил 13.10"
+  },
+  {
+   "id": "red_4ad_pvo",
+   "name": "Войсковая ПВО: 4-я бронетанковая дивизия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_4ad",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_23md",
+   "name": "23-я механизированная дивизия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "TellElKebir"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 160,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 80,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 60,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "note": "резерв 2-й армии"
+  },
+  {
+   "id": "red_23md_pvo",
+   "name": "Войсковая ПВО: 23-я механизированная дивизия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_23md",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_6md",
+   "name": "6-я механизированная дивизия",
+   "side": "red",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Km101"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "T_55",
+     "count": 160,
+     "role": "MBT"
+    },
+    {
+     "type": "BMP_1",
+     "count": 80,
+     "role": "IFV"
+    },
+    {
+     "type": "BTR-60",
+     "count": 60,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 2,
+   "arrives_jitter": 0,
+   "note": "резерв 3-й армии"
+  },
+  {
+   "id": "red_6md_pvo",
+   "name": "Войсковая ПВО: 6-я механизированная дивизия",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_6md",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "ZSU_23_4_Shilka",
+     "count": 8,
+     "role": "launcher"
+    },
+    {
+     "type": "Strela_1_9P31",
+     "count": 6,
+     "role": "launcher"
+    },
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 8,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_ismailia",
+   "name": "Гарнизон Исмаилии (коммандос, 182-я пдбр)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Ismailia"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR-60",
+     "count": 30,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 200,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 40,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "Исмаилию 22.10 не взяли",
+   "order": "garrison"
+  },
+  {
+   "id": "red_ismailia_pvo",
+   "name": "Войсковая ПВО: Гарнизон Исмаилии (коммандос, 182-я пдбр)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_ismailia",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_suez",
+   "name": "Гарнизон Суэца (19-я пд, ополчение)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Suez"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR-60",
+     "count": 30,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 200,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 40,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "штурм 24.10 отбит",
+   "order": "garrison"
+  },
+  {
+   "id": "red_suez_pvo",
+   "name": "Войсковая ПВО: Гарнизон Суэца (19-я пд, ополчение)",
+   "side": "red",
+   "role": "sam_short",
+   "attached_to": "red_suez",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "SA-18 Igla manpad",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_qantara_w",
+   "name": "Тыловые части 2-й армии (Кантара-Запад)",
+   "side": "red",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "QantaraWest"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "BTR-60",
+     "count": 30,
+     "role": "APC"
+    },
+    {
+     "type": "Infantry AK",
+     "count": 200,
+     "role": "infantry"
+    },
+    {
+     "type": "Soldier RPG",
+     "count": 40,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "order": "garrison"
+  },
+  {
+   "id": "blue_fort_qantara",
+   "name": "Опорные пункты Кантары (линия Бар-Лева)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "QantaraEast"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 6,
+     "role": "APC"
+    },
+    {
+     "type": "Soldier M4",
+     "count": 30,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "сдан 9.10",
+   "order": "garrison",
+   "quality": 1.0
+  },
+  {
+   "id": "blue_fort_firdan",
+   "name": "Опорные пункты у Фирдана",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Firdan"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 6,
+     "role": "APC"
+    },
+    {
+     "type": "Soldier M4",
+     "count": 30,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "order": "garrison",
+   "quality": 0.8
+  },
+  {
+   "id": "blue_fort_matzmed",
+   "name": "Опорный пункт 'Мацмед'",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Matzmed"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 6,
+     "role": "APC"
+    },
+    {
+     "type": "Soldier M4",
+     "count": 30,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "order": "garrison",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_fort_lakekan",
+   "name": "Опорный пункт 'Лакекан' (Китайская ферма)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "ChineseFarm"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 6,
+     "role": "APC"
+    },
+    {
+     "type": "Soldier M4",
+     "count": 30,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "order": "garrison",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_fort_tewfik",
+   "name": "Опорный пункт 'Мезах' (Порт-Тауфик)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "PortTewfik"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 6,
+     "role": "APC"
+    },
+    {
+     "type": "Soldier M4",
+     "count": 30,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "сдан 13.10",
+   "order": "garrison",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_14bde",
+   "name": "14-я бронетанковая бригада (Амнон Решеф)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Tasa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "252-я дивизия",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_14bde_pvo",
+   "name": "Войсковая ПВО: 14-я бронетанковая бригада (Амнон Решеф)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_14bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_401bde",
+   "name": "401-я бронетанковая бригада (Дан Шомрон)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Mitla"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "252-я дивизия; перевалы 14.10 удержаны",
+   "order": "garrison",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_401bde_pvo",
+   "name": "Войсковая ПВО: 401-я бронетанковая бригада (Дан Шомрон)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_401bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_460bde",
+   "name": "460-я бронетанковая бригада (Габи Амир)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "defend",
+   "route": [
+    "Giddi"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 90,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 25,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "note": "252-я дивизия",
+   "order": "garrison",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_460bde_pvo",
+   "name": "Войсковая ПВО: 460-я бронетанковая бригада (Габи Амир)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_460bde",
+   "state": "defend",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_162div",
+   "name": "162-я дивизия (Адан)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Baluza"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 220,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 70,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "note": "резерв: подход 7-8.10",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_162div_pvo",
+   "name": "Войсковая ПВО: 162-я дивизия (Адан)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_162div",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_143div",
+   "name": "143-я дивизия (Шарон)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Tasa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 220,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 70,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 3,
+   "arrives_jitter": 0,
+   "axis": "gazelle",
+   "note": "резерв; переправа 15-16.10",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_143div_pvo",
+   "name": "Войсковая ПВО: 143-я дивизия (Шарон)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_143div",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_146div",
+   "name": "146-я дивизия (Каланит)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Refidim"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-60",
+     "count": 220,
+     "role": "MBT"
+    },
+    {
+     "type": "M-113",
+     "count": 70,
+     "role": "APC"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 6,
+   "arrives_jitter": 0,
+   "note": "ОЦЕНКА",
+   "quality": 2.0
+  },
+  {
+   "id": "blue_146div_pvo",
+   "name": "Войсковая ПВО: 146-я дивизия (Каланит)",
+   "side": "blue",
+   "role": "sam_short",
+   "attached_to": "blue_146div",
+   "state": "pending",
+   "composition": [
+    {
+     "type": "Vulcan",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_247para",
+   "name": "247-я парашютно-десантная бригада (Дани Мат)",
+   "side": "blue",
+   "role": "maneuver",
+   "state": "pending",
+   "route": [
+    "Tasa"
+   ],
+   "progress_km": 0.0,
+   "march_kmh": 30,
+   "daily_advance_km": 25,
+   "composition": [
+    {
+     "type": "M-113",
+     "count": 30,
+     "role": "APC"
+    },
+    {
+     "type": "Soldier M4",
+     "count": 120,
+     "role": "infantry"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; состав - ОЦЕНКА",
+   "estimate": true,
+   "arrives_day": 9,
+   "arrives_jitter": 0,
+   "axis": "gazelle",
+   "note": "первой - через канал",
+   "quality": 2.0
+  },
+  {
+   "id": "red_kub_1",
+   "name": "Батарея Куб №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.78,
+    "lon": 32.22
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_2",
+   "name": "Батарея Куб №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.58,
+    "lon": 32.2
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_3",
+   "name": "Батарея Куб №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.38,
+    "lon": 32.24
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_4",
+   "name": "Батарея Куб №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.12,
+    "lon": 32.42
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_5",
+   "name": "Батарея Куб №5",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 29.98,
+    "lon": 32.45
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_kub_6",
+   "name": "Батарея Куб №6",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.7,
+    "lon": 32.15
+   },
+   "composition": [
+    {
+     "type": "Kub_1S91_str",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Kub_2P25_ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_1",
+   "name": "Дивизион С-75 №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.65,
+    "lon": 32.05
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_2",
+   "name": "Дивизион С-75 №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.35,
+    "lon": 32.05
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_3",
+   "name": "Дивизион С-75 №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.05,
+    "lon": 32.25
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_4",
+   "name": "Дивизион С-75 №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.45,
+    "lon": 31.8
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s75_5",
+   "name": "Дивизион С-75 №5",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.1,
+    "lon": 31.45
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "SNR_75V",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "S_75M_Volhov",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_1",
+   "name": "Дивизион С-125 №1",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.8,
+    "lon": 32.12
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_2",
+   "name": "Дивизион С-125 №2",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.48,
+    "lon": 32.12
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_3",
+   "name": "Дивизион С-125 №3",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.22,
+    "lon": 32.28
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "red_s125_4",
+   "name": "Дивизион С-125 №4",
+   "side": "red",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.6,
+    "lon": 31.95
+   },
+   "composition": [
+    {
+     "type": "p-19 s-125 sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "snr s-125 tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "5p73 s-125 ln",
+     "count": 4,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_refidim",
+   "name": "Батарея HAWK (Рефидим)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.38,
+    "lon": 33.12
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "blue_hawk_tasa",
+   "name": "Батарея HAWK (Таса)",
+   "side": "blue",
+   "role": "sam_medium",
+   "state": "deployed",
+   "fixed": true,
+   "pos": {
+    "lat": 30.48,
+    "lon": 32.95
+   },
+   "composition": [
+    {
+     "type": "Hawk_sr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_tr",
+     "count": 1,
+     "role": "radar"
+    },
+    {
+     "type": "Hawk_pcp",
+     "count": 1,
+     "role": "control"
+    },
+    {
+     "type": "Hawk_ln",
+     "count": 6,
+     "role": "launcher"
+    }
+   ],
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; место - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f4_hz",
+   "name": "Эскадрильи F-4E 'Курнас' (Хацор)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzor",
+   "type": "F_4E_45MC",
+   "count": 36,
+   "strike_radius_km": 500,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_f4_tn",
+   "name": "Эскадрильи F-4E (Тель-Ноф)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "tel_nof",
+   "type": "F_4E_45MC",
+   "count": 24,
+   "strike_radius_km": 500,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_a4_hz",
+   "name": "Эскадрильи A-4 'Скайхок' (Хацерим)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "hatzerim",
+   "type": "A_4E_C",
+   "count": 50,
+   "strike_radius_km": 400,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА; мод A-4E-C: без мода части в кампании нет",
+   "estimate": true,
+   "mod": "a4ec"
+  },
+  {
+   "id": "i_a4_rf",
+   "name": "Эскадрилья A-4 (Рефидим)",
+   "side": "blue",
+   "role": "fighter_bomber",
+   "base": "melez",
+   "type": "A_4E_C",
+   "count": 16,
+   "strike_radius_km": 300,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА; мод A-4E-C",
+   "estimate": true,
+   "mod": "a4ec"
+  },
+  {
+   "id": "i_nesher",
+   "name": "Эскадрильи 'Нешер' и 'Мираж' IIICJ",
+   "side": "blue",
+   "role": "fighter",
+   "base": "hatzor",
+   "type": "Mirage_F1CE",
+   "count": 50,
+   "strike_radius_km": 450,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА; Нешер/Мираж III - Mirage F1CE",
+   "estimate": true
+  },
+  {
+   "id": "i_nesher_rf",
+   "name": "Дежурное звено 'Мираж' (Рефидим)",
+   "side": "blue",
+   "role": "fighter",
+   "base": "melez",
+   "type": "Mirage_F1CE",
+   "count": 12,
+   "strike_radius_km": 400,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "i_ch53",
+   "name": "114-я эскадрилья (CH-53)",
+   "side": "blue",
+   "role": "transport_helo",
+   "base": "bir_hasanah",
+   "type": "CH_53E",
+   "count": 8,
+   "strike_radius_km": 200,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА; CH-53D - CH-53E",
+   "estimate": true
+  },
+  {
+   "id": "e_mig21_in",
+   "name": "Истребительные эскадрильи (МиГ-21МФ, Иншас)",
+   "side": "red",
+   "role": "fighter",
+   "base": "inshas_airbase",
+   "type": "MiG_21Bis",
+   "count": 40,
+   "strike_radius_km": 250,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-21МФ - МиГ-21бис",
+   "estimate": true
+  },
+  {
+   "id": "e_mig21_ab",
+   "name": "Истребительные эскадрильи (МиГ-21, Абу-Сувейр)",
+   "side": "red",
+   "role": "fighter",
+   "base": "abu_suwayr",
+   "type": "MiG_21Bis",
+   "count": 30,
+   "strike_radius_km": 250,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "e_mig21_ma",
+   "name": "Истребительные эскадрильи (МиГ-21, Мансура)",
+   "side": "red",
+   "role": "fighter",
+   "base": "al_mansurah",
+   "type": "MiG_21Bis",
+   "count": 30,
+   "strike_radius_km": 250,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  },
+  {
+   "id": "e_su7",
+   "name": "Истребительно-бомбардировочные эскадрильи (Су-7БМК)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "as_salihiyah",
+   "type": "Su_17M4",
+   "count": 40,
+   "strike_radius_km": 300,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА; Су-7БМК - Су-17М4",
+   "estimate": true
+  },
+  {
+   "id": "e_mig17",
+   "name": "Истребительно-бомбардировочные эскадрильи (МиГ-17Ф)",
+   "side": "red",
+   "role": "fighter_bomber",
+   "base": "bilbeis_air_base",
+   "type": "MiG_15bis",
+   "count": 40,
+   "strike_radius_km": 200,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА; МиГ-17 - МиГ-15бис",
+   "estimate": true
+  },
+  {
+   "id": "e_mi8",
+   "name": "Вертолётные эскадрильи (Ми-8)",
+   "side": "red",
+   "role": "transport_helo",
+   "base": "fayed",
+   "type": "Mi_8MT",
+   "count": 20,
+   "strike_radius_km": 150,
+   "source": "Herzog 'War of Atonement' / Adan 'On the Banks of the Suez' / El Shazly, по памяти - проверить; число и радиус - ОЦЕНКА",
+   "estimate": true
+  }
+ ],
+ "strategic_stock": {},
+ "variants": [
+  {
+   "name": "base",
+   "title": "Синай, октябрь 1973: Суэцкий канал",
+   "task_rules": {
+    "blue": {
+     "strike_factory": {
+      "off": true,
+      "why": "по промышленности Египта не били"
+     }
+    },
+    "red": {
+     "strike_factory": {
+      "off": true,
+      "why": "по Израилю за Синаем удары - единичные"
+     }
+    }
+   },
+   "posture_days": [
+    {
+     "from_day": 5,
+     "red": "defense"
+    },
+    {
+     "from_day": 9,
+     "red": "offense",
+     "umbrella": {
+      "red": false
+     }
+    },
+    {
+     "from_day": 10,
+     "red": "defense",
+     "umbrella": {
+      "red": true
+     },
+     "halt": [
+      "red"
+     ],
+     "blue": "offense"
+    },
+    {
+     "from_day": 18,
+     "blue": "defense"
+    }
+   ],
+   "posture": {
+    "red": "offense",
+    "blue": "defense"
+   },
+   "objectives": {
+    "red": {
+     "qantara": [
+      "QantaraEast",
+      "Baluza"
+     ],
+     "firdan": [
+      "Firdan",
+      "Tasa"
+     ],
+     "center": [
+      "ChineseFarm",
+      "Tasa"
+     ],
+     "south": [
+      "PortTewfik",
+      "Mitla",
+      "Giddi"
+     ]
+    },
+    "blue": {
+     "gazelle": [
+      "Matzmed",
+      "Deversoir",
+      "Fayed",
+      "Geneifa",
+      "Adabiya"
+     ]
+    }
+   }
+  }
+ ],
+ "historical": true,
+ "replacements": {
+  "air_per_day": 1,
+  "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."
+ },
+ "ad_templates": {
+  "red": {
+   "short": [
+    {
+     "name": "ЗУ-23, ПЗРК",
+     "composition": [
+      {
+       "type": "Ural_375_ZU_23",
+       "role": "launcher",
+       "count": 2
+      },
+      {
+       "type": "SA-18 Igla manpad",
+       "role": "launcher",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  },
+  "blue": {
+   "short": [
+    {
+     "name": "Вулкан",
+     "composition": [
+      {
+       "type": "Vulcan",
+       "role": "launcher",
+       "count": 4
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "_not_included": "Флот (бой у Балтима и Дамьетты 8-9.10), Ту-16 с ракетами КСР-2, ОТР 'Скад' (16.10), десанты египетских коммандос в Синае (вертолётами 6.10 - в модели нет), фронт на Красном море.",
+ "air_war": {
+  "air_skill": {
+   "blue": 2.5,
+   "red": 0.6
+  },
+  "sam_loss_k": {
+   "blue": 1.3
+  }
+ }
+}

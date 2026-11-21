@@ -29,6 +29,7 @@ THEATRE_INFO = {   # карта DCS: класс pydcs, центр (восход/
     "caucasus": {"cls": "Caucasus", "lat": 42.5, "lon": 43.5, "utc": 4, "climate": "tbilisi"},
     "syria": {"cls": "Syria", "lat": 33.5, "lon": 35.8, "utc": 3, "climate": "beirut"},
     "persiangulf": {"cls": "PersianGulf", "lat": 26.3, "lon": 55.5, "utc": 4, "climate": "dubai"},
+    "sinai": {"cls": "Sinai", "lat": 30.3, "lon": 32.8, "utc": 2, "climate": "ismailia"},
 }
 
 
@@ -448,7 +449,9 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "strategic_stock": copy.deepcopy(forces.get("strategic_stock") or sec.get("strategic_stock") or {}),
         "strategic_resupply": copy.deepcopy(forces.get("strategic_resupply") or sec.get("strategic_resupply") or {}),
         "dispersal": copy.deepcopy(forces.get("dispersal") or {}),
-        "loadout_policy": copy.deepcopy(forces.get("loadout_policy") or {}),   # правило подвесок стороны (weapons.policy)
+        "loadout_policy": copy.deepcopy(forces.get("loadout_policy") or {}),
+        # воздушная война сценария: выучка в воздушном бою (air_skill) и множитель потерь от ЗРК (sam_loss_k) сторон
+        "air_war": copy.deepcopy(forces.get("air_war") or {}),   # правило подвесок стороны (weapons.policy)
         "external_awacs": copy.deepcopy(forces.get("external_awacs") or {}),   # ДРЛО извне театра (build.external_awacs)   # рассредоточение авиации сторон (dispersal.py)
         "strategic_per_day": copy.deepcopy(forces.get("strategic_per_day") or sec.get("strategic_per_day") or {}),   # запас авиационных ПКР сторон (naval.use_air_asm)
         "naval_bases": copy.deepcopy(sec.get("naval_bases") or {}),   # порты ремонта кораблей (naval.port_of); нет - за картой   # морской подвоз (naval.sea_supply)
@@ -695,8 +698,8 @@ def tasks_not(unit: dict) -> list[str]:
 
 # ---- влияние игрока на исход (настройка influence): исторический сценарий - исторический ход или альтернативный;
 # гипотетический сценарий (холодная война, вариант Ливана с Израилем) - всегда альтернативный (ОЦЕНКИ) ----
-HISTORICAL_OOBS = {"oob_kyiv22", "oob_kharkiv22", "oob_golan73", "oob_lebanon83", "oob_syria", "oob_vietnam72",
-                   "oob_vietnam72_lb2", "oob_tankerwar88", "oob_karabakh", "oob_abkhazia", "oob_caucasus"}
+HISTORICAL_OOBS = {"oob_golan73", "oob_syria", "oob_vietnam72",
+                   "oob_vietnam72_lb2", "oob_tankerwar88", "oob_abkhazia", "oob_caucasus"}
 PLAYER_K_ALT = 1.5        # ОЦЕНКА: вес вылета игрока в альтернативном ходе (повреждение объектов, шок частей)
 
 

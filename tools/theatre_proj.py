@@ -5,8 +5,8 @@
 аэродромами тыла помещается в сушу карты (LAND). Расстояния и направления театра сохраняются с точностью до s:
 аэродромы тыла - на реальном удалении (сотни км), а не в 30 км от фронта.
 
-Аэродромы: для реального аэродрома - ближайший к его проекции аэродром карты (не вертолётная площадка, с местами
-для самолётов), каждый один раз.
+Аэродромы: для реального аэродрома - ближайший к его проекции военный аэродром карты для реактивных (не лётное поле с
+короткой ВПП), на своей территории и не ближе к противнику, чем реальный (с поправкой на масштаб); каждый один раз.
 """
 from __future__ import annotations
 
@@ -52,8 +52,26 @@ def affine(src: list[tuple[float, float]], dst: list[tuple[float, float]]):
     return lambda la, lo: tuple(round(float(v), 4) for v in np.array([la, lo, 1.0]) @ X)
 
 
-def airfields(terrain, wanted: dict, proj: Proj, min_slots: int = 8) -> dict:
-    """{ключ: (широта, долгота) реального аэродрома} -> {ключ: имя аэродрома карты}."""
+JET_SLOT_W = 18     # стоянки шире (м) - для реактивных; у лётных полей (Ринтельн, Люнебург, Уммерн) - 10-14 м:
+JET_MIN_SLOTS = 12  # там ВПП - сотни метров (Васильков на Ринтельне - 700 м)
+FRONT_KEEP = 0.75   # аэродром карты - не ближе к противнику, чем эта доля проекции реального удаления
+FRONT_MIN_KM = 25   # и не ближе этого (артиллерия, ПЗРК у ВПП)
+
+
+def jet_base(a) -> bool:
+    """Военный аэродром для реактивных: не гражданское лётное поле, стоянки под истребители, их не меньше JET_MIN_SLOTS.
+    pydcs не знает длину ВПП - признак по стоянкам (у полей планеристов и малой авиации они 10-14 м)."""
+    pl = [s for s in a.parking_slots if s.airplanes]
+    return (not a.civilian and len(pl) >= JET_MIN_SLOTS and max((s.width for s in pl), default=0) >= JET_SLOT_W)
+
+
+def airfields(terrain, wanted: dict, proj: Proj, min_slots: int = 8, sides: dict | None = None,
+              places: dict | None = None, heli: set | None = None, far: tuple = ()) -> dict:
+    """{ключ: (широта, долгота) реального аэродрома} -> {ключ: имя аэродрома карты}. Самолётные базы - только военные
+    аэродромы для реактивных (jet_base); вертолётные (heli) - любые. С sides ({ключ: сторона}) и places ({имя:
+    (широта, долгота карты, сторона)}): ближайший пункт к аэродрому - своей стороны, до противника - не меньше
+    FRONT_KEEP проекции реального удаления (не на самой границе); нет такого - ближайший подходящий."""
+    heli = heli or set()
     cand = {}
     for n, a in terrain.airports.items():
         if n.startswith(("H ", "Airracing")):
@@ -61,17 +79,37 @@ def airfields(terrain, wanted: dict, proj: Proj, min_slots: int = 8) -> dict:
         if sum(1 for s in a.parking_slots if s.airplanes) < min_slots:
             continue
         p = a.position.latlng()
-        cand[n] = (p.lat, p.lng)
+        cand[n] = ((p.lat, p.lng), jet_base(a))
+    def dist(a, b):
+        return math.hypot(*_km(a, b))
     out, used = {}, set()
     for k, (la, lo) in wanted.items():
         mp = proj(la, lo)
-        best = min((n for n in cand if n not in used), key=lambda n: sum(x * x for x in _km(mp, cand[n])))
+        side = (sides or {}).get(k)
+        def ok(n):
+            pos, jet = cand[n]
+            if k not in heli and not jet:
+                return False
+            if not side or not places:
+                return True
+            near = min(places.values(), key=lambda q: dist(pos, q[:2]))
+            if near[2] != side:
+                return False
+            foe = [q[:2] for q in places.values() if q[2] and q[2] != side]
+            if not foe or k in far:              # глубокий тыл у края карты - удаление не в масштабе
+                return True
+            want = min(dist(mp, q) for q in foe)       # удаление проекции реального аэродрома от противника
+            return min(dist(pos, q) for q in foe) >= max(FRONT_MIN_KM, FRONT_KEEP * want) or want < FRONT_MIN_KM
+        free = [n for n in cand if n not in used]
+        pool = [n for n in free if ok(n)] or [n for n in free if k in heli or cand[n][1]] or free
+        best = min(pool, key=lambda n: dist(mp, cand[n][0]))
         used.add(best)
         out[k] = best
     return out
 
 
-def apply(G, real_places: dict, real_airbases: dict, bbox_extra: tuple = (), far: tuple = ()) -> Proj:
+def apply(G, real_places: dict, real_airbases: dict, bbox_extra: tuple = (), far: tuple = (),
+          extra_places: dict | None = None) -> Proj:
     """Перенос сценария gen_caucasus (модуль G) на проекцию реального театра: пункты - из real_places
     ({имя: (широта, долгота)}; сторона - прежняя), ЗРК, станции РЭБ, пусковые - аффинным преобразованием старых
     условных координат в новые (по пунктам), мосты - середины своих связей, аэродромы - ближайшие к проекции
@@ -89,7 +127,14 @@ def apply(G, real_places: dict, real_airbases: dict, bbox_extra: tuple = (), far
     for b in G.BRIDGES:
         a_, c_ = (G.PLACES[x] for x in b["links"][0])
         b["lat"], b["lon"] = round((a_[0] + c_[0]) / 2, 4), round((a_[1] + c_[1]) / 2, 4)
-    names = airfields(Germany(), real_airbases, P)
+    for n, (la, lo, sd) in (extra_places or {}).items():   # пункты без условной схемы (граница) - сразу в проекции
+        G.PLACES[n] = (*P(la, lo), sd)
+    sides = {k: sd for sd, ks in G.AIRBASES.items() for k in ks}
+    heli_roles = ("attack_helo", "transport_helo", "helo", "heli")
+    heli = {k for k in real_airbases if [r for r in G.AIR if r[5] == k]
+            and all(r[3] in heli_roles for r in G.AIR if r[5] == k)}
+    near_places = {n: v for n, v in G.PLACES.items() if n not in far}   # глубокий тыл у края карты - не в масштабе
+    names = airfields(Germany(), real_airbases, P, sides=sides, places=near_places, heli=heli, far=far)
     G.AIRBASES = {s: [names.get(n, n) for n in ns] for s, ns in G.AIRBASES.items()}
     G.AIR = [r[:5] + (names.get(r[5], r[5]),) + tuple(r[6:]) for r in G.AIR]
     G.EXTERNAL_SUPPLY = {names.get(n, n) for n in G.EXTERNAL_SUPPLY}

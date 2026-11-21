@@ -514,3 +514,36 @@ def sealift(state: dict, unit: dict) -> tuple[float, str]:
         return model.strength(g), "по уцелевшим кораблям группы"
     alive = sum(n for t, n in model.alive_by_type(g).items() if info(t).get("kind") in kinds)
     return max(0.0, min(1.0, alive / tot)), f"уцелело перевозчиков {alive:.0f} из {tot}"
+
+
+# ---- морская огневая поддержка (поле nfs корабельной группы): огонь корабельной артиллерии по противнику у берега ----
+NFS_MAX = 0.5             # ОЦЕНКА: предел прибавки к силе части от огня кораблей
+
+
+def fire_support_k(state: dict, unit: dict) -> float:
+    """Множитель силы своей части в бою от огня кораблей (nfs: {km - дальность стрельбы, k - вес огня}): часть ближе km
+    к корабельной группе своей стороны - x (1 + k), берётся сильнейшая группа, не больше NFS_MAX (ОЦЕНКИ: линкор с 406-мм
+    - до ~38 км, 127-мм - ~20 км)."""
+    if unit.get("state") != "battle":
+        return 1.0
+    best = 0.0
+    pos = None
+    for g in ships(state, unit["side"]):
+        nfs = g.get("nfs")
+        if not nfs:
+            continue
+        pos = pos or model.unit_pos(state, unit)
+        if model.dist_km(g["pos"], pos) <= nfs.get("km", 20):
+            best = max(best, nfs.get("k", 0.2) * model.strength(g))
+    return 1.0 + min(NFS_MAX, best)
+
+
+def fire_target(state: dict, g: dict) -> dict | None:
+    """Точка огня корабельной группы в миссии: ближайшая часть противника в бою в дальности nfs."""
+    nfs = g.get("nfs")
+    if not nfs:
+        return None
+    from . import ops
+    foes = [u for u in ops._maneuver(state, model.enemy(g["side"])) if u["state"] == "battle"]
+    best = min(((model.dist_km(g["pos"], model.unit_pos(state, u)), u) for u in foes), default=None, key=lambda x: x[0])
+    return model.unit_pos(state, best[1]) if best and best[0] <= nfs.get("km", 20) else None

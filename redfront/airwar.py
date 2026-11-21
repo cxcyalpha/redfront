@@ -94,7 +94,8 @@ def _strike(state: dict, e: dict) -> list[str]:
     # потери группы от ЗРК коридора и дежурных пар ПВО противника
     from . import ew
     uav_k, uav_loss = ew.uav_factors(state, perf, obj["pos"])   # беспилотник в зоне подавления РЭБ противника
-    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) + uav_loss)   # перехват - воздушным боем ниже
+    sam_k = ((state.get("air_war") or {}).get("sam_loss_k") or {}).get(e["side"], 1.0)   # сценарий: РЭБ, ложные цели, тактика
+    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) * sam_k + uav_loss)   # перехват - воздушным боем ниже
     asm_frac = 1.0
     if obj["kind"] == "ship":                    # ПКР стороны: нет - бомбы с малой высоты над ордером, потери выше
         from . import naval
@@ -173,6 +174,8 @@ def resolve(state: dict, t0: float, t1: float) -> list[str]:
     from . import recon
     lines += recon.resolve(state, t1)            # разведывательные вылеты - в журнал разведки после обработки данных
     skip = set(a.get("done", [])) | set(a.get("played", []))
+    from . import aircombat                      # встречные бои истребителей сторон за шаг
+    lines += aircombat.clashes(state, t0, t1, skip)
     for e in a["entries"]:
         if e.get("ai_only") or e.get("resolved") or not (t0 < _tot(e) <= t1):
             continue

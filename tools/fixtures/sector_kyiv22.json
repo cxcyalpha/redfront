@@ -1,5 +1,5 @@
 {
- "_about": "Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.84 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Nordholz, Bremen, Luneburg, Chojna, Rinteln, Gutersloh, Dusseldorf, Giebelstadt. Рельеф и реки (Днепр) - карты, не Украины.",
+ "_about": "Киев, 24.02.2022. Генерирован tools/gen_kyiv22.py. Реальная география, спроецированная на карту Cold War Germany: масштаб 0.84 от реального (расстояния театра сохранены), аэродромы карты - ближайшие к проекции реальных: Nordholz, Bremen, Lubeck, Chojna, Obermehler Schlotheim, Cologne, Dusseldorf, Giebelstadt. Рельеф и реки (Днепр) - карты, не Украины.",
  "theatre": "germany",
  "places": {
   "Mozyr": {
@@ -211,9 +211,9 @@
    "military": true,
    "supply_external": true
   },
-  "luneburg": {
-   "name": "Luneburg",
-   "airport": "Luneburg",
+  "lubeck": {
+   "name": "Lubeck",
+   "airport": "Lubeck",
    "side": "red",
    "military": true,
    "supply_external": true
@@ -232,15 +232,15 @@
    "military": true,
    "supply_external": true
   },
-  "rinteln": {
-   "name": "Rinteln",
-   "airport": "Rinteln",
+  "obermehler_schlotheim": {
+   "name": "Obermehler Schlotheim",
+   "airport": "Obermehler Schlotheim",
    "side": "blue",
    "military": true
   },
-  "gutersloh": {
-   "name": "Gutersloh",
-   "airport": "Gutersloh",
+  "cologne": {
+   "name": "Cologne",
+   "airport": "Cologne",
    "side": "blue",
    "military": true
   },
@@ -622,6 +622,17 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
+   "id": "blue_ad_af_cologne",
+   "name": "ПВО аэродрома Cologne",
+   "side": "blue",
+   "tier": "short",
+   "covers": "af_cologne",
+   "lat": 50.879,
+   "lon": 7.16,
+   "variant": 0,
+   "rule": "ПВО объекта: у каждого военного аэродрома"
+  },
+  {
    "id": "blue_ad_af_dusseldorf",
    "name": "ПВО аэродрома Dusseldorf",
    "side": "blue",
@@ -644,24 +655,13 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "blue_ad_af_gutersloh",
-   "name": "ПВО аэродрома Gutersloh",
-   "side": "blue",
-   "tier": "short",
-   "covers": "af_gutersloh",
-   "lat": 51.9337,
-   "lon": 8.317,
-   "variant": 0,
-   "rule": "ПВО объекта: у каждого военного аэродрома"
-  },
-  {
-   "id": "red_ad_af_luneburg",
-   "name": "ПВО аэродрома Luneburg",
+   "id": "red_ad_af_lubeck",
+   "name": "ПВО аэродрома Lubeck",
    "side": "red",
    "tier": "short",
-   "covers": "af_luneburg",
-   "lat": 53.2478,
-   "lon": 10.482,
+   "covers": "af_lubeck",
+   "lat": 53.7914,
+   "lon": 10.7169,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
@@ -677,13 +677,13 @@
    "rule": "ПВО объекта: у каждого военного аэродрома"
   },
   {
-   "id": "blue_ad_af_rinteln",
-   "name": "ПВО аэродрома Rinteln",
+   "id": "blue_ad_af_obermehler_schlotheim",
+   "name": "ПВО аэродрома Obermehler Schlotheim",
    "side": "blue",
    "tier": "short",
-   "covers": "af_rinteln",
-   "lat": 52.1881,
-   "lon": 9.055,
+   "covers": "af_obermehler_schlotheim",
+   "lat": 51.2772,
+   "lon": 10.6504,
    "variant": 0,
    "rule": "ПВО объекта: у каждого военного аэродрома"
   }

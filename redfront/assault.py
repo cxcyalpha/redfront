@@ -88,6 +88,9 @@ def candidates(state: dict, side: str, tdef: dict) -> list[str]:
     return [n for _k, n in out]
 
 
+REINFORCE_RATIO = 0.5    # ОЦЕНКА: подкрепление - если у пункта противника не меньше половины своих сил
+
+
 def front_candidates(state: dict, side: str, tdef: dict) -> list[tuple[str, str]]:
     """Высадка у фронта (mode front доктрины - аэромобильные действия, армия США во Вьетнаме): [(пункт, вид)], лучшие
     первыми. reinforce - свой пункт на линии соприкосновения, к которому подходят части противника (в threat_km), а
@@ -107,7 +110,7 @@ def front_candidates(state: dict, side: str, tdef: dict) -> list[tuple[str, str]
         nb = [q for q in g[name]]
         if p.get("side") == side and any(pl[q].get("side") == foe for q in nb):
             enemy, own = power(foe, name), power(side, name)
-            if enemy > 0 and enemy > own:        # угрожаемый участок: противника больше
+            if enemy > 0 and enemy >= REINFORCE_RATIO * own:   # угрожаемый участок: противник подошёл в силе
                 out.append(((0, -(enemy - own)), name, "reinforce"))
         elif p.get("side") == foe and any(pl[q].get("side") == side for q in nb):
             if not ops._units_near(state, name, foe, tdef.get("lz_clear_km", 5)):

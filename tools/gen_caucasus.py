@@ -222,16 +222,26 @@ DOCTRINE: dict | None = None
 SAM_FIXED = False
 FRONT_KM = None   # линия фронта на карте - не дальше от пунктов (frontline; нет - 45 км); реальный масштаб - больше
 AIR_ASSAULT: list = []
+# исторический ход (механики sim/ops; пусто - как раньше): города (пункт -> сила обороны, sim.urban_k), гарнизоны
+# (id частей, ops: order garrison), выучка частей (id или "*:сторона" -> quality), темп колонн без сопротивления
+# (сторона -> км/сутки, sim unopposed_km), смена позы по датам (posture_days варианта), запас управляемого оружия
+URBAN: dict = {}
+GARRISON: set = set()
+QUALITY: dict = {}
+UNOPPOSED: dict = {}
+POSTURE_DAYS: list = []
+MUNITIONS: dict = {}
+HISTORICAL: bool | None = None
 EW: list = []                                      # станции РЭБ (ew.py): (id, имя, сторона, станция, {тип: число}, шир, долг, источник)                             # аэромобильные роты: (id, имя, сторона, пункт, {тип: число}, человек, источник)                                  # позиции ЗРК известны (объектовая ПВО) - цели ударов по позициям                       # пакеты доктрины сторон (нет - по умолчанию)
 
 
 def main() -> None:
-    if THEATRE == "germany":
-        from dcs.terrain.germany import Germany as _T
-    else:
-        from dcs.terrain import Caucasus as _T
-    terrain = _T()
-    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s} for n, (la, lo, s) in PLACES.items()}
+    import sys as _sys
+    _sys.path.insert(0, str(DATA.parent.parent))
+    from redfront import model as _model
+    terrain = _model.terrain_class(THEATRE)()
+    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s, **({"urban": URBAN[n]} if n in URBAN else {})}
+              for n, (la, lo, s) in PLACES.items()}
     adj = {n: set() for n in places}
     for a, b in LINKS:
         assert a in places and b in places, (a, b)
@@ -290,6 +300,13 @@ def main() -> None:
             u["axis"] = axis
         if note:
             u["note"] = note
+        if uid in GARRISON:
+            u["order"] = "garrison"
+        q = QUALITY.get(uid, QUALITY.get(f"*:{side}"))
+        if q is not None:
+            u["quality"] = q
+        if side in UNOPPOSED:
+            u["unopposed_km"] = UNOPPOSED[side]
         units.append(u)
         if ad:
             units.append({"id": f"{uid}_pvo", "name": f"Войсковая ПВО: {name}", "side": side, "role": "sam_short",
@@ -331,7 +348,10 @@ def main() -> None:
         **({"doctrine": DOCTRINE} if DOCTRINE else {}),
         "units": units,
         "strategic_stock": STRATEGIC,
-        "variants": [{"name": "base", "title": TITLE, "task_rules": TASK_RULES, **EXTRA_VARIANT}],
+        "variants": [{"name": "base", "title": TITLE, "task_rules": TASK_RULES,
+                      **({"posture_days": POSTURE_DAYS} if POSTURE_DAYS else {}), **EXTRA_VARIANT}],
+        **({"munitions": MUNITIONS} if MUNITIONS else {}),
+        **({"historical": HISTORICAL} if HISTORICAL is not None else {}),
         "replacements": {"air_per_day": 1, "note": "Пополнение: самолётов в сутки до штата (ОЦЕНКА)."},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]}
@@ -343,5 +363,25 @@ def main() -> None:
           f"ЗРК {len(SAMS)}, авиачастей {len(AIR)}")
 
 
+def caucasus_2008() -> None:
+    """Исторический ход 8-12.08.2008 (только эта кампания; кампании на основе модуля задают свои значения)."""
+    global OFF_LIMITS, URBAN, QUALITY, UNOPPOSED, POSTURE_DAYS
+    # Россия не шла на Тбилиси, Мцхету, Кутаиси и через Военно-Грузинскую дорогу (политика, Тальявини)
+    OFF_LIMITS = {**OFF_LIMITS, "red": ["Kazbegi", "Pasanauri", "Dusheti", "Mtskheta", "Tbilisi", "Rustavi", "Marneuli",
+                                         "Sagarejo", "Telavi", "Kutaisi", "Tkibuli", "Ambrolauri", "Oni", "Batumi",
+                                         "Kobuleti", "Ozurgeti", "Akhaltsikhe", "Borjomi"]}
+    URBAN = {"Tskhinvali": 1.5, "Gori": 1.5, "Tbilisi": 3.0, "Kutaisi": 2.0}
+    # армия Грузии после 10-11.08 - отход без боя (Танки августа): выучка и стойкость ниже; 58-я армия - колоннами
+    QUALITY = {"*:blue": 0.7}
+    UNOPPOSED = {"red": 50}
+    # прекращение огня 12.08 (план Медведева - Саркози); 13-14.08 - выход к Гори и Поти, затем - оборона
+    POSTURE_DAYS = [{"from_day": 7, "red": "defense", "halt": ["red"]}]
+    # 7-я вдд - морем и по железной дороге через Сочи к Очамчире 9-10.08, 11.08 - Зугдиди и Сенаки
+    global GROUND
+    GROUND = [(r[0], r[1], r[2], "Ochamchire", r[4], r[5], 2) + tuple(r[7:]) if r[0] in ("red_7vdv_247", "red_7vdv_108")
+              else r for r in GROUND]
+
+
 if __name__ == "__main__":
+    caucasus_2008()
     main()

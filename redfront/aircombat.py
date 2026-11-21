@@ -34,8 +34,8 @@ AIR_SKILL = {"Israel": 1.8, "USA": 1.2, "UK": 1.2, "Germany": 1.1, "France": 1.1
 def _quality(state: dict, side: str, type_name: str) -> float:
     from . import fitness
     a = fitness.absolute(type_name, "air")
-    sk = model.doctrine(state, side)["sim"].get(
-        "air_skill", AIR_SKILL.get((state.get("countries") or {}).get(side, ""), 1.0))
+    sk = ((state.get("air_war") or {}).get("air_skill") or {}).get(side) or model.doctrine(state, side)["sim"].get(
+        "air_skill", AIR_SKILL.get((state.get("countries") or {}).get(side, ""), 1.0))   # сценарий сильнее доктрины
     return max(0.05, (a if a is not None else 0.5)) * sk
 
 
@@ -158,3 +158,73 @@ def engage(state: dict, e: dict, pos: dict, t: float, strike_size: int) -> tuple
     # перехваченная группа: удар слабее по доле бортов, до которых дошли перехватчики
     hit = min(1.0, free / max(1, strike_size))
     return lost_str, 1.0 - (1.0 - JETTISON_K) * hit, lines
+
+
+# ---- встречные бои истребителей: дежурства в зонах, расчистка воздуха и прикрытие пакетов сторон друг против друга ----
+CLASH_KM = 60             # ОЦЕНКА: группы истребителей сторон ближе - встречаются (обнаружение РЛС, наведение)
+P_CLASH = 0.4             # ОЦЕНКА: вероятность боя при встрече за шаг модели (час) - разошлись, не навели, не нашли
+FIRST_SHOT = 1.3          # ОЦЕНКА: у стороны с ДРЛО в воздухе - первый пуск: вес её огня
+FIGHTER_GROUPS = ("cover", "sweep", "escort", "cap")
+
+
+def _presences(state: dict, t0: float, t1: float, skip: set) -> list[dict]:
+    """Группы истребителей в воздухе в окне (t0, t1]: зоны дежурства и группы прикрытия/расчистки пакетов."""
+    out = []
+    for e in (state.get("ato") or {}).get("entries", []):
+        if e["id"] in skip:
+            continue
+        for g in e["task"]["package"]:
+            tm = (e.get("times") or {}).get(g["group"]) or {}
+            kind = g["objective"]["kind"]
+            cap = kind in ("cap_zone",) and e["kind"] in ("cap_own_troops", "fleet_cap", "cap", "barcap")
+            esc = g["group"].rstrip("0123456789") in FIGHTER_GROUPS and kind in ("sweep_zone", "cover_zone", "escort_lz")
+            if not (cap or esc):
+                continue
+            a = tm.get("objective_s", 0) - (0 if cap else 300)
+            b = tm.get("land_s", 0) if cap else tm.get("objective_s", 0) + 600
+            if b <= t0 or a > t1:
+                continue
+            perf = state["units"].get(g["performer"])
+            pos = g["objective"].get("pos") or (g.get("route") or [None])[-1]
+            if not perf or perf.get("count", 0) <= 0 or not pos:
+                continue
+            out.append({"entry": e, "group": g["group"], "perf": perf, "size": min(g["size"], perf["count"]),
+                        "pos": pos, "side": e["side"]})
+    return out
+
+
+def clashes(state: dict, t0: float, t1: float, skip: set | None = None) -> list[str]:
+    """Встречные бои истребителей за шаг модели: пары групп сторон ближе CLASH_KM в одно время - бой с вероятностью
+    P_CLASH (каждая группа - не больше одного боя за шаг). Потери по качеству (тип, выучка), сторона с ДРЛО бьёт
+    первой; расход ракет; экипажи - катапультирование (поиск и спасение) или гибель."""
+    pres = _presences(state, t0, t1, skip or set())
+    lines = []
+    used: set[int] = set()
+    reds = [p for p in pres if p["side"] == "red"]
+    blues = [p for p in pres if p["side"] == "blue"]
+    pairs = sorted(((model.dist_km(a["pos"], b["pos"]), i, j) for i, a in enumerate(reds) for j, b in enumerate(blues)),
+                   key=lambda x: x[0])
+    for d, i, j in pairs:
+        if d > CLASH_KM or ("r", i) in used or ("b", j) in used:
+            continue
+        a, b = reds[i], blues[j]
+        r = model.rng(state, f"clash-{a['entry']['id']}-{a['group']}-{b['entry']['id']}-{b['group']}-{int(t1)}")
+        if not ((r.random() < P_CLASH) if r else False):
+            continue
+        used.add(("r", i))
+        used.add(("b", j))
+        na, nb = min(a["size"], a["perf"]["count"]), min(b["size"], b["perf"]["count"])
+        if na <= 0 or nb <= 0:
+            continue
+        qa = _quality(state, "red", a["perf"]["type"]) * (FIRST_SHOT if _awacs_up(state, "red", t1) else 1.0)
+        qb = _quality(state, "blue", b["perf"]["type"]) * (FIRST_SHOT if _awacs_up(state, "blue", t1) else 1.0)
+        ka = na * KILL_PER_AIRCRAFT * qa / (qa + qb)       # сбито красными
+        kb = nb * KILL_PER_AIRCRAFT * qb / (qa + qb)
+        pos = model.lerp(a["pos"], b["pos"], 0.5)
+        lost_b = _lose(state, b["perf"], min(nb, _rounds(ka, r)), pos, f"clash:{a['entry']['id']}:{t1:.0f}:b", r)
+        lost_a = _lose(state, a["perf"], min(na, _rounds(kb, r)), pos, f"clash:{b['entry']['id']}:{t1:.0f}:r", r)
+        _spend_aam(state, "red", ka * AAM_PER_KILL)
+        _spend_aam(state, "blue", kb * AAM_PER_KILL)
+        lines.append(f"Воздушный бой: {na} x {a['perf']['type']} ({a['perf']['name']}) против {nb} x {b['perf']['type']} "
+                     f"({b['perf']['name']}) - сбито {lost_a} и {lost_b}.")
+    return lines

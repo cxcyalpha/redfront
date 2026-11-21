@@ -215,10 +215,19 @@ def bid_of(n):
     return n.lower().replace(" ", "_").replace("-", "_")
 
 
+# исторический ход апреля 1972 (Andrade, 'Trial by Fire'): 3-я дивизия АРВ и морская пехота держат рубеж Донгха -
+# Куангчи до конца апреля (Куангчи пал 1.05), Хюэ не взят; аэромобильные роты АРВН - в резерве (в тыл ВНА не
+# высаживались); ВНА держит захваченное у ДМЗ. ОЦЕНКИ
+URBAN = {"Hue": 3.0, "QuangTri": 2.0, "DongHa": 2.0}
+GARRISON = {"blue_3div", "blue_147", "blue_369", "blue_258"}   # 258-я бр МП - Донгха (мост, 2.04 взорван)
+QUALITY = {"*:blue": 0.85}
+
+
 def main() -> None:
     from dcs.terrain import Caucasus
     terrain = Caucasus()
-    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s} for n, (la, lo, s) in PLACES.items()}
+    places = {n: {"lat": la, "lon": lo, "estimate": True, "side": s, **({"urban": URBAN[n]} if n in URBAN else {})}
+              for n, (la, lo, s) in PLACES.items()}
     adj = {n: set() for n in places}
     for a, b in LINKS:
         assert a in places and b in places, (a, b)
@@ -265,6 +274,11 @@ def main() -> None:
             u["arrives_day"], u["arrives_jitter"] = day, 0
         if axis:
             u["axis"] = axis
+        if uid in GARRISON:
+            u["order"] = "garrison"
+        q = QUALITY.get(uid, QUALITY.get(f"*:{side}"))
+        if q is not None:
+            u["quality"] = q
         units.append(u)
         if ad:
             units.append({"id": f"{uid}_pvo", "name": f"Войсковая ПВО: {name}", "side": side, "role": "sam_short",
@@ -305,7 +319,11 @@ def main() -> None:
                       "posture": {"red": "offense", "blue": "defense"},
                       "task_rules": {"blue": {
                           "_zones": ZONES,
-                          "strike_airfield": {"from_day": 35, "why": "аэродромы МиГов - с 'Лайнбэкера' (10.05.1972)"}}}}],
+                          "strike_airfield": {"from_day": 35, "why": "аэродромы МиГов - с 'Лайнбэкера' (10.05.1972)"},
+                          }},
+                      # АРВН в апреле 1972 - в обороне: аэромобильные роты - подкрепление угрожаемых рубежей, без
+                      # захвата пунктов ВНА с фланга
+                      "task_params": {"blue": {"air_assault": {"front_kinds": ["reinforce"]}}}}],
         "replacements": {"air_per_day": 2, "note": "ОЦЕНКА"},
         "ad_templates": {side: {tier: [{"name": v["name"], "composition": [{"type": t, "role": r, "count": c}
                                                                            for t, r, c in v["composition"]]} for v in vs]

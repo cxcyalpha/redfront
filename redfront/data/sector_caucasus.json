@@ -78,7 +78,8 @@
    "lat": 42.227,
    "lon": 43.969,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 1.5
   },
   "Gagra": {
    "lat": 43.33,
@@ -198,7 +199,8 @@
    "lat": 42.267,
    "lon": 42.718,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 2.0
   },
   "Tkibuli": {
    "lat": 42.35,
@@ -258,7 +260,8 @@
    "lat": 41.985,
    "lon": 44.112,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 1.5
   },
   "Kaspi": {
    "lat": 41.925,
@@ -282,7 +285,8 @@
    "lat": 41.716,
    "lon": 44.783,
    "estimate": true,
-   "side": "blue"
+   "side": "blue",
+   "urban": 3.0
   },
   "Rustavi": {
    "lat": 41.549,
@@ -697,6 +701,26 @@
    "Zaramag",
    "UpperLars",
    "Sochi"
+  ],
+  "red": [
+   "Kazbegi",
+   "Pasanauri",
+   "Dusheti",
+   "Mtskheta",
+   "Tbilisi",
+   "Rustavi",
+   "Marneuli",
+   "Sagarejo",
+   "Telavi",
+   "Kutaisi",
+   "Tkibuli",
+   "Ambrolauri",
+   "Oni",
+   "Batumi",
+   "Kobuleti",
+   "Ozurgeti",
+   "Akhaltsikhe",
+   "Borjomi"
   ]
  },
  "axes": {

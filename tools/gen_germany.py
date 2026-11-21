@@ -913,6 +913,14 @@ WP_EXERCISE = {
 }
 
 
+# большие города (ОЦЕНКИ по населению и плотности застройки): оборона в них - в urban раз прочнее (sim.urban_k);
+# доктрины обеих сторон предписывали обходить крупные города (ОВД - темп, НАТО - "Forward Defense" у границы)
+URBAN = {"Hamburg": 4.0, "Bremen": 3.0, "Hannover": 3.0, "Frankfurt": 3.5, "Nurnberg": 3.0, "Leipzig": 3.0,
+         "Braunschweig": 2.5, "Kassel": 2.5, "Kiel": 2.5, "Magdeburg": 2.5, "Halle": 2.5, "Lubeck": 2.0, "Erfurt": 2.0,
+         "Gottingen": 2.0, "Bielefeld": 2.0, "Osnabruck": 2.0, "Wurzburg": 2.0, "Hildesheim": 2.0, "Wolfsburg": 1.5,
+         "Salzgitter": 1.5, "Rostock": 2.0, "Schwerin": 1.5, "Fulda": 1.5}
+
+
 def main() -> None:
     ham = json.loads((DATA / "sector_hamburg.json").read_text(encoding="utf-8"))
     places = {}
@@ -922,6 +930,9 @@ def main() -> None:
     for d, side in ((PLACES_B, "blue"), (PLACES_R, "red")):
         for n, (la, lo) in d.items():
             places[n] = {"lat": la, "lon": lo, "estimate": True, "side": side}
+    for n, k in URBAN.items():                   # большие города: оборона в застройке (sim.urban_k)
+        if n in places:
+            places[n]["urban"] = k
     pos = {n: (p["lat"], p["lon"]) for n, p in places.items()}
     ham_set = set(ham["places"])
     links = {tuple(sorted(l)) for l in ham["links"]}
