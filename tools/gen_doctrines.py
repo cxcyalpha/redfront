@@ -52,7 +52,8 @@ PACKAGES = [
                                           "size": 2},
                                "method_source": "19.04.1972: пара МиГ-17 бомбами с малой высоты по эсминцам у Донгхоя - "
                                                 "единичный эпизод (размер группы - ОЦЕНКА)"}},
-        sim={"night_power": 1.2, "attack_min_strength": 0.6, "withdraw_below": 0.45,
+        sim={"night_power": 1.2, "attack_min_strength": 0.6, "withdraw_below": 0.45, "morale_k": 0.5,
+             "morale_note": "ВНА 1972: атаки продолжались при больших потерях (Куангчи, Анлок) - мораль к потерям устойчивее, ОЦЕНКА",
              "sam_scoot_types": ["S_75M_Volhov", "SNR_75V"], "sam_move_days": [2, 6],
              "sam_note_vn": "дивизионы С-75 ДРВ меняли позиции часто - через 2-6 суток, каждый в свой день (ОЦЕНКА)",
              "night_note": "Северовьетнамская армия: ночные действия и просачивание - сильная сторона (night_power 1.2 - "
@@ -73,13 +74,13 @@ PACKAGES = [
         # поддержка войск и удары по колоннам - истребители-бомбардировщики (Су-7БМК, МиГ-17Ф, Су-20): штурмовиков
         # (роль attack) в ВВС Египта и Сирии 1973 г. нет
         tasks={k: {"performers": ["attack", "fighter_bomber"]} for k in ("cas_contact", "strike_column_march")},
-        sim={"night_power": 0.7, "choice_width": 1, "attack_min_strength": 0.75,
+        sim={"night_power": 0.7, "choice_width": 1, "attack_min_strength": 0.75, "morale_k": 1.2,
+             "morale_note": "Pollack: сплочённость и инициатива слабее - мораль от потерь падает быстрее, ОЦЕНКА",
              "night_note": "Арабские армии 1973: ночной бой слабее дневного (night_power 0.7 - ОЦЕНКА по Pollack); "
                            "план держится жёстко - выбор цели без импровизации (choice_width 1)"},
-        extra={"roll_back_from_day": 2,   # 6.10.1973 - внезапный массированный удар без предварительного подавления ПВО
-               "roll_back_note": "первый удар (сутки 1) - по аэродромам, позициям и КП без подавления ПВО (Herzog, Nordeen); "
-                                 "далее - по поясам ПВО по очереди",
-               "gci": {"channels": 4, "commit_km": 80, "leash_km": 20, "odds": 1.0, "hit_run": False, "heli": True, "bingo": 0.4,
+        # roll_back_from_day (первый удар 6.10 без подавления ПВО) не включён: на Синае удары суток 1 по тылу Израиля
+        # срывали переправу 16.10 (проверка истории) - эффект удара по тылу в модели сильнее исторического
+        extra={"gci": {"channels": 4, "commit_km": 80, "leash_km": 20, "odds": 1.0, "hit_run": False, "heli": True, "bingo": 0.4,
                        "per_target": 2, "source": "жёсткое наведение с земли (советская школа), за зонтик ЗРК не "
                                                   "выходят, в бой при равенстве и больше (odds 1) - ОЦЕНКИ"},
                "umbrella": {"km": 25, "tasks": ["cap_own_troops", "cas_contact", "cas_helo", "strike_column_march",
@@ -100,7 +101,8 @@ PACKAGES = [
         drop=["awacs_orbit", "tanker_orbit", "strike_bai", "strike_fofa", "fleet_cap"],
         shares=[{"from_day": 1, "DCA": 0.25, "OCA": 0.05, "SEAD": 0.25, "APCLO": 0.45},
                 {"from_day": 3, "DCA": 0.3, "OCA": 0.2, "SEAD": 0.15, "APCLO": 0.35}],
-        sim={"night_power": 1.1, "counter_ratio": 0.9, "attack_min_strength": 0.6,
+        sim={"night_power": 1.1, "counter_ratio": 0.9, "attack_min_strength": 0.6, "morale_k": 0.8,
+             "morale_note": "Армия обороны Израиля 1973: стойкость при потерях выше (Голаны 6-9.10), ОЦЕНКА",
              "night_note": "Армия обороны Израиля: контратаки и при меньшинстве (counter_ratio 0.9), ночной бой (night_power "
                            "1.1) - ОЦЕНКИ"},
         extra={"nation_bonus": None,

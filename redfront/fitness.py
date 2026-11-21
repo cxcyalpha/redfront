@@ -55,13 +55,8 @@ _BEST: dict = {}
 def era_best(state: dict, cls: str) -> float | None:
     """Лучшая оценка этого вида задач среди типов кампании (обе стороны, в строю): эпоха - по составу сил. Кэш - по
     набору типов в строю (план дня спрашивает тысячи раз, состав за это время не меняется)."""
-    stamp = (id(state), state.get("day"), state.get("ground_s"), state.get("sortie"), len(state["units"]))
-    tk = _BEST.get(("types", stamp))             # набор типов в строю - один раз на шаг модели
-    if tk is None:
-        tk = frozenset(u.get("type", "") for u in state["units"].values()
-                       if model.category(u) in ("air", "heli") and u.get("count", 0) > 0)
-        _BEST[("types", stamp)] = tk
-    types = tk
+    types = frozenset(u.get("type", "") for u in state["units"].values()
+                      if u.get("count", 0) > 0 and u.get("type") and model.category(u) in ("air", "heli"))
     key = (types, cls)
     if key not in _BEST:
         if len(_BEST) > 4096:

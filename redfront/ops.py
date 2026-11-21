@@ -140,18 +140,19 @@ def _maneuver(state: dict, side: str | None = None) -> list[dict]:
             and u["state"] not in ("destroyed", "pending") and (side is None or u["side"] == side)]
 
 
-_NODE: dict = {}
+_NODE: list = [None, {}]   # [словарь пунктов кампании, {место: ближний пункт}] - ссылка на сам словарь, не id()
 
 
 def node_of(state: dict, u: dict) -> str:
-    """Ближайший к части пункт (кэш по месту: пункты не двигаются)."""
+    """Ближайший к части пункт (кэш по месту: пункты не двигаются; кэш - одной кампании, сверка по объекту)."""
     pos = model.unit_pos(state, u)
-    key = (id(state["places"]), len(state["places"]), round(pos["lat"], 4), round(pos["lon"], 4))
-    n = _NODE.get(key)
+    places = state["places"]
+    if _NODE[0] is not places or len(_NODE[1]) > 50000:
+        _NODE[0], _NODE[1] = places, {}
+    key = (round(pos["lat"], 4), round(pos["lon"], 4))
+    n = _NODE[1].get(key)
     if n is None:
-        if len(_NODE) > 50000:
-            _NODE.clear()
-        n = _NODE[key] = min(state["places"], key=lambda p: model.dist_km(pos, state["places"][p]))
+        n = _NODE[1][key] = min(places, key=lambda p: model.dist_km(pos, places[p]))
     return n
 
 
@@ -239,7 +240,7 @@ def morale(state: dict, side: str) -> list[str]:
         from . import morale as _m
         for u in _maneuver(state, side):
             u["quality"] = u.get("quality", 1.0) * k
-            _m.hit(state, u, float(row.get("morale_hit", 0.3)))
+            _m.hit(state, u, float(row.get("morale_hit", 0.0)))   # по умолчанию - только выучка (quality_k)
         lines.append(f"Потерян {row['place']}: надлом обороны - {row.get('note') or 'войска стороны деморализованы'}.")
     return lines
 

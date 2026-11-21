@@ -453,9 +453,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if kind in tparams:                      # параметры задачи по сценарию поверх доктрины (Гостомель: дальность десанта)
             tdef = {**tdef, **tparams[kind]}
         rule = rules.get(kind) or {}
-        if rule.get("off") or state["day"] < rule.get("from_day", 0):
+        if rule.get("off") or state["day"] < rule.get("from_day", 0) or state["day"] > rule.get("until_day", 10**6):
             reasons.append(f"{tdef['title']}: " + (rule.get("why") or "не в замысле сценария") +
-                           (f" (с {rule['from_day']}-го дня)" if rule.get("from_day") and not rule.get("off") else ""))
+                           (f" (с {rule['from_day']}-го дня)" if rule.get("from_day") and not rule.get("off") else "") +
+                           (f" (до {rule['until_day']}-го дня)" if rule.get("until_day") and not rule.get("off") else ""))
             continue
         if tdef.get("from_year") and year and year < tdef["from_year"]:
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
@@ -561,6 +562,8 @@ def _helo_gate(state: dict, side: str, t: dict, doc: dict, reasons: list) -> boo
     if not helos or t.get("ai_only") and t["kind"] in ("airlift",):
         return True
     tdef = doc["tasks"].get(t["kind"], {})
+    if tdef.get("method") == "airlift_unit":     # к своей части (снабжение, раненые) - своя проверка ПВО (max_threats)
+        return True
     tparams = ((state.get("task_params") or {}).get(side) or {}).get(t["kind"]) or {}
     tdef = {**tdef, **tparams}
     obj = t["package"][0]["objective"]

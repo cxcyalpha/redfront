@@ -3999,7 +3999,7 @@ def theatres_section(tmp: Path) -> None:
         log = sim.end_day(st)
     st2 = model.new_campaign("vnh", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
     seen, lines = set(), []
-    for _ in range(6):
+    for _ in range(10):                          # мораль: ВНА выдыхается - потери АРВН, а с ними вывоз раненых, позже
         planner.plan(st2)
         seen |= {e["kind"] for e in st2["ato"]["entries"] if e["side"] == "blue"}
         lines += sim.end_day(st2)
