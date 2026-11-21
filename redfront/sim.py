@@ -104,11 +104,16 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
     engaged = [u for u in _maneuver(state) if u["state"] == "battle"]
     pw = {u["id"]: power(state, u) for u in _maneuver(state)}    # сила на начало суток: потери сторон считаются одновременно
     urb = {u["id"]: urban_k(state, u) for u in _maneuver(state)}   # оборона в городе (places.urban): сильнее и прочнее
+    off = {s: ops.posture_of(state, s) == "offense" and bool(ops.objective(state, s, None)) for s in model.SIDES}
+    att = {u["id"]: attacking(u, off[u["side"]]) for u in engaged}
     for u in engaged:
         foes = [units[f] for f in u.get("engaged", []) if f in units]
         # огонь противника делится между всеми, с кем он в бою (по их силе): бригада против четырёх дивизий не бьёт
         # каждую в полную силу (Ланчестер)
-        enemy = sum(pw.get(f["id"], 0.0) * urb.get(f["id"], 1.0) * _share(units, pw, f, u) for f in foes if f["state"] in ACTIVE)
+        # позиционные бои: ни часть, ни этот противник не наступают (оба держат рубеж) - огонь, разведка боем, без
+        # штурма: потери в STATIC_K раз меньше (оперативная пауза 9-13.10.1973 на Синае)
+        enemy = sum(pw.get(f["id"], 0.0) * urb.get(f["id"], 1.0) * _share(units, pw, f, u)
+                    * (1.0 if att[u["id"]] or att.get(f["id"]) else STATIC_K) for f in foes if f["state"] in ACTIVE)
         if enemy <= 0 or pw[u["id"]] <= 0:
             continue
         sim = _sim(state, u["side"])
@@ -147,6 +152,17 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
             u["engaged"] = []
             lines.append(f"{u['name']}: противник выбыл - " + ("удержал район." if u.get("defending") else "продолжает марш."))
     return lines
+
+
+STATIC_K = 0.25         # ОЦЕНКА: доля потерь позиционного боя от боя с наступлением
+
+
+def attacking(u: dict, offense: bool = False) -> bool:
+    """Часть ведёт наступление (штурм, атака с марша), а не держит рубеж и не отходит; сторона в наступлении (поза
+    сценария, offense) - атакуют и части, стоявшие в бою на рубеже (кроме гарнизонов и отходящих)."""
+    if u.get("order") in ("withdraw", "delay", "garrison", "airhead"):
+        return False
+    return offense or (not u.get("defending") and u.get("order") != "hold")
 
 
 def _length(state: dict, u: dict) -> float:
