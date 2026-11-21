@@ -360,14 +360,21 @@ def airfields(state: dict) -> list[str]:
     from . import ops
     lines = []
     for af in objects(state, "airfield"):
-        if af["state"] == "lost":
-            continue
         sim = _sim(state, af["side"])
         foe = model.enemy(af["side"])
         units = [u for u in ops._maneuver(state, foe) if u["state"] not in ("halted",)]
         d_unit = min((model.dist_km(af["pos"], model.unit_pos(state, u)) for u in units), default=1e9)
         d_place = min((model.dist_km(af["pos"], pl) for pl in state["places"].values() if pl.get("side") == foe), default=1e9)
         before = af["state"]
+        if before == "lost":                     # потерянный - возвращается, только если противник отброшен и район снова свой
+            near = min(state["places"].values(), key=lambda pl: model.dist_km(af["pos"], pl), default=None) if state["places"] else None
+            if d_unit <= sim["airfield_lost_km"] or not near or near.get("side") != af["side"]:
+                continue
+            af["state"] = "closed" if min(d_unit, d_place) <= sim["airfield_threat_km"] else "active"
+            state["airbases"][af["base"]]["state"] = af["state"]
+            af["damage"] = max(af.get("damage", 0.0), 0.5)   # ОЦЕНКА: брошенный аэродром - разрушения, восстановление
+            lines.append(f"{af['name']}: возвращён (противник отброшен), " + ("пока закрыт." if af["state"] == "closed" else "открыт."))
+            continue
         if d_unit <= sim["airfield_lost_km"]:
             af["state"] = "lost"
         elif min(d_unit, d_place) <= sim["airfield_threat_km"]:

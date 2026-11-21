@@ -436,7 +436,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "countries": forces["countries"],
         "settings": {"column_budget_units": column_budget_units,   # ОЦЕНКА версии 0.1: бюджет машин на колонну при плотности 1.0
                      "bubble_km": BUBBLE_KM, "randomness": randomness},
-        "places": sec["places"],
+        "places": {k: {**v, "side0": v.get("side")} for k, v in sec["places"].items()},   # side0 - владелец на начало
         "links": sec.get("links", []),            # связи пунктов - граф оперативного уровня (ops.py)
         "supply_entry": sec.get("supply_entry", {}),   # пункты входа подвоза из тыла (вне карты), если заданы в секторе
         "no_front": bool(sec.get("no_front")),
@@ -459,6 +459,7 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
         "task_rules": (chosen or {}).get("task_rules", {}),
         "task_params": (chosen or {}).get("task_params", {}),   # параметры задач поверх доктрины (сторона -> задача -> поля)   # задачи сценария: с какого дня, запрет (1982: Бекаа - с 4-го)
         "posture_days": (chosen or {}).get("posture_days", []),   # смена позы по дням (1973: Израиль переходит в наступление)
+        "morale_break": copy.deepcopy((chosen or {}).get("morale_break", [])),   # надлом: потеря пункта - падение выучки (ops.morale)
         "posture": (chosen or {}).get("posture", {}),   # поза сторон по сценарию (наступает синяя - 1982), иначе доктрины
         "replacements": forces.get("replacements", {}),
         "objectives": objectives,                 # цели операции сторон (по порядку), с учётом варианта
@@ -537,6 +538,12 @@ def rng(state: dict, purpose: str) -> random.Random | None:
     if not state.get("settings", {}).get("randomness"):
         return None
     return random.Random(f"{(state.get('scenario') or {}).get('seed', 0)}-{state['day']}-{purpose}")
+
+
+def rng_seeded(state: dict, purpose: str) -> random.Random:
+    """Генератор и при выключенной случайности (жребий нужен всегда: попадания ракет, выбор площадок) - по seed
+    кампании, а не по её id: один seed - один ход кампании."""
+    return rng(state, purpose) or random.Random(f"{(state.get('scenario') or {}).get('seed', 0)}-{state['day']}-{purpose}-fixed")
 
 
 def set_date(state: dict, date: str) -> str:

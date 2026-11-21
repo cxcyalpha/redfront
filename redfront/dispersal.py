@@ -24,7 +24,7 @@ from . import model
 
 def _rng(state: dict, purpose: str) -> random.Random:
     """Случайность сценария; выключена - всё равно повторяемая по кампании (рассредоточение - часть доктрины)."""
-    return model.rng(state, purpose) or random.Random(f"{state.get('campaign_id')}-{state['day']}-{purpose}")
+    return model.rng_seeded(state, purpose)
 
 
 GROUND_K = 1.0     # ОЦЕНКА: доля самолётов части на стоянках, гибнущая при полном (1.0) приросте повреждения аэродрома

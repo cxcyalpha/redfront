@@ -3035,11 +3035,12 @@ def fog_section(tmp: Path) -> None:
     check(0 < moves < len(free) * 6 * 0.3 and roam_ok,
           f"за 6 суток {moves} смен позиций у {len(free)} самостоятельных ЗРК - не перетасовка, каждый в своём районе")
     navy = [s_ for s_ in st["units"].values() if model.category(s_) == "naval" and s_["side"] != "blue"]
+    seen = lambda u: ((st.get("intel") or {}).get(u["id"]) or {}).get("day", -1)   # разведка стороны видела после переезда
     moved = [u for u in far if model.dist_km(u["pos"], start[u["id"]]) > 0.5   # вдали от кораблей игрока (они видят берег)
-             and all(model.dist_km(u["pos"], s_["pos"]) > 150 for s_ in navy)]
+             and all(model.dist_km(u["pos"], s_["pos"]) > 150 for s_ in navy) and seen(u) < u.get("moved_day", 0)]
     if moved:
         u = moved[0]
-        check(model.dist_km(intel.known_pos(st, u), start[u["id"]]) < 0.1,
+        check(model.dist_km(intel.known_pos(st, u), u["pos"]) > 0.5,
               f"туман войны: {u['name']} сменил позицию - игрок видит прежнюю")
         st["task"] = {"package": [{"base": next(iter(st["airbases"])), "route": [dict(u["pos"])]}]}
         intel.after_debrief(st, {"ground": [{"unit": u["id"]}]})

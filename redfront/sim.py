@@ -43,6 +43,7 @@ def power(state: dict, unit: dict) -> float:
             * night * shock * naval.fire_support_k(state, unit))
 
 
+WITHDRAW_K = 0.7         # ОЦЕНКА: темп отхода от маршевого - заторы, прикрытие, потери техники на дорогах
 SHOCK_POWER = 0.7        # ОЦЕНКА: сила части в шоке после удара (альтернативный ход, debrief)
 SHOCK_SPEED = 0.5        # и темп марша
 
@@ -133,7 +134,8 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
                          f"боеспособность {s0:.0%} -> {model.strength(u):.0%}.")
     for u in engaged:
         sim = _sim(state, u["side"])
-        if model.strength(u) < sim["combat_ineffective_below"]:
+        hold = ops.GARRISON_HOLD if u.get("order") == "garrison" else 1.0   # гарнизон города держится дольше (ops.py)
+        if model.strength(u) < sim["combat_ineffective_below"] * hold:
             u["state"] = "halted"
             lines.append(f"{u['name']}: потерял боеспособность, вышел из боя.")
     for u in engaged:                                             # бой окончен, если против части никого не осталось
@@ -207,7 +209,8 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
     lines = []
     units = _maneuver(state)
     budget, start = {}, {}
-    foes = {s: [model.unit_pos(state, x) for x in units if x["side"] != s and x["state"] in ACTIVE] for s in model.SIDES}
+    foes = {s: [model.unit_pos(state, x) for x in units if x["side"] != s and x["state"] in ACTIVE
+                and x.get("order") != "withdraw"] for s in model.SIDES}   # отходящий противник марш не сдерживает
     for u in units:
         if u["state"] == "march":
             sm = _sim(state, u["side"])
@@ -218,7 +221,9 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
             rear = road and own and all(model.dist_km(pos, f) > sm.get("road_clear_km", 15) for f in foes[u["side"]])
             free_ = not rear and all(model.dist_km(pos, f) > sm.get("road_clear_km", 15) for f in foes[u["side"]])
             unopp = u.get("unopposed_km", sm.get("unopposed_km"))
-            if rear:                                 # марш по своему тылу - темпом колонны, а не наступления (ОЦЕНКА)
+            if road and own and u.get("order") == "withdraw":   # отход по своей земле - колонной по дорогам, отрыв от
+                budget[u["id"]] = road * WITHDRAW_K * u.get("supply", 1.0) * frac_day   # противника (ОЦЕНКА)
+            elif rear:                                 # марш по своему тылу - темпом колонны, а не наступления (ОЦЕНКА)
                 budget[u["id"]] = road * u.get("supply", 1.0) * frac_day
             elif free_ and unopp:                    # по земле противника, где его частей нет: колонной по дорогам
                 budget[u["id"]] = unopp * u.get("supply", 1.0) * frac_day   # (2022: без разведки и охранения, ОЦЕНКА)

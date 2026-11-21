@@ -226,5 +226,5 @@ def clashes(state: dict, t0: float, t1: float, skip: set | None = None) -> list[
         _spend_aam(state, "red", ka * AAM_PER_KILL)
         _spend_aam(state, "blue", kb * AAM_PER_KILL)
         lines.append(f"Воздушный бой: {na} x {a['perf']['type']} ({a['perf']['name']}) против {nb} x {b['perf']['type']} "
-                     f"({b['perf']['name']}) - сбито {lost_a} и {lost_b}.")
+                     f"({b['perf']['name']}) - потери {lost_a} и {lost_b} соответственно.")
     return lines
