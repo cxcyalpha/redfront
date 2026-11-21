@@ -283,6 +283,8 @@ def route_km(state: dict, unit: dict) -> float:
 def unit_pos(state: dict, unit: dict) -> dict:
     if unit.get("attached_to"):                 # приданная часть (войсковая ПВО) - там же, где её часть
         return unit_pos(state, state["units"][unit["attached_to"]])
+    if unit.get("hold_pos") and unit.get("order") == "airhead":   # десант держит аэродром или переправу (assault.py)
+        return unit["hold_pos"]
     if "route" in unit:                          # как point_at_km(route_points(...)), по кэшу геометрии
         pts, cum = _route_geom(state, unit["route"])
         km = max(0.0, unit["progress_km"])

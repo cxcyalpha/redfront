@@ -67,12 +67,19 @@ PACKAGES = [
         "(2002); C. Herzog, The War of Atonement (1975). Армия: слабость ночного боя и инициативы младших командиров "
         "(Pollack) - night_power, attack_min_strength, choice_width - ОЦЕНКИ.",
         drop=["awacs_orbit", "fleet_cap"],
-        shares=[{"from_day": 1, "DCA": 0.3, "OCA": 0.3, "SEAD": 0.05, "APCLO": 0.35},
-                {"from_day": 2, "DCA": 0.5, "OCA": 0.05, "SEAD": 0.05, "APCLO": 0.4}],
+        shares=[{"from_day": 1, "DCA": 0.2, "OCA": 0.3, "SEAD": 0.05, "APCLO": 0.45},
+                {"from_day": 2, "DCA": 0.5, "OCA": 0.05, "SEAD": 0.05, "APCLO": 0.4},
+                {"from_day": 4, "DCA": 0.6, "OCA": 0.0, "SEAD": 0.05, "APCLO": 0.35}],
+        # поддержка войск и удары по колоннам - истребители-бомбардировщики (Су-7БМК, МиГ-17Ф, Су-20): штурмовиков
+        # (роль attack) в ВВС Египта и Сирии 1973 г. нет
+        tasks={k: {"performers": ["attack", "fighter_bomber"]} for k in ("cas_contact", "strike_column_march")},
         sim={"night_power": 0.7, "choice_width": 1, "attack_min_strength": 0.75,
              "night_note": "Арабские армии 1973: ночной бой слабее дневного (night_power 0.7 - ОЦЕНКА по Pollack); "
                            "план держится жёстко - выбор цели без импровизации (choice_width 1)"},
-        extra={"gci": {"channels": 4, "commit_km": 80, "leash_km": 20, "odds": 1.0, "hit_run": False, "heli": True, "bingo": 0.4,
+        extra={"roll_back_from_day": 2,   # 6.10.1973 - внезапный массированный удар без предварительного подавления ПВО
+               "roll_back_note": "первый удар (сутки 1) - по аэродромам, позициям и КП без подавления ПВО (Herzog, Nordeen); "
+                                 "далее - по поясам ПВО по очереди",
+               "gci": {"channels": 4, "commit_km": 80, "leash_km": 20, "odds": 1.0, "hit_run": False, "heli": True, "bingo": 0.4,
                        "per_target": 2, "source": "жёсткое наведение с земли (советская школа), за зонтик ЗРК не "
                                                   "выходят, в бой при равенстве и больше (odds 1) - ОЦЕНКИ"},
                "umbrella": {"km": 25, "tasks": ["cap_own_troops", "cas_contact", "cas_helo", "strike_column_march",

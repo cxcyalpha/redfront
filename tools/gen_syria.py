@@ -279,6 +279,7 @@ def main() -> None:
         "preset": {"title": "Июнь 1982: Ливан, долина Бекаа", "year": 1982, "date": "1982-06-06"},
         "date": "1982-06-06",
         "countries": {"red": "Syria", "blue": "Israel"},
+        "doctrine": {"red": "arab"},   # ВВС Сирии 1982 - советская школа под зонтиком ЗРК Бекаа (Pollack, Nordeen)
         "units": units,
         "variants": [{"name": "base", "title": "Июнь 1982: Ливан, долина Бекаа",
                       "posture": {"blue": "offense", "red": "defense"}, "posture_days": POSTURE_DAYS,

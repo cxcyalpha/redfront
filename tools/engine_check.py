@@ -115,6 +115,26 @@ def invariants(st: dict) -> list[str]:
     return bad
 
 
+def doctrine_gaps(st: dict) -> list[str]:
+    """Задачи доктрины стороны, у которых в её составе сил нет ни одной части-исполнителя (роль не та): задача
+    доктрины никогда не планируется (арабские ВВС 1973: поддержка войск - роль attack, а частей attack нет)."""
+    from redfront import planner
+    out = []
+    year = planner.campaign_year(st)
+    for side in model.SIDES:
+        doc = model.doctrine(st, side)
+        rules = (st.get("task_rules") or {}).get(side) or {}
+        shares = ((doc.get("apportionment") or {}).get("classes") or {})
+        planned = {k for ks in shares.values() for k in ks}
+        for kind, tdef in doc["tasks"].items():
+            if kind not in planned or (rules.get(kind) or {}).get("off") or (tdef.get("from_year") and year and year < tdef["from_year"]):
+                continue
+            if not any(u.get("side") == side and model.category(u) in ("air", "heli") and planner.role_ok(st, u, tdef["performers"])
+                       for u in st["units"].values()):
+                out.append(f"{side}: задача '{tdef.get('title', kind)}' ({kind}) - нет частей ролей {tdef['performers']}")
+    return out
+
+
 def run(name: str, days: int, side: str, seed: int = 1) -> tuple[list[str], dict]:
     st = model.new_campaign("chk", sector=f"sector_{name}.json", oob=f"oob_{name}.json", seed=seed, player_side=side)
     problems = [f"сутки 0: {x}" for x in invariants(st)]
@@ -159,6 +179,8 @@ def main(argv: list[str]) -> int:
         for p in uniq[:15]:
             print("     ", p)
         total += len(uniq)
+        for g in doctrine_gaps(st1):             # предупреждение, не нарушение: задачи без исполнителей бывают и по замыслу
+            print("      доктрина:", g)
     print(f"ИТОГ: {total} нарушений")
     return 1 if total else 0
 

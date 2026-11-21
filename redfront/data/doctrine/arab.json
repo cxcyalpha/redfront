@@ -155,7 +155,8 @@
    },
    "title": "Удар по войскам в соприкосновении",
    "performers": [
-    "attack"
+    "attack",
+    "fighter_bomber"
    ],
    "target": {
     "category": "ground",
@@ -503,7 +504,8 @@
   "strike_column_march": {
    "title": "Удар по колонне на марше",
    "performers": [
-    "attack"
+    "attack",
+    "fighter_bomber"
    ],
    "target": {
     "category": "ground",
@@ -3376,10 +3378,10 @@
   "shares": [
    {
     "from_day": 1,
-    "DCA": 0.3,
+    "DCA": 0.2,
     "OCA": 0.3,
     "SEAD": 0.05,
-    "APCLO": 0.35
+    "APCLO": 0.45
    },
    {
     "from_day": 2,
@@ -3387,6 +3389,13 @@
     "OCA": 0.05,
     "SEAD": 0.05,
     "APCLO": 0.4
+   },
+   {
+    "from_day": 4,
+    "DCA": 0.6,
+    "OCA": 0.0,
+    "SEAD": 0.05,
+    "APCLO": 0.35
    }
   ],
   "estimate": true
@@ -3526,5 +3535,7 @@
   "ground_source": "El Shazly: плацдармы 6-13.10 - в пределах зонтика ЗРК западного берега (10-15 км); выход за него 14.10 - разгром. ОЦЕНКА 10 км за кромкой зоны",
   "exposed_k": 1.8,
   "exposed_source": "14.10.1973: египетские бронетанковые дивизии вне зонтика ЗРК - ~250 танков за день (ВВС и ПТУР Израиля); ОЦЕНКА x1.8 к потерям в бою"
- }
+ },
+ "roll_back_from_day": 2,
+ "roll_back_note": "первый удар (сутки 1) - по аэродромам, позициям и КП без подавления ПВО (Herzog, Nordeen); далее - по поясам ПВО по очереди"
 }

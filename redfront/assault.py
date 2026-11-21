@@ -50,6 +50,11 @@ def lz_point(state: dict, side: str, place: str, tdef: dict) -> dict:
 
 
 def candidates(state: dict, side: str, tdef: dict) -> list[str]:
+    """Пункты для высадки, лучшие первыми (см. _candidates_keyed)."""
+    return [n for _k, n in _candidates_keyed(state, side, tdef)]
+
+
+def _candidates_keyed(state: dict, side: str, tdef: dict) -> list[tuple[tuple, str]]:
     """Пункты для высадки, лучшие первыми: противника, в assault_min_km..assault_max_km от своих пунктов, без
     его частей ближе lz_clear_km, не соседний (по графу) со своими; ключ - (сколько его складов отрезается от подвоза, путь до цели своей оси, глубина)."""
     foe = model.enemy(side)
@@ -85,7 +90,67 @@ def candidates(state: dict, side: str, tdef: dict) -> list[str]:
         to_obj = ops.path_km(state, name, obj) if obj else 0.0
         out.append(((-cut, to_obj, depth), name))
     out.sort()
-    return [n for _k, n in out]
+    return out
+
+
+AF_VALUE = 2.0          # ОЦЕНКИ: ценность захвата аэродрома (в "складах, отрезанных от подвоза") + по 1 за авиачасть на нём
+BRIDGE_VALUE = 1.0      # и переправы (большой мост - +1): мост целым - для своего наступления (Пегасус, Арнем)
+POINT_LZ_KM = 1.0       # площадка - в стольких км от аэродрома/моста, со стороны своих
+
+
+def _foe_near(state: dict, side: str, pos: dict, km: float) -> bool:
+    foe = model.enemy(side)
+    return any(model.dist_km(model.unit_pos(state, u), pos) <= km for u in ops._maneuver(state, foe)
+               if u["state"] not in ("halted",))
+
+
+def point_candidates(state: dict, side: str, tdef: dict) -> list[tuple[tuple, dict]]:
+    """Аэродромы и переправы противника для захвата десантом (lz_targets доктрины: airfield, bridge): в
+    assault_min_km..assault_max_km от своих пунктов, без его частей ближе lz_clear_km. -> [(ключ, цель)]; цель -
+    {place: ближний пункт противника (маршрут части), how: airfield|bridge, target: id объекта, pos: где держать}."""
+    kinds = tdef.get("lz_targets", ["airfield", "bridge"])
+    foe = model.enemy(side)
+    pl = state["places"]
+    own = [p for p in pl.values() if p.get("side") == side]
+    if not own or not kinds:
+        return []
+    banned = set((state.get("off_limits") or {}).get(side, []))
+    out = []
+    objs = []
+    if "airfield" in kinds:
+        for af in logistics.objects(state, "airfield"):
+            b = state["airbases"].get(af.get("base")) or {}
+            if af.get("side") != foe or af["state"] == "lost" or b.get("kind") in ("farp", "carrier"):
+                continue
+            n_air = sum(1 for u in state["units"].values() if u.get("base") == af["base"] and model.category(u) in ("air", "heli")
+                        and u.get("count", 0) > 0)
+            objs.append((af, "airfield", AF_VALUE + n_air, af["pos"]))
+    if "bridge" in kinds:
+        for br in logistics.objects(state, "bridge"):
+            if br.get("damage", 0) >= 1.0 or logistics.bridge_side(state, br) != foe:
+                continue
+            objs.append((br, "bridge", BRIDGE_VALUE + (0.0 if logistics.is_minor(br) else 1.0), br["pos"]))
+    for o, how, value, pos in objs:
+        depth = min(model.dist_km(pos, q) for q in own)
+        if not tdef.get("assault_min_km", 8) <= depth <= tdef.get("assault_max_km", 50):
+            continue
+        if _foe_near(state, side, pos, tdef.get("lz_clear_km", 10)):
+            continue
+        near = min((n for n, q in pl.items() if q.get("side") == foe), key=lambda n: model.dist_km(pl[n], pos), default=None)
+        if not near or near in banned or model.dist_km(pl[near], pos) > 30:
+            continue
+        hold = model.offset(pos, model.bearing_deg(pos, min(own, key=lambda q: model.dist_km(pos, q))), POINT_LZ_KM * 1000)
+        out.append(((-value, 0.0, depth), {"place": near, "how": how, "target": o["id"], "pos": hold, "name": o["name"]}))
+    return out
+
+
+def deep_candidates(state: dict, side: str, tdef: dict) -> list[dict]:
+    """Все цели десанта в тылу противника, лучшие первыми: пункты (candidates), аэродромы и переправы
+    (point_candidates). -> [{place, how, target?, pos?, name}]."""
+    keyed = [(k, {"place": n, "how": "deep", "name": n}) for k, n in _candidates_keyed(state, side, tdef)]
+    keyed += point_candidates(state, side, tdef)
+    keyed.sort(key=lambda kc: kc[0])
+    return [c for _k, c in keyed]
 
 
 REINFORCE_RATIO = 0.5    # ОЦЕНКА: подкрепление - если у пункта противника не меньше половины своих сил
@@ -181,6 +246,11 @@ def resolve(state: dict, until_s: float | None = None) -> list[str]:
             continue
         u["state"], u["order"], u["defending"], u["engaged"] = "defend", "airhead", True, []
         u["airhead_day"] = state["day"]
+        if obj.get("mode") in ("airfield", "bridge") and obj.get("hold_pos"):   # держит аэродром/переправу, а не пункт
+            u["hold_pos"], u["hold_target"] = dict(obj["hold_pos"]), obj.get("target")
+            what = state["units"].get(obj.get("target"), {}).get("name", obj.get("target"))
+            lines.append(f"{u['name']}: высажена у объекта {what} ({how}: село {landed} из {size} бортов), держит до подхода своих.")
+            continue
         lines.append(f"{u['name']}: высажена у {place} ({how}: село {landed} из {size} бортов), держит пункт до подхода своих.")
     return lines
 
@@ -192,6 +262,8 @@ def linkup(state: dict) -> list[str]:
         if (u.get("order") == "airhead" and u["state"] != "destroyed" and u.get("supply_frac", 0) > 0
                 and state["places"][u["route"][-1]].get("side") == u["side"]):
             u["order"] = None
+            u.pop("hold_pos", None)
+            u.pop("hold_target", None)
             lines.append(f"{u['name']}: соединилась со своими у {u['route'][-1]}.")
     return lines
 

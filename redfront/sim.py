@@ -38,9 +38,9 @@ def power(state: dict, unit: dict) -> float:
     # night_power - ночной бой стороны относительно дня (доктрина: армии арабских стран 1973 ночью слабее - ОЦЕНКА)
     night = sim.get("night_power", 1.0) if state.get("_night_now") else 1.0
     shock = SHOCK_POWER if unit.get("shock_until", 0) >= state.get("day", 0) else 1.0   # после удара в вылете игрока
-    from . import naval                          # огонь кораблей по берегу (nfs корабельной группы)
+    from . import morale, naval                  # огонь кораблей по берегу (nfs корабельной группы); мораль части
     return (p * (spf + (1.0 - spf) * frac) * artillery_k(state, unit) * _art_bde(state, unit) * unit.get("quality", 1.0)
-            * night * shock * naval.fire_support_k(state, unit))
+            * night * shock * naval.fire_support_k(state, unit) * morale.power_k(unit))
 
 
 WITHDRAW_K = 0.7         # ОЦЕНКА: темп отхода от маршевого - заторы, прикрытие, потери техники на дорогах
@@ -129,7 +129,7 @@ def battles(state: dict, frac_day: float = 1.0, tag: str = "") -> list[str]:
         umb = model.doctrine(state, u["side"]).get("umbrella") or {}
         if umb.get("ground") and not ops._under_sams(state, u["side"], model.unit_pos(state, u)):
             frac *= umb.get("exposed_k", 1.0)    # вне зонтика своих ЗРК - под ударами авиации противника (14.10.1973)
-        frac *= frac_day
+        frac *= frac_day * _nk(state, u["side"], 1)   # ночью бой стороны медленнее (её доктрина)
         s0 = model.strength(u)
         n = _take_losses(u, frac)
         for a in _attached(state, u):                            # приданная ПВО несёт те же потери
@@ -246,7 +246,8 @@ def movement(state: dict, frac_day: float = 1.0) -> list[str]:
             else:
                 budget[u["id"]] = ((u.get("daily_advance_km") or sm["daily_advance_km"]) * model.strength(u)
                                    * u.get("supply", 1.0) * frac_day)         # без снабжения - медленнее
-            budget[u["id"]] *= u.get("speed_k", 1.0)        # передовой отряд, ОМГ - быстрее (ops.py)
+            budget[u["id"]] *= u.get("speed_k", 1.0) * _nk(state, u["side"], 0)   # передовой отряд, ОМГ - быстрее (ops.py);
+            # ночью - марш стороны медленнее (night_march её доктрины)
             if u.get("shock_until", 0) >= state.get("day", 0):
                 budget[u["id"]] *= SHOCK_SPEED              # часть в шоке после удара игрока
             from . import ew
@@ -394,15 +395,18 @@ def advance(state: dict, to_s: float, ground: bool = True) -> list[str]:
             for side in model.SIDES:
                 lines += ops.commander(state, side, COMMAND_H / 24)
         lines += airwar.resolve(state, t, t + dt)
-        if ground:                               # ночью (вне лётного дня) марш и бой медленнее (night_*, доктрина)
-            nm, nb = _night(state, t)
-            state["_night_now"] = nb != 1.0 or nm != 1.0      # сила ночью по доктрине стороны (power, night_power)
+        if ground:                               # ночью (вне лётного дня) марш и бой медленнее - по доктрине каждой стороны
+            from . import ato                    # (night_march, night_battle; сила ночью - night_power, power)
+            night = ato.is_night(state, t)
+            state["_night_now"] = night
+            state["_night_k"] = {s_: _night_k(state, s_, night) for s_ in model.SIDES}
             lines += _checks(state)
-            lines += battles(state, dt / DAY_S * nb, f"-{int(t // 3600)}")
-            lines += movement(state, dt / DAY_S * nm)
+            lines += battles(state, dt / DAY_S, f"-{int(t // 3600)}")
+            lines += movement(state, dt / DAY_S)
             lines += ops.capture(state)
         t += dt
     state.pop("_night_now", None)
+    state.pop("_night_k", None)
     state["ground_s"] = t
     for u in _maneuver(state):                   # сводка за отрезок
         if u["id"] in s0 and s0[u["id"]] - model.strength(u) > 0.005:
@@ -413,14 +417,22 @@ def advance(state: dict, to_s: float, ground: bool = True) -> list[str]:
     return lines
 
 
-def _night(state: dict, t: float) -> tuple[float, float]:
-    """Множители марша и боя в момент t: ночью - night_march / night_battle доктрины игрока (одни на обе стороны -
-    ОЦЕНКА), днём - 1."""
-    from . import ato
-    if not ato.is_night(state, t):
+def _night_k(state: dict, side: str, night: bool) -> tuple[float, float]:
+    """Множители марша и боя стороны ночью - night_march / night_battle её доктрины, днём - 1."""
+    if not night:
         return 1.0, 1.0
-    sim_ = _sim(state, state["player_side"])
+    sim_ = _sim(state, side)
     return sim_.get("night_march", 1.0), sim_.get("night_battle", 1.0)
+
+
+def _night(state: dict, t: float, side: str | None = None) -> tuple[float, float]:
+    """Множители марша и боя стороны (по умолчанию - игрока) в момент t."""
+    from . import ato
+    return _night_k(state, side or state["player_side"], ato.is_night(state, t))
+
+
+def _nk(state: dict, side: str, i: int) -> float:
+    return ((state.get("_night_k") or {}).get(side) or (1.0, 1.0))[i]
 
 
 def ato_hhmm(t: float) -> str:
@@ -453,6 +465,7 @@ def tempo(state: dict) -> list[str]:
 def _day_snapshot(state: dict) -> None:
     state["_day_pos"] = {u["id"]: [model.unit_pos(state, u)["lat"], model.unit_pos(state, u)["lon"]] for u in _maneuver(state)}
     state["_day_owner"] = {p: q.get("side") for p, q in state["places"].items()}
+    state["_day_str"] = {u["id"]: model.strength(u) for u in _maneuver(state)}   # для морали (потери за сутки)
 
 
 def end_day(state: dict) -> list[str]:
@@ -465,6 +478,8 @@ def end_day(state: dict) -> list[str]:
     lines += tempo(state)
     lines += csar.daily(state)                   # сбитые экипажи: выход к своим, плен
     lines += logistics.supply(state)
+    from . import morale                         # мораль частей: потери суток, окружение, отдых, успех (morale.py)
+    lines += morale.daily(state, state.get("_day_str") or {})
     lines += assault.linkup(state)
     lines += assault.medevac(state)              # вывоз раненых вертолётами (рейсы суток)
     lines += assault.recall(state)               # аэромобильные роты - обратно в резерв

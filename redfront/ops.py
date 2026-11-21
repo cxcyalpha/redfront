@@ -33,6 +33,8 @@ def _sim(state: dict, side: str) -> dict:
 def graph(state: dict) -> dict[str, dict[str, float]]:
     """Граф пунктов (км - по дороге, если она известна); связи с разрушенным большим мостом закрыты, с разрушенным малым - длиннее на объезд
     (logistics.link_open / link_detour - здесь то же правило одним проходом по мостам: граф строится часто)."""
+    if _G is not None and _G[0] == _CROSS:     # граф на время решения командования стороны - один
+        return _G[1]
     from . import logistics
     closed, detour = set(), set()
     for br in logistics.objects(state, "bridge"):
@@ -57,6 +59,8 @@ def graph(state: dict) -> dict[str, dict[str, float]]:
         if k in detour:                                  # разрушен малый мост - объезд (ОЦЕНКА, sim.bridge_detour_km)
             d += extra
         g[a][b] = g[b][a] = d
+    if _G is not None:
+        _G[:] = [_CROSS, g]
     return g
 
 
@@ -89,13 +93,16 @@ def path(state: dict, a: str, b: str, side: str | None = None, avoid: set | None
 
 _CROSS: str | None = None   # сторона, чья командование решает: разрушенный большой мост для её частей - форсирование
 _PK: dict | None = None   # кэш path_km на время решения командования (граф за это время не меняется)
+_G: list | None = None    # кэш графа на то же время: [сторона, граф]
 
 
 def path_km(state: dict, a: str, b: str) -> float:
+    """Длина кратчайшего пути по графу - по дорогам (road_km), с объездами и форсированием, как и сам путь (path)."""
     if _PK is not None and (a, b) in _PK:
         return _PK[(a, b)]
     p = path(state, a, b)
-    km = sum(model.dist_km(state["places"][x], state["places"][y]) for x, y in zip(p, p[1:])) if p else 1e18
+    g = graph(state)
+    km = sum(g[x].get(y, model.dist_km(state["places"][x], state["places"][y])) for x, y in zip(p, p[1:])) if p else 1e18
     if _PK is not None:
         _PK[(a, b)] = _PK[(b, a)] = km
     return km
@@ -133,10 +140,19 @@ def _maneuver(state: dict, side: str | None = None) -> list[dict]:
             and u["state"] not in ("destroyed", "pending") and (side is None or u["side"] == side)]
 
 
+_NODE: dict = {}
+
+
 def node_of(state: dict, u: dict) -> str:
-    """Пункт, где часть стоит (конец маршрута), иначе ближайший."""
+    """Ближайший к части пункт (кэш по месту: пункты не двигаются)."""
     pos = model.unit_pos(state, u)
-    return min(state["places"], key=lambda p: model.dist_km(pos, state["places"][p]))
+    key = (id(state["places"]), len(state["places"]), round(pos["lat"], 4), round(pos["lon"], 4))
+    n = _NODE.get(key)
+    if n is None:
+        if len(_NODE) > 50000:
+            _NODE.clear()
+        n = _NODE[key] = min(state["places"], key=lambda p: model.dist_km(pos, state["places"][p]))
+    return n
 
 
 def _units_near(state: dict, p: str, side: str, km: float) -> list[dict]:
@@ -220,24 +236,26 @@ def morale(state: dict, side: str) -> list[str]:
             continue
         row["done"] = state.get("day")
         k = float(row.get("quality_k", 0.7))
+        from . import morale as _m
         for u in _maneuver(state, side):
             u["quality"] = u.get("quality", 1.0) * k
+            _m.hit(state, u, float(row.get("morale_hit", 0.3)))
         lines.append(f"Потерян {row['place']}: надлом обороны - {row.get('note') or 'войска стороны деморализованы'}.")
     return lines
 
 
 def commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
-    global _PK, _CROSS
+    global _PK, _CROSS, _G
     if not enabled(state):
         return []
-    _PK, _CROSS = {}, side
+    _PK, _CROSS, _G = {}, side, [None, None]
     try:
         lines = morale(state, side)
         lines += _commander(state, side, frac_day)
         lines += _operations(state, side, frac_day)
         return lines
     finally:
-        _PK, _CROSS = None, None
+        _PK, _CROSS, _G = None, None, None
 
 
 def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
@@ -271,7 +289,8 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
             lines.append(f"{u['name']}: гарнизон в окружении {state['day'] - u['cut_since']} сут. - прорыв к своим, отход в {dest}.")
     # 1. отход: в бою ниже withdraw_below или небоеспособна
     for u in own:
-        weak = model.strength(u) < sim["withdraw_below"] * (GARRISON_HOLD if u.get("order") == "garrison" else 1.0)
+        from . import morale as _m               # низкая мораль - отход раньше
+        weak = model.strength(u) < (sim["withdraw_below"] + _m.withdraw_shift(u)) * (GARRISON_HOLD if u.get("order") == "garrison" else 1.0)
         if (u["state"] == "battle" and weak) or u["state"] == "halted":
             here = node_of(state, u)
             pool = rear or [p for p in state["places"] if owner(state, p) == side and p != here]   # тыла нет - в ближний свой
@@ -627,8 +646,10 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
         if u["state"] != "battle" or u.get("order") in ("withdraw", "garrison"):
             continue                             # гарнизон города не бежит: окружён - держится (Чернигов, Сумы 2022)
         enemy = sum(_s.power(state, state["units"][f]) for f in u.get("engaged", []) if f in state["units"])
-        if enemy < ROUT_RATIO * max(1e-6, _s.power(state, u) * _s.urban_k(state, u)):
+        from . import morale as _m               # надломленная часть бежит при меньшем перевесе
+        if enemy < ROUT_RATIO * _m.rout_k(u) * max(1e-6, _s.power(state, u) * _s.urban_k(state, u)):
             continue
+        lines += _m.hit(state, u, _m.ROUT_HIT, "разгром")
         here = node_of(state, u)
         back = [q for q in g[here] if owner(state, q) == side and q != here]
         if not back:
@@ -742,14 +763,18 @@ def capture(state: dict) -> list[str]:
     if not enabled(state):
         return []
     lines = []
+    pos = {s: [model.unit_pos(state, u) for u in _maneuver(state, s) if _active(u) and u.get("order") != "withdraw"]
+           for s in model.SIDES}                 # места частей - один раз на шаг (а не на каждый пункт)
+    near = lambda p, s, km: any(model.dist_km(q, state["places"][p]) <= km for q in pos[s])
+    ban = {s: banned(state, s) for s in model.SIDES}
     for p in state["places"]:
         for side in model.SIDES:
             if owner(state, p) == side:
                 continue
-            if p in banned(state, side):
+            if p in ban[side]:
                 continue                         # куда сторона по сценарию не идёт - и не занимает (Беларусь, Россия)
             km = _sim(state, side)["capture_km"]
-            if _units_near(state, p, side, km) and not _units_near(state, p, model.enemy(side), _sim(state, side)["contact_km"]):
+            if near(p, side, km) and not near(p, model.enemy(side), _sim(state, side)["contact_km"]):
                 state["places"][p]["side"] = side
                 lines.append(f"Пункт {p} занят: {'красные' if side == 'red' else 'синие'}.")
                 for d in state["units"].values():       # склад в занятом пункте - потерян стороной

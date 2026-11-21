@@ -355,6 +355,9 @@ def supply(state: dict) -> list[str]:
     return lines
 
 
+CAPTURE_OWN_KM = 8   # ОЦЕНКА: аэродром захвачен противником, если его часть на аэродроме, а своих частей ближе нет
+
+
 def airfields(state: dict) -> list[str]:
     """Состояние аэродромов по близости противника; перебазирование эскадрилий с закрытых и потерянных."""
     from . import ops
@@ -366,6 +369,25 @@ def airfields(state: dict) -> list[str]:
         d_unit = min((model.dist_km(af["pos"], model.unit_pos(state, u)) for u in units), default=1e9)
         d_place = min((model.dist_km(af["pos"], pl) for pl in state["places"].values() if pl.get("side") == foe), default=1e9)
         before = af["state"]
+        if before == "lost" and d_unit <= sim["airfield_lost_km"] and not any(   # противник держит аэродром, своих рядом
+                model.dist_km(af["pos"], model.unit_pos(state, u)) <= CAPTURE_OWN_KM   # нет - захвачен им
+                for u in ops._maneuver(state, af["side"]) if u["state"] not in ("halted",)):
+            old = af["side"]
+            af["side"] = state["airbases"][af["base"]]["side"] = foe
+            af["state"] = state["airbases"][af["base"]]["state"] = "closed"
+            af["damage"] = max(af.get("damage", 0.0), 0.5)   # ОЦЕНКА: брошенный - подорван, в воронках: сначала ремонт
+            af["captured_day"] = state["day"]
+            for u in state["units"].values():    # объектовая ПВО аэродрома - уничтожена или брошена
+                if u.get("covers") == af["id"] and u.get("state") not in ("destroyed",):
+                    u["state"] = "destroyed"
+                    lines.append(f"{u['name']}: брошена при потере аэродрома.")
+            for u in state["units"].values():    # не успевшие перебазироваться - потеряны на стоянках
+                if u.get("base") == af["base"] and u.get("side") == old and model.category(u) in ("air", "heli") and u.get("count", 0) > 0:
+                    lines.append(f"{u['name']}: {u['count']} ЛА потеряны на захваченном аэродроме.")
+                    u["count"] = 0
+            lines.append(f"{af['name']}: захвачен ({'красными' if foe == 'red' else 'синими'}), полоса повреждена - "
+                         "закрыт до восстановления и отхода противника.")
+            continue
         if before == "lost":                     # потерянный - возвращается, только если противник отброшен и район снова свой
             near = min(state["places"].values(), key=lambda pl: model.dist_km(af["pos"], pl), default=None) if state["places"] else None
             if d_unit <= sim["airfield_lost_km"] or not near or near.get("side") != af["side"]:
