@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import math
-import random
 import re
 
 from . import model
@@ -101,7 +100,8 @@ def launchers(state: dict, side: str) -> list[dict]:
 
 
 def _targets(state: dict, side: str) -> list[dict]:
-    lim = set((state.get("air_limits") or {}).get(side, []))
+    from . import planner
+    lim = planner.air_banned(state, side) if state.get("air_limits") else set()
     out = []
     for u in state["units"].values():
         if u.get("side") != model.enemy(side) or u.get("role") not in TARGET_VALUE or u.get("state") == "lost":
@@ -115,7 +115,7 @@ def _targets(state: dict, side: str) -> list[dict]:
 def plan(state: dict) -> list[str]:
     """План пусков на сутки: каждая пусковая - по ценной цели в досягаемости (больше ценности - меньше повреждение
     цели), пока есть ракеты. Сторона без запаса (strategic_stock) ракет этого типа не пускает."""
-    rng = random.Random(f"{state['campaign_id']}-ssm-{state['day']}")
+    rng = model.rng_seeded(state, "ssm")
     stock = state.setdefault("strategic_stock", {})
     plan_ = []
     for side in model.SIDES:
@@ -170,7 +170,7 @@ def _p_hit(cep_m: float, lethal_m: float) -> float:
 
 def resolve(state: dict) -> list[str]:
     """Исход пусков суток (ssm_plan): пусковая жива - пуск; перехват; попадание; повреждение; расход ракет; переезд."""
-    rng = random.Random(f"{state['campaign_id']}-ssmres-{state['day']}")
+    rng = model.rng_seeded(state, "ssmres")
     stock = state.setdefault("strategic_stock", {})
     lines, by = [], {}
     moved = set()

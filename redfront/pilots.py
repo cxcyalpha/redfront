@@ -48,24 +48,64 @@ SURNAMES = {
     "nl": ["de Jong", "Jansen", "de Vries", "van den Berg", "van Dijk", "Bakker", "Janssen", "Visser", "Smit", "Meijer",
            "de Boer", "Mulder", "de Groot", "Bos", "Vos", "Peters", "Hendriks", "van Leeuwen", "Dekker", "Brouwer"],
 }
+# Ближний Восток, Кавказ, Вьетнам - латиницей (кроме Грузии и Абхазии); звания - транслитерацией
+RANKS.update({
+    "il": ["Segen-Mishne", "Segen", "Seren", "Rav-Seren", "Sgan-Aluf"],
+    "ar": ["Mulazim", "Mulazim Awwal", "Naqib", "Raid", "Muqaddam"],
+    "ir": ["Sotvan 2", "Sotvan 1", "Sarvan", "Sargord", "Sarhang 2"],
+    "ge": ["л-т", "ст. л-т", "к-н", "м-р", "п/п-к"],
+    "ab": ["л-т", "ст. л-т", "к-н", "м-р", "п/п-к"],
+    "vn": ["Thieu uy", "Trung uy", "Dai uy", "Thieu ta", "Trung ta"],
+})
+SURNAMES.update({
+    "il": ["Cohen", "Levi", "Mizrahi", "Peretz", "Biton", "Friedman", "Avraham", "Dahan", "Azoulay", "Katz",
+           "Shapira", "Ben-David", "Goldberg", "Ashkenazi", "Rosenberg", "Ben-Ami", "Spector", "Ronen", "Peled", "Gal",
+           "Barak", "Harel", "Eitan", "Shani", "Yaari", "Lapidot", "Tal", "Amir", "Ofer", "Golan"],
+    "ar": ["Hassan", "Mahmoud", "Ibrahim", "Mustafa", "Abdel-Rahman", "Saleh", "Khalil", "Youssef", "Mansour", "Fathi",
+           "Shafik", "Hamdi", "Nasr", "Saad", "Ghanem", "Haddad", "Nasser", "Rifai", "Kamal", "Sabri",
+           "Hussein", "Abbas", "Darwish", "Othman", "Zaki", "Fawzi", "Rashid", "Taha", "Sharif", "Barakat"],
+    "ir": ["Mohammadi", "Hosseini", "Ahmadi", "Rezaei", "Moradi", "Karimi", "Jafari", "Rahimi", "Hashemi", "Ghasemi",
+           "Sadeghi", "Bagheri", "Kazemi", "Nouri", "Zamani", "Rostami", "Yazdani", "Tehrani", "Shirazi", "Farahani"],
+    "ge": ["Беридзе", "Капанадзе", "Гелашвили", "Майсурадзе", "Цицишвили", "Кобахидзе", "Кварацхелия", "Гогичаишвили",
+           "Лордкипанидзе", "Мачавариани", "Джапаридзе", "Церетели", "Чхеидзе", "Абашидзе", "Гиоргадзе", "Хуцишвили",
+           "Чиковани", "Шенгелия", "Тодуа", "Ломидзе", "Мгалоблишвили", "Натадзе", "Бакрадзе", "Двали"],
+    "ab": ["Аршба", "Квициния", "Бжания", "Агрба", "Гумба", "Цвижба", "Ласуриа", "Ашуба", "Хагба", "Анкваб",
+           "Чачхалиа", "Гицба", "Шамба", "Барцыц", "Габния", "Ченгелия", "Тарба", "Маргания", "Ардзинба", "Кварчия"],
+    "vn": ["Nguyen", "Tran", "Le", "Pham", "Hoang", "Phan", "Vu", "Dang", "Bui", "Do", "Ho", "Ngo", "Duong", "Ly"],
+})
+VN_GIVEN = ["Van Coc", "Van Bay", "Hong Nhi", "Duc Soat", "Van Tho", "Ngoc Do", "Thanh Chung", "Dang Kinh", "Van Hoa",
+            "Minh Tuan", "Quang Huy", "Van Long", "Tien Dung", "Huu Phuoc", "Cong Thanh", "Van Nam", "Xuan Truong"]
+INITIALS_LAT = "ABCDEFGHJKLMNOPRSTWYZ"
 SURNAMES["frg"] = SURNAMES["gdr"]
 SURNAMES["ca"] = SURNAMES["uk"][:25] + ["Tremblay", "Gagnon", "Roy", "Côté", "Bouchard", "Gauthier", "Morin", "Lavoie",
                                         "Fortin", "Gagné", "Ouellet", "Pelletier", "Bélanger", "Lévesque", "Bergeron"]
 INITIALS = {"su": "АБВГДЕИКЛМНОПРСТФЮЯ", "gdr": "ABCDEFGHJKLMNPRSTUW", "frg": "ABCDEFGHJKLMNPRSTUW",
             "us": "ABCDEFGHJKLMNPRSTW", "uk": "ABCDEFGHJKLMNPRSTW", "be": "ABCDEFGHJLMPRS", "nl": "ABCDEFGHJKLMNPRSW",
-            "ca": "ABCDEFGHJKLMNPRSTW"}
-NATION_RE = [("gdr", r"ННА|NVA|JBG-\d|JG-\d|KHG|THG|MFG"), ("uk", r"RAF|брит|Royal"), ("be", r"бельг|Belg"),
+            "ca": "ABCDEFGHJKLMNPRSTW", "il": "ADEGHIMNRSTUYZ", "ar": "AFHIKMNORSWY", "ir": "ABDFHJKMNRS",
+            "ge": "АБВГДЗИЛМНОРТ", "ab": "АБВГДЗИЛМНРТ", "vn": INITIALS_LAT}
+# страна стороны в сценарии -> национальность лётчиков, когда название части ничего не говорит; страны-"хозяева"
+# коалиций (Россия, США, ФРГ) - нет: их части разных стран различаются по названию (NATION_RE), иначе su / us
+COUNTRY_NATION = {"Israel": "il", "Egypt": "ar", "Syria": "ar", "Iraq": "ar", "Jordan": "ar", "Libya": "ar",
+                  "Saudi Arabia": "ar", "Iran": "ir", "Georgia": "ge", "Abkhazia": "ab", "Vietnam": "vn"}
+NATION_RE = [("vn", r"Южного Вьетнама|VNAF"), ("ab", r"Абхаз"), ("ge", r"Грузи"), ("su", r"России|ВКС|ВВС РФ"),
+             ("us", r"ВВС США|армии США|USN|USMC|VF-|VA-|VAW-|VAQ-|VS-|HMM-|KC-135|E-3A"), ("gdr", r"ННА|NVA|JBG-\d|JG-\d|KHG|THG|MFG"), ("uk", r"RAF|брит|Royal"), ("be", r"бельг|Belg"),
              ("nl", r"Нидерл|голланд|Dutch|KLu"), ("ca", r"Канад|Canad"),
              ("frg", r"нем\.|ФРГ|Bundes|Luftwaffe|JaboG|JBG \d|JG \d|LTG \d|AG \d|MFG \d|Хересфлигер|PAH|Панцер"),
              ("us", r"США|USAF|U\.S\.|TFW|TRW|trw|амер")]
 
 
-def nation(u: dict) -> str:
+def nation(u: dict, state: dict | None = None) -> str:
+    """Национальность части: задана в составе сил (nation), иначе - по названию, иначе - по стране стороны в
+    сценарии (запоминается в u['nation'] при первом обращении с состоянием)."""
     if u.get("nation") in RANKS:
         return u["nation"]
     for n, rx in NATION_RE:
         if re.search(rx, u.get("name", "")):
             return n
+    c = ((state or {}).get("countries") or {}).get(u.get("side"))
+    if c in COUNTRY_NATION:
+        u["nation"] = COUNTRY_NATION[c]
+        return u["nation"]
     return "su" if u["side"] == "red" else "us"
 
 
@@ -73,16 +113,21 @@ def _rng(u: dict, k: int) -> random.Random:
     return random.Random(f"{u['id']}-{k}")
 
 
-def new_name(u: dict, used: set[str]) -> dict:
+def new_name(u: dict, used: set[str], state: dict | None = None) -> dict:
     """Новый лётчик полка: звание - чаще младшие (пополнение - из училищ)."""
-    nat = nation(u)
+    nat = nation(u, state)
     k = u.get("_pilot_seq", 0)
     for _ in range(50):
         k += 1
         r = _rng(u, k)
         sur = r.choice(SURNAMES[nat])
         ini = r.choice(INITIALS[nat])
-        name = f"{sur} {ini}.{r.choice(INITIALS[nat])}." if nat == "su" else f"{ini}. {sur}"
+        if nat in ("su", "ab"):                  # фамилия и инициалы с отчеством
+            name = f"{sur} {ini}.{r.choice(INITIALS[nat])}."
+        elif nat == "vn":                        # фамилия, затем личное имя
+            name = f"{sur} {r.choice(VN_GIVEN)}"
+        else:
+            name = f"{ini}. {sur}"
         if name not in used:
             break
     u["_pilot_seq"] = k
@@ -102,7 +147,7 @@ def ensure(state: dict, u: dict) -> list[dict]:
     want = u["crews"] if "crews" in u else u.get("count", 0)
     used = {p["name"] for p in roster} | {p["name"] for p in u.get("pilots_lost", [])}
     while len(roster) < want:
-        p = new_name(u, used)
+        p = new_name(u, used, state)
         used.add(p["name"])
         roster.append(p)
     while len(roster) > want:                    # экипажей стало меньше без имени (потери вне учёта) - младший

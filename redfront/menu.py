@@ -77,6 +77,14 @@ def run(path: Path | None = None, out_dir: Path | None = None) -> int:
                     print(ln)
                 model.save(st, path)
             elif c == "5":
+                if st.get("ended"):              # кампания завершена (campaign.py)
+                    from . import campaign
+                    e = st["ended"]
+                    print(f"Кампания завершена: {e['reason']}. Итог - {e['verdict']}.")
+                    if e["reason"].startswith("историческая") and input("Продолжить в альтернативном ходе? (y/n) ").strip().lower() == "y":
+                        print(campaign.resume(st))
+                        model.save(st, path)
+                    continue
                 for ln in sim.end_day(st):
                     print(ln)
                 model.save(st, path)

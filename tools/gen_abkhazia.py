@@ -56,7 +56,9 @@ G.LINKS = [
 ]
 G.SUPPLY_ENTRY = {"red": ["Adler"], "blue": ["Kutaisi", "Samtredia"]}
 G.EXTERNAL_SUPPLY = {"Gudauta", "Sochi-Adler"}   # российские аэродромы: снабжение из России, не со складов Абхазии
-G.OFF_LIMITS = {"blue": ["Sochi", "Adler"]}       # Грузия не действует на территории России
+G.OFF_LIMITS = {"blue": ["Sochi", "Adler"],       # Грузия не действует на территории России
+                "red": ["Zugdidi", "Khobi", "Jvari", "Senaki", "Poti", "Samtredia", "Kutaisi", "Kobuleti", "Batumi"]}   # абхазская
+# сторона остановилась на Ингури (30.09.1993) - граница бывшей автономии, дальше - Грузия (политика, не нехватка сил)
 G.AIRBASES = {"red": ["Gudauta", "Sochi-Adler"], "blue": ["Sukhumi-Babushara", "Senaki-Kolkhi", "Kutaisi", "Kobuleti"]}
 G.AXES = {
     "sukhumi": {"title": "Гумиста - Сухуми", "objectives": ["Sukhumi", "Kelasuri", "Babushara"]},
@@ -140,6 +142,9 @@ G.SSM = []
 # гарнизон Ткварчели - в окружении год, слабый (0.7)
 G.URBAN = {"Sukhumi": 1.8, "Ochamchire": 1.3}
 G.GARRISON = {"blue_ge_sukhumi"}
+# 27.09.1993 - падение Сухуми: распад грузинской группировки, к 30.09 оставлены Очамчира и Гали (ОЦЕНКА величины)
+G.EXTRA_VARIANT = {"morale_break": [{"side": "blue", "place": "Sukhumi", "quality_k": 0.5,
+                                     "note": "после падения Сухуми грузинские части отходят к Ингури"}]}
 G.QUALITY = {"*:blue": 0.45, "blue_ge_ochamchire": 0.7, "red_tkv": 0.8}
 
 if __name__ == "__main__":

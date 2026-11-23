@@ -33,13 +33,15 @@ def _sim(state: dict, side: str) -> dict:
 def graph(state: dict) -> dict[str, dict[str, float]]:
     """Граф пунктов (км - по дороге, если она известна); связи с разрушенным большим мостом закрыты, с разрушенным малым - длиннее на объезд
     (logistics.link_open / link_detour - здесь то же правило одним проходом по мостам: граф строится часто)."""
+    if _G is not None and _G[0] == _CROSS:     # граф на время решения командования стороны - один
+        return _G[1]
     from . import logistics
     closed, detour = set(), set()
     for br in logistics.objects(state, "bridge"):
         if br.get("damage", 0) >= 1.0:
             for l in br.get("links", []):
                 (detour if logistics.is_minor(br) else closed).add(frozenset(l))
-    extra = model.doctrine(state, state["player_side"])["sim"].get("bridge_detour_km", 0) if detour else 0
+    extra = model.doctrine(state, _CROSS or state["player_side"])["sim"].get("bridge_detour_km", 0) if detour else 0   # объезд - по доктрине решающей стороны
     g: dict[str, dict[str, float]] = {p: {} for p in state["places"]}
     rk = state.get("road_km") or {}              # длина по дороге (roads.apply), иначе - по прямой
     for a, b in state.get("links", []):
@@ -57,6 +59,8 @@ def graph(state: dict) -> dict[str, dict[str, float]]:
         if k in detour:                                  # разрушен малый мост - объезд (ОЦЕНКА, sim.bridge_detour_km)
             d += extra
         g[a][b] = g[b][a] = d
+    if _G is not None:
+        _G[:] = [_CROSS, g]
     return g
 
 
@@ -89,13 +93,16 @@ def path(state: dict, a: str, b: str, side: str | None = None, avoid: set | None
 
 _CROSS: str | None = None   # сторона, чья командование решает: разрушенный большой мост для её частей - форсирование
 _PK: dict | None = None   # кэш path_km на время решения командования (граф за это время не меняется)
+_G: list | None = None    # кэш графа на то же время: [сторона, граф]
 
 
 def path_km(state: dict, a: str, b: str) -> float:
+    """Длина кратчайшего пути по графу - по дорогам (road_km), с объездами и форсированием, как и сам путь (path)."""
     if _PK is not None and (a, b) in _PK:
         return _PK[(a, b)]
     p = path(state, a, b)
-    km = sum(model.dist_km(state["places"][x], state["places"][y]) for x, y in zip(p, p[1:])) if p else 1e18
+    g = graph(state)
+    km = sum(g[x].get(y, model.dist_km(state["places"][x], state["places"][y])) for x, y in zip(p, p[1:])) if p else 1e18
     if _PK is not None:
         _PK[(a, b)] = _PK[(b, a)] = km
     return km
@@ -103,6 +110,20 @@ def path_km(state: dict, a: str, b: str) -> float:
 
 def owner(state: dict, p: str) -> str | None:
     return state["places"][p].get("side")
+
+
+def banned(state: dict, side: str) -> set[str]:
+    """Пункты, куда сторона по сценарию не идёт (off_limits: политические ограничения) - ни целью, ни транзитом.
+    Альтернативный ход после исторической фазы: у стороны с перевесом - сняты (campaign.limits_lifted)."""
+    from . import campaign
+    if campaign.limits_lifted(state, side):
+        return set()
+    return set((state.get("off_limits") or {}).get(side, [])) - campaign.alt_targets(state, side)   # новые цели - не запрет
+
+
+def own_path(state: dict, side: str, a: str, b: str) -> list[str] | None:
+    """Путь в тылу/вдоль фронта: по своей земле, иначе - в обход запретных пунктов, иначе - кратчайший."""
+    return path(state, a, b, side=side) or path(state, a, b, avoid=banned(state, side) - {b})   # запретные - никогда
 
 
 def front_links(state: dict) -> list[tuple[str, str]]:
@@ -123,10 +144,20 @@ def _maneuver(state: dict, side: str | None = None) -> list[dict]:
             and u["state"] not in ("destroyed", "pending") and (side is None or u["side"] == side)]
 
 
+_NODE: list = [None, {}]   # [словарь пунктов кампании, {место: ближний пункт}] - ссылка на сам словарь, не id()
+
+
 def node_of(state: dict, u: dict) -> str:
-    """Пункт, где часть стоит (конец маршрута), иначе ближайший."""
+    """Ближайший к части пункт (кэш по месту: пункты не двигаются; кэш - одной кампании, сверка по объекту)."""
     pos = model.unit_pos(state, u)
-    return min(state["places"], key=lambda p: model.dist_km(pos, state["places"][p]))
+    places = state["places"]
+    if _NODE[0] is not places or len(_NODE[1]) > 50000:
+        _NODE[0], _NODE[1] = places, {}
+    key = (round(pos["lat"], 4), round(pos["lon"], 4))
+    n = _NODE[1].get(key)
+    if n is None:
+        n = _NODE[1][key] = min(places, key=lambda p: model.dist_km(pos, places[p]))
+    return n
 
 
 def _units_near(state: dict, p: str, side: str, km: float) -> list[dict]:
@@ -164,6 +195,13 @@ def _disengage(state: dict, u: dict) -> None:
     u["engaged"] = []
 
 
+HOLD_REACH_KM = 150   # ОЦЕНКА: на пустой рубеж фронта выдвигается часть не дальше стольких км по своей земле
+
+
+def _route_len(state: dict, p: list[str]) -> float:
+    return sum(model.dist_km(state["places"][x], state["places"][y]) for x, y in zip(p, p[1:]))
+
+
 AXIS_REACH_KM = 80   # ОЦЕНКА: наступающая часть выбирает цель не дальше стольких км по графу (длинный фронт)
 
 
@@ -191,17 +229,38 @@ def objective(state: dict, side: str, u: dict | None = None) -> str | None:
     return next((o for o in objs if owner(state, o) != side), None)   # цели по порядку: первая не взятая
 
 
+def morale(state: dict, side: str) -> list[str]:
+    """Надлом стороны (сценарий morale_break: [{side, place, quality_k, note}]): потерян ключевой пункт - выучка и
+    стойкость всех её манёвренных частей падают в quality_k раз, один раз (Сухуми 27.09.1993 - распад грузинской
+    группировки; ОЦЕНКА величины)."""
+    lines = []
+    for i, row in enumerate(state.get("morale_break") or []):
+        if row.get("side") != side or row.get("done") or row.get("place") not in state["places"]:
+            continue
+        if owner(state, row["place"]) == side:
+            continue
+        row["done"] = state.get("day")
+        k = float(row.get("quality_k", 0.7))
+        from . import morale as _m
+        for u in _maneuver(state, side):
+            u["quality"] = u.get("quality", 1.0) * k
+            _m.hit(state, u, float(row.get("morale_hit", 0.0)))   # по умолчанию - только выучка (quality_k)
+        lines.append(f"Потерян {row['place']}: надлом обороны - {row.get('note') or 'войска стороны деморализованы'}.")
+    return lines
+
+
 def commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
-    global _PK, _CROSS
+    global _PK, _CROSS, _G
     if not enabled(state):
         return []
-    _PK, _CROSS = {}, side
+    _PK, _CROSS, _G = {}, side, [None, None]
     try:
-        lines = _commander(state, side, frac_day)
+        lines = morale(state, side)
+        lines += _commander(state, side, frac_day)
         lines += _operations(state, side, frac_day)
         return lines
     finally:
-        _PK, _CROSS = None, None
+        _PK, _CROSS, _G = None, None, None
 
 
 def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
@@ -227,15 +286,21 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
         # путь по своей земле, нет - напрямую (прорыв через кольцо)
         if rear_:
             dest = min(rear_, key=lambda p: path_km(state, here, p))
+            p = own_path(state, side, here, dest)
+            if not p:
+                continue
             _disengage(state, u)
-            set_route(state, u, path(state, here, dest, side=side) or path(state, here, dest), "withdraw")
+            set_route(state, u, p, "withdraw")
             lines.append(f"{u['name']}: гарнизон в окружении {state['day'] - u['cut_since']} сут. - прорыв к своим, отход в {dest}.")
     # 1. отход: в бою ниже withdraw_below или небоеспособна
     for u in own:
-        weak = model.strength(u) < sim["withdraw_below"] * (GARRISON_HOLD if u.get("order") == "garrison" else 1.0)
+        from . import morale as _m               # низкая мораль - отход раньше
+        weak = model.strength(u) < (sim["withdraw_below"] + _m.withdraw_shift(u)) * (GARRISON_HOLD if u.get("order") == "garrison" else 1.0)
         if (u["state"] == "battle" and weak) or u["state"] == "halted":
             here = node_of(state, u)
             pool = rear or [p for p in state["places"] if owner(state, p) == side and p != here]   # тыла нет - в ближний свой
+            if _units_near(state, here, model.enemy(side), sim["contact_km"]):   # противник уже здесь - не восстанавливаться
+                pool = [p for p in pool if p != here]                            # под огнём, а отходить дальше
             dest = min(pool, key=lambda p: path_km(state, here, p), default=None)
             if dest is None:
                 continue
@@ -244,8 +309,14 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
                 u["state"], u["order"] = "refit", None
                 lines.append(f"{u['name']}: в тылу ({here}), восстановление.")
                 continue
+            p = path(state, here, dest, side=side)  # отход - только по своей земле
+            if not p:                                # окружена (Ткварчели 1993): через противника не отходит - держится
+                if u["state"] == "halted":           # на месте и восстанавливается под огнём
+                    u["state"], u["defending"] = "refit", True
+                    lines.append(f"{u['name']}: ({model.strength(u):.0%}) в окружении - отхода нет, держится в районе {here}.")
+                continue
             _disengage(state, u)
-            set_route(state, u, path(state, here, dest, side=side) or path(state, here, dest), "withdraw")   # по своей земле
+            set_route(state, u, p, "withdraw")
             lines.append(f"{u['name']}: ({model.strength(u):.0%}) выходит из боя, отходит в {dest}.")
     # 1а. закрепление: часть дошла до своего рубежа (dig_in_at, сценарий: плацдармы 1973) - гарнизон, дальше не идёт
     for u in own:
@@ -282,8 +353,8 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
         posture = "defense"                                       # цели операции достигнуты - удерживать
     g = graph(state)
     if posture == "offense":
-        banned = set((state.get("off_limits") or {}).get(side, []))   # политические ограничения сценария
-        all_targets = {q for p in front for q in g[p] if owner(state, q) != side and q not in banned}
+        ban = banned(state, side)                # политические ограничения сценария
+        all_targets = {q for p in front for q in g[p] if owner(state, q) != side and q not in ban}
         if ground_umbrella(state, side):         # доктрина "зонтика" (Египет 1973): наступать - только под своими ЗРК
             under = {q for q in all_targets if _under_sams(state, side, state["places"][q])}
             all_targets = under
@@ -312,7 +383,7 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
                 t = r.choices(top, weights=w)[0]
             else:
                 t = min(top, key=lambda q: path_km(state, here, q))
-            p = path(state, here, t, avoid=banned | (held - {t})) or path(state, here, t, avoid=banned)
+            p = path(state, here, t, avoid=ban | (held - {t})) or path(state, here, t, avoid=ban)
             if p and len(p) > 1:
                 set_route(state, u, p, "attack")
                 lines.append(f"{u['name']}: наступление на {t} ({' - '.join(p)}).")
@@ -342,9 +413,9 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
                 continue                                          # держит свой пункт фронта
             if need:
                 t = min(need, key=lambda p: path_km(state, here, p))
-                need.remove(t)
-                p = path(state, here, t)
-                if p and len(p) > 1:
+                p = own_path(state, side, here, t)       # на рубеж - по своей земле, не через противника
+                if p and len(p) > 1 and _route_len(state, p) <= HOLD_REACH_KM:   # не через полкарты в обход
+                    need.remove(t)
                     set_route(state, u, p, "hold")
                     lines.append(f"{u['name']}: выдвигается на рубеж {t}.")
                     continue
@@ -353,8 +424,9 @@ def _commander(state: dict, side: str, frac_day: float = 1.0) -> list[str]:
             if model.strength(u) < sim["attack_min_strength"]:
                 continue
             here = node_of(state, u)
-            empty = [q for q in g[here] if owner(state, q) != side and state["places"][q].get("side") == side   # только свои
-                     and not _units_near(state, q, model.enemy(side), sim["contact_km"])]                       # (исходно)
+            empty = [q for q in g[here] if owner(state, q) != side and state["places"][q].get("side0") == side   # только
+                     and q not in banned(state, side)                                                           # свои исходно
+                     and not _units_near(state, q, model.enemy(side), sim["contact_km"])]
             if empty:
                 t = empty[0]
                 set_route(state, u, [here, t], "attack")
@@ -402,10 +474,11 @@ def give_order(state: dict, uid: str, kind: str, place: str | None = None) -> st
         raise ValueError("укажите пункт")
     if kind in ("move", "withdraw") and owner(state, place) != side:
         raise ValueError(f"{place}: пункт противника - для него приказ 'наступать'")
-    if place in set((state.get("off_limits") or {}).get(side, [])):
-        raise ValueError(f"{place}: по сценарию сторона туда не идёт")
+    warn = ""                                    # игрока сценарий не ограничивает: запретный район - предупреждение
+    if place in banned(state, side):
+        warn = " Внимание: по сценарию сторона туда не идёт - решение и последствия на вас."
     u["player_order"] = {"type": kind, "place": place, "day": state["day"], "done": False}
-    return f"{u['name']}: приказ - {dict(hold='держать', move='выйти в', attack='наступать на', withdraw='отойти в')[kind]} {place}."
+    return f"{u['name']}: приказ - {dict(hold='держать', move='выйти в', attack='наступать на', withdraw='отойти в')[kind]} {place}." + warn
 
 
 def player_orders(state: dict, side: str) -> list[str]:
@@ -426,8 +499,7 @@ def player_orders(state: dict, side: str) -> list[str]:
             o["done"] = True
             lines.append(f"{u['name']}: по приказу держит {t}.")
             continue
-        p = (path(state, here, t, side=side) if o["type"] == "withdraw" else None) or \
-            (bypass_path(state, side, here, t) if o["type"] == "attack" else path(state, here, t))
+        p = bypass_path(state, side, here, t) if o["type"] == "attack" else own_path(state, side, here, t)
         if not p or len(p) < 2:
             lines.append(f"{u['name']}: приказ не выполнить - нет пути до {t}.")
             o["done"] = True
@@ -497,7 +569,8 @@ def posture_of(state: dict, side: str) -> str:
 def bypass_path(state: dict, side: str, a: str, b: str) -> list[str] | None:
     """Путь наступающего: в обход городов противника с гарнизоном (held_cities), кроме конечного; обхода нет - прямо."""
     held = held_cities(state, model.enemy(side)) - {b}
-    return (path(state, a, b, avoid=held) if held else None) or path(state, a, b)
+    ban = banned(state, side) - {b}
+    return (path(state, a, b, avoid=held | ban) if held else None) or path(state, a, b, avoid=ban)   # запретные - никогда
 
 
 def route_from(state: dict, side: str, u: dict, t: str) -> list[str] | None:
@@ -509,6 +582,8 @@ def route_from(state: dict, side: str, u: dict, t: str) -> list[str] | None:
         if cl:
             a, b = cl
             rest = [b] if b == t else bypass_path(state, side, b, t)
+            if rest and len(rest) > 1 and rest[1] == a:   # к цели - назад по своему участку: разворот, без петли a-b-a
+                return rest
             return [a] + rest if rest else None
     return bypass_path(state, side, node_of(state, u), t)
 
@@ -554,6 +629,7 @@ def success_entry(state: dict, u: dict, used: dict | None = None) -> str | None:
     return min(rear, key=lambda q: model.dist_km(state["places"][q], state["places"][best])) if rear else best
 
 
+COUNTER_MAX_LOSS = 0.10   # ОЦЕНКА: контрудар прекращается, если с начала потеряно больше этой доли боеспособности
 ROUT_RATIO = 6.0        # ОЦЕНКА: перевес, при котором часть в бою не держит пункт и отходит
 
 
@@ -576,8 +652,10 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
         if u["state"] != "battle" or u.get("order") in ("withdraw", "garrison"):
             continue                             # гарнизон города не бежит: окружён - держится (Чернигов, Сумы 2022)
         enemy = sum(_s.power(state, state["units"][f]) for f in u.get("engaged", []) if f in state["units"])
-        if enemy < ROUT_RATIO * max(1e-6, _s.power(state, u) * _s.urban_k(state, u)):
+        from . import morale as _m               # надломленная часть бежит при меньшем перевесе
+        if enemy < ROUT_RATIO * _m.rout_k(u) * max(1e-6, _s.power(state, u) * _s.urban_k(state, u)):
             continue
+        lines += _m.hit(state, u, _m.ROUT_HIT, "разгром")
         here = node_of(state, u)
         back = [q for q in g[here] if owner(state, q) == side and q != here]
         if not back:
@@ -607,25 +685,44 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
     pc = ground_control(state, side)             # части под приказом игрока - без приёмов командования стороны
     free = [u for u in own if u["state"] == "defend" and not u.get("engaged") and u.get("order") not in ("reserve", "airhead", "garrison")
             and model.strength(u) >= sim.get("attack_min_strength", 0.7) and not (pc and u.get("player_order"))]
+    # контрудар захлебнулся: потери с начала больше COUNTER_MAX_LOSS - прекратить, отойти на свой ближний пункт (8.10.1973:
+    # контрудар 162-й дивизии остановлен в тот же день; без этого резерв перемалывался неделю)
+    offense = posture_of(state, side) == "offense" and bool(objective(state, side, None))
+    for u in own:                                # в наступлении стороны (поза сценария) - не контрудар, а наступление
+        if u.get("op_role") != "counter" or u["state"] != "battle" or offense:
+            continue
+        if u.get("counter_s0", 1.0) - model.strength(u) < COUNTER_MAX_LOSS:
+            continue
+        here = node_of(state, u)
+        mine = [q for q in state["places"] if owner(state, q) == side and not _units_near(state, q, foe, sim["contact_km"])]
+        dest = min(mine, key=lambda q: path_km(state, here, q), default=None)
+        p = own_path(state, side, here, dest) if dest else None
+        if not p or len(p) < 2:
+            continue
+        _disengage(state, u)
+        set_route(state, u, p, "withdraw")      # отход разрывает соприкосновение (sim._contacts)
+        lines.append(f"{u['name']}: контрудар не удался - выходит из боя, рубеж {dest}.")
     # контрудар резервом (НАТО): по вклинившейся части противника, которая слабее
     if sim.get("counterattack"):
         for u in sorted(free, key=lambda x: -_s.power(state, x)):
             here = node_of(state, u)
             pw = _s.power(state, u)
-            tgt = [e for e in _maneuver(state, foe) if _active(e) and e.get("order") != "withdraw"
+            tgt = [e for e in _maneuver(state, foe) if _active(e) and e.get("order") not in ("withdraw", "garrison")
+                   and not (e.get("defending") and e.get("dig_h", 0) >= _sim(state, foe).get("prepared_h", 1e9))   # вклинился,
+                   # а не закрепился: по подготовленной обороне контрудар резервом не наносят (8.10.1973 - 162-я дивизия)
                    and owner(state, node_of(state, e)) == side and pw >= sim.get("counter_ratio", 1.2) * _s.power(state, e)
                    and path_km(state, here, node_of(state, e)) <= sim.get("counter_km", 60)]
             if not tgt:
                 continue
             e = min(tgt, key=lambda x: path_km(state, here, node_of(state, x)))
-            p = path(state, here, node_of(state, e))
+            p = own_path(state, side, here, node_of(state, e))
             if p and len(p) > 1:
                 set_route(state, u, p, "attack")
-                u["op_role"] = "counter"
+                u["op_role"], u["counter_s0"] = "counter", model.strength(u)
                 free.remove(u)
                 lines.append(f"{u['name']}: контрудар по вклинившейся {e['name']} ({p[-1]}).")
-    if posture_of(state, side) != "offense":     # поза сценария (оборона), а не доктрины: в обороне - без ОМГ
-        return lines
+    if posture_of(state, side) != "offense" or not objective(state, side, None):   # поза сценария (оборона), а не
+        return lines                             # доктрины; целей операции нет или взяты - без ОМГ и передовых отрядов
     # передовой отряд (ОВД): сильнейшая часть - на рубеж в глубине за фронтом, быстрее главных сил
     if sim.get("forward_detachment") and not any(u.get("op_role") == "forward" for u in own):
         cand = [u for u in own if u["state"] in ("defend", "march") and u.get("order") in (None, "attack", "hold")
@@ -652,6 +749,7 @@ def _operations(state: dict, side: str, frac_day: float) -> list[str]:
                    and d.get("side") == foe and d.get("state") != "lost" and d.get("place") in state["places"]}
         targets |= {q for d in state["units"].values() if model.category(d) == "bridge"
                     for l in d.get("links", []) for q in l if owner(state, q) == foe}
+        targets -= banned(state, side)          # не за политические ограничения сценария (Тбилиси 2008)
         cand = [u for u in own if u["state"] in ("defend", "march") and not u.get("engaged") and model.strength(u) >= 0.8
                 and u.get("op_role") != "forward" and u.get("order") != "garrison" and not (pc and u.get("player_order"))]
         if gap and targets and cand:
@@ -671,14 +769,21 @@ def capture(state: dict) -> list[str]:
     if not enabled(state):
         return []
     lines = []
+    pos = {s: [model.unit_pos(state, u) for u in _maneuver(state, s) if _active(u) and u.get("order") != "withdraw"]
+           for s in model.SIDES}                 # места частей - один раз на шаг (а не на каждый пункт)
+    near = lambda p, s, km: any(model.dist_km(q, state["places"][p]) <= km for q in pos[s])
+    ban = {s: banned(state, s) for s in model.SIDES}
+    by_player = [model.unit_pos(state, u) for u in _maneuver(state, state.get("player_side")) if _active(u)
+                 and u.get("player_order") and ground_control(state, state.get("player_side"))]   # приказ игрока - и туда
     for p in state["places"]:
         for side in model.SIDES:
             if owner(state, p) == side:
                 continue
-            if p in set((state.get("off_limits") or {}).get(side, [])):
+            if p in ban[side] and not (side == state.get("player_side") and any(
+                    model.dist_km(q, state["places"][p]) <= _sim(state, side)["capture_km"] for q in by_player)):
                 continue                         # куда сторона по сценарию не идёт - и не занимает (Беларусь, Россия)
             km = _sim(state, side)["capture_km"]
-            if _units_near(state, p, side, km) and not _units_near(state, p, model.enemy(side), _sim(state, side)["contact_km"]):
+            if near(p, side, km) and not near(p, model.enemy(side), _sim(state, side)["contact_km"]):
                 state["places"][p]["side"] = side
                 lines.append(f"Пункт {p} занят: {'красные' if side == 'red' else 'синие'}.")
                 for d in state["units"].values():       # склад в занятом пункте - потерян стороной

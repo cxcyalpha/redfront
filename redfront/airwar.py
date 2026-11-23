@@ -22,7 +22,15 @@ LOSS = {"column": 0.04, "site": 0.25, "ship": 0.15}   # доля исправн�
 ART_SITE_LOSS = 0.06   # ОЦЕНКА: артбригада - батареи рассредоточены на километры: удар пары накрывает часть орудий
 DAMAGE = {"depot": 0.35, "factory": 0.25, "airfield": 0.3, "bridge": 0.5}
 LOSS_PER_THREAT = 0.03                             # вероятность потерять борт на ЗРК коридора
+LOSS_MAX = 0.15     # ОЦЕНКА: потолок потерь борта от ЗРК за вылет - зоны перекрываются, огонь делится между целями
+PER_THREAT_MAX = 0.4   # ОЦЕНКА: потолок срыва удара от ЗРК (1973, "Дугман-5": ~10% потерь на вылет по поясу ПВО)
 EJECT_P = 0.7
+
+
+def saturate(per: float, n: float, cap: float) -> float:
+    """Вклад n угроз с вкладом per каждая при потолке cap: вначале ~ per x n, у пояса ПВО - к cap (не линейно)."""
+    import math
+    return cap * (1.0 - math.exp(-per * n / cap)) if n > 0 and cap > 0 else 0.0
 
 
 QRA_P = 0.05                                       # дежурная пара ПВО противника рядом с целью: минус к успеху
@@ -95,7 +103,7 @@ def _strike(state: dict, e: dict) -> list[str]:
     from . import ew
     uav_k, uav_loss = ew.uav_factors(state, perf, obj["pos"])   # беспилотник в зоне подавления РЭБ противника
     sam_k = ((state.get("air_war") or {}).get("sam_loss_k") or {}).get(e["side"], 1.0)   # сценарий: РЭБ, ложные цели, тактика
-    pl = min(0.5, LOSS_PER_THREAT * len(threats) * sead_factor(state, e, threats) * sam_k + uav_loss)   # перехват - воздушным боем ниже
+    pl = min(0.5, saturate(LOSS_PER_THREAT, len(threats), LOSS_MAX) * sead_factor(state, e, threats) * sam_k + uav_loss)   # перехват - воздушным боем ниже
     asm_frac = 1.0
     if obj["kind"] == "ship":                    # ПКР стороны: нет - бомбы с малой высоты над ордером, потери выше
         from . import naval
@@ -135,7 +143,7 @@ def _strike(state: dict, e: dict) -> list[str]:
         lines.append(f"ИИ, {e['title']}: ударная группа не дошла до цели.")
         return lines
     qra = alerts_near(state, model.enemy(e["side"]), obj["pos"], _tot(e))   # дежурные пары рядом: уклонение, срыв
-    p = max(0.1, min(0.9, (STRIKE_P - PER_THREAT * len(threats) - QRA_P * qra) * fk * uav_k))   # захода и без боя
+    p = max(0.1, min(0.9, (STRIKE_P - saturate(PER_THREAT, len(threats), PER_THREAT_MAX) - QRA_P * qra) * fk * uav_k))   # захода и без боя
     if not ((r.random() < p) if r else p >= 0.5):
         lines.append(f"ИИ, {e['title']}: цель не поражена.")
         return lines

@@ -155,7 +155,8 @@
    },
    "title": "Удар по войскам в соприкосновении",
    "performers": [
-    "attack"
+    "attack",
+    "fighter_bomber"
    ],
    "target": {
     "category": "ground",
@@ -503,7 +504,8 @@
   "strike_column_march": {
    "title": "Удар по колонне на марше",
    "performers": [
-    "attack"
+    "attack",
+    "fighter_bomber"
    ],
    "target": {
     "category": "ground",
@@ -3376,10 +3378,10 @@
   "shares": [
    {
     "from_day": 1,
-    "DCA": 0.3,
+    "DCA": 0.2,
     "OCA": 0.3,
     "SEAD": 0.05,
-    "APCLO": 0.35
+    "APCLO": 0.45
    },
    {
     "from_day": 2,
@@ -3387,6 +3389,13 @@
     "OCA": 0.05,
     "SEAD": 0.05,
     "APCLO": 0.4
+   },
+   {
+    "from_day": 4,
+    "DCA": 0.6,
+    "OCA": 0.0,
+    "SEAD": 0.05,
+    "APCLO": 0.35
    }
   ],
   "estimate": true
@@ -3492,7 +3501,9 @@
   "night_march": 0.6,
   "night_battle": 0.5,
   "night_note": "Арабские армии 1973: ночной бой слабее дневного (night_power 0.7 - ОЦЕНКА по Pollack); план держится жёстко - выбор цели без импровизации (choice_width 1)",
-  "night_power": 0.7
+  "night_power": 0.7,
+  "morale_k": 1.2,
+  "morale_note": "Pollack: сплочённость и инициатива слабее - мораль от потерь падает быстрее, ОЦЕНКА"
  },
  "task_priority_note": "Порядок задач = приоритет плана дня (ОЦЕНКА): войска в соприкосновении, затем колонны на марше.",
  "gci": {

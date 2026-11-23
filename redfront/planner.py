@@ -434,10 +434,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
     tasked: dict[str, int] = {}                  # задач у части в этом плане
     year = campaign_year(state)
     gate, gated = _gates(state, side)            # пояса ПВО перед целями в глубине: сначала они (roll-back)
-    if doc.get("roll_back") is False:            # доктрина без roll-back (США 1972: пакет идёт сквозь пояс С-75 с
+    if (doc.get("roll_back") is False or state["day"] < doc.get("roll_back_from_day", 0)):            # доктрина без roll-back (США 1972: пакет идёт сквозь пояс С-75 с
         gated = {}                               # подавлением в своём составе); пояс - лишь первым в очереди целей ЗРК
     rules = (state.get("task_rules") or {}).get(side) or {}   # правила задач сценария (с какого дня, запрет)
-    banned = set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))   # куда авиация не бьёт
+    banned = air_banned(state, side)             # куда авиация не бьёт
     for z in rules.get("_zones") or []:          # запретные для ударов районы сценария до дня until_day (правила применения:
         if state["day"] < z.get("until_day", 10**6):   # Ханой и Хайфон до "Лайнбэкера") - только авиация, не наземные войска
             banned |= set(z["places"])
@@ -453,9 +453,10 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
         if kind in tparams:                      # параметры задачи по сценарию поверх доктрины (Гостомель: дальность десанта)
             tdef = {**tdef, **tparams[kind]}
         rule = rules.get(kind) or {}
-        if rule.get("off") or state["day"] < rule.get("from_day", 0):
+        if rule.get("off") or state["day"] < rule.get("from_day", 0) or state["day"] > rule.get("until_day", 10**6):
             reasons.append(f"{tdef['title']}: " + (rule.get("why") or "не в замысле сценария") +
-                           (f" (с {rule['from_day']}-го дня)" if rule.get("from_day") and not rule.get("off") else ""))
+                           (f" (с {rule['from_day']}-го дня)" if rule.get("from_day") and not rule.get("off") else "") +
+                           (f" (до {rule['until_day']}-го дня)" if rule.get("until_day") and not rule.get("off") else ""))
             continue
         if tdef.get("from_year") and year and year < tdef["from_year"]:
             continue                             # задачи ещё нет в доктрине на год кампании (BAI - с 1980, FOFA - с 1983)
@@ -522,10 +523,77 @@ def plan_side(state: dict, side: str, max_tasks: int = MAX_TASKS, per_kind: int 
             tasks.append(t)
         if not found and not targets:
             reasons.append(f"{tdef['title']}: целей нет")
+    tasks = [t for t in tasks if _helo_gate(state, side, t, doc, reasons)]   # вертолёты - без самоубийственных вылетов
     orbit = [t for t in tasks if t.get("ai_only")]   # дежурство - вне лимита плана дня (игрок его не летает)
     regular = apportion(state, doc, _interleave([t for t in tasks if not t.get("ai_only")]), max_tasks)   # доли - по кругу видов
     return joint_heli(state, side, _interleave(regular)[:max_tasks]) + orbit, "; ".join(reasons) or "целей для задач доктрины нет"
 
+
+
+def air_banned(state: dict, side: str) -> set[str]:
+    """Районы, по которым авиация стороны не бьёт (air_limits, иначе off_limits); альтернативный ход после
+    исторической фазы - у стороны с перевесом сняты (campaign.limits_lifted)."""
+    from . import campaign
+    if campaign.limits_lifted(state, side):
+        return set()
+    return set((state.get("air_limits", state.get("off_limits")) or {}).get(side, [])) - campaign.alt_targets(state, side)
+
+
+# ---- вертолёты: без самоубийственных вылетов (ОЦЕНКИ; доктрина может задать helo_max_risk / helo_max_depth_km задачи) ----
+HELO_RISK_W = {"sam_short": 0.5, "sam_medium": 1.5, "sam_long": 1.5, "naval": 1.0}   # вес угрозы для вертолёта на малой высоте
+HELO_RADAR_SHORT_W = 1.0     # ЗРК ближнего действия с РЛС (Оса, Тор, Роланд, Тунгуска) - опаснее ПЗРК и зениток
+HELO_MAX_RISK = 1.5          # сумма весов угроз в коридоре: больше - вылет не планируется
+HELO_MAX_DEPTH_KM = {"default": 25, "csar": 40}   # глубина цели за передним краем противника (вертолёт над чужой
+# территорией без прикрытия ПВО своих войск); десант и эвакуация - своими полями доктрины (assault_max_km)
+HELO_DEEP_KINDS = ("air_assault", "air_evac")
+
+
+def helo_risk(state: dict, threats: list[str]) -> float:
+    """Опасность коридора для вертолёта: сумма весов ЗРК (ближнего с РЛС - выше, ПЗРК и зенитки - ниже)."""
+    w = 0.0
+    for t in threats:
+        u = state["units"].get(t)
+        if not u:
+            continue
+        role = "naval" if model.category(u) == "naval" else u.get("role", "sam_short")
+        k = HELO_RISK_W.get(role, 1.0)
+        if role == "sam_short" and any(c["type"] in RADAR_SAM_TYPES for c in u.get("composition", [])):
+            k = HELO_RADAR_SHORT_W
+        w += k
+    return w
+
+
+def _helo_gate(state: dict, side: str, t: dict, doc: dict, reasons: list) -> bool:
+    """Задача с вертолётами (ударная, прикрытия, транспортные группы): не через насыщенную ПВО (helo_risk больше
+    helo_max_risk) и не глубже helo_max_depth_km за передний край противника. Замысел сценария (площадки lz_prefer
+    десанта: Гостомель 24.02) - без ограничений: высадка под огнём, как и было."""
+    helos = [g for g in t.get("package", []) if model.category(state["units"].get(g["performer"]) or {}) == "heli"]
+    if not helos or t.get("ai_only") and t["kind"] in ("airlift",):
+        return True
+    tdef = doc["tasks"].get(t["kind"], {})
+    if tdef.get("method") == "airlift_unit":     # к своей части (снабжение, раненые) - своя проверка ПВО (max_threats)
+        return True
+    tparams = ((state.get("task_params") or {}).get(side) or {}).get(t["kind"]) or {}
+    tdef = {**tdef, **tparams}
+    obj = t["package"][0]["objective"]
+    if obj.get("place") and obj["place"] in (tdef.get("lz_prefer") or []):
+        return True
+    risk = helo_risk(state, t.get("threats") or [])
+    lim = float(tdef.get("helo_max_risk", HELO_MAX_RISK))
+    if risk > lim:
+        reasons.append(f"{t['title']}: вертолётам не пройти - ПВО в коридоре (опасность {risk:.1f} при допустимой {lim:.1f})")
+        return False
+    if t["kind"] not in HELO_DEEP_KINDS:
+        pos = t.get("target_pos") or obj.get("pos")
+        if pos:
+            from . import farp
+            depth = farp.front_km(state, model.enemy(side), pos)   # до своих: глубина над территорией противника
+            lim_d = float(tdef.get("helo_max_depth_km", HELO_MAX_DEPTH_KM.get(t["kind"], HELO_MAX_DEPTH_KM["default"])))
+            if depth > lim_d:
+                reasons.append(f"{t['title']}: для вертолётов слишком глубоко ({depth:.0f} км за передним краем, "
+                               f"допустимо {lim_d:.0f})")
+                return False
+    return True
 
 
 def targets_for(state: dict, side: str, kind: str, tdef: dict, reasons: list | None = None, gate: dict | None = None,
@@ -537,10 +605,10 @@ def targets_for(state: dict, side: str, kind: str, tdef: dict, reasons: list | N
     reasons = reasons if reasons is not None else []
     if gate is None or gated is None:
         gate, gated = _gates(state, side)
-        if doc.get("roll_back") is False:
+        if (doc.get("roll_back") is False or state["day"] < doc.get("roll_back_from_day", 0)):
             gated = {}
     if banned is None:
-        banned = set((state.get("air_limits", state.get("off_limits")) or {}).get(side, []))
+        banned = air_banned(state, side)
     def _allowed_area(u):
         if not banned:
             return True
@@ -1022,17 +1090,26 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
     foe = model.enemy(side)
     out, used = [], set()
     front = tdef.get("mode") == "front"          # аэромобильные действия у фронта (армия США во Вьетнаме)
-    places = assault.front_candidates(state, side, tdef) if front else [(p, "deep") for p in assault.candidates(state, side, tdef)]
+    if front:
+        cands = [{"place": p, "how": k, "name": p} for p, k in assault.front_candidates(state, side, tdef)]
+    else:                                        # в глубину: пункты, аэродромы и переправы противника
+        cands = assault.deep_candidates(state, side, tdef)
     if tdef.get("front_kinds"):                  # сценарий: только подкрепление угрожаемых участков (без захвата с фланга)
-        places = [(p, k) for p, k in places if k in tdef["front_kinds"]]
+        cands = [c for c in cands if c["how"] in tdef["front_kinds"]]
     for u in res:
         if len(out) >= tdef.get("per_day", 1):
             break
-        for place, how in places:
-            if place in used:
+        for c in cands:
+            place, how = c["place"], c["how"]
+            if (c.get("target") or place) in used:
                 continue
-            lz = (assault.lz_point(state, model.enemy(side), place, tdef) if how == "reinforce"   # за пунктом, от противника
-                  else assault.lz_point(state, side, place, tdef))
+            if c.get("pos"):                     # аэродром, переправа - площадка у самого объекта
+                lz = c["pos"]
+            else:
+                lz = (assault.lz_point(state, model.enemy(side), place, tdef) if how == "reinforce"   # за пунктом, от противника
+                      else assault.lz_point(state, side, place, tdef))
+            if assault.hot_lz(state, side, lz, tdef) > tdef.get("hot_lz_max", 2) and place not in (tdef.get("lz_prefer") or []):
+                continue                         # площадка под плотным огнём - не туда (кроме замысла сценария)
             best = None
             for r in performers:
                 need = assault.lift_need(u, r["type"])
@@ -1058,19 +1135,22 @@ def assault_tasks(state: dict, side: str, kind: str, tdef: dict, performers: lis
                 groups.append({"group": "strike" if not k else f"lift{k // GROUP_MAX + 1}",
                                "title": s["title"] + (f" ({k // GROUP_MAX + 1})" if k else ""), "performer": perf["id"],
                                "size": min(GROUP_MAX, need - k), "base": perf["base"], "route": [lz],
-                               "objective": {"kind": "air_assault", "unit": u["id"], "place": place, "pos": lz, "mode": how},
+                               "objective": {"kind": "air_assault", "unit": u["id"], "place": place, "pos": lz, "mode": how,
+                                             **({"target": c["target"], "hold_pos": c["pos"]} if c.get("target") else {})},
                                "maintask": s["maintask"], "loadout": [], "lead_min": -k // GROUP_MAX, "ai": {},
                                "alt_m": tdef["transit_alt_m_agl"]})
             tasked[perf["id"]] = tasked.get(perf["id"], 0) + 1
             heli_escort(state, side, tdef, perf, lz, groups, tasked, need)
-            used.add(place)
+            used.add(c.get("target") or place)
             hot = assault.hot_lz(state, side, lz, tdef)
-            what = {"reinforce": "подкрепление", "flank": "захват с фланга"}.get(how)
-            out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {place}" + (f" ({what})" if what else ""),
+            what = {"reinforce": "подкрепление", "flank": "захват с фланга", "airfield": "захват аэродрома",
+                    "bridge": "захват переправы"}.get(how)
+            out.append({"kind": kind, "side": side, "title": f"{tdef['title']}: {u['name']} - {c['name']}" + (f" ({what})" if what else ""),
                         "performer": perf["id"], "target": u["id"], "group_size": need, "base": perf["base"],
                         "target_pos": lz, "ip": lz, "distance_km": round(km, 1), "threats": threats,
-                        "package": groups, "package_notes": f"площадка в {tdef.get('lz_offset_km', 2)} км от {place}; "
-                                                          f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"
+                        "package": groups, "package_notes": (f"площадка у объекта {c['name']}; " if c.get("target") else
+                                                             f"площадка в {tdef.get('lz_offset_km', 2)} км от {place}; ")
+                                                          + f"{need} x {perf['type']} ({assault.troops(perf['type'])} десантников на борт)"
                                                           + (f"; площадка под огнём: частей противника рядом {hot}" if hot else "")})
             break
     return out

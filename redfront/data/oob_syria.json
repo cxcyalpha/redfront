@@ -11,6 +11,9 @@
   "red": "Syria",
   "blue": "Israel"
  },
+ "doctrine": {
+  "red": "arab"
+ },
  "units": [
   {
    "id": "blue_91div",

@@ -106,7 +106,7 @@ def main(argv=None) -> int:
     p = sp.add_parser("roads-apply"); p.add_argument("state"); p.add_argument("file")
     p = sp.add_parser("ato", help="план полётов на сутки; --side all - и противника (отладка)")
     p.add_argument("state"); p.add_argument("--side", choices=("own", "enemy", "all"), default="own")
-    for c in ("status", "plan", "end-day"):
+    for c in ("status", "plan", "end-day", "resume"):
         sp.add_parser(c).add_argument("state")
     sp.add_parser("menu", help="меню: новая кампания, план, сборка, дебриф, следующий день").add_argument("state", nargs="?")
     p = sp.add_parser("gui", help="окно кампании в браузере (карта, план, сборка, дебриф)")
@@ -277,8 +277,16 @@ def main(argv=None) -> int:
         for ln in roads.apply(st, roads.load(Path(a.file))):
             print(ln)
     elif a.cmd == "end-day":
+        if st.get("ended"):                      # кампания завершена (campaign.py): итог; продолжение - команда resume
+            e = st["ended"]
+            print(f"Кампания завершена (сутки {e['day'] - 1}): {e['reason']}. Итог - {e['verdict']}."
+                  + (" Продолжить в альтернативном ходе: resume." if e["reason"].startswith("историческая") else ""))
+            return 0
         for ln in sim.end_day(st):
             print(ln)
+    elif a.cmd == "resume":
+        from . import campaign
+        print(campaign.resume(st))
     model.save(st, path)
     return 0
 

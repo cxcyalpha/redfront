@@ -505,7 +505,7 @@ def targets(state: dict, kind: str) -> dict:
     side = state["player_side"]
     tdef = _tdef(state, side, kind)
     reasons: list[str] = []
-    tg = planner.targets_for(state, side, kind, tdef, reasons)
+    tg = planner.targets_for(state, side, kind, tdef, reasons, banned=set())   # свой вылет игрока - без ограничений сценария
     perfs = [u for u in state["units"].values() if u["side"] == side and planner.role_ok(state, u, tdef["performers"])
              and logistics.available(state, u) > 0 and kind not in model.tasks_not(u) and not u.get("mod_off")]
     bases = [state["airbases"][u["base"]] for u in perfs]
@@ -526,7 +526,7 @@ def create(state: dict, kind: str, target: str, performer: str | None = None, to
     side = state["player_side"]
     tdef = _tdef(state, side, kind)
     tgt = state["units"].get(target)
-    if not tgt or tgt["id"] not in {t["id"] for t in planner.targets_for(state, side, kind, tdef)}:
+    if not tgt or tgt["id"] not in {t["id"] for t in planner.targets_for(state, side, kind, tdef, banned=set())}:
         raise ValueError("эта цель для задачи недоступна (не разведана, вне района или не той категории)")
     perf = state["units"].get(performer) if performer else None
     if performer and (not perf or perf["side"] != side or not planner.role_ok(state, perf, tdef["performers"])):
@@ -642,6 +642,6 @@ def kinds_for(state: dict, target: str) -> list[dict]:
     out = []
     for k in kinds(state):
         tdef = _tdef(state, side, k["kind"])
-        if any(t["id"] == target for t in planner.targets_for(state, side, k["kind"], tdef)):
+        if any(t["id"] == target for t in planner.targets_for(state, side, k["kind"], tdef, banned=set())):
             out.append(k)
     return out

@@ -164,7 +164,7 @@ def resolve(state: dict, t1: float) -> list[str]:
             if high:
                 threats = [x for x in threats if planner.threat_radius_km(state["units"][x]) >= HIGH_MIN_KM]
             qra = airwar.alerts_near(state, model.enemy(e["side"]), g["route"][0], e["tot_s"])
-            pl = min(0.5, airwar.LOSS_PER_THREAT * len(threats) + airwar.QRA_LOSS * qra)
+            pl = min(0.5, airwar.saturate(airwar.LOSS_PER_THREAT, len(threats), airwar.LOSS_MAX) + airwar.QRA_LOSS * qra)
             down = sum(1 for _ in range(g["size"]) if r.random() < pl) if r else 0
             if down:
                 perf["count"] = max(0, perf.get("count", 0) - down)

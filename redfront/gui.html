@@ -303,6 +303,8 @@ const I18N = {
     probe: "Зонд карты", probeApply: "Применить зонд", roadsProbe: "Зонд дорог", roadsApply: "Применить дороги",
     mizPh: "путь к своей .miz с зонами целей (Assign as... ROLE/VALUE)", import: "Импорт",
     needCamp: "Сначала создайте или откройте кампанию.", noCamp: "Создайте кампанию кнопкой «Новая».", noCamps: "нет кампаний",
+    phaseHist: n => `историческая фаза - до суток ${n}`, phaseAlt: "альтернативный ход",
+    ended: e => `КАМПАНИЯ ЗАВЕРШЕНА: ${e.reason}. Итог - ${e.verdict}`, resume: "Продолжить (альтернативный ход)",
     day: "день", oldVer: " (старая версия)", randomVar: "случайный (по seed)",
     meta: (s, side) => `День <b>${s.day}</b>, обстановка на ${esc(s.ground_time || "00:00")} · ${s.date || ""} · вылетов ${s.sortie} · игрок: <span class="${s.side}">${side}</span>` + (s.weather ? ` · <span title="${esc(s.weather_text)}">☁ ${esc(s.weather)}</span>` : ""),
     red: "красные", blue: "синие", Red: "Красные", Blue: "Синие", seed: "seed", noRandom: "без случайности", built: "собран вылет",
@@ -420,6 +422,8 @@ const I18N = {
     probe: "Map probe", probeApply: "Apply probe", roadsProbe: "Roads probe", roadsApply: "Apply roads",
     mizPh: "path to your own .miz with target zones (Assign as... ROLE/VALUE)", import: "Import",
     needCamp: "Create or open a campaign first.", noCamp: "Create a campaign with the “New” button.", noCamps: "no campaigns",
+    phaseHist: n => `historical phase - until day ${n}`, phaseAlt: "alternative course",
+    ended: e => `CAMPAIGN OVER: ${e.reason}. Result: ${e.verdict}`, resume: "Continue (alternative course)",
     day: "day", oldVer: " (old version)", randomVar: "random (by seed)",
     meta: (s, side) => `Day <b>${s.day}</b>, situation at ${esc(s.ground_time || "00:00")} · ${s.date || ""} · sorties flown ${s.sortie} · player: <span class="${s.side}">${side}</span>` + (s.weather ? ` · <span title="${esc(s.weather_text)}">☁ ${esc(s.weather)}</span>` : ""),
     red: "red", blue: "blue", Red: "Red", Blue: "Blue", seed: "seed", noRandom: "no randomness", built: "built sortie",
@@ -956,7 +960,11 @@ const sideName = (s, cap) => T(cap ? (s === "red" ? "Red" : "Blue") : s);
 
 function render() {
   if (!ST) { $("#pane").innerHTML = `<p class='meta'>${T("noCamp")}</p>`; $("#meta").innerHTML = ""; drawMap(); renderInspector(); renderMatrix(); return; }
-  $("#meta").innerHTML = T("meta")(ST, sideName(ST.side));
+  $("#meta").innerHTML = T("meta")(ST, sideName(ST.side)) + (ST.ended
+    ? ` · <b style="color:#c33">${esc(T("ended")(ST.ended))}</b>` + (String(ST.ended.reason).startsWith("историческая")
+      ? ` <button id="bResume">${T("resume")}</button>` : "")
+    : ST.phase === "historical" && ST.hist_end ? ` · ${T("phaseHist")(ST.hist_end)}` : ST.hist_end ? ` · ${T("phaseAlt")}` : "");
+  const br = $("#bResume"); if (br) br.onclick = e => act("resume", {}, e.currentTarget);
   fillHist();
   $("#meta").title = `${ST.scenario || ""} · ${T("seed")} ${ST.seed ?? "-"}${ST.randomness ? "" : " · " + T("noRandom")}` +
     (ST.built ? ` · ${T("built")} ${ST.built.sortie}: ${ST.built.file}` : "");

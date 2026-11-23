@@ -3035,11 +3035,12 @@ def fog_section(tmp: Path) -> None:
     check(0 < moves < len(free) * 6 * 0.3 and roam_ok,
           f"за 6 суток {moves} смен позиций у {len(free)} самостоятельных ЗРК - не перетасовка, каждый в своём районе")
     navy = [s_ for s_ in st["units"].values() if model.category(s_) == "naval" and s_["side"] != "blue"]
+    seen = lambda u: ((st.get("intel") or {}).get(u["id"]) or {}).get("day", -1)   # разведка стороны видела после переезда
     moved = [u for u in far if model.dist_km(u["pos"], start[u["id"]]) > 0.5   # вдали от кораблей игрока (они видят берег)
-             and all(model.dist_km(u["pos"], s_["pos"]) > 150 for s_ in navy)]
+             and all(model.dist_km(u["pos"], s_["pos"]) > 150 for s_ in navy) and seen(u) < u.get("moved_day", 0)]
     if moved:
         u = moved[0]
-        check(model.dist_km(intel.known_pos(st, u), start[u["id"]]) < 0.1,
+        check(model.dist_km(intel.known_pos(st, u), u["pos"]) > 0.5,
               f"туман войны: {u['name']} сменил позицию - игрок видит прежнюю")
         st["task"] = {"package": [{"base": next(iter(st["airbases"])), "route": [dict(u["pos"])]}]}
         intel.after_debrief(st, {"ground": [{"unit": u["id"]}]})
@@ -3666,6 +3667,82 @@ def ground_ops_section(tmp: Path) -> None:
     check(closed and crossing, f"мост {br['name']} разрушен: подвоз закрыт, части форсируют с ходу (путь длиннее на crossing_km)")
 
 
+def engine_rules_section(tmp: Path) -> None:
+    """Правила движка: вертолёты без самоубийственных вылетов, захват аэродрома десантом, мораль, арабская доктрина."""
+    from redfront import logistics, morale, ops, planner
+    print("\n== правила движка: вертолёты, десант на аэродром, мораль ==")
+    st = model.new_campaign("rules", sector="sector_golan73.json", oob="oob_golan73.json", seed=1)
+    heli = next(u for u in st["units"].values() if model.category(u) == "heli")
+    sams = [u["id"] for u in st["units"].values() if u.get("role") == "sam_medium" and u["side"] != heli["side"]][:3]
+    front = next(iter(ops.front_links(st)))
+    near = model.lerp(st["places"][front[0]], st["places"][front[1]], 0.5)
+    doc = model.doctrine(st, heli["side"])
+    mk = lambda thr, pos: {"kind": "cas_helo", "title": "проба", "threats": thr, "target_pos": pos,
+                           "package": [{"performer": heli["id"], "objective": {"kind": "unit", "pos": pos}}]}
+    why: list = []
+    deep = model.offset(near, 90 if heli["side"] == "red" else 270, 120000)
+    check(planner._helo_gate(st, heli["side"], mk([], near), doc, why) and not planner._helo_gate(st, heli["side"], mk(sams, near), doc, why)
+          and not planner._helo_gate(st, heli["side"], mk([], deep), doc, why),
+          f"вертолёты: у фронта без ПВО - да; через 3 ЗРК средней дальности - нет; глубоко за фронтом - нет ({why[0][:60]}...)")
+    d = model.doctrine(st, "red")["tasks"]["cas_contact"]["performers"]
+    check("fighter_bomber" in d, f"арабская доктрина: поддержка войск - и истребители-бомбардировщики (Су-7, МиГ-17): {d}")
+    # десант удерживает аэродром противника - аэродром переходит к нему
+    st = model.new_campaign("afcap", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+    para = next(u for u in st["units"].values() if u.get("air_mobile") and u["side"] == "red")
+    blue_pos = [model.unit_pos(st, u) for u in ops._maneuver(st, "blue")]
+    af = next(a for a in logistics.objects(st, "airfield") if a["side"] == "blue"
+              and all(model.dist_km(a["pos"], q) > 20 for q in blue_pos))
+    para.update({"order": "airhead", "state": "defend", "hold_pos": dict(af["pos"]), "route": [para["route"][0]]})
+    logistics.airfields(st)
+    logistics.airfields(st)
+    check(af["side"] == "red" and st["airbases"][af["base"]]["side"] == "red" and af["state"] == "closed",
+          f"{af['name']}: десант на аэродроме, своих частей рядом нет - захвачен ({af['side']}, {af['state']})")
+    # мораль: потери за сутки - мораль ниже, сила ниже; отдых - восстановление
+    u = next(x for x in ops._maneuver(st, "red") if x.get("role") != "air_assault" and not x.get("attached_to"))
+    p0 = sim.power(st, u)
+    start = {u["id"]: model.strength(u)}
+    sim._take_losses(u, 0.3)
+    morale.daily(st, start)
+    m1 = morale.get(u)
+    p1 = sim.power(st, u) / max(1e-9, model.strength(u)) * start[u["id"]]
+    u["state"], u["engaged"] = "defend", []
+    morale.daily(st, {u["id"]: model.strength(u)})
+    check(m1 < 0.7 and p1 < p0 and morale.get(u) > m1,
+          f"мораль: потери 30% за сутки - мораль {m1:.0%}, сила ниже ({p1:.0f} против {p0:.0f}); сутки отдыха - {morale.get(u):.0%}")
+
+
+def campaign_end_section(tmp: Path) -> None:
+    """Конец кампании: историческая фаза по дате, события по датам, продолжение в альтернативном ходе, свобода игрока."""
+    from redfront import campaign, ops
+    print("\n== конец кампании ==")
+    st = model.new_campaign("end", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1)
+    log = []
+    for _ in range(12):
+        if st.get("ended"):
+            break
+        planner.plan(st)
+        log += sim.end_day(st)
+    e = st.get("ended") or {}
+    check(any(l.startswith("Событие: 12.08") for l in log) and e.get("last_day") == campaign.hist_end(st)
+          and e.get("reason", "").startswith("историческая фаза") and e.get("verdict"),
+          f"Кавказ-2008, исторический ход: события по датам, конец - {e.get('last_day')}-е сутки ({e.get('reason', '-')[:50]}...), итог - {e.get('verdict')}")
+    msg = campaign.resume(st)
+    planner.plan(st)
+    sim.end_day(st)
+    check(not st.get("ended") and model.influence(st) == "alternative" and campaign.phase(st) == "alternative"
+          and st["objectives"]["red"] == ["Mtskheta", "Tbilisi"] and ops.posture_of(st, "red") == "offense"
+          and "Tbilisi" not in ops.banned(st, "red"),
+          f"продолжение после исторической фазы - альтернативный ход, новые цели красных: {st['objectives']['red']} ({msg[:40]}...)")
+    check(campaign.hold_done(st, "blue")[1] >= 2,
+          f"удержание синих в альтернативном ходе: {campaign.hold_list(st, 'blue')} (Тбилиси - теперь цель противника)")
+    st = model.new_campaign("end2", sector="sector_caucasus.json", oob="oob_caucasus.json", seed=1)   # исторический ход
+    st["settings"]["ground_control"] = True
+    u = next(x for x in ops._maneuver(st, "red") if not x.get("attached_to") and x["state"] not in ("destroyed", "pending"))
+    txt = ops.give_order(st, u["id"], "attack", "Tbilisi")
+    check("Внимание" in txt and u["player_order"]["place"] == "Tbilisi",
+          f"игрока сценарий не ограничивает: приказ на Тбилиси принят с предупреждением")
+
+
 def frontline_section(tmp: Path) -> None:
     """Линия соприкосновения, территории, пункты и цели операции на карте F10 (frontline.py, рисунки миссии)."""
     from redfront import frontline
@@ -3954,7 +4031,7 @@ def theatres_section(tmp: Path) -> None:
         log = sim.end_day(st)
     st2 = model.new_campaign("vnh", sector="sector_vietnam72.json", oob="oob_vietnam72.json", seed=7, player_side="blue")
     seen, lines = set(), []
-    for _ in range(6):
+    for _ in range(10):                          # мораль: ВНА выдыхается - потери АРВН, а с ними вывоз раненых, позже
         planner.plan(st2)
         seen |= {e["kind"] for e in st2["ato"]["entries"] if e["side"] == "blue"}
         lines += sim.end_day(st2)
@@ -4539,7 +4616,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, own_control_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
+            command_section, own_control_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, engine_rules_section, campaign_end_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:

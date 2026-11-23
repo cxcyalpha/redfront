@@ -49,12 +49,21 @@ def absolute(type_name: str, cls: str | None) -> float | None:
     return fit.get(cls, 0.0)                     # оценки есть, а этого вида задач нет - тип для него не годится
 
 
+_BEST: dict = {}
+
+
 def era_best(state: dict, cls: str) -> float | None:
-    """Лучшая оценка этого вида задач среди типов кампании (обе стороны, в строю): эпоха - по составу сил."""
-    vals = [absolute(u.get("type", ""), cls) for u in state["units"].values()
-            if model.category(u) in ("air", "heli") and u.get("count", 0) > 0]
-    vals = [v for v in vals if v is not None]
-    return max(vals) if vals else None
+    """Лучшая оценка этого вида задач среди типов кампании (обе стороны, в строю): эпоха - по составу сил. Кэш - по
+    набору типов в строю (план дня спрашивает тысячи раз, состав за это время не меняется)."""
+    types = frozenset(u.get("type", "") for u in state["units"].values()
+                      if u.get("count", 0) > 0 and u.get("type") and model.category(u) in ("air", "heli"))
+    key = (types, cls)
+    if key not in _BEST:
+        if len(_BEST) > 4096:
+            _BEST.clear()
+        vals = [v for v in (absolute(t, cls) for t in types) if v is not None]
+        _BEST[key] = max(vals) if vals else None
+    return _BEST[key]
 
 
 def relative(state: dict, type_name: str, cls: str | None) -> float:
