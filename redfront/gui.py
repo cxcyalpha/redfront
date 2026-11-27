@@ -625,6 +625,26 @@ class App:
             return {"lines": [f"Копия пресета: {dst}",
                               "Правьте в текстовом редакторе (части: units - тип type, число count, аэродром base, роль role); "
                               "в списке пресетов она появится как '(свой)'."]}
+        if action in ("abprobe", "abapply"):     # аэродромы карты, которых нет в pydcs (обновление карты DCS)
+            from . import airbases_ext
+            tid = model.theatre_id(model.sector_theatre(SECTOR))
+            if req.get("file"):
+                try:
+                    tid = model.theatre_id(self.load(req)[1].get("theatre"))
+                except (OSError, ValueError, KeyError, RuntimeError):
+                    pass
+            if action == "abprobe":
+                r = airbases_ext.probe(missions_dir(self.home) / f"redfront_airbase_probe_{tid}.miz", tid)
+                return {"lines": [f"Служебная миссия аэродромов: {r['file']}",
+                                  "Запустите её в DCS (можно наблюдателем), дождитесь 'аэродромы записаны', выйдите, "
+                                  "затем 'Применить аэродромы'."]}
+            f = saved_games_file(f"airbases_{tid}.json", self.home)
+            if not f:
+                raise FileNotFoundError("файла зонда аэродромов нет: сначала 'Зонд аэродромов' и запуск служебной миссии в DCS")
+            r = airbases_ext.apply(f)
+            return {"lines": [f"Аэродромов и площадок карты: {r['total']}, новых для pydcs - {len(r['new'])}."]
+                    + [f"  {x['name']} ({x['lat']:.3f}, {x['lon']:.3f}), полос {x['runways']}, стоянок {x['parking']}" for x in r["new"]]
+                    + ["Новые кампании этой карты получат их сами (в пределах 200 км от театра кампании)."]}
         if action in ("mapprobe", "roadsprobe"):
             sec_f = SECTOR
             if req.get("file"):

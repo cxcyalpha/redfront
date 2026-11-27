@@ -120,6 +120,10 @@ def main(argv=None) -> int:
     p.add_argument("--humans", type=int, default=1,
                    help="людей в вылете (сначала группа --fly, затем остальные группы пакета; больше 1 - места Client)")
     p.add_argument("--task", type=int, help="номер задачи из плана дня (plan); по умолчанию - первая")
+    p = sp.add_parser("airbase-probe", help="служебная миссия: аэродромы карты DCS (новые, которых нет в pydcs)")
+    p.add_argument("out"); p.add_argument("--theatre", default="germany")
+    p = sp.add_parser("airbase-apply", help="применить файл зонда аэродромов (Saved Games\\DCS\\redfront\\airbases_<карта>.json)")
+    p.add_argument("file")
     p = sp.add_parser("map-probe", help="служебная миссия: найти на карте DCS объекты мостов и складов сектора")
     p.add_argument("out"); p.add_argument("--sector", default="sector_hamburg.json")
     p = sp.add_parser("map-apply", help="применить файл зонда карты к кампании или к файлу сектора")
@@ -140,6 +144,21 @@ def main(argv=None) -> int:
         print(f"Служебная миссия: {r['file']}\nСектор '{r['sector']}', участков: {len(r['pairs'])} ({', '.join(r['pairs'])}).\n"
               f"Запустите её в DCS, дождитесь сообщения 'дороги записаны', выйдите. Файл: "
               f"Saved Games\\DCS\\redfront\\roads_{r['sector']}.json")
+        return 0
+    if a.cmd == "airbase-probe":
+        from . import airbases_ext
+        r = airbases_ext.probe(Path(a.out), a.theatre)
+        print(f"Служебная миссия: {r['file']}\nЗапустите её в DCS (карта '{r['theatre']}'), дождитесь сообщения "
+              f"'аэродромы записаны', выйдите. Файл: Saved Games\\DCS\\redfront\\airbases_{r['theatre']}.json")
+        return 0
+    if a.cmd == "airbase-apply":
+        from . import airbases_ext
+        r = airbases_ext.apply(Path(a.file))
+        print(f"Карта '{r['theatre']}': аэродромов и площадок в файле {r['total']}, новых для pydcs - {len(r['new'])}:")
+        for x in r["new"]:
+            print(f"  {x['name']} (id {x['id']}, {'аэродром' if x['category'] == 0 else 'площадка'}): {x['lat']:.4f}, "
+                  f"{x['lon']:.4f}; полос {x['runways']}, стоянок {x['parking']}")
+        print("Новые кампании этой карты получат их сами (в пределах театра кампании); собранные миссии - тоже.")
         return 0
     if a.cmd == "map-probe":
         r = mapobj.probe(Path(a.out), a.sector)

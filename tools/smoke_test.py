@@ -3743,6 +3743,44 @@ def campaign_end_section(tmp: Path) -> None:
           f"игрока сценарий не ограничивает: приказ на Тбилиси принят с предупреждением")
 
 
+def airbase_probe_section(tmp: Path) -> None:
+    """Аэродромы карты, которых нет в pydcs (зонд airbase_probe.lua): в терраин, в кампанию, в миссию."""
+    import json as _json
+    import zipfile
+    from dcs import Mission as _M, mapping, planes, task as _task
+    from dcs.mission import StartType as _ST
+    from redfront import airbases_ext
+    print("\n== аэродромы зонда (новые на карте, нет в pydcs) ==")
+    r = airbases_ext.probe(tmp / "ab_probe.miz", "germany")
+    lua = zipfile.ZipFile(r["file"]).read("mission").decode("utf-8")
+    check("getAirbases" in lua and "airbases_germany.json" in lua, "служебная миссия аэродромов: world.getAirbases -> airbases_germany.json")
+    old = airbases_ext.DATA_DIR
+    airbases_ext.DATA_DIR = tmp / "airbases"
+    try:
+        p0 = mapping.Point.from_latlng(mapping.LatLng(53.335, 14.93), model.terrain("germany"))   # проба: у Старгарда
+        fake = {"theatre": "germany", "airbases": [{"id": 99001, "name": "Kluczewo", "category": 0, "x": p0.x, "y": p0.y,
+                "runways": [{"name": "27-09", "course": 4.71, "length": 2500, "width": 60}],
+                "parking": [{"idx": i, "type": 104 if i < 4 else 40, "x": p0.x + 30 * i, "y": p0.y + 200} for i in range(8)]}]}
+        f = tmp / "airbases_germany.json"
+        f.write_text(_json.dumps(fake), encoding="utf-8")
+        res = airbases_ext.apply(f)
+        m = _M(model.terrain_class("germany")())
+        ap = m.terrain.airports.get("Kluczewo")
+        fg = m.flight_group_from_airport(m.coalition["red"].country("Russia"), "t", planes.MiG_29A, ap, maintask=_task.CAP,
+                                         start_type=_ST.Cold, group_size=2) if ap else None
+        m.save(str(tmp / "ab.miz"))
+        mis = zipfile.ZipFile(tmp / "ab.miz").read("mission").decode("utf-8")
+        st = model.new_campaign("ab", sector="sector_germany.json", oob="oob_germany.json", seed=1)
+        xb = [k for k, b in st["airbases"].items() if b.get("probed")]
+        check(res["new"] and ap is not None and fg is not None and "99001" in mis and xb and st["airbases"][xb[0]]["side"] == "red"
+              and f"af_{xb[0]}" in st["units"],
+              f"новый аэродром из зонда: в терраине pydcs, группа на стоянке (airdromeId 99001), в кампании - {xb} у красных")
+    finally:
+        airbases_ext.DATA_DIR = old
+        model._TERRAINS.pop("germany", None)
+        model._TCLS.pop("germany", None)
+
+
 def frontline_section(tmp: Path) -> None:
     """Линия соприкосновения, территории, пункты и цели операции на карте F10 (frontline.py, рисунки миссии)."""
     from redfront import frontline
@@ -4616,7 +4654,7 @@ SECTIONS = [core_section, patriot_close_section, front_section, random_section, 
             theatre_section, air_section, package_section, roads_section, column_road_section, mapobj_section,
             gui_section, germany_section, air_defence_section, support_air_section, helo_section, ato_section, presets_section,
             supply_section, assault_section, csar_section, convoy_section, advance_section, qra_section, ctld_section,
-            command_section, own_control_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, engine_rules_section, campaign_end_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
+            command_section, own_control_section, farp_section, field_farp_section, landcover_section, evac_section, fitness_section, fog_section, ground_fog_section, recon_section, explain_section, crew_section, reinforce_section, nato_section, payload_section, mixed_section, heli_pkg_section, push_qra_section, gui_planner_section, iads_section, formations_section, ground_ops_section, engine_rules_section, campaign_end_section, airbase_probe_section, frontline_section, mission_ad_section, weather_kneeboard_section, fires_section, realism_section, theatres_section]
 
 
 def main() -> int:

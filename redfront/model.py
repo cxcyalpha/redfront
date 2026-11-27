@@ -43,8 +43,7 @@ def terrain(state_or_name=None):
     """Терраин pydcs карты кампании (кэш: создание терраина - секунды)."""
     tid = theatre_id(state_or_name or "germany")
     if tid not in _TERRAINS:
-        import dcs.terrain as _t
-        _TERRAINS[tid] = getattr(_t, THEATRE_INFO[tid]["cls"])()
+        _TERRAINS[tid] = terrain_class(tid)()
     return _TERRAINS[tid]
 
 
@@ -59,9 +58,23 @@ def sector_theatre(sector) -> str:
         return "germany"
 
 
+_TCLS: dict = {}
+
+
 def terrain_class(state_or_name=None):
+    """Класс терраина pydcs карты - с аэродромами, которых pydcs ещё не знает (данные зонда, airbases_ext.py)."""
     import dcs.terrain as _t
-    return getattr(_t, THEATRE_INFO[theatre_id(state_or_name or "germany")]["cls"])
+    tid = theatre_id(state_or_name or "germany")
+    base = getattr(_t, THEATRE_INFO[tid]["cls"])
+    from . import airbases_ext
+    if not airbases_ext.data_file(tid).is_file():
+        return base
+    if tid not in _TCLS:
+        def init(self, *a, **kw):
+            base.__init__(self, *a, **kw)
+            airbases_ext.install(self, tid)
+        _TCLS[tid] = type(base.__name__, (base,), {"__init__": init})
+    return _TCLS[tid]
 
 
 def load_json(name: str | Path) -> dict:
@@ -348,6 +361,9 @@ def new_campaign(name: str, date: str | None = None, start_hour: int = 7,
             continue
         ll = terrain.airports[b["airport"]].position.latlng()
         bases[bid] = {**b, "lat": ll.lat, "lon": ll.lng, "state": "open"}
+    from . import airbases_ext                   # аэродромы карты, которых сектор и pydcs ещё не знают (зонд)
+    for bid, b in airbases_ext.campaign_bases(sec, terrain, bases).items():
+        bases[bid] = b
     for cid, c in (sec.get("carriers") or {}).items():   # авианосцы - палубные базы на море (позиция - из сектора)
         bases[cid] = {**c, "kind": "carrier", "airport": None, "state": "open"}
     for u in forces["units"]:                    # с палубы - только палубные типы (aircraft.json carrier) и вертолёты
